@@ -1,0 +1,82 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.0.31903.59
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "IO.Las", "src\IO.Las\IO.Las.csproj", "{EF804C35-0306-464A-9702-47330EA0F0CA}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{944B06C2-3216-44EC-A43A-DAF9200A05C8}"
+	ProjectSection(SolutionItems) = preProject
+		Directory.Versions.props = Directory.Versions.props
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "src", "src", "{94D31DAF-54FD-47A1-ABC5-DE0D31E8A7ED}"
+	ProjectSection(SolutionItems) = preProject
+		src\Directory.Build.props = src\Directory.Build.props
+		src\Directory.Build.targets = src\Directory.Build.targets
+		src\Directory.Packages.props = src\Directory.Packages.props
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "docs", "docs", "{DFB1AACC-6714-4E77-9D33-41F0F8925ACD}"
+	ProjectSection(SolutionItems) = preProject
+		docs\asprs_las_format_v10_2003.pdf = docs\asprs_las_format_v10_2003.pdf
+		docs\asprs_las_format_v11_2005.pdf = docs\asprs_las_format_v11_2005.pdf
+		docs\asprs_las_format_v12_2008.pdf = docs\asprs_las_format_v12_2008.pdf
+		docs\asprs_las_format_v13_r11_2010.pdf = docs\asprs_las_format_v13_r11_2010.pdf
+		docs\asprs_las_format_v14_r15_2019.pdf = docs\asprs_las_format_v14_r15_2019.pdf
+		docs\copc-specification-1.0.pdf = docs\copc-specification-1.0.pdf
+		docs\laszip.pdf = docs\laszip.pdf
+		docs\LAZ_Specification_1.4_R0.pdf = docs\LAZ_Specification_1.4_R0.pdf
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "tests", "tests", "{1D3F3E65-48DE-4C8F-BE82-CF9C2D8D930C}"
+	ProjectSection(SolutionItems) = preProject
+		tests\Directory.Build.props = tests\Directory.Build.props
+		tests\Directory.Packages.props = tests\Directory.Packages.props
+	EndProjectSection
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "IO.Las.Tests", "tests\IO.Las.Tests\IO.Las.Tests.csproj", "{57EAF8CB-00B7-4524-8E93-912CB614C1AA}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Debug|x64 = Debug|x64
+		Debug|x86 = Debug|x86
+		Release|Any CPU = Release|Any CPU
+		Release|x64 = Release|x64
+		Release|x86 = Release|x86
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{EF804C35-0306-464A-9702-47330EA0F0CA}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{EF804C35-0306-464A-9702-47330EA0F0CA}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{EF804C35-0306-464A-9702-47330EA0F0CA}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{EF804C35-0306-464A-9702-47330EA0F0CA}.Debug|x64.Build.0 = Debug|Any CPU
+		{EF804C35-0306-464A-9702-47330EA0F0CA}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{EF804C35-0306-464A-9702-47330EA0F0CA}.Debug|x86.Build.0 = Debug|Any CPU
+		{EF804C35-0306-464A-9702-47330EA0F0CA}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{EF804C35-0306-464A-9702-47330EA0F0CA}.Release|Any CPU.Build.0 = Release|Any CPU
+		{EF804C35-0306-464A-9702-47330EA0F0CA}.Release|x64.ActiveCfg = Release|Any CPU
+		{EF804C35-0306-464A-9702-47330EA0F0CA}.Release|x64.Build.0 = Release|Any CPU
+		{EF804C35-0306-464A-9702-47330EA0F0CA}.Release|x86.ActiveCfg = Release|Any CPU
+		{EF804C35-0306-464A-9702-47330EA0F0CA}.Release|x86.Build.0 = Release|Any CPU
+		{57EAF8CB-00B7-4524-8E93-912CB614C1AA}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{57EAF8CB-00B7-4524-8E93-912CB614C1AA}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{57EAF8CB-00B7-4524-8E93-912CB614C1AA}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{57EAF8CB-00B7-4524-8E93-912CB614C1AA}.Debug|x64.Build.0 = Debug|Any CPU
+		{57EAF8CB-00B7-4524-8E93-912CB614C1AA}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{57EAF8CB-00B7-4524-8E93-912CB614C1AA}.Debug|x86.Build.0 = Debug|Any CPU
+		{57EAF8CB-00B7-4524-8E93-912CB614C1AA}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{57EAF8CB-00B7-4524-8E93-912CB614C1AA}.Release|Any CPU.Build.0 = Release|Any CPU
+		{57EAF8CB-00B7-4524-8E93-912CB614C1AA}.Release|x64.ActiveCfg = Release|Any CPU
+		{57EAF8CB-00B7-4524-8E93-912CB614C1AA}.Release|x64.Build.0 = Release|Any CPU
+		{57EAF8CB-00B7-4524-8E93-912CB614C1AA}.Release|x86.ActiveCfg = Release|Any CPU
+		{57EAF8CB-00B7-4524-8E93-912CB614C1AA}.Release|x86.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{EF804C35-0306-464A-9702-47330EA0F0CA} = {94D31DAF-54FD-47A1-ABC5-DE0D31E8A7ED}
+		{57EAF8CB-00B7-4524-8E93-912CB614C1AA} = {1D3F3E65-48DE-4C8F-BE82-CF9C2D8D930C}
+	EndGlobalSection
+EndGlobal

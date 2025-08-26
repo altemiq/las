@@ -1,0 +1,24 @@
+<Project>
+
+  <PropertyGroup>
+	<!-- do not error when we can't find a release version -->
+	<MSBuildWarningsNotAsErrors>$(MSBuildWarningsNotAsErrors);SV0001</MSBuildWarningsNotAsErrors>
+  </PropertyGroup>
+
+  <ItemGroup Label="Designers">
+    <Compile Update="**\*.Designer.cs" AutoGen="True" />
+  </ItemGroup>
+
+  <ItemGroup Label="Resources">
+    <Compile Update="**\Resources*.Designer.cs" DesignTime="True" DependentUpon="$([System.String]::Copy('%(Filename)').Replace('.Designer','')).resx" />
+    <EmbeddedResource Update="@(EmbeddedResource->WithMetadataValue('LastGenOutput',''))" LastGenOutput="%(Filename).Designer.cs" />
+    <EmbeddedResource Update="@(EmbeddedResource->WithMetadataValue('Generator',''))" Generator="ResXFileCodeGenerator" />
+    <EmbeddedResource Update="@(EmbeddedResource->WithMetadataValue('CustomToolNamespace',''))" CustomToolNamespace="$(RootNamespace).Properties" />
+  </ItemGroup>
+
+  <ItemGroup Label="Settings">
+    <Compile Update="**\Settings*.Designer.cs" DesignTimeSharedInput="True" DependentUpon="$([System.String]::Copy('%(Filename)').Replace('.Designer','')).settings" />
+    <None Update="**\Settings.settings" Generator="SettingsSingleFileGenerator" LastGenOutput="%(Filename).Designer.cs" CustomToolNamespace="$(RootNamespace).Properties" />
+  </ItemGroup>
+
+</Project>

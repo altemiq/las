@@ -1,0 +1,38 @@
+﻿<Project>
+  <Import Project="$([MSBuild]::GetPathOfFileAbove('Directory.Versions$(MSBuildThisFileExtension)', '$(MSBuildThisFileDirectory)../'))" />
+
+  <PropertyGroup>
+    <Company>Altemiq</Company>
+    <AssemblyName>$(Company).$(MSBuildProjectName)</AssemblyName>
+    <RootNamespace>$(AssemblyName.Replace('.Tests', ''))</RootNamespace>
+
+    <OutputType>Exe</OutputType>
+
+    <LangVersion>latest</LangVersion>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+
+    <IsPackable>false</IsPackable>
+    <IsPublishable>false</IsPublishable>
+
+    <AutoGenerateBindingRedirects Condition=" '$([MSBuild]::GetTargetFrameworkIdentifier($(TargetFramework)))' == '.NETFramework' ">true</AutoGenerateBindingRedirects>
+    <GenerateBindingRedirectsOutputType Condition=" '$(AutoGenerateBindingRedirects)' == 'true' ">true</GenerateBindingRedirectsOutputType>
+
+    <NetCoreOnly Condition=" '$(NetCoreOnly)' == '' and '$([System.OperatingSystem]::IsWindows())' == 'true' ">false</NetCoreOnly>
+    <NetCoreOnly Condition=" '$(NetCoreOnly)' == '' and '$([System.OperatingSystem]::IsWindows())' != 'true' ">true</NetCoreOnly>
+
+    <MSBuildWarningsAsMessages>$(MSBuildWarningsAsMessages);MSB3836</MSBuildWarningsAsMessages>
+    <SuppressTfmSupportBuildWarnings>true</SuppressTfmSupportBuildWarnings>
+    <CheckEolTargetFramework>false</CheckEolTargetFramework>
+  </PropertyGroup>
+
+  <PropertyGroup Label="Build">
+    <!-- Enable Build Acceleration in Visual Studio. -->
+    <AccelerateBuildsInVisualStudio>true</AccelerateBuildsInVisualStudio>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <Service Include="{82a7f48d-3b50-4b1e-b82e-3ada8210c358}" />
+  </ItemGroup>
+
+</Project>

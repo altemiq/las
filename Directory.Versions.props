@@ -1,0 +1,31 @@
+﻿<Project>
+
+  <ItemGroup>
+    <PackageVersion Include="PolySharp" Version="1.15.0" />
+  </ItemGroup>
+
+  <PropertyGroup Label="LAS versions">
+    <MaximumLasVersion Condition=" '$(MaximumLasVersion)' == '' ">1.4</MaximumLasVersion>
+
+    <SupportLas12>false</SupportLas12>
+    <SupportLas12 Condition=" $([MSBuild]::VersionGreaterThanOrEquals('$(MaximumLasVersion)', '1.2')) ">true</SupportLas12>
+    <SupportLas13>false</SupportLas13>
+    <SupportLas13 Condition=" $([MSBuild]::VersionGreaterThanOrEquals('$(MaximumLasVersion)', '1.3')) ">true</SupportLas13>
+    <SupportLas14>false</SupportLas14>
+    <SupportLas14 Condition=" $([MSBuild]::VersionGreaterThanOrEquals('$(MaximumLasVersion)', '1.4')) ">true</SupportLas14>
+    <SupportLas15>false</SupportLas15>
+    <SupportLas15 Condition=" $([MSBuild]::VersionGreaterThanOrEquals('$(MaximumLasVersion)', '1.5')) ">true</SupportLas15>
+
+    <DefineConstants Condition=" $([MSBuild]::VersionEquals('$(MaximumLasVersion)', '1.1')) ">$(DefineConstants);LAS1_1</DefineConstants>
+    <DefineConstants>$(DefineConstants);LAS1_1_OR_GREATER</DefineConstants>
+    <DefineConstants Condition=" $([MSBuild]::VersionEquals('$(MaximumLasVersion)', '1.2')) ">$(DefineConstants);LAS1_2</DefineConstants>
+    <DefineConstants Condition=" '$(SupportLas12)' == 'true' ">$(DefineConstants);LAS1_2_OR_GREATER</DefineConstants>
+    <DefineConstants Condition=" $([MSBuild]::VersionEquals('$(MaximumLasVersion)', '1.3')) ">$(DefineConstants);LAS1_3</DefineConstants>
+    <DefineConstants Condition=" '$(SupportLas13)' == 'true' ">$(DefineConstants);LAS1_3_OR_GREATER</DefineConstants>
+    <DefineConstants Condition=" $([MSBuild]::VersionEquals('$(MaximumLasVersion)', '1.4')) ">$(DefineConstants);LAS1_4</DefineConstants>
+    <DefineConstants Condition=" '$(SupportLas14)' == 'true' ">$(DefineConstants);LAS1_4_OR_GREATER</DefineConstants>
+    <DefineConstants Condition=" $([MSBuild]::VersionEquals('$(MaximumLasVersion)', '1.5')) ">$(DefineConstants);LAS1_5</DefineConstants>
+    <DefineConstants Condition=" '$(SupportLas15)' == 'true' ">$(DefineConstants);LAS1_5_OR_GREATER</DefineConstants>
+  </PropertyGroup>
+
+</Project>
