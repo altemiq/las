@@ -1,0 +1,53 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<doc>
+    <members>
+        <member name="M:Altemiq.IO.Las.HeaderBlock.Constructor">
+            <summary>
+                Initializes a new instance of the <see cref="T:Altemiq.IO.Las.HeaderBlock"/> struct.
+            </summary>
+            <param name="fileSourceId">The file source ID.</param>
+            <param name="globalEncoding">The global encoding.</param>
+            <param name="projectId">The project ID.</param>
+            <param name="version">The version.</param>
+            <param name="systemIdentifier">The system identifier.</param>
+            <param name="generatingSoftware">The generating software.</param>
+            <param name="fileCreation">The file creation.</param>
+            <param name="pointDataFormat">The point data format.</param>
+            <param name="pointCount">The point count.</param>
+            <param name="pointsByReturn">The number of points by return.</param>
+            <param name="scaleFactor">The scale factor.</param>
+            <param name="offset">The offset.</param>
+            <param name="min">The minimum bounds.</param>
+            <param name="max">The maximum bounds.</param>
+            <exception cref="T:System.ArgumentOutOfRangeException">Invalid version.</exception>
+            <exception cref="T:System.ArgumentOutOfRangeException">
+                <paramref name="pointsByReturn"/> is the incorrect size.
+            </exception>
+        </member>
+        <member name="P:Altemiq.IO.Las.HeaderBlock.GlobalEncoding">
+            <summary>Gets the global encoding.</summary>
+            <value>The global encoding.</value>
+            <remarks>
+                This is a bit field used to indicate certain global properties about the file. In LAS 1.2 (the version in which this field was introduced), only the low bit is defined (this is the bit, that if set, would have the unsigned integer yield a value of 1).
+                <list type="table">
+                    <listheader>
+                        <term>Field</term>
+                        <description>Description</description>
+                    </listheader>
+                    <item>
+                        <term>GPS Time Type (Bit 0)</term>
+                        <description>
+                            The meaning of GPS Time in the Point Records<br/>
+                            0 (not set) -> GPS time in the point record fields is GPS Week Time (the same as previous versions of LAS)<br/>
+                            1 (set) -> GPS Time is standard GPS Time (satellite GPS Time) minus 1 x 10<sup>9</sup>. The offset moves the time back to near zero to improve floating point resolution.
+                        </description>
+                    </item>
+                    <item>
+                        <term>Reserved (Bits 1:15)</term>
+                        <description>Must be set to zero.</description>
+                    </item>
+                </list>
+            </remarks>
+        </member>
+    </members>
+</doc>

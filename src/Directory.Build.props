@@ -1,0 +1,59 @@
+<Project>
+
+  <PropertyGroup>    
+    <VersionPrefix Condition="'$(VersionPrefix)' == ''">1.0</VersionPrefix>
+
+    <NeutralLanguage>en</NeutralLanguage>
+    <LangVersion>latest</LangVersion>
+    <ImplicitUsings>enable</ImplicitUsings>
+
+    <!-- Nullable -->
+    <Nullable>enable</Nullable>
+
+    <!-- generate resources -->
+    <GenerateStronglyTypedResources>true</GenerateStronglyTypedResources>
+
+    <CheckEolTargetFramework>false</CheckEolTargetFramework>
+
+    <GenerateDocumentationFile>true</GenerateDocumentationFile>
+
+    <IsTrimmable Condition="$([MSBuild]::IsTargetFrameworkCompatible('$(TargetFramework)', 'net6.0'))">true</IsTrimmable>
+    <IsAotCompatible Condition="$([MSBuild]::IsTargetFrameworkCompatible('$(TargetFramework)', 'net7.0'))">true</IsAotCompatible>
+  </PropertyGroup>
+  
+  <PropertyGroup Label="Packaging">
+    <Authors>rsking;altemiq</Authors>
+    <Description>A collection of base classes.</Description>
+    <PackageLicenseExpression>MIT</PackageLicenseExpression>
+    <PackageTags>Core</PackageTags>    
+  </PropertyGroup>
+
+  <PropertyGroup Condition=" $([MSBuild]::GetTargetFrameworkIdentifier('$(TargetFramework)')) == '.NETStandard' and $([MSBuild]::VersionLessThan($([MSBuild]::GetTargetFrameworkVersion('$(TargetFramework)')), '2.0')) ">
+    <NoWarn>$(NoWarn);NETSDK1215</NoWarn>
+  </PropertyGroup>
+
+  <PropertyGroup Label="Signing" Condition=" '$(Configuration)' != '' AND '$(Configuration)' != 'Debug' ">
+    <SignAssembly>true</SignAssembly>
+    <AssemblyOriginatorKeyFile>$([MSBuild]::GetPathOfFileAbove(Las.snk))</AssemblyOriginatorKeyFile>
+    <PublicKey>002400000480000094000000060200000024000052534131000400000100010095e864d575cc14c8873fc39f8497976caa11c567b8fb62208efc332418833e7902fd73655b8aa51611ae0b00c3e58ae0a9147978f62de10cc1620cc3e48bc6c12fd361fabb9dc1f4e72d4837e0d1a99aab45a9fb14332f65d427ba361f225ee672bb6857ace94005bb338034eb4c2c351b0e50f858f98b14148a2af99a0d7acd</PublicKey>
+  </PropertyGroup>
+
+  <PropertyGroup Label="Analyzers">
+    <AnalysisLevel>preview</AnalysisLevel>
+  </PropertyGroup>
+
+  <PropertyGroup>
+    <NoWarn>$(NoWarn);SA1642;SA1643</NoWarn>
+  </PropertyGroup>
+
+  <PropertyGroup>
+    <UseSpanParsing>false</UseSpanParsing>
+    <UseSpanParsing Condition=" $([MSBuild]::IsTargetFrameworkCompatible('$(TargetFramework)', 'netstandard1.3')) ">true</UseSpanParsing>
+    <DefineConstants Condition=" '$(UseSpanParsing)' == 'true' ">$(DefineConstants);USE_SPAN_PARSING</DefineConstants>
+
+    <UseGenericMath>false</UseGenericMath>
+    <UseGenericMath Condition=" $([MSBuild]::IsTargetFrameworkCompatible('$(TargetFramework)', 'net7.0')) ">true</UseGenericMath>
+    <DefineConstants Condition=" '$(UseGenericMath)' == 'true' ">$(DefineConstants);USE_GENERIC_MATH</DefineConstants>
+  </PropertyGroup>
+
+</Project>

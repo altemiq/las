@@ -1,0 +1,54 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFrameworks>net7.0;net5.0;netstandard2.1;netstandard2.0</TargetFrameworks>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+    <PolySharpIncludeGeneratedTypes>
+      $(PolySharpIncludeGeneratedTypes);
+      System.Index;
+      System.Range;
+      System.Diagnostics.CodeAnalysis.DoesNotReturnAttribute;
+      System.Diagnostics.CodeAnalysis.DynamicallyAccessedMembersAttribute;
+      System.Diagnostics.CodeAnalysis.DynamicallyAccessedMemberTypes;
+      System.Diagnostics.CodeAnalysis.NotNullAttribute;
+      System.Diagnostics.CodeAnalysis.NotNullWhenAttribute;
+      System.Diagnostics.CodeAnalysis.StringSyntaxAttribute;
+      System.Runtime.CompilerServices.CallerArgumentExpressionAttribute;
+      System.Runtime.CompilerServices.CompilerFeatureRequiredAttribute;
+      System.Runtime.CompilerServices.IsExternalInit;
+      System.Runtime.CompilerServices.RequiredMemberAttribute;
+      System.Diagnostics.CodeAnalysis.SetsRequiredMembersAttribute;
+    </PolySharpIncludeGeneratedTypes>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="PolySharp">
+      <PrivateAssets>all</PrivateAssets>
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+    </PackageReference>
+  </ItemGroup>
+
+  <ItemGroup Condition=" !$([MSBuild]::IsTargetFrameworkCompatible('$(TargetFramework)', 'netstandard2.1')) ">  
+    <PackageReference Include="System.Memory" VersionOverride="4.5.0" />
+  </ItemGroup>
+
+  <ItemGroup Condition=" $([MSBuild]::IsTargetFrameworkCompatible('$(TargetFramework)', 'netstandard2.0')) and !$([MSBuild]::IsTargetFrameworkCompatible('$(TargetFramework)', 'netstandard2.1')) ">
+    <PackageReference Include="Microsoft.Bcl.HashCode" VersionOverride="1.0.0" />
+  </ItemGroup>
+
+  <ItemGroup Condition=" !$([MSBuild]::IsTargetFrameworkCompatible('$(TargetFramework)', 'net7.0')) ">
+    <Compile Remove="IBasePointDataRecord{TSelf}.cs" />
+  </ItemGroup>
+
+  <ItemGroup Condition=" !$([MSBuild]::IsTargetFrameworkCompatible('$(TargetFramework)', 'netcoreapp1.0')) ">
+    <PackageReference Include="System.Runtime.CompilerServices.Unsafe" VersionOverride="4.5.0" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Compile Update="PointConverter.*.cs;HeaderBlockBuilder.*.cs">
+      <DependentUpon>$([System.Text.RegularExpressions.Regex]::Replace('%(Filename)%(Extension)', '\.[^.]+\%(Extension)$', '%(Extension)'))</DependentUpon>
+    </Compile>
+  </ItemGroup>
+
+</Project>

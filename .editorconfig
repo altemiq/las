@@ -1,0 +1,61 @@
+# Remove the line below if you want to inherit .editorconfig settings from higher directories
+root = true
+
+# Don't use tabs for indentation.
+[*]
+indent_style = space
+# (Please don't specify an indent_size here; that has too many unintended consequences.)
+
+# Code files
+[*.{cs,csx,vb,vbx}]
+indent_size = 4
+
+# Xml project files
+[*.{csproj,vbproj,vcxproj,vcxproj.filters,proj,projitems,shproj,wixproj}]
+indent_size = 2
+
+# Xml config files
+[*.{props,targets,ruleset,config,nuspec,resx,vsixmanifest,vsct,runsettings}]
+indent_size = 2
+
+# JSON files
+[*.json]
+indent_size = 2
+
+# C#/VB files
+[*.{cs,vb}]
+
+#### Core EditorConfig Options ####
+
+# New line preferences
+insert_final_newline = false
+
+#### Spelling ####
+spelling_exclusion_path = .\exclusion.dic
+
+#### Code Style ####
+
+# var preferences
+csharp_style_var_elsewhere = true:silent
+csharp_style_var_for_built_in_types = true:silent
+csharp_style_var_when_type_is_apparent = true:silent
+
+# preferences
+csharp_style_prefer_unbound_generic_type_in_nameof = false:silent
+
+#### Supressions ####
+
+## Roslynator
+
+# RCS1163: Unused parameter
+dotnet_diagnostic.RCS1163.severity = none
+
+## Sonar
+
+# S1133: Deprecated code should be removed
+dotnet_diagnostic.S1133.severity = suggestion
+
+## Resharper
+
+# Add explicit 'return' or 'continue' before local functions
+resharper_separate_local_functions_with_jump_statement_highlighting = none

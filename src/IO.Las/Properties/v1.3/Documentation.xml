@@ -1,0 +1,51 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<doc>
+    <members>
+        <member name="P:Altemiq.IO.Las.HeaderBlock.GlobalEncoding">
+            <summary>Gets the global encoding.</summary>
+            <value>The global encoding.</value>
+            <remarks>
+                This is a bit field used to indicate certain global properties about the file. In LAS 1.2 (the version in which this field was introduced), only the low bit is defined (this is the bit, that if set, would have the unsigned integer yield a value of 1).
+                <list type="table">
+                    <listheader>
+                        <term>Field</term>
+                        <description>Description</description>
+                    </listheader>
+                    <item>
+                        <term>GPS Time Type (Bit 0)</term>
+                        <description>
+                            The meaning of GPS Time in the Point Records<br/>
+                            0 (not set) -> GPS time in the point record fields is GPS Week Time (the same as previous versions of LAS)<br/>
+                            1 (set) -> GPS Time is standard GPS Time (satellite GPS Time) minus 1 x 10<sup>9</sup> (Adjusted Standard GPS Time). The offset moves the time back to near zero to improve floating point resolution.
+                        </description>
+                    </item>
+                    <item>
+                        <term>Waveform Data Packets Internal (Bit 1)</term>
+                        <description>
+                            If this bit is set, the waveform data packets are located within this file
+                            (note that this bit is mutually exclusive with bit 2)
+                        </description>
+                    </item>
+                    <item>
+                        <term>Waveform Data Packets External (Bit 2)</term>
+                        <description>
+                            If this bit is set, the waveform data packets are located externally in an auxiliary file with the same base name as this file but the extension ".wdp".
+                            (note that this bit is mutually exclusive with bit 1)
+                        </description>
+                    </item>
+                    <item>
+                        <term>Synthetic Return Numbers (Bit 3)</term>
+                        <description>
+                            If this bit is set, the point return numbers in the point data records have been synthetically generated.
+                            This could be the case, for example, when a composite file is created by combining a First Return File and a Last Return File. In this case, first return data will be labeled "1 of 2" and second return data will be labeled "2 of 2"
+                        </description>
+                    </item>
+                    <item>
+                        <term>Reserved (Bits 4:15)</term>
+                        <description>Must be set to zero.</description>
+                    </item>
+                </list>
+            </remarks>
+        </member>
+    </members>
+</doc>

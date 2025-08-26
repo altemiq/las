@@ -1,0 +1,27 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<doc>
+    <members>
+        <member name="M:Altemiq.IO.Las.HeaderBlock.Constructor">
+            <summary>
+                Initializes a new instance of the <see cref="T:Altemiq.IO.Las.HeaderBlock"/> struct.
+            </summary>
+            <param name="fileSourceId">The file source ID.</param>
+            <param name="projectId">The project ID.</param>
+            <param name="version">The version.</param>
+            <param name="systemIdentifier">The system identifier.</param>
+            <param name="generatingSoftware">The generating software.</param>
+            <param name="fileCreation">The file creation.</param>
+            <param name="pointDataFormat">The point data format.</param>
+            <param name="pointCount">The point count.</param>
+            <param name="pointsByReturn">The number of points by return.</param>
+            <param name="scaleFactor">The scale factor.</param>
+            <param name="offset">The offset.</param>
+            <param name="min">The minimum bounds.</param>
+            <param name="max">The maximum bounds.</param>
+            <exception cref="T:System.ArgumentOutOfRangeException">Invalid version.</exception>
+            <exception cref="T:System.ArgumentOutOfRangeException">
+                <paramref name="pointsByReturn"/> is the incorrect size.
+            </exception>
+        </member>
+    </members>
+</doc>

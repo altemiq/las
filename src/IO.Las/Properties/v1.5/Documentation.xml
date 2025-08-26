@@ -1,0 +1,102 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<doc>
+    <members>
+        <member name="M:Altemiq.IO.Las.HeaderBlock.Constructor">
+            <summary>
+                Initializes a new instance of the <see cref="T:Altemiq.IO.Las.HeaderBlock"/> struct.
+            </summary>
+            <param name="fileSourceId">The file source ID.</param>
+            <param name="globalEncoding">The global encoding.</param>
+            <param name="projectId">The project ID.</param>
+            <param name="version">The version.</param>
+            <param name="systemIdentifier">The system identifier.</param>
+            <param name="generatingSoftware">The generating software.</param>
+            <param name="fileCreation">The file creation.</param>
+            <param name="pointDataFormat">The point data format.</param>
+            <param name="legacyPointCount">The legacy point count.</param>
+            <param name="legacyPointsByReturn">The legacy points by return.</param>
+            <param name="scaleFactor">The scale factor.</param>
+            <param name="offset">The offset.</param>
+            <param name="pointCount">The point count.</param>
+            <param name="pointsByReturn">The number of points by return.</param>
+            <param name="maxGpsTime">The maximum GPS time.</param>
+            <param name="minGpsTime">The minimum GPS time.</param>
+            <param name="timeOffset">The time offset.</param>
+            <param name="min">The minimum bounds.</param>
+            <param name="max">The maximum bounds.</param>
+            <exception cref="T:System.ArgumentOutOfRangeException">Invalid version.</exception>
+            <exception cref="T:System.ArgumentOutOfRangeException">
+                <paramref name="legacyPointsByReturn"/> is the incorrect size.
+            </exception>
+            <exception cref="T:System.ArgumentOutOfRangeException">
+                <paramref name="pointsByReturn"/> is the incorrect size.    
+            </exception>
+        </member>
+        <member name="P:Altemiq.IO.Las.HeaderBlock.GlobalEncoding">
+            <summary>Gets the global encoding.</summary>
+            <value>The global encoding.</value>
+            <remarks>
+                This is a bit field used to indicate certain global properties about the file. In LAS 1.2 (the version in which this field was introduced), only the low bit is defined (this is the bit, that if set, would have the unsigned integer yield a value of 1).
+                <list type="table">
+                    <listheader>
+                        <term>Field</term>
+                        <description>Description</description>
+                    </listheader>
+                    <item>
+                        <term>GPS Time Type (Bit 0)</term>
+                        <description>
+                            The meaning of GPS Time in the point records. If this bit is not set, the GPS time in the point record fields is GPSWeek Time (the same as versions 1.0 through 1.2 of LAS).
+                            Otherwise, if this bit is set, the GPS Time is standard GPS Time (satellite GPS Time) minus 1 x 10<sup>9</sup> (Adjusted Standard GPS Time).
+                            The offset moves the time back to near zero to improve floating-point resolution.
+                            The origin of standard GPS Time is defined as midnight of the morning of January 6, 1980.
+                        </description>
+                    </item>
+                    <item>
+                        <term>Waveform Data Packets Internal (Bit 1)</term>
+                        <description>
+                            If this bit is set, the waveform data packets are located within this file (note that this bit is mutually exclusive with bit 2).
+                            This is deprecated now.
+                        </description>
+                    </item>
+                    <item>
+                        <term>Waveform Data Packets External (Bit 2)</term>
+                        <description>
+                            If this bit is set, the waveform data packets are located externally in an auxiliary file with the same base name as this file but the extension *.wdp.
+                            (note that this bit is mutually exclusive with bit 1)
+                        </description>
+                    </item>
+                    <item>
+                        <term>Synthetic Return Numbers (Bit 3)</term>
+                        <description>
+                            If this bit is set, the point return numbers in the point data records have been synthetically generated.
+                            This could be the case, for example, when a composite file is created by combining a First Return File and a Last Return File, or when simulating return numbers for a system not directly supporting multiple returns.
+                        </description>
+                    </item>
+                    <item>
+                        <term>WKT (Bit 4)</term>
+                        <description>
+                            If set, the Coordinate Reference System (CRS) is WKT.
+                            This bit must be set.
+                            GeoTIFF CRS definitions are not supported for legacy compatibility beginning with LAS 1.5.
+                        </description>
+                    </item>
+                    <item>
+                        <term>Reserved (Bit 5)</term>
+                        <description>Must be set to zero.</description>
+                    </item>
+                    <item>
+                        <term>Time Offset Flag (Bit 6)</term>
+                        <description>
+                            Used in combination with GPS Time Type to indicate the meaning of GPS Time in the point records.
+                            If both bits are set, the GPS Time is defined as Offset GPS Time. The Offset GPS Time is standard GPS Time (satellite GPS Time) minus 1 x (10<sup>6</sup>) x Time Offset. The Time Time Offset is specified in the LAS header.
+                        </description>
+                    </item>
+                    <item>
+                        <term>Reserved (Bits 7:15)</term>
+                        <description>Must be set to zero.</description>
+                    </item>
+                </list>
+            </remarks>
+        </member>
+    </members>
+</doc>
