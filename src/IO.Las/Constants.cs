@@ -203,4 +203,66 @@ internal static class Constants
         /// </summary>
         public const int NirFieldOffset = ColorFieldOffset + (3 * sizeof(ushort));
     }
+
+    /// <summary>
+    /// The <see cref="VariableLengthRecordHeader"/> constants.
+    /// </summary>
+    public static class VariableLengthRecord
+    {
+        /// <summary>
+        /// The reserved field offset.
+        /// </summary>
+        public const int ReservedFieldOffset = 0;
+
+        /// <summary>
+        /// The <see cref="VariableLengthRecordHeader.UserId"/> field offset.
+        /// </summary>
+        public const int UserIdFieldOffset = ReservedFieldOffset + sizeof(ushort);
+
+        /// <summary>
+        /// The <see cref="VariableLengthRecordHeader.RecordId"/> field offset.
+        /// </summary>
+        public const int RecordIdFieldOffset = UserIdFieldOffset + 16;
+
+        /// <summary>
+        /// The <see cref="VariableLengthRecordHeader.RecordLengthAfterHeader"/> field offset.
+        /// </summary>
+        public const int RecordLengthAfterHeaderFieldOffset = RecordIdFieldOffset + sizeof(ushort);
+
+        /// <summary>
+        /// The <see cref="VariableLengthRecordHeader.Description"/> field offset.
+        /// </summary>
+        public const int DescriptionFieldOffset = RecordLengthAfterHeaderFieldOffset + sizeof(ushort);
+    }
+
+    /// <summary>
+    /// The <see cref="ExtendedVariableLengthRecordHeader"/> constants.
+    /// </summary>
+    public static class ExtendedVariableLengthRecord
+    {
+        /// <summary>
+        /// The reserved field offset.
+        /// </summary>
+        public const int ReservedFieldOffset = VariableLengthRecord.ReservedFieldOffset;
+
+        /// <summary>
+        /// The <see cref="ExtendedVariableLengthRecordHeader.UserId"/> field offset.
+        /// </summary>
+        public const int UserIdFieldOffset = VariableLengthRecord.UserIdFieldOffset;
+
+        /// <summary>
+        /// The <see cref="ExtendedVariableLengthRecordHeader.RecordId"/> field offset.
+        /// </summary>
+        public const int RecordIdFieldOffset = VariableLengthRecord.RecordIdFieldOffset;
+
+        /// <summary>
+        /// The <see cref="ExtendedVariableLengthRecordHeader.RecordLengthAfterHeader"/> field offset.
+        /// </summary>
+        public const int RecordLengthAfterHeaderFieldOffset = VariableLengthRecord.RecordLengthAfterHeaderFieldOffset;
+
+        /// <summary>
+        /// The <see cref="ExtendedVariableLengthRecordHeader.Description"/> field offset.
+        /// </summary>
+        public const int DescriptionFieldOffset = RecordLengthAfterHeaderFieldOffset + sizeof(ulong);
+    }
 }

@@ -25,7 +25,6 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "docs", "docs", "{DFB1AACC-6
 		docs\asprs_las_format_v13_r11_2010.pdf = docs\asprs_las_format_v13_r11_2010.pdf
 		docs\asprs_las_format_v14_r15_2019.pdf = docs\asprs_las_format_v14_r15_2019.pdf
 		docs\copc-specification-1.0.pdf = docs\copc-specification-1.0.pdf
-		docs\laszip.pdf = docs\laszip.pdf
 		docs\LAZ_Specification_1.4_R0.pdf = docs\LAZ_Specification_1.4_R0.pdf
 	EndProjectSection
 EndProject

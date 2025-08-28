@@ -365,7 +365,7 @@ public readonly record struct GpsColorWaveformPointDataRecord :
     }
 
     /// <summary>
-    /// Writes this instance  into a span of bytes, as little endian.
+    /// Writes this instance into a span of bytes, as little endian.
     /// </summary>
     /// <param name="destination">The span of bytes where the value is to be written, as little endian.</param>
     public void WriteLittleEndian(Span<byte> destination)
