@@ -1,5 +1,5 @@
 // -----------------------------------------------------------------------
-// <copyright file="ExtendedExtendedVariableLengthRecordHeader.cs" company="Altemiq">
+// <copyright file="ExtendedVariableLengthRecordHeader.cs" company="Altemiq">
 // Copyright (c) Altemiq. All rights reserved.
 // </copyright>
 // -----------------------------------------------------------------------
@@ -63,10 +63,10 @@ public readonly record struct ExtendedVariableLengthRecordHeader
 #else
     {
         this.reserved = System.Buffers.Binary.BinaryPrimitives.ReadUInt16LittleEndian(data.AsSpan(Constants.ExtendedVariableLengthRecord.ReservedFieldOffset, sizeof(ushort)));
-        this.userId = System.Text.Encoding.UTF8.GetString(data, Constants.ExtendedVariableLengthRecord.UserIdFieldOffset,  GetNullChar(data, Constants.ExtendedVariableLengthRecord.UserIdFieldOffset) - Constants.ExtendedVariableLengthRecord.UserIdFieldOffset);
+        this.userId = System.Text.Encoding.UTF8.GetString(data, Constants.ExtendedVariableLengthRecord.UserIdFieldOffset, GetNullChar(data, Constants.ExtendedVariableLengthRecord.UserIdFieldOffset) - Constants.ExtendedVariableLengthRecord.UserIdFieldOffset);
         this.recordId = System.Buffers.Binary.BinaryPrimitives.ReadUInt16LittleEndian(data.AsSpan(Constants.ExtendedVariableLengthRecord.RecordIdFieldOffset, sizeof(ushort)));
         this.recordLengthAfterHeader = System.Buffers.Binary.BinaryPrimitives.ReadUInt64LittleEndian(data.AsSpan(Constants.ExtendedVariableLengthRecord.RecordLengthAfterHeaderFieldOffset, sizeof(ushort)));
-        this.description = System.Text.Encoding.UTF8.GetString(data, Constants.ExtendedVariableLengthRecord.DescriptionFieldOffset,  GetNullChar(data, Constants.ExtendedVariableLengthRecord.DescriptionFieldOffset) - Constants.ExtendedVariableLengthRecord.DescriptionFieldOffset);
+        this.description = System.Text.Encoding.UTF8.GetString(data, Constants.ExtendedVariableLengthRecord.DescriptionFieldOffset, GetNullChar(data, Constants.ExtendedVariableLengthRecord.DescriptionFieldOffset) - Constants.ExtendedVariableLengthRecord.DescriptionFieldOffset);
     }
 #endif
 
@@ -80,17 +80,18 @@ public readonly record struct ExtendedVariableLengthRecordHeader
         this.reserved = System.Buffers.Binary.BinaryPrimitives.ReadUInt16LittleEndian(data[..Constants.ExtendedVariableLengthRecord.UserIdFieldOffset]);
         this.userId =
 #if NETSTANDARD2_1_OR_GREATER || NETCOREAPP2_1_OR_GREATER
-            System.Text.Encoding.UTF8.GetString(data[Constants.ExtendedVariableLengthRecord.UserIdFieldOffset..GetNullChar(data,  Constants.ExtendedVariableLengthRecord.UserIdFieldOffset)]);
+            System.Text.Encoding.UTF8.GetString(data[Constants.ExtendedVariableLengthRecord.UserIdFieldOffset..GetNullChar(data, Constants.ExtendedVariableLengthRecord.UserIdFieldOffset)]);
 #else
-            System.Text.Encoding.UTF8.GetString(data[Constants.ExtendedVariableLengthRecord.UserIdFieldOffset..GetNullChar(data,  Constants.ExtendedVariableLengthRecord.UserIdFieldOffset)].ToArray());
+            System.Text.Encoding.UTF8.GetString(data[Constants.ExtendedVariableLengthRecord.UserIdFieldOffset..GetNullChar(data, Constants.ExtendedVariableLengthRecord.UserIdFieldOffset)].ToArray());
 #endif
         this.recordId = System.Buffers.Binary.BinaryPrimitives.ReadUInt16LittleEndian(data[Constants.ExtendedVariableLengthRecord.RecordIdFieldOffset..Constants.ExtendedVariableLengthRecord.RecordLengthAfterHeaderFieldOffset]);
-        this.recordLengthAfterHeader = System.Buffers.Binary.BinaryPrimitives.ReadUInt64LittleEndian(data[Constants.ExtendedVariableLengthRecord.RecordLengthAfterHeaderFieldOffset..Constants.ExtendedVariableLengthRecord.DescriptionFieldOffset]);
+        this.recordLengthAfterHeader =
+            System.Buffers.Binary.BinaryPrimitives.ReadUInt64LittleEndian(data[Constants.ExtendedVariableLengthRecord.RecordLengthAfterHeaderFieldOffset..Constants.ExtendedVariableLengthRecord.DescriptionFieldOffset]);
         this.description =
 #if NETSTANDARD2_1_OR_GREATER || NETCOREAPP2_1_OR_GREATER
-            System.Text.Encoding.UTF8.GetString(data[Constants.ExtendedVariableLengthRecord.DescriptionFieldOffset..GetNullChar(data,  Constants.ExtendedVariableLengthRecord.DescriptionFieldOffset)]);
+            System.Text.Encoding.UTF8.GetString(data[Constants.ExtendedVariableLengthRecord.DescriptionFieldOffset..GetNullChar(data, Constants.ExtendedVariableLengthRecord.DescriptionFieldOffset)]);
 #else
-            System.Text.Encoding.UTF8.GetString(data[Constants.ExtendedVariableLengthRecord.DescriptionFieldOffset..GetNullChar(data,  Constants.ExtendedVariableLengthRecord.DescriptionFieldOffset)].ToArray());
+            System.Text.Encoding.UTF8.GetString(data[Constants.ExtendedVariableLengthRecord.DescriptionFieldOffset..GetNullChar(data, Constants.ExtendedVariableLengthRecord.DescriptionFieldOffset)].ToArray());
 #endif
     }
 #pragma warning restore CS8618 // Non-nullable field must contain a non-null value when exiting constructor. Consider adding the 'required' modifier or declaring as nullable.
@@ -98,22 +99,38 @@ public readonly record struct ExtendedVariableLengthRecordHeader
     /// <summary>
     /// Gets the summary.
     /// </summary>
-    public required string UserId { get => this.userId; init => this.userId = value; }
+    public required string UserId
+    {
+        get => this.userId;
+        init => this.userId = value;
+    }
 
     /// <summary>
     /// Gets the record ID.
     /// </summary>
-    public required ushort RecordId { get => this.recordId; init => this.recordId = value; }
+    public required ushort RecordId
+    {
+        get => this.recordId;
+        init => this.recordId = value;
+    }
 
     /// <summary>
     /// Gets the description.
     /// </summary>
-    public string Description { get => this.description; init => this.description = value; }
+    public string Description
+    {
+        get => this.description;
+        init => this.description = value;
+    }
 
     /// <summary>
     /// Gets the record length after the header.
     /// </summary>
-    public ulong RecordLengthAfterHeader { get => this.recordLengthAfterHeader; init => this.recordLengthAfterHeader = value; }
+    public ulong RecordLengthAfterHeader
+    {
+        get => this.recordLengthAfterHeader;
+        init => this.recordLengthAfterHeader = value;
+    }
 
     /// <summary>
     /// Writes this instance to the destination.
@@ -126,7 +143,7 @@ public readonly record struct ExtendedVariableLengthRecordHeader
             System.Runtime.InteropServices.Marshal.StructureToPtr(this, GetIntPtrFromSpan(destination), fDeleteOld: false);
             return;
 
-            unsafe static IntPtr GetIntPtrFromSpan<T>(Span<T> span)
+            static unsafe IntPtr GetIntPtrFromSpan<T>(Span<T> span)
             {
                 // Cast the reference to an IntPtr
                 return (IntPtr)System.Runtime.CompilerServices.Unsafe.AsPointer(ref System.Runtime.InteropServices.MemoryMarshal.GetReference(span));
@@ -145,7 +162,7 @@ public readonly record struct ExtendedVariableLengthRecordHeader
         System.Buffers.Binary.BinaryPrimitives.WriteUInt16LittleEndian(destination[..Constants.ExtendedVariableLengthRecord.UserIdFieldOffset], this.reserved);
         WriteString(destination[Constants.ExtendedVariableLengthRecord.UserIdFieldOffset..Constants.ExtendedVariableLengthRecord.RecordIdFieldOffset], this.userId);
         System.Buffers.Binary.BinaryPrimitives.WriteUInt16LittleEndian(destination[Constants.ExtendedVariableLengthRecord.RecordIdFieldOffset..Constants.ExtendedVariableLengthRecord.RecordLengthAfterHeaderFieldOffset], this.recordId);
-        System.Buffers.Binary.BinaryPrimitives.WriteUInt64LittleEndian(destination[Constants.ExtendedVariableLengthRecord.RecordLengthAfterHeaderFieldOffset..Constants.ExtendedVariableLengthRecord.DescriptionFieldOffset], this.recordLengthAfterHeader); 
+        System.Buffers.Binary.BinaryPrimitives.WriteUInt64LittleEndian(destination[Constants.ExtendedVariableLengthRecord.RecordLengthAfterHeaderFieldOffset..Constants.ExtendedVariableLengthRecord.DescriptionFieldOffset], this.recordLengthAfterHeader);
         WriteString(destination[Constants.ExtendedVariableLengthRecord.DescriptionFieldOffset..Size], this.description);
 
         static void WriteString(Span<byte> destination, string input)

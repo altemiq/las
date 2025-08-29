@@ -17,7 +17,7 @@ public class VariableLengthRecordHeaderTests
         RecordLengthAfterHeader = 40,
         Description = "by LAStools of Martin Isenburg",
     };
-    
+
     [Test]
     [LittleEndianOnly]
     public async Task FromMemory()
@@ -28,7 +28,7 @@ public class VariableLengthRecordHeaderTests
             .Satisfies(h => h.RecordId, recordId => recordId.IsEqualTo((ushort)34735))
             .Satisfies(h => h.Description, description => description.IsEqualTo("by LAStools of Martin Isenburg"));
     }
-    
+
     [Test]
     public async Task FromBytes()
     {

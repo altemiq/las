@@ -99,7 +99,8 @@ public interface IBasePointDataRecord
     /// Writes this instance to the destination.
     /// </summary>
     /// <param name="destination">The destination.</param>
-    void Write(Span<byte> destination);
+    /// <returns>The number of bytes written.</returns>
+    int Write(Span<byte> destination);
 
     /// <summary>
     /// Converts this instance to a <see cref="GpsPointDataRecord"/>.

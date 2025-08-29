@@ -283,22 +283,23 @@ public readonly record struct ExtendedGpsPointDataRecord :
     public static ExtendedGpsPointDataRecord Create(ReadOnlySpan<byte> data) => BitConverter.IsLittleEndian ? System.Runtime.InteropServices.MemoryMarshal.Read<ExtendedGpsPointDataRecord>(data) : new(data);
 
     /// <inheritdoc />
-    public void Write(Span<byte> destination)
+    public int Write(Span<byte> destination)
     {
         if (BitConverter.IsLittleEndian)
         {
             System.Runtime.InteropServices.MemoryMarshal.Write(destination, ref System.Runtime.CompilerServices.Unsafe.AsRef(this));
-            return;
+            return Size;
         }
 
-        this.WriteLittleEndian(destination);
+        return this.WriteLittleEndian(destination);
     }
 
     /// <summary>
     /// Writes this instance into a span of bytes, as little endian.
     /// </summary>
     /// <param name="destination">The span of bytes where the value is to be written, as little endian.</param>
-    public void WriteLittleEndian(Span<byte> destination)
+    /// <returns>The number of bytes written.</returns>
+    public int WriteLittleEndian(Span<byte> destination)
     {
         System.Buffers.Binary.BinaryPrimitives.WriteInt32LittleEndian(destination[..Constants.ExtendedPointDataRecord.YFieldOffset], this.X);
         System.Buffers.Binary.BinaryPrimitives.WriteInt32LittleEndian(destination[Constants.ExtendedPointDataRecord.YFieldOffset..Constants.ExtendedPointDataRecord.ZFieldOffset], this.Y);
@@ -311,6 +312,7 @@ public readonly record struct ExtendedGpsPointDataRecord :
         System.Buffers.Binary.BinaryPrimitives.WriteInt16LittleEndian(destination[Constants.ExtendedPointDataRecord.ScanAngleFieldOffset..Constants.ExtendedPointDataRecord.PointSourceIdFieldOffset], this.ScanAngle);
         System.Buffers.Binary.BinaryPrimitives.WriteUInt16LittleEndian(destination[Constants.ExtendedPointDataRecord.PointSourceIdFieldOffset..Constants.ExtendedPointDataRecord.GpsTimeFieldOffset], this.PointSourceId);
         BitManipulation.WriteDoubleLittleEndian(destination[Constants.ExtendedPointDataRecord.GpsTimeFieldOffset..Constants.ExtendedPointDataRecord.ColorFieldOffset], this.GpsTime);
+        return Size;
     }
 
     /// <inheritdoc />

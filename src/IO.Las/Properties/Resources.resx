@@ -27,4 +27,16 @@
   <data name="CannotDetermineGpsWeek" xml:space="preserve">
     <value>Cannot determine GPS week without Header.FileCreation set.</value>
   </data>
+  <data name="InvalidPointFormatId" xml:space="preserve">
+    <value>Invalid point format ID ({0}) for {1}</value>
+  </data>
+  <data name="InvalidVersion" xml:space="preserve">
+    <value>Invalid version. `{0}` must be between `{1}` and `{2}` inclusive.</value>
+  </data>
+  <data name="MultipleVlrsFound" xml:space="preserve">
+    <value>Cannot have more that one VLR of type {0}</value>
+  </data>
+  <data name="CannotSetOn" xml:space="preserve">
+    <value>Cannot set {0} on {1}.</value>
+  </data>
 </root>
