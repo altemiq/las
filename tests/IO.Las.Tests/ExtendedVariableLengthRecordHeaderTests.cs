@@ -17,7 +17,7 @@ public class ExtendedVariableLengthRecordHeaderTests
         RecordLengthAfterHeader = 8896,
         Description = "EPT Hierarchy",
     };
-    
+
     [Test]
     [LittleEndianOnly]
     public async Task FromMemory()
@@ -28,7 +28,7 @@ public class ExtendedVariableLengthRecordHeaderTests
             .Satisfies(h => h.RecordId, recordId => recordId.IsEqualTo((ushort)1000))
             .Satisfies(h => h.Description, description => description.IsEqualTo("EPT Hierarchy"));
     }
-    
+
     [Test]
     public async Task FromBytes()
     {

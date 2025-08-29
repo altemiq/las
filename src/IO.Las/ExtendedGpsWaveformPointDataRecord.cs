@@ -362,22 +362,23 @@ public readonly record struct ExtendedGpsWaveformPointDataRecord :
     public static ExtendedGpsWaveformPointDataRecord Create(ReadOnlySpan<byte> data) => BitConverter.IsLittleEndian ? System.Runtime.InteropServices.MemoryMarshal.Read<ExtendedGpsWaveformPointDataRecord>(data) : new(data);
 
     /// <inheritdoc />
-    public void Write(Span<byte> destination)
+    public int Write(Span<byte> destination)
     {
         if (BitConverter.IsLittleEndian)
         {
             System.Runtime.InteropServices.MemoryMarshal.Write(destination, ref System.Runtime.CompilerServices.Unsafe.AsRef(this));
-            return;
+            return Size;
         }
 
-        this.WriteLittleEndian(destination);
+        return this.WriteLittleEndian(destination);
     }
 
     /// <summary>
     /// Writes this instance into a span of bytes, as little endian.
     /// </summary>
     /// <param name="destination">The span of bytes where the value is to be written, as little endian.</param>
-    public void WriteLittleEndian(Span<byte> destination)
+    /// <returns>The number of bytes written.</returns>
+    public int WriteLittleEndian(Span<byte> destination)
     {
         System.Buffers.Binary.BinaryPrimitives.WriteInt32LittleEndian(destination[..Constants.ExtendedPointDataRecord.YFieldOffset], this.X);
         System.Buffers.Binary.BinaryPrimitives.WriteInt32LittleEndian(destination[Constants.ExtendedPointDataRecord.YFieldOffset..Constants.ExtendedPointDataRecord.ZFieldOffset], this.Y);
@@ -397,6 +398,7 @@ public readonly record struct ExtendedGpsWaveformPointDataRecord :
         BitManipulation.WriteSingleLittleEndian(destination[ParametricDxFieldOffset..ParametricDyFieldOffset], this.ParametricDx);
         BitManipulation.WriteSingleLittleEndian(destination[ParametricDyFieldOffset..ParametricDzFieldOffset], this.ParametricDy);
         BitManipulation.WriteSingleLittleEndian(destination[ParametricDzFieldOffset..Size], this.ParametricDz);
+        return Size;
     }
 
     /// <inheritdoc/>

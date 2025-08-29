@@ -355,22 +355,23 @@ public readonly record struct ExtendedGpsColorNearInfraredPointDataRecord :
     public static ExtendedGpsColorNearInfraredPointDataRecord Create(ReadOnlySpan<byte> data) => BitConverter.IsLittleEndian ? System.Runtime.InteropServices.MemoryMarshal.Read<ExtendedGpsColorNearInfraredPointDataRecord>(data) : new(data);
 
     /// <inheritdoc />
-    public void Write(Span<byte> destination)
+    public int Write(Span<byte> destination)
     {
         if (BitConverter.IsLittleEndian)
         {
             System.Runtime.InteropServices.MemoryMarshal.Write(destination, ref System.Runtime.CompilerServices.Unsafe.AsRef(this));
-            return;
+            return Size;
         }
 
-        this.WriteLittleEndian(destination);
+        return this.WriteLittleEndian(destination);
     }
 
     /// <summary>
     /// Writes this instance into a span of bytes, as little endian.
     /// </summary>
     /// <param name="destination">The span of bytes where the value is to be written, as little endian.</param>
-    public void WriteLittleEndian(Span<byte> destination)
+    /// <returns>The number of bytes written.</returns>
+    public int WriteLittleEndian(Span<byte> destination)
     {
         System.Buffers.Binary.BinaryPrimitives.WriteInt32LittleEndian(destination[..Constants.ExtendedPointDataRecord.YFieldOffset], this.X);
         System.Buffers.Binary.BinaryPrimitives.WriteInt32LittleEndian(destination[Constants.ExtendedPointDataRecord.YFieldOffset..Constants.ExtendedPointDataRecord.ZFieldOffset], this.Y);
@@ -387,6 +388,7 @@ public readonly record struct ExtendedGpsColorNearInfraredPointDataRecord :
         System.Buffers.Binary.BinaryPrimitives.WriteUInt16LittleEndian(destination[(Constants.ExtendedPointDataRecord.ColorFieldOffset + sizeof(ushort))..], this.Color.G);
         System.Buffers.Binary.BinaryPrimitives.WriteUInt16LittleEndian(destination[(Constants.ExtendedPointDataRecord.ColorFieldOffset + sizeof(ushort) + sizeof(ushort))..], this.Color.B);
         System.Buffers.Binary.BinaryPrimitives.WriteUInt16LittleEndian(destination[Constants.ExtendedPointDataRecord.NirFieldOffset..Size], this.NearInfrared);
+        return Size;
     }
 
     /// <inheritdoc/>

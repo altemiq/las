@@ -80,7 +80,7 @@ public readonly record struct VariableLengthRecordHeader
         this.reserved = System.Buffers.Binary.BinaryPrimitives.ReadUInt16LittleEndian(data[..Constants.VariableLengthRecord.UserIdFieldOffset]);
         this.userId =
 #if NETSTANDARD2_1_OR_GREATER || NETCOREAPP2_1_OR_GREATER
-            System.Text.Encoding.UTF8.GetString(data[Constants.VariableLengthRecord.UserIdFieldOffset..GetNullChar(data,  Constants.VariableLengthRecord.UserIdFieldOffset)]);
+            System.Text.Encoding.UTF8.GetString(data[Constants.VariableLengthRecord.UserIdFieldOffset..GetNullChar(data, Constants.VariableLengthRecord.UserIdFieldOffset)]);
 #else
             System.Text.Encoding.UTF8.GetString(data[Constants.VariableLengthRecord.UserIdFieldOffset..GetNullChar(data,  Constants.VariableLengthRecord.UserIdFieldOffset)].ToArray());
 #endif
@@ -88,7 +88,7 @@ public readonly record struct VariableLengthRecordHeader
         this.recordLengthAfterHeader = System.Buffers.Binary.BinaryPrimitives.ReadUInt16LittleEndian(data[Constants.VariableLengthRecord.RecordLengthAfterHeaderFieldOffset..Constants.VariableLengthRecord.DescriptionFieldOffset]);
         this.description =
 #if NETSTANDARD2_1_OR_GREATER || NETCOREAPP2_1_OR_GREATER
-            System.Text.Encoding.UTF8.GetString(data[Constants.VariableLengthRecord.DescriptionFieldOffset..GetNullChar(data,  Constants.VariableLengthRecord.DescriptionFieldOffset)]);
+            System.Text.Encoding.UTF8.GetString(data[Constants.VariableLengthRecord.DescriptionFieldOffset..GetNullChar(data, Constants.VariableLengthRecord.DescriptionFieldOffset)]);
 #else
             System.Text.Encoding.UTF8.GetString(data[Constants.VariableLengthRecord.DescriptionFieldOffset..GetNullChar(data,  Constants.VariableLengthRecord.DescriptionFieldOffset)].ToArray());
 #endif
@@ -126,7 +126,7 @@ public readonly record struct VariableLengthRecordHeader
             System.Runtime.InteropServices.Marshal.StructureToPtr(this, GetIntPtrFromSpan(destination), fDeleteOld: false);
             return;
 
-            unsafe static IntPtr GetIntPtrFromSpan<T>(Span<T> span)
+            static unsafe IntPtr GetIntPtrFromSpan<T>(Span<T> span)
             {
                 // Cast the reference to an IntPtr
                 return (IntPtr)System.Runtime.CompilerServices.Unsafe.AsPointer(ref System.Runtime.InteropServices.MemoryMarshal.GetReference(span));
@@ -145,7 +145,7 @@ public readonly record struct VariableLengthRecordHeader
         System.Buffers.Binary.BinaryPrimitives.WriteUInt16LittleEndian(destination[..Constants.VariableLengthRecord.UserIdFieldOffset], this.reserved);
         WriteString(destination[Constants.VariableLengthRecord.UserIdFieldOffset..Constants.VariableLengthRecord.RecordIdFieldOffset], this.userId);
         System.Buffers.Binary.BinaryPrimitives.WriteUInt16LittleEndian(destination[Constants.VariableLengthRecord.RecordIdFieldOffset..Constants.VariableLengthRecord.RecordLengthAfterHeaderFieldOffset], this.recordId);
-        System.Buffers.Binary.BinaryPrimitives.WriteUInt16LittleEndian(destination[Constants.VariableLengthRecord.RecordLengthAfterHeaderFieldOffset..Constants.VariableLengthRecord.DescriptionFieldOffset], this.recordLengthAfterHeader); 
+        System.Buffers.Binary.BinaryPrimitives.WriteUInt16LittleEndian(destination[Constants.VariableLengthRecord.RecordLengthAfterHeaderFieldOffset..Constants.VariableLengthRecord.DescriptionFieldOffset], this.recordLengthAfterHeader);
         WriteString(destination[Constants.VariableLengthRecord.DescriptionFieldOffset..Size], this.description);
 
         static void WriteString(Span<byte> destination, string input)
