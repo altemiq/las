@@ -13,4 +13,8 @@
     <ProjectReference Include="..\..\src\IO.Las\IO.Las.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <EmbeddedResource Include="**/*.las;**/*.bin" />
+  </ItemGroup>
+
 </Project>

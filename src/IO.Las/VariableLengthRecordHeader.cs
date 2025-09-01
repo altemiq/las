@@ -67,6 +67,19 @@ public readonly record struct VariableLengthRecordHeader
         this.recordId = System.Buffers.Binary.BinaryPrimitives.ReadUInt16LittleEndian(data.AsSpan(Constants.VariableLengthRecord.RecordIdFieldOffset, sizeof(ushort)));
         this.recordLengthAfterHeader = System.Buffers.Binary.BinaryPrimitives.ReadUInt16LittleEndian(data.AsSpan(Constants.VariableLengthRecord.RecordLengthAfterHeaderFieldOffset, sizeof(ushort)));
         this.description = System.Text.Encoding.UTF8.GetString(data, Constants.VariableLengthRecord.DescriptionFieldOffset,  GetNullChar(data, Constants.VariableLengthRecord.DescriptionFieldOffset) - Constants.VariableLengthRecord.DescriptionFieldOffset);
+
+        static int GetNullChar(byte[] source, int startIndex = 0)
+        {
+            for (var i = startIndex; i < source.Length; i++)
+            {
+                if (source[i] is 0)
+                {
+                    return i;
+                }
+            }
+
+            return source.Length;
+        }
     }
 #endif
 
@@ -78,20 +91,10 @@ public readonly record struct VariableLengthRecordHeader
     public VariableLengthRecordHeader(ReadOnlySpan<byte> data)
     {
         this.reserved = System.Buffers.Binary.BinaryPrimitives.ReadUInt16LittleEndian(data[..Constants.VariableLengthRecord.UserIdFieldOffset]);
-        this.userId =
-#if NETSTANDARD2_1_OR_GREATER || NETCOREAPP2_1_OR_GREATER
-            System.Text.Encoding.UTF8.GetString(data[Constants.VariableLengthRecord.UserIdFieldOffset..GetNullChar(data, Constants.VariableLengthRecord.UserIdFieldOffset)]);
-#else
-            System.Text.Encoding.UTF8.GetString(data[Constants.VariableLengthRecord.UserIdFieldOffset..GetNullChar(data,  Constants.VariableLengthRecord.UserIdFieldOffset)].ToArray());
-#endif
+        this.userId = System.Text.Encoding.UTF8.GetNullTerminatedString(data[Constants.VariableLengthRecord.UserIdFieldOffset..Constants.VariableLengthRecord.RecordIdFieldOffset]);
         this.recordId = System.Buffers.Binary.BinaryPrimitives.ReadUInt16LittleEndian(data[Constants.VariableLengthRecord.RecordIdFieldOffset..Constants.VariableLengthRecord.RecordLengthAfterHeaderFieldOffset]);
         this.recordLengthAfterHeader = System.Buffers.Binary.BinaryPrimitives.ReadUInt16LittleEndian(data[Constants.VariableLengthRecord.RecordLengthAfterHeaderFieldOffset..Constants.VariableLengthRecord.DescriptionFieldOffset]);
-        this.description =
-#if NETSTANDARD2_1_OR_GREATER || NETCOREAPP2_1_OR_GREATER
-            System.Text.Encoding.UTF8.GetString(data[Constants.VariableLengthRecord.DescriptionFieldOffset..GetNullChar(data, Constants.VariableLengthRecord.DescriptionFieldOffset)]);
-#else
-            System.Text.Encoding.UTF8.GetString(data[Constants.VariableLengthRecord.DescriptionFieldOffset..GetNullChar(data,  Constants.VariableLengthRecord.DescriptionFieldOffset)].ToArray());
-#endif
+        this.description = System.Text.Encoding.UTF8.GetNullTerminatedString(data[Constants.VariableLengthRecord.DescriptionFieldOffset..Size]);
     }
 #pragma warning restore CS8618 // Non-nullable field must contain a non-null value when exiting constructor. Consider adding the 'required' modifier or declaring as nullable.
 
@@ -114,6 +117,27 @@ public readonly record struct VariableLengthRecordHeader
     /// Gets the record length after the header.
     /// </summary>
     public ushort RecordLengthAfterHeader { get => this.recordLengthAfterHeader; init => this.recordLengthAfterHeader = value; }
+
+    /// <summary>
+    /// Reads an instance of <see cref="VariableLengthRecordHeader"/> from the source.
+    /// </summary>
+    /// <param name="source">The source.</param>
+    /// <returns>The instance of <see cref="VariableLengthRecordHeader"/>.</returns>
+    public static VariableLengthRecordHeader Read(ReadOnlySpan<byte> source)
+    {
+        if (BitConverter.IsLittleEndian)
+        {
+            return System.Runtime.InteropServices.Marshal.PtrToStructure<VariableLengthRecordHeader>(GetIntPtrFromSpan(source));
+
+            static unsafe IntPtr GetIntPtrFromSpan<T>(ReadOnlySpan<T> span)
+            {
+                // Cast the reference to an IntPtr
+                return (IntPtr)System.Runtime.CompilerServices.Unsafe.AsPointer(ref System.Runtime.InteropServices.MemoryMarshal.GetReference(span));
+            }
+        }
+
+        return new(source);
+    }
 
     /// <summary>
     /// Writes this instance to the destination.
@@ -163,18 +187,5 @@ public readonly record struct VariableLengthRecordHeader
                 current++;
             }
         }
-    }
-
-    private static int GetNullChar(ReadOnlySpan<byte> source, int startIndex = 0)
-    {
-        for (var i = startIndex; i < source.Length; i++)
-        {
-            if (source[i] is 0)
-            {
-                return i;
-            }
-        }
-
-        return source.Length;
     }
 }

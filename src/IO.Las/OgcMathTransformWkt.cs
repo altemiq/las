@@ -36,12 +36,7 @@ public sealed record OgcMathTransformWkt : VariableLengthRecord
     /// <param name="header">The header.</param>
     /// <param name="data">The data.</param>
     internal OgcMathTransformWkt(VariableLengthRecordHeader header, ReadOnlySpan<byte> data)
-        : base(header) => this.Wkt =
-#if NETSTANDARD2_1_OR_GREATER || NETCOREAPP2_1_OR_GREATER
-            System.Text.Encoding.UTF8.GetString(data[..^1]);
-#else
-            System.Text.Encoding.UTF8.GetString(data[..^1].ToArray());
-#endif
+        : base(header) => this.Wkt = System.Text.Encoding.UTF8.GetString(data[..^1]);
 
     /// <summary>
     /// Gets the well-known text.
@@ -54,14 +49,7 @@ public sealed record OgcMathTransformWkt : VariableLengthRecord
         this.Header.Write(destination);
         int bytesWritten = VariableLengthRecordHeader.Size;
         var d = destination[bytesWritten..];
-
-#if NETSTANDARD2_1_OR_GREATER || NETCOREAPP2_1_OR_GREATER
         bytesWritten += System.Text.Encoding.UTF8.GetBytes(this.Wkt, d);
-#else
-        var bytes = System.Text.Encoding.UTF8.GetBytes(this.Wkt);
-        bytes.AsSpan().CopyTo(d);
-        bytesWritten += bytes.Length;
-#endif
         d[bytesWritten] = 0;
 
         return bytesWritten + 1;

@@ -39,7 +39,7 @@ public sealed record TextAreaDescription : VariableLengthRecord
     /// <param name="header">The header.</param>
     /// <param name="data">The data.</param>
     internal TextAreaDescription(VariableLengthRecordHeader header, ReadOnlySpan<byte> data)
-        : this(header, GetString(data))
+        : this(header, System.Text.Encoding.ASCII.GetNullTerminatedString(data))
     {
     }
 
@@ -59,31 +59,9 @@ public sealed record TextAreaDescription : VariableLengthRecord
         int bytesWritten = VariableLengthRecordHeader.Size;
         d = destination[bytesWritten..];
 
-#if NETSTANDARD2_0
-        var bytes = System.Text.Encoding.ASCII.GetBytes(this.Value);
-        bytes.AsSpan().CopyTo(d);
-        bytesWritten += bytes.Length;
-#else
         bytesWritten += System.Text.Encoding.ASCII.GetBytes(this.Value, d);
-#endif
-        d = destination[bytesWritten..];
-        d[0] = 0;
+        d[bytesWritten] = 0;
 
         return bytesWritten + 1;
-    }
-
-    private static string GetString(ReadOnlySpan<byte> data)
-    {
-        var nullCharIndex = data.IndexOf((byte)0);
-        if (nullCharIndex is -1)
-        {
-            nullCharIndex = data.Length;
-        }
-
-#if NETSTANDARD2_1_OR_GREATER || NETCOREAPP2_1_OR_GREATER
-        return System.Text.Encoding.ASCII.GetString(data[..nullCharIndex]);
-#else
-        return System.Text.Encoding.ASCII.GetString(data[..nullCharIndex].ToArray());
-#endif
     }
 }

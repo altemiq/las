@@ -13,7 +13,7 @@ public class VariableLengthRecordHeaderTests
     private static readonly VariableLengthRecordHeader Header = new()
     {
         UserId = VariableLengthRecordHeader.ProjectionUserId,
-        RecordId = (ushort)34735,
+        RecordId = 34735,
         RecordLengthAfterHeader = 40,
         Description = "by LAStools of Martin Isenburg",
     };

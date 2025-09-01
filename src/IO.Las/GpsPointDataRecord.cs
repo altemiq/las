@@ -60,7 +60,7 @@ public readonly record struct GpsPointDataRecord :
         this.ScanAngleRank = (sbyte)data[Constants.PointDataRecord.ScanAngleRankFieldOffset];
         this.UserData = data[Constants.PointDataRecord.UserDataFieldOffset];
         this.PointSourceId = System.Buffers.Binary.BinaryPrimitives.ReadUInt16LittleEndian(data[Constants.PointDataRecord.PointSourceIdFieldOffset..Constants.PointDataRecord.GpsTimeFieldOffset]);
-        this.GpsTime = BitManipulation.ReadDoubleLittleEndian(data[Constants.PointDataRecord.GpsTimeFieldOffset..Size]);
+        this.GpsTime = System.Buffers.Binary.BinaryPrimitives.ReadDoubleLittleEndian(data[Constants.PointDataRecord.GpsTimeFieldOffset..Size]);
     }
 
 #if NET7_0_OR_GREATER
@@ -285,7 +285,7 @@ public readonly record struct GpsPointDataRecord :
         destination[Constants.PointDataRecord.ScanAngleRankFieldOffset] = (byte)this.ScanAngleRank;
         destination[Constants.PointDataRecord.UserDataFieldOffset] = this.UserData;
         System.Buffers.Binary.BinaryPrimitives.WriteUInt16LittleEndian(destination[Constants.PointDataRecord.PointSourceIdFieldOffset..Constants.PointDataRecord.ColorFieldOffset], this.PointSourceId);
-        BitManipulation.WriteDoubleLittleEndian(destination[Constants.PointDataRecord.GpsTimeFieldOffset..Size], this.GpsTime);
+        System.Buffers.Binary.BinaryPrimitives.WriteDoubleLittleEndian(destination[Constants.PointDataRecord.GpsTimeFieldOffset..Size], this.GpsTime);
         return Size;
     }
 

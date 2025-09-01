@@ -68,7 +68,7 @@ public readonly record struct GpsColorWaveformPointDataRecord :
         this.ScanAngleRank = (sbyte)data[Constants.PointDataRecord.ScanAngleRankFieldOffset];
         this.UserData = data[Constants.PointDataRecord.UserDataFieldOffset];
         this.PointSourceId = System.Buffers.Binary.BinaryPrimitives.ReadUInt16LittleEndian(data[Constants.PointDataRecord.PointSourceIdFieldOffset..Constants.PointDataRecord.GpsTimeFieldOffset]);
-        this.GpsTime = BitManipulation.ReadDoubleLittleEndian(data[Constants.PointDataRecord.GpsTimeFieldOffset..Constants.PointDataRecord.GpsColorFieldOffset]);
+        this.GpsTime = System.Buffers.Binary.BinaryPrimitives.ReadDoubleLittleEndian(data[Constants.PointDataRecord.GpsTimeFieldOffset..Constants.PointDataRecord.GpsColorFieldOffset]);
         this.Color = new()
         {
             R = System.Buffers.Binary.BinaryPrimitives.ReadUInt16LittleEndian(data[Constants.PointDataRecord.GpsColorFieldOffset..]),
@@ -78,10 +78,10 @@ public readonly record struct GpsColorWaveformPointDataRecord :
         this.WavePacketDescriptorIndex = data[Constants.PointDataRecord.GpsColorWaveformFieldOffset];
         this.ByteOffsetToWaveformData = System.Buffers.Binary.BinaryPrimitives.ReadUInt64LittleEndian(data[ByteOffsetToWaveformDataFieldOffset..WaveformPacketSizeInBytesFieldOffset]);
         this.WaveformPacketSizeInBytes = System.Buffers.Binary.BinaryPrimitives.ReadUInt32LittleEndian(data[WaveformPacketSizeInBytesFieldOffset..ReturnPointWaveformLocationFieldOffset]);
-        this.ReturnPointWaveformLocation = BitManipulation.ReadSingleLittleEndian(data[ReturnPointWaveformLocationFieldOffset..ParametricDxFieldOffset]);
-        this.ParametricDx = BitManipulation.ReadSingleLittleEndian(data[ParametricDxFieldOffset..ParametricDyFieldOffset]);
-        this.ParametricDy = BitManipulation.ReadSingleLittleEndian(data[ParametricDyFieldOffset..ParametricDzFieldOffset]);
-        this.ParametricDz = BitManipulation.ReadSingleLittleEndian(data[ParametricDzFieldOffset..Size]);
+        this.ReturnPointWaveformLocation = System.Buffers.Binary.BinaryPrimitives.ReadSingleLittleEndian(data[ReturnPointWaveformLocationFieldOffset..ParametricDxFieldOffset]);
+        this.ParametricDx = System.Buffers.Binary.BinaryPrimitives.ReadSingleLittleEndian(data[ParametricDxFieldOffset..ParametricDyFieldOffset]);
+        this.ParametricDy = System.Buffers.Binary.BinaryPrimitives.ReadSingleLittleEndian(data[ParametricDyFieldOffset..ParametricDzFieldOffset]);
+        this.ParametricDz = System.Buffers.Binary.BinaryPrimitives.ReadSingleLittleEndian(data[ParametricDzFieldOffset..Size]);
     }
 
 #if NET7_0_OR_GREATER
@@ -380,17 +380,17 @@ public readonly record struct GpsColorWaveformPointDataRecord :
         destination[Constants.PointDataRecord.ScanAngleRankFieldOffset] = (byte)this.ScanAngleRank;
         destination[Constants.PointDataRecord.UserDataFieldOffset] = this.UserData;
         System.Buffers.Binary.BinaryPrimitives.WriteUInt16LittleEndian(destination[Constants.PointDataRecord.PointSourceIdFieldOffset..Constants.PointDataRecord.ColorFieldOffset], this.PointSourceId);
-        BitManipulation.WriteDoubleLittleEndian(destination[Constants.PointDataRecord.GpsTimeFieldOffset..Constants.PointDataRecord.GpsColorFieldOffset], this.GpsTime);
+        System.Buffers.Binary.BinaryPrimitives.WriteDoubleLittleEndian(destination[Constants.PointDataRecord.GpsTimeFieldOffset..Constants.PointDataRecord.GpsColorFieldOffset], this.GpsTime);
         System.Buffers.Binary.BinaryPrimitives.WriteUInt16LittleEndian(destination[Constants.PointDataRecord.GpsColorFieldOffset..], this.Color.R);
         System.Buffers.Binary.BinaryPrimitives.WriteUInt16LittleEndian(destination[(Constants.PointDataRecord.GpsColorFieldOffset + sizeof(ushort))..], this.Color.G);
         System.Buffers.Binary.BinaryPrimitives.WriteUInt16LittleEndian(destination[(Constants.PointDataRecord.GpsColorFieldOffset + sizeof(ushort) + sizeof(ushort))..], this.Color.B);
         destination[Constants.PointDataRecord.GpsColorWaveformFieldOffset] = this.WavePacketDescriptorIndex;
         System.Buffers.Binary.BinaryPrimitives.WriteUInt64LittleEndian(destination[ByteOffsetToWaveformDataFieldOffset..WaveformPacketSizeInBytesFieldOffset], this.ByteOffsetToWaveformData);
         System.Buffers.Binary.BinaryPrimitives.WriteUInt32LittleEndian(destination[WaveformPacketSizeInBytesFieldOffset..ReturnPointWaveformLocationFieldOffset], this.WaveformPacketSizeInBytes);
-        BitManipulation.WriteSingleLittleEndian(destination[ReturnPointWaveformLocationFieldOffset..ParametricDxFieldOffset], this.ReturnPointWaveformLocation);
-        BitManipulation.WriteSingleLittleEndian(destination[ParametricDxFieldOffset..ParametricDyFieldOffset], this.ParametricDx);
-        BitManipulation.WriteSingleLittleEndian(destination[ParametricDyFieldOffset..ParametricDzFieldOffset], this.ParametricDy);
-        BitManipulation.WriteSingleLittleEndian(destination[ParametricDzFieldOffset..Size], this.ParametricDz);
+        System.Buffers.Binary.BinaryPrimitives.WriteSingleLittleEndian(destination[ReturnPointWaveformLocationFieldOffset..ParametricDxFieldOffset], this.ReturnPointWaveformLocation);
+        System.Buffers.Binary.BinaryPrimitives.WriteSingleLittleEndian(destination[ParametricDxFieldOffset..ParametricDyFieldOffset], this.ParametricDx);
+        System.Buffers.Binary.BinaryPrimitives.WriteSingleLittleEndian(destination[ParametricDyFieldOffset..ParametricDzFieldOffset], this.ParametricDy);
+        System.Buffers.Binary.BinaryPrimitives.WriteSingleLittleEndian(destination[ParametricDzFieldOffset..Size], this.ParametricDz);
         return Size;
     }
 

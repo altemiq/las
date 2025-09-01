@@ -74,13 +74,7 @@ public record GeoAsciiParamsTag : VariableLengthRecord, IReadOnlyList<string>
 
         foreach (var s in this.strings)
         {
-#if NETSTANDARD2_1 || NETCOREAPP2_1_OR_GREATER
             bytesWritten += System.Text.Encoding.ASCII.GetBytes(s, d);
-#else
-            var bytes = System.Text.Encoding.ASCII.GetBytes(s);
-            bytes.AsSpan().CopyTo(d);
-            bytesWritten += bytes.Length;
-#endif
             d[bytesWritten] = 0;
             bytesWritten++;
             d = destination[bytesWritten..];
@@ -96,23 +90,14 @@ public record GeoAsciiParamsTag : VariableLengthRecord, IReadOnlyList<string>
         var nextIndex = GetNextIndex(data, current);
         while (nextIndex is not -1)
         {
-            builder.Add(GetString(data, current, nextIndex));
+            builder.Add(System.Text.Encoding.ASCII.GetString(data[current..nextIndex]));
             current = nextIndex + 1;
             nextIndex = GetNextIndex(data, current);
         }
 
-        builder.Add(GetString(data, current, data.Length));
+        builder.Add(System.Text.Encoding.ASCII.GetString(data[current..]));
 
         return builder.ToReadOnlyCollection();
-
-        static string GetString(ReadOnlySpan<byte> data, int startIndex, int endIndex)
-        {
-#if NETSTANDARD2_1_OR_GREATER || NETCOREAPP2_1_OR_GREATER
-            return System.Text.Encoding.ASCII.GetString(data[startIndex..endIndex]);
-#else
-            return System.Text.Encoding.ASCII.GetString(data[startIndex..endIndex].ToArray());
-#endif
-        }
 
         static int GetNextIndex(ReadOnlySpan<byte> data, int startIndex)
         {

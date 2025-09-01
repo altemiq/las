@@ -61,7 +61,7 @@ public readonly record struct GpsColorPointDataRecord :
         this.ScanAngleRank = (sbyte)data[Constants.PointDataRecord.ScanAngleRankFieldOffset];
         this.UserData = data[Constants.PointDataRecord.UserDataFieldOffset];
         this.PointSourceId = System.Buffers.Binary.BinaryPrimitives.ReadUInt16LittleEndian(data[Constants.PointDataRecord.PointSourceIdFieldOffset..Constants.PointDataRecord.GpsTimeFieldOffset]);
-        this.GpsTime = BitManipulation.ReadDoubleLittleEndian(data[Constants.PointDataRecord.GpsTimeFieldOffset..Constants.PointDataRecord.GpsColorFieldOffset]);
+        this.GpsTime = System.Buffers.Binary.BinaryPrimitives.ReadDoubleLittleEndian(data[Constants.PointDataRecord.GpsTimeFieldOffset..Constants.PointDataRecord.GpsColorFieldOffset]);
         this.Color = new()
         {
             R = System.Buffers.Binary.BinaryPrimitives.ReadUInt16LittleEndian(data[Constants.PointDataRecord.GpsColorFieldOffset..]),
@@ -310,7 +310,7 @@ public readonly record struct GpsColorPointDataRecord :
         destination[Constants.PointDataRecord.ScanAngleRankFieldOffset] = (byte)this.ScanAngleRank;
         destination[Constants.PointDataRecord.UserDataFieldOffset] = this.UserData;
         System.Buffers.Binary.BinaryPrimitives.WriteUInt16LittleEndian(destination[Constants.PointDataRecord.PointSourceIdFieldOffset..Constants.PointDataRecord.ColorFieldOffset], this.PointSourceId);
-        BitManipulation.WriteDoubleLittleEndian(destination[Constants.PointDataRecord.GpsTimeFieldOffset..Constants.PointDataRecord.GpsColorFieldOffset], this.GpsTime);
+        System.Buffers.Binary.BinaryPrimitives.WriteDoubleLittleEndian(destination[Constants.PointDataRecord.GpsTimeFieldOffset..Constants.PointDataRecord.GpsColorFieldOffset], this.GpsTime);
         System.Buffers.Binary.BinaryPrimitives.WriteUInt16LittleEndian(destination[Constants.PointDataRecord.GpsColorFieldOffset..], this.Color.R);
         System.Buffers.Binary.BinaryPrimitives.WriteUInt16LittleEndian(destination[(Constants.PointDataRecord.GpsColorFieldOffset + sizeof(ushort))..], this.Color.G);
         System.Buffers.Binary.BinaryPrimitives.WriteUInt16LittleEndian(destination[(Constants.PointDataRecord.GpsColorFieldOffset + sizeof(ushort) + sizeof(ushort))..], this.Color.B);

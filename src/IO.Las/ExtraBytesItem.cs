@@ -77,7 +77,7 @@ public readonly record struct ExtraBytesItem
         this.reserved = source[..2].ToArray();
         this.dataType = (ExtraBytesDataType)source[2];
         this.options = (ExtraBytesOptions)source[3];
-        this.name = System.Text.Encoding.UTF8.GetString(GetStringBytes(source[4..36]));
+        this.name = System.Text.Encoding.UTF8.GetNullTerminatedString(source[4..36]);
         this.unused = source[36..40].ToArray();
         this.noData = source[40..48].ToArray();
         this.deprecated1 = source[48..64].ToArray();
@@ -85,42 +85,11 @@ public readonly record struct ExtraBytesItem
         this.deprecated2 = source[72..88].ToArray();
         this.max = source[88..96].ToArray();
         this.deprecated3 = source[96..112].ToArray();
-        this.scale = BitManipulation.ReadDoubleLittleEndian(source[112..120]);
+        this.scale = System.Buffers.Binary.BinaryPrimitives.ReadDoubleLittleEndian(source[112..120]);
         this.deprecated4 = source[120..136].ToArray();
-        this.offset = BitManipulation.ReadDoubleLittleEndian(source[136..144]);
+        this.offset = System.Buffers.Binary.BinaryPrimitives.ReadDoubleLittleEndian(source[136..144]);
         this.deprecated5 = source[144..160].ToArray();
-        this.description = System.Text.Encoding.UTF8.GetString(GetStringBytes(source[160..192]));
-
-        static
-#if NETSTANDARD2_1_OR_GREATER || NETCOREAPP2_1_OR_GREATER
-            ReadOnlySpan<byte>
-#else
-            byte[]
-#endif
-            GetStringBytes(ReadOnlySpan<byte> source)
-        {
-            var span = source[..GetNullChar(source)];
-
-            return
-#if NETSTANDARD2_1_OR_GREATER || NETCOREAPP2_1_OR_GREATER
-                span;
-#else
-                span.ToArray();
-#endif
-
-            static int GetNullChar(ReadOnlySpan<byte> source, int startIndex = 0)
-            {
-                for (var i = startIndex; i < source.Length; i++)
-                {
-                    if (source[i] is 0)
-                    {
-                        return i;
-                    }
-                }
-
-                return source.Length;
-            }
-        }
+        this.description = System.Text.Encoding.UTF8.GetNullTerminatedString(source[160..192]);
     }
 
     /// <summary>
@@ -247,14 +216,13 @@ public readonly record struct ExtraBytesItem
             this.noData.CopyTo(destination[40..48]);
             this.min.CopyTo(destination[64..72]);
             this.max.CopyTo(destination[88..96]);
-            BitManipulation.WriteDoubleLittleEndian(destination[112..120], this.scale);
-            BitManipulation.WriteDoubleLittleEndian(destination[136..142], this.offset);
+            System.Buffers.Binary.BinaryPrimitives.WriteDoubleLittleEndian(destination[112..120], this.scale);
+            System.Buffers.Binary.BinaryPrimitives.WriteDoubleLittleEndian(destination[136..142], this.offset);
             WriteString(this.description, destination[160..192]);
         }
 
         static void WriteString(string value, Span<byte> destination)
         {
-#if NETSTANDARD2_1_OR_GREATER || NETCOREAPP2_1_OR_GREATER
             var chars = value.AsSpan();
             if (chars.Length > destination.Length)
             {
@@ -262,11 +230,6 @@ public readonly record struct ExtraBytesItem
             }
 
             var written = System.Text.Encoding.UTF8.GetBytes(chars, destination);
-#else
-            var bytes = System.Text.Encoding.UTF8.GetBytes(value);
-            var written = Math.Min(bytes.Length, destination.Length);
-            bytes.AsSpan(0, written).CopyTo(destination);
-#endif
 
             if (written < destination.Length)
             {
@@ -279,7 +242,7 @@ public readonly record struct ExtraBytesItem
     {
         ExtraBytesDataType.UnsignedChar or ExtraBytesDataType.UnsignedShort or ExtraBytesDataType.UnsignedLong or ExtraBytesDataType.UnsignedLongLong => System.Buffers.Binary.BinaryPrimitives.ReadUInt64LittleEndian(data),
         ExtraBytesDataType.Char or ExtraBytesDataType.Short or ExtraBytesDataType.Long or ExtraBytesDataType.LongLong => System.Buffers.Binary.BinaryPrimitives.ReadInt64LittleEndian(data),
-        ExtraBytesDataType.Float or ExtraBytesDataType.Double => BitManipulation.ReadDoubleLittleEndian(data),
+        ExtraBytesDataType.Float or ExtraBytesDataType.Double => System.Buffers.Binary.BinaryPrimitives.ReadDoubleLittleEndian(data),
         ExtraBytesDataType.Undocumented => data,
         _ => throw new ArgumentOutOfRangeException(nameof(dataType), string.Format(Properties.Resources.Culture, Properties.Resources.CannotSetOn, "data-type", dataType)),
     };
@@ -342,7 +305,7 @@ public readonly record struct ExtraBytesItem
 
         void WriteDouble(double v)
         {
-            BitManipulation.WriteDoubleLittleEndian(data, v);
+            System.Buffers.Binary.BinaryPrimitives.WriteDoubleLittleEndian(data, v);
         }
     }
 

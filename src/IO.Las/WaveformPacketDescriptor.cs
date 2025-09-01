@@ -53,8 +53,8 @@ public sealed record WaveformPacketDescriptor : VariableLengthRecord
         this.WaveformCompressionType = data[1];
         this.NumberOfSamples = System.Buffers.Binary.BinaryPrimitives.ReadUInt32LittleEndian(data[2..6]);
         this.TemporalSampleSpacing = System.Buffers.Binary.BinaryPrimitives.ReadUInt32LittleEndian(data[6..10]);
-        this.DigitizerGain = BitManipulation.ReadDoubleLittleEndian(data[10..18]);
-        this.DigitizerOffset = BitManipulation.ReadDoubleLittleEndian(data[18..26]);
+        this.DigitizerGain = System.Buffers.Binary.BinaryPrimitives.ReadDoubleLittleEndian(data[10..18]);
+        this.DigitizerOffset = System.Buffers.Binary.BinaryPrimitives.ReadDoubleLittleEndian(data[18..26]);
     }
 
     /// <summary>
@@ -111,8 +111,8 @@ public sealed record WaveformPacketDescriptor : VariableLengthRecord
         data[1] = this.WaveformCompressionType;
         System.Buffers.Binary.BinaryPrimitives.WriteUInt32LittleEndian(data[2..6], this.NumberOfSamples);
         System.Buffers.Binary.BinaryPrimitives.WriteUInt32LittleEndian(data[6..10], this.TemporalSampleSpacing);
-        BitManipulation.WriteDoubleLittleEndian(data[10..18], this.DigitizerGain);
-        BitManipulation.WriteDoubleLittleEndian(data[18..26], this.DigitizerOffset);
+        System.Buffers.Binary.BinaryPrimitives.WriteDoubleLittleEndian(data[10..18], this.DigitizerGain);
+        System.Buffers.Binary.BinaryPrimitives.WriteDoubleLittleEndian(data[18..26], this.DigitizerOffset);
 
         return VariableLengthRecordHeader.Size + 26;
     }

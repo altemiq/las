@@ -67,6 +67,19 @@ public readonly record struct ExtendedVariableLengthRecordHeader
         this.recordId = System.Buffers.Binary.BinaryPrimitives.ReadUInt16LittleEndian(data.AsSpan(Constants.ExtendedVariableLengthRecord.RecordIdFieldOffset, sizeof(ushort)));
         this.recordLengthAfterHeader = System.Buffers.Binary.BinaryPrimitives.ReadUInt64LittleEndian(data.AsSpan(Constants.ExtendedVariableLengthRecord.RecordLengthAfterHeaderFieldOffset, sizeof(ushort)));
         this.description = System.Text.Encoding.UTF8.GetString(data, Constants.ExtendedVariableLengthRecord.DescriptionFieldOffset, GetNullChar(data, Constants.ExtendedVariableLengthRecord.DescriptionFieldOffset) - Constants.ExtendedVariableLengthRecord.DescriptionFieldOffset);
+
+        static int GetNullChar(byte[] source, int startIndex = 0)
+        {
+            for (var i = startIndex; i < source.Length; i++)
+            {
+                if (source[i] is 0)
+                {
+                    return i;
+                }
+            }
+
+            return source.Length;
+        }
     }
 #endif
 
@@ -78,21 +91,10 @@ public readonly record struct ExtendedVariableLengthRecordHeader
     public ExtendedVariableLengthRecordHeader(ReadOnlySpan<byte> data)
     {
         this.reserved = System.Buffers.Binary.BinaryPrimitives.ReadUInt16LittleEndian(data[..Constants.ExtendedVariableLengthRecord.UserIdFieldOffset]);
-        this.userId =
-#if NETSTANDARD2_1_OR_GREATER || NETCOREAPP2_1_OR_GREATER
-            System.Text.Encoding.UTF8.GetString(data[Constants.ExtendedVariableLengthRecord.UserIdFieldOffset..GetNullChar(data, Constants.ExtendedVariableLengthRecord.UserIdFieldOffset)]);
-#else
-            System.Text.Encoding.UTF8.GetString(data[Constants.ExtendedVariableLengthRecord.UserIdFieldOffset..GetNullChar(data, Constants.ExtendedVariableLengthRecord.UserIdFieldOffset)].ToArray());
-#endif
+        this.userId = System.Text.Encoding.UTF8.GetNullTerminatedString(data[Constants.ExtendedVariableLengthRecord.UserIdFieldOffset..Constants.ExtendedVariableLengthRecord.RecordIdFieldOffset]);
         this.recordId = System.Buffers.Binary.BinaryPrimitives.ReadUInt16LittleEndian(data[Constants.ExtendedVariableLengthRecord.RecordIdFieldOffset..Constants.ExtendedVariableLengthRecord.RecordLengthAfterHeaderFieldOffset]);
-        this.recordLengthAfterHeader =
-            System.Buffers.Binary.BinaryPrimitives.ReadUInt64LittleEndian(data[Constants.ExtendedVariableLengthRecord.RecordLengthAfterHeaderFieldOffset..Constants.ExtendedVariableLengthRecord.DescriptionFieldOffset]);
-        this.description =
-#if NETSTANDARD2_1_OR_GREATER || NETCOREAPP2_1_OR_GREATER
-            System.Text.Encoding.UTF8.GetString(data[Constants.ExtendedVariableLengthRecord.DescriptionFieldOffset..GetNullChar(data, Constants.ExtendedVariableLengthRecord.DescriptionFieldOffset)]);
-#else
-            System.Text.Encoding.UTF8.GetString(data[Constants.ExtendedVariableLengthRecord.DescriptionFieldOffset..GetNullChar(data, Constants.ExtendedVariableLengthRecord.DescriptionFieldOffset)].ToArray());
-#endif
+        this.recordLengthAfterHeader = System.Buffers.Binary.BinaryPrimitives.ReadUInt64LittleEndian(data[Constants.ExtendedVariableLengthRecord.RecordLengthAfterHeaderFieldOffset..Constants.ExtendedVariableLengthRecord.DescriptionFieldOffset]);
+        this.description = System.Text.Encoding.UTF8.GetNullTerminatedString(data[Constants.ExtendedVariableLengthRecord.DescriptionFieldOffset..Size]);
     }
 #pragma warning restore CS8618 // Non-nullable field must contain a non-null value when exiting constructor. Consider adding the 'required' modifier or declaring as nullable.
 
@@ -130,6 +132,27 @@ public readonly record struct ExtendedVariableLengthRecordHeader
     {
         get => this.recordLengthAfterHeader;
         init => this.recordLengthAfterHeader = value;
+    }
+
+    /// <summary>
+    /// Reads an instance of <see cref="ExtendedVariableLengthRecordHeader"/> from the source.
+    /// </summary>
+    /// <param name="source">The source.</param>
+    /// <returns>The instance of <see cref="ExtendedVariableLengthRecordHeader"/>.</returns>
+    public static ExtendedVariableLengthRecordHeader Read(ReadOnlySpan<byte> source)
+    {
+        if (BitConverter.IsLittleEndian)
+        {
+            return System.Runtime.InteropServices.Marshal.PtrToStructure<ExtendedVariableLengthRecordHeader>(GetIntPtrFromSpan(source));
+
+            static unsafe IntPtr GetIntPtrFromSpan<T>(ReadOnlySpan<T> span)
+            {
+                // Cast the reference to an IntPtr
+                return (IntPtr)System.Runtime.CompilerServices.Unsafe.AsPointer(ref System.Runtime.InteropServices.MemoryMarshal.GetReference(span));
+            }
+        }
+
+        return new(source);
     }
 
     /// <summary>
@@ -180,18 +203,5 @@ public readonly record struct ExtendedVariableLengthRecordHeader
                 current++;
             }
         }
-    }
-
-    private static int GetNullChar(ReadOnlySpan<byte> source, int startIndex = 0)
-    {
-        for (var i = startIndex; i < source.Length; i++)
-        {
-            if (source[i] is 0)
-            {
-                return i;
-            }
-        }
-
-        return source.Length;
     }
 }

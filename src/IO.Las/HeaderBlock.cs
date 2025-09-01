@@ -244,7 +244,13 @@ public readonly struct HeaderBlock : IEquatable<HeaderBlock>
     /// </summary>
     /// <value>The file source id.</value>
     /// <remarks>
-    /// This field should be set to a value between 1 and 65,535, inclusive. A value of zero (0) is interpreted to mean that an ID has not been assigned. In this case, processing software is free to assign any LAS 1.2 3 valid number. Note that this scheme allows a LIDAR project to contain up to 65,535 unique sources. A source can be considered an original flight line or it can be the result of merge and/or extract operations.
+    /// <para>
+    /// This field should be set to a value from 0 to 65,535.
+    /// A value of zero is interpreted to mean that an ID has not been assigned, which is the norm for a LAS file resulting from an aggregation of multiple independent sources (e.g., a tile merged from multiple swaths).</para>
+    /// <para>
+    /// Note that this scheme allows a project to contain up to 65,535 unique sources.
+    /// Example sources can include a data repository ID or an original collection of temporally consistent data such as a flight line or sortie number for airborne systems, a route number for mobile systems, or a setup identifier for static systems.
+    /// </para>
     /// </remarks>
     public ushort FileSourceId { get; }
 
@@ -361,7 +367,7 @@ public readonly struct HeaderBlock : IEquatable<HeaderBlock>
     /// Gets the number of points by return.
     /// </summary>
     /// <remarks>The first unsigned long value will be the total number of records from the first return, and the second contains the total number for return two, and so forth up to five returns.</remarks>
-    public readonly IReadOnlyList<ulong> NumberOfPointsByReturn => this.Version switch
+    public IReadOnlyList<ulong> NumberOfPointsByReturn => this.Version switch
     {
         { Major: 1, Minor: >= 4 } => this.RawNumberOfPointsByReturn,
         _ => new ReadOnlyLegacy(this.LegacyNumberOfPointsByReturn),
@@ -400,11 +406,11 @@ public readonly struct HeaderBlock : IEquatable<HeaderBlock>
     /// <summary>
     /// Gets the raw number of points by return.
     /// </summary>
-    internal readonly IReadOnlyList<ulong> RawNumberOfPointsByReturn { get; }
+    internal IReadOnlyList<ulong> RawNumberOfPointsByReturn { get; }
 #endif
 
     /// <summary>
-    /// Gets the result of the equals operator.
+    /// Gets the result of the equal operator.
     /// </summary>
     /// <param name="left">The left hand side.</param>
     /// <param name="right">The right hand side.</param>
@@ -412,7 +418,7 @@ public readonly struct HeaderBlock : IEquatable<HeaderBlock>
     public static bool operator ==(in HeaderBlock left, in HeaderBlock right) => left.Equals(in right);
 
     /// <summary>
-    /// Gets the result of the not-equals operator.
+    /// Gets the result of the not-equal operator.
     /// </summary>
     /// <param name="left">The left hand side.</param>
     /// <param name="right">The right hand side.</param>
@@ -420,39 +426,39 @@ public readonly struct HeaderBlock : IEquatable<HeaderBlock>
     public static bool operator !=(in HeaderBlock left, in HeaderBlock right) => !(left == right);
 
     /// <inheritdoc/>
-    public readonly bool Equals(HeaderBlock other) => this.Equals(in other);
+    public bool Equals(HeaderBlock other) => this.Equals(in other);
 
     /// <inheritdoc cref="Equals(HeaderBlock)"/>
-    public readonly bool Equals(in HeaderBlock other) => StringComparer.Ordinal.Equals(this.FileSignature, other.FileSignature)
-        && this.FileSourceId == other.FileSourceId
+    public bool Equals(in HeaderBlock other) => StringComparer.Ordinal.Equals(this.FileSignature, other.FileSignature)
+                                                && this.FileSourceId == other.FileSourceId
 #if LAS1_2_OR_GREATER
-        && this.GlobalEncoding == other.GlobalEncoding
+                                                && this.GlobalEncoding == other.GlobalEncoding
 #endif
-        && this.ProjectId == other.ProjectId
-        && this.Version == other.Version
-        && StringComparer.Ordinal.Equals(this.SystemIdentifier, other.SystemIdentifier)
-        && StringComparer.Ordinal.Equals(this.GeneratingSoftware, other.GeneratingSoftware)
-        && this.FileCreation == other.FileCreation
-        && this.PointDataFormat == other.PointDataFormat
-        && this.ScaleFactor == other.ScaleFactor
-        && this.Offset == other.Offset
-        && this.Min == other.Min
-        && this.Max == other.Max
-        && this.NumberOfPointRecords == other.NumberOfPointRecords
+                                                && this.ProjectId == other.ProjectId
+                                                && this.Version == other.Version
+                                                && StringComparer.Ordinal.Equals(this.SystemIdentifier, other.SystemIdentifier)
+                                                && StringComparer.Ordinal.Equals(this.GeneratingSoftware, other.GeneratingSoftware)
+                                                && this.FileCreation == other.FileCreation
+                                                && this.PointDataFormat == other.PointDataFormat
+                                                && this.ScaleFactor == other.ScaleFactor
+                                                && this.Offset == other.Offset
+                                                && this.Min == other.Min
+                                                && this.Max == other.Max
+                                                && this.NumberOfPointRecords == other.NumberOfPointRecords
 #if LAS1_5_OR_GREATER
-        && this.NumberOfPointsByReturn.SequenceEqual(other.NumberOfPointsByReturn)
-        && this.MaxGpsTime.Equals(other.MaxGpsTime)
-        && this.MinGpsTime.Equals(other.MinGpsTime)
-        && this.TimeOffset.Equals(other.TimeOffset);
+                                                && this.NumberOfPointsByReturn.SequenceEqual(other.NumberOfPointsByReturn)
+                                                && this.MaxGpsTime.Equals(other.MaxGpsTime)
+                                                && this.MinGpsTime.Equals(other.MinGpsTime)
+                                                && this.TimeOffset.Equals(other.TimeOffset);
 #else
-        && this.NumberOfPointsByReturn.SequenceEqual(other.NumberOfPointsByReturn);
+                                                && this.NumberOfPointsByReturn.SequenceEqual(other.NumberOfPointsByReturn);
 #endif
 
     /// <inheritdoc/>
-    public override readonly bool Equals([System.Diagnostics.CodeAnalysis.NotNullWhen(true)] object? obj) => obj is HeaderBlock headerBlock ? this.Equals(in headerBlock) : base.Equals(obj);
+    public override bool Equals([System.Diagnostics.CodeAnalysis.NotNullWhen(true)] object? obj) => obj is HeaderBlock headerBlock ? this.Equals(in headerBlock) : base.Equals(obj);
 
     /// <inheritdoc/>
-    public override readonly int GetHashCode()
+    public override int GetHashCode()
 #if NETSTANDARD2_0_OR_GREATER || NET461_OR_GREATER || NET
     {
         var hashCode = default(HashCode);
@@ -543,7 +549,7 @@ public readonly struct HeaderBlock : IEquatable<HeaderBlock>
           {{nameof(this.TimeOffset)}}, {{this.TimeOffset}}
         }
         """;
-#elif LAS1_5_OR_GREATER
+#elif LAS1_4_OR_GREATER
     /// <summary>
     /// Converts the value of this instance to its equivalent string representation.
     /// </summary>
@@ -608,14 +614,14 @@ public readonly struct HeaderBlock : IEquatable<HeaderBlock>
 
         bool IEquatable<IReadOnlyList<ulong>>.Equals(IReadOnlyList<ulong>? other) => other switch
         {
-            ReadOnlyLegacy rol => this.source == rol.source,
-            IReadOnlyList<ulong> rol => this.source == rol,
+            ReadOnlyLegacy rol => this.source.Equals(rol.source),
+            { } rol => this.source.Equals(rol),
             _ => false,
         };
 
         bool IEquatable<IReadOnlyList<uint>>.Equals(IReadOnlyList<uint>? other) => other switch
         {
-            IReadOnlyList<uint> rol => this.source == rol,
+            { } rol => this.source.Equals(rol),
             _ => false,
         };
 

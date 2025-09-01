@@ -74,7 +74,7 @@ public record GeoDoubleParamsTag : VariableLengthRecord, IReadOnlyList<double>
 
         foreach (var s in this.values)
         {
-            BitManipulation.WriteDoubleLittleEndian(d, s);
+            System.Buffers.Binary.BinaryPrimitives.WriteDoubleLittleEndian(d, s);
             bytesWritten += sizeof(double);
             d = destination[bytesWritten..];
         }
@@ -87,7 +87,7 @@ public record GeoDoubleParamsTag : VariableLengthRecord, IReadOnlyList<double>
         var builder = new System.Runtime.CompilerServices.ReadOnlyCollectionBuilder<double>();
         for (int i = 0; i < data.Length; i += sizeof(double))
         {
-            builder.Add(BitManipulation.ReadDoubleLittleEndian(data.Slice(i, sizeof(double))));
+            builder.Add(System.Buffers.Binary.BinaryPrimitives.ReadDoubleLittleEndian(data.Slice(i, sizeof(double))));
         }
 
         return builder.ToReadOnlyCollection();

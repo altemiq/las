@@ -2,8 +2,7 @@
 
   <PropertyGroup>
     <TargetFrameworks>net7.0;net5.0;netstandard2.1;netstandard2.0</TargetFrameworks>
-    <ImplicitUsings>enable</ImplicitUsings>
-    <Nullable>enable</Nullable>
+    <LangVersion>preview</LangVersion>
     <PolySharpIncludeGeneratedTypes>
       $(PolySharpIncludeGeneratedTypes);
       System.Index;
@@ -11,6 +10,7 @@
       System.Diagnostics.CodeAnalysis.DoesNotReturnAttribute;
       System.Diagnostics.CodeAnalysis.DynamicallyAccessedMembersAttribute;
       System.Diagnostics.CodeAnalysis.DynamicallyAccessedMemberTypes;
+      System.Diagnostics.CodeAnalysis.MemberNotNullWhenAttribute;
       System.Diagnostics.CodeAnalysis.NotNullAttribute;
       System.Diagnostics.CodeAnalysis.NotNullWhenAttribute;
       System.Diagnostics.CodeAnalysis.StringSyntaxAttribute;
@@ -20,6 +20,9 @@
       System.Runtime.CompilerServices.RequiredMemberAttribute;
       System.Diagnostics.CodeAnalysis.SetsRequiredMembersAttribute;
     </PolySharpIncludeGeneratedTypes>
+
+    <!-- turn off buggy analyzer -->
+    <NoWarn>$(NoWarn);S1117</NoWarn>
   </PropertyGroup>
 
   <ItemGroup>
@@ -29,20 +32,18 @@
     </PackageReference>
   </ItemGroup>
 
-  <ItemGroup Condition=" !$([MSBuild]::IsTargetFrameworkCompatible('$(TargetFramework)', 'netstandard2.1')) ">  
-    <PackageReference Include="System.Memory" VersionOverride="4.5.0" />
+  <ItemGroup Condition=" !$([MSBuild]::IsTargetFrameworkCompatible('$(TargetFramework)', 'netstandard2.1')) ">
+    <PackageReference Include="Microsoft.Bcl.AsyncInterfaces" VersionOverride="1.0.0" />
+    <PackageReference Include="Microsoft.Bcl.HashCode" VersionOverride="1.0.0" />
+    <PackageReference Include="System.Memory" VersionOverride="4.5.4" />
   </ItemGroup>
 
-  <ItemGroup Condition=" $([MSBuild]::IsTargetFrameworkCompatible('$(TargetFramework)', 'netstandard2.0')) and !$([MSBuild]::IsTargetFrameworkCompatible('$(TargetFramework)', 'netstandard2.1')) ">
-    <PackageReference Include="Microsoft.Bcl.HashCode" VersionOverride="1.0.0" />
+  <ItemGroup Condition=" !$([MSBuild]::IsTargetFrameworkCompatible('$(TargetFramework)', 'netcoreapp1.0')) AND $([MSBuild]::IsTargetFrameworkCompatible('$(TargetFramework)', 'netstandard2.1')) ">
+    <PackageReference Include="System.Runtime.CompilerServices.Unsafe" VersionOverride="4.5.0" />
   </ItemGroup>
 
   <ItemGroup Condition=" !$([MSBuild]::IsTargetFrameworkCompatible('$(TargetFramework)', 'net7.0')) ">
     <Compile Remove="IBasePointDataRecord{TSelf}.cs" />
-  </ItemGroup>
-
-  <ItemGroup Condition=" !$([MSBuild]::IsTargetFrameworkCompatible('$(TargetFramework)', 'netcoreapp1.0')) ">
-    <PackageReference Include="System.Runtime.CompilerServices.Unsafe" VersionOverride="4.5.0" />
   </ItemGroup>
 
   <ItemGroup>
@@ -93,13 +94,13 @@
   </ItemGroup>
 
   <ItemGroup Condition=" '$(SupportLas15)' != 'true' ">
-    <!-- remove new VLRs -->
-    <Compile Remove="**\OgcEpoch.cs" />
-    <Compile Remove="**\MediaType*.cs" />
-
     <!-- Remove v1.5 specific resources -->
     <EmbeddedResource Remove="Properties\v1.5\*.resx" />
     <None Remove="Properties\v1.5\*.xml" />
+  </ItemGroup>
+  
+  <ItemGroup>
+    <InternalsVisibleTo Include="$(AssemblyName).Tests" />
   </ItemGroup>
 
 </Project>

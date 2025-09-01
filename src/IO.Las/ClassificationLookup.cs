@@ -88,11 +88,7 @@ public sealed record ClassificationLookup : VariableLengthRecord, IReadOnlyList<
             else
             {
                 d[0] = value.ClassNumber;
-#if NETSTANDARD2_1_OR_GREATER || NETCOREAPP2_1_OR_GREATER
                 System.Text.Encoding.UTF8.GetBytes(value.Description, d[1..]);
-#else
-                System.Text.Encoding.UTF8.GetBytes(value.Description).AsSpan().CopyTo(d[1..]);
-#endif
             }
 
             bytesWritten += ValueSize;
@@ -118,7 +114,7 @@ public sealed record ClassificationLookup : VariableLengthRecord, IReadOnlyList<
                 : new()
                 {
                     ClassNumber = s[0],
-                    Description = System.Text.Encoding.UTF8.GetString(GetStringBytes(s[1..])),
+                    Description = System.Text.Encoding.UTF8.GetNullTerminatedString(s[1..]),
                 };
 
             builder.Add(entry);
@@ -134,37 +130,6 @@ public sealed record ClassificationLookup : VariableLengthRecord, IReadOnlyList<
             {
                 // Cast the reference to an IntPtr
                 return (IntPtr)System.Runtime.CompilerServices.Unsafe.AsPointer(ref System.Runtime.InteropServices.MemoryMarshal.GetReference(span));
-            }
-        }
-
-        static
-#if NETSTANDARD2_1_OR_GREATER || NETCOREAPP2_1_OR_GREATER
-            ReadOnlySpan<byte>
-#else
-            byte[]
-#endif
-            GetStringBytes(ReadOnlySpan<byte> source)
-        {
-            var span = source[..GetNullChar(source)];
-
-            return
-#if NETSTANDARD2_1_OR_GREATER || NETCOREAPP2_1_OR_GREATER
-                span;
-#else
-                span.ToArray();
-#endif
-
-            static int GetNullChar(ReadOnlySpan<byte> source, int startIndex = 0)
-            {
-                for (var i = startIndex; i < source.Length; i++)
-                {
-                    if (source[i] is 0)
-                    {
-                        return i;
-                    }
-                }
-
-                return source.Length;
             }
         }
     }
