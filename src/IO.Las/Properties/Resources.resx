@@ -42,4 +42,7 @@
   <data name="InvalidSignature" xml:space="preserve">
     <value>Invalid signature. Must be `{0}`, but found `{1}`</value>
   </data>
+  <data name="InvalidVlrFound" xml:space="preserve">
+    <value>Cannot have VLR of type {0}</value>
+  </data>
 </root>

@@ -196,21 +196,21 @@ public partial class HeaderBlockBuilder
     /// Gets the suggested time offset for the current date.
     /// </summary>
     /// <returns>The suggested time offset.</returns>
-    public static ushort GetSuggestedTimeOffset() => GpsPointDataRecord.GetTimeOffset();
+    public static ushort GetSuggestedTimeOffset() => GpsTime.GetTimeOffset();
 
     /// <summary>
     /// Gets the suggested time offset for the specified date.
     /// </summary>
     /// <param name="dateTime">The date.</param>
     /// <returns>The suggested time offset.</returns>
-    public static ushort GetSuggestedTimeOffset(DateTime dateTime) => GpsPointDataRecord.GetTimeOffset(dateTime.Year);
+    public static ushort GetSuggestedTimeOffset(DateTime dateTime) => GpsTime.GetTimeOffset(dateTime.Year);
 
     /// <summary>
     /// Gets the suggested time offset for the specified year.
     /// </summary>
     /// <param name="year">The year.</param>
     /// <returns>The suggested time offset.</returns>
-    public static ushort GetSuggestedTimeOffset(int year) => GpsPointDataRecord.GetTimeOffset(year);
+    public static ushort GetSuggestedTimeOffset(int year) => GpsTime.GetTimeOffset(year);
 #endif
 
     /// <summary>
@@ -231,7 +231,7 @@ public partial class HeaderBlockBuilder
     /// Adds a point to the header block.
     /// </summary>
     /// <param name="point">The point.</param>
-    public void Add(PointDataRecord point)
+    public void Add(IBasePointDataRecord point)
     {
         var (x, y, z) = PointDataRecordQuantizer.Get(point, this.ScaleFactor, this.Offset);
 #if LAS1_5_OR_GREATER
@@ -251,8 +251,10 @@ public partial class HeaderBlockBuilder
     /// <summary>
     /// Adds the points to the header block.
     /// </summary>
+    /// <typeparam name="T">The type of point.</typeparam>
     /// <param name="points">The points.</param>
-    public void Add(IEnumerable<PointDataRecord> points)
+    public void Add<T>(IEnumerable<T> points)
+        where T : IBasePointDataRecord
     {
         foreach (var point in points)
         {
@@ -265,17 +267,7 @@ public partial class HeaderBlockBuilder
     /// Adds a point to the header block.
     /// </summary>
     /// <param name="point">The point.</param>
-    public void Add(GpsPointDataRecord point)
-    {
-        var (x, y, z) = PointDataRecordQuantizer.Get(point, this.ScaleFactor, this.Offset);
-        this.Add(x, y, z, point.GpsTime, point.ReturnNumber);
-    }
-
-    /// <summary>
-    /// Adds a point to the header block.
-    /// </summary>
-    /// <param name="point">The point.</param>
-    public void Add(ExtendedGpsPointDataRecord point)
+    public void Add(IGpsPointDataRecord point)
     {
         var (x, y, z) = PointDataRecordQuantizer.Get(point, this.ScaleFactor, this.Offset);
         this.Add(x, y, z, point.GpsTime, point.ReturnNumber);
@@ -289,7 +281,7 @@ public partial class HeaderBlockBuilder
     /// <param name="y">The y-coordinate.</param>
     /// <param name="z">The z-coordinate.</param>
     /// <param name="returnNumber">The return number.</param>
-    public void Add(double x, double y, double z, int returnNumber = 1) => this.Add(this.Trucate(x, y, z), returnNumber);
+    public void Add(double x, double y, double z, int returnNumber = 1) => this.Add(this.Truncate(x, y, z), returnNumber);
 
 #if LAS1_5_OR_GREATER
     /// <summary>
@@ -300,7 +292,7 @@ public partial class HeaderBlockBuilder
     /// <param name="z">The z-coordinate.</param>
     /// <param name="gpsTime">The gps time.</param>
     /// <param name="returnNumber">The return number.</param>
-    public void Add(double x, double y, double z, DateTime gpsTime, int returnNumber = 1) => this.Add(this.Trucate(x, y, z), gpsTime, returnNumber);
+    public void Add(double x, double y, double z, double gpsTime, int returnNumber = 1) => this.Add(this.Truncate(x, y, z), gpsTime, returnNumber);
 #endif
 
     /// <summary>
@@ -395,12 +387,9 @@ public partial class HeaderBlockBuilder
     }
 #endif
 
-    private Vector3D Trucate(double x, double y, double z)
+    private Vector3D Truncate(double x, double y, double z)
     {
-        return new Vector3D(
-            TruncateToScale(x, this.ScaleFactor.X),
-            TruncateToScale(y, this.ScaleFactor.Y),
-            TruncateToScale(z, this.ScaleFactor.Y));
+        return new(TruncateToScale(x, this.ScaleFactor.X), TruncateToScale(y, this.ScaleFactor.Y), TruncateToScale(z, this.ScaleFactor.Y));
 
         [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
         static double TruncateToScale(double value, double scale)
@@ -414,13 +403,13 @@ public partial class HeaderBlockBuilder
     {
         return HasFlag(this.GlobalEncoding, GlobalEncoding.StandardGpsTime)
             ? GetAdjusted(gpsTime)
-            : GpsPointDataRecord.DateTimeToGpsWeekTime(gpsTime, 0);
+            : GpsTime.DateTimeToGpsWeekTime(gpsTime, 0);
 
-        double GetAdjusted(DateTime gpsTime)
+        double GetAdjusted(DateTime value)
         {
             return HasFlag(this.GlobalEncoding, GlobalEncoding.TimeOffsetFlag)
-                ? GpsPointDataRecord.DateTimeToTimeOffsetGpsTime(gpsTime, this.TimeOffset)
-                : GpsPointDataRecord.DateTimeToAdjustedStandardGpsTime(gpsTime);
+                ? GpsTime.DateTimeToTimeOffsetGpsTime(value, this.TimeOffset)
+                : GpsTime.DateTimeToAdjustedStandardGpsTime(value);
         }
 
         [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]

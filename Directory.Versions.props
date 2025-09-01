@@ -5,7 +5,7 @@
   </ItemGroup>
 
   <PropertyGroup Label="LAS versions">
-    <MaximumLasVersion Condition=" '$(MaximumLasVersion)' == '' ">1.4</MaximumLasVersion>
+    <MaximumLasVersion Condition=" '$(MaximumLasVersion)' == '' ">1.5</MaximumLasVersion>
 
     <SupportLas12>false</SupportLas12>
     <SupportLas12 Condition=" $([MSBuild]::VersionGreaterThanOrEquals('$(MaximumLasVersion)', '1.2')) ">true</SupportLas12>

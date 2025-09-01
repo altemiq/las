@@ -99,12 +99,27 @@ public class HeaderBlockValidator
 #endif
 
         // check the VLRs
-        CheckMultipleVlr<GeoKeyDirectoryTag>(this.Culture, variableLengthRecords);
-        CheckMultipleVlr<GeoAsciiParamsTag>(this.Culture, variableLengthRecords);
-        CheckMultipleVlr<GeoDoubleParamsTag>(this.Culture, variableLengthRecords);
+#if LAS1_5_OR_GREATER
+        if (header is { Version: { Major: 1, Minor: >= 5 } })
+        {
+            CheckAny<GeoKeyDirectoryTag>(this.Culture, variableLengthRecords);
+            CheckAny<GeoAsciiParamsTag>(this.Culture, variableLengthRecords);
+            CheckAny<GeoDoubleParamsTag>(this.Culture, variableLengthRecords);
+        }
+        else
+        {
+            CheckMultiple<GeoKeyDirectoryTag>(this.Culture, variableLengthRecords);
+            CheckMultiple<GeoAsciiParamsTag>(this.Culture, variableLengthRecords);
+            CheckMultiple<GeoDoubleParamsTag>(this.Culture, variableLengthRecords);
+        }
+#else
+        CheckMultiple<GeoKeyDirectoryTag>(this.Culture, variableLengthRecords);
+        CheckMultiple<GeoAsciiParamsTag>(this.Culture, variableLengthRecords);
+        CheckMultiple<GeoDoubleParamsTag>(this.Culture, variableLengthRecords);
+#endif
 #if LAS1_4_OR_GREATER
-        CheckMultipleVlr<OgcCoordinateSystemWkt>(this.Culture, variableLengthRecords);
-        CheckMultipleVlr<OgcMathTransformWkt>(this.Culture, variableLengthRecords);
+        CheckMultiple<OgcCoordinateSystemWkt>(this.Culture, variableLengthRecords);
+        CheckMultiple<OgcMathTransformWkt>(this.Culture, variableLengthRecords);
 #endif
 
 #if LAS1_3_OR_GREATER
@@ -124,7 +139,16 @@ public class HeaderBlockValidator
         }
 #endif
 
-        static void CheckMultipleVlr<T>(System.Globalization.CultureInfo culture, IEnumerable<VariableLengthRecord> variableLengthRecords)
+        static void CheckAny<T>(System.Globalization.CultureInfo culture, IEnumerable<VariableLengthRecord> variableLengthRecords)
+            where T : VariableLengthRecord
+        {
+            if (variableLengthRecords.OfType<T>().Any())
+            {
+                throw new InvalidOperationException(string.Format(culture, Properties.Resources.ResourceManager.GetString(nameof(Properties.Resources.InvalidVlrFound), culture)!, typeof(T)));
+            }
+        }
+
+        static void CheckMultiple<T>(System.Globalization.CultureInfo culture, IEnumerable<VariableLengthRecord> variableLengthRecords)
             where T : VariableLengthRecord
         {
             if (variableLengthRecords.OfType<T>().Skip(1).Any())

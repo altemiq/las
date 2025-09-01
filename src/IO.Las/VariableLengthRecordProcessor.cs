@@ -49,10 +49,6 @@ public sealed class VariableLengthRecordProcessor
         this.Register(VariableLengthRecordHeader.SpecUserId, ExtraBytes.TagRecordId, (header, bytes) => new ExtraBytes(header, bytes));
         this.Register(VariableLengthRecordHeader.SpecUserId, Superseded.TagRecordId, (header, _) => new Superseded(header));
 #endif
-#if LAS1_5_OR_GREATER
-        this.Register(VariableLengthRecordHeader.ProjectionUserId, OgcEpoch.TagRecordId, record => new OgcEpoch(record));
-        this.Register(VariableLengthRecordHeader.SpecUserId, MediaTypes.TagRecordId, record => new MediaTypes(record));
-#endif
     }
 
     /// <summary>
