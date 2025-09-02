@@ -1,6 +1,4 @@
-﻿using Microsoft.VisualBasic;
-
-namespace Altemiq.IO.Las;
+﻿namespace Altemiq.IO.Las;
 
 using System.Runtime.InteropServices;
 

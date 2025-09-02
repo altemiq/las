@@ -196,6 +196,16 @@ public class HeaderBlockReader(Stream stream)
     /// <returns>The next <see cref="VariableLengthRecord"/>.</returns>
     internal static VariableLengthRecord GetVariableLengthRecord(Stream stream)
     {
+#if NETSTANDARD2_1_OR_GREATER || NETCOREAPP2_1_OR_GREATER
+        Span<byte> byteArray = stackalloc byte[54];
+        _ = stream.Read(byteArray);
+        var header = VariableLengthRecordHeader.Read(byteArray);
+
+        byteArray = stackalloc byte[header.RecordLengthAfterHeader];
+        _ = stream.Read(byteArray);
+
+        return VariableLengthRecordProcessor.Instance.Process(header, byteArray);
+#else
         var byteArray = new byte[54];
         _ = stream.Read(byteArray, 0, byteArray.Length);
         var header = VariableLengthRecordHeader.Read(byteArray);
@@ -204,6 +214,7 @@ public class HeaderBlockReader(Stream stream)
         _ = stream.Read(byteArray, 0, header.RecordLengthAfterHeader);
 
         return VariableLengthRecordProcessor.Instance.Process(header, byteArray);
+#endif
     }
 
 #if LAS1_3_OR_GREATER
@@ -299,7 +310,7 @@ public class HeaderBlockReader(Stream stream)
         this.headerSize = System.Buffers.Binary.BinaryPrimitives.ReadUInt16LittleEndian(source[90..92]);
 
         // read the rest of the header
-        var bytesLeft = this.headerSize - 92;
+        var bytesLeft = this.headerSize - 96;
         if (byteArray.Length < bytesLeft)
         {
             System.Buffers.ArrayPool<byte>.Shared.Return(byteArray);

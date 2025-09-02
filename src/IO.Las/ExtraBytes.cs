@@ -18,6 +18,8 @@ public sealed record ExtraBytes : VariableLengthRecord, IReadOnlyList<ExtraBytes
 
     private readonly IReadOnlyList<ExtraBytesItem> items;
 
+    private readonly int[] indexes;
+
     /// <summary>
     /// Initialises a new instance of the <see cref="ExtraBytes"/> class.
     /// </summary>
@@ -45,7 +47,11 @@ public sealed record ExtraBytes : VariableLengthRecord, IReadOnlyList<ExtraBytes
     }
 
     private ExtraBytes(VariableLengthRecordHeader header, IReadOnlyList<ExtraBytesItem> items)
-        : base(header) => this.items = items;
+        : base(header)
+    {
+        this.items = items;
+        this.indexes = this.CreateIndexes();
+    }
 
     /// <inheritdoc />
     public int Count => this.items.Count;
@@ -71,13 +77,29 @@ public sealed record ExtraBytes : VariableLengthRecord, IReadOnlyList<ExtraBytes
         return bytesWritten;
     }
 
+    /// <summary>
+    /// Gets the data.
+    /// </summary>
+    /// <param name="index">The index.</param>
+    /// <param name="source">The source.</param>
+    /// <returns>The value.</returns>
+    public object? GetData(int index, ReadOnlySpan<byte> source) => this.items[index].GetData(source[this.indexes[index]..]);
+
+    /// <summary>
+    /// Gets the data.
+    /// </summary>
+    /// <param name="index">The index.</param>
+    /// <param name="source">The source.</param>
+    /// <returns>The value.</returns>
+    public ValueTask<object?> GetDataAsync(int index, ReadOnlyMemory<byte> source) => this.items[index].GetDataAsync(source[this.indexes[index]..]);
+
     /// <inheritdoc />
     public IEnumerator<ExtraBytesItem> GetEnumerator() => this.items.GetEnumerator();
 
     /// <inheritdoc />
     System.Collections.IEnumerator System.Collections.IEnumerable.GetEnumerator() => this.items.GetEnumerator();
 
-    private static IReadOnlyList<ExtraBytesItem> GetEntries(ReadOnlySpan<byte> source)
+    private static System.Collections.ObjectModel.ReadOnlyCollection<ExtraBytesItem> GetEntries(ReadOnlySpan<byte> source)
     {
         var count = source.Length / 192;
         var builder = new System.Runtime.CompilerServices.ReadOnlyCollectionBuilder<ExtraBytesItem>(count);
@@ -89,5 +111,28 @@ public sealed record ExtraBytes : VariableLengthRecord, IReadOnlyList<ExtraBytes
         }
 
         return builder.ToReadOnlyCollection();
+    }
+
+    private int[] CreateIndexes()
+    {
+        var result = new int[this.items.Count];
+        for (var i = 1; i < this.items.Count; i++)
+        {
+            var byteCount = this.items[i - 1] switch
+            {
+                { DataType: ExtraBytesDataType.Undocumented, Options: var options } => (ushort)options,
+                { DataType: ExtraBytesDataType.UnsignedChar or ExtraBytesDataType.Char } => sizeof(byte),
+                { DataType: ExtraBytesDataType.UnsignedShort or ExtraBytesDataType.Short } => sizeof(short),
+                { DataType: ExtraBytesDataType.UnsignedLong or ExtraBytesDataType.Long } => sizeof(int),
+                { DataType: ExtraBytesDataType.UnsignedLongLong or ExtraBytesDataType.LongLong } => sizeof(long),
+                { DataType: ExtraBytesDataType.Float } => sizeof(float),
+                { DataType: ExtraBytesDataType.Double } => sizeof(double),
+                _ => default,
+            };
+
+            result[i] = result[i - 1] + byteCount;
+        }
+
+        return result;
     }
 }

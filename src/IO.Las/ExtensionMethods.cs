@@ -21,11 +21,27 @@ public static partial class ExtensionMethods
         var streamPosition = stream.Position;
         if (streamPosition < position)
         {
-            MoveForward(stream, streamPosition, position);
+            MoveToPosition(stream, streamPosition, position);
         }
     }
 
-    private static void MoveForward(Stream stream, long baseStreamPosition, long position)
+    /// <summary>
+    /// Moves the <paramref name="stream"/> to the specified <paramref name="position"/>.
+    /// </summary>
+    /// <param name="stream">The stream.</param>
+    /// <param name="position">The position.</param>
+    internal static void MoveToPositionAbsolute(this Stream stream, long position)
+    {
+        var streamPosition = stream.Position;
+        if (streamPosition == position)
+        {
+            return;
+        }
+
+        MoveToPosition(stream, streamPosition, position);
+    }
+
+    private static void MoveToPosition(Stream stream, long currentPosition, long position)
     {
         if (stream.CanSeek)
         {
@@ -33,7 +49,12 @@ public static partial class ExtensionMethods
         }
         else
         {
-            var delta = position - baseStreamPosition;
+            if (position < currentPosition)
+            {
+                throw new InvalidOperationException($"Cannot move to {currentPosition}.");
+            }
+
+            var delta = position - currentPosition;
             while (delta > 0)
             {
                 _ = stream.ReadByte();
