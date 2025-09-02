@@ -9,7 +9,7 @@ namespace Altemiq.IO.Las.Readers.Raw;
 /// <summary>
 /// The <see cref="PointDataRecord"/> reader.
 /// </summary>
-public sealed class PointDataRecordReader : PointDataRecordReader<PointDataRecord>
+internal sealed class PointDataRecordReader : PointDataRecordReader<PointDataRecord>
 {
     /// <inheritdoc />
     public override PointDataRecord Read(ReadOnlySpan<byte> source) => PointDataRecord.Create(source);

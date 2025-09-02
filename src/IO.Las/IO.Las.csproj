@@ -15,6 +15,7 @@
       System.Diagnostics.CodeAnalysis.NotNullWhenAttribute;
       System.Diagnostics.CodeAnalysis.StringSyntaxAttribute;
       System.Runtime.CompilerServices.CallerArgumentExpressionAttribute;
+      System.Runtime.CompilerServices.CollectionBuilderAttribute;
       System.Runtime.CompilerServices.CompilerFeatureRequiredAttribute;
       System.Runtime.CompilerServices.IsExternalInit;
       System.Runtime.CompilerServices.RequiredMemberAttribute;

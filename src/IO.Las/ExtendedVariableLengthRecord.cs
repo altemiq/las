@@ -18,4 +18,12 @@ public abstract record ExtendedVariableLengthRecord(ExtendedVariableLengthRecord
     /// <param name="destination">The destination.</param>
     /// <returns>The number of bytes written.</returns>
     public abstract int Write(Span<byte> destination);
+
+    /// <summary>
+    /// Returns the sizes of this instance.
+    /// </summary>
+    /// <returns>The size.</returns>
+    public ulong Size() => Size(this.Header.RecordLengthAfterHeader);
+
+    private static ulong Size(ulong dataLength) => ExtendedVariableLengthRecordHeader.Size + (sizeof(byte) * dataLength);
 }

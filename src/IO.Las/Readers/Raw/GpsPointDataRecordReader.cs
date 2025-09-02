@@ -9,7 +9,7 @@ namespace Altemiq.IO.Las.Readers.Raw;
 /// <summary>
 /// The <see cref="GpsPointDataRecord"/> reader.
 /// </summary>
-public sealed class GpsPointDataRecordReader : PointDataRecordReader<GpsPointDataRecord>
+internal sealed class GpsPointDataRecordReader : PointDataRecordReader<GpsPointDataRecord>
 {
     /// <inheritdoc />
     public override GpsPointDataRecord Read(ReadOnlySpan<byte> source) => GpsPointDataRecord.Create(source);

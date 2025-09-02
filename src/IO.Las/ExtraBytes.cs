@@ -9,6 +9,7 @@ namespace Altemiq.IO.Las;
 /// <summary>
 /// The Extra Bytes VLR provides a mechanism whereby additional information can be added to the end of a standard Point Record.
 /// </summary>
+[System.Runtime.CompilerServices.CollectionBuilder(typeof(ExtraBytes), nameof(Create))]
 public sealed record ExtraBytes : VariableLengthRecord, IReadOnlyList<ExtraBytesItem>
 {
     /// <summary>
@@ -25,14 +26,7 @@ public sealed record ExtraBytes : VariableLengthRecord, IReadOnlyList<ExtraBytes
     /// </summary>
     /// <param name="items">The items.</param>
     public ExtraBytes(params IReadOnlyList<ExtraBytesItem> items)
-        : this(
-            new()
-            {
-                UserId = VariableLengthRecordHeader.SpecUserId,
-                RecordId = TagRecordId,
-                RecordLengthAfterHeader = (ushort)(items.Count * 192),
-            },
-            items)
+        : this(CreateHeader(items.Count), items)
     {
     }
 
@@ -53,11 +47,23 @@ public sealed record ExtraBytes : VariableLengthRecord, IReadOnlyList<ExtraBytes
         this.indexes = this.CreateIndexes();
     }
 
+    private ExtraBytes(ReadOnlySpan<ExtraBytesItem> items)
+        : this(CreateHeader(items.Length), GetEntries(items))
+    {
+    }
+
     /// <inheritdoc />
     public int Count => this.items.Count;
 
     /// <inheritdoc />
     public ExtraBytesItem this[int index] => this.items[index];
+
+    /// <summary>
+    /// Creates an instance of <see cref="ExtraBytes"/>.
+    /// </summary>
+    /// <param name="items">The values.</param>
+    /// <returns>The <see cref="ExtraBytes"/>.</returns>
+    public static ExtraBytes Create(ReadOnlySpan<ExtraBytesItem> items) => new(items);
 
     /// <inheritdoc />
     public override int Write(Span<byte> destination)
@@ -99,6 +105,12 @@ public sealed record ExtraBytes : VariableLengthRecord, IReadOnlyList<ExtraBytes
     /// <inheritdoc />
     System.Collections.IEnumerator System.Collections.IEnumerable.GetEnumerator() => this.items.GetEnumerator();
 
+    /// <summary>
+    /// Gets the byte count.
+    /// </summary>
+    /// <returns>The byte count.</returns>
+    internal ushort GetByteCount() => (ushort)this.items.Sum(GetByteCount);
+
     private static System.Collections.ObjectModel.ReadOnlyCollection<ExtraBytesItem> GetEntries(ReadOnlySpan<byte> source)
     {
         var count = source.Length / 192;
@@ -113,24 +125,46 @@ public sealed record ExtraBytes : VariableLengthRecord, IReadOnlyList<ExtraBytes
         return builder.ToReadOnlyCollection();
     }
 
+    private static System.Collections.ObjectModel.ReadOnlyCollection<ExtraBytesItem> GetEntries(ReadOnlySpan<ExtraBytesItem> source)
+    {
+        var count = source.Length;
+        var builder = new System.Runtime.CompilerServices.ReadOnlyCollectionBuilder<ExtraBytesItem>(count);
+
+        for (int i = 0; i < count; i++)
+        {
+            builder.Add(source[i]);
+        }
+
+        return builder.ToReadOnlyCollection();
+    }
+
+    private static int GetByteCount(ExtraBytesItem item) =>
+        item switch
+        {
+            { DataType: ExtraBytesDataType.Undocumented, Options: var options } => (ushort)options,
+            { DataType: ExtraBytesDataType.UnsignedChar or ExtraBytesDataType.Char } => sizeof(byte),
+            { DataType: ExtraBytesDataType.UnsignedShort or ExtraBytesDataType.Short } => sizeof(short),
+            { DataType: ExtraBytesDataType.UnsignedLong or ExtraBytesDataType.Long } => sizeof(int),
+            { DataType: ExtraBytesDataType.UnsignedLongLong or ExtraBytesDataType.LongLong } => sizeof(long),
+            { DataType: ExtraBytesDataType.Float } => sizeof(float),
+            { DataType: ExtraBytesDataType.Double } => sizeof(double),
+            _ => default,
+        };
+
+    private static VariableLengthRecordHeader CreateHeader(int count) =>
+        new()
+        {
+            UserId = VariableLengthRecordHeader.SpecUserId,
+            RecordId = TagRecordId,
+            RecordLengthAfterHeader = (ushort)(count * 192),
+        };
+
     private int[] CreateIndexes()
     {
         var result = new int[this.items.Count];
         for (var i = 1; i < this.items.Count; i++)
         {
-            var byteCount = this.items[i - 1] switch
-            {
-                { DataType: ExtraBytesDataType.Undocumented, Options: var options } => (ushort)options,
-                { DataType: ExtraBytesDataType.UnsignedChar or ExtraBytesDataType.Char } => sizeof(byte),
-                { DataType: ExtraBytesDataType.UnsignedShort or ExtraBytesDataType.Short } => sizeof(short),
-                { DataType: ExtraBytesDataType.UnsignedLong or ExtraBytesDataType.Long } => sizeof(int),
-                { DataType: ExtraBytesDataType.UnsignedLongLong or ExtraBytesDataType.LongLong } => sizeof(long),
-                { DataType: ExtraBytesDataType.Float } => sizeof(float),
-                { DataType: ExtraBytesDataType.Double } => sizeof(double),
-                _ => default,
-            };
-
-            result[i] = result[i - 1] + byteCount;
+            result[i] = result[i - 1] + GetByteCount(this.items[i - 1]);
         }
 
         return result;

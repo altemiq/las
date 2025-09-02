@@ -10,7 +10,7 @@ namespace Altemiq.IO.Las.Readers;
 /// The point data record reader.
 /// </summary>
 /// <typeparam name="T">The type of point.</typeparam>
-public abstract class PointDataRecordReader<T> : IPointDataRecordReader
+internal abstract class PointDataRecordReader<T> : IPointDataRecordReader
     where T : IBasePointDataRecord
 {
     /// <inheritdoc/>
