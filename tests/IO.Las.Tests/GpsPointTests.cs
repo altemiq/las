@@ -13,7 +13,11 @@ public class GpsPointTests
 
 
 
-    private static readonly GpsPointDataRecord Point = new()
+    private static
+#if !NETFRAMEWORK
+        readonly
+#endif
+        GpsPointDataRecord Point = new()
     {
         X = 2757,
         Y = -1377,
@@ -51,7 +55,11 @@ public class GpsPointTests
     public async Task ToMemory()
     {
         var destination = new byte[Bytes.Length];
+#if NETFRAMEWORK
+        MemoryMarshal.Write(destination, ref Point);
+#else
         MemoryMarshal.Write(destination, in Point);
+#endif
         await Assert.That(destination).IsEquivalentTo(Bytes);
     }
 
@@ -79,8 +87,8 @@ public class GpsPointTests
             .Satisfies(p => p.KeyPoint, keyPoint => keyPoint.IsFalse())
             .Satisfies(p => p.Withheld, withheld => withheld.IsFalse())
             .Satisfies(p => p.ScanAngleRank, scanAngleRank => scanAngleRank.IsEqualTo((sbyte)-29))
-            .Satisfies(p => p.UserData, userData => userData.IsZero())
-            .Satisfies(p => p.PointSourceId, pointSourceId => pointSourceId.IsZero())
+            .Satisfies(p => p.UserData, userData => userData.IsDefault())
+            .Satisfies(p => p.PointSourceId, pointSourceId => pointSourceId.IsDefault())
             .Satisfies(p => Quantizer.GetDateTime(p.GpsTime), gpsTime => gpsTime.IsAfter(new(2010, 1, 1)));
     }
 }

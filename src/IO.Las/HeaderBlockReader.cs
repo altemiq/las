@@ -256,14 +256,18 @@ public class HeaderBlockReader(Stream stream)
 #if LAS1_2_OR_GREATER
             GlobalEncoding = (GlobalEncoding)System.Buffers.Binary.BinaryPrimitives.ReadUInt16LittleEndian(source[2..4]),
 #endif
+#if NETSTANDARD2_1_OR_GREATER || NETCOREAPP2_1_OR_GREATER
+            ProjectId = new(source[4..20]),
+#endif
+            Version = new(source[20], source[21]),
+            SystemIdentifier = System.Text.Encoding.UTF8.GetNullTerminatedString(source[22..54]),
+            GeneratingSoftware = System.Text.Encoding.UTF8.GetNullTerminatedString(source[54..86]),
         };
 
-#if NETSTANDARD2_1_OR_GREATER || NETCOREAPP2_1_OR_GREATER
-        builder.ProjectId = new(source[4..20]);
-#else
+#if !NETSTANDARD2_1_OR_GREATER && !NETCOREAPP2_1_OR_GREATER
         var guid1 = System.Buffers.Binary.BinaryPrimitives.ReadUInt32LittleEndian(source[4..8]);
-        var guid2 = System.Buffers.Binary.BinaryPrimitives.ReadUInt32LittleEndian(source[8..10]);
-        var guid3 = System.Buffers.Binary.BinaryPrimitives.ReadUInt32LittleEndian(source[10..12]);
+        var guid2 = System.Buffers.Binary.BinaryPrimitives.ReadUInt16LittleEndian(source[8..10]);
+        var guid3 = System.Buffers.Binary.BinaryPrimitives.ReadUInt16LittleEndian(source[10..12]);
         builder.ProjectId = new(
             (int)guid1,
             (short)guid2,
@@ -277,11 +281,6 @@ public class HeaderBlockReader(Stream stream)
             source[18],
             source[19]);
 #endif
-
-        builder.Version = new(source[20], source[21]);
-
-        builder.SystemIdentifier = System.Text.Encoding.UTF8.GetNullTerminatedString(source[22..54]);
-        builder.GeneratingSoftware = System.Text.Encoding.UTF8.GetNullTerminatedString(source[54..86]);
 
         // file creation
         var days = System.Buffers.Binary.BinaryPrimitives.ReadUInt16LittleEndian(source[86..88]);

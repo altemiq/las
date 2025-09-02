@@ -46,8 +46,12 @@
     <Compile Remove="IBasePointDataRecord{TSelf}.cs" />
   </ItemGroup>
 
+  <ItemGroup Condition=" $([MSBuild]::IsTargetFrameworkCompatible('$(TargetFramework)', 'net5.0')) ">
+    <Compile Remove="ExtensionMethods.BinaryPrimitives.cs" />
+  </ItemGroup>
+
   <ItemGroup>
-    <Compile Update="PointConverter.*.cs;HeaderBlockBuilder.*.cs">
+    <Compile Update="PointConverter.*.cs;HeaderBlockBuilder.*.cs;ExtensionMethods.*.cs">
       <DependentUpon>$([System.Text.RegularExpressions.Regex]::Replace('%(Filename)%(Extension)', '\.[^.]+\%(Extension)$', '%(Extension)'))</DependentUpon>
     </Compile>
   </ItemGroup>

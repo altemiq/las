@@ -11,7 +11,11 @@ public class PointTests
         0xC5, 0x0A, 0x00, 0x00, 0x9F, 0xFA, 0xFF, 0xFF, 0xC3, 0xE5, 0xFF, 0xFF, 0xAE, 0x01, 0x09, 0x01, 0xE3, 0x00, 0x00, 0x00,
     ];
 
-    private static readonly PointDataRecord Point = new()
+    private static
+#if !NETFRAMEWORK
+        readonly
+#endif
+        PointDataRecord Point = new()
     {
         X = 2757,
         Y = -1377,
@@ -48,7 +52,11 @@ public class PointTests
     public async Task ToMemory()
     {
         var destination = new byte[Bytes.Length];
+#if NETFRAMEWORK
+        MemoryMarshal.Write(destination, ref Point);
+#else
         MemoryMarshal.Write(destination, in Point);
+#endif
         await Assert.That(destination).IsEquivalentTo(Bytes);
     }
 
@@ -116,7 +124,7 @@ public class PointTests
             .Satisfies(p => p.KeyPoint, keyPoint => keyPoint.IsFalse())
             .Satisfies(p => p.Withheld, withheld => withheld.IsFalse())
             .Satisfies(p => p.ScanAngleRank, scanAngleRank => scanAngleRank.IsEqualTo((sbyte)-29))
-            .Satisfies(p => p.UserData, userData => userData.IsZero())
-            .Satisfies(p => p.PointSourceId, pointSourceId => pointSourceId.IsZero());
+            .Satisfies(p => p.UserData, userData => userData.IsDefault())
+            .Satisfies(p => p.PointSourceId, pointSourceId => pointSourceId.IsDefault());
     }
 }

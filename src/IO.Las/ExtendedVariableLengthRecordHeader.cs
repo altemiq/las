@@ -65,7 +65,7 @@ public readonly record struct ExtendedVariableLengthRecordHeader
         this.reserved = System.Buffers.Binary.BinaryPrimitives.ReadUInt16LittleEndian(data.AsSpan(Constants.ExtendedVariableLengthRecord.ReservedFieldOffset, sizeof(ushort)));
         this.userId = System.Text.Encoding.UTF8.GetString(data, Constants.ExtendedVariableLengthRecord.UserIdFieldOffset, GetNullChar(data, Constants.ExtendedVariableLengthRecord.UserIdFieldOffset) - Constants.ExtendedVariableLengthRecord.UserIdFieldOffset);
         this.recordId = System.Buffers.Binary.BinaryPrimitives.ReadUInt16LittleEndian(data.AsSpan(Constants.ExtendedVariableLengthRecord.RecordIdFieldOffset, sizeof(ushort)));
-        this.recordLengthAfterHeader = System.Buffers.Binary.BinaryPrimitives.ReadUInt64LittleEndian(data.AsSpan(Constants.ExtendedVariableLengthRecord.RecordLengthAfterHeaderFieldOffset, sizeof(ushort)));
+        this.recordLengthAfterHeader = System.Buffers.Binary.BinaryPrimitives.ReadUInt64LittleEndian(data.AsSpan(Constants.ExtendedVariableLengthRecord.RecordLengthAfterHeaderFieldOffset, sizeof(ulong)));
         this.description = System.Text.Encoding.UTF8.GetString(data, Constants.ExtendedVariableLengthRecord.DescriptionFieldOffset, GetNullChar(data, Constants.ExtendedVariableLengthRecord.DescriptionFieldOffset) - Constants.ExtendedVariableLengthRecord.DescriptionFieldOffset);
 
         static int GetNullChar(byte[] source, int startIndex = 0)

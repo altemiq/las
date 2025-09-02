@@ -12,7 +12,11 @@ public class GpsColorPointTests
         0x00, 0x00, 0x00, 0x00, 0x68, 0x90, 0xA2, 0x64, 0x0B, 0x1E, 0x41, 0x90, 0xA2, 0x64, 0x0B, 0x1E, 0x41,
     ];
 
-    private static readonly GpsColorPointDataRecord Point = new()
+    private static
+#if !NETFRAMEWORK
+        readonly
+#endif
+        GpsColorPointDataRecord Point = new()
     {
         X = 2757,
         Y = -1377,
@@ -51,7 +55,11 @@ public class GpsColorPointTests
     public async Task ToMemory()
     {
         var destination = new byte[Bytes.Length];
+#if NETFRAMEWORK
+        MemoryMarshal.Write(destination, ref Point);
+#else
         MemoryMarshal.Write(destination, in Point);
+#endif
         await Assert.That(destination).IsEquivalentTo(Bytes);
     }
 
@@ -79,14 +87,14 @@ public class GpsColorPointTests
             .Satisfies(p => p.KeyPoint, keyPoint => keyPoint.IsFalse())
             .Satisfies(p => p.Withheld, withheld => withheld.IsFalse())
             .Satisfies(p => p.ScanAngleRank, scanAngleRank => scanAngleRank.IsEqualTo((sbyte)-29))
-            .Satisfies(p => p.UserData, userData => userData.IsZero())
-            .Satisfies(p => p.PointSourceId, pointSourceId => pointSourceId.IsZero())
+            .Satisfies(p => p.UserData, userData => userData.IsDefault())
+            .Satisfies(p => p.PointSourceId, pointSourceId => pointSourceId.IsDefault())
             .Satisfies(p => Quantizer.GetDateTime(p.GpsTime), gpsTime => gpsTime.IsAfter(new(2010, 1, 1)))
             .Satisfies(
                 p => p.Color,
                 color => color
-                    .Satisfies(c => c.R, r => r.IsNotZero())
-                    .Satisfies(c => c.G, g => g.IsNotZero())
-                    .Satisfies(c => c.B, b => b.IsNotZero()));
+                    .Satisfies(c => c.R, r => r.IsNotDefault())
+                    .Satisfies(c => c.G, g => g.IsNotDefault())
+                    .Satisfies(c => c.B, b => b.IsNotDefault()));
     }
 }

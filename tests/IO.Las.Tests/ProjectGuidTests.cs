@@ -18,10 +18,18 @@ public class ProjectGuidTests
     [Arguments(ProjectGuid2, "guid2.bin")]
     public async Task ReadTheBytesCorrectly(string guid, string resource)
     {
-        await using Stream stream = typeof(ProjectGuidTests).Assembly.GetManifestResourceStream(typeof(ProjectGuidTests), resource)
-                                   ?? throw new InvalidOperationException("Failed to get stream");
-        byte[] bytes = System.Buffers.ArrayPool<byte>.Shared.Rent((int)stream.Length);
-        _ = await Assert.That(await stream.ReadAsync(bytes)).IsEqualTo(bytes.Length);
+#if NET
+        await
+#endif
+        using Stream stream = typeof(ProjectGuidTests).Assembly.GetManifestResourceStream(typeof(ProjectGuidTests), resource)
+                              ?? throw new InvalidOperationException("Failed to get stream");
+        var length = (int)stream.Length;
+        byte[] bytes = System.Buffers.ArrayPool<byte>.Shared.Rent(length);
+#if NET
+        _ = await Assert.That(await stream.ReadAsync(bytes.AsMemory(0, length))).IsEqualTo(length);
+#else
+        _ = await Assert.That(await stream.ReadAsync(bytes, 0, length)).IsEqualTo(length);
+#endif
         _ = await Assert.That(bytes).HasCount().EqualTo(16);
 
         _ = await Assert.That(new Guid(bytes)).IsEqualTo(Guid.Parse(guid));
@@ -34,8 +42,11 @@ public class ProjectGuidTests
     [Arguments(ProjectGuid2, "guid2.las")]
     public async Task ReadTheHeaderCorrectly(string guid, string resource)
     {
-        await using Stream stream = typeof(ProjectGuidTests).Assembly.GetManifestResourceStream(typeof(ProjectGuidTests), resource)
-                                    ?? throw new InvalidOperationException("Failed to get stream");
+#if NET
+        await
+#endif
+        using Stream stream = typeof(ProjectGuidTests).Assembly.GetManifestResourceStream(typeof(ProjectGuidTests), resource)
+                              ?? throw new InvalidOperationException("Failed to get stream");
         HeaderBlockReader headerReader = new(stream);
         var headerBlock = headerReader.GetHeaderBlock();
         _ = await Assert.That(headerBlock.ProjectId).IsEqualTo(Guid.Parse(guid));

@@ -2,4 +2,6 @@
 
 // You can use attributes at the assembly level to apply to all tests in the assembly
 [assembly: Retry(3)]
+#if !NETFRAMEWORK
 [assembly: System.Diagnostics.CodeAnalysis.ExcludeFromCodeCoverage]
+#endif

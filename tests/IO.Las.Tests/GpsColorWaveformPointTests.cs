@@ -12,7 +12,11 @@ public class GpsColorWaveformPointTests
         0x00, 0x00, 0x00, 0x00, 0x00, 0xF0, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
     ];
 
-    private static readonly GpsColorWaveformPointDataRecord Point = new()
+    private static
+#if !NETFRAMEWORK
+        readonly
+#endif
+        GpsColorWaveformPointDataRecord Point = new()
     {
         X = 2757,
         Y = -1377,
@@ -58,7 +62,11 @@ public class GpsColorWaveformPointTests
     public async Task ToMemory()
     {
         var destination = new byte[Bytes.Length];
+#if NETFRAMEWORK
+        MemoryMarshal.Write(destination, ref Point);
+#else
         MemoryMarshal.Write(destination, in Point);
+#endif
         await Assert.That(destination).IsEquivalentTo(Bytes);
     }
 
@@ -86,21 +94,21 @@ public class GpsColorWaveformPointTests
             .Satisfies(p => p.KeyPoint, keyPoint => keyPoint.IsFalse())
             .Satisfies(p => p.Withheld, withheld => withheld.IsFalse())
             .Satisfies(p => p.ScanAngleRank, scanAngleRank => scanAngleRank.IsEqualTo((sbyte)-29))
-            .Satisfies(p => p.UserData, userData => userData.IsZero())
-            .Satisfies(p => p.PointSourceId, pointSourceId => pointSourceId.IsZero())
+            .Satisfies(p => p.UserData, userData => userData.IsDefault())
+            .Satisfies(p => p.PointSourceId, pointSourceId => pointSourceId.IsDefault())
             .Satisfies(p => Quantizer.GetDateTime(p.GpsTime), gpsTime => gpsTime.IsAfter(new(2010, 1, 1)))
             .Satisfies(
                 p => p.Color,
                 color => color
-                    .Satisfies(c => c.R, r => r.IsNotZero())
-                    .Satisfies(c => c.G, g => g.IsNotZero())
-                    .Satisfies(c => c.B, b => b.IsNotZero()))
+                    .Satisfies(c => c.R, r => r.IsNotDefault())
+                    .Satisfies(c => c.G, g => g.IsNotDefault())
+                    .Satisfies(c => c.B, b => b.IsNotDefault()))
             .Satisfies(p => p.WavePacketDescriptorIndex, wavePacketDescriptorIndex => wavePacketDescriptorIndex.IsEqualTo((byte)1))
             .Satisfies(p => p.ByteOffsetToWaveformData, byteOffsetToWaveformData => byteOffsetToWaveformData.IsEqualTo(240UL))
             .Satisfies(p => p.WaveformPacketSizeInBytes, waveformPacketSizeInBytes => waveformPacketSizeInBytes.IsEqualTo(240U))
-            .Satisfies(p => p.ReturnPointWaveformLocation, returnPointWaveformLocation => returnPointWaveformLocation.IsZero())
-            .Satisfies(p => p.ParametricDx, parametricDx => parametricDx.IsZero())
-            .Satisfies(p => p.ParametricDy, parametricDy => parametricDy.IsZero())
-            .Satisfies(p => p.ParametricDz, parametricDz => parametricDz.IsZero());
+            .Satisfies(p => p.ReturnPointWaveformLocation, returnPointWaveformLocation => returnPointWaveformLocation.IsDefault())
+            .Satisfies(p => p.ParametricDx, parametricDx => parametricDx.IsDefault())
+            .Satisfies(p => p.ParametricDy, parametricDy => parametricDy.IsDefault())
+            .Satisfies(p => p.ParametricDz, parametricDz => parametricDz.IsDefault());
     }
 }
