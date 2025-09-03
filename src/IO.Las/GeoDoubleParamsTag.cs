@@ -56,6 +56,13 @@ public record GeoDoubleParamsTag : VariableLengthRecord, IReadOnlyList<double>
     public double this[int index] => this.values[index];
 
     /// <summary>
+    /// Gets the <see cref="double"/> with the specified key.
+    /// </summary>
+    /// <param name="key">The key of the element to get.</param>
+    /// <returns>The <see cref="double"/> with the specified key.</returns>
+    public double this[GeoKeyEntry key] => this.TryGetValue(key, out var value) ? value : throw new KeyNotFoundException();
+
+    /// <summary>
     /// Creates an instance of <see cref="GeoDoubleParamsTag"/>.
     /// </summary>
     /// <param name="items">The values.</param>
@@ -67,6 +74,24 @@ public record GeoDoubleParamsTag : VariableLengthRecord, IReadOnlyList<double>
 
     /// <inheritdoc />
     System.Collections.IEnumerator System.Collections.IEnumerable.GetEnumerator() => this.GetEnumerator();
+
+    /// <summary>
+    /// Tries to get the value associated with the specified key.
+    /// </summary>
+    /// <param name="key">The key.</param>
+    /// <param name="value">The value.</param>
+    /// <returns><see langword="true"/> if <paramref name="key"/> is found; otherwise <see langword="false"/>.</returns>
+    public bool TryGetValue(GeoKeyEntry key, out double value)
+    {
+        if (key.TiffTagLocation is TagRecordId && key.ValueOffset < this.values.Count)
+        {
+            value = this.values[key.ValueOffset];
+            return true;
+        }
+
+        value = default;
+        return false;
+    }
 
     /// <inheritdoc />
     public override int Write(Span<byte> destination)

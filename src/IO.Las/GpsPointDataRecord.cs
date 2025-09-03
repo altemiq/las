@@ -258,6 +258,14 @@ public readonly record struct GpsPointDataRecord :
     public static GpsPointDataRecord Create(ReadOnlySpan<byte> data) => BitConverter.IsLittleEndian ? System.Runtime.InteropServices.MemoryMarshal.Read<GpsPointDataRecord>(data) : new(data);
 
     /// <inheritdoc />
+    IBasePointDataRecord IBasePointDataRecord.Clone() => this;
+
+#if NET7_0_OR_GREATER
+    /// <inheritdoc />
+    GpsPointDataRecord IBasePointDataRecord<GpsPointDataRecord>.Clone() => this;
+#endif
+
+    /// <inheritdoc />
     public int Write(Span<byte> destination)
     {
         if (BitConverter.IsLittleEndian)

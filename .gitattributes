@@ -33,5 +33,6 @@
 # GIT LFS
 *.zip			filter=lfs diff=lfs merge=lfs -text
 *.mdb			filter=lfs diff=lfs merge=lfs -text
-src/Resources/*	filter=lfs diff=lfs merge=lfs -text
+*.las           filter=lfs diff=lfs merge=lfs -text
+*.laz           filter=lfs diff=lfs merge=lfs -text
 *.db			filter=lfs diff=lfs merge=lfs -text

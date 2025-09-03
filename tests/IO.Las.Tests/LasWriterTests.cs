@@ -127,7 +127,7 @@ public class LasWriterTests
             .IsAssignableTo<IPointDataRecord>()
             .Satisfies(p => p.Classification, classification => classification.IsEqualTo(Classification.LowVegetation));
 
-        _ = await Assert.That(extraBytes.GetData(0, extra)).IsEqualTo(ExtraValue);
+        _ = await Assert.That(extraBytes.GetValue(0, extra)).IsEqualTo(ExtraValue);
     }
 
     [Test]
@@ -207,7 +207,7 @@ public class LasWriterTests
             .IsAssignableTo<IPointDataRecord>()
             .Satisfies(p => p.Classification, classification => classification.IsEqualTo(Classification.LowVegetation));
 
-        _ = await Assert.That(await extraBytes.GetDataAsync(0, outputPoint.ExtraBytes)).IsEqualTo(ExtraValue);
+        _ = await Assert.That(await extraBytes.GetValueAsync(0, outputPoint.ExtraBytes)).IsEqualTo(ExtraValue);
     }
 #endif
 }

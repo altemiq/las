@@ -51,4 +51,7 @@
   <data name="CannotMoveToPosition" xml:space="preserve">
     <value>Cannot move to {0}.</value>
   </data>
+  <data name="IsNotAValue" xml:space="preserve">
+    <value>{0} is not a {1} value</value>
+  </data>
 </root>

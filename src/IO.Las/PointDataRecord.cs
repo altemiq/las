@@ -238,6 +238,14 @@ public readonly record struct PointDataRecord :
     public static PointDataRecord Create(ReadOnlySpan<byte> data) => BitConverter.IsLittleEndian ? System.Runtime.InteropServices.MemoryMarshal.Read<PointDataRecord>(data) : new(data);
 
     /// <inheritdoc />
+    IBasePointDataRecord IBasePointDataRecord.Clone() => this;
+
+#if NET7_0_OR_GREATER
+    /// <inheritdoc />
+    PointDataRecord IBasePointDataRecord<PointDataRecord>.Clone() => this;
+#endif
+
+    /// <inheritdoc />
     public int Write(Span<byte> destination)
     {
         if (BitConverter.IsLittleEndian)

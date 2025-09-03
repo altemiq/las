@@ -25,8 +25,8 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "docs", "docs", "{DFB1AACC-6
 		docs\asprs_las_format_v13_r11_2010.pdf = docs\asprs_las_format_v13_r11_2010.pdf
 		docs\copc-specification-1.0.pdf = docs\copc-specification-1.0.pdf
 		docs\LAZ_Specification_1.4_R0.pdf = docs\LAZ_Specification_1.4_R0.pdf
-		docs\LAS_1_4_r16.pdf = docs\LAS_1_4_r16.pdf
-		docs\LAS_1_5_r00.pdf = docs\LAS_1_5_r00.pdf
+		docs\asprs_las_format_v15_r00_2025.pdf = docs\asprs_las_format_v15_r00_2025.pdf
+		docs\asprs_las_format_v14_r16_2025.pdf = docs\asprs_las_format_v14_r16_2025.pdf
 	EndProjectSection
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "tests", "tests", "{1D3F3E65-48DE-4C8F-BE82-CF9C2D8D930C}"
@@ -36,6 +36,15 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "tests", "tests", "{1D3F3E65
 	EndProjectSection
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "IO.Las.Tests", "tests\IO.Las.Tests\IO.Las.Tests.csproj", "{57EAF8CB-00B7-4524-8E93-912CB614C1AA}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "tools", "tools", "{1F43FFFE-A631-478E-BA36-A193CD67B6C7}"
+	ProjectSection(SolutionItems) = preProject
+		tools\Directory.Build.props = tools\Directory.Build.props
+		tools\Directory.Packages.props = tools\Directory.Packages.props
+		tools\Directory.Build.targets = tools\Directory.Build.targets
+	EndProjectSection
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Las", "tools\Las\Las.csproj", "{17F4C02F-3355-4F99-83D8-BC5CDD1824E4}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -71,6 +80,18 @@ Global
 		{57EAF8CB-00B7-4524-8E93-912CB614C1AA}.Release|x64.Build.0 = Release|Any CPU
 		{57EAF8CB-00B7-4524-8E93-912CB614C1AA}.Release|x86.ActiveCfg = Release|Any CPU
 		{57EAF8CB-00B7-4524-8E93-912CB614C1AA}.Release|x86.Build.0 = Release|Any CPU
+		{17F4C02F-3355-4F99-83D8-BC5CDD1824E4}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{17F4C02F-3355-4F99-83D8-BC5CDD1824E4}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{17F4C02F-3355-4F99-83D8-BC5CDD1824E4}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{17F4C02F-3355-4F99-83D8-BC5CDD1824E4}.Debug|x64.Build.0 = Debug|Any CPU
+		{17F4C02F-3355-4F99-83D8-BC5CDD1824E4}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{17F4C02F-3355-4F99-83D8-BC5CDD1824E4}.Debug|x86.Build.0 = Debug|Any CPU
+		{17F4C02F-3355-4F99-83D8-BC5CDD1824E4}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{17F4C02F-3355-4F99-83D8-BC5CDD1824E4}.Release|Any CPU.Build.0 = Release|Any CPU
+		{17F4C02F-3355-4F99-83D8-BC5CDD1824E4}.Release|x64.ActiveCfg = Release|Any CPU
+		{17F4C02F-3355-4F99-83D8-BC5CDD1824E4}.Release|x64.Build.0 = Release|Any CPU
+		{17F4C02F-3355-4F99-83D8-BC5CDD1824E4}.Release|x86.ActiveCfg = Release|Any CPU
+		{17F4C02F-3355-4F99-83D8-BC5CDD1824E4}.Release|x86.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -78,5 +99,6 @@ Global
 	GlobalSection(NestedProjects) = preSolution
 		{EF804C35-0306-464A-9702-47330EA0F0CA} = {94D31DAF-54FD-47A1-ABC5-DE0D31E8A7ED}
 		{57EAF8CB-00B7-4524-8E93-912CB614C1AA} = {1D3F3E65-48DE-4C8F-BE82-CF9C2D8D930C}
+		{17F4C02F-3355-4F99-83D8-BC5CDD1824E4} = {1F43FFFE-A631-478E-BA36-A193CD67B6C7}
 	EndGlobalSection
 EndGlobal

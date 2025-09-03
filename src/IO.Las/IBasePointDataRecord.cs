@@ -96,6 +96,12 @@ public interface IBasePointDataRecord
     ushort PointSourceId { get; init; }
 
     /// <summary>
+    /// Clones this instance to a new instance.
+    /// </summary>
+    /// <returns>The new instance.</returns>
+    IBasePointDataRecord Clone();
+
+    /// <summary>
     /// Writes this instance to the destination.
     /// </summary>
     /// <param name="destination">The destination.</param>

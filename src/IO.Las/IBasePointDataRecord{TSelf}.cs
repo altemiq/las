@@ -96,4 +96,10 @@ public interface IBasePointDataRecord<out TSelf> : IBasePointDataRecord
     /// <param name="data">The data.</param>
     /// <returns>The instance of <typeparamref name="TSelf"/>.</returns>
     static abstract TSelf Create(ReadOnlySpan<byte> data);
+
+    /// <summary>
+    /// Clones this instance to a new instance.
+    /// </summary>
+    /// <returns>The new instance.</returns>
+    new TSelf Clone();
 }

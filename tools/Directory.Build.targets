@@ -1,0 +1,12 @@
+<Project>
+
+  <PropertyGroup>
+    <RootNamespace>$(Company).IO.$(MSBuildProjectName)</RootNamespace>
+    <ResourceNamespace>$(RootNamespace).Tool</ResourceNamespace>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <Using Include="System.CommandLine" />
+  </ItemGroup>
+
+</Project>

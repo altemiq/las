@@ -1,0 +1,23 @@
+<Project>
+  <Import Project="$([MSBuild]::GetPathOfFileAbove('$(MSBuildThisFileName.Replace('Build', 'Versions'))$(MSBuildThisFileExtension)', '$(MSBuildThisFileDirectory)'))" />
+
+  <PropertyGroup>
+    <AssemblyName>$(MSBuildProjectName.ToLower())</AssemblyName>
+
+    <DefaultTargetFramework>net9.0</DefaultTargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+
+    <IsPackable>false</IsPackable>
+    <IsPublishable>true</IsPublishable>
+    <PublishRelease>true</PublishRelease>
+
+    <GenerateStronglyTypedResources>true</GenerateStronglyTypedResources>
+
+    <RuntimeIdentifiers>win-x64;win-arm64;linux-x64;linux-arm64</RuntimeIdentifiers>
+    <ContainerRuntimeIdentifiers>linux-x64;linux-arm64</ContainerRuntimeIdentifiers>
+
+    <NoWarn>$(NoWarn);CS8002</NoWarn>
+  </PropertyGroup>
+  
+</Project>

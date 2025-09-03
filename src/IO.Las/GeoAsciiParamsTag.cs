@@ -20,6 +20,8 @@ public record GeoAsciiParamsTag : VariableLengthRecord, IReadOnlyList<string>
 
     private readonly IReadOnlyList<string> strings;
 
+    private readonly ushort[] indexes;
+
     /// <summary>
     /// Initializes a new instance of the <see cref="GeoAsciiParamsTag"/> class.
     /// </summary>
@@ -47,13 +49,34 @@ public record GeoAsciiParamsTag : VariableLengthRecord, IReadOnlyList<string>
     }
 
     private GeoAsciiParamsTag(VariableLengthRecordHeader header, IReadOnlyList<string> strings)
-        : base(header) => this.strings = strings;
+        : base(header)
+    {
+        this.strings = strings;
+
+        var idx = new ushort[this.strings.Count + 1];
+        idx[0] = 0;
+        var currentIndex = (ushort)0;
+        for (var i = 0; i < this.strings.Count; i++)
+        {
+            currentIndex += (ushort)(System.Text.Encoding.ASCII.GetByteCount(this.strings[i]) + 1);
+            idx[i + 1] = currentIndex;
+        }
+
+        this.indexes = idx;
+    }
 
     /// <inheritdoc />
     public int Count => this.strings.Count;
 
     /// <inheritdoc />
     public string this[int index] => this.strings[index];
+
+    /// <summary>
+    /// Gets the <see cref="string"/> with the specified key.
+    /// </summary>
+    /// <param name="key">The key of the element to get.</param>
+    /// <returns>The <see cref="string"/> with the specified key.</returns>
+    public string this[GeoKeyEntry key] => this.TryGetValue(key, out var value) ? value : throw new KeyNotFoundException();
 
     /// <summary>
     /// Creates an instance of <see cref="GeoAsciiParamsTag"/>.
@@ -67,6 +90,32 @@ public record GeoAsciiParamsTag : VariableLengthRecord, IReadOnlyList<string>
 
     /// <inheritdoc />
     System.Collections.IEnumerator System.Collections.IEnumerable.GetEnumerator() => this.GetEnumerator();
+
+    /// <summary>
+    /// Tries to get the value associated with the specified key.
+    /// </summary>
+    /// <param name="key">The key.</param>
+    /// <param name="value">The value.</param>
+    /// <returns><see langword="true"/> if <paramref name="key"/> is found; otherwise <see langword="false"/>.</returns>
+    public bool TryGetValue(GeoKeyEntry key, [System.Diagnostics.CodeAnalysis.NotNullWhen(true)] out string? value)
+    {
+        if (key.TiffTagLocation is TagRecordId)
+        {
+            for (var i = 0; i < this.indexes.Length - 1; i++)
+            {
+                if (this.indexes[i] != key.ValueOffset || (this.indexes[i + 1] - this.indexes[i]) != key.Count)
+                {
+                    continue;
+                }
+
+                value = this.strings[i];
+                return true;
+            }
+        }
+
+        value = default;
+        return false;
+    }
 
     /// <inheritdoc />
     public override int Write(Span<byte> destination)

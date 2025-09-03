@@ -66,6 +66,13 @@ public sealed record GeoKeyDirectoryTag : VariableLengthRecord, IReadOnlyList<Ge
     public GeoKeyEntry this[int index] => this.values[index];
 
     /// <summary>
+    /// Gets the <see cref="GeoKeyEntry"/> with the specified key.
+    /// </summary>
+    /// <param name="key">The key of the element to get.</param>
+    /// <returns>The <see cref="GeoKeyEntry"/> with the specified key.</returns>
+    public GeoKeyEntry this[GeoKey key] => this.values.FirstOrDefault(x => x.KeyId == key);
+
+    /// <summary>
     /// Creates an instance of <see cref="GeoKeyDirectoryTag"/>.
     /// </summary>
     /// <param name="items">The values.</param>
@@ -129,11 +136,5 @@ public sealed record GeoKeyDirectoryTag : VariableLengthRecord, IReadOnlyList<Ge
         return builder.ToReadOnlyCollection();
     }
 
-    private static Version GetVersion(ReadOnlySpan<byte> source)
-    {
-        var keyDirectoryVersion = System.Buffers.Binary.BinaryPrimitives.ReadUInt16LittleEndian(source);
-        var keyRevision = System.Buffers.Binary.BinaryPrimitives.ReadUInt16LittleEndian(source[2..]);
-        var minorRevision = System.Buffers.Binary.BinaryPrimitives.ReadUInt16LittleEndian(source[4..]);
-        return new(keyDirectoryVersion, keyRevision, 0, minorRevision);
-    }
+    private static Version GetVersion(ReadOnlySpan<byte> source) => new(System.Buffers.Binary.BinaryPrimitives.ReadUInt16LittleEndian(source[2..4]), System.Buffers.Binary.BinaryPrimitives.ReadUInt16LittleEndian(source[2..4]), System.Buffers.Binary.BinaryPrimitives.ReadUInt16LittleEndian(source[4..6]));
 }

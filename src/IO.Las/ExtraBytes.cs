@@ -10,7 +10,7 @@ namespace Altemiq.IO.Las;
 /// The Extra Bytes VLR provides a mechanism whereby additional information can be added to the end of a standard Point Record.
 /// </summary>
 [System.Runtime.CompilerServices.CollectionBuilder(typeof(ExtraBytes), nameof(Create))]
-public sealed record ExtraBytes : VariableLengthRecord, IReadOnlyList<ExtraBytesItem>
+public sealed record ExtraBytes : VariableLengthRecord, IExtraBytes
 {
     /// <summary>
     /// The tag record ID.
@@ -91,14 +91,14 @@ public sealed record ExtraBytes : VariableLengthRecord, IReadOnlyList<ExtraBytes
     /// <param name="index">The index.</param>
     /// <param name="source">The source.</param>
     /// <returns>The value.</returns>
-    public object? GetData(int index, ReadOnlySpan<byte> source) => this.items[index].GetData(source[this.indexes[index]..]);
+    public object? GetValue(int index, ReadOnlySpan<byte> source) => this.items[index].GetData(source[this.indexes[index]..]);
 
     /// <summary>
     /// Gets the data.
     /// </summary>
     /// <param name="source">The source.</param>
     /// <returns>The value.</returns>
-    public IReadOnlyList<object?> GetData(ReadOnlySpan<byte> source)
+    public IReadOnlyList<object?> GetValues(ReadOnlySpan<byte> source)
     {
         var values = new object?[this.items.Count];
         for (int i = 0; i < this.items.Count; i++)
@@ -115,7 +115,23 @@ public sealed record ExtraBytes : VariableLengthRecord, IReadOnlyList<ExtraBytes
     /// <param name="index">The index.</param>
     /// <param name="source">The source.</param>
     /// <returns>The value.</returns>
-    public ValueTask<object?> GetDataAsync(int index, ReadOnlyMemory<byte> source) => this.items[index].GetDataAsync(source[this.indexes[index]..]);
+    public ValueTask<object?> GetValueAsync(int index, ReadOnlyMemory<byte> source) => this.items[index].GetDataAsync(source[this.indexes[index]..]);
+
+    /// <summary>
+    /// Gets the data.
+    /// </summary>
+    /// <param name="source">The source.</param>
+    /// <returns>The value.</returns>
+    public async ValueTask<IReadOnlyList<object?>> GetValuesAsync(ReadOnlyMemory<byte> source)
+    {
+        var values = new object?[this.items.Count];
+        for (int i = 0; i < this.items.Count; i++)
+        {
+            values[i] = await this.items[i].GetDataAsync(source[this.indexes[i]..]).ConfigureAwait(false);
+        }
+
+        return values;
+    }
 
     /// <inheritdoc />
     public IEnumerator<ExtraBytesItem> GetEnumerator() => this.items.GetEnumerator();

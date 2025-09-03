@@ -399,6 +399,14 @@ public readonly record struct ExtendedGpsColorNearInfraredWaveformPointDataRecor
     public static ExtendedGpsColorNearInfraredWaveformPointDataRecord Create(ReadOnlySpan<byte> data) => BitConverter.IsLittleEndian ? System.Runtime.InteropServices.MemoryMarshal.Read<ExtendedGpsColorNearInfraredWaveformPointDataRecord>(data) : new(data);
 
     /// <inheritdoc />
+    IBasePointDataRecord IBasePointDataRecord.Clone() => this;
+
+#if NET7_0_OR_GREATER
+    /// <inheritdoc />
+    ExtendedGpsColorNearInfraredWaveformPointDataRecord IBasePointDataRecord<ExtendedGpsColorNearInfraredWaveformPointDataRecord>.Clone() => this;
+#endif
+
+    /// <inheritdoc />
     public int Write(Span<byte> destination)
     {
         if (BitConverter.IsLittleEndian)
