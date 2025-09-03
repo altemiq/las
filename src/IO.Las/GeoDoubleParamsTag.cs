@@ -10,6 +10,7 @@ namespace Altemiq.IO.Las;
 /// This record is simply an array of ASCII data.
 /// It contains many strings separated by null terminator characters, which are referenced by position from data in the <see cref="GeoKeyDirectoryTag"/> record.
 /// </summary>
+[System.Runtime.CompilerServices.CollectionBuilder(typeof(GeoDoubleParamsTag), nameof(Create))]
 public record GeoDoubleParamsTag : VariableLengthRecord, IReadOnlyList<double>
 {
     /// <summary>
@@ -23,8 +24,15 @@ public record GeoDoubleParamsTag : VariableLengthRecord, IReadOnlyList<double>
     /// Initializes a new instance of the <see cref="GeoDoubleParamsTag"/> class.
     /// </summary>
     /// <param name="values">The values.</param>
-    public GeoDoubleParamsTag(params IEnumerable<double> values)
-        : this([.. values])
+    public GeoDoubleParamsTag(params IReadOnlyList<double> values)
+        : this(
+            new()
+            {
+                UserId = VariableLengthRecordHeader.ProjectionUserId,
+                RecordId = TagRecordId,
+                RecordLengthAfterHeader = (ushort)(sizeof(double) * values.Count),
+            },
+            values)
     {
     }
 
@@ -38,18 +46,6 @@ public record GeoDoubleParamsTag : VariableLengthRecord, IReadOnlyList<double>
     {
     }
 
-    private GeoDoubleParamsTag(IReadOnlyList<double> values)
-        : this(
-            new()
-            {
-                UserId = VariableLengthRecordHeader.ProjectionUserId,
-                RecordId = TagRecordId,
-                RecordLengthAfterHeader = (ushort)(sizeof(double) * values.Count),
-            },
-            values)
-    {
-    }
-
     private GeoDoubleParamsTag(VariableLengthRecordHeader header, IReadOnlyList<double> values)
         : base(header) => this.values = values;
 
@@ -58,6 +54,13 @@ public record GeoDoubleParamsTag : VariableLengthRecord, IReadOnlyList<double>
 
     /// <inheritdoc />
     public double this[int index] => this.values[index];
+
+    /// <summary>
+    /// Creates an instance of <see cref="GeoDoubleParamsTag"/>.
+    /// </summary>
+    /// <param name="items">The values.</param>
+    /// <returns>The <see cref="GeoDoubleParamsTag"/>.</returns>
+    public static GeoAsciiParamsTag Create(ReadOnlySpan<string> items) => new(items.ToReadOnlyList());
 
     /// <inheritdoc />
     public IEnumerator<double> GetEnumerator() => this.values.GetEnumerator();

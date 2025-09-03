@@ -9,6 +9,7 @@ namespace Altemiq.IO.Las;
 /// <summary>
 /// Classification lookup.
 /// </summary>
+[System.Runtime.CompilerServices.CollectionBuilder(typeof(ClassificationLookup), nameof(Create))]
 public sealed record ClassificationLookup : VariableLengthRecord, IReadOnlyList<ClassificationLookupItem>
 {
     /// <summary>
@@ -28,7 +29,7 @@ public sealed record ClassificationLookup : VariableLengthRecord, IReadOnlyList<
     /// Initialises a new instance of the <see cref="ClassificationLookup"/> class.
     /// </summary>
     /// <param name="values">The values.</param>
-    public ClassificationLookup(params IEnumerable<ClassificationLookupItem> values)
+    public ClassificationLookup(params IReadOnlyList<ClassificationLookupItem> values)
         : this(
             new()
             {
@@ -36,7 +37,7 @@ public sealed record ClassificationLookup : VariableLengthRecord, IReadOnlyList<
                 RecordId = TagRecordId,
                 RecordLengthAfterHeader = TotalSize,
             },
-            [.. values])
+            values)
     {
     }
 
@@ -58,6 +59,13 @@ public sealed record ClassificationLookup : VariableLengthRecord, IReadOnlyList<
 
     /// <inheritdoc />
     public ClassificationLookupItem this[int index] => this.values[index];
+
+    /// <summary>
+    /// Creates an instance of <see cref="ClassificationLookup"/>.
+    /// </summary>
+    /// <param name="items">The values.</param>
+    /// <returns>The <see cref="ClassificationLookup"/>.</returns>
+    public static ClassificationLookup Create(ReadOnlySpan<ClassificationLookupItem> items) => new(items.ToReadOnlyList());
 
     /// <inheritdoc />
     public IEnumerator<ClassificationLookupItem> GetEnumerator() => this.values.GetEnumerator();
@@ -101,7 +109,7 @@ public sealed record ClassificationLookup : VariableLengthRecord, IReadOnlyList<
         return End;
     }
 
-    private static IReadOnlyList<ClassificationLookupItem> GetEntries(ReadOnlySpan<byte> source)
+    private static System.Collections.ObjectModel.ReadOnlyCollection<ClassificationLookupItem> GetEntries(ReadOnlySpan<byte> source)
     {
         var builder = new System.Runtime.CompilerServices.ReadOnlyCollectionBuilder<ClassificationLookupItem>(ValueCount);
 

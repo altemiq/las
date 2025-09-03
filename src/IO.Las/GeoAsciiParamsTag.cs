@@ -10,6 +10,7 @@ namespace Altemiq.IO.Las;
 /// This record is simply an array of ASCII data.
 /// It contains many strings separated by null terminator characters, which are referenced by position from data in the <see cref="GeoKeyDirectoryTag"/> record.
 /// </summary>
+[System.Runtime.CompilerServices.CollectionBuilder(typeof(GeoAsciiParamsTag), nameof(Create))]
 public record GeoAsciiParamsTag : VariableLengthRecord, IReadOnlyList<string>
 {
     /// <summary>
@@ -23,8 +24,15 @@ public record GeoAsciiParamsTag : VariableLengthRecord, IReadOnlyList<string>
     /// Initializes a new instance of the <see cref="GeoAsciiParamsTag"/> class.
     /// </summary>
     /// <param name="strings">The strings.</param>
-    public GeoAsciiParamsTag(params IEnumerable<string> strings)
-        : this([.. strings])
+    public GeoAsciiParamsTag(params IReadOnlyList<string> strings)
+        : this(
+            new()
+            {
+                UserId = VariableLengthRecordHeader.ProjectionUserId,
+                RecordId = TagRecordId,
+                RecordLengthAfterHeader = (ushort)strings.Sum(s => System.Text.Encoding.UTF8.GetByteCount(s) + 1),
+            },
+            strings)
     {
     }
 
@@ -38,18 +46,6 @@ public record GeoAsciiParamsTag : VariableLengthRecord, IReadOnlyList<string>
     {
     }
 
-    private GeoAsciiParamsTag(IReadOnlyList<string> strings)
-        : this(
-            new()
-            {
-                UserId = VariableLengthRecordHeader.ProjectionUserId,
-                RecordId = TagRecordId,
-                RecordLengthAfterHeader = (ushort)strings.Sum(s => System.Text.Encoding.UTF8.GetByteCount(s) + 1),
-            },
-            strings)
-    {
-    }
-
     private GeoAsciiParamsTag(VariableLengthRecordHeader header, IReadOnlyList<string> strings)
         : base(header) => this.strings = strings;
 
@@ -58,6 +54,13 @@ public record GeoAsciiParamsTag : VariableLengthRecord, IReadOnlyList<string>
 
     /// <inheritdoc />
     public string this[int index] => this.strings[index];
+
+    /// <summary>
+    /// Creates an instance of <see cref="GeoAsciiParamsTag"/>.
+    /// </summary>
+    /// <param name="items">The values.</param>
+    /// <returns>The <see cref="GeoAsciiParamsTag"/>.</returns>
+    public static GeoAsciiParamsTag Create(ReadOnlySpan<string> items) => new(items.ToReadOnlyList());
 
     /// <inheritdoc />
     public IEnumerator<string> GetEnumerator() => this.strings.GetEnumerator();

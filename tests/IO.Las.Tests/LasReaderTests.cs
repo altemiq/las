@@ -113,7 +113,7 @@ public class LasReaderTests
         await using Stream stream = typeof(LasReaderTests).Assembly.GetManifestResourceStream(typeof(LasReaderTests), "fusa.las")
                                     ?? throw new InvalidOperationException("Failed to get stream");
         using LasReader reader = new(stream);
-        await CheckHeader(reader.Header, new Version(1, 1));
+        await CheckHeader(reader.Header, new(1, 1));
         _ = await Assert.That(reader.VariableLengthRecords).HasCount().EqualToOne();
 
         _ = await Assert.That(await reader.ReadPointDataRecordAsync())
@@ -145,7 +145,7 @@ public class LasReaderTests
         await using Stream stream = typeof(LasReaderTests).Assembly.GetManifestResourceStream(typeof(LasReaderTests), "fusa_height.las")
                                     ?? throw new InvalidOperationException("Failed to get stream");
         using LasReader reader = new(stream);
-        await CheckHeader(reader.Header, new Version(1, 4));
+        await CheckHeader(reader.Header, new(1, 4));
         _ = await Assert.That(reader.VariableLengthRecords).HasCount().EqualTo(2);
 
         var extraBytes = reader.VariableLengthRecords.OfType<ExtraBytes>().Single();
@@ -153,7 +153,7 @@ public class LasReaderTests
         double min = double.MaxValue;
         double max = double.MinValue;
 
-        while (await reader.ReadPointDataRecordAsync() is { } point)
+        while (await reader.ReadPointDataRecordAsync() is { PointDataRecord: not null } point)
         {
             _ = await Assert.That(point.PointDataRecord).IsAssignableTo<IGpsPointDataRecord>();
             
@@ -180,7 +180,7 @@ public class LasReaderTests
         using Stream stream = typeof(LasReaderTests).Assembly.GetManifestResourceStream(typeof(LasReaderTests), "fusa.las")
                               ?? throw new InvalidOperationException("Failed to get stream");
         using LasReader reader = new(stream);
-        await CheckHeader(reader.Header, new Version(1, 1));
+        await CheckHeader(reader.Header, new(1, 1));
 
         var quantizer = new PointDataRecordQuantizer(reader.Header);
         var fileCreation = reader.Header.FileCreation.GetValueOrDefault();

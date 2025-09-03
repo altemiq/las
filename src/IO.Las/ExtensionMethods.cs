@@ -41,6 +41,25 @@ public static partial class ExtensionMethods
         MoveToPosition(stream, streamPosition, position);
     }
 
+    /// <summary>
+    /// Converts the <see cref="ReadOnlySpan{T}"/> to a <see cref="IReadOnlyList{T}"/>.
+    /// </summary>
+    /// <typeparam name="T">The type of item in the source.</typeparam>
+    /// <param name="source">The source.</param>
+    /// <returns>The read-only list of <typeparamref name="T"/>.</returns>
+    internal static IReadOnlyList<T> ToReadOnlyList<T>(this ReadOnlySpan<T> source)
+    {
+        var count = source.Length;
+        var builder = new System.Runtime.CompilerServices.ReadOnlyCollectionBuilder<T>(count);
+
+        for (int i = 0; i < count; i++)
+        {
+            builder.Add(source[i]);
+        }
+
+        return builder.ToReadOnlyCollection();
+    }
+
     private static void MoveToPosition(Stream stream, long currentPosition, long position)
     {
         if (stream.CanSeek)

@@ -10,6 +10,7 @@ namespace Altemiq.IO.Las;
 /// This record contains the key values that define the coordinate system.
 /// A complete description can be found in the GeoTIFF format specification.
 /// </summary>
+[System.Runtime.CompilerServices.CollectionBuilder(typeof(GeoKeyDirectoryTag), nameof(Create))]
 public sealed record GeoKeyDirectoryTag : VariableLengthRecord, IReadOnlyList<GeoKeyEntry>
 {
     /// <summary>
@@ -23,8 +24,16 @@ public sealed record GeoKeyDirectoryTag : VariableLengthRecord, IReadOnlyList<Ge
     /// Initializes a new instance of the <see cref="GeoKeyDirectoryTag"/> class.
     /// </summary>
     /// <param name="entries">The entries.</param>
-    public GeoKeyDirectoryTag(params IEnumerable<GeoKeyEntry> entries)
-        : this([.. entries])
+    public GeoKeyDirectoryTag(params IReadOnlyList<GeoKeyEntry> entries)
+        : this(
+            new()
+            {
+                UserId = VariableLengthRecordHeader.ProjectionUserId,
+                RecordId = TagRecordId,
+                RecordLengthAfterHeader = (ushort)(4 * sizeof(ushort) * entries.Count),
+            },
+            new(1, 1),
+            entries)
     {
     }
 
@@ -35,19 +44,6 @@ public sealed record GeoKeyDirectoryTag : VariableLengthRecord, IReadOnlyList<Ge
     /// <param name="data">The data.</param>
     internal GeoKeyDirectoryTag(VariableLengthRecordHeader header, ReadOnlySpan<byte> data)
         : this(header, GetVersion(data), GetEntries(data[8..], System.Buffers.Binary.BinaryPrimitives.ReadUInt16LittleEndian(data[6..8])))
-    {
-    }
-
-    private GeoKeyDirectoryTag(IReadOnlyList<GeoKeyEntry> values)
-        : this(
-            new()
-            {
-                UserId = VariableLengthRecordHeader.ProjectionUserId,
-                RecordId = TagRecordId,
-                RecordLengthAfterHeader = (ushort)(4 * sizeof(ushort) * values.Count),
-            },
-            new(1, 1),
-            values)
     {
     }
 
@@ -68,6 +64,13 @@ public sealed record GeoKeyDirectoryTag : VariableLengthRecord, IReadOnlyList<Ge
 
     /// <inheritdoc />
     public GeoKeyEntry this[int index] => this.values[index];
+
+    /// <summary>
+    /// Creates an instance of <see cref="GeoKeyDirectoryTag"/>.
+    /// </summary>
+    /// <param name="items">The values.</param>
+    /// <returns>The <see cref="GeoKeyDirectoryTag"/>.</returns>
+    public static GeoKeyDirectoryTag Create(ReadOnlySpan<GeoKeyEntry> items) => new(items.ToReadOnlyList());
 
     /// <inheritdoc />
     public override int Write(Span<byte> destination)
@@ -103,11 +106,11 @@ public sealed record GeoKeyDirectoryTag : VariableLengthRecord, IReadOnlyList<Ge
     /// <inheritdoc />
     System.Collections.IEnumerator System.Collections.IEnumerable.GetEnumerator() => this.GetEnumerator();
 
-    private static IReadOnlyList<GeoKeyEntry> GetEntries(ReadOnlySpan<byte> source, int count)
+    private static System.Collections.ObjectModel.ReadOnlyCollection<GeoKeyEntry> GetEntries(ReadOnlySpan<byte> source, int count)
     {
         var builder = new System.Runtime.CompilerServices.ReadOnlyCollectionBuilder<GeoKeyEntry>(count);
 
-        for (int i = 0; i < count; i++)
+        for (var i = 0; i < count; i++)
         {
             var index = i * 8;
             var entry = BitConverter.IsLittleEndian

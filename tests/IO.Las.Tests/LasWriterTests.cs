@@ -20,11 +20,13 @@ public class LasWriterTests
             PointDataFormatId = 1,
         };
 
-        GeoKeyDirectoryTag geoKeyDirectoryTag = new(
-            new GeoKeyEntry { Count = 1, KeyId = GeoKey.GTModelTypeGeoKey, ValueOffset = 1 },
-            new GeoKeyEntry { Count = 1, KeyId = GeoKey.ProjectedCRSGeoKey, ValueOffset = 32754 },
-            new GeoKeyEntry { Count = 1, KeyId = GeoKey.ProjLinearUnitsGeoKey, ValueOffset = 9001 },
-            new GeoKeyEntry { Count = 1, KeyId = GeoKey.VerticalUnitsGeoKey, ValueOffset = 9001 });
+        GeoKeyDirectoryTag geoKeyDirectoryTag =
+        [
+            new() { Count = 1, KeyId = GeoKey.GTModelTypeGeoKey, ValueOffset = 1 },
+            new() { Count = 1, KeyId = GeoKey.ProjectedCRSGeoKey, ValueOffset = 32754 },
+            new() { Count = 1, KeyId = GeoKey.ProjLinearUnitsGeoKey, ValueOffset = 9001 },
+            new() { Count = 1, KeyId = GeoKey.VerticalUnitsGeoKey, ValueOffset = 9001 }
+        ];
 
         MemoryStream memoryStream = new();
         using (LasWriter lasWriter = new(memoryStream, true))
@@ -44,7 +46,7 @@ public class LasWriterTests
         _ = await Assert.That(outputHeader.PointDataFormatId).IsEqualTo((byte)1);
     }
     
-    #if LAS1_4_OR_GREATER
+#if LAS1_4_OR_GREATER
     [Test]
     public async Task HeaderWithExtraBytes()
     {
@@ -52,20 +54,22 @@ public class LasWriterTests
         {
             SystemIdentifier = "LAS tests",
             GeneratingSoftware = "Las.Tests.exe",
-            Version = new Version(1, 1),
+            Version = new(1, 1),
             FileCreation = new DateTime(2010, 1, 1).AddDays(40),
             PointDataFormatId = 1,
             LegacyNumberOfPointRecords = 1,
         };
 
-        GeoKeyDirectoryTag geoKeyDirectoryTag = new(
-            new GeoKeyEntry { Count = 1, KeyId = GeoKey.GTModelTypeGeoKey, ValueOffset = 1 },
-            new GeoKeyEntry { Count = 1, KeyId = GeoKey.ProjectedCRSGeoKey, ValueOffset = 32754 },
-            new GeoKeyEntry { Count = 1, KeyId = GeoKey.ProjLinearUnitsGeoKey, ValueOffset = 9001 },
-            new GeoKeyEntry { Count = 1, KeyId = GeoKey.VerticalUnitsGeoKey, ValueOffset = 9001 });
+        GeoKeyDirectoryTag geoKeyDirectoryTag =
+        [
+            new() { Count = 1, KeyId = GeoKey.GTModelTypeGeoKey, ValueOffset = 1 },
+            new() { Count = 1, KeyId = GeoKey.ProjectedCRSGeoKey, ValueOffset = 32754 },
+            new() { Count = 1, KeyId = GeoKey.ProjLinearUnitsGeoKey, ValueOffset = 9001 },
+            new() { Count = 1, KeyId = GeoKey.VerticalUnitsGeoKey, ValueOffset = 9001 },
+        ];
         ExtraBytes extraBytes =
         [
-            new ExtraBytesItem
+            new()
             {
                 DataType = ExtraBytesDataType.Short,
                 Options = ExtraBytesOptions.Scale | ExtraBytesOptions.Offset,
@@ -77,7 +81,7 @@ public class LasWriterTests
         ];
 
         MemoryStream memoryStream = new();
-        double extraValue = 123.34;
+        const double ExtraValue = 123.34;
         Span<byte> span = stackalloc byte[sizeof(short)];
         using (LasWriter lasWriter = new(memoryStream, true))
         {
@@ -98,8 +102,7 @@ public class LasWriterTests
                 GpsTime = 0
             };
             
-            var value = (short)extraBytes[0].DescaleAndOffset(extraValue);
-            System.Buffers.Binary.BinaryPrimitives.WriteInt16LittleEndian(span, value);
+            extraBytes.Write(span, ExtraValue);
             lasWriter.Write(point, span);
         }
 
@@ -124,7 +127,7 @@ public class LasWriterTests
             .IsAssignableTo<IPointDataRecord>()
             .Satisfies(p => p.Classification, classification => classification.IsEqualTo(Classification.LowVegetation));
         
-        _ = await Assert.That(extraBytes.GetData(0, extra)).IsEqualTo(extraValue);
+        _ = await Assert.That(extraBytes.GetData(0, extra)).IsEqualTo(ExtraValue);
     }
 
     [Test]
@@ -134,20 +137,22 @@ public class LasWriterTests
         {
             SystemIdentifier = "LAS tests",
             GeneratingSoftware = "Las.Tests.exe",
-            Version = new Version(1, 1),
+            Version = new(1, 1),
             FileCreation = new DateTime(2010, 1, 1).AddDays(40),
             PointDataFormatId = 1,
             LegacyNumberOfPointRecords = 1,
         };
 
-        GeoKeyDirectoryTag geoKeyDirectoryTag = new(
-            new GeoKeyEntry { Count = 1, KeyId = GeoKey.GTModelTypeGeoKey, ValueOffset = 1 },
-            new GeoKeyEntry { Count = 1, KeyId = GeoKey.ProjectedCRSGeoKey, ValueOffset = 32754 },
-            new GeoKeyEntry { Count = 1, KeyId = GeoKey.ProjLinearUnitsGeoKey, ValueOffset = 9001 },
-            new GeoKeyEntry { Count = 1, KeyId = GeoKey.VerticalUnitsGeoKey, ValueOffset = 9001 });
+        GeoKeyDirectoryTag geoKeyDirectoryTag =
+        [
+            new() { Count = 1, KeyId = GeoKey.GTModelTypeGeoKey, ValueOffset = 1 },
+            new() { Count = 1, KeyId = GeoKey.ProjectedCRSGeoKey, ValueOffset = 32754 },
+            new() { Count = 1, KeyId = GeoKey.ProjLinearUnitsGeoKey, ValueOffset = 9001 },
+            new() { Count = 1, KeyId = GeoKey.VerticalUnitsGeoKey, ValueOffset = 9001 },
+        ];
         ExtraBytes extraBytes =
         [
-            new ExtraBytesItem
+            new()
             {
                 DataType = ExtraBytesDataType.Short,
                 Options = ExtraBytesOptions.Scale | ExtraBytesOptions.Offset,
@@ -159,7 +164,7 @@ public class LasWriterTests
         ];
 
         MemoryStream memoryStream = new();
-        double extraValue = 123.34;
+        const double ExtraValue = 123.34;
         var span = new byte[sizeof(short)];
         using (LasWriter lasWriter = new(memoryStream, true))
         {
@@ -180,8 +185,7 @@ public class LasWriterTests
                 GpsTime = 0
             };
             
-            var value = (short)extraBytes[0].DescaleAndOffset(extraValue);
-            System.Buffers.Binary.BinaryPrimitives.WriteInt16LittleEndian(span, value);
+            extraBytes.Write(span, ExtraValue);
             await lasWriter.WriteAsync(point, span);
         }
 
@@ -203,7 +207,7 @@ public class LasWriterTests
             .IsAssignableTo<IPointDataRecord>()
             .Satisfies(p => p.Classification, classification => classification.IsEqualTo(Classification.LowVegetation));
         
-        _ = await Assert.That(await extraBytes.GetDataAsync(0, outputPoint.ExtraBytes)).IsEqualTo(extraValue);
+        _ = await Assert.That(await extraBytes.GetDataAsync(0, outputPoint.ExtraBytes)).IsEqualTo(ExtraValue);
     }
 #endif
 }

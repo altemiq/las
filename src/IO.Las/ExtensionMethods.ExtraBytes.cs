@@ -12,44 +12,162 @@ namespace Altemiq.IO.Las;
 public static partial class ExtensionMethods
 {
     /// <summary>
-    /// Scales and offset the value, if required.
+    /// Writes the extra byte values to the destination.
+    /// </summary>
+    /// <param name="extraBytes">The extra bytes.</param>
+    /// <param name="destination">The destination.</param>
+    /// <param name="values">The values.</param>
+    /// <returns>The number of bytes written.</returns>
+    /// <exception cref="ArgumentOutOfRangeException">The number of values does not match the extra byte items.</exception>
+    public static int Write(this ExtraBytes extraBytes, Span<byte> destination, params IReadOnlyList<object> values)
+    {
+        // get the value
+        if (extraBytes.Count != values.Count)
+        {
+            throw new ArgumentOutOfRangeException(nameof(values));
+        }
+
+        var written = 0;
+        for (var i = 0; i < values.Count; i++)
+        {
+            written += extraBytes[i].Write(destination[written..], values[i]);
+        }
+
+        return written;
+    }
+
+    /// <summary>
+    /// Writes the extra byte value to the destination.
+    /// </summary>
+    /// <param name="item">The extra bytes item.</param>
+    /// <param name="destination">The destination.</param>
+    /// <param name="value">The value.</param>
+    /// <returns>The number of bytes written.</returns>
+    /// <exception cref="ArgumentOutOfRangeException">The type of <paramref name="value"/> is invalid.</exception>
+    public static int Write(this ExtraBytesItem item, Span<byte> destination, object value)
+    {
+        return item.DescaleAndRemoveOffset(value) switch
+        {
+            byte v => WriteByte(destination, v),
+            sbyte v => WriteSByte(destination, v),
+            short v => WriteInt16(destination, v),
+            ushort v => WriteUInt16(destination, v),
+            int v => WriteInt32(destination, v),
+            uint v => WriteUInt32(destination, v),
+            long v => WriteInt64(destination, v),
+            ulong v => WriteUInt64(destination, v),
+            float v => WriteSingle(destination, v),
+            double v => WriteDouble(destination, v),
+            byte[] v => WriteBytes(destination, v),
+            _ => throw new ArgumentOutOfRangeException(nameof(value)),
+        };
+
+        static int WriteByte(Span<byte> destination, byte value)
+        {
+            destination[0] = value;
+            return sizeof(byte);
+        }
+
+        static int WriteSByte(Span<byte> destination, sbyte value)
+        {
+            destination[0] = (byte)value;
+            return sizeof(sbyte);
+        }
+
+        static int WriteInt16(Span<byte> destination, short value)
+        {
+            System.Buffers.Binary.BinaryPrimitives.WriteInt16LittleEndian(destination, value);
+            return sizeof(short);
+        }
+
+        static int WriteUInt16(Span<byte> destination, ushort value)
+        {
+            System.Buffers.Binary.BinaryPrimitives.WriteUInt16LittleEndian(destination, value);
+            return sizeof(ushort);
+        }
+
+        static int WriteInt32(Span<byte> destination, int value)
+        {
+            System.Buffers.Binary.BinaryPrimitives.WriteInt32LittleEndian(destination, value);
+            return sizeof(int);
+        }
+
+        static int WriteUInt32(Span<byte> destination, uint value)
+        {
+            System.Buffers.Binary.BinaryPrimitives.WriteUInt32LittleEndian(destination, value);
+            return sizeof(uint);
+        }
+
+        static int WriteInt64(Span<byte> destination, long value)
+        {
+            System.Buffers.Binary.BinaryPrimitives.WriteInt64LittleEndian(destination, value);
+            return sizeof(long);
+        }
+
+        static int WriteUInt64(Span<byte> destination, ulong value)
+        {
+            System.Buffers.Binary.BinaryPrimitives.WriteUInt64LittleEndian(destination, value);
+            return sizeof(ulong);
+        }
+
+        static int WriteSingle(Span<byte> destination, float value)
+        {
+            System.Buffers.Binary.BinaryPrimitives.WriteSingleLittleEndian(destination, value);
+            return sizeof(ulong);
+        }
+
+        static int WriteDouble(Span<byte> destination, double value)
+        {
+            System.Buffers.Binary.BinaryPrimitives.WriteDoubleLittleEndian(destination, value);
+            return sizeof(ulong);
+        }
+
+        static int WriteBytes(Span<byte> destination, byte[] value)
+        {
+            value.AsSpan().CopyTo(destination);
+            return value.Length;
+        }
+    }
+
+    /// <summary>
+    /// Scales and applies the offset the value, if required.
     /// </summary>
     /// <param name="item">The item.</param>
     /// <param name="value">The value to scale and offset.</param>
     /// <returns>The scaled, and offset value.</returns>
-    public static object ScaleAndOffset(this ExtraBytesItem item, object value) => (item, value) switch
+    public static object ScaleAndApplyOffset(this ExtraBytesItem item, object value) => (item, value) switch
     {
         ({ HasScale: false, HasOffset: false }, var v) => v,
-        ({ HasScale: true, HasOffset: true }, byte v) => ScaleAndOffset(item, v),
+        ({ HasScale: true, HasOffset: true }, byte v) => ScaleAndApplyOffset(item, v),
         ({ HasScale: true, HasOffset: false }, byte v) => Scale(item, v),
-        ({ HasScale: false, HasOffset: true }, byte v) => Offset(item, v),
-        ({ HasScale: true, HasOffset: true }, sbyte v) => ScaleAndOffset(item, v),
+        ({ HasScale: false, HasOffset: true }, byte v) => ApplyOffset(item, v),
+        ({ HasScale: true, HasOffset: true }, sbyte v) => ScaleAndApplyOffset(item, v),
         ({ HasScale: true, HasOffset: false }, sbyte v) => Scale(item, v),
-        ({ HasScale: false, HasOffset: true }, sbyte v) => Offset(item, v),
-        ({ HasScale: true, HasOffset: true }, ushort v) => ScaleAndOffset(item, v),
+        ({ HasScale: false, HasOffset: true }, sbyte v) => ApplyOffset(item, v),
+        ({ HasScale: true, HasOffset: true }, ushort v) => ScaleAndApplyOffset(item, v),
         ({ HasScale: true, HasOffset: false }, ushort v) => Scale(item, v),
-        ({ HasScale: false, HasOffset: true }, ushort v) => Offset(item, v),
-        ({ HasScale: true, HasOffset: true }, short v) => ScaleAndOffset(item, v),
+        ({ HasScale: false, HasOffset: true }, ushort v) => ApplyOffset(item, v),
+        ({ HasScale: true, HasOffset: true }, short v) => ScaleAndApplyOffset(item, v),
         ({ HasScale: true, HasOffset: false }, short v) => Scale(item, v),
-        ({ HasScale: false, HasOffset: true }, short v) => Offset(item, v),
-        ({ HasScale: true, HasOffset: true }, uint v) => ScaleAndOffset(item, v),
+        ({ HasScale: false, HasOffset: true }, short v) => ApplyOffset(item, v),
+        ({ HasScale: true, HasOffset: true }, uint v) => ScaleAndApplyOffset(item, v),
         ({ HasScale: true, HasOffset: false }, uint v) => Scale(item, v),
-        ({ HasScale: false, HasOffset: true }, uint v) => Offset(item, v),
-        ({ HasScale: true, HasOffset: true }, int v) => ScaleAndOffset(item, v),
+        ({ HasScale: false, HasOffset: true }, uint v) => ApplyOffset(item, v),
+        ({ HasScale: true, HasOffset: true }, int v) => ScaleAndApplyOffset(item, v),
         ({ HasScale: true, HasOffset: false }, int v) => Scale(item, v),
-        ({ HasScale: false, HasOffset: true }, int v) => Offset(item, v),
-        ({ HasScale: true, HasOffset: true }, ulong v) => ScaleAndOffset(item, v),
+        ({ HasScale: false, HasOffset: true }, int v) => ApplyOffset(item, v),
+        ({ HasScale: true, HasOffset: true }, ulong v) => ScaleAndApplyOffset(item, v),
         ({ HasScale: true, HasOffset: false }, ulong v) => Scale(item, v),
-        ({ HasScale: false, HasOffset: true }, ulong v) => Offset(item, v),
-        ({ HasScale: true, HasOffset: true }, long v) => ScaleAndOffset(item, v),
+        ({ HasScale: false, HasOffset: true }, ulong v) => ApplyOffset(item, v),
+        ({ HasScale: true, HasOffset: true }, long v) => ScaleAndApplyOffset(item, v),
         ({ HasScale: true, HasOffset: false }, long v) => Scale(item, v),
-        ({ HasScale: false, HasOffset: true }, long v) => Offset(item, v),
-        ({ HasScale: true, HasOffset: true }, float v) => ScaleAndOffset(item, v),
+        ({ HasScale: false, HasOffset: true }, long v) => ApplyOffset(item, v),
+        ({ HasScale: true, HasOffset: true }, float v) => ScaleAndApplyOffset(item, v),
         ({ HasScale: true, HasOffset: false }, float v) => Scale(item, v),
-        ({ HasScale: false, HasOffset: true }, float v) => Offset(item, v),
-        ({ HasScale: true, HasOffset: true }, double v) => ScaleAndOffset(item, v),
+        ({ HasScale: false, HasOffset: true }, float v) => ApplyOffset(item, v),
+        ({ HasScale: true, HasOffset: true }, double v) => ScaleAndApplyOffset(item, v),
         ({ HasScale: true, HasOffset: false }, double v) => Scale(item, v),
-        ({ HasScale: false, HasOffset: true }, double v) => Offset(item, v),
+        ({ HasScale: false, HasOffset: true }, double v) => ApplyOffset(item, v),
         _ => value,
     };
 
@@ -58,41 +176,41 @@ public static partial class ExtensionMethods
     /// </summary>
     /// <param name="item">The item.</param>
     /// <param name="value">The value to descale and offset.</param>
-    /// <returns>The descaled, and offsetted value.</returns>
-    public static object DescaleAndOffset(this ExtraBytesItem item, object value)
+    /// <returns>The descaled, and offset value.</returns>
+    public static object DescaleAndRemoveOffset(this ExtraBytesItem item, object value)
     {
         var returnValue = (item, value) switch
         {
             ({ HasOffset: false, HasScale: false }, var v) => v,
-            ({ HasOffset: true, HasScale: true }, byte v) => DeoffsetAndDescale(item, v),
-            ({ HasOffset: true, HasScale: false }, byte v) => Deoffset(item, v),
+            ({ HasOffset: true, HasScale: true }, byte v) => RemoveOffsetAndDescale(item, v),
+            ({ HasOffset: true, HasScale: false }, byte v) => RemoveOffset(item, v),
             ({ HasOffset: false, HasScale: true }, byte v) => Descale(item, v),
-            ({ HasOffset: true, HasScale: true }, sbyte v) => DeoffsetAndDescale(item, v),
-            ({ HasOffset: true, HasScale: false }, sbyte v) => Deoffset(item, v),
+            ({ HasOffset: true, HasScale: true }, sbyte v) => RemoveOffsetAndDescale(item, v),
+            ({ HasOffset: true, HasScale: false }, sbyte v) => RemoveOffset(item, v),
             ({ HasOffset: false, HasScale: true }, sbyte v) => Descale(item, v),
-            ({ HasOffset: true, HasScale: true }, ushort v) => DeoffsetAndDescale(item, v),
-            ({ HasOffset: true, HasScale: false }, ushort v) => Deoffset(item, v),
+            ({ HasOffset: true, HasScale: true }, ushort v) => RemoveOffsetAndDescale(item, v),
+            ({ HasOffset: true, HasScale: false }, ushort v) => RemoveOffset(item, v),
             ({ HasOffset: false, HasScale: true }, ushort v) => Descale(item, v),
-            ({ HasOffset: true, HasScale: true }, short v) => DeoffsetAndDescale(item, v),
-            ({ HasOffset: true, HasScale: false }, short v) => Deoffset(item, v),
+            ({ HasOffset: true, HasScale: true }, short v) => RemoveOffsetAndDescale(item, v),
+            ({ HasOffset: true, HasScale: false }, short v) => RemoveOffset(item, v),
             ({ HasOffset: false, HasScale: true }, short v) => Descale(item, v),
-            ({ HasOffset: true, HasScale: true }, uint v) => DeoffsetAndDescale(item, v),
-            ({ HasOffset: true, HasScale: false }, uint v) => Deoffset(item, v),
+            ({ HasOffset: true, HasScale: true }, uint v) => RemoveOffsetAndDescale(item, v),
+            ({ HasOffset: true, HasScale: false }, uint v) => RemoveOffset(item, v),
             ({ HasOffset: false, HasScale: true }, uint v) => Descale(item, v),
-            ({ HasOffset: true, HasScale: true }, int v) => DeoffsetAndDescale(item, v),
-            ({ HasOffset: true, HasScale: false }, int v) => Deoffset(item, v),
+            ({ HasOffset: true, HasScale: true }, int v) => RemoveOffsetAndDescale(item, v),
+            ({ HasOffset: true, HasScale: false }, int v) => RemoveOffset(item, v),
             ({ HasOffset: false, HasScale: true }, int v) => Descale(item, v),
-            ({ HasOffset: true, HasScale: true }, ulong v) => DeoffsetAndDescale(item, v),
-            ({ HasOffset: true, HasScale: false }, ulong v) => Deoffset(item, v),
+            ({ HasOffset: true, HasScale: true }, ulong v) => RemoveOffsetAndDescale(item, v),
+            ({ HasOffset: true, HasScale: false }, ulong v) => RemoveOffset(item, v),
             ({ HasOffset: false, HasScale: true }, ulong v) => Descale(item, v),
-            ({ HasOffset: true, HasScale: true }, long v) => DeoffsetAndDescale(item, v),
-            ({ HasOffset: true, HasScale: false }, long v) => Deoffset(item, v),
+            ({ HasOffset: true, HasScale: true }, long v) => RemoveOffsetAndDescale(item, v),
+            ({ HasOffset: true, HasScale: false }, long v) => RemoveOffset(item, v),
             ({ HasOffset: false, HasScale: true }, long v) => Descale(item, v),
-            ({ HasOffset: true, HasScale: true }, float v) => DeoffsetAndDescale(item, v),
-            ({ HasOffset: true, HasScale: false }, float v) => Deoffset(item, v),
+            ({ HasOffset: true, HasScale: true }, float v) => RemoveOffsetAndDescale(item, v),
+            ({ HasOffset: true, HasScale: false }, float v) => RemoveOffset(item, v),
             ({ HasOffset: false, HasScale: true }, float v) => Descale(item, v),
-            ({ HasOffset: true, HasScale: true }, double v) => DeoffsetAndDescale(item, v),
-            ({ HasOffset: true, HasScale: false }, double v) => Deoffset(item, v),
+            ({ HasOffset: true, HasScale: true }, double v) => RemoveOffsetAndDescale(item, v),
+            ({ HasOffset: true, HasScale: false }, double v) => RemoveOffset(item, v),
             ({ HasOffset: false, HasScale: true }, double v) => Descale(item, v),
             _ => value,
         };
@@ -142,34 +260,34 @@ public static partial class ExtensionMethods
     };
 
     [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
-    private static double ScaleAndOffset(ExtraBytesItem item, byte value) => Offset(item, Scale(item, value));
+    private static double ScaleAndApplyOffset(ExtraBytesItem item, byte value) => ApplyOffset(item, Scale(item, value));
 
     [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
-    private static double ScaleAndOffset(ExtraBytesItem item, sbyte value) => Offset(item, Scale(item, value));
+    private static double ScaleAndApplyOffset(ExtraBytesItem item, sbyte value) => ApplyOffset(item, Scale(item, value));
 
     [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
-    private static double ScaleAndOffset(ExtraBytesItem item, ushort value) => Offset(item, Scale(item, value));
+    private static double ScaleAndApplyOffset(ExtraBytesItem item, ushort value) => ApplyOffset(item, Scale(item, value));
 
     [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
-    private static double ScaleAndOffset(ExtraBytesItem item, short value) => Offset(item, Scale(item, value));
+    private static double ScaleAndApplyOffset(ExtraBytesItem item, short value) => ApplyOffset(item, Scale(item, value));
 
     [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
-    private static double ScaleAndOffset(ExtraBytesItem item, uint value) => Offset(item, Scale(item, value));
+    private static double ScaleAndApplyOffset(ExtraBytesItem item, uint value) => ApplyOffset(item, Scale(item, value));
 
     [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
-    private static double ScaleAndOffset(ExtraBytesItem item, int value) => Offset(item, Scale(item, value));
+    private static double ScaleAndApplyOffset(ExtraBytesItem item, int value) => ApplyOffset(item, Scale(item, value));
 
     [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
-    private static double ScaleAndOffset(ExtraBytesItem item, ulong value) => Offset(item, Scale(item, value));
+    private static double ScaleAndApplyOffset(ExtraBytesItem item, ulong value) => ApplyOffset(item, Scale(item, value));
 
     [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
-    private static double ScaleAndOffset(ExtraBytesItem item, long value) => Offset(item, Scale(item, value));
+    private static double ScaleAndApplyOffset(ExtraBytesItem item, long value) => ApplyOffset(item, Scale(item, value));
 
     [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
-    private static double ScaleAndOffset(ExtraBytesItem item, float value) => Offset(item, Scale(item, value));
+    private static double ScaleAndApplyOffset(ExtraBytesItem item, float value) => ApplyOffset(item, Scale(item, value));
 
     [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
-    private static double ScaleAndOffset(ExtraBytesItem item, double value) => Offset(item, Scale(item, value));
+    private static double ScaleAndApplyOffset(ExtraBytesItem item, double value) => ApplyOffset(item, Scale(item, value));
 
     [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
     private static double Scale(ExtraBytesItem item, byte value) => value * item.Scale;
@@ -202,64 +320,64 @@ public static partial class ExtensionMethods
     private static double Scale(ExtraBytesItem item, double value) => value * item.Scale;
 
     [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
-    private static double Offset(ExtraBytesItem item, byte value) => value + item.Offset;
+    private static double ApplyOffset(ExtraBytesItem item, byte value) => value + item.Offset;
 
     [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
-    private static double Offset(ExtraBytesItem item, sbyte value) => value + item.Offset;
+    private static double ApplyOffset(ExtraBytesItem item, sbyte value) => value + item.Offset;
 
     [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
-    private static double Offset(ExtraBytesItem item, ushort value) => value + item.Offset;
+    private static double ApplyOffset(ExtraBytesItem item, ushort value) => value + item.Offset;
 
     [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
-    private static double Offset(ExtraBytesItem item, short value) => value + item.Offset;
+    private static double ApplyOffset(ExtraBytesItem item, short value) => value + item.Offset;
 
     [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
-    private static double Offset(ExtraBytesItem item, uint value) => value + item.Offset;
+    private static double ApplyOffset(ExtraBytesItem item, uint value) => value + item.Offset;
 
     [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
-    private static double Offset(ExtraBytesItem item, int value) => value + item.Offset;
+    private static double ApplyOffset(ExtraBytesItem item, int value) => value + item.Offset;
 
     [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
-    private static double Offset(ExtraBytesItem item, ulong value) => value + item.Offset;
+    private static double ApplyOffset(ExtraBytesItem item, ulong value) => value + item.Offset;
 
     [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
-    private static double Offset(ExtraBytesItem item, long value) => value + item.Offset;
+    private static double ApplyOffset(ExtraBytesItem item, long value) => value + item.Offset;
 
     [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
-    private static double Offset(ExtraBytesItem item, float value) => value + item.Offset;
+    private static double ApplyOffset(ExtraBytesItem item, float value) => value + item.Offset;
 
     [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
-    private static double Offset(ExtraBytesItem item, double value) => value + item.Offset;
+    private static double ApplyOffset(ExtraBytesItem item, double value) => value + item.Offset;
 
     [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
-    private static double DeoffsetAndDescale(ExtraBytesItem item, byte value) => Descale(item, Deoffset(item, value));
+    private static double RemoveOffsetAndDescale(ExtraBytesItem item, byte value) => Descale(item, RemoveOffset(item, value));
 
     [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
-    private static double DeoffsetAndDescale(ExtraBytesItem item, sbyte value) => Descale(item, Deoffset(item, value));
+    private static double RemoveOffsetAndDescale(ExtraBytesItem item, sbyte value) => Descale(item, RemoveOffset(item, value));
 
     [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
-    private static double DeoffsetAndDescale(ExtraBytesItem item, ushort value) => Descale(item, Deoffset(item, value));
+    private static double RemoveOffsetAndDescale(ExtraBytesItem item, ushort value) => Descale(item, RemoveOffset(item, value));
 
     [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
-    private static double DeoffsetAndDescale(ExtraBytesItem item, short value) => Descale(item, Deoffset(item, value));
+    private static double RemoveOffsetAndDescale(ExtraBytesItem item, short value) => Descale(item, RemoveOffset(item, value));
 
     [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
-    private static double DeoffsetAndDescale(ExtraBytesItem item, uint value) => Descale(item, Deoffset(item, value));
+    private static double RemoveOffsetAndDescale(ExtraBytesItem item, uint value) => Descale(item, RemoveOffset(item, value));
 
     [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
-    private static double DeoffsetAndDescale(ExtraBytesItem item, int value) => Descale(item, Deoffset(item, value));
+    private static double RemoveOffsetAndDescale(ExtraBytesItem item, int value) => Descale(item, RemoveOffset(item, value));
 
     [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
-    private static double DeoffsetAndDescale(ExtraBytesItem item, ulong value) => Descale(item, Deoffset(item, value));
+    private static double RemoveOffsetAndDescale(ExtraBytesItem item, ulong value) => Descale(item, RemoveOffset(item, value));
 
     [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
-    private static double DeoffsetAndDescale(ExtraBytesItem item, long value) => Descale(item, Deoffset(item, value));
+    private static double RemoveOffsetAndDescale(ExtraBytesItem item, long value) => Descale(item, RemoveOffset(item, value));
 
     [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
-    private static double DeoffsetAndDescale(ExtraBytesItem item, float value) => Descale(item, Deoffset(item, value));
+    private static double RemoveOffsetAndDescale(ExtraBytesItem item, float value) => Descale(item, RemoveOffset(item, value));
 
     [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
-    private static double DeoffsetAndDescale(ExtraBytesItem item, double value) => Descale(item, Deoffset(item, value));
+    private static double RemoveOffsetAndDescale(ExtraBytesItem item, double value) => Descale(item, RemoveOffset(item, value));
 
     [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
     private static double Descale(ExtraBytesItem item, byte value) => value / item.Scale;
@@ -292,32 +410,32 @@ public static partial class ExtensionMethods
     private static double Descale(ExtraBytesItem item, double value) => value / item.Scale;
 
     [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
-    private static double Deoffset(ExtraBytesItem item, byte value) => value - item.Offset;
+    private static double RemoveOffset(ExtraBytesItem item, byte value) => value - item.Offset;
 
     [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
-    private static double Deoffset(ExtraBytesItem item, sbyte value) => value - item.Offset;
+    private static double RemoveOffset(ExtraBytesItem item, sbyte value) => value - item.Offset;
 
     [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
-    private static double Deoffset(ExtraBytesItem item, ushort value) => value - item.Offset;
+    private static double RemoveOffset(ExtraBytesItem item, ushort value) => value - item.Offset;
 
     [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
-    private static double Deoffset(ExtraBytesItem item, short value) => value - item.Offset;
+    private static double RemoveOffset(ExtraBytesItem item, short value) => value - item.Offset;
 
     [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
-    private static double Deoffset(ExtraBytesItem item, uint value) => value - item.Offset;
+    private static double RemoveOffset(ExtraBytesItem item, uint value) => value - item.Offset;
 
     [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
-    private static double Deoffset(ExtraBytesItem item, int value) => value - item.Offset;
+    private static double RemoveOffset(ExtraBytesItem item, int value) => value - item.Offset;
 
     [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
-    private static double Deoffset(ExtraBytesItem item, ulong value) => value - item.Offset;
+    private static double RemoveOffset(ExtraBytesItem item, ulong value) => value - item.Offset;
 
     [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
-    private static double Deoffset(ExtraBytesItem item, long value) => value - item.Offset;
+    private static double RemoveOffset(ExtraBytesItem item, long value) => value - item.Offset;
 
     [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
-    private static double Deoffset(ExtraBytesItem item, float value) => value - item.Offset;
+    private static double RemoveOffset(ExtraBytesItem item, float value) => value - item.Offset;
 
     [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
-    private static double Deoffset(ExtraBytesItem item, double value) => value - item.Offset;
+    private static double RemoveOffset(ExtraBytesItem item, double value) => value - item.Offset;
 }

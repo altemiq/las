@@ -26,7 +26,14 @@ public sealed record ExtraBytes : VariableLengthRecord, IReadOnlyList<ExtraBytes
     /// </summary>
     /// <param name="items">The items.</param>
     public ExtraBytes(params IReadOnlyList<ExtraBytesItem> items)
-        : this(CreateHeader(items.Count), items)
+        : this(
+            new()
+            {
+                UserId = VariableLengthRecordHeader.SpecUserId,
+                RecordId = TagRecordId,
+                RecordLengthAfterHeader = (ushort)(items.Count * 192),
+            },
+            items)
     {
     }
 
@@ -47,11 +54,6 @@ public sealed record ExtraBytes : VariableLengthRecord, IReadOnlyList<ExtraBytes
         this.indexes = this.CreateIndexes();
     }
 
-    private ExtraBytes(ReadOnlySpan<ExtraBytesItem> items)
-        : this(CreateHeader(items.Length), GetEntries(items))
-    {
-    }
-
     /// <inheritdoc />
     public int Count => this.items.Count;
 
@@ -63,7 +65,7 @@ public sealed record ExtraBytes : VariableLengthRecord, IReadOnlyList<ExtraBytes
     /// </summary>
     /// <param name="items">The values.</param>
     /// <returns>The <see cref="ExtraBytes"/>.</returns>
-    public static ExtraBytes Create(ReadOnlySpan<ExtraBytesItem> items) => new(items);
+    public static ExtraBytes Create(ReadOnlySpan<ExtraBytesItem> items) => new(items.ToReadOnlyList());
 
     /// <inheritdoc />
     public override int Write(Span<byte> destination)
@@ -84,12 +86,28 @@ public sealed record ExtraBytes : VariableLengthRecord, IReadOnlyList<ExtraBytes
     }
 
     /// <summary>
-    /// Gets the data.
+    /// Gets the data for the specified index.
     /// </summary>
     /// <param name="index">The index.</param>
     /// <param name="source">The source.</param>
     /// <returns>The value.</returns>
     public object? GetData(int index, ReadOnlySpan<byte> source) => this.items[index].GetData(source[this.indexes[index]..]);
+
+    /// <summary>
+    /// Gets the data.
+    /// </summary>
+    /// <param name="source">The source.</param>
+    /// <returns>The value.</returns>
+    public IReadOnlyList<object?> GetData(ReadOnlySpan<byte> source)
+    {
+        var values = new object?[this.items.Count];
+        for (int i = 0; i < this.items.Count; i++)
+        {
+            values[i] = this.items[i].GetData(source[this.indexes[i]..]);
+        }
+
+        return values;
+    }
 
     /// <summary>
     /// Gets the data.
@@ -125,19 +143,6 @@ public sealed record ExtraBytes : VariableLengthRecord, IReadOnlyList<ExtraBytes
         return builder.ToReadOnlyCollection();
     }
 
-    private static System.Collections.ObjectModel.ReadOnlyCollection<ExtraBytesItem> GetEntries(ReadOnlySpan<ExtraBytesItem> source)
-    {
-        var count = source.Length;
-        var builder = new System.Runtime.CompilerServices.ReadOnlyCollectionBuilder<ExtraBytesItem>(count);
-
-        for (int i = 0; i < count; i++)
-        {
-            builder.Add(source[i]);
-        }
-
-        return builder.ToReadOnlyCollection();
-    }
-
     private static int GetByteCount(ExtraBytesItem item) =>
         item switch
         {
@@ -149,14 +154,6 @@ public sealed record ExtraBytes : VariableLengthRecord, IReadOnlyList<ExtraBytes
             { DataType: ExtraBytesDataType.Float } => sizeof(float),
             { DataType: ExtraBytesDataType.Double } => sizeof(double),
             _ => default,
-        };
-
-    private static VariableLengthRecordHeader CreateHeader(int count) =>
-        new()
-        {
-            UserId = VariableLengthRecordHeader.SpecUserId,
-            RecordId = TagRecordId,
-            RecordLengthAfterHeader = (ushort)(count * 192),
         };
 
     private int[] CreateIndexes()
