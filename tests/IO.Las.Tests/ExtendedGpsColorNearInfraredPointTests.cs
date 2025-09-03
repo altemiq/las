@@ -16,28 +16,28 @@ public class ExtendedGpsColorNearInfraredPointTests
         readonly
 #endif
         ExtendedGpsColorNearInfraredPointDataRecord Point = new()
-    {
-        X = 5977566,
-        Y = 957396,
-        Z = -513145,
-        Intensity = 36022,
-        ReturnNumber = 1,
-        NumberOfReturns = 2,
-        Synthetic = false,
-        KeyPoint = false,
-        Withheld = false,
-        Overlap = false,
-        ScannerChannel = 0,
-        ScanDirectionFlag = false,
-        EdgeOfFlightLine = false,
-        Classification = ExtendedClassification.MediumVegetation,
-        UserData = 0,
-        ScanAngle = 30834,
-        PointSourceId = 0,
-        GpsTime = 181652401.20220396,
-        Color = Color.FromRgb(25191, 42903, 16805),
-        NearInfrared = 16805,
-    };
+        {
+            X = 5977566,
+            Y = 957396,
+            Z = -513145,
+            Intensity = 36022,
+            ReturnNumber = 1,
+            NumberOfReturns = 2,
+            Synthetic = false,
+            KeyPoint = false,
+            Withheld = false,
+            Overlap = false,
+            ScannerChannel = 0,
+            ScanDirectionFlag = false,
+            EdgeOfFlightLine = false,
+            Classification = ExtendedClassification.MediumVegetation,
+            UserData = 0,
+            ScanAngle = 30834,
+            PointSourceId = 0,
+            GpsTime = 181652401.20220396,
+            Color = Color.FromRgb(25191, 42903, 16805),
+            NearInfrared = 16805,
+        };
 
     [Test]
     [LittleEndianOnly]

@@ -18,24 +18,24 @@ public class GpsPointTests
         readonly
 #endif
         GpsPointDataRecord Point = new()
-    {
-        X = 2757,
-        Y = -1377,
-        Z = -6717,
-        Intensity = 430,
-        ReturnNumber = 1,
-        NumberOfReturns = 1,
-        ScanDirectionFlag = false,
-        EdgeOfFlightLine = false,
-        Classification = Classification.Unclassified,
-        Synthetic = false,
-        KeyPoint = false,
-        Withheld = false,
-        ScanAngleRank = -29,
-        UserData = 0,
-        PointSourceId = 0,
-        GpsTime = 492249.15875399113,
-    };
+        {
+            X = 2757,
+            Y = -1377,
+            Z = -6717,
+            Intensity = 430,
+            ReturnNumber = 1,
+            NumberOfReturns = 1,
+            ScanDirectionFlag = false,
+            EdgeOfFlightLine = false,
+            Classification = Classification.Unclassified,
+            Synthetic = false,
+            KeyPoint = false,
+            Withheld = false,
+            ScanAngleRank = -29,
+            UserData = 0,
+            PointSourceId = 0,
+            GpsTime = 492249.15875399113,
+        };
 
     [Test]
     [LittleEndianOnly]

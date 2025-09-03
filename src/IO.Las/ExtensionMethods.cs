@@ -70,7 +70,7 @@ public static partial class ExtensionMethods
         {
             if (position < currentPosition)
             {
-                throw new InvalidOperationException($"Cannot move to {currentPosition}.");
+                throw new InvalidOperationException(string.Format(System.Globalization.CultureInfo.CurrentCulture, Properties.Resources.CannotMoveToPosition, currentPosition));
             }
 
             var delta = position - currentPosition;

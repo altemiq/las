@@ -14,7 +14,7 @@ public class LasReaderTests
         var point = reader.ReadPointDataRecord();
         var pointDataRecord = point.PointDataRecord;
         var data = point.ExtraBytes.ToArray();
-        
+
         await Assert.That(pointDataRecord).IsTypeOf<GpsPointDataRecord>().Satisfies(p => p.X, x => x.IsNotDefault());
         await Assert.That(data).IsEmpty();
     }
@@ -25,9 +25,9 @@ public class LasReaderTests
         await using Stream stream = typeof(LasReaderTests).Assembly.GetManifestResourceStream(typeof(LasReaderTests), "fusa.las")
                               ?? throw new InvalidOperationException("Failed to get stream");
         byte[] bytes = new byte[4];
-        
+
         await Assert.That(await stream.ReadAsync(bytes)).IsEqualTo(bytes.Length);
-        
+
         using LasReader reader = new(stream, System.Text.Encoding.UTF8.GetString(bytes));
         await CheckHeader(reader.Header, new(1, 1));
         _ = await Assert.That(reader.VariableLengthRecords).HasCount().EqualToOne();
@@ -35,11 +35,11 @@ public class LasReaderTests
         var point = reader.ReadPointDataRecord();
         var pointDataRecord = point.PointDataRecord;
         var data = point.ExtraBytes.ToArray();
-        
+
         _ = await Assert.That(pointDataRecord).IsTypeOf<GpsPointDataRecord>();
         _ = await Assert.That(data).IsEmpty();
     }
-    
+
 #if LAS1_4_OR_GREATER
     [Test]
     public async Task ReadWithExtraBytes()
@@ -53,14 +53,14 @@ public class LasReaderTests
         double min = double.MaxValue;
         double max = double.MinValue;
         var extraBytes = reader.VariableLengthRecords.OfType<ExtraBytes>().Single();
-        
+
         while (reader.ReadPointDataRecord() is { } point)
         {
             if (point.PointDataRecord is null)
             {
                 break;
             }
-            
+
             if (extraBytes[0].GetData(point.ExtraBytes) is double value)
             {
                 if (value < min)
@@ -79,7 +79,7 @@ public class LasReaderTests
         _ = await Assert.That(max).IsBetween(19.72 - 0.001, 19.72 + 0.001);
     }
 #endif
-    
+
     [Test]
     public async Task ReadByPointIndex()
     {
@@ -106,7 +106,7 @@ public class LasReaderTests
             .IsAssignableTo<IGpsPointDataRecord>()
             .Satisfies(p => quantizer.GetDateTime(p.GpsTime), gpsTime => gpsTime.IsBetween(fileCreation - TimeSpan.FromDays(7), fileCreation + TimeSpan.FromDays(7)));
     }
-    
+
     [Test]
     public async Task ReadLasAsync()
     {
@@ -133,7 +133,7 @@ public class LasReaderTests
         _ = await Assert.That(reader.VariableLengthRecords).HasCount().EqualToOne();
 
         var point = await reader.ReadPointDataRecordAsync();
-        
+
         _ = await Assert.That(point.PointDataRecord).IsAssignableTo<IGpsPointDataRecord>();
         _ = await Assert.That(point.ExtraBytes.IsEmpty).IsTrue();
     }
@@ -156,7 +156,7 @@ public class LasReaderTests
         while (await reader.ReadPointDataRecordAsync() is { PointDataRecord: not null } point)
         {
             _ = await Assert.That(point.PointDataRecord).IsAssignableTo<IGpsPointDataRecord>();
-            
+
             double value = await Assert.That(await extraBytes[0].GetDataAsync(point.ExtraBytes)).IsTypeOf<double>();
             if (value < min)
             {
@@ -201,7 +201,7 @@ public class LasReaderTests
             .IsAssignableTo<IGpsPointDataRecord>()
             .Satisfies(p => quantizer.GetDateTime(p.GpsTime), gpsTime => gpsTime.IsBetween(fileCreation - TimeSpan.FromDays(7), fileCreation + TimeSpan.FromDays(7)));
     }
-    
+
     private static async Task CheckHeader(HeaderBlock headerBlock, Version version)
     {
         _ = await Assert.That(headerBlock.FileSignature).IsEqualTo("LASF");

@@ -85,7 +85,7 @@ public record GeoDoubleParamsTag : VariableLengthRecord, IReadOnlyList<double>
         return bytesWritten;
     }
 
-    private static IReadOnlyList<double> GetValues(ReadOnlySpan<byte> data)
+    private static System.Collections.ObjectModel.ReadOnlyCollection<double> GetValues(ReadOnlySpan<byte> data)
     {
         var builder = new System.Runtime.CompilerServices.ReadOnlyCollectionBuilder<double>();
         for (int i = 0; i < data.Length; i += sizeof(double))

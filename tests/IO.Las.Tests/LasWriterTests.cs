@@ -45,7 +45,7 @@ public class LasWriterTests
         _ = await Assert.That(outputHeader.GeneratingSoftware).IsEqualTo("Las.Tests.exe");
         _ = await Assert.That(outputHeader.PointDataFormatId).IsEqualTo((byte)1);
     }
-    
+
 #if LAS1_4_OR_GREATER
     [Test]
     public async Task HeaderWithExtraBytes()
@@ -101,7 +101,7 @@ public class LasWriterTests
                 PointSourceId = 0,
                 GpsTime = 0
             };
-            
+
             extraBytes.Write(span, ExtraValue);
             lasWriter.Write(point, span);
         }
@@ -126,7 +126,7 @@ public class LasWriterTests
             .IsNotNull()
             .IsAssignableTo<IPointDataRecord>()
             .Satisfies(p => p.Classification, classification => classification.IsEqualTo(Classification.LowVegetation));
-        
+
         _ = await Assert.That(extraBytes.GetData(0, extra)).IsEqualTo(ExtraValue);
     }
 
@@ -184,7 +184,7 @@ public class LasWriterTests
                 PointSourceId = 0,
                 GpsTime = 0
             };
-            
+
             extraBytes.Write(span, ExtraValue);
             await lasWriter.WriteAsync(point, span);
         }
@@ -206,7 +206,7 @@ public class LasWriterTests
             .IsNotNull()
             .IsAssignableTo<IPointDataRecord>()
             .Satisfies(p => p.Classification, classification => classification.IsEqualTo(Classification.LowVegetation));
-        
+
         _ = await Assert.That(await extraBytes.GetDataAsync(0, outputPoint.ExtraBytes)).IsEqualTo(ExtraValue);
     }
 #endif

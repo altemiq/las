@@ -14,24 +14,24 @@ public class ColorPointTests
         readonly
 #endif
         ColorPointDataRecord Point = new()
-    {
-        X = 2757,
-        Y = -1377,
-        Z = -6717,
-        Intensity = 430,
-        ReturnNumber = 1,
-        NumberOfReturns = 1,
-        ScanDirectionFlag = false,
-        EdgeOfFlightLine = false,
-        Classification = Classification.Unclassified,
-        Synthetic = false,
-        KeyPoint = false,
-        Withheld = false,
-        ScanAngleRank = -29,
-        UserData = 0,
-        PointSourceId = 0,
-        Color = Color.FromRgb(26624, 41616, 2916),
-    };
+        {
+            X = 2757,
+            Y = -1377,
+            Z = -6717,
+            Intensity = 430,
+            ReturnNumber = 1,
+            NumberOfReturns = 1,
+            ScanDirectionFlag = false,
+            EdgeOfFlightLine = false,
+            Classification = Classification.Unclassified,
+            Synthetic = false,
+            KeyPoint = false,
+            Withheld = false,
+            ScanAngleRank = -29,
+            UserData = 0,
+            PointSourceId = 0,
+            Color = Color.FromRgb(26624, 41616, 2916),
+        };
 
     [Test]
     [LittleEndianOnly]

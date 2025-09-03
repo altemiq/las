@@ -206,7 +206,7 @@ public readonly record struct ExtraBytesItem
             };
         }
 
-        object? ScaleAndOffset(ExtraBytesItem item, object? value)
+        static object? ScaleAndOffset(ExtraBytesItem item, object? value)
         {
             return (item.HasScale, item.HasOffset, value) switch
             {

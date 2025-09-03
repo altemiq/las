@@ -14,23 +14,23 @@ public class PointTests
         readonly
 #endif
         PointDataRecord Point = new()
-    {
-        X = 2757,
-        Y = -1377,
-        Z = -6717,
-        Intensity = 430,
-        ReturnNumber = 1,
-        NumberOfReturns = 1,
-        ScanDirectionFlag = false,
-        EdgeOfFlightLine = false,
-        Classification = Classification.Unclassified,
-        Synthetic = false,
-        KeyPoint = false,
-        Withheld = false,
-        ScanAngleRank = -29,
-        UserData = 0,
-        PointSourceId = 0,
-    };
+        {
+            X = 2757,
+            Y = -1377,
+            Z = -6717,
+            Intensity = 430,
+            ReturnNumber = 1,
+            NumberOfReturns = 1,
+            ScanDirectionFlag = false,
+            EdgeOfFlightLine = false,
+            Classification = Classification.Unclassified,
+            Synthetic = false,
+            KeyPoint = false,
+            Withheld = false,
+            ScanAngleRank = -29,
+            UserData = 0,
+            PointSourceId = 0,
+        };
 
     [Test]
     [LittleEndianOnly]

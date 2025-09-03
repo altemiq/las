@@ -9,7 +9,9 @@ namespace Altemiq.IO.Las;
 /// <summary>
 /// The LAS writer.
 /// </summary>
-public class LasWriter : ILasWriter, IDisposable
+/// <param name="stream">The stream.</param>
+/// <param name="leaveOpen"><see langword="true"/> to leave the stream open after the <see cref="LasWriter"/> object is disposed; otherwise <see langword="false"/>.</param>
+public class LasWriter(Stream stream, bool leaveOpen = false) : ILasWriter, IDisposable
 {
 #if LAS1_4_OR_GREATER
     /// <summary>
@@ -18,7 +20,7 @@ public class LasWriter : ILasWriter, IDisposable
     protected static readonly Version EvlrVersion = new(1, 4);
 #endif
 
-    private readonly bool leaveOpen;
+    private readonly bool leaveOpen = leaveOpen;
 
     private byte[] buffer = [];
 
@@ -31,17 +33,6 @@ public class LasWriter : ILasWriter, IDisposable
 #endif
 
     private bool disposedValue;
-
-    /// <summary>
-    /// Initializes a new instance of the <see cref="LasWriter"/> class based on the specified stream, and optionally leaves the stream open.
-    /// </summary>
-    /// <param name="stream">The stream.</param>
-    /// <param name="leaveOpen"><see langword="true"/> to leave the stream open after the <see cref="LasWriter"/> object is disposed; otherwise <see langword="false"/>.</param>
-    public LasWriter(Stream stream, bool leaveOpen = false)
-    {
-        this.BaseStream = stream;
-        this.leaveOpen = leaveOpen;
-    }
 
     /// <summary>
     /// Initializes a new instance of the <see cref="LasWriter"/> class based on the reader, and optionally leaves the stream open.
@@ -91,12 +82,12 @@ public class LasWriter : ILasWriter, IDisposable
     /// <summary>
     /// Gets the base stream.
     /// </summary>
-    protected Stream BaseStream { get; }
+    protected Stream BaseStream { get; } = stream;
 
     /// <inheritdoc/>
     public virtual void Write(in HeaderBlock header, params IEnumerable<VariableLengthRecord> records)
     {
-        var recordsList = records as IReadOnlyList<VariableLengthRecord> ?? records.ToList();
+        var recordsList = records as IReadOnlyList<VariableLengthRecord> ?? [.. records];
 
 #if LAS1_4_OR_GREATER
         // check for extra bytes to increase the point record size by
@@ -180,7 +171,11 @@ public class LasWriter : ILasWriter, IDisposable
         var written = await this.RawWriter.WriteAsync(this.buffer, record, cancellationToken).ConfigureAwait(false);
         extraBytes.CopyTo(this.buffer.AsMemory(written));
         written += extraBytes.Length;
+#if NETSTANDARD2_1_OR_GREATER || NETCOREAPP2_1_OR_GREATER
+        await this.BaseStream.WriteAsync(this.buffer.AsMemory(0, written), cancellationToken).ConfigureAwait(false);
+#else
         await this.BaseStream.WriteAsync(this.buffer, 0, written, cancellationToken).ConfigureAwait(false);
+#endif
     }
 
     /// <inheritdoc />

@@ -48,4 +48,7 @@
   <data name="FailedToMoveToPoint" xml:space="preserve">
     <value>Failed to move to point {0}.</value>
   </data>
+  <data name="CannotMoveToPosition" xml:space="preserve">
+    <value>Cannot move to {0}.</value>
+  </data>
 </root>

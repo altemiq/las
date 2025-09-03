@@ -221,7 +221,11 @@ public class LasReader : ILasReader, IDisposable
         this.MoveToPointData();
 
         // read the data
+#if NETSTANDARD2_1_OR_GREATER || NETCOREAPP2_1_OR_GREATER
+        _ = await this.BaseStream.ReadAsync(this.buffer.AsMemory(0, this.buffer.Length), cancellationToken).ConfigureAwait(false);
+#else
         _ = await this.BaseStream.ReadAsync(this.buffer, 0, this.buffer.Length, cancellationToken).ConfigureAwait(false);
+#endif
         ReadOnlySpan<byte> data = this.buffer;
 
         // read the point.
@@ -460,11 +464,11 @@ public class LasReader : ILasReader, IDisposable
             { PointDataFormatId: GpsColorWaveformPointDataRecord.Id, Version: { Major: 1, Minor: >= 3 and < 5 } } => (new Readers.Raw.GpsColorWaveformPointDataRecordReader(), GpsColorWaveformPointDataRecord.Size),
 #endif
 #if LAS1_4_OR_GREATER
-             { PointDataFormatId: ExtendedGpsPointDataRecord.Id, Version: { Major: 1, Minor: >= 4 } } => (new Readers.Raw.ExtendedGpsPointDataRecordReader(), ExtendedGpsPointDataRecord.Size),
-             { PointDataFormatId: ExtendedGpsColorPointDataRecord.Id, Version: { Major: 1, Minor: >= 4 } } => (new Readers.Raw.ExtendedGpsColorPointDataRecordReader(), ExtendedGpsColorPointDataRecord.Size),
-             { PointDataFormatId: ExtendedGpsColorNearInfraredPointDataRecord.Id, Version: { Major: 1, Minor: >= 4 } } => (new Readers.Raw.ExtendedGpsColorNearInfraredPointDataRecordReader(), ExtendedGpsColorNearInfraredPointDataRecord.Size),
-             { PointDataFormatId: ExtendedGpsWaveformPointDataRecord.Id, Version: { Major: 1, Minor: >= 4 } } => (new Readers.Raw.ExtendedGpsWaveformPointDataRecordReader(), ExtendedGpsWaveformPointDataRecord.Size),
-             { PointDataFormatId: ExtendedGpsColorNearInfraredWaveformPointDataRecord.Id, Version: { Major: 1, Minor: >= 4 } } => (new Readers.Raw.ExtendedGpsColorNearInfraredWaveformPointDataRecordReader(), ExtendedGpsColorNearInfraredWaveformPointDataRecord.Size),
+            { PointDataFormatId: ExtendedGpsPointDataRecord.Id, Version: { Major: 1, Minor: >= 4 } } => (new Readers.Raw.ExtendedGpsPointDataRecordReader(), ExtendedGpsPointDataRecord.Size),
+            { PointDataFormatId: ExtendedGpsColorPointDataRecord.Id, Version: { Major: 1, Minor: >= 4 } } => (new Readers.Raw.ExtendedGpsColorPointDataRecordReader(), ExtendedGpsColorPointDataRecord.Size),
+            { PointDataFormatId: ExtendedGpsColorNearInfraredPointDataRecord.Id, Version: { Major: 1, Minor: >= 4 } } => (new Readers.Raw.ExtendedGpsColorNearInfraredPointDataRecordReader(), ExtendedGpsColorNearInfraredPointDataRecord.Size),
+            { PointDataFormatId: ExtendedGpsWaveformPointDataRecord.Id, Version: { Major: 1, Minor: >= 4 } } => (new Readers.Raw.ExtendedGpsWaveformPointDataRecordReader(), ExtendedGpsWaveformPointDataRecord.Size),
+            { PointDataFormatId: ExtendedGpsColorNearInfraredWaveformPointDataRecord.Id, Version: { Major: 1, Minor: >= 4 } } => (new Readers.Raw.ExtendedGpsColorNearInfraredWaveformPointDataRecordReader(), ExtendedGpsColorNearInfraredWaveformPointDataRecord.Size),
 #endif
             { Version: { Major: 1, Minor: <= 1 } } => throw new InvalidOperationException(Properties.v1_1.Resources.OnlyDataPointsAreAllowed),
 #if LAS1_2_OR_GREATER

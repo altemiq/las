@@ -17,25 +17,25 @@ public class GpsColorPointTests
         readonly
 #endif
         GpsColorPointDataRecord Point = new()
-    {
-        X = 2757,
-        Y = -1377,
-        Z = -6717,
-        Intensity = 430,
-        ReturnNumber = 1,
-        NumberOfReturns = 1,
-        ScanDirectionFlag = false,
-        EdgeOfFlightLine = false,
-        Classification = Classification.Unclassified,
-        Synthetic = false,
-        KeyPoint = false,
-        Withheld = false,
-        ScanAngleRank = -29,
-        UserData = 0,
-        PointSourceId = 0,
-        GpsTime = 492249.15875399113,
-        Color = Color.FromRgb(41616, 2916, 16670),
-    };
+        {
+            X = 2757,
+            Y = -1377,
+            Z = -6717,
+            Intensity = 430,
+            ReturnNumber = 1,
+            NumberOfReturns = 1,
+            ScanDirectionFlag = false,
+            EdgeOfFlightLine = false,
+            Classification = Classification.Unclassified,
+            Synthetic = false,
+            KeyPoint = false,
+            Withheld = false,
+            ScanAngleRank = -29,
+            UserData = 0,
+            PointSourceId = 0,
+            GpsTime = 492249.15875399113,
+            Color = Color.FromRgb(41616, 2916, 16670),
+        };
 
     [Test]
     [LittleEndianOnly]

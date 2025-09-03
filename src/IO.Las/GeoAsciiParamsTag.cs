@@ -86,7 +86,7 @@ public record GeoAsciiParamsTag : VariableLengthRecord, IReadOnlyList<string>
         return bytesWritten;
     }
 
-    private static IReadOnlyList<string> GetStrings(ReadOnlySpan<byte> data)
+    private static System.Collections.ObjectModel.ReadOnlyCollection<string> GetStrings(ReadOnlySpan<byte> data)
     {
         var builder = new System.Runtime.CompilerServices.ReadOnlyCollectionBuilder<string>();
         var current = 0;

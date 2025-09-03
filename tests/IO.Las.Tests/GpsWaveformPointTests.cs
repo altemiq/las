@@ -17,31 +17,31 @@ public class GpsWaveformPointTests
         readonly
 #endif
         GpsWaveformPointDataRecord Point = new()
-    {
-        X = 2757,
-        Y = -1377,
-        Z = -6717,
-        Intensity = 430,
-        ReturnNumber = 1,
-        NumberOfReturns = 1,
-        ScanDirectionFlag = false,
-        EdgeOfFlightLine = false,
-        Classification = Classification.Unclassified,
-        Synthetic = false,
-        KeyPoint = false,
-        Withheld = false,
-        ScanAngleRank = -29,
-        UserData = 0,
-        PointSourceId = 0,
-        GpsTime = 492249.15875399113,
-        WavePacketDescriptorIndex = 1,
-        ByteOffsetToWaveformData = 240UL,
-        WaveformPacketSizeInBytes = 240U,
-        ReturnPointWaveformLocation = 0,
-        ParametricDx = 0,
-        ParametricDy = 0,
-        ParametricDz = 0,
-    };
+        {
+            X = 2757,
+            Y = -1377,
+            Z = -6717,
+            Intensity = 430,
+            ReturnNumber = 1,
+            NumberOfReturns = 1,
+            ScanDirectionFlag = false,
+            EdgeOfFlightLine = false,
+            Classification = Classification.Unclassified,
+            Synthetic = false,
+            KeyPoint = false,
+            Withheld = false,
+            ScanAngleRank = -29,
+            UserData = 0,
+            PointSourceId = 0,
+            GpsTime = 492249.15875399113,
+            WavePacketDescriptorIndex = 1,
+            ByteOffsetToWaveformData = 240UL,
+            WaveformPacketSizeInBytes = 240U,
+            ReturnPointWaveformLocation = 0,
+            ParametricDx = 0,
+            ParametricDy = 0,
+            ParametricDz = 0,
+        };
 
     [Test]
     [LittleEndianOnly]
