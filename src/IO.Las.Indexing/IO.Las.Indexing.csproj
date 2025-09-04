@@ -1,0 +1,28 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFrameworks>net7.0;net5.0;netstandard2.1;netstandard2.0</TargetFrameworks>
+    <LangVersion>preview</LangVersion>
+  </PropertyGroup>
+
+  <PropertyGroup Label="Packaging">
+    <_Tag>Indexing</_Tag>
+    <Product>$(Product.Replace('{Type}', '$(_Tag)'))</Product>
+    <Description>$(Description.Replace('{Type}', '$(_Tag)'))</Description>
+    <PackageTags>$(PackageTags);$(_Tag)</PackageTags>
+    <PackageLicenseExpression>LGPL-2.1-only</PackageLicenseExpression>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\IO.Las\IO.Las.csproj" />
+  </ItemGroup>
+
+  <ItemGroup Condition=" '$(SupportLas14)' != 'true' ">
+    <Compile Remove="LaxTag.cs" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <InternalsVisibleTo Include="las" />
+  </ItemGroup>
+
+</Project>

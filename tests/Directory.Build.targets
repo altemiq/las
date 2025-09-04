@@ -1,0 +1,18 @@
+<Project>
+
+  <Choose>
+    <When Condition=" '$([MSBuild]::GetTargetFrameworkIdentifier($(TargetFramework)))' == '.NETFramework' AND '$(EnableTUnitPolyfills)' == 'true' ">
+      <PropertyGroup>
+        <EnableTUnitPolyfills>false</EnableTUnitPolyfills>
+      </PropertyGroup>
+
+      <ItemGroup>
+        <PackageReference Include="Polyfill">
+          <PrivateAssets>all</PrivateAssets>
+          <IncludeAssets>runtime; build; native; contentfiles; analyzers</IncludeAssets>
+        </PackageReference>
+      </ItemGroup>
+    </When>
+  </Choose>
+
+</Project>
