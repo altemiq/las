@@ -12,6 +12,32 @@ namespace Altemiq.IO.Las;
 internal static class Constants
 {
     /// <summary>
+    /// The sizes.
+    /// </summary>
+    public static class Size
+    {
+        /// <summary>
+        /// The <see cref="IGpsPointDataRecord.GpsTime"/> size.
+        /// </summary>
+        public const ushort GpsTime = sizeof(double);
+
+        /// <summary>
+        /// The <see cref="IColorPointDataRecord.Color"/> size.
+        /// </summary>
+        public const ushort Color = 3 * sizeof(ushort);
+
+        /// <summary>
+        /// The <see cref="IWaveformPointDataRecord"/> size.
+        /// </summary>
+        public const ushort Waveform = sizeof(byte) + sizeof(ulong) + sizeof(uint) + sizeof(float) + sizeof(float) + sizeof(float) + sizeof(float);
+
+        /// <summary>
+        /// The <see cref="INearInfraredPointDataRecord.NearInfrared"/> size.
+        /// </summary>
+        public const ushort NearInfrared = sizeof(ushort);
+    }
+
+    /// <summary>
     /// The bit masks.
     /// </summary>
     public static class BitMasks

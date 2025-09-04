@@ -9,7 +9,7 @@ namespace Altemiq.IO.Las.S3;
 /// <summary>
 /// An optimized <see cref="Amazon.S3"/> <see cref="Stream"/> for <see cref="Las"/> files.
 /// </summary>
-public class S3ChunkedStream : ChunkedStream
+public sealed class S3ChunkedStream : ChunkedStream
 {
     private readonly Amazon.S3.IAmazonS3 client;
 

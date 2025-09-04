@@ -849,7 +849,7 @@ public sealed class LasQuadTree : IEquatable<LasQuadTree>
                         IntersectTileWithCells(cells, levelOffset, tileMinX, tileMinY, tileMaxX, tileMaxY, cellMinX, cellMidY, cellMidX, cellMaxY, currentLevel, levelIndex | 2);
                         cellMinX = cellMidX;
                         cellMinY = cellMidY;
-                        levelIndex = levelIndex | 3;
+                        levelIndex |= 3;
                         continue;
                     }
 

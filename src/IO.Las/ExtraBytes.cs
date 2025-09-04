@@ -145,6 +145,24 @@ public sealed record ExtraBytes : VariableLengthRecord, IExtraBytes
     /// <returns>The byte count.</returns>
     internal ushort GetByteCount() => (ushort)this.items.Sum(GetByteCount);
 
+    /// <summary>
+    /// Gets the byte count.
+    /// </summary>
+    /// <param name="item">The item.</param>
+    /// <returns>The byte count.</returns>
+    internal static int GetByteCount(ExtraBytesItem item) =>
+        item switch
+        {
+            { DataType: ExtraBytesDataType.Undocumented, Options: var options } => (ushort)options,
+            { DataType: ExtraBytesDataType.UnsignedChar or ExtraBytesDataType.Char } => sizeof(byte),
+            { DataType: ExtraBytesDataType.UnsignedShort or ExtraBytesDataType.Short } => sizeof(short),
+            { DataType: ExtraBytesDataType.UnsignedLong or ExtraBytesDataType.Long } => sizeof(int),
+            { DataType: ExtraBytesDataType.UnsignedLongLong or ExtraBytesDataType.LongLong } => sizeof(long),
+            { DataType: ExtraBytesDataType.Float } => sizeof(float),
+            { DataType: ExtraBytesDataType.Double } => sizeof(double),
+            _ => default,
+        };
+
     private static System.Collections.ObjectModel.ReadOnlyCollection<ExtraBytesItem> GetEntries(ReadOnlySpan<byte> source)
     {
         var count = source.Length / 192;
@@ -158,19 +176,6 @@ public sealed record ExtraBytes : VariableLengthRecord, IExtraBytes
 
         return builder.ToReadOnlyCollection();
     }
-
-    private static int GetByteCount(ExtraBytesItem item) =>
-        item switch
-        {
-            { DataType: ExtraBytesDataType.Undocumented, Options: var options } => (ushort)options,
-            { DataType: ExtraBytesDataType.UnsignedChar or ExtraBytesDataType.Char } => sizeof(byte),
-            { DataType: ExtraBytesDataType.UnsignedShort or ExtraBytesDataType.Short } => sizeof(short),
-            { DataType: ExtraBytesDataType.UnsignedLong or ExtraBytesDataType.Long } => sizeof(int),
-            { DataType: ExtraBytesDataType.UnsignedLongLong or ExtraBytesDataType.LongLong } => sizeof(long),
-            { DataType: ExtraBytesDataType.Float } => sizeof(float),
-            { DataType: ExtraBytesDataType.Double } => sizeof(double),
-            _ => default,
-        };
 
     private int[] CreateIndexes()
     {

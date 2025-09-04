@@ -9,7 +9,7 @@ namespace Altemiq.IO.Las.Http;
 /// <summary>
 /// The <see cref="System.Net.Http"/> <see cref="Stream"/> for LAS.
 /// </summary>
-public class HttpChunkedStream : ChunkedStream
+public sealed class HttpChunkedStream : ChunkedStream
 {
     private readonly HttpClient httpClient;
 

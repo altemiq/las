@@ -771,7 +771,7 @@ internal static class Information
                             (float)(minimumY - header.Min.Y)),
                         (float)(header.Max.X - maximumX)),
                     (float)(header.Max.Y - maximumY))
-                : default(float);
+                : default;
 
             yield return (string.Empty, string.Create(System.Globalization.CultureInfo.InvariantCulture, $"LAStiling (idx {record.LevelIndex}, lvl {record.Level}, sub {record.ImplicitLevels}, bbox {record.MinX} {record.MinY} {record.MaxX} {record.MaxY}{(record.Buffer ? ", buffer" : string.Empty)}{(record.Reversible ? ", reversible" : string.Empty)}) (size {maximumX - minimumX} x {maximumY - minimumY}, buffer {buffer})"));
         }

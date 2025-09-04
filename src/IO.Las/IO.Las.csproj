@@ -105,8 +105,9 @@
   </ItemGroup>
   
   <ItemGroup>
-    <InternalsVisibleTo Include="$(AssemblyName).Tests" />
+    <InternalsVisibleTo Include="$(AssemblyName).Compression" />
     <InternalsVisibleTo Include="$(AssemblyName).Indexing" />
+    <InternalsVisibleTo Include="$(AssemblyName).Tests" />
     <InternalsVisibleTo Include="las" />
   </ItemGroup>
 

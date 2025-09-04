@@ -1,0 +1,43 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFrameworks>net7.0;net5.0;netstandard2.1;netstandard2.0</TargetFrameworks>
+    <RootNamespace>$(RootNamespace.Replace('.Compression', ''))</RootNamespace>
+    <LangVersion>preview</LangVersion>
+  </PropertyGroup>
+  
+  <ItemGroup>
+    <ProjectReference Include="..\IO.Las\IO.Las.csproj" />
+  </ItemGroup>
+
+  <ItemGroup Condition=" '$(SupportLas12)' != 'true' ">
+    <!-- Remove color point data records for versions below 1.2 -->
+    <Compile Remove="**\*Color*.cs" />
+    <Compile Remove="**\*12.cs" />
+  </ItemGroup>
+
+  <ItemGroup Condition=" '$(SupportLas13)' != 'true' ">
+    <!-- Remove wavepoint point data records for versions below 1.3 -->
+    <Compile Remove="**\*Waveform*.cs" />
+    <Compile Remove="**\*WavePacket*.cs" />
+    <Compile Remove="**\*13.cs" />
+  </ItemGroup>
+
+  <ItemGroup Condition=" '$(SupportLas14)' != 'true' ">
+    <!-- Remove extended point data records for versions below 1.4 -->
+    <Compile Remove="**\Extended*PointDataRecord*.cs" />
+    <Compile Remove="**\*Layered*.cs" />
+    <Compile Remove="**\*14.cs" />
+    <Compile Remove="**\*Reader3.cs" />
+    <Compile Remove="**\*Writer3.cs" />
+    <Compile Remove="**\*Context*.cs" />
+
+    <!-- Remove v1.4 specific resources -->
+    <EmbeddedResource Remove="Properties\v1.4\*.resx" />
+  </ItemGroup>
+  
+  <ItemGroup>
+    <InternalsVisibleTo Include="$(AssemblyName).Tests" />
+  </ItemGroup>
+
+</Project>

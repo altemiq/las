@@ -70,12 +70,12 @@ internal static class FileExtensions
         /// <exception cref="InvalidOperationException">The uri scheme is not supported.</exception>
         public static Stream OpenRead(Uri uri, Func<HttpClient> httpClientFactory)
             => uri switch
-        {
-            { Scheme: "file" } => new FileStream(uri.LocalPath, FileMode.Open, FileAccess.Read, FileShare.Read, ushort.MaxValue),
-            _ when S3.S3UriUtility.IsS3(uri) => S3.S3Las.OpenRead(uri),
-            { Scheme: "http" or "https" } => Http.HttpLas.OpenRead(uri, httpClientFactory),
-            _ => throw new NotSupportedException(),
-        };
+            {
+                { Scheme: "file" } => new FileStream(uri.LocalPath, FileMode.Open, FileAccess.Read, FileShare.Read, ushort.MaxValue),
+                _ when S3.S3UriUtility.IsS3(uri) => S3.S3Las.OpenRead(uri),
+                { Scheme: "http" or "https" } => Http.HttpLas.OpenRead(uri, httpClientFactory),
+                _ => throw new NotSupportedException(),
+            };
 
         /// <summary>
         /// Opens an existing URI for writing.

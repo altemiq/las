@@ -13,6 +13,7 @@
 
     <!-- generate resources -->
     <GenerateStronglyTypedResources>true</GenerateStronglyTypedResources>
+    <ResourceNamespace>$(Company).$(MSBuildProjectName)</ResourceNamespace>
 
     <CheckEolTargetFramework>false</CheckEolTargetFramework>
 

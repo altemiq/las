@@ -8,5 +8,5 @@ public class LasIndexTests
         Stream stream = typeof(LasIndexTests).Assembly.GetManifestResourceStream(typeof(LasIndexTests), "fusa.lax") ?? throw new InvalidOperationException();
         _ = await Assert.That(() => LasIndex.ReadFrom(stream)).ThrowsNothing();
     }
-    
+
 }
