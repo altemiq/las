@@ -6,6 +6,7 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\..\src\IO.Las.Tiling\IO.Las.Tiling.csproj" />
     <ProjectReference Include="..\..\src\IO.Las\IO.Las.csproj" />
   </ItemGroup>
 
