@@ -129,6 +129,7 @@ internal static class Information
             OgcCoordinateSystemWkt ogcCoordinateSystemWkt => GetOgcCoordinateSystemWkt(ogcCoordinateSystemWkt),
             OgcMathTransformWkt ogcMathTransformWkt => GetOgcMathTransformWkt(ogcMathTransformWkt),
 #endif
+            Tiling tiling => GetTiling(tiling),
             _ => [],
         };
 
@@ -757,6 +758,23 @@ internal static class Information
             yield return (string.Empty, string.Create(System.Globalization.CultureInfo.InvariantCulture, $"index {record.Header.RecordId - WaveformPacketDescriptor.MinTagRecordId + 1} bits/sample {record.BitsPerSample} compression {record.WaveformCompressionType} samples {record.NumberOfSamples} temporal {record.TemporalSampleSpacing} gain {record.DigitizerGain}, offset {record.DigitizerOffset}"));
         }
 #endif
+
+        IEnumerable<(object? Header, object? Value)> GetTiling(Tiling record)
+        {
+            var quadTree = new Indexing.LasQuadTree(record.MinX, record.MaxX, record.MinY, record.MaxY, (int)record.Level, (int)record.LevelIndex, default);
+            var (minimumX, minimumY, maximumX, maximumY) = quadTree.GetBounds(0, (int)record.LevelIndex);
+            var buffer = record.Buffer
+                ? Math.Max(
+                    Math.Max(
+                        Math.Max(
+                            (float)(minimumX - header.Min.X),
+                            (float)(minimumY - header.Min.Y)),
+                        (float)(header.Max.X - maximumX)),
+                    (float)(header.Max.Y - maximumY))
+                : default(float);
+
+            yield return (string.Empty, string.Create(System.Globalization.CultureInfo.InvariantCulture, $"LAStiling (idx {record.LevelIndex}, lvl {record.Level}, sub {record.ImplicitLevels}, bbox {record.MinX} {record.MinY} {record.MaxX} {record.MaxY}{(record.Buffer ? ", buffer" : string.Empty)}{(record.Reversible ? ", reversible" : string.Empty)}) (size {maximumX - minimumX} x {maximumY - minimumY}, buffer {buffer})"));
+        }
     }
 
 #if LAS1_3_OR_GREATER

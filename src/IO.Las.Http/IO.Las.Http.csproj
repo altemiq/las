@@ -1,0 +1,23 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFrameworks>net7.0;net5.0;netstandard2.1;netstandard2.0</TargetFrameworks>
+    <PackageTags>$(PackageTags) HTTP</PackageTags>
+  </PropertyGroup>
+
+  <PropertyGroup Label="Packaging">
+    <_Tag>HTTP</_Tag>
+    <Product>$(Product.Replace('{Type}', '$(_Tag)'))</Product>
+    <Description>$(Description.Replace('{Type}', '$(_Tag)'))</Description>
+    <PackageTags>$(PackageTags);$(_Tag)</PackageTags>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\IO.Las\IO.Las.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Using Include="System.Net.Http" />
+  </ItemGroup>
+
+</Project>

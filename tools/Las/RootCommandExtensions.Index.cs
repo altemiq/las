@@ -45,6 +45,7 @@ internal static partial class RootCommandExtensions
             };
 
             command.SetAction(static parseResult => Index.Processor.Process(
+                parseResult.GetServices(),
                 parseResult.GetRequiredValue(Arguments.Inputs),
                 parseResult.GetValue(Options.Indexing.TileSize),
                 parseResult.GetValue(Options.Indexing.MaximumIntervals),
@@ -68,18 +69,19 @@ internal static partial class RootCommandExtensions
                 command.SetAction(
                     static parseResult =>
                     {
+                        var services = parseResult.GetServices();
                         var output = parseResult.InvocationConfiguration.Output;
                         var error = parseResult.InvocationConfiguration.Error;
                         var input = parseResult.GetRequiredValue(Arguments.Input);
 
 #if LAS1_4_OR_GREATER
                         var index = Path.GetExtension(input) is ".las" or ".laz"
-                            ? CreateFromReader(input)
-                            : CreateFromLax(Path.ChangeExtension(input, ".lax"));
+                            ? CreateFromReader(input, services)
+                            : CreateFromLax(Path.ChangeExtension(input, ".lax"), services);
 #else
                         var lax = Path.ChangeExtension(input, ".lax");
                         var index = Path.Exists(lax)
-                            ? CreateFromLax(lax)
+                            ? CreateFromLax(lax, services)
                             : throw new InvalidOperationException();
 #endif
 
@@ -102,16 +104,16 @@ internal static partial class RootCommandExtensions
                         }
 
 #if LAS1_4_OR_GREATER
-                        static Indexing.LasIndex? CreateFromReader(Uri file)
+                        static Indexing.LasIndex? CreateFromReader(Uri file, IServiceProvider? services)
                         {
-                            using var reader = new LasReader(File.OpenRead(file), leaveOpen: false);
+                            using var reader = new LasReader(File.OpenRead(file, services), leaveOpen: false);
                             return Index.IndexingExtensions.ReadIndex(reader);
                         }
 #endif
 
-                        static Indexing.LasIndex CreateFromLax(Uri file)
+                        static Indexing.LasIndex CreateFromLax(Uri file, IServiceProvider? services)
                         {
-                            using var stream = File.OpenRead(file);
+                            using var stream = File.OpenRead(file, services);
                             return Indexing.LasIndex.ReadFrom(stream);
                         }
                     });
@@ -132,19 +134,20 @@ internal static partial class RootCommandExtensions
                 command.SetAction(
                     parseResult =>
                     {
+                        var services = parseResult.GetServices();
                         var error = parseResult.InvocationConfiguration.Error;
                         var input = parseResult.GetRequiredValue(Arguments.Input);
                         var indexInput = parseResult.GetRequiredValue(indexOption);
 
                         Indexing.LasIndex? readIndex = default;
-                        if (File.Exists(indexInput))
+                        if (Path.Exists(indexInput, services))
                         {
                             readIndex = Path.GetExtension(indexInput) switch
                             {
 #if LAS1_4_OR_GREATER
-                                ".las" or ".laz" => CreateFromReader(input),
+                                ".las" or ".laz" => CreateFromReader(input, services),
 #endif
-                                ".lax" => CreateFromLax(input),
+                                ".lax" => CreateFromLax(input, services),
                                 _ => throw new InvalidOperationException(),
                             };
                         }
@@ -156,7 +159,7 @@ internal static partial class RootCommandExtensions
                         }
 
                         Indexing.LasIndex createdIndex;
-                        using (var reader = new LasReader(File.OpenRead(input)))
+                        using (var reader = new LasReader(File.OpenRead(input, services)))
                         {
                             createdIndex = Indexing.LasIndex.Create(reader);
                         }
@@ -199,16 +202,16 @@ internal static partial class RootCommandExtensions
             }
 
 #if LAS1_4_OR_GREATER
-            static Indexing.LasIndex? CreateFromReader(Uri file)
+            static Indexing.LasIndex? CreateFromReader(Uri file, IServiceProvider? services)
             {
-                using var reader = new LasReader(File.OpenRead(file), leaveOpen: false);
+                using var reader = new LasReader(File.OpenRead(file, services), leaveOpen: false);
                 return Index.IndexingExtensions.ReadIndex(reader);
             }
 #endif
 
-            static Indexing.LasIndex CreateFromLax(Uri file)
+            static Indexing.LasIndex CreateFromLax(Uri file, IServiceProvider? services)
             {
-                using var stream = File.OpenRead(file);
+                using var stream = File.OpenRead(file, services);
                 return Indexing.LasIndex.ReadFrom(stream);
             }
         }

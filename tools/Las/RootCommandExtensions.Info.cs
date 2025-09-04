@@ -6,12 +6,10 @@
 
 namespace Altemiq.IO.Las;
 
-using Microsoft.Extensions.DependencyInjection;
-
 /// <content>
 /// The INFO command extensions.
 /// </content>
-public static partial class RootCommandExtensions
+internal static partial class RootCommandExtensions
 {
     /// <summary>
     /// Adds INFO to the root command.
@@ -45,14 +43,15 @@ public static partial class RootCommandExtensions
 
             command.SetAction(parseResult =>
             {
+                var services = parseResult.GetServices();
                 var console = parseResult.CreateConsole(outputOption);
                 var noMinMax = parseResult.GetValue(noMinMaxOption);
                 var noReturns = parseResult.GetValue(noReturnsOption);
                 var boundingBox = parseResult.GetValue(Options.InsideRectangle);
-                foreach (var file in parseResult.GetRequiredValue(Arguments.Inputs).Select(f => f.LocalPath))
+                foreach (var file in parseResult.GetRequiredValue(Arguments.Inputs))
                 {
-                    console.WriteLine(string.Format(System.Globalization.CultureInfo.InvariantCulture, "las info report for '{0}'", file), AnsiConsoleStyles.Title);
-                    using var stream = File.OpenRead(file);
+                    console.WriteLine(string.Format(System.Globalization.CultureInfo.InvariantCulture, "las info report for '{0}'", file.LocalPath), AnsiConsoleStyles.Title);
+                    using var stream = File.OpenRead(file, services);
                     Info.Processor.Process(stream, console, System.Globalization.CultureInfo.InvariantCulture, noMinMax, noReturns, boundingBox);
                 }
             });

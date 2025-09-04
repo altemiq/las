@@ -10,21 +10,6 @@
     <PackageReference Include="TUnit" />
   </ItemGroup>
 
-  <Choose>
-    <When Condition=" '$([MSBuild]::GetTargetFrameworkIdentifier($(TargetFramework)))' == '.NETFramework' ">
-      <PropertyGroup>
-        <EnableTUnitPolyfills>false</EnableTUnitPolyfills>
-      </PropertyGroup>
-      
-      <ItemGroup>
-        <PackageReference Include="Polyfill">
-          <PrivateAssets>all</PrivateAssets>
-          <IncludeAssets>runtime; build; native; contentfiles; analyzers</IncludeAssets>
-        </PackageReference>
-      </ItemGroup>
-    </When>
-  </Choose>
-
   <ItemGroup>
     <ProjectReference Include="..\..\src\IO.Las\IO.Las.csproj" />
   </ItemGroup>

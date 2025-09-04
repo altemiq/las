@@ -9,7 +9,7 @@ namespace Altemiq.IO.Las;
 /// <summary>
 /// The <see cref="RootCommand"/> extensions.
 /// </summary>
-public static partial class RootCommandExtensions
+internal static partial class RootCommandExtensions
 {
     /// <summary>
     /// Adds all the tool commands.
@@ -22,6 +22,7 @@ public static partial class RootCommandExtensions
     {
         VariableLengthRecordProcessor.Instance.RegisterTiling();
         return command
-            .AddInfo();
+            .AddInfo()
+            .AddIndex();
     }
 }

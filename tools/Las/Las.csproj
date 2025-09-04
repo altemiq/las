@@ -3,16 +3,28 @@
   <PropertyGroup>
     <OutputType>Exe</OutputType>
     <TargetFramework>$(DefaultTargetFramework)</TargetFramework>
+    <LangVersion>preview</LangVersion>
+    
+    <!-- packaging -->
+    <EnableSdkContainerSupport>true</EnableSdkContainerSupport>
+    <ContainerDescription>Container for the `las` executable</ContainerDescription>
+
+    <!-- turn off buggy analyzer -->
+    <NoWarn>$(NoWarn);S1117</NoWarn>
   </PropertyGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\..\src\IO.Las.Http\IO.Las.Http.csproj" />
+    <ProjectReference Include="..\..\src\IO.Las.Indexing\IO.Las.Indexing.csproj" />
+    <ProjectReference Include="..\..\src\IO.Las.S3\IO.Las.S3.csproj" />
     <ProjectReference Include="..\..\src\IO.Las.Tiling\IO.Las.Tiling.csproj" />
-    <ProjectReference Include="..\..\src\IO.Las\IO.Las.csproj" />
   </ItemGroup>
 
   <ItemGroup>
     <PackageReference Include="Altemiq.CommandLine.DependencyInjection" />
     <PackageReference Include="Altemiq.CommandLine.Spectre" />
+    <PackageReference Include="Microsoft.Extensions.Http" />
+    <PackageReference Include="Spectre.Console.Analyzer" />
   </ItemGroup>
   
   <ItemGroup>
@@ -20,9 +32,19 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Compile Update="RootCommandExtensions.*.cs">
+    <Compile Update="ExtensionMethods.*.cs;Options.*.cs;RootCommandExtensions.*.cs">
       <DependentUpon>$([System.Text.RegularExpressions.Regex]::Replace('%(Filename)%(Extension)', '\.[^.]+\%(Extension)$', '%(Extension)'))</DependentUpon>
     </Compile>
   </ItemGroup>
+
+  <Target Name="_SetContainerLabels"
+          BeforeTargets="ComputeContainerConfig"
+          Condition=" '$(EnableSdkContainerSupport)' == 'true' ">
+
+    <ItemGroup>
+      <ContainerLabel Include="org.opencontainers.image.source" Value="$(PrivateRepositoryUrl)" Condition=" '$(PrivateRepositoryUrl)' != '' " />
+    </ItemGroup>
+
+  </Target>
 
 </Project>

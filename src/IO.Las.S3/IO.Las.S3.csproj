@@ -1,0 +1,31 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFrameworks>net7.0;net5.0;netstandard2.1;netstandard2.0</TargetFrameworks>
+    <PackageTags>$(PackageTags) AWS S3</PackageTags>
+    <PolySharpIncludeGeneratedTypes>
+      $(PolySharpIncludeGeneratedTypes);
+      System.Diagnostics.CodeAnalysis.DoesNotReturnAttribute;
+      System.Diagnostics.CodeAnalysis.NotNullWhenAttribute;
+    </PolySharpIncludeGeneratedTypes>
+  </PropertyGroup>
+
+  <PropertyGroup Label="Packaging">
+    <Product>$(Product.Replace('{Type}', 'AWS S3'))</Product>
+    <Description>$(Description.Replace('{Type}', 'AWS S3'))</Description>
+    <PackageTags>$(PackageTags);AWS;S3</PackageTags>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="AWSSDK.S3" VersionOverride="4.0.0" />
+    <PackageReference Include="PolySharp">
+      <PrivateAssets>all</PrivateAssets>
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+    </PackageReference>
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\IO.Las\IO.Las.csproj" />
+  </ItemGroup>
+
+</Project>

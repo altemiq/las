@@ -36,4 +36,16 @@
   <data name="Description" xml:space="preserve">
     <value>LAS tools</value>
   </data>
+  <data name="Command_IndexDescription" xml:space="preserve">
+    <value>Creates a *.lax file for a given *.las or *.laz file that contains spatial indexing information.</value>
+  </data>
+  <data name="Command_IndexDumpDescription" xml:space="preserve">
+    <value>Dumps the contents of the given *.las or *.laz file</value>
+  </data>
+  <data name="Command_IndexCheckDescription" xml:space="preserve">
+    <value>Checks the index for a specified file.</value>
+  </data>
+  <data name="Option_IndexCheckIndexDescription" xml:space="preserve">
+    <value>Where to get the index from.</value>
+  </data>
 </root>

@@ -9,7 +9,7 @@ using Microsoft.Extensions.DependencyInjection;
 
 var rootCommand = new RootCommand()
     .AddAllTools()
-    .UseServices((parseResult, services) => services.AddSingleton(parseResult.CreateConsole(Options.Output)))
+    .UseServices((parseResult, services) => services.AddHttpClient().AddSingleton(parseResult.CreateConsole(Options.Output)))
     .AddFiglet(Altemiq.IO.Las.Tool.Properties.Resources.Title, Spectre.Console.Color.DeepSkyBlue1);
 
 return await rootCommand
