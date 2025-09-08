@@ -14,6 +14,7 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\..\src\IO.Las.Compression\IO.Las.Compression.csproj" />
     <ProjectReference Include="..\..\src\IO.Las.Http\IO.Las.Http.csproj" />
     <ProjectReference Include="..\..\src\IO.Las.Indexing\IO.Las.Indexing.csproj" />
     <ProjectReference Include="..\..\src\IO.Las.S3\IO.Las.S3.csproj" />

@@ -22,7 +22,7 @@ internal static class Processor
     /// <param name="boundingBox">The bounding box.</param>
     public static void Process(Stream stream, IAnsiConsole console, IFormatProvider formatProvider, bool noMinMax, bool noReturns, BoundingBox? boundingBox)
     {
-        using var reader = new LasReader(stream);
+        using var reader = LazReader.Create(stream);
         reader.Format(
             formatProvider,
             (style, provider, format, args) => console.Write(string.Format(provider, format, args), style),

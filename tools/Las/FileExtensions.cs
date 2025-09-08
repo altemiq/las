@@ -118,6 +118,41 @@ internal static class FileExtensions
             }
         }
 
+        /// <summary>
+        /// Opens an existing URI for reading.
+        /// </summary>
+        /// <param name="uri">The uri.</param>
+        /// <param name="mode">A <see cref="FileMode"/> value that specifies whether an uri is created if one does not exist, and determines whether the contents of existing uris are retained or overwritten.</param>
+        /// <returns>The stream from URI.</returns>
+        /// <exception cref="InvalidOperationException">The uri scheme is not supported.</exception>
+        public static Stream Open(Uri uri, FileMode mode) => Open(uri, mode, static () => new());
+
+        /// <summary>
+        /// Opens an existing URI for reading.
+        /// </summary>
+        /// <param name="uri">The uri.</param>
+        /// <param name="mode">A <see cref="FileMode"/> value that specifies whether an uri is created if one does not exist, and determines whether the contents of existing uris are retained or overwritten.</param>
+        /// <param name="serviceProvider">The service provider.</param>
+        /// <returns>The stream from URI.</returns>
+        /// <exception cref="InvalidOperationException">The uri scheme is not supported.</exception>
+        public static Stream Open(Uri uri, FileMode mode, IServiceProvider? serviceProvider) => Open(uri, mode, CreateHttpClient(serviceProvider));
+
+        /// <summary>
+        /// Opens an existing URI for reading.
+        /// </summary>
+        /// <param name="uri">The uri.</param>
+        /// <param name="mode">A <see cref="FileMode"/> value that specifies whether an uri is created if one does not exist, and determines whether the contents of existing uris are retained or overwritten.</param>
+        /// <param name="httpClientFactory">The <see cref="System.Net.Http"/> client factory.</param>
+        /// <returns>The stream from URI.</returns>
+        /// <exception cref="InvalidOperationException">The uri scheme is not supported.</exception>
+        public static Stream Open(Uri uri, FileMode mode, Func<HttpClient> httpClientFactory) => (uri, mode) switch
+        {
+            ({ Scheme: "file" }, _) => File.Open(uri.LocalPath, mode),
+            (_, FileMode.Open) when S3.S3UriUtility.IsS3(uri) => S3.S3Las.OpenRead(uri),
+            ({ Scheme: "http" or "https" }, FileMode.Open) => Http.HttpLas.OpenRead(uri, httpClientFactory),
+            _ => throw new NotSupportedException(),
+        };
+
 #pragma warning disable S1144
         private static void CreateDirectoryIfPossible(string path)
         {

@@ -12,12 +12,19 @@ namespace Altemiq.IO.Las.Writers.Raw;
 internal sealed class PointDataRecordWriter : IPointDataRecordWriter
 {
     /// <inheritdoc />
-    public int Write(Span<byte> destination, IBasePointDataRecord record) => record.Write(destination);
+    public int Write(Span<byte> destination, IBasePointDataRecord record, ReadOnlySpan<byte> extraBytes)
+    {
+        var bytesWritten = record.Write(destination);
+        extraBytes.CopyTo(destination[bytesWritten..]);
+        return bytesWritten + extraBytes.Length;
+    }
 
     /// <inheritdoc />
-    public ValueTask<int> WriteAsync(Memory<byte> destination, IBasePointDataRecord record, CancellationToken cancellationToken = default)
+    public ValueTask<int> WriteAsync(Memory<byte> destination, IBasePointDataRecord record, ReadOnlyMemory<byte> extraBytes, CancellationToken cancellationToken = default)
     {
         cancellationToken.ThrowIfCancellationRequested();
-        return new(record.Write(destination.Span));
+        var bytesWritten = record.Write(destination.Span);
+        extraBytes.CopyTo(destination[bytesWritten..]);
+        return new(bytesWritten + extraBytes.Length);
     }
 }

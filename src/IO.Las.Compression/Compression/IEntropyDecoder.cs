@@ -14,10 +14,10 @@ internal interface IEntropyDecoder : IEntropyCoder
     /// <summary>
     /// Initializes this instance.
     /// </summary>
-    /// <param name="reader">The binary reader.</param>
+    /// <param name="stream">The stream.</param>
     /// <param name="reallyInit">Set to <see langword="true"/> to really initialize.</param>
     /// <returns><see langword="true"/> if this was initialized correctly.</returns>
-    bool Initialize(BinaryReader? reader, bool reallyInit = true);
+    bool Initialize(Stream? stream, bool reallyInit = true);
 
     /// <summary>
     /// Decodes a bit with modelling.
@@ -83,8 +83,8 @@ internal interface IEntropyDecoder : IEntropyCoder
     double ReadDouble();
 
     /// <summary>
-    /// Gets the binary reader.
+    /// Gets the stream.
     /// </summary>
-    /// <returns>The binary reader.</returns>
-    BinaryReader GetBinaryReader();
+    /// <returns>The stream.</returns>
+    Stream GetStream();
 }

@@ -28,5 +28,5 @@ public readonly struct LasPointMemory(IBasePointDataRecord pointDataRecord, Read
     /// </summary>
     /// <param name="pointMemory">The point.</param>
     /// <returns>The span based point.</returns>
-    public static explicit operator LasPointSpan(LasPointMemory pointMemory) => new(pointMemory.PointDataRecord!, pointMemory.ExtraBytes.Span);
+    public static implicit operator LasPointSpan(LasPointMemory pointMemory) => new(pointMemory.PointDataRecord!, pointMemory.ExtraBytes.Span);
 }

@@ -11,29 +11,29 @@ namespace Altemiq.IO.Las.Compression;
 /// </summary>
 internal sealed class ArithmeticDecoder : ArithmeticCoder, IEntropyDecoder
 {
-    private BinaryReader? binaryReader;
+    private Stream? inputStream;
 
     private uint value;
 
     private uint length;
 
     /// <inheritdoc/>
-    [System.Diagnostics.CodeAnalysis.MemberNotNullWhen(true, nameof(binaryReader))]
-    public bool Initialize(BinaryReader? reader, bool reallyInit = true)
+    [System.Diagnostics.CodeAnalysis.MemberNotNullWhen(true, nameof(this.inputStream))]
+    public bool Initialize(Stream? stream, bool reallyInit = true)
     {
-        if (reader is null)
+        if (stream is null)
         {
             return false;
         }
 
-        this.binaryReader = reader;
+        this.inputStream = stream;
         this.length = MaxLength;
         if (reallyInit)
         {
-            var tempValue = reader.ReadByte() << 24;
-            tempValue |= reader.ReadByte() << 16;
-            tempValue |= reader.ReadByte() << 8;
-            tempValue |= reader.ReadByte();
+            var tempValue = stream.ReadByte() << 24;
+            tempValue |= stream.ReadByte() << 16;
+            tempValue |= stream.ReadByte() << 8;
+            tempValue |= stream.ReadByte();
             this.value = (uint)tempValue;
         }
 
@@ -41,7 +41,7 @@ internal sealed class ArithmeticDecoder : ArithmeticCoder, IEntropyDecoder
     }
 
     /// <inheritdoc/>
-    public override void Done() => this.binaryReader = null;
+    public override void Done() => this.inputStream = null;
 
     /// <inheritdoc/>
     public uint DecodeBit(IBitModel model)
@@ -269,7 +269,7 @@ internal sealed class ArithmeticDecoder : ArithmeticCoder, IEntropyDecoder
     }
 
     /// <inheritdoc/>
-    public float ReadSingle() => ExtendedBitConverter.UInt32BitsToSingle(this.ReadUInt32());
+    public float ReadSingle() => BitConverter.UInt32BitsToSingle(this.ReadUInt32());
 
     /// <inheritdoc/>
     public ulong ReadUInt64()
@@ -280,18 +280,18 @@ internal sealed class ArithmeticDecoder : ArithmeticCoder, IEntropyDecoder
     }
 
     /// <inheritdoc/>
-    public double ReadDouble() => ExtendedBitConverter.UInt64BitsToDouble(this.ReadUInt64());
+    public double ReadDouble() => BitConverter.UInt64BitsToDouble(this.ReadUInt64());
 
     /// <inheritdoc/>
-    public BinaryReader GetBinaryReader() => this.binaryReader ?? throw new CompressionNotInitializedException();
+    public Stream GetStream() => this.inputStream ?? throw new CompressionNotInitializedException();
 
     private void RenormalizeDecimalInterval()
     {
-        var reader = this.GetBinaryReader();
+        var reader = this.GetStream();
 
         do
         {
-            this.value = (this.value << 8) | reader.ReadByte();
+            this.value = (this.value << 8) | reader.ReadByteLittleEndian();
         }
         while ((this.length <<= 8) < MinLength);
     }

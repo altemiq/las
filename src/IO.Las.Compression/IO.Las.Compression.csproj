@@ -4,7 +4,23 @@
     <TargetFrameworks>net7.0;net5.0;netstandard2.1;netstandard2.0</TargetFrameworks>
     <RootNamespace>$(RootNamespace.Replace('.Compression', ''))</RootNamespace>
     <LangVersion>preview</LangVersion>
+    <PolySharpIncludeGeneratedTypes>
+      $(PolySharpIncludeGeneratedTypes);
+      System.Diagnostics.CodeAnalysis.DoesNotReturnIfAttribute;
+      System.Diagnostics.CodeAnalysis.NotNullIfNotNullAttribute;
+      System.Diagnostics.CodeAnalysis.UnscopedRefAttribute;
+    </PolySharpIncludeGeneratedTypes>
+
+    <!-- turn off buggy analyzer -->
+    <NoWarn>$(NoWarn);S1117</NoWarn>
   </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="PolySharp">
+      <PrivateAssets>all</PrivateAssets>
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+    </PackageReference>
+  </ItemGroup>
   
   <ItemGroup>
     <ProjectReference Include="..\IO.Las\IO.Las.csproj" />
@@ -38,6 +54,10 @@
   
   <ItemGroup>
     <InternalsVisibleTo Include="$(AssemblyName).Tests" />
+  </ItemGroup>
+  
+  <ItemGroup>
+    <Compile Remove="**\*Write*" />
   </ItemGroup>
 
 </Project>

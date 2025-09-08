@@ -58,10 +58,10 @@ public readonly record struct GpsWaveformPointDataRecord :
     [System.Diagnostics.CodeAnalysis.SetsRequiredMembers]
     public GpsWaveformPointDataRecord(ReadOnlySpan<byte> data)
     {
-        this.X = System.Buffers.Binary.BinaryPrimitives.ReadInt32LittleEndian(data[..Constants.PointDataRecord.YFieldOffset]);
-        this.Y = System.Buffers.Binary.BinaryPrimitives.ReadInt32LittleEndian(data[Constants.PointDataRecord.YFieldOffset..Constants.PointDataRecord.ZFieldOffset]);
-        this.Z = System.Buffers.Binary.BinaryPrimitives.ReadInt32LittleEndian(data[Constants.PointDataRecord.ZFieldOffset..Constants.PointDataRecord.IntensityFieldOffset]);
-        this.Intensity = System.Buffers.Binary.BinaryPrimitives.ReadUInt16LittleEndian(data[Constants.PointDataRecord.IntensityFieldOffset..Constants.PointDataRecord.FlagsFieldOffset]);
+        this.X = FieldAccessors.PointDataRecord.GetX(data);
+        this.Y = FieldAccessors.PointDataRecord.GetY(data);
+        this.Z = FieldAccessors.PointDataRecord.GetZ(data);
+        this.Intensity = FieldAccessors.PointDataRecord.GetIntensity(data);
         this.flags = data[Constants.PointDataRecord.FlagsFieldOffset];
         this.classification = data[Constants.PointDataRecord.ClassificationFieldOffset];
         this.ScanAngleRank = (sbyte)data[Constants.PointDataRecord.ScanAngleRankFieldOffset];
@@ -104,57 +104,57 @@ public readonly record struct GpsWaveformPointDataRecord :
     /// <inheritdoc />
     public required byte ReturnNumber
     {
-        get => BitManipulation.Get(this.flags, Constants.BitMasks.Mask0 | Constants.BitMasks.Mask1 | Constants.BitMasks.Mask2);
-        init => this.flags = BitManipulation.Set(this.flags, value, Constants.BitMasks.Mask0 | Constants.BitMasks.Mask1 | Constants.BitMasks.Mask2);
+        get => FieldAccessors.PointDataRecord.GetReturnNumber(this.flags);
+        init => FieldAccessors.PointDataRecord.SetReturnNumber(ref this.flags, value);
     }
 
     /// <inheritdoc />
     public required byte NumberOfReturns
     {
-        get => BitManipulation.Get(this.flags, Constants.BitMasks.Mask3 | Constants.BitMasks.Mask4 | Constants.BitMasks.Mask5, 3);
-        init => this.flags = BitManipulation.Set(this.flags, value, Constants.BitMasks.Mask3 | Constants.BitMasks.Mask4 | Constants.BitMasks.Mask5, 3);
+        get => FieldAccessors.PointDataRecord.GetNumberOfReturns(this.flags);
+        init => FieldAccessors.PointDataRecord.SetNumberOfReturns(ref this.flags, value);
     }
 
     /// <inheritdoc />
     public required bool ScanDirectionFlag
     {
-        get => BitManipulation.IsSet(this.flags, Constants.BitMasks.Mask6);
-        init => this.flags = BitManipulation.Apply(this.flags, Constants.BitMasks.Mask6, value);
+        get => FieldAccessors.PointDataRecord.GetScanDirectionFlag(this.flags);
+        init => FieldAccessors.PointDataRecord.SetScanDirectionFlag(ref this.flags, value);
     }
 
     /// <inheritdoc />
     public required bool EdgeOfFlightLine
     {
-        get => BitManipulation.IsSet(this.flags, Constants.BitMasks.Mask7);
-        init => this.flags = BitManipulation.Apply(this.flags, Constants.BitMasks.Mask7, value);
+        get => FieldAccessors.PointDataRecord.GetEdgeOfFlightLine(this.flags);
+        init => FieldAccessors.PointDataRecord.SetEdgeOfFlightLine(ref this.flags, value);
     }
 
     /// <inheritdoc />
     public required Classification Classification
     {
-        get => (Classification)BitManipulation.Get(this.classification, Constants.BitMasks.Mask0 | Constants.BitMasks.Mask1 | Constants.BitMasks.Mask2 | Constants.BitMasks.Mask3 | Constants.BitMasks.Mask4);
-        init => this.classification = BitManipulation.Set(this.classification, (byte)value, Constants.BitMasks.Mask0 | Constants.BitMasks.Mask1 | Constants.BitMasks.Mask2 | Constants.BitMasks.Mask3 | Constants.BitMasks.Mask4);
+        get => FieldAccessors.PointDataRecord.GetClassification(this.classification);
+        init => FieldAccessors.PointDataRecord.SetClassification(ref this.classification, value);
     }
 
     /// <inheritdoc />
     public bool Synthetic
     {
-        get => BitManipulation.IsSet(this.classification, Constants.BitMasks.Mask5);
-        init => this.classification = BitManipulation.Apply(this.classification, Constants.BitMasks.Mask5, value);
+        get => FieldAccessors.PointDataRecord.GetSynthetic(this.classification);
+        init => FieldAccessors.PointDataRecord.SetSynthetic(ref this.classification, value);
     }
 
     /// <inheritdoc />
     public bool KeyPoint
     {
-        get => BitManipulation.IsSet(this.classification, Constants.BitMasks.Mask6);
-        init => this.classification = BitManipulation.Apply(this.classification, Constants.BitMasks.Mask6, value);
+        get => FieldAccessors.PointDataRecord.GetKeyPoint(this.classification);
+        init => FieldAccessors.PointDataRecord.SetKeyPoint(ref this.classification, value);
     }
 
     /// <inheritdoc />
     public bool Withheld
     {
-        get => BitManipulation.IsSet(this.classification, Constants.BitMasks.Mask7);
-        init => this.classification = BitManipulation.Apply(this.classification, Constants.BitMasks.Mask7, value);
+        get => FieldAccessors.PointDataRecord.GetWithheld(this.classification);
+        init => FieldAccessors.PointDataRecord.SetWithheld(ref this.classification, value);
     }
 
     /// <inheritdoc />
@@ -340,9 +340,9 @@ public readonly record struct GpsWaveformPointDataRecord :
     /// <returns>The number of bytes written.</returns>
     public int WriteLittleEndian(Span<byte> destination)
     {
-        System.Buffers.Binary.BinaryPrimitives.WriteInt32LittleEndian(destination[..Constants.PointDataRecord.YFieldOffset], this.X);
-        System.Buffers.Binary.BinaryPrimitives.WriteInt32LittleEndian(destination[Constants.PointDataRecord.YFieldOffset..Constants.PointDataRecord.ZFieldOffset], this.Y);
-        System.Buffers.Binary.BinaryPrimitives.WriteInt32LittleEndian(destination[Constants.PointDataRecord.ZFieldOffset..Constants.PointDataRecord.IntensityFieldOffset], this.Z);
+        FieldAccessors.PointDataRecord.SetX(destination, this.X);
+        FieldAccessors.PointDataRecord.SetY(destination, this.Y);
+        FieldAccessors.PointDataRecord.SetZ(destination, this.Z);
         System.Buffers.Binary.BinaryPrimitives.WriteUInt16LittleEndian(destination[Constants.PointDataRecord.IntensityFieldOffset..Constants.PointDataRecord.FlagsFieldOffset], this.Intensity);
         destination[Constants.PointDataRecord.FlagsFieldOffset] = this.flags;
         destination[Constants.PointDataRecord.ClassificationFieldOffset] = this.classification;

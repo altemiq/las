@@ -15,8 +15,6 @@ public class LasReader : ILasReader, IDisposable
 
     private readonly Readers.IPointDataRecordReader rawReader;
 
-    private readonly ushort basePointDataLength;
-
     private readonly ushort pointDataLength;
 
 #if LAS1_4_OR_GREATER
@@ -56,7 +54,6 @@ public class LasReader : ILasReader, IDisposable
                 out this.offsetToPointData,
                 out this.offsetToVariableLengthRecords,
                 out _,
-                out this.basePointDataLength,
                 out this.pointDataLength,
                 out this.endOfPointDataRecords);
 #else
@@ -67,7 +64,6 @@ public class LasReader : ILasReader, IDisposable
                 out this.rawReader,
                 out this.offsetToPointData,
                 out this.offsetToVariableLengthRecords,
-                out this.basePointDataLength,
                 out this.pointDataLength,
                 out this.endOfPointDataRecords);
 #endif
@@ -95,7 +91,6 @@ public class LasReader : ILasReader, IDisposable
                 out this.offsetToPointData,
                 out this.offsetToVariableLengthRecords,
                 out _,
-                out this.basePointDataLength,
                 out this.pointDataLength,
                 out this.endOfPointDataRecords);
 #else
@@ -106,7 +101,6 @@ public class LasReader : ILasReader, IDisposable
                 out this.rawReader,
                 out this.offsetToPointData,
                 out this.offsetToVariableLengthRecords,
-                out this.basePointDataLength,
                 out this.pointDataLength,
                 out this.endOfPointDataRecords);
 #endif
@@ -136,7 +130,6 @@ public class LasReader : ILasReader, IDisposable
                 out this.offsetToPointData,
                 out this.offsetToVariableLengthRecords,
                 out _,
-                out this.basePointDataLength,
                 out this.pointDataLength,
                 out this.endOfPointDataRecords);
 #else
@@ -148,7 +141,6 @@ public class LasReader : ILasReader, IDisposable
                 out this.rawReader,
                 out this.offsetToPointData,
                 out this.offsetToVariableLengthRecords,
-                out this.basePointDataLength,
                 out this.pointDataLength,
                 out this.endOfPointDataRecords);
 #endif
@@ -197,9 +189,9 @@ public class LasReader : ILasReader, IDisposable
         ReadOnlySpan<byte> data = this.buffer;
 
         // read the point.
-        var point = this.rawReader.Read(data[..this.basePointDataLength]);
+        var point = this.rawReader.Read(data);
         this.IncrementPointIndex();
-        return new(point, data[this.basePointDataLength..this.pointDataLength]);
+        return point;
     }
 
     /// <inheritdoc/>
@@ -222,16 +214,15 @@ public class LasReader : ILasReader, IDisposable
 
         // read the data
 #if NETSTANDARD2_1_OR_GREATER || NETCOREAPP2_1_OR_GREATER
-        _ = await this.BaseStream.ReadAsync(this.buffer.AsMemory(0, this.buffer.Length), cancellationToken).ConfigureAwait(false);
+        _ = await this.BaseStream.ReadAsync(this.buffer, cancellationToken).ConfigureAwait(false);
 #else
         _ = await this.BaseStream.ReadAsync(this.buffer, 0, this.buffer.Length, cancellationToken).ConfigureAwait(false);
 #endif
-        ReadOnlySpan<byte> data = this.buffer;
 
         // read the point.
-        var point = this.rawReader.Read(data[..this.basePointDataLength]);
+        var point = await this.rawReader.ReadAsync(this.buffer, cancellationToken).ConfigureAwait(false);
         this.IncrementPointIndex();
-        return new(point, new(this.buffer, this.basePointDataLength, this.pointDataLength - this.basePointDataLength));
+        return point;
     }
 
     /// <inheritdoc/>
@@ -381,17 +372,16 @@ public class LasReader : ILasReader, IDisposable
 #if LAS1_4_OR_GREATER
             out long offsetToExtendedVariableLengthRecords,
 #endif
-            out ushort basePointDataLength,
             out ushort pointDataLength,
             out long endOfPointDataRecords)
     {
         var headerReader = new HeaderBlockReader(stream);
         var header = headerReader.GetHeaderBlock(fileSignature ?? headerReader.GetFileSignature());
 #if LAS1_4_OR_GREATER
-        var (variableLengthRecords, extendedVariableLengthRecords) = Initialize(stream, headerReader, header, out rawReader, out offsetToPointData, out offsetToVariableLengthRecords, out offsetToExtendedVariableLengthRecords, out basePointDataLength, out pointDataLength, out endOfPointDataRecords);
+        var (variableLengthRecords, extendedVariableLengthRecords) = Initialize(stream, headerReader, header, out rawReader, out offsetToPointData, out offsetToVariableLengthRecords, out offsetToExtendedVariableLengthRecords, out pointDataLength, out endOfPointDataRecords);
         return (header, variableLengthRecords, extendedVariableLengthRecords);
 #else
-        var variableLengthRecords = Initialize(stream, headerReader, header, out rawReader, out offsetToPointData, out offsetToVariableLengthRecords, out basePointDataLength, out pointDataLength, out endOfPointDataRecords);
+        var variableLengthRecords = Initialize(stream, headerReader, header, out rawReader, out offsetToPointData, out offsetToVariableLengthRecords, out pointDataLength, out endOfPointDataRecords);
         return (header, variableLengthRecords);
 #endif
     }
@@ -412,7 +402,6 @@ public class LasReader : ILasReader, IDisposable
 #if LAS1_4_OR_GREATER
             out long offsetToExtendedVariableLengthRecords,
 #endif
-            out ushort basePointDataLength,
             out ushort pointDataLength,
             out long endOfPointDataRecords)
     {
@@ -451,24 +440,24 @@ public class LasReader : ILasReader, IDisposable
             stream.Position = offsetToPointData;
         }
 
-        (rawReader, basePointDataLength) = header switch
+        rawReader = header switch
         {
-            { PointDataFormatId: PointDataRecord.Id, Version: { Major: 1, Minor: >= 0 and < 5 } } => ((Readers.IPointDataRecordReader)new Readers.Raw.PointDataRecordReader(), PointDataRecord.Size),
-            { PointDataFormatId: GpsPointDataRecord.Id, Version: { Major: 1, Minor: >= 0 and < 5 } } => (new Readers.Raw.GpsPointDataRecordReader(), GpsPointDataRecord.Size),
+            { PointDataFormatId: PointDataRecord.Id, Version: { Major: 1, Minor: >= 0 and < 5 } } => new Readers.Raw.PointDataRecordReader(),
+            { PointDataFormatId: GpsPointDataRecord.Id, Version: { Major: 1, Minor: >= 0 and < 5 } } => new Readers.Raw.GpsPointDataRecordReader(),
 #if LAS1_2_OR_GREATER
-            { PointDataFormatId: ColorPointDataRecord.Id, Version: { Major: 1, Minor: >= 2 and < 5 } } => (new Readers.Raw.ColorPointDataRecordReader(), ColorPointDataRecord.Size),
-            { PointDataFormatId: GpsColorPointDataRecord.Id, Version: { Major: 1, Minor: >= 2 and < 5 } } => (new Readers.Raw.GpsColorPointDataRecordReader(), GpsColorPointDataRecord.Size),
+            { PointDataFormatId: ColorPointDataRecord.Id, Version: { Major: 1, Minor: >= 2 and < 5 } } => new Readers.Raw.ColorPointDataRecordReader(),
+            { PointDataFormatId: GpsColorPointDataRecord.Id, Version: { Major: 1, Minor: >= 2 and < 5 } } => new Readers.Raw.GpsColorPointDataRecordReader(),
 #endif
 #if LAS1_3_OR_GREATER
-            { PointDataFormatId: GpsWaveformPointDataRecord.Id, Version: { Major: 1, Minor: >= 3 and < 5 } } => (new Readers.Raw.GpsWaveformPointDataRecordReader(), GpsWaveformPointDataRecord.Size),
-            { PointDataFormatId: GpsColorWaveformPointDataRecord.Id, Version: { Major: 1, Minor: >= 3 and < 5 } } => (new Readers.Raw.GpsColorWaveformPointDataRecordReader(), GpsColorWaveformPointDataRecord.Size),
+            { PointDataFormatId: GpsWaveformPointDataRecord.Id, Version: { Major: 1, Minor: >= 3 and < 5 } } => new Readers.Raw.GpsWaveformPointDataRecordReader(),
+            { PointDataFormatId: GpsColorWaveformPointDataRecord.Id, Version: { Major: 1, Minor: >= 3 and < 5 } } => new Readers.Raw.GpsColorWaveformPointDataRecordReader(),
 #endif
 #if LAS1_4_OR_GREATER
-            { PointDataFormatId: ExtendedGpsPointDataRecord.Id, Version: { Major: 1, Minor: >= 4 } } => (new Readers.Raw.ExtendedGpsPointDataRecordReader(), ExtendedGpsPointDataRecord.Size),
-            { PointDataFormatId: ExtendedGpsColorPointDataRecord.Id, Version: { Major: 1, Minor: >= 4 } } => (new Readers.Raw.ExtendedGpsColorPointDataRecordReader(), ExtendedGpsColorPointDataRecord.Size),
-            { PointDataFormatId: ExtendedGpsColorNearInfraredPointDataRecord.Id, Version: { Major: 1, Minor: >= 4 } } => (new Readers.Raw.ExtendedGpsColorNearInfraredPointDataRecordReader(), ExtendedGpsColorNearInfraredPointDataRecord.Size),
-            { PointDataFormatId: ExtendedGpsWaveformPointDataRecord.Id, Version: { Major: 1, Minor: >= 4 } } => (new Readers.Raw.ExtendedGpsWaveformPointDataRecordReader(), ExtendedGpsWaveformPointDataRecord.Size),
-            { PointDataFormatId: ExtendedGpsColorNearInfraredWaveformPointDataRecord.Id, Version: { Major: 1, Minor: >= 4 } } => (new Readers.Raw.ExtendedGpsColorNearInfraredWaveformPointDataRecordReader(), ExtendedGpsColorNearInfraredWaveformPointDataRecord.Size),
+            { PointDataFormatId: ExtendedGpsPointDataRecord.Id, Version: { Major: 1, Minor: >= 4 } } => new Readers.Raw.ExtendedGpsPointDataRecordReader(),
+            { PointDataFormatId: ExtendedGpsColorPointDataRecord.Id, Version: { Major: 1, Minor: >= 4 } } => new Readers.Raw.ExtendedGpsColorPointDataRecordReader(),
+            { PointDataFormatId: ExtendedGpsColorNearInfraredPointDataRecord.Id, Version: { Major: 1, Minor: >= 4 } } => new Readers.Raw.ExtendedGpsColorNearInfraredPointDataRecordReader(),
+            { PointDataFormatId: ExtendedGpsWaveformPointDataRecord.Id, Version: { Major: 1, Minor: >= 4 } } => new Readers.Raw.ExtendedGpsWaveformPointDataRecordReader(),
+            { PointDataFormatId: ExtendedGpsColorNearInfraredWaveformPointDataRecord.Id, Version: { Major: 1, Minor: >= 4 } } => new Readers.Raw.ExtendedGpsColorNearInfraredWaveformPointDataRecordReader(),
 #endif
             { Version: { Major: 1, Minor: <= 1 } } => throw new InvalidOperationException(Properties.v1_1.Resources.OnlyDataPointsAreAllowed),
 #if LAS1_2_OR_GREATER

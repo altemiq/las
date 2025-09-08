@@ -14,9 +14,9 @@ internal interface IEntropyEncoder : IEntropyCoder
     /// <summary>
     /// Initializes this instance.
     /// </summary>
-    /// <param name="writer">The output stream.</param>
+    /// <param name="stream">The output stream.</param>
     /// <returns><see langword="true"/> if successfully initialized; otherwise <see langword="false"/>.</returns>
-    bool Initialize(BinaryWriter writer);
+    bool Initialize(Stream stream);
 
     /// <summary>
     /// Encode a bit with modelling.
@@ -82,8 +82,8 @@ internal interface IEntropyEncoder : IEntropyCoder
     void WriteDouble(double sym);
 
     /// <summary>
-    /// Gets the binary writer.
+    /// Gets the stream.
     /// </summary>
-    /// <returns>The binary writer.</returns>
-    BinaryWriter GetBinaryWriter();
+    /// <returns>The stream.</returns>
+    Stream GetStream();
 }

@@ -16,5 +16,13 @@ public interface IPointDataRecordReader
     /// </summary>
     /// <param name="source">The source.</param>
     /// <returns>The point data record.</returns>
-    IBasePointDataRecord Read(ReadOnlySpan<byte> source);
+    LasPointSpan Read(ReadOnlySpan<byte> source);
+
+    /// <summary>
+    /// Reads the point data record asynchronously.
+    /// </summary>
+    /// <param name="source">The source.</param>
+    /// <param name="cancellationToken">The cancellation token.</param>
+    /// <returns>The point data record.</returns>
+    ValueTask<LasPointMemory> ReadAsync(ReadOnlyMemory<byte> source, CancellationToken cancellationToken = default);
 }

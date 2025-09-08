@@ -22,4 +22,11 @@ public readonly ref struct LasPointSpan(IBasePointDataRecord pointDataRecord, Re
     /// Gets the extra bytes.
     /// </summary>
     public ReadOnlySpan<byte> ExtraBytes { get; } = extraBytes;
+
+    /// <summary>
+    /// Converts a <see cref="LasPointSpan"/> to a <see cref="LasPointMemory"/>.
+    /// </summary>
+    /// <param name="pointSpan">The point.</param>
+    /// <returns>The memory based point.</returns>
+    public static explicit operator LasPointMemory(LasPointSpan pointSpan) => new(pointSpan.PointDataRecord!, pointSpan.ExtraBytes.ToArray());
 }

@@ -9,7 +9,7 @@ namespace Altemiq.IO.Las.Readers.Raw;
 /// <summary>
 /// The <see cref="ExtendedGpsColorPointDataRecord"/> reader.
 /// </summary>
-internal sealed class ExtendedGpsColorPointDataRecordReader : PointDataRecordReader<ExtendedGpsColorPointDataRecord>
+internal sealed class ExtendedGpsColorPointDataRecordReader() : PointDataRecordReader<ExtendedGpsColorPointDataRecord>(ExtendedGpsColorPointDataRecord.Size)
 {
     /// <inheritdoc />
     public override ExtendedGpsColorPointDataRecord Read(ReadOnlySpan<byte> source) => ExtendedGpsColorPointDataRecord.Create(source);

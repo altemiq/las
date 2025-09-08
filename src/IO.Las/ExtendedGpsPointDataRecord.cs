@@ -50,17 +50,17 @@ public readonly record struct ExtendedGpsPointDataRecord :
     [System.Diagnostics.CodeAnalysis.SetsRequiredMembers]
     public ExtendedGpsPointDataRecord(ReadOnlySpan<byte> data)
     {
-        this.X = System.Buffers.Binary.BinaryPrimitives.ReadInt32LittleEndian(data[..Constants.ExtendedPointDataRecord.YFieldOffset]);
-        this.Y = System.Buffers.Binary.BinaryPrimitives.ReadInt32LittleEndian(data[Constants.ExtendedPointDataRecord.YFieldOffset..Constants.ExtendedPointDataRecord.ZFieldOffset]);
-        this.Z = System.Buffers.Binary.BinaryPrimitives.ReadInt32LittleEndian(data[Constants.ExtendedPointDataRecord.ZFieldOffset..Constants.ExtendedPointDataRecord.IntensityFieldOffset]);
-        this.Intensity = System.Buffers.Binary.BinaryPrimitives.ReadUInt16LittleEndian(data[Constants.ExtendedPointDataRecord.IntensityFieldOffset..Constants.ExtendedPointDataRecord.FlagsFieldOffset]);
+        this.X = FieldAccessors.ExtendedPointDataRecord.GetX(data);
+        this.Y = FieldAccessors.ExtendedPointDataRecord.GetY(data);
+        this.Z = FieldAccessors.ExtendedPointDataRecord.GetZ(data);
+        this.Intensity = FieldAccessors.ExtendedPointDataRecord.GetIntensity(data);
         this.flags = data[Constants.ExtendedPointDataRecord.FlagsFieldOffset];
         this.classificationFlags = data[Constants.ExtendedPointDataRecord.ClassificationFlagsFieldOffset];
         this.Classification = (ExtendedClassification)data[Constants.ExtendedPointDataRecord.ClassificationFieldOffset];
         this.UserData = data[Constants.ExtendedPointDataRecord.UserDataFieldOffset];
-        this.ScanAngle = System.Buffers.Binary.BinaryPrimitives.ReadInt16LittleEndian(data[Constants.ExtendedPointDataRecord.ScanAngleFieldOffset..Constants.ExtendedPointDataRecord.PointSourceIdFieldOffset]);
-        this.PointSourceId = System.Buffers.Binary.BinaryPrimitives.ReadUInt16LittleEndian(data[Constants.ExtendedPointDataRecord.PointSourceIdFieldOffset..Constants.ExtendedPointDataRecord.GpsTimeFieldOffset]);
-        this.GpsTime = System.Buffers.Binary.BinaryPrimitives.ReadDoubleLittleEndian(data[Constants.ExtendedPointDataRecord.GpsTimeFieldOffset..Size]);
+        this.ScanAngle = FieldAccessors.ExtendedPointDataRecord.GetScanAngle(data);
+        this.PointSourceId = FieldAccessors.ExtendedPointDataRecord.GetPointSourceId(data);
+        this.GpsTime = FieldAccessors.ExtendedPointDataRecord.GetGpsTime(data);
     }
 
 #if NET7_0_OR_GREATER
@@ -90,64 +90,64 @@ public readonly record struct ExtendedGpsPointDataRecord :
     /// <inheritdoc />
     public required byte ReturnNumber
     {
-        get => BitManipulation.Get(this.flags, Constants.BitMasks.Mask0 | Constants.BitMasks.Mask1 | Constants.BitMasks.Mask2 | Constants.BitMasks.Mask3);
-        init => this.flags = BitManipulation.Set(this.flags, value, Constants.BitMasks.Mask0 | Constants.BitMasks.Mask1 | Constants.BitMasks.Mask2 | Constants.BitMasks.Mask3);
+        get => FieldAccessors.ExtendedPointDataRecord.GetReturnNumber(this.flags);
+        init => FieldAccessors.ExtendedPointDataRecord.SetReturnNumber(ref this.flags, value);
     }
 
     /// <inheritdoc />
     public required byte NumberOfReturns
     {
-        get => BitManipulation.Get(this.flags, Constants.BitMasks.Mask4 | Constants.BitMasks.Mask5 | Constants.BitMasks.Mask6 | Constants.BitMasks.Mask7, 4);
-        init => this.flags = BitManipulation.Set(this.flags, value, Constants.BitMasks.Mask4 | Constants.BitMasks.Mask5 | Constants.BitMasks.Mask6 | Constants.BitMasks.Mask7, 4);
+        get => FieldAccessors.ExtendedPointDataRecord.GetNumberOfReturns(this.flags);
+        init => FieldAccessors.ExtendedPointDataRecord.SetNumberOfReturns(ref this.flags, value);
     }
 
     /// <inheritdoc />
     public bool Synthetic
     {
-        get => BitManipulation.IsSet(this.classificationFlags, Constants.BitMasks.Mask0);
-        init => this.classificationFlags = BitManipulation.Apply(this.classificationFlags, Constants.BitMasks.Mask0, value);
+        get => FieldAccessors.ExtendedPointDataRecord.GetSynthetic(this.classificationFlags);
+        init => FieldAccessors.ExtendedPointDataRecord.SetSynthetic(ref this.classificationFlags, value);
     }
 
     /// <inheritdoc />
     public bool KeyPoint
     {
-        get => BitManipulation.IsSet(this.classificationFlags, Constants.BitMasks.Mask1);
-        init => this.classificationFlags = BitManipulation.Apply(this.classificationFlags, Constants.BitMasks.Mask1, value);
+        get => FieldAccessors.ExtendedPointDataRecord.GetKeyPoint(this.classificationFlags);
+        init => FieldAccessors.ExtendedPointDataRecord.SetKeyPoint(ref this.classificationFlags, value);
     }
 
     /// <inheritdoc />
     public bool Withheld
     {
-        get => BitManipulation.IsSet(this.classificationFlags, Constants.BitMasks.Mask2);
-        init => this.classificationFlags = BitManipulation.Apply(this.classificationFlags, Constants.BitMasks.Mask2, value);
+        get => FieldAccessors.ExtendedPointDataRecord.GetWithheld(this.classificationFlags);
+        init => FieldAccessors.ExtendedPointDataRecord.SetWithheld(ref this.classificationFlags, value);
     }
 
     /// <inheritdoc />
     public bool Overlap
     {
-        get => BitManipulation.IsSet(this.classificationFlags, Constants.BitMasks.Mask3);
-        init => this.classificationFlags = BitManipulation.Apply(this.classificationFlags, Constants.BitMasks.Mask3, value);
+        get => FieldAccessors.ExtendedPointDataRecord.GetOverlap(this.classificationFlags);
+        init => FieldAccessors.ExtendedPointDataRecord.SetOverlap(ref this.classificationFlags, value);
     }
 
     /// <inheritdoc />
     public byte ScannerChannel
     {
-        get => BitManipulation.Get(this.classificationFlags, Constants.BitMasks.Mask4 | Constants.BitMasks.Mask5, 4);
-        init => this.classificationFlags = BitManipulation.Set(this.classificationFlags, value, Constants.BitMasks.Mask4 | Constants.BitMasks.Mask5, 4);
+        get => FieldAccessors.ExtendedPointDataRecord.GetScannerChannel(this.classificationFlags);
+        init => FieldAccessors.ExtendedPointDataRecord.SetScannerChannel(ref this.classificationFlags, value);
     }
 
     /// <inheritdoc />
     public required bool ScanDirectionFlag
     {
-        get => BitManipulation.IsSet(this.classificationFlags, Constants.BitMasks.Mask6);
-        init => this.classificationFlags = BitManipulation.Apply(this.classificationFlags, Constants.BitMasks.Mask6, value);
+        get => FieldAccessors.ExtendedPointDataRecord.GetScanDirectionFlag(this.classificationFlags);
+        init => FieldAccessors.ExtendedPointDataRecord.SetScanDirectionFlag(ref this.classificationFlags, value);
     }
 
     /// <inheritdoc />
     public required bool EdgeOfFlightLine
     {
-        get => BitManipulation.IsSet(this.classificationFlags, Constants.BitMasks.Mask7);
-        init => this.classificationFlags = BitManipulation.Apply(this.classificationFlags, Constants.BitMasks.Mask7, value);
+        get => FieldAccessors.ExtendedPointDataRecord.GetEdgeOfFlightLine(this.classificationFlags);
+        init => FieldAccessors.ExtendedPointDataRecord.SetEdgeOfFlightLine(ref this.classificationFlags, value);
     }
 
     /// <inheritdoc />
@@ -309,17 +309,17 @@ public readonly record struct ExtendedGpsPointDataRecord :
     /// <returns>The number of bytes written.</returns>
     public int WriteLittleEndian(Span<byte> destination)
     {
-        System.Buffers.Binary.BinaryPrimitives.WriteInt32LittleEndian(destination[..Constants.ExtendedPointDataRecord.YFieldOffset], this.X);
-        System.Buffers.Binary.BinaryPrimitives.WriteInt32LittleEndian(destination[Constants.ExtendedPointDataRecord.YFieldOffset..Constants.ExtendedPointDataRecord.ZFieldOffset], this.Y);
-        System.Buffers.Binary.BinaryPrimitives.WriteInt32LittleEndian(destination[Constants.ExtendedPointDataRecord.ZFieldOffset..Constants.ExtendedPointDataRecord.IntensityFieldOffset], this.Z);
-        System.Buffers.Binary.BinaryPrimitives.WriteUInt16LittleEndian(destination[Constants.ExtendedPointDataRecord.IntensityFieldOffset..Constants.ExtendedPointDataRecord.FlagsFieldOffset], this.Intensity);
+        FieldAccessors.ExtendedPointDataRecord.SetX(destination, this.X);
+        FieldAccessors.ExtendedPointDataRecord.SetY(destination, this.Y);
+        FieldAccessors.ExtendedPointDataRecord.SetZ(destination, this.Z);
+        FieldAccessors.ExtendedPointDataRecord.SetIntensity(destination, this.Intensity);
         destination[Constants.ExtendedPointDataRecord.FlagsFieldOffset] = this.flags;
         destination[Constants.ExtendedPointDataRecord.ClassificationFlagsFieldOffset] = this.classificationFlags;
         destination[Constants.ExtendedPointDataRecord.ClassificationFieldOffset] = (byte)this.Classification;
         destination[Constants.ExtendedPointDataRecord.UserDataFieldOffset] = this.UserData;
-        System.Buffers.Binary.BinaryPrimitives.WriteInt16LittleEndian(destination[Constants.ExtendedPointDataRecord.ScanAngleFieldOffset..Constants.ExtendedPointDataRecord.PointSourceIdFieldOffset], this.ScanAngle);
-        System.Buffers.Binary.BinaryPrimitives.WriteUInt16LittleEndian(destination[Constants.ExtendedPointDataRecord.PointSourceIdFieldOffset..Constants.ExtendedPointDataRecord.GpsTimeFieldOffset], this.PointSourceId);
-        System.Buffers.Binary.BinaryPrimitives.WriteDoubleLittleEndian(destination[Constants.ExtendedPointDataRecord.GpsTimeFieldOffset..Constants.ExtendedPointDataRecord.ColorFieldOffset], this.GpsTime);
+        FieldAccessors.ExtendedPointDataRecord.SetScanAngle(destination, this.ScanAngle);
+        FieldAccessors.ExtendedPointDataRecord.SetPointSourceId(destination, this.PointSourceId);
+        FieldAccessors.ExtendedPointDataRecord.SetGpsTime(destination, this.GpsTime);
         return Size;
     }
 

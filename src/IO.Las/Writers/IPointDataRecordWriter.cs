@@ -16,15 +16,17 @@ public interface IPointDataRecordWriter
     /// </summary>
     /// <param name="destination">The destination.</param>
     /// <param name="record">The record.</param>
+    /// <param name="extraBytes">The extra bytes.</param>
     /// <returns>The number of bytes written.</returns>
-    public abstract int Write(Span<byte> destination, IBasePointDataRecord record);
+    int Write(Span<byte> destination, IBasePointDataRecord record, ReadOnlySpan<byte> extraBytes);
 
     /// <summary>
     /// Writes the point data record asynchronously.
     /// </summary>
     /// <param name="destination">The destination.</param>
     /// <param name="record">The record.</param>
+    /// <param name="extraBytes">The extra bytes.</param>
     /// <param name="cancellationToken">The cancellation token.</param>
     /// <returns>The number of bytes written.</returns>
-    public abstract ValueTask<int> WriteAsync(Memory<byte> destination, IBasePointDataRecord record, CancellationToken cancellationToken = default);
+    ValueTask<int> WriteAsync(Memory<byte> destination, IBasePointDataRecord record, ReadOnlyMemory<byte> extraBytes, CancellationToken cancellationToken = default);
 }

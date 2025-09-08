@@ -39,7 +39,7 @@ internal static class Processor
         foreach (var file in inputs)
         {
             Indexing.LasIndex index;
-            using (var reader = new LasReader(File.OpenRead(file, services)))
+            using (var reader = LazReader.Create(File.OpenRead(file, services)))
             {
                 index = Indexing.LasIndex.Create(reader, tileSize, maximumIntervals, minimumPoints, threshold);
             }
@@ -47,11 +47,16 @@ internal static class Processor
 #if LAS1_4_OR_GREATER
             if (append)
             {
-                throw new NotImplementedException();
+                // open the file for reading
+                using var reader = LazReader.Create(File.Open(file, FileMode.Open, services));
+                if (reader is LazReader lazReader)
+                {
+                    throw new NotImplementedException();
+                }
             }
             else
             {
-                using var stream = File.OpenWrite(Path.ChangeExtension(file, ".lax"), services);
+                using var stream = File.OpenWrite(Path.ChangeExtension(file.LocalPath, ".lax"));
                 index.WriteTo(stream);
             }
 #else

@@ -14,25 +14,14 @@ internal abstract class PointDataRecordWriter<T> : IPointDataRecordWriter
     where T : IBasePointDataRecord
 {
     /// <inheritdoc/>
-    int IPointDataRecordWriter.Write(Span<byte> destination, IBasePointDataRecord record) => record is T t ? this.Write(destination, t) : throw new InvalidOperationException();
+    int IPointDataRecordWriter.Write(Span<byte> destination, IBasePointDataRecord record, ReadOnlySpan<byte> extraBytes) => record is T t ? this.Write(destination, t, extraBytes) : throw new InvalidOperationException();
 
     /// <inheritdoc/>
-    ValueTask<int> IPointDataRecordWriter.WriteAsync(Memory<byte> destination, IBasePointDataRecord record, CancellationToken cancellationToken) => record is T t ? this.WriteAsync(destination, t, cancellationToken) : throw new InvalidOperationException();
+    ValueTask<int> IPointDataRecordWriter.WriteAsync(Memory<byte> destination, IBasePointDataRecord record, ReadOnlyMemory<byte> extraBytes, CancellationToken cancellationToken) => record is T t ? this.WriteAsync(destination, t, extraBytes, cancellationToken) : throw new InvalidOperationException();
 
-    /// <summary>
-    /// Writes the point data record.
-    /// </summary>
-    /// <param name="destination">The destination.</param>
-    /// <param name="record">The record.</param>
-    /// <returns>The number of bytes written.</returns>
-    public abstract int Write(Span<byte> destination, T record);
+    /// <inheritdoc cref="IPointDataRecordWriter.Write"/>
+    public abstract int Write(Span<byte> destination, T record, ReadOnlySpan<byte> extraBytes);
 
-    /// <summary>
-    /// Writes the point data record asynchronously.
-    /// </summary>
-    /// <param name="destination">The destination.</param>
-    /// <param name="record">The record.</param>
-    /// <param name="cancellationToken">The cancellation token.</param>
-    /// <returns>The number of bytes written.</returns>
-    public abstract ValueTask<int> WriteAsync(Memory<byte> destination, T record, CancellationToken cancellationToken = default);
+    /// <inheritdoc cref="IPointDataRecordWriter.WriteAsync"/>
+    public abstract ValueTask<int> WriteAsync(Memory<byte> destination, T record, ReadOnlyMemory<byte> extraBytes, CancellationToken cancellationToken = default);
 }

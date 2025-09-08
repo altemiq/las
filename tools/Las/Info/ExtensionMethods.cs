@@ -75,7 +75,7 @@ internal static class ExtensionMethods
         int SingleReturns,
         long[] OverviewReturnNumber,
         long[] OverviewNumberOfReturns,
-        int[] Histogram) GetStatistics(this LasReader reader, BoundingBox? box)
+        int[] Histogram) GetStatistics(this ILasReader reader, BoundingBox? box)
     {
         var x = MinMax.Create<int>();
         var y = MinMax.Create<int>();

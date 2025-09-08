@@ -13,7 +13,7 @@ internal sealed class ArithmeticEncoder : ArithmeticCoder, IEntropyEncoder
 {
     private readonly byte[] outBuffer;
     private readonly int endBuffer;
-    private BinaryWriter? binaryWriter;
+    private Stream? outputStream;
     private int outByte;
     private int endByte;
 
@@ -30,15 +30,15 @@ internal sealed class ArithmeticEncoder : ArithmeticCoder, IEntropyEncoder
     }
 
     /// <inheritdoc/>
-    [System.Diagnostics.CodeAnalysis.MemberNotNullWhen(true, nameof(binaryWriter))]
-    public bool Initialize(BinaryWriter? writer)
+    [System.Diagnostics.CodeAnalysis.MemberNotNullWhen(true, nameof(this.outputStream))]
+    public bool Initialize(Stream? stream)
     {
-        if (writer is null)
+        if (stream is null)
         {
             return false;
         }
 
-        this.binaryWriter = writer;
+        this.outputStream = stream;
         this.@base = default;
         this.length = MaxLength;
         this.outByte = default;
@@ -50,7 +50,7 @@ internal sealed class ArithmeticEncoder : ArithmeticCoder, IEntropyEncoder
     /// <inheritdoc/>
     public override void Done()
     {
-        if (this.binaryWriter is null)
+        if (this.outputStream is null)
         {
             // not initialized.
             return;
@@ -89,24 +89,24 @@ internal sealed class ArithmeticEncoder : ArithmeticCoder, IEntropyEncoder
 
         if (this.endByte != this.endBuffer)
         {
-            this.binaryWriter.Write(this.outBuffer, BufferSize, BufferSize);
+            this.outputStream.Write(this.outBuffer, BufferSize, BufferSize);
         }
 
         var bufferSize = this.outByte;
         if (bufferSize is not 0)
         {
-            this.binaryWriter.Write(this.outBuffer, 0, bufferSize);
+            this.outputStream.Write(this.outBuffer, 0, bufferSize);
         }
 
         // write two or three zero bytes to be in sync with the decoder's byte reads
-        this.binaryWriter.Write(byte.MinValue);
-        this.binaryWriter.Write(byte.MinValue);
+        this.outputStream.WriteByteLittleEndian(byte.MinValue);
+        this.outputStream.WriteByteLittleEndian(byte.MinValue);
         if (anotherByte)
         {
-            this.binaryWriter.Write(byte.MinValue);
+            this.outputStream.WriteByteLittleEndian(byte.MinValue);
         }
 
-        this.binaryWriter = null;
+        this.outputStream = null;
     }
 
     /// <inheritdoc/>
@@ -296,7 +296,7 @@ internal sealed class ArithmeticEncoder : ArithmeticCoder, IEntropyEncoder
     }
 
     /// <inheritdoc/>
-    public void WriteFloat(float sym) => this.WriteInt(ExtendedBitConverter.SingleToUInt32Bits(sym));
+    public void WriteFloat(float sym) => this.WriteInt(BitConverter.SingleToUInt32Bits(sym));
 
     /// <inheritdoc/>
     public void WriteInt64(ulong sym)
@@ -309,13 +309,13 @@ internal sealed class ArithmeticEncoder : ArithmeticCoder, IEntropyEncoder
     }
 
     /// <inheritdoc/>
-    public void WriteDouble(double sym) => this.WriteInt64(ExtendedBitConverter.DoubleToUInt64Bits(sym));
+    public void WriteDouble(double sym) => this.WriteInt64(BitConverter.DoubleToUInt64Bits(sym));
 
     /// <summary>
-    /// Gets the binary writer.
+    /// Gets the stream.
     /// </summary>
-    /// <returns>The binary writer.</returns>
-    public BinaryWriter GetBinaryWriter() => this.binaryWriter ?? throw new CompressionNotInitializedException();
+    /// <returns>The stream.</returns>
+    public Stream GetStream() => this.outputStream ?? throw new CompressionNotInitializedException();
 
     private void PropagateCarry()
     {
@@ -356,7 +356,7 @@ internal sealed class ArithmeticEncoder : ArithmeticCoder, IEntropyEncoder
 
     private void ManageOutBuffer()
     {
-        if (this.binaryWriter is null)
+        if (this.outputStream is null)
         {
             throw new CompressionNotInitializedException();
         }
@@ -366,7 +366,7 @@ internal sealed class ArithmeticEncoder : ArithmeticCoder, IEntropyEncoder
             this.outByte = default;
         }
 
-        this.binaryWriter.Write(this.outBuffer, this.outByte, BufferSize);
+        this.outputStream.Write(this.outBuffer, this.outByte, BufferSize);
         this.endByte = this.outByte + BufferSize;
     }
 }

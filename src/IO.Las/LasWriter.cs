@@ -110,24 +110,26 @@ public class LasWriter(Stream stream, bool leaveOpen = false) : ILasWriter, IDis
 #endif
         Array.Resize(ref this.buffer, pointDataRecordSize);
 
-        if (recordSize is not 0)
+        if (recordSize is 0)
         {
-            byte[] byteArray = System.Buffers.ArrayPool<byte>.Shared.Rent(0);
-            foreach (var record in recordsList)
-            {
-                var size = record.Size();
-                if (byteArray.Length < size)
-                {
-                    System.Buffers.ArrayPool<byte>.Shared.Return(byteArray);
-                    byteArray = System.Buffers.ArrayPool<byte>.Shared.Rent(size);
-                }
+            return;
+        }
 
-                var written = record.Write(byteArray);
-                this.BaseStream.Write(byteArray, 0, written);
+        byte[] byteArray = System.Buffers.ArrayPool<byte>.Shared.Rent(0);
+        foreach (var record in recordsList)
+        {
+            var size = record.Size();
+            if (byteArray.Length < size)
+            {
+                System.Buffers.ArrayPool<byte>.Shared.Return(byteArray);
+                byteArray = System.Buffers.ArrayPool<byte>.Shared.Rent(size);
             }
 
-            System.Buffers.ArrayPool<byte>.Shared.Return(byteArray);
+            var written = record.Write(byteArray);
+            this.BaseStream.Write(byteArray, 0, written);
         }
+
+        System.Buffers.ArrayPool<byte>.Shared.Return(byteArray);
     }
 
     /// <inheritdoc />
@@ -142,9 +144,7 @@ public class LasWriter(Stream stream, bool leaveOpen = false) : ILasWriter, IDis
         }
 #endif
 
-        var written = this.RawWriter.Write(this.buffer, record);
-        extraBytes.CopyTo(this.buffer.AsSpan(written));
-        written += extraBytes.Length;
+        var written = this.RawWriter.Write(this.buffer, record, extraBytes);
         this.BaseStream.Write(this.buffer, 0, written);
     }
 
@@ -168,9 +168,7 @@ public class LasWriter(Stream stream, bool leaveOpen = false) : ILasWriter, IDis
         }
 #endif
 
-        var written = await this.RawWriter.WriteAsync(this.buffer, record, cancellationToken).ConfigureAwait(false);
-        extraBytes.CopyTo(this.buffer.AsMemory(written));
-        written += extraBytes.Length;
+        var written = await this.RawWriter.WriteAsync(this.buffer, record, extraBytes, cancellationToken).ConfigureAwait(false);
 #if NETSTANDARD2_1_OR_GREATER || NETCOREAPP2_1_OR_GREATER
         await this.BaseStream.WriteAsync(this.buffer.AsMemory(0, written), cancellationToken).ConfigureAwait(false);
 #else
