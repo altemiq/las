@@ -91,7 +91,7 @@ public sealed record ExtraBytes : VariableLengthRecord, IExtraBytes
     /// <param name="index">The index.</param>
     /// <param name="source">The source.</param>
     /// <returns>The value.</returns>
-    public object? GetValue(int index, ReadOnlySpan<byte> source) => this.items[index].GetData(source[this.indexes[index]..]);
+    public object? GetValue(int index, ReadOnlySpan<byte> source) => this.items[index].GetValue(source[this.indexes[index]..]);
 
     /// <summary>
     /// Gets the data.
@@ -103,7 +103,7 @@ public sealed record ExtraBytes : VariableLengthRecord, IExtraBytes
         var values = new object?[this.items.Count];
         for (int i = 0; i < this.items.Count; i++)
         {
-            values[i] = this.items[i].GetData(source[this.indexes[i]..]);
+            values[i] = this.items[i].GetValue(source[this.indexes[i]..]);
         }
 
         return values;

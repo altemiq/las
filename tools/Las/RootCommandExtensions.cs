@@ -20,6 +20,8 @@ internal static partial class RootCommandExtensions
     public static T AddAllTools<T>(this T command)
         where T : RootCommand
     {
+        VariableLengthRecordProcessor.Instance.RegisterCompression();
+        VariableLengthRecordProcessor.Instance.RegisterIndexing();
         VariableLengthRecordProcessor.Instance.RegisterTiling();
         return command
             .AddInfo()

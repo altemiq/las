@@ -10,7 +10,7 @@ namespace Altemiq.IO.Las.Readers.Compressed;
 /// The gps time reader.
 /// </summary>
 /// <param name="decoder">The decoder.</param>
-internal sealed class GpsTimeReader(Compression.IEntropyDecoder decoder) : ISimpleReader
+internal sealed class GpsTimeReader(IEntropyDecoder decoder) : ISimpleReader
 {
     private const int Multiple = 500;
 
@@ -26,9 +26,9 @@ internal sealed class GpsTimeReader(Compression.IEntropyDecoder decoder) : ISimp
     private readonly int[] lastGpsTimeDiff = new int[4];
     private readonly int[] multiExtremeCounter = new int[4];
 
-    private readonly Compression.ISymbolModel gpsTimeMulti = decoder.CreateSymbolModel(MultipleTotal);
-    private readonly Compression.ISymbolModel gpsTimeZeroDiff = decoder.CreateSymbolModel(6);
-    private readonly Compression.IntegerDecompressor gpsTimeIntegerDecompressor = new(decoder, 32, 9);
+    private readonly ISymbolModel gpsTimeMulti = decoder.CreateSymbolModel(MultipleTotal);
+    private readonly ISymbolModel gpsTimeZeroDiff = decoder.CreateSymbolModel(6);
+    private readonly IntegerDecompressor gpsTimeIntegerDecompressor = new(decoder, 32, 9);
 
     private uint last;
     private uint next;

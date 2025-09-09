@@ -176,14 +176,14 @@ public readonly record struct ExtraBytesItem
     /// </summary>
     /// <param name="source">The source.</param>
     /// <returns>The value.</returns>
-    public object? GetData(ReadOnlyMemory<byte> source) => this.GetData(source.Span);
+    public object? GetValue(ReadOnlyMemory<byte> source) => this.GetValue(source.Span);
 
     /// <summary>
     /// Gets the data.
     /// </summary>
     /// <param name="source">The source.</param>
     /// <returns>The value.</returns>
-    public object? GetData(ReadOnlySpan<byte> source)
+    public object? GetValue(ReadOnlySpan<byte> source)
     {
         return ScaleAndOffset(this, GetValue(this, source));
 
@@ -432,7 +432,7 @@ public readonly record struct ExtraBytesItem
     /// </summary>
     /// <param name="source">The source.</param>
     /// <returns>The value.</returns>
-    public ValueTask<object?> GetDataAsync(ReadOnlyMemory<byte> source) => new(this.GetData(source.Span));
+    public ValueTask<object?> GetDataAsync(ReadOnlyMemory<byte> source) => new(this.GetValue(source.Span));
 
     /// <summary>
     /// Reads an instance of <see cref="ExtraBytesItem"/> from the source.

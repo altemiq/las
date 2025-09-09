@@ -214,7 +214,7 @@ public partial class HeaderBlockBuilder
 #endif
 
     /// <summary>
-    /// Sets the offset usiing the specified coordinates and precision.
+    /// Sets the offset using the specified coordinates and precision.
     /// </summary>
     /// <param name="x">The x-coordinate.</param>
     /// <param name="y">The y-coordinate.</param>
@@ -222,7 +222,7 @@ public partial class HeaderBlockBuilder
     /// <param name="horizontalPrecision">The horizontal position.</param>
     /// <param name="verticalPrecision">The vertical position.</param>
     public void SetOffset(double x, double y, double z, double horizontalPrecision = 1000, double verticalPrecision = 100) =>
-        this.Offset = new Vector3D(
+        this.Offset = new(
             Math.Truncate(x / horizontalPrecision) * horizontalPrecision,
             Math.Truncate(y / horizontalPrecision) * horizontalPrecision,
             Math.Truncate(z / verticalPrecision) * verticalPrecision);
@@ -465,7 +465,7 @@ public partial class HeaderBlockBuilder
         var minGpsTime = this.MinGpsTime.Equals(double.MaxValue) ? default : this.MinGpsTime;
 #endif
 
-        return new HeaderBlock(
+        return new(
             this.FileSourceId,
 #if LAS1_5_OR_GREATER
             (GlobalEncoding)BitManipulation.Get((byte)this.GlobalEncoding, Constants.BitMasks.Mask0 | Constants.BitMasks.Mask1 | Constants.BitMasks.Mask2 | Constants.BitMasks.Mask3 | Constants.BitMasks.Mask4 | Constants.BitMasks.Mask5 | Constants.BitMasks.Mask6),

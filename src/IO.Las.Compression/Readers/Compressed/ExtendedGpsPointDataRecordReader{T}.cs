@@ -6,8 +6,6 @@
 
 namespace Altemiq.IO.Las.Readers.Compressed;
 
-using Altemiq.IO.Las.Compression;
-
 /// <summary>
 /// The compressed <see cref="Readers.IPointDataRecordReader"/> for <see cref="IExtendedPointDataRecord"/> instances.
 /// </summary>
@@ -207,14 +205,13 @@ internal abstract class ExtendedGpsPointDataRecordReader<T> : IPointDataRecordRe
 
         // get last
         var lastPoint = processingContext.LastPoint;
-        var lastItem = lastPoint;
 
         ////////////////////////////////////////
         // decompress XY layer
         ////////////////////////////////////////
 
         // create single (3) / first (1) / last (2) / intermediate (0) context from last point return
-        var lastPointReturn = GetLastPointReturn(lastPoint, lastItem[gpsTimeChangeIndex]);
+        var lastPointReturn = GetLastPointReturn(lastPoint, lastPoint[gpsTimeChangeIndex]);
 
         // decompress which values have changed with last point return context
         var changedValues = (int)this.valueChannelReturnsXY.Decoder.DecodeSymbol(processingContext.ChangedValuesModels[lastPointReturn]);
@@ -228,7 +225,7 @@ internal abstract class ExtendedGpsPointDataRecordReader<T> : IPointDataRecordRe
             if (this.contexts[scannerChannel].Unused)
             {
                 // create and init entropy models and integer decompressors
-                this.CreateAndInitModelsAndDecompressors(scannerChannel, lastItem, gpsTimeChangeIndex);
+                this.CreateAndInitModelsAndDecompressors(scannerChannel, lastPoint, gpsTimeChangeIndex);
 
                 // set the scanner channel
                 FieldAccessors.ExtendedPointDataRecord.SetScannerChannel(ref this.contexts[scannerChannel].LastPoint[Constants.ExtendedPointDataRecord.ClassificationFlagsFieldOffset], (byte)scannerChannel);
@@ -472,14 +469,14 @@ internal abstract class ExtendedGpsPointDataRecordReader<T> : IPointDataRecordRe
         if (this.valueGpsTime.Changed && gpsTimeChange)
         {
             this.ReadGpsTime();
-            System.Buffers.Binary.BinaryPrimitives.WriteDoubleLittleEndian(lastItem.AsSpan(Constants.ExtendedPointDataRecord.GpsTimeFieldOffset), BitConverter.UInt64BitsToDouble(processingContext.LastGpsTime[processingContext.Last]));
+            System.Buffers.Binary.BinaryPrimitives.WriteDoubleLittleEndian(lastPoint.AsSpan(Constants.ExtendedPointDataRecord.GpsTimeFieldOffset), BitConverter.UInt64BitsToDouble(processingContext.LastGpsTime[processingContext.Last]));
         }
 
         // copy the last item
-        System.Array.Copy(lastItem, this.data, ExtendedGpsPointDataRecord.Size);
+        Array.Copy(lastPoint, this.data, ExtendedGpsPointDataRecord.Size);
 
         // remember if the last point had a GPS time change
-        lastItem[gpsTimeChangeIndex] = gpsTimeChange ? (byte)0x01 : (byte)0x00;
+        lastPoint[gpsTimeChangeIndex] = gpsTimeChange ? (byte)0x01 : (byte)0x00;
         return this.data;
 
         static int GetLastPointReturn(ReadOnlySpan<byte> lastPoint, byte gpsTimeChange)

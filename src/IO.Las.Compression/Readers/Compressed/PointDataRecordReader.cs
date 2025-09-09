@@ -11,7 +11,7 @@ namespace Altemiq.IO.Las.Readers.Compressed;
 /// </summary>
 /// <param name="decoder">The decoder.</param>
 /// <param name="extraBytes">The number of extra bytes.</param>
-internal sealed class PointDataRecordReader(Compression.IEntropyDecoder decoder, int extraBytes) : PointDataRecordReader<PointDataRecord>(decoder, PointDataRecord.Size + extraBytes, PointDataRecord.Size)
+internal sealed class PointDataRecordReader(IEntropyDecoder decoder, int extraBytes) : PointDataRecordReader<PointDataRecord>(decoder, PointDataRecord.Size + extraBytes, PointDataRecord.Size)
 {
     private readonly ISimpleReader byteReader = extraBytes switch
     {

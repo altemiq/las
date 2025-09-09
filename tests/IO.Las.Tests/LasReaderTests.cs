@@ -61,7 +61,7 @@ public class LasReaderTests
                 break;
             }
 
-            if (extraBytes[0].GetData(point.ExtraBytes) is double value)
+            if (extraBytes[0].GetValue(point.ExtraBytes) is double value)
             {
                 if (value < min)
                 {

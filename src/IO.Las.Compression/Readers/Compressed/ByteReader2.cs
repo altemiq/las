@@ -6,8 +6,6 @@
 
 namespace Altemiq.IO.Las.Readers.Compressed;
 
-using Altemiq.IO.Las.Compression;
-
 /// <summary>
 /// The compressed byte reader, version 2.
 /// </summary>
@@ -42,13 +40,12 @@ internal sealed class ByteReader2 : ISimpleReader
     /// <inheritdoc/>
     public bool Initialize(ReadOnlySpan<byte> item)
     {
-        var startIndex = item.Length - this.lastItem.Length;
         foreach (var bitModel in this.byteModels)
         {
             _ = bitModel.Initialize();
         }
 
-        item.Slice(startIndex, this.lastItem.Length).CopyTo(this.lastItem);
+        item[..this.lastItem.Length].CopyTo(this.lastItem);
 
         return true;
     }

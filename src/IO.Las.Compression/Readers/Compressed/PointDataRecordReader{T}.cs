@@ -13,24 +13,24 @@ namespace Altemiq.IO.Las.Readers.Compressed;
 /// <param name="decoder">The decoder.</param>
 /// <param name="pointDataLength">The point data length.</param>
 /// <param name="basePointDataLength">The base point data length, without extra bytes.</param>
-internal abstract class PointDataRecordReader<T>(Compression.IEntropyDecoder decoder, int pointDataLength, int basePointDataLength) : IPointDataRecordReader, ISimple
+internal abstract class PointDataRecordReader<T>(IEntropyDecoder decoder, int pointDataLength, int basePointDataLength) : IPointDataRecordReader, ISimple
     where T : IBasePointDataRecord
 {
-    private readonly Compression.ISymbolModel changedValuesModel = decoder.CreateSymbolModel(64);
-    private readonly Compression.IntegerDecompressor intensityIntegerDecompressor = new(decoder, 16, 4);
-    private readonly Compression.ISymbolModel scanAngleRankModels0 = decoder.CreateSymbolModel(Compression.ArithmeticCoder.ModelCount);
-    private readonly Compression.ISymbolModel scanAngleRankModels1 = decoder.CreateSymbolModel(Compression.ArithmeticCoder.ModelCount);
-    private readonly Compression.IntegerDecompressor pointSourceIdIntegerDecompressor = new(decoder);
-    private readonly Compression.ISymbolModel?[] bitByteModels = new Compression.ISymbolModel[Compression.ArithmeticCoder.ModelCount];
-    private readonly Compression.ISymbolModel?[] classificationModels = new Compression.ISymbolModel[Compression.ArithmeticCoder.ModelCount];
-    private readonly Compression.ISymbolModel?[] userDataModels = new Compression.ISymbolModel[Compression.ArithmeticCoder.ModelCount];
-    private readonly Compression.IntegerDecompressor deltaXIntegerDecompressor = new(decoder, 32, 2);
-    private readonly Compression.IntegerDecompressor deltaYIntegerDecompressor = new(decoder, 32, 22);
-    private readonly Compression.IntegerDecompressor zIntegerDecompressor = new(decoder, 32, 20);
+    private readonly ISymbolModel changedValuesModel = decoder.CreateSymbolModel(64);
+    private readonly IntegerDecompressor intensityIntegerDecompressor = new(decoder, 16, 4);
+    private readonly ISymbolModel scanAngleRankModels0 = decoder.CreateSymbolModel(ArithmeticCoder.ModelCount);
+    private readonly ISymbolModel scanAngleRankModels1 = decoder.CreateSymbolModel(ArithmeticCoder.ModelCount);
+    private readonly IntegerDecompressor pointSourceIdIntegerDecompressor = new(decoder);
+    private readonly ISymbolModel?[] bitByteModels = new ISymbolModel[ArithmeticCoder.ModelCount];
+    private readonly ISymbolModel?[] classificationModels = new ISymbolModel[ArithmeticCoder.ModelCount];
+    private readonly ISymbolModel?[] userDataModels = new ISymbolModel[ArithmeticCoder.ModelCount];
+    private readonly IntegerDecompressor deltaXIntegerDecompressor = new(decoder, 32, 2);
+    private readonly IntegerDecompressor deltaYIntegerDecompressor = new(decoder, 32, 22);
+    private readonly IntegerDecompressor zIntegerDecompressor = new(decoder, 32, 20);
     private readonly byte[] lastPoint = new byte[PointDataRecord.Size];
     private readonly ushort[] lastIntensity = new ushort[16];
-    private readonly Compression.StreamingMedian5[] lastXDiffMedian5 = new Compression.StreamingMedian5[16];
-    private readonly Compression.StreamingMedian5[] lastYDiffMedian5 = new Compression.StreamingMedian5[16];
+    private readonly StreamingMedian5[] lastXDiffMedian5 = new StreamingMedian5[16];
+    private readonly StreamingMedian5[] lastYDiffMedian5 = new StreamingMedian5[16];
     private readonly int[] lastHeight = new int[8];
 
     private readonly byte[] data = new byte[pointDataLength];
@@ -57,7 +57,7 @@ internal abstract class PointDataRecordReader<T>(Compression.IEntropyDecoder dec
         _ = this.scanAngleRankModels0.Initialize();
         _ = this.scanAngleRankModels1.Initialize();
         this.pointSourceIdIntegerDecompressor.Initialize();
-        for (var i = 0; i < Compression.ArithmeticCoder.ModelCount; i++)
+        for (var i = 0; i < ArithmeticCoder.ModelCount; i++)
         {
             _ = this.bitByteModels[i]?.Initialize();
             _ = this.classificationModels[i]?.Initialize();
@@ -132,7 +132,7 @@ internal abstract class PointDataRecordReader<T>(Compression.IEntropyDecoder dec
                 var model = this.bitByteModels[this.lastPoint[Constants.PointDataRecord.FlagsFieldOffset]];
                 if (model is null)
                 {
-                    model = decoder.CreateSymbolModel(Compression.ArithmeticCoder.ModelCount);
+                    model = decoder.CreateSymbolModel(ArithmeticCoder.ModelCount);
                     this.bitByteModels[this.lastPoint[Constants.PointDataRecord.FlagsFieldOffset]] = model;
                     _ = model.Initialize();
                 }
@@ -142,8 +142,8 @@ internal abstract class PointDataRecordReader<T>(Compression.IEntropyDecoder dec
 
             var returnNumber = FieldAccessors.PointDataRecord.GetReturnNumber(this.lastPoint);
             numberOfReturns = FieldAccessors.PointDataRecord.GetNumberOfReturns(this.lastPoint);
-            returnMap = Compression.Common.NumberReturnMap[numberOfReturns][returnNumber];
-            returnLevel = Compression.Common.NumberReturnLevel[numberOfReturns][returnNumber];
+            returnMap = Common.NumberReturnMap[numberOfReturns][returnNumber];
+            returnLevel = Common.NumberReturnLevel[numberOfReturns][returnNumber];
 
             // decompress the intensity if it has changed
             if ((changedValues & 16) is not 0)
@@ -163,7 +163,7 @@ internal abstract class PointDataRecordReader<T>(Compression.IEntropyDecoder dec
                 var model = this.classificationModels[this.lastPoint[Constants.PointDataRecord.ClassificationFieldOffset]];
                 if (model is null)
                 {
-                    model = decoder.CreateSymbolModel(Compression.ArithmeticCoder.ModelCount);
+                    model = decoder.CreateSymbolModel(ArithmeticCoder.ModelCount);
                     this.classificationModels[this.lastPoint[Constants.PointDataRecord.ClassificationFieldOffset]] = model;
                     _ = model.Initialize();
                 }
@@ -185,7 +185,7 @@ internal abstract class PointDataRecordReader<T>(Compression.IEntropyDecoder dec
                 var model = this.userDataModels[this.lastPoint[Constants.PointDataRecord.UserDataFieldOffset]];
                 if (model is null)
                 {
-                    model = decoder.CreateSymbolModel(Compression.ArithmeticCoder.ModelCount);
+                    model = decoder.CreateSymbolModel(ArithmeticCoder.ModelCount);
                     this.userDataModels[this.lastPoint[Constants.PointDataRecord.UserDataFieldOffset]] = model;
                     _ = model.Initialize();
                 }
@@ -204,8 +204,8 @@ internal abstract class PointDataRecordReader<T>(Compression.IEntropyDecoder dec
         {
             var returnNumber = FieldAccessors.PointDataRecord.GetReturnNumber(this.lastPoint);
             numberOfReturns = FieldAccessors.PointDataRecord.GetNumberOfReturns(this.lastPoint);
-            returnMap = Compression.Common.NumberReturnMap[numberOfReturns][returnNumber];
-            returnLevel = Compression.Common.NumberReturnLevel[numberOfReturns][returnNumber];
+            returnMap = Common.NumberReturnMap[numberOfReturns][returnNumber];
+            returnLevel = Common.NumberReturnLevel[numberOfReturns][returnNumber];
         }
 
         // decompress x coordinate

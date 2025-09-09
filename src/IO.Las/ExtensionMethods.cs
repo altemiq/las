@@ -12,6 +12,51 @@ namespace Altemiq.IO.Las;
 public static partial class ExtensionMethods
 {
     /// <summary>
+    /// Gets the point data record length.
+    /// </summary>
+    /// <param name="header">The header.</param>
+    /// <returns>The point data record length.</returns>
+    /// <exception cref="InvalidOperationException">Invalid <see cref="HeaderBlock.PointDataFormatId"/> for <see cref="HeaderBlock.Version"/>.</exception>
+    /// <exception cref="InvalidCastException">Invalid <see cref="HeaderBlock.PointDataFormatId"/> value.</exception>
+    internal static ushort GetPointDataRecordLength(this in HeaderBlock header)
+    {
+        return header switch
+        {
+            { PointDataFormatId: PointDataRecord.Id, Version: { Major: 1, Minor: >= 0 and < 5 } } => PointDataRecord.Size,
+            { PointDataFormatId: GpsPointDataRecord.Id, Version: { Major: 1, Minor: >= 0 and < 5 } } => GpsPointDataRecord.Size,
+#if LAS1_2_OR_GREATER
+            { PointDataFormatId: ColorPointDataRecord.Id, Version: { Major: 1, Minor: >= 2 and < 5 } } => ColorPointDataRecord.Size,
+            { PointDataFormatId: GpsColorPointDataRecord.Id, Version: { Major: 1, Minor: >= 2 and < 5 } } => GpsColorPointDataRecord.Size,
+#endif
+#if LAS1_3_OR_GREATER
+            { PointDataFormatId: GpsWaveformPointDataRecord.Id, Version: { Major: 1, Minor: >= 3 and < 5 } } => GpsWaveformPointDataRecord.Size,
+            { PointDataFormatId: GpsColorWaveformPointDataRecord.Id, Version: { Major: 1, Minor: >= 3 and < 5 } } => GpsColorWaveformPointDataRecord.Size,
+#endif
+#if LAS1_4_OR_GREATER
+            { PointDataFormatId: ExtendedGpsPointDataRecord.Id, Version: { Major: 1, Minor: >= 4 } } => ExtendedGpsPointDataRecord.Size,
+            { PointDataFormatId: ExtendedGpsColorPointDataRecord.Id, Version: { Major: 1, Minor: >= 4 } } => ExtendedGpsColorPointDataRecord.Size,
+            { PointDataFormatId: ExtendedGpsColorNearInfraredPointDataRecord.Id, Version: { Major: 1, Minor: >= 4 } } => ExtendedGpsColorNearInfraredPointDataRecord.Size,
+            { PointDataFormatId: ExtendedGpsWaveformPointDataRecord.Id, Version: { Major: 1, Minor: >= 4 } } => ExtendedGpsWaveformPointDataRecord.Size,
+            { PointDataFormatId: ExtendedGpsColorNearInfraredWaveformPointDataRecord.Id, Version: { Major: 1, Minor: >= 4 } } => ExtendedGpsColorNearInfraredWaveformPointDataRecord.Size,
+#endif
+            { Version: { Major: 1, Minor: <= 1 } } => throw new InvalidOperationException(Properties.v1_1.Resources.OnlyDataPointsAreAllowed),
+#if LAS1_2_OR_GREATER
+            { Version: { Major: 1, Minor: 2 } } => throw new InvalidOperationException(Properties.v1_2.Resources.OnlyDataPointsAreAllowed),
+#endif
+#if LAS1_3_OR_GREATER
+            { Version: { Major: 1, Minor: 3 } } => throw new InvalidOperationException(Properties.v1_3.Resources.OnlyDataPointsAreAllowed),
+#endif
+#if LAS1_4_OR_GREATER
+            { Version: { Major: 1, Minor: 4 } } => throw new InvalidOperationException(Properties.v1_4.Resources.OnlyDataPointsAreAllowed),
+#endif
+#if LAS1_5_OR_GREATER
+            { Version: { Major: 1, Minor: 5 } } => throw new InvalidOperationException(Properties.v1_5.Resources.OnlyDataPointsAreAllowed),
+#endif
+            _ => throw new InvalidCastException(),
+        };
+    }
+
+    /// <summary>
     /// Moves to <paramref name="stream"/> to the specified <paramref name="position"/>.
     /// </summary>
     /// <param name="stream">The stream.</param>

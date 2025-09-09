@@ -30,7 +30,7 @@ internal class PointWiseReader : RawReader
 
         this.Decoder = zip.Coder switch
         {
-            Coder.Arithmetic => new Compression.ArithmeticDecoder(),
+            Coder.Arithmetic => new ArithmeticDecoder(),
             _ => throw new NotSupportedException(),
         };
 
@@ -75,7 +75,7 @@ internal class PointWiseReader : RawReader
     /// <summary>
     /// Gets the decoder.
     /// </summary>
-    public Compression.IEntropyDecoder Decoder { get; }
+    public IEntropyDecoder Decoder { get; }
 
     /// <inheritdoc/>
     public sealed override void Close(Stream stream) => this.Decoder.Done();
@@ -187,7 +187,7 @@ internal class PointWiseReader : RawReader
         Span<byte> bytes = stackalloc byte[100];
 
         var bytesWritten = point.Write(bytes);
-        extraBytes.CopyTo(bytes);
+        extraBytes.CopyTo(bytes[bytesWritten..]);
         bytesWritten += extraBytes.Length;
 
         switch (recordReader)

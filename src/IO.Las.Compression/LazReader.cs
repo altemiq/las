@@ -74,6 +74,19 @@ public sealed partial class LazReader : LasReader, ILazReader
         return point;
     }
 
+    /// <inheritdoc />
+    public override async ValueTask<LasPointMemory> ReadPointDataRecordAsync(CancellationToken cancellationToken = default)
+    {
+        if (!this.CheckPointIndex())
+        {
+            return default;
+        }
+
+        var point = await this.pointReader.ReadAsync(this.BaseStream, this.PointDataLength, cancellationToken).ConfigureAwait(false);
+        this.IncrementPointIndex();
+        return point;
+    }
+
     /// <summary>
     /// Moves to the specified chunk.
     /// </summary>

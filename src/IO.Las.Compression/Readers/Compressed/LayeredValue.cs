@@ -16,7 +16,7 @@ internal sealed class LayeredValue(bool requested)
     /// <summary>
     /// The decoder.
     /// </summary>
-    public readonly Compression.IEntropyDecoder Decoder = new Compression.ArithmeticDecoder();
+    public readonly IEntropyDecoder Decoder = new ArithmeticDecoder();
 
     /// <summary>
     /// The value indicating whether this instance is requested.

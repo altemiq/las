@@ -162,7 +162,7 @@ public readonly struct Vector3D : IFormattable, IEquatable<Vector3D>
     public static Vector3D operator /(Vector3D left, double right)
     {
         var num = 1D / right;
-        return new Vector3D(left.X * num, left.Y * num, left.Z * num);
+        return new(left.X * num, left.Y * num, left.Z * num);
     }
 
     /// <summary>

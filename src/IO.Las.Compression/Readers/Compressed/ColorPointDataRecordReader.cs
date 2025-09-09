@@ -11,7 +11,7 @@ namespace Altemiq.IO.Las.Readers.Compressed;
 /// </summary>
 /// <param name="decoder">The decoder.</param>
 /// <param name="extraBytes">The number of extra bytes.</param>
-internal sealed class ColorPointDataRecordReader(Compression.IEntropyDecoder decoder, int extraBytes) : PointDataRecordReader<ColorPointDataRecord>(decoder, ColorPointDataRecord.Size + extraBytes, ColorPointDataRecord.Size)
+internal sealed class ColorPointDataRecordReader(IEntropyDecoder decoder, int extraBytes) : PointDataRecordReader<ColorPointDataRecord>(decoder, ColorPointDataRecord.Size + extraBytes, ColorPointDataRecord.Size)
 {
     private readonly ColorReader2 colorReader = new(decoder);
 

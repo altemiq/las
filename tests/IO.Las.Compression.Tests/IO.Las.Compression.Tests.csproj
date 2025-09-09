@@ -13,5 +13,9 @@
   <ItemGroup>
     <ProjectReference Include="..\..\src\IO.Las.Compression\IO.Las.Compression.csproj" />
   </ItemGroup>
+  
+  <ItemGroup>
+    <EmbeddedResource Include="*.laz" />
+  </ItemGroup>
 
 </Project>

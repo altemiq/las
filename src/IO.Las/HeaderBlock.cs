@@ -124,7 +124,7 @@ public readonly struct HeaderBlock : IEquatable<HeaderBlock>
 #else
         this.NumberOfPointsByReturn = new uint[5];
 #endif
-        this.ScaleFactor = new Vector3D(0.01, 0.01, 0.01);
+        this.ScaleFactor = new(0.01, 0.01, 0.01);
         this.Offset = Vector3D.Zero;
         this.Min = Vector3D.Zero;
         this.Max = Vector3D.Zero;

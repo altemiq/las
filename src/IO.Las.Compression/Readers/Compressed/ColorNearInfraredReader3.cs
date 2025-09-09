@@ -6,8 +6,6 @@
 
 namespace Altemiq.IO.Las.Readers.Compressed;
 
-using Altemiq.IO.Las.Compression;
-
 /// <summary>
 /// The compressed reader for <see cref="Color"/> with near-infrared values, version 3.
 /// </summary>

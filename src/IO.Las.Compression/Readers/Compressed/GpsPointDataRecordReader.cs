@@ -11,7 +11,7 @@ namespace Altemiq.IO.Las.Readers.Compressed;
 /// </summary>
 /// <param name="decoder">The decoder.</param>
 /// <param name="extraBytes">The number of extra bytes.</param>
-internal sealed class GpsPointDataRecordReader(Compression.IEntropyDecoder decoder, int extraBytes) : PointDataRecordReader<GpsPointDataRecord>(decoder, GpsPointDataRecord.Size + extraBytes, GpsPointDataRecord.Size)
+internal sealed class GpsPointDataRecordReader(IEntropyDecoder decoder, int extraBytes) : PointDataRecordReader<GpsPointDataRecord>(decoder, GpsPointDataRecord.Size + extraBytes, GpsPointDataRecord.Size)
 {
     private readonly GpsTimeReader gpsTimeReader = new(decoder);
 

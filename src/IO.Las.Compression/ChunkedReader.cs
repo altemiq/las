@@ -395,7 +395,7 @@ internal abstract class ChunkedReader : IPointReader
     /// <param name="readChunkTotals">Set to <see langword="true"/> to read the chunk totals.</param>
     /// <param name="decoder">The decoder.</param>
     /// <returns>The chunk table.</returns>
-    internal static (long[] ChunkStarts, uint NumberChunks, uint TabledChunks, uint[]? ChunkTotals) ReadChunkTable(Stream stream, long chunksStart, bool readChunkTotals, Compression.IEntropyDecoder decoder)
+    internal static (long[] ChunkStarts, uint NumberChunks, uint TabledChunks, uint[]? ChunkTotals) ReadChunkTable(Stream stream, long chunksStart, bool readChunkTotals, IEntropyDecoder decoder)
     {
         long[]? chunkStarts = default;
         uint numberChunks = default;
@@ -419,7 +419,7 @@ internal abstract class ChunkedReader : IPointReader
     protected static void ReadChunkTable(
         Stream stream,
         long chunksStart,
-        Compression.IEntropyDecoder decoder,
+        IEntropyDecoder decoder,
         [System.Diagnostics.CodeAnalysis.NotNullIfNotNull(nameof(stream))]
         ref long[]? chunkStarts,
         ref uint numberChunks,
@@ -439,7 +439,7 @@ internal abstract class ChunkedReader : IPointReader
     protected static void ReadChunkTable(
         Stream stream,
         long chunksStart,
-        Compression.IEntropyDecoder decoder,
+        IEntropyDecoder decoder,
         [System.Diagnostics.CodeAnalysis.NotNullIfNotNull(nameof(stream))]
         ref long[]? chunkStarts,
         ref uint numberChunks,
@@ -633,7 +633,7 @@ internal abstract class ChunkedReader : IPointReader
         long chunksStart,
         [System.Diagnostics.CodeAnalysis.DoesNotReturnIf(true)]
         bool readChunkTotals, // hack for forcing chunkTotals to not be null when `true`
-        Compression.IEntropyDecoder decoder,
+        IEntropyDecoder decoder,
         [System.Diagnostics.CodeAnalysis.NotNullIfNotNull(nameof(stream))]
         ref long[]? chunkStarts,
         ref uint numberChunks,
@@ -660,7 +660,7 @@ internal abstract class ChunkedReader : IPointReader
         if (numberChunks > 0)
         {
             _ = decoder.Initialize(stream);
-            var decompressor = new Compression.IntegerDecompressor(decoder, 32, 2);
+            var decompressor = new IntegerDecompressor(decoder, 32, 2);
             decompressor.Initialize();
             for (var i = 1; i <= numberChunks; i++)
             {

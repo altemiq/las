@@ -349,9 +349,13 @@ public class LasWriter(Stream stream, bool leaveOpen = false) : ILasWriter, IDis
             destination[24] = (byte)header.Version.Major;
             destination[25] = (byte)header.Version.Minor;
 
-            System.Text.Encoding.UTF8.GetBytes(header.SystemIdentifier, destination[26..58]);
+            // system identifier, with the bytes afterward cleared
+            var bytesWritten = System.Text.Encoding.UTF8.GetBytes(header.SystemIdentifier, destination[26..58]);
+            destination.Slice(26 + bytesWritten, 32 - bytesWritten).Clear();
 
-            System.Text.Encoding.UTF8.GetBytes(header.GeneratingSoftware, destination[58..90]);
+            // generating software, with the bytes afterward cleared
+            bytesWritten = System.Text.Encoding.UTF8.GetBytes(header.GeneratingSoftware, destination[58..90]);
+            destination.Slice(58 + bytesWritten, 32 - bytesWritten).Clear();
 
             // file creation date
             if (header.FileCreation.HasValue)
@@ -366,40 +370,7 @@ public class LasWriter(Stream stream, bool leaveOpen = false) : ILasWriter, IDis
             System.Buffers.Binary.BinaryPrimitives.WriteUInt32LittleEndian(destination[100..104], recordCount);
             destination[104] = header.PointDataFormat;
 
-            var pointDataRecordSize = header switch
-            {
-                { PointDataFormatId: PointDataRecord.Id, Version: { Major: 1, Minor: >= 0 and < 5 } } => PointDataRecord.Size,
-                { PointDataFormatId: GpsPointDataRecord.Id, Version: { Major: 1, Minor: >= 0 and < 5 } } => GpsPointDataRecord.Size,
-#if LAS1_2_OR_GREATER
-                { PointDataFormatId: ColorPointDataRecord.Id, Version: { Major: 1, Minor: >= 2 and < 5 } } => ColorPointDataRecord.Size,
-                { PointDataFormatId: GpsColorPointDataRecord.Id, Version: { Major: 1, Minor: >= 2 and < 5 } } => GpsColorPointDataRecord.Size,
-#endif
-#if LAS1_3_OR_GREATER
-                { PointDataFormatId: GpsWaveformPointDataRecord.Id, Version: { Major: 1, Minor: >= 3 and < 5 } } => GpsWaveformPointDataRecord.Size,
-                { PointDataFormatId: GpsColorWaveformPointDataRecord.Id, Version: { Major: 1, Minor: >= 3 and < 5 } } => GpsColorWaveformPointDataRecord.Size,
-#endif
-#if LAS1_4_OR_GREATER
-                { PointDataFormatId: ExtendedGpsPointDataRecord.Id, Version: { Major: 1, Minor: >= 4 } } => ExtendedGpsPointDataRecord.Size,
-                { PointDataFormatId: ExtendedGpsColorPointDataRecord.Id, Version: { Major: 1, Minor: >= 4 } } => ExtendedGpsColorPointDataRecord.Size,
-                { PointDataFormatId: ExtendedGpsColorNearInfraredPointDataRecord.Id, Version: { Major: 1, Minor: >= 4 } } => ExtendedGpsColorNearInfraredPointDataRecord.Size,
-                { PointDataFormatId: ExtendedGpsWaveformPointDataRecord.Id, Version: { Major: 1, Minor: >= 4 } } => ExtendedGpsWaveformPointDataRecord.Size,
-                { PointDataFormatId: ExtendedGpsColorNearInfraredWaveformPointDataRecord.Id, Version: { Major: 1, Minor: >= 4 } } => ExtendedGpsColorNearInfraredWaveformPointDataRecord.Size,
-#endif
-                { Version: { Major: 1, Minor: <= 1 } } => throw new InvalidOperationException(Properties.v1_1.Resources.OnlyDataPointsAreAllowed),
-#if LAS1_2_OR_GREATER
-                { Version: { Major: 1, Minor: 2 } } => throw new InvalidOperationException(Properties.v1_2.Resources.OnlyDataPointsAreAllowed),
-#endif
-#if LAS1_3_OR_GREATER
-                { Version: { Major: 1, Minor: 3 } } => throw new InvalidOperationException(Properties.v1_3.Resources.OnlyDataPointsAreAllowed),
-#endif
-#if LAS1_4_OR_GREATER
-                { Version: { Major: 1, Minor: 4 } } => throw new InvalidOperationException(Properties.v1_4.Resources.OnlyDataPointsAreAllowed),
-#endif
-#if LAS1_5_OR_GREATER
-                { Version: { Major: 1, Minor: 5 } } => throw new InvalidOperationException(Properties.v1_5.Resources.OnlyDataPointsAreAllowed),
-#endif
-                _ => throw new InvalidCastException(),
-            };
+            var pointDataRecordSize = header.GetPointDataRecordLength();
 
             // add the extra bytes.
 #if LAS1_4_OR_GREATER

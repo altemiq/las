@@ -57,7 +57,7 @@
   </ItemGroup>
   
   <ItemGroup>
-    <Compile Remove="**\*Write*" />
+    <Using Include="$(RootNamespace).Compression" />
   </ItemGroup>
 
 </Project>
