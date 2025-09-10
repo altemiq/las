@@ -22,9 +22,7 @@ internal class RawWriter(Writers.IPointDataRecordWriter writer, int pointDataLen
     public virtual ValueTask WriteAsync(Stream stream, IBasePointDataRecord record, ReadOnlyMemory<byte> extraBytes, CancellationToken cancellationToken = default) => this.WriteAsync(stream, writer, record, extraBytes, cancellationToken);
 
     /// <inheritdoc/>
-    public virtual void Initialize(Stream stream)
-    {
-    }
+    public virtual void Initialize(Stream stream) => stream.SwitchStreamIfMultiple(LasStreams.PointData);
 
     /// <inheritdoc/>
     public virtual void Close(Stream stream)

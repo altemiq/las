@@ -94,6 +94,7 @@ public sealed class LazWriter : LasWriter
         this.WriteHeader(header, (uint)recordsList.Count, recordSize);
 #endif
 
+        _ = this.BaseStream.SwitchStreamIfMultiple(LasStreams.VariableLengthRecord);
         var buffer = System.Buffers.ArrayPool<byte>.Shared.Rent(recordsList.Max(x => x.Size()));
         foreach (var record in recordsList)
         {
@@ -127,6 +128,30 @@ public sealed class LazWriter : LasWriter
         ThrowIfNull(record);
 #endif
         this.pointWriter!.Write(this.BaseStream, record, extraBytes);
+    }
+
+    /// <summary>
+    /// Writes the point to the specified chunk.
+    /// </summary>
+    /// <param name="record">The record.</param>
+    /// <param name="extraBytes">The extra bytes.</param>
+    /// <param name="chunkKey">The chunk key to write to.</param>
+    public void Write(IBasePointDataRecord record, ReadOnlySpan<byte> extraBytes, int chunkKey)
+    {
+#if NET6_0_OR_GREATER
+        ArgumentNullException.ThrowIfNull(record);
+#else
+        ThrowIfNull(record);
+#endif
+
+        if (this.pointWriter is ChunkedWriter chunkedWriter && this.BaseStream.CanSwitchStream())
+        {
+            chunkedWriter.Write(this.BaseStream, record, extraBytes, chunkKey);
+        }
+        else
+        {
+            this.pointWriter!.Write(this.BaseStream, record, extraBytes);
+        }
     }
 
     /// <summary>
@@ -235,6 +260,26 @@ public sealed class LazWriter : LasWriter
         ThrowIfNull(record);
 #endif
         return this.pointWriter!.WriteAsync(this.BaseStream, record, extraBytes, cancellationToken);
+    }
+
+    /// <summary>
+    /// Writes the point to the specified chunk asynchronously.
+    /// </summary>
+    /// <param name="record">The record.</param>
+    /// <param name="extraBytes">The extra bytes.</param>
+    /// <param name="chunkKey">The chunk to write to.</param>
+    /// <param name="cancellationToken">The cancellation token.</param>
+    /// <returns>The asynchronous task.</returns>
+    public ValueTask WriteAsync(IBasePointDataRecord record, ReadOnlyMemory<byte> extraBytes, int chunkKey, CancellationToken cancellationToken = default)
+    {
+#if NET6_0_OR_GREATER
+        ArgumentNullException.ThrowIfNull(record);
+#else
+        ThrowIfNull(record);
+#endif
+        return this.pointWriter is ChunkedWriter chunkedWriter && this.BaseStream.CanSwitchStream()
+            ? chunkedWriter.WriteAsync(this.BaseStream, record, extraBytes, chunkKey, cancellationToken)
+            : this.pointWriter!.WriteAsync(this.BaseStream, record, extraBytes, cancellationToken);
     }
 
     /// <summary>
@@ -571,6 +616,7 @@ public sealed class LazWriter : LasWriter
                 return;
             }
 
+            _ = this.BaseStream.SwitchStreamIfMultiple(LasStreams.VariableLengthRecord);
             _ = this.BaseStream.Seek(this.offsetToLasZipVlr, SeekOrigin.Begin);
             var compressedTag = HeaderBlockReader.GetVariableLengthRecord(this.BaseStream) as CompressedTag
                                 ?? throw new InvalidOperationException(Compression.Properties.Resources.FailedToReadCompressedTag);
@@ -584,6 +630,7 @@ public sealed class LazWriter : LasWriter
                 offsetToSpecialEvlrs = this.BaseStream.Length;
             }
 
+            _ = this.BaseStream.SwitchStreamIfMultiple(LazStreams.SpecialExtendedVariableLengthRecord);
             _ = this.BaseStream.Seek(offsetToSpecialEvlrs, SeekOrigin.Begin);
 
             // write the evlr
@@ -597,6 +644,7 @@ public sealed class LazWriter : LasWriter
 
             if (numberOfSpecialEvlrs is not -1)
             {
+                _ = this.BaseStream.SwitchStreamIfMultiple(LasStreams.VariableLengthRecord);
                 _ = this.BaseStream.Seek(this.offsetToLasZipVlr + 54 + 16, SeekOrigin.Begin);
                 this.BaseStream.WriteInt64LittleEndian(numberOfSpecialEvlrs);
                 this.BaseStream.WriteInt64LittleEndian(offsetToSpecialEvlrs);

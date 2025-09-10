@@ -64,6 +64,8 @@ public class HeaderBlockReader(Stream stream)
     /// <returns>The file signature.</returns>
     public string GetFileSignature()
     {
+        _ = stream.SwitchStreamIfMultiple(LasStreams.Header);
+
         // do a cache on the stream
         if (stream is ICacheStream prepareStream)
         {
@@ -100,6 +102,8 @@ public class HeaderBlockReader(Stream stream)
     /// <returns><see langword="true"/> if the current position is at the start of the variable length records.</returns>
     public bool MoveToVariableLengthRecords()
     {
+        _ = stream.SwitchStreamIfMultiple(LasStreams.VariableLengthRecord);
+
         if (stream is ICacheStream prepareStream)
         {
             prepareStream.Cache(this.headerSize, (int)(this.OffsetToPointData - this.headerSize));
@@ -126,6 +130,8 @@ public class HeaderBlockReader(Stream stream)
     /// <returns><see langword="true"/> if the current position is at the start of the extended variable length records.</returns>
     public bool MoveToExtendedVariableLengthRecords(long startOfFirstExtendedVariableLengthRecord)
     {
+        _ = stream.SwitchStreamIfMultiple(LasStreams.ExtendedVariableLengthRecord);
+
         if (stream is ICacheStream prepareStream)
         {
             prepareStream.Cache(startOfFirstExtendedVariableLengthRecord);
@@ -257,6 +263,7 @@ public class HeaderBlockReader(Stream stream)
             throw new ArgumentException(string.Format(Properties.Resources.Culture, Properties.Resources.InvalidSignature, "LASF", fileSignature), nameof(fileSignature));
         }
 
+        _ = stream.SwitchStreamIfMultiple(LasStreams.Header);
         var byteArray = System.Buffers.ArrayPool<byte>.Shared.Rent(92);
         _ = stream.Read(byteArray, 0, 92);
         ReadOnlySpan<byte> source = byteArray;

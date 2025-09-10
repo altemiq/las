@@ -1,0 +1,39 @@
+﻿// -----------------------------------------------------------------------
+// <copyright file="LazMultipleMemoryStream.cs" company="Altemiq">
+// Copyright (c) Altemiq. All rights reserved.
+// </copyright>
+// -----------------------------------------------------------------------
+
+namespace Altemiq.IO.Las;
+
+/// <summary>
+/// The LAZ <see cref="MemoryStream"/> <see cref="MultipleStream"/>.
+/// </summary>
+internal class LazMultipleMemoryStream : LasMultipleMemoryStream
+{
+    /// <summary>
+    /// Initializes a new instance of the <see cref="LazMultipleMemoryStream"/> class.
+    /// </summary>
+    public LazMultipleMemoryStream()
+        : this(LazStreams.Comparer)
+    {
+    }
+
+    /// <summary>
+    /// Initializes a new instance of the <see cref="LazMultipleMemoryStream"/> class.
+    /// </summary>
+    /// <param name="comparer">The <see cref="IComparer{T}"/> implementation to use when comparing keys.</param>
+    protected LazMultipleMemoryStream(IComparer<string> comparer)
+        : this(new LasStreamDictionary(comparer))
+    {
+    }
+
+    /// <summary>
+    /// Initializes a new instance of the <see cref="LazMultipleMemoryStream"/> class.
+    /// </summary>
+    /// <param name="dictionary">The dictionary.</param>
+    protected LazMultipleMemoryStream(IDictionary<string, Stream> dictionary)
+        : base(dictionary)
+    {
+    }
+}

@@ -10,7 +10,9 @@ public class ExtendedVariableLengthRecordTests
 {
     [Test]
     [Arguments(typeof(MemoryStream))]
+    [Arguments(typeof(LasMultipleMemoryStream))]
     [Arguments(typeof(ForwardOnlyMemoryStream))]
+    [Arguments(typeof(ForwardOnlyLasMultipleMemoryStream))]
     public async Task WriteExtendedVariableLengthRecord(Type type)
     {
         ExtendedVariableLengthRecord evlr = new UnknownExtendedVariableLengthRecord(
@@ -84,6 +86,11 @@ public class ExtendedVariableLengthRecordTests
     }
 
     internal sealed class ForwardOnlyMemoryStream : MemoryStream
+    {
+        public override bool CanSeek => false;
+    }
+
+    internal sealed class ForwardOnlyLasMultipleMemoryStream : LasMultipleMemoryStream
     {
         public override bool CanSeek => false;
     }

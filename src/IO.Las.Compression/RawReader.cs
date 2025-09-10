@@ -47,9 +47,7 @@ internal class RawReader(Readers.IPointDataRecordReader reader, long pointStart)
     }
 
     /// <inheritdoc/>
-    public virtual void Initialize(Stream stream)
-    {
-    }
+    public virtual void Initialize(Stream stream) => stream.SwitchStreamIfMultiple(LasStreams.PointData);
 
     /// <inheritdoc/>
     public virtual void Close(Stream stream)

@@ -109,6 +109,15 @@ public class LasReader : ILasReader, IDisposable
     }
 
     /// <summary>
+    /// Initializes a new instance of the <see cref="LasReader"/> class based on the specified path.
+    /// </summary>
+    /// <param name="path">The file to be opened for reading.</param>
+    public LasReader(string path)
+        : this(CreateStream(path))
+    {
+    }
+
+    /// <summary>
     /// Initializes a new instance of the <see cref="LasReader"/> class based on the specified stream and character encoding, and optionally leaves the stream open.
     /// </summary>
     /// <param name="input">The input.</param>
@@ -182,6 +191,7 @@ public class LasReader : ILasReader, IDisposable
             return default;
         }
 
+        _ = this.BaseStream.SwitchStreamIfMultiple(LasStreams.PointData);
         this.MoveToPointData();
 
         // read the data
@@ -210,6 +220,7 @@ public class LasReader : ILasReader, IDisposable
             return default;
         }
 
+        _ = this.BaseStream.SwitchStreamIfMultiple(LasStreams.PointData);
         this.MoveToPointData();
 
         // read the data
@@ -353,6 +364,7 @@ public class LasReader : ILasReader, IDisposable
     {
         // get the position of the point
         var pointPosition = (long)(this.offsetToPointData + (target * this.pointDataLength));
+        _ = this.BaseStream.SwitchStreamIfMultiple(LasStreams.PointData);
         this.BaseStream.MoveToPositionAbsolute(pointPosition);
         return this.BaseStream.Position == pointPosition;
     }
@@ -481,4 +493,11 @@ public class LasReader : ILasReader, IDisposable
         return variableLengthRecords;
 #endif
     }
+
+    private static Stream CreateStream(string path) => path switch
+    {
+        not null when File.Exists(path) => File.OpenRead(path),
+        not null when Directory.Exists(path) => LasMultipleFileStream.OpenRead(path),
+        _ => throw new NotSupportedException(),
+    };
 }

@@ -57,6 +57,15 @@ public class LasWriter(Stream stream, bool leaveOpen = false) : ILasWriter, IDis
         }
     }
 
+    /// <summary>
+    /// Initializes a new instance of the <see cref="LasWriter"/> class based on the specified path.
+    /// </summary>
+    /// <param name="path">The file to be opened for writing.</param>
+    public LasWriter(string path)
+        : this(CreateStream(path))
+    {
+    }
+
 #if LAS1_4_OR_GREATER
     /// <summary>
     /// Initializes a new instance of the <see cref="LasWriter"/> class based on the specified stream and character encoding, and optionally leaves the stream open.
@@ -100,6 +109,8 @@ public class LasWriter(Stream stream, bool leaveOpen = false) : ILasWriter, IDis
 
         HeaderBlockValidator.Instance.Validate(header, recordsList);
 
+        _ = this.BaseStream.SwitchStreamIfMultiple(LasStreams.PointData);
+
         // offset to point data
         var recordSize = recordsList.Aggregate(0u, (current, record) => current + record.Size());
         var pointDataRecordSize =
@@ -115,6 +126,7 @@ public class LasWriter(Stream stream, bool leaveOpen = false) : ILasWriter, IDis
             return;
         }
 
+        _ = this.BaseStream.SwitchStreamIfMultiple(LasStreams.VariableLengthRecord);
         byte[] byteArray = System.Buffers.ArrayPool<byte>.Shared.Rent(0);
         foreach (var record in recordsList)
         {
@@ -145,6 +157,7 @@ public class LasWriter(Stream stream, bool leaveOpen = false) : ILasWriter, IDis
 #endif
 
         var written = this.RawWriter.Write(this.buffer, record, extraBytes);
+        _ = this.BaseStream.SwitchStreamIfMultiple(LasStreams.PointData);
         this.BaseStream.Write(this.buffer, 0, written);
     }
 
@@ -169,6 +182,7 @@ public class LasWriter(Stream stream, bool leaveOpen = false) : ILasWriter, IDis
 #endif
 
         var written = await this.RawWriter.WriteAsync(this.buffer, record, extraBytes, cancellationToken).ConfigureAwait(false);
+        _ = this.BaseStream.SwitchStreamIfMultiple(LasStreams.PointData);
 #if NETSTANDARD2_1_OR_GREATER || NETCOREAPP2_1_OR_GREATER
         await this.BaseStream.WriteAsync(this.buffer.AsMemory(0, written), cancellationToken).ConfigureAwait(false);
 #else
@@ -218,6 +232,7 @@ public class LasWriter(Stream stream, bool leaveOpen = false) : ILasWriter, IDis
             throw new InvalidOperationException(Properties.v1_4.Resources.InvalidLASVersionForEVLRWriting);
         }
 
+        _ = this.BaseStream.SwitchStreamIfMultiple(LasStreams.ExtendedVariableLengthRecord);
         var startPosition = this.BaseStream.Position;
         var size = (int)record.Size();
 
@@ -242,6 +257,7 @@ public class LasWriter(Stream stream, bool leaveOpen = false) : ILasWriter, IDis
         var currentPosition = this.BaseStream.Position;
 
         // update the count
+        _ = this.BaseStream.SwitchStreamIfMultiple(LasStreams.Header);
         if (this.numberOfExtendedVariableLengthRecords is 0)
         {
             // write the start value
@@ -256,6 +272,7 @@ public class LasWriter(Stream stream, bool leaveOpen = false) : ILasWriter, IDis
         System.Buffers.Binary.BinaryPrimitives.WriteInt32LittleEndian(byteArray, this.numberOfExtendedVariableLengthRecords);
         this.BaseStream.Write(byteArray, 0, sizeof(int));
 
+        _ = this.BaseStream.SwitchStreamIfMultiple(LasStreams.PointData);
         this.BaseStream.Position = currentPosition;
 
         System.Buffers.ArrayPool<byte>.Shared.Return(byteArray);
@@ -330,6 +347,8 @@ public class LasWriter(Stream stream, bool leaveOpen = false) : ILasWriter, IDis
 
             var byteArray = System.Buffers.ArrayPool<byte>.Shared.Rent(size);
             Span<byte> destination = byteArray;
+
+            _ = stream.SwitchStreamIfMultiple(LasStreams.Header);
 
             // write the file signature
             System.Text.Encoding.UTF8.GetBytes(header.FileSignature, destination[..4]);
@@ -459,4 +478,11 @@ public class LasWriter(Stream stream, bool leaveOpen = false) : ILasWriter, IDis
             this.disposedValue = true;
         }
     }
+
+    private static Stream CreateStream(string path) => path switch
+    {
+        not null when Directory.Exists(path) => LasMultipleFileStream.OpenWrite(path),
+        not null => File.Open(path, FileMode.Create),
+        _ => throw new NotSupportedException(),
+    };
 }

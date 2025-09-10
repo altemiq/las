@@ -78,6 +78,7 @@ internal abstract class ChunkedReader : IPointReader
                 }
             }
 
+            _ = stream.SwitchStreamIfMultiple(LazStreams.FormatChunk((int)this.currentChunk));
             _ = this.InitializeDecoder(stream);
 
             if (this.currentChunk == this.tabledChunksValue)
@@ -132,6 +133,7 @@ internal abstract class ChunkedReader : IPointReader
                 }
             }
 
+            _ = stream.SwitchStreamIfMultiple(LazStreams.FormatChunk((int)this.currentChunk));
             _ = this.InitializeDecoder(stream);
 
             if (this.currentChunk == this.tabledChunksValue)
@@ -489,6 +491,7 @@ internal abstract class ChunkedReader : IPointReader
         bool ReadChunkTableCore()
         {
             // read the 8 bytes that store the location of the chunk table
+            _ = stream.SwitchStreamIfMultiple(LazStreams.ChunkTablePosition);
             var chunkTableStartPosition = stream.ReadInt64LittleEndian();
 
             // this is where the chunks start
@@ -512,6 +515,9 @@ internal abstract class ChunkedReader : IPointReader
 
                 return true;
             }
+
+            // get the chunk table stream
+            _ = stream.SwitchStreamIfMultiple(LazStreams.ChunkTable);
 
             // maybe the stream is not seekable
             if (!stream.CanSeek)

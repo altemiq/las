@@ -107,8 +107,12 @@
     <InternalsVisibleTo Include="$(AssemblyName).Cloud" />
     <InternalsVisibleTo Include="$(AssemblyName).Compression" />
     <InternalsVisibleTo Include="$(AssemblyName).Indexing" />
-    <InternalsVisibleTo Include="$(AssemblyName).Tests" />
     <InternalsVisibleTo Include="las" />
+  </ItemGroup>
+  
+  <ItemGroup Label="Tests">
+    <InternalsVisibleTo Include="$(AssemblyName).Compression.Tests" />
+    <InternalsVisibleTo Include="$(AssemblyName).Tests" />
   </ItemGroup>
   
   <ItemGroup>

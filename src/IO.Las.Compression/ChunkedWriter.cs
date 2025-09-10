@@ -50,6 +50,7 @@ internal abstract class ChunkedWriter(Writers.IPointDataRecordWriter rawWriter, 
         this.chunkTableStartPosition = stream.CanSeek
             ? stream.Position
             : InvalidChunkTableStartPosition;
+        _ = stream.SwitchStreamIfMultiple(LazStreams.ChunkTablePosition);
         stream.WriteInt64LittleEndian(this.chunkTableStartPosition);
     }
 
@@ -136,10 +137,12 @@ internal abstract class ChunkedWriter(Writers.IPointDataRecordWriter rawWriter, 
 
         bool WriteChunkTable()
         {
+            _ = stream.SwitchStreamIfMultiple(LazStreams.ChunkTable);
             var position = stream.Position;
             if (this.chunkTableStartPosition is not InvalidChunkTableStartPosition)
             {
                 // stream is seekable
+                _ = stream.SwitchStreamIfMultiple(LazStreams.ChunkTablePosition);
                 if (stream.Seek(this.chunkTableStartPosition, SeekOrigin.Begin) is 0)
                 {
                     return false;
@@ -147,6 +150,7 @@ internal abstract class ChunkedWriter(Writers.IPointDataRecordWriter rawWriter, 
 
                 stream.WriteInt64LittleEndian(position);
 
+                _ = stream.SwitchStreamIfMultiple(LazStreams.ChunkTable);
                 if (stream.Seek(position, SeekOrigin.Begin) is 0)
                 {
                     return false;
@@ -287,6 +291,10 @@ internal abstract class ChunkedWriter(Writers.IPointDataRecordWriter rawWriter, 
             this.currentChunkWriter.Initialize(stream);
             this.writers.Add(chunkKey, this.currentChunkWriter);
         }
+        else
+        {
+            _ = stream.SwitchStreamIfMultiple(LazStreams.FormatChunk(chunkKey));
+        }
 
         return this.currentChunkWriter;
     }
@@ -337,6 +345,7 @@ internal abstract class ChunkedWriter(Writers.IPointDataRecordWriter rawWriter, 
         public void Initialize(Stream stream)
         {
             this.Writer.Initialize(stream);
+            _ = stream.SwitchStreamIfMultiple(LazStreams.FormatChunk(chunkKey));
             this.Start = this.End = stream.Position;
         }
 
@@ -346,6 +355,7 @@ internal abstract class ChunkedWriter(Writers.IPointDataRecordWriter rawWriter, 
         /// <param name="stream">The stream.</param>
         public void Finalize(Stream stream)
         {
+            _ = stream.SwitchStreamIfMultiple(LazStreams.FormatChunk(chunkKey));
             this.Writer.Close(stream);
             this.End = stream.Position;
         }

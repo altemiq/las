@@ -39,16 +39,16 @@ public sealed class LasQuadTree : IEquatable<LasQuadTree>
     public LasQuadTree(double boundingBoxMinX, double boundingBoxMaxX, double boundingBoxMinY, double boundingBoxMaxY, float cellSize, float offsetX = default, float offsetY = default)
     {
         // enlarge bounding box to units of cells
-        this.minimumX = boundingBoxMinX - offsetX is >= 0
+        this.minimumX = boundingBoxMinX - offsetX >= 0
             ? (cellSize * ((int)((boundingBoxMinX - offsetX) / cellSize))) + offsetX
             : (cellSize * ((int)((boundingBoxMinX - offsetX) / cellSize) - 1)) + offsetX;
-        this.maximumX = boundingBoxMaxX - offsetX is >= 0
+        this.maximumX = boundingBoxMaxX - offsetX >= 0
             ? (cellSize * ((int)((boundingBoxMaxX - offsetX) / cellSize) + 1)) + offsetX
             : (cellSize * ((int)((boundingBoxMaxX - offsetX) / cellSize))) + offsetX;
-        this.minimumY = boundingBoxMinY - offsetY is >= 0
+        this.minimumY = boundingBoxMinY - offsetY >= 0
             ? (cellSize * ((int)((boundingBoxMinY - offsetY) / cellSize))) + offsetY
             : (cellSize * ((int)((boundingBoxMinY - offsetY) / cellSize) - 1)) + offsetY;
-        this.maximumY = boundingBoxMaxY - offsetY is >= 0
+        this.maximumY = boundingBoxMaxY - offsetY >= 0
             ? (cellSize * ((int)((boundingBoxMaxY - offsetY) / cellSize) + 1)) + offsetY
             : (cellSize * ((int)((boundingBoxMaxY - offsetY) / cellSize))) + offsetY;
 

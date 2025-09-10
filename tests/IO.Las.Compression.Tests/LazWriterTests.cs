@@ -53,7 +53,7 @@ public class LazWriterTests
             lasWriter.Write(builder.HeaderBlock, geoKeyDirectoryTag, extraBytes);
             extraBytes.Write(span, 124.56);
             lasWriter.Write(
-                new GpsPointDataRecord()
+                new GpsPointDataRecord
                 {
                     X = default,
                     Y = default,
@@ -238,6 +238,152 @@ public class LazWriterTests
         _ = await Assert.That(records).HasCount().EqualToOne();
     }
 
+    [Test]
+    public async Task ExplodedStream()
+    {
+        HeaderBlockBuilder builder = new()
+        {
+            SystemIdentifier = "LAS tests",
+            GeneratingSoftware = "Las.Tests.exe",
+            Version = new Version(1, 1),
+            FileCreation = new DateTime(2010, 1, 1).AddDays(40),
+            PointDataFormatId = 1,
+#if LAS1_4_OR_GREATER
+            LegacyNumberOfPointRecords = 2,
+#else
+            NumberOfPointRecords = 2,
+#endif
+        };
+
+        GeoKeyDirectoryTag geoKeyDirectoryTag = new(
+            new GeoKeyEntry { Count = 1, KeyId = GeoKey.GTModelTypeGeoKey, ValueOffset = 1 },
+            new GeoKeyEntry { Count = 1, KeyId = GeoKey.ProjectedCRSGeoKey, ValueOffset = 32754 },
+            new GeoKeyEntry { Count = 1, KeyId = GeoKey.ProjLinearUnitsGeoKey, ValueOffset = 9001 },
+            new GeoKeyEntry { Count = 1, KeyId = GeoKey.VerticalUnitsGeoKey, ValueOffset = 9001 });
+#if LAS1_4_OR_GREATER
+        ExtraBytes extraBytes =
+        [
+            new()
+            {
+                DataType = ExtraBytesDataType.Short,
+                Options = ExtraBytesOptions.Scale | ExtraBytesOptions.Offset,
+                Scale = 0.01,
+                Offset = 250,
+                Name = "height above ground",
+                Description = "vertical point to TIN distance",
+            },
+        ];
+#endif
+
+        await using LasMultipleMemoryStream stream = new();
+
+#if LAS1_4_OR_GREATER
+        const double ExtraValue = 123.34;
+        Span<byte> span = stackalloc byte[sizeof(ushort)];
+#endif
+
+        using (LazWriter lasWriter = new(stream, true))
+        {
+#if LAS1_4_OR_GREATER
+            lasWriter.Write(builder.HeaderBlock, geoKeyDirectoryTag, extraBytes);
+
+            extraBytes.Write(span, 124.56);
+            lasWriter.Write(
+                new GpsPointDataRecord
+                {
+                    X = default,
+                    Y = default,
+                    Z = default,
+                    Classification = Classification.HighVegetation,
+                    EdgeOfFlightLine = default,
+                    GpsTime = default,
+                    NumberOfReturns = 1,
+                    ReturnNumber = 1,
+                    PointSourceId = default,
+                    ScanDirectionFlag = default,
+                    ScanAngleRank = default,
+                },
+                span);
+
+            extraBytes.Write(span, ExtraValue);
+            lasWriter.Write(
+                new GpsPointDataRecord
+                {
+                    X = 1,
+                    Y = 1,
+                    Z = 1,
+                    Classification = Classification.LowVegetation,
+                    EdgeOfFlightLine = default,
+                    GpsTime = default,
+                    NumberOfReturns = 1,
+                    ReturnNumber = 1,
+                    PointSourceId = default,
+                    ScanDirectionFlag = default,
+                    ScanAngleRank = default,
+                },
+                span);
+#else
+            lasWriter.Write(builder.HeaderBlock, geoKeyDirectoryTag);
+
+            lasWriter.Write(new GpsPointDataRecord
+            {
+                X = default,
+                Y = default,
+                Z = default,
+                Classification = Classification.HighVegetation,
+                EdgeOfFlightLine = default,
+                GpsTime = default,
+                NumberOfReturns = 1,
+                ReturnNumber = 1,
+                PointSourceId = default,
+                ScanDirectionFlag = default,
+                ScanAngleRank = default,
+            });
+
+            lasWriter.Write(new GpsPointDataRecord
+            {
+                X = 1,
+                Y = 1,
+                Z = 1,
+                Classification = Classification.LowVegetation,
+                EdgeOfFlightLine = default,
+                GpsTime = default,
+                NumberOfReturns = 1,
+                ReturnNumber = 1,
+                PointSourceId = default,
+                ScanDirectionFlag = default,
+                ScanAngleRank = default,
+            });
+#endif
+        }
+
+        stream.Reset();
+        HeaderBlock outputHeader;
+        IBasePointDataRecord outputPoint;
+        byte[] bytes;
+        using (LazReader lasReader = new(stream))
+        {
+            outputHeader = lasReader.Header;
+            _ = lasReader.ReadPointDataRecord();
+            var record = lasReader.ReadPointDataRecord();
+            outputPoint = record.PointDataRecord;
+            bytes = record.ExtraBytes.ToArray();
+        }
+
+        _ = await Assert.That(outputHeader.SystemIdentifier).IsEqualTo("LAS tests");
+        _ = await Assert.That(outputHeader.GeneratingSoftware).IsEqualTo("Las.Tests.exe");
+        _ = await Assert.That(outputHeader.PointDataFormatId).IsEqualTo((byte)1);
+
+        _ = await Assert.That(outputPoint)
+            .IsNotNull()
+            .IsAssignableTo<IPointDataRecord>()
+            .Satisfies(p => p.Classification, classification => classification.IsEqualTo(Classification.LowVegetation));
+
+#if LAS1_4_OR_GREATER
+        _ = await Assert.That(extraBytes.GetValue(0, bytes)).IsTypeOf<double>().And.IsEqualTo(ExtraValue);
+#endif
+    }
+
 #if LAS1_4_OR_GREATER
     [Test]
     [Arguments(3000, 4, typeof(FixedLayeredChunkedReader))]
@@ -320,8 +466,8 @@ public class LazWriterTests
                 .And.Satisfies(
                     records => records.OfType<CompressedTag>().Single(),
                     record => record.IsNotNull().And.Satisfies(
-                        ct => ct.Compressor,
-                        compressor => compressor.IsEqualTo(Compressor.LayeredChunked))
+                            ct => ct.Compressor,
+                            compressor => compressor.IsEqualTo(Compressor.LayeredChunked))
                         .And.IsAssignableTo<CompressedTag>());
 
             while (lasReader.ReadPointDataRecord() is { PointDataRecord: not null })
@@ -430,8 +576,8 @@ public class LazWriterTests
                 .And.Satisfies(
                     records => records.OfType<CompressedTag>().Single(),
                     record => record.IsNotNull().And.Satisfies(
-                        tag => tag.Compressor,
-                        compressor => compressor.IsEqualTo(Compressor.LayeredChunked))
+                            tag => tag.Compressor,
+                            compressor => compressor.IsEqualTo(Compressor.LayeredChunked))
                         .And.IsAssignableTo<CompressedTag>());
 
             while (await lasReader.ReadPointDataRecordAsync() is { PointDataRecord: not null })
@@ -460,18 +606,21 @@ public class LazWriterTests
     }
 
     [Test]
-    public async Task ExtendedVariableLengthRecords()
+    [MatrixDataSource]
+    public async Task ExtendedVariableLengthRecords([Matrix(true, false)] bool exploded)
     {
         ExtendedVariableLengthRecord record = new UnknownExtendedVariableLengthRecord(
             new()
             {
-                UserId ="mine",
-                RecordId =12345,
-                Description ="test EVLR",
+                UserId = "mine",
+                RecordId = 12345,
+                Description = "test EVLR",
                 RecordLengthAfterHeader = 0,
-            }, 
+            },
             []);
-        await using Stream stream = new MemoryStream();
+        await using Stream stream = exploded
+            ? new LasMultipleMemoryStream()
+            : new MemoryStream();
         using (LazWriter writer = new(stream, leaveOpen: true))
         {
             HeaderBlockBuilder headerBuilder = new();
@@ -485,19 +634,22 @@ public class LazWriterTests
     }
 
     [Test]
-    public async Task SpecialExtendedVariableLengthRecords()
+    [MatrixDataSource]
+    public async Task SpecialExtendedVariableLengthRecords([Matrix(true, false)] bool exploded)
     {
         _ = VariableLengthRecordProcessor.Instance.TryRegisterCompression();
         ExtendedVariableLengthRecord record = new UnknownExtendedVariableLengthRecord(
             new()
             {
-                UserId ="mine",
-                RecordId =12345,
-                Description ="test EVLR",
+                UserId = "mine",
+                RecordId = 12345,
+                Description = "test EVLR",
                 RecordLengthAfterHeader = 0,
-            }, 
+            },
             []);
-        await using Stream memoryStream = new MemoryStream();
+        await using Stream memoryStream = exploded
+            ? new LasMultipleMemoryStream()
+            : new MemoryStream();
         using (LazWriter writer = new(memoryStream, leaveOpen: true))
         {
             HeaderBlockBuilder headerBuilder = new();
@@ -547,7 +699,7 @@ public class LazWriterTests
             Y = 2,
             Z = 3,
             GpsTime = quantizer.GetGpsTime(DateTime.UtcNow),
-            Color = Color.FromRgb(0,0,ushort.MaxValue),
+            Color = Color.FromRgb(0, 0, ushort.MaxValue),
             ReturnNumber = 1,
             NumberOfReturns = 1,
             EdgeOfFlightLine = default,
@@ -602,7 +754,7 @@ public class LazWriterTests
             ScanDirectionFlag = default,
             Classification = default,
             ScanAngle = default,
-            EdgeOfFlightLine =default,
+            EdgeOfFlightLine = default,
             PointSourceId = default,
             Color = default,
         };
@@ -631,7 +783,7 @@ public class LazWriterTests
             Y = default,
             Z = default,
             GpsTime = quantizer.GetGpsTime(DateTime.UtcNow.AddHours(1)),
-            Color = Color.FromRgb(0,ushort.MaxValue,0),
+            Color = Color.FromRgb(0, ushort.MaxValue, 0),
             ReturnNumber = 3,
             NumberOfReturns = 3,
             Overlap = true,
