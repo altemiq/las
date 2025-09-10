@@ -11,7 +11,7 @@ namespace Altemiq.IO.Las;
 /// </summary>
 [Serializable]
 [System.Runtime.InteropServices.StructLayout(System.Runtime.InteropServices.LayoutKind.Explicit, Size = 3 * sizeof(ushort))]
-public readonly struct Color : IEquatable<Color>
+public readonly partial struct Color : IEquatable<Color>
 {
     /// <summary>
     /// An empty color structure.
@@ -21,6 +21,13 @@ public readonly struct Color : IEquatable<Color>
     private const int RGBRedShift = 32;
     private const int RGBGreenShift = 16;
     private const int RGBBlueShift = 0;
+
+    private Color(long value)
+    {
+        this.R = unchecked((ushort)(value >> RGBRedShift));
+        this.G = unchecked((ushort)(value >> RGBGreenShift));
+        this.B = unchecked((ushort)(value >> RGBBlueShift));
+    }
 
     /// <summary>
     /// Gets the red component value of this <see cref="Color" /> structure.
@@ -137,7 +144,7 @@ public readonly struct Color : IEquatable<Color>
     {
         var (min, max) = MinMaxRgb(this.R, this.G, this.B);
 
-        return (max + min) / (byte.MaxValue * 2F);
+        return (max + min) / (ushort.MaxValue * 2F);
     }
 
     /// <summary>
@@ -188,9 +195,9 @@ public readonly struct Color : IEquatable<Color>
         var (min, max) = MinMaxRgb(r, g, b);
 
         var div = max + min;
-        if (div > byte.MaxValue)
+        if (div > ushort.MaxValue)
         {
-            div = (byte.MaxValue * 2) - max - min;
+            div = (ushort.MaxValue * 2) - max - min;
         }
 
         return (max - min) / (float)div;

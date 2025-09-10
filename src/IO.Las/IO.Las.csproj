@@ -110,5 +110,13 @@
     <InternalsVisibleTo Include="$(AssemblyName).Tests" />
     <InternalsVisibleTo Include="las" />
   </ItemGroup>
+  
+  <ItemGroup>
+    <CompilerVisibleProperty Include="RootNamespace" />
+    <ProjectReference Include="..\IO.Las.CodeGeneration\IO.Las.CodeGeneration.csproj"
+                      SetTargetFramework="TargetFramework=netstandard2.0"
+                      OutputItemType="Analyzer"
+                      ReferenceOutputAssembly="false" />
+  </ItemGroup>
 
 </Project>

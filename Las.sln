@@ -61,6 +61,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "IO.Las.Compression", "src\I
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "IO.Las.Compression.Tests", "tests\IO.Las.Compression.Tests\IO.Las.Compression.Tests.csproj", "{72FF4124-72F5-48C2-8C4E-5A74359E98D9}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "IO.Las.CodeGeneration", "src\IO.Las.CodeGeneration\IO.Las.CodeGeneration.csproj", "{F3080DB0-14D7-42F8-A55D-3A4AAB738F0E}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -191,6 +193,18 @@ Global
 		{72FF4124-72F5-48C2-8C4E-5A74359E98D9}.Release|x64.Build.0 = Release|Any CPU
 		{72FF4124-72F5-48C2-8C4E-5A74359E98D9}.Release|x86.ActiveCfg = Release|Any CPU
 		{72FF4124-72F5-48C2-8C4E-5A74359E98D9}.Release|x86.Build.0 = Release|Any CPU
+		{F3080DB0-14D7-42F8-A55D-3A4AAB738F0E}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{F3080DB0-14D7-42F8-A55D-3A4AAB738F0E}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{F3080DB0-14D7-42F8-A55D-3A4AAB738F0E}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{F3080DB0-14D7-42F8-A55D-3A4AAB738F0E}.Debug|x64.Build.0 = Debug|Any CPU
+		{F3080DB0-14D7-42F8-A55D-3A4AAB738F0E}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{F3080DB0-14D7-42F8-A55D-3A4AAB738F0E}.Debug|x86.Build.0 = Debug|Any CPU
+		{F3080DB0-14D7-42F8-A55D-3A4AAB738F0E}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{F3080DB0-14D7-42F8-A55D-3A4AAB738F0E}.Release|Any CPU.Build.0 = Release|Any CPU
+		{F3080DB0-14D7-42F8-A55D-3A4AAB738F0E}.Release|x64.ActiveCfg = Release|Any CPU
+		{F3080DB0-14D7-42F8-A55D-3A4AAB738F0E}.Release|x64.Build.0 = Release|Any CPU
+		{F3080DB0-14D7-42F8-A55D-3A4AAB738F0E}.Release|x86.ActiveCfg = Release|Any CPU
+		{F3080DB0-14D7-42F8-A55D-3A4AAB738F0E}.Release|x86.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -206,5 +220,6 @@ Global
 		{D3D27BD5-DB4C-4349-AF06-9AFA6B7431A1} = {94D31DAF-54FD-47A1-ABC5-DE0D31E8A7ED}
 		{2B7168FE-4E3D-4095-B391-F998E389B41C} = {94D31DAF-54FD-47A1-ABC5-DE0D31E8A7ED}
 		{72FF4124-72F5-48C2-8C4E-5A74359E98D9} = {1D3F3E65-48DE-4C8F-BE82-CF9C2D8D930C}
+		{F3080DB0-14D7-42F8-A55D-3A4AAB738F0E} = {94D31DAF-54FD-47A1-ABC5-DE0D31E8A7ED}
 	EndGlobalSection
 EndGlobal
