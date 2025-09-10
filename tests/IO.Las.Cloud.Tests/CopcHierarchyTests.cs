@@ -13,9 +13,12 @@ public class CopcHierarchyTests
             second,
         ];
 
-        CopcInfo info = new();
-
-        CopcHierarchy hierarchy = new(entries, info);
+        CopcHierarchy hierarchy = new(entries);
+        CopcInfo info = new()
+        {
+            RootHierOffset = CopcHierarchy.HeaderSize,
+            RootHierSize = hierarchy.Header.RecordLengthAfterHeader,
+        };
 
         _ = await Assert.That(info.RootHierOffset).IsEqualTo((ulong)CopcHierarchy.HeaderSize);
         _ = await Assert.That(info.RootHierSize).IsEqualTo(64UL);
@@ -30,8 +33,12 @@ public class CopcHierarchyTests
         CopcHierarchy.Entry first = new(new(1, 2, 3, 4), 5, 6, 7);
         CopcHierarchy.Entry second = new(new(7, 6, 5, 4), 3, 2, 1);
 
-        CopcInfo info = new();
-        CopcHierarchy hierarchy = new([first, second], info);
+        CopcHierarchy hierarchy = new([first, second]);
+        CopcInfo info = new()
+        {
+            RootHierOffset = CopcHierarchy.HeaderSize,
+            RootHierSize = hierarchy.Header.RecordLengthAfterHeader,
+        };
 
         Span<byte> data = stackalloc byte[(int)hierarchy.Size()];
 

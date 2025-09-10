@@ -245,7 +245,7 @@ public class LazWriterTests
         {
             SystemIdentifier = "LAS tests",
             GeneratingSoftware = "Las.Tests.exe",
-            Version = new Version(1, 1),
+            Version = new(1, 1),
             FileCreation = new DateTime(2010, 1, 1).AddDays(40),
             PointDataFormatId = 1,
 #if LAS1_4_OR_GREATER

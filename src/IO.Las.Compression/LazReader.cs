@@ -9,7 +9,7 @@ namespace Altemiq.IO.Las;
 /// <summary>
 /// Represents a reader for LAZ files.
 /// </summary>
-public sealed partial class LazReader : LasReader, ILazReader
+public sealed class LazReader : LasReader, ILazReader
 {
     private readonly IPointReader pointReader;
 
@@ -29,6 +29,15 @@ public sealed partial class LazReader : LasReader, ILazReader
     /// <param name="leaveOpen"><see langword="true"/> to leave the stream open after the <see cref="LazReader"/> object is disposed; otherwise <see langword="false"/>.</param>
     public LazReader(Stream input, string fileSignature, bool leaveOpen = false)
         : base(input, fileSignature, leaveOpen) => this.pointReader = this.CreatePointReader();
+
+    /// <summary>
+    /// Initializes a new instance of the <see cref="LazReader"/> class based on the specified path.
+    /// </summary>
+    /// <param name="path">The file to be opened for reading.</param>
+    public LazReader(string path)
+        : this(CreateStream(path))
+    {
+    }
 
     private LazReader(Stream input, bool leaveOpen, HeaderBlockReader headerReader, in HeaderBlock header)
         : base(input, leaveOpen, headerReader, header) => this.pointReader = this.CreatePointReader();
@@ -128,49 +137,56 @@ public sealed partial class LazReader : LasReader, ILazReader
     protected override bool MoveToPoint(ulong current, ulong target)
         => this.pointReader.MoveToPoint(this.BaseStream, this.PointDataLength, current, target);
 
+    private static Stream CreateStream(string path) => path switch
+    {
+        not null when File.Exists(path) => File.OpenRead(path),
+        not null when Directory.Exists(path) => LazMultipleFileStream.OpenRead(path),
+        _ => throw new NotSupportedException(),
+    };
+
     private IPointReader CreatePointReader()
     {
-        return Initialize(this.Header, this.BaseStream.Position, this.VariableLengthRecords, this.RawReader);
-
-        static IPointReader Initialize(
-            in HeaderBlock header,
-            long pointStart,
-            IReadOnlyList<VariableLengthRecord> variableLengthRecords,
-            Readers.IPointDataRecordReader reader)
+        return GetLasZip(this.VariableLengthRecords) switch
         {
-            LasZip? zip = default;
+            null or { Items: null } or { Compressor: Compressor.None } => new RawReader(this.RawReader, this.BaseStream.Position),
+            { Compressor: Compressor.PointWise } zip => new PointWiseReader(this.RawReader, this.Header, zip, this.BaseStream.Position),
+            { Compressor: Compressor.PointWiseChunked } zip => new PointWiseChunkedReader(this.RawReader, this.Header, zip),
+#if LAS1_4_OR_GREATER
+            { Compressor: Compressor.LayeredChunked, ChunkSize: LasZip.VariableChunkSize } zip => new VariableLayeredChunkedReader(this.RawReader, this.Header, zip),
+            { Compressor: Compressor.LayeredChunked } zip => new FixedLayeredChunkedReader(this.RawReader, this.Header, zip),
+#endif
+            _ => throw new InvalidOperationException(),
+        };
+
+        static LasZip? GetLasZip(IReadOnlyList<VariableLengthRecord> variableLengthRecords)
+        {
             for (var i = 0; i < variableLengthRecords.Count; i++)
             {
                 var variableLengthRecord = variableLengthRecords[i];
                 if (variableLengthRecord is CompressedTag compressedTag)
                 {
-                    zip = LasZip.From(compressedTag);
+                    return LasZip.From(compressedTag);
                 }
-                else if (variableLengthRecord is UnknownVariableLengthRecord { Header.RecordId: CompressedTag.TagRecordId } record)
+
+                if (variableLengthRecord is not UnknownVariableLengthRecord { Header.RecordId: CompressedTag.TagRecordId } record)
                 {
-                    compressedTag = new(record.Header, record.Data);
-
-                    // update the variable length records
-                    if (variableLengthRecords is IList<VariableLengthRecord> records)
-                    {
-                        records[i] = compressedTag;
-                    }
-
-                    zip = LasZip.From(compressedTag);
+                    // this is not a compressed TAG
+                    continue;
                 }
+
+                // this was not explicitly a compressed TAG, so let's create one.
+                compressedTag = new(record.Header, record.Data);
+
+                // update the variable length records
+                if (variableLengthRecords is IList<VariableLengthRecord> records)
+                {
+                    records[i] = compressedTag;
+                }
+
+                return LasZip.From(compressedTag);
             }
 
-            return zip switch
-            {
-                null or { Items: null } or { Compressor: Compressor.None } => new RawReader(reader, pointStart),
-                { Compressor: Compressor.PointWise } => new PointWiseReader(reader, header, zip, pointStart),
-                { Compressor: Compressor.PointWiseChunked } => new PointWiseChunkedReader(reader, header, zip),
-#if LAS1_4_OR_GREATER
-                { Compressor: Compressor.LayeredChunked, ChunkSize: LasZip.VariableChunkSize } => new VariableLayeredChunkedReader(reader, header, zip),
-                { Compressor: Compressor.LayeredChunked } => new FixedLayeredChunkedReader(reader, header, zip),
-#endif
-                _ => throw new InvalidOperationException(),
-            };
+            return default;
         }
     }
 }

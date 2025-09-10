@@ -21,10 +21,13 @@ internal static partial class RootCommandExtensions
         where T : RootCommand
     {
         VariableLengthRecordProcessor.Instance.RegisterCompression();
-        VariableLengthRecordProcessor.Instance.RegisterCloudOptimized();
         VariableLengthRecordProcessor.Instance.RegisterTiling();
         return command
             .AddInfo()
-            .AddIndex();
+            .AddIndex()
+#if LAS1_4_OR_GREATER
+            .AddCloudOptimized()
+#endif
+            .AddTo();
     }
 }

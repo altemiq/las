@@ -70,6 +70,15 @@ public sealed class LazWriter : LasWriter
 #endif
     }
 
+    /// <summary>
+    /// Initializes a new instance of the <see cref="LazWriter"/> class based on the specified path.
+    /// </summary>
+    /// <param name="path">The file to be opened for writing.</param>
+    public LazWriter(string path)
+        : base(CreateStream(path))
+    {
+    }
+
     /// <inheritdoc/>
     public override void Write(in HeaderBlock header, params IEnumerable<VariableLengthRecord> records)
     {
@@ -438,6 +447,13 @@ public sealed class LazWriter : LasWriter
 
         base.Dispose(disposing);
     }
+
+    private static Stream CreateStream(string path) => path switch
+    {
+        not null when Directory.Exists(path) => LazMultipleFileStream.OpenWrite(path),
+        not null => File.Open(path, FileMode.Create),
+        _ => throw new NotSupportedException(),
+    };
 
 #if !NET6_0_OR_GREATER
     [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]

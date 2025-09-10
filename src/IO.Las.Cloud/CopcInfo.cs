@@ -95,12 +95,12 @@ public sealed record CopcInfo : VariableLengthRecord
     /// <summary>
     /// Gets the file offset to the first hierarchy page.
     /// </summary>
-    public ulong RootHierOffset { get; internal set; }
+    public ulong RootHierOffset { get; init; }
 
     /// <summary>
     /// Gets the size of the first hierarchy page in bytes.
     /// </summary>
-    public ulong RootHierSize { get; internal set; }
+    public ulong RootHierSize { get; init; }
 
     /// <summary>
     /// Gets the minimum of GPSTime.

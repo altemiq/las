@@ -45,7 +45,22 @@
   <data name="Command_IndexCheckDescription" xml:space="preserve">
     <value>Checks the index for a specified file.</value>
   </data>
+  <data name="Command_ToDescription" xml:space="preserve">
+    <value>Converts a LA(S/Z) file</value>
+  </data>
+  <data name="Command_ToLasDescription" xml:space="preserve">
+    <value>Converts a LAS file to a new LAS file.</value>
+  </data>
+  <data name="Command_ToLazDescription" xml:space="preserve">
+    <value>Converts a LA(S/Z) file to a new LAZ file.</value>
+  </data>
   <data name="Option_IndexCheckIndexDescription" xml:space="preserve">
     <value>Where to get the index from.</value>
+  </data>
+  <data name="Command_ToExplodedDescription" xml:space="preserve">
+    <value>Tests the explode functionality.</value>
+  </data>
+  <data name="CompletedWritingTo" xml:space="preserve">
+    <value>Completed writing to '{0}'</value>
   </data>
 </root>
