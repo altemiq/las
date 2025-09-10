@@ -125,7 +125,7 @@ public class LasWriter(Stream stream, bool leaveOpen = false) : ILasWriter, IDis
                 byteArray = System.Buffers.ArrayPool<byte>.Shared.Rent(size);
             }
 
-            var written = record.Write(byteArray);
+            var written = record.CopyTo(byteArray);
             this.BaseStream.Write(byteArray, 0, written);
         }
 
@@ -223,7 +223,7 @@ public class LasWriter(Stream stream, bool leaveOpen = false) : ILasWriter, IDis
 
         var byteArray = System.Buffers.ArrayPool<byte>.Shared.Rent(size);
 
-        record.Write(byteArray);
+        record.CopyTo(byteArray);
 
         this.BaseStream.Write(byteArray, 0, size);
 

@@ -14,7 +14,7 @@ internal sealed class PointDataRecordWriter : IPointDataRecordWriter
     /// <inheritdoc />
     public int Write(Span<byte> destination, IBasePointDataRecord record, ReadOnlySpan<byte> extraBytes)
     {
-        var bytesWritten = record.Write(destination);
+        var bytesWritten = record.CopyTo(destination);
         extraBytes.CopyTo(destination[bytesWritten..]);
         return bytesWritten + extraBytes.Length;
     }
@@ -23,7 +23,7 @@ internal sealed class PointDataRecordWriter : IPointDataRecordWriter
     public ValueTask<int> WriteAsync(Memory<byte> destination, IBasePointDataRecord record, ReadOnlyMemory<byte> extraBytes, CancellationToken cancellationToken = default)
     {
         cancellationToken.ThrowIfCancellationRequested();
-        var bytesWritten = record.Write(destination.Span);
+        var bytesWritten = record.CopyTo(destination.Span);
         extraBytes.CopyTo(destination[bytesWritten..]);
         return new(bytesWritten + extraBytes.Length);
     }

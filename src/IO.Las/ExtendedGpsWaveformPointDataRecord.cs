@@ -370,7 +370,7 @@ public readonly record struct ExtendedGpsWaveformPointDataRecord :
 #endif
 
     /// <inheritdoc />
-    public int Write(Span<byte> destination)
+    public int CopyTo(Span<byte> destination)
     {
         if (BitConverter.IsLittleEndian)
         {

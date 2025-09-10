@@ -74,10 +74,10 @@ public sealed record ClassificationLookup : VariableLengthRecord, IReadOnlyList<
     System.Collections.IEnumerator System.Collections.IEnumerable.GetEnumerator() => this.GetEnumerator();
 
     /// <inheritdoc />
-    public override int Write(Span<byte> destination)
+    public override int CopyTo(Span<byte> destination)
     {
         const int End = VariableLengthRecordHeader.Size + TotalSize;
-        this.Header.Write(destination);
+        this.Header.CopyTo(destination);
         int bytesWritten = VariableLengthRecordHeader.Size;
         var d = destination[bytesWritten..];
 

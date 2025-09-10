@@ -47,9 +47,9 @@ public sealed record WaveformDataPackets : ExtendedVariableLengthRecord
     public ReadOnlyMemory<byte> Data { get; }
 
     /// <inheritdoc />
-    public override int Write(Span<byte> destination)
+    public override int CopyTo(Span<byte> destination)
     {
-        this.Header.Write(destination);
+        this.Header.CopyTo(destination);
         this.Data.Span.CopyTo(destination[ExtendedVariableLengthRecordHeader.Size..]);
         return ExtendedVariableLengthRecordHeader.Size + this.Data.Length;
     }

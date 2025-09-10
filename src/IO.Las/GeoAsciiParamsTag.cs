@@ -118,9 +118,9 @@ public record GeoAsciiParamsTag : VariableLengthRecord, IReadOnlyList<string>
     }
 
     /// <inheritdoc />
-    public override int Write(Span<byte> destination)
+    public override int CopyTo(Span<byte> destination)
     {
-        this.Header.Write(destination);
+        this.Header.CopyTo(destination);
         int bytesWritten = VariableLengthRecordHeader.Size;
         var d = destination[bytesWritten..];
 

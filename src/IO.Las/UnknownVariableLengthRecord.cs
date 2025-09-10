@@ -14,9 +14,9 @@ namespace Altemiq.IO.Las;
 public sealed record UnknownVariableLengthRecord(VariableLengthRecordHeader Header, byte[] Data) : VariableLengthRecord(Header with { RecordLengthAfterHeader = (ushort)Data.Length })
 {
     /// <inheritdoc />
-    public override int Write(Span<byte> destination)
+    public override int CopyTo(Span<byte> destination)
     {
-        this.Header.Write(destination);
+        this.Header.CopyTo(destination);
         this.Data.AsSpan().CopyTo(destination[VariableLengthRecordHeader.Size..]);
         return VariableLengthRecordHeader.Size + this.Data.Length;
     }

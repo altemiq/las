@@ -52,10 +52,10 @@ public sealed record TextAreaDescription : VariableLengthRecord
     public string Value { get; }
 
     /// <inheritdoc />
-    public override int Write(Span<byte> destination)
+    public override int CopyTo(Span<byte> destination)
     {
         var d = destination;
-        this.Header.Write(d);
+        this.Header.CopyTo(d);
         int bytesWritten = VariableLengthRecordHeader.Size;
         d = destination[bytesWritten..];
 

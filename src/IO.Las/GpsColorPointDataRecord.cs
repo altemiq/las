@@ -291,7 +291,7 @@ public readonly record struct GpsColorPointDataRecord :
 #endif
 
     /// <inheritdoc />
-    public int Write(Span<byte> destination)
+    public int CopyTo(Span<byte> destination)
     {
         if (BitConverter.IsLittleEndian)
         {

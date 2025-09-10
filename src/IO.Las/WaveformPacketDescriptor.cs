@@ -102,9 +102,9 @@ public sealed record WaveformPacketDescriptor : VariableLengthRecord
     public required double DigitizerOffset { get; init; }
 
     /// <inheritdoc />
-    public override int Write(Span<byte> destination)
+    public override int CopyTo(Span<byte> destination)
     {
-        this.Header.Write(destination);
+        this.Header.CopyTo(destination);
         var data = destination[VariableLengthRecordHeader.Size..];
 
         data[0] = this.BitsPerSample;

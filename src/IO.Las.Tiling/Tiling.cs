@@ -137,7 +137,7 @@ public sealed record Tiling : VariableLengthRecord
     public float MaxY { get; init; }
 
     /// <inheritdoc />
-    public override int Write(Span<byte> destination)
+    public override int CopyTo(Span<byte> destination)
     {
         System.Buffers.Binary.BinaryPrimitives.WriteUInt32LittleEndian(destination[..LevelIndexIdx], this.Level);
         System.Buffers.Binary.BinaryPrimitives.WriteUInt32LittleEndian(destination[LevelIndexIdx..ImplicitLevelsIdx], this.LevelIndex);

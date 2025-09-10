@@ -102,11 +102,11 @@ public interface IBasePointDataRecord
     IBasePointDataRecord Clone();
 
     /// <summary>
-    /// Writes this instance to the destination.
+    /// Copies the contents of this instance into a destination <see cref="Span{T}"/>.
     /// </summary>
-    /// <param name="destination">The destination.</param>
+    /// <param name="destination">The destination <see cref="Span{T}"/> object.</param>
     /// <returns>The number of bytes written.</returns>
-    int Write(Span<byte> destination);
+    int CopyTo(Span<byte> destination);
 
     /// <summary>
     /// Converts this instance to a <see cref="GpsPointDataRecord"/>.

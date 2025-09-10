@@ -220,9 +220,9 @@ public sealed record CompressedTag : VariableLengthRecord, IReadOnlyList<LasItem
     IEnumerator IEnumerable.GetEnumerator() => this.GetEnumerator();
 
     /// <inheritdoc />
-    public override int Write(Span<byte> destination)
+    public override int CopyTo(Span<byte> destination)
     {
-        this.Header.Write(destination);
+        this.Header.CopyTo(destination);
         var bytesWritten = VariableLengthRecordHeader.Size;
 
         // write out the values

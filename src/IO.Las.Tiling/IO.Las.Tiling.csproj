@@ -3,7 +3,6 @@
   <PropertyGroup>
     <TargetFrameworks>net7.0;net5.0;netstandard2.1;netstandard2.0</TargetFrameworks>
     <RootNamespace>$(RootNamespace.Replace('.Tiling', ''))</RootNamespace>
-    <LangVersion>preview</LangVersion>
     <PolySharpIncludeGeneratedTypes>
       $(PolySharpIncludeGeneratedTypes);
       System.Index;

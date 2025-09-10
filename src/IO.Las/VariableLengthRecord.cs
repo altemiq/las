@@ -13,11 +13,11 @@ namespace Altemiq.IO.Las;
 public abstract record VariableLengthRecord(VariableLengthRecordHeader Header)
 {
     /// <summary>
-    /// Writes this instance to the destination.
+    /// Copies the contents of this instance into a destination <see cref="Span{T}"/>.
     /// </summary>
-    /// <param name="destination">The destination.</param>
+    /// <param name="destination">The destination <see cref="Span{T}"/> object.</param>
     /// <returns>The number of bytes written.</returns>
-    public abstract int Write(Span<byte> destination);
+    public abstract int CopyTo(Span<byte> destination);
 
     /// <summary>
     /// Returns the sizes of this instance.

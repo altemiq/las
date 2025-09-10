@@ -3,7 +3,6 @@
   <PropertyGroup>
     <TargetFrameworks>net7.0;net5.0;netstandard2.1;netstandard2.0</TargetFrameworks>
     <RootNamespace>$(RootNamespace.Replace('.Compression', ''))</RootNamespace>
-    <LangVersion>preview</LangVersion>
     <PolySharpIncludeGeneratedTypes>
       $(PolySharpIncludeGeneratedTypes);
       System.Diagnostics.CodeAnalysis.DoesNotReturnIfAttribute;
@@ -54,6 +53,7 @@
   
   <ItemGroup>
     <InternalsVisibleTo Include="$(AssemblyName).Tests" />
+    <InternalsVisibleTo Include="$(AssemblyName.Replace('.Compression', '')).Cloud" />
   </ItemGroup>
   
   <ItemGroup>

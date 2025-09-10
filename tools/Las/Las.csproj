@@ -3,7 +3,6 @@
   <PropertyGroup>
     <OutputType>Exe</OutputType>
     <TargetFramework>$(DefaultTargetFramework)</TargetFramework>
-    <LangVersion>preview</LangVersion>
     
     <!-- packaging -->
     <EnableSdkContainerSupport>true</EnableSdkContainerSupport>
@@ -14,6 +13,7 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\..\src\IO.Las.Cloud\IO.Las.Cloud.csproj" />
     <ProjectReference Include="..\..\src\IO.Las.Compression\IO.Las.Compression.csproj" />
     <ProjectReference Include="..\..\src\IO.Las.Http\IO.Las.Http.csproj" />
     <ProjectReference Include="..\..\src\IO.Las.Indexing\IO.Las.Indexing.csproj" />

@@ -51,7 +51,8 @@ internal static class Processor
                 using var reader = LazReader.Create(File.Open(file, FileMode.Open, services));
                 if (reader is LazReader lazReader)
                 {
-                    throw new NotImplementedException();
+                    using var writer = new LazWriter(lazReader, leaveOpen: true);
+                    writer.Write(new Indexing.LaxTag(index), special: true);
                 }
             }
             else

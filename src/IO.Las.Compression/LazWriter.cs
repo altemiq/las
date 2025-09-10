@@ -105,7 +105,7 @@ public sealed class LazWriter : LasWriter
             }
 #endif
 
-            var bytesWritten = record.Write(buffer);
+            var bytesWritten = record.CopyTo(buffer);
 
             this.BaseStream.Write(buffer, 0, bytesWritten);
         }
@@ -590,7 +590,7 @@ public sealed class LazWriter : LasWriter
             callback?.Invoke(this.BaseStream.Position);
 
             var bytes = System.Buffers.ArrayPool<byte>.Shared.Rent((int)record.Size());
-            var bytesWritten = record.Write(bytes);
+            var bytesWritten = record.CopyTo(bytes);
             this.BaseStream.Write(bytes, 0, bytesWritten);
 
             var position = this.BaseStream.Position;

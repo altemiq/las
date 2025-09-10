@@ -407,7 +407,7 @@ public readonly record struct ExtendedGpsColorNearInfraredWaveformPointDataRecor
 #endif
 
     /// <inheritdoc />
-    public int Write(Span<byte> destination)
+    public int CopyTo(Span<byte> destination)
     {
         if (BitConverter.IsLittleEndian)
         {

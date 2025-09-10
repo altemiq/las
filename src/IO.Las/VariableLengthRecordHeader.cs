@@ -140,10 +140,10 @@ public readonly record struct VariableLengthRecordHeader
     }
 
     /// <summary>
-    /// Writes this instance to the destination.
+    /// Copies the contents of this instance into a destination <see cref="Span{T}"/>.
     /// </summary>
-    /// <param name="destination">The destination.</param>
-    public void Write(Span<byte> destination)
+    /// <param name="destination">The destination <see cref="Span{T}"/> object.</param>
+    public void CopyTo(Span<byte> destination)
     {
         if (BitConverter.IsLittleEndian)
         {

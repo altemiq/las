@@ -55,7 +55,7 @@ internal abstract class PointDataRecordWriter<T> : IPointDataRecordWriter, ISimp
     /// <inheritdoc cref="IPointDataRecordWriter.Write" />
     public int Write(Span<byte> destination, [System.Diagnostics.CodeAnalysis.NotNull] T record, ReadOnlySpan<byte> extraBytes)
     {
-        var bytesWritten = record.Write(destination);
+        var bytesWritten = record.CopyTo(destination);
         extraBytes.CopyTo(destination[bytesWritten..]);
         bytesWritten += extraBytes.Length;
         this.Write(destination[..bytesWritten]);
@@ -71,7 +71,7 @@ internal abstract class PointDataRecordWriter<T> : IPointDataRecordWriter, ISimp
     /// <inheritdoc cref="IPointDataRecordWriter.WriteAsync"/>
     public async ValueTask<int> WriteAsync(Memory<byte> destination, [System.Diagnostics.CodeAnalysis.NotNull] T record, ReadOnlyMemory<byte> extraBytes, CancellationToken cancellationToken = default)
     {
-        var bytesWritten = record.Write(destination.Span);
+        var bytesWritten = record.CopyTo(destination.Span);
         extraBytes.CopyTo(destination[bytesWritten..]);
         bytesWritten += extraBytes.Length;
         await this.WriteAsync(destination[..bytesWritten], cancellationToken).ConfigureAwait(false);

@@ -186,7 +186,7 @@ internal class PointWiseReader : RawReader
     {
         Span<byte> bytes = stackalloc byte[100];
 
-        var bytesWritten = point.Write(bytes);
+        var bytesWritten = point.CopyTo(bytes);
         extraBytes.CopyTo(bytes[bytesWritten..]);
         bytesWritten += extraBytes.Length;
 

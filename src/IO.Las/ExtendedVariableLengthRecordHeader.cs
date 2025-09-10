@@ -159,7 +159,7 @@ public readonly record struct ExtendedVariableLengthRecordHeader
     /// Writes this instance to the destination.
     /// </summary>
     /// <param name="destination">The destination.</param>
-    public void Write(Span<byte> destination)
+    public void CopyTo(Span<byte> destination)
     {
         if (BitConverter.IsLittleEndian)
         {

@@ -53,9 +53,9 @@ public sealed record LaxTag : ExtendedVariableLengthRecord
     public LasIndex GetIndex() => LasIndex.ReadFrom(this.data.Span);
 
     /// <inheritdoc />
-    public override int Write(Span<byte> destination)
+    public override int CopyTo(Span<byte> destination)
     {
-        this.Header.Write(destination);
+        this.Header.CopyTo(destination);
         this.data.Span.CopyTo(destination[ExtendedVariableLengthRecordHeader.Size..]);
         return ExtendedVariableLengthRecordHeader.Size + this.data.Length;
     }

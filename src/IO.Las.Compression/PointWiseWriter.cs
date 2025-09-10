@@ -85,7 +85,7 @@ internal class PointWiseWriter : RawWriter
             base.Write(stream, record, extraBytes);
 
             Span<byte> bytes = stackalloc byte[100];
-            var bytesWritten = record.Write(bytes);
+            var bytesWritten = record.CopyTo(bytes);
             extraBytes.CopyTo(bytes[bytesWritten..]);
             bytesWritten += extraBytes.Length;
 
@@ -119,7 +119,7 @@ internal class PointWiseWriter : RawWriter
             await base.WriteAsync(stream, record, extraBytes, cancellationToken).ConfigureAwait(false);
 
             Span<byte> bytes = stackalloc byte[100];
-            var bytesWritten = record.Write(bytes);
+            var bytesWritten = record.CopyTo(bytes);
             extraBytes.Span.CopyTo(bytes[bytesWritten..]);
             bytesWritten += extraBytes.Length;
 

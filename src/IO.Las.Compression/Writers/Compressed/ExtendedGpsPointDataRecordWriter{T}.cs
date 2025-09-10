@@ -103,7 +103,7 @@ internal abstract class ExtendedGpsPointDataRecordWriter<T> : Writers.PointDataR
     public sealed override int Write(Span<byte> destination, [System.Diagnostics.CodeAnalysis.NotNull] T record, ReadOnlySpan<byte> extraBytes)
     {
         var context = default(uint);
-        var bytesWritten = record.Write(destination);
+        var bytesWritten = record.CopyTo(destination);
         extraBytes.CopyTo(destination[bytesWritten..]);
         bytesWritten += extraBytes.Length;
         this.Write(destination[..bytesWritten], ref context);
@@ -116,7 +116,7 @@ internal abstract class ExtendedGpsPointDataRecordWriter<T> : Writers.PointDataR
     /// <inheritdoc/>
     public sealed override async ValueTask<int> WriteAsync(Memory<byte> destination, [System.Diagnostics.CodeAnalysis.NotNull] T record, ReadOnlyMemory<byte> extraBytes, CancellationToken cancellationToken = default)
     {
-        var bytesWritten = record.Write(destination.Span);
+        var bytesWritten = record.CopyTo(destination.Span);
         extraBytes.CopyTo(destination[bytesWritten..]);
         bytesWritten += extraBytes.Length;
         _ = await this.WriteAsync(destination[..bytesWritten], default,  cancellationToken).ConfigureAwait(false);

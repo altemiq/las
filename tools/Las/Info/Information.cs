@@ -128,6 +128,7 @@ internal static class Information
             ExtraBytes extraBytes => GetExtraBytes(extraBytes),
             OgcCoordinateSystemWkt ogcCoordinateSystemWkt => GetOgcCoordinateSystemWkt(ogcCoordinateSystemWkt),
             OgcMathTransformWkt ogcMathTransformWkt => GetOgcMathTransformWkt(ogcMathTransformWkt),
+            Cloud.CopcInfo copcInfo => GetCopcInfo(header, copcInfo),
 #endif
             Tiling tiling => GetTiling(tiling),
             _ => [],
@@ -759,6 +760,17 @@ internal static class Information
         }
 #endif
 
+#if LAS1_4_OR_GREATER
+        IEnumerable<(object? Header, object? Value)> GetCopcInfo(HeaderBlock header, Cloud.CopcInfo record)
+        {
+            yield return (default, string.Format(System.Globalization.CultureInfo.InvariantCulture, "center x y z: {0" + Format(header.ScaleFactor.X) + "} {1" + Format(header.ScaleFactor.Y) + "} {2" + Format(header.ScaleFactor.Z) + "}", record.CentreX, record.CentreY, record.CentreZ));
+            yield return (default, string.Create(System.Globalization.CultureInfo.InvariantCulture, $"root node halfsize: {record.HalfSize:0.000}"));
+            yield return (default, string.Create(System.Globalization.CultureInfo.InvariantCulture, $"root node point spacing: {record.Spacing:0.000}"));
+            yield return (default, string.Create(System.Globalization.CultureInfo.InvariantCulture, $"gpstime min/max: {record.GpsTimeMinimum:0.00}/{record.GpsTimeMaximum:0.00}"));
+            yield return (default, string.Create(System.Globalization.CultureInfo.InvariantCulture, $"root hierarchy offset/size: {record.RootHierOffset}/{record.RootHierSize}"));
+        }
+#endif
+
         IEnumerable<(object? Header, object? Value)> GetTiling(Tiling record)
         {
             var quadTree = new Indexing.LasQuadTree(record.MinX, record.MaxX, record.MinY, record.MaxY, (int)record.Level, (int)record.LevelIndex, default);
@@ -790,6 +802,49 @@ internal static class Information
         yield return ("record ID", evlr.Header.RecordId);
         yield return ("length after header", evlr.Header.RecordLengthAfterHeader);
         yield return ("description", evlr.Header.Description);
+
+#if LAS1_4_OR_GREATER
+        var extra = evlr switch
+        {
+            Cloud.CopcHierarchy copcHierarchy => GetCopcHierarchy(copcHierarchy),
+            _ => [],
+        };
+
+        foreach (var item in extra)
+        {
+            yield return item;
+        }
+
+        static IEnumerable<(object? Header, object? Value)> GetCopcHierarchy(Cloud.CopcHierarchy record)
+        {
+            if (record.Root is not { } root)
+            {
+                yield return (default, "ERROR: invalid COPC file, EPT hierachy not parsed.");
+                yield break;
+            }
+
+            var maxOctreeLevel = root.Max(static e => e.Key.Level) + 1;
+            yield return (default, string.Create(System.Globalization.CultureInfo.InvariantCulture, $"Octree with {maxOctreeLevel} levels"));
+
+            var pointCount = new uint[maxOctreeLevel];
+            var voxelCount = new uint[maxOctreeLevel];
+
+            foreach (var entry in root)
+            {
+                var entryPointCount = (uint)entry.PointCount;
+                pointCount[entry.Key.Level] += entryPointCount;
+                voxelCount[entry.Key.Level]++;
+            }
+
+            for (int i = 0; i < maxOctreeLevel; i++)
+            {
+                if (pointCount[i] is not 0)
+                {
+                    yield return (default, string.Create(System.Globalization.CultureInfo.InvariantCulture, $"Level {i}: {pointCount[i]} points in {voxelCount[i]} voxels"));
+                }
+            }
+        }
+#endif
     }
 #endif
 
