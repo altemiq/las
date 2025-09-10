@@ -48,5 +48,5 @@ public class LasMultipleStreamsTests
     }
 
     private class BasicLasMultipleMemoryStreams(IDictionary<string, Stream> dictionary) : LasMultipleMemoryStream(dictionary);
-    
+
 }

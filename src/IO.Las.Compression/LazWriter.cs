@@ -87,7 +87,7 @@ public sealed class LazWriter : LasWriter
             throw new InvalidOperationException("Cannot write header while writing is not complete");
         }
 
-        var recordsList = records is IList<VariableLengthRecord> { IsReadOnly: false } r ? r : records.ToList();
+        var recordsList = records is IList<VariableLengthRecord> { IsReadOnly: false } r ? r : [.. records];
 #if LAS1_4_OR_GREATER
         (var extraByteCount, this.pointWriter) = GetExtraByteCountAndPointWriter(header, this.RawWriter, recordsList);
 #else
@@ -492,9 +492,8 @@ public sealed class LazWriter : LasWriter
             records.Add(new CompressedTag(zip));
         }
 
-        if (header.PointDataFormatId > 5 && zip.Compressor is not Compressor.LayeredChunked)
+        if (header.PointDataFormatId >= ExtendedGpsPointDataRecord.Id && zip.Compressor is not Compressor.LayeredChunked)
         {
-            // write to STD error
             throw new InvalidOperationException(string.Format(Compression.Properties.Resources.Culture, Compression.Properties.v1_4.Resources.RequireNativeExtension, header.PointDataFormatId));
         }
 

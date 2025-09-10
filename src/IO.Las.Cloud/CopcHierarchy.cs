@@ -29,18 +29,14 @@ public sealed record CopcHierarchy : ExtendedVariableLengthRecord
     /// Initializes a new instance of the <see cref="CopcHierarchy"/> class.
     /// </summary>
     /// <param name="entries">The entries.</param>
-    /// <param name="info">The COPC information.</param>
     public CopcHierarchy(ICollection<Entry> entries)
         : base(new ExtendedVariableLengthRecordHeader
-            {
-                UserId = CopcConstants.UserId,
-                RecordId = TagRecordId,
-                RecordLengthAfterHeader = (ushort)(entries.Count * EntrySize),
-                Description = "EPT hierarchy",
-            })
-    {
-        this.Root = new([..entries]);
-    }
+        {
+            UserId = CopcConstants.UserId,
+            RecordId = TagRecordId,
+            RecordLengthAfterHeader = (ushort)(entries.Count * EntrySize),
+            Description = "EPT hierarchy",
+        }) => this.Root = new([.. entries]);
 
     /// <summary>
     /// Initializes a new instance of the <see cref="CopcHierarchy"/> class.
@@ -84,13 +80,6 @@ public sealed record CopcHierarchy : ExtendedVariableLengthRecord
     /// Gets the count.
     /// </summary>
     public Page Root { get; }
-
-    public static (CopcHierarchy Hierarchy, CopcInfo Info) CreateHierarchy(ICollection<Entry> entries, CopcInfo info)
-    {
-        var hierarchy = new CopcHierarchy(entries);
-        info = info with { RootHierOffset = HeaderSize, RootHierSize = hierarchy.Header.RecordLengthAfterHeader, };
-        return (hierarchy, info);
-    }
 
     /// <summary>
     /// Gets the page.

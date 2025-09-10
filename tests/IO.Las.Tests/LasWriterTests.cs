@@ -210,7 +210,7 @@ public class LasWriterTests
         _ = await Assert.That(await extraBytes.GetValueAsync(0, outputPoint.ExtraBytes)).IsEqualTo(ExtraValue);
     }
 #endif
-    
+
     [Test]
     public async Task ExplodedStream()
     {
@@ -254,7 +254,7 @@ public class LasWriterTests
         const double ExtraValue = 123.34;
         Span<byte> span = stackalloc byte[sizeof(ushort)];
 #endif
-        
+
         using (LasWriter lasWriter = new(stream, true))
         {
 #if LAS1_4_OR_GREATER

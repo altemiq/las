@@ -78,5 +78,5 @@ public class ColorTests
         {
             return HashCode.Combine(obj.R, obj.G, obj.B);
         }
-    }   
+    }
 }

@@ -284,13 +284,13 @@ internal abstract class ExtendedGpsPointDataRecordReader<T> : IPointDataRecordRe
         {
             // return number plus 1 mod 16
             returnNumber = (lastReturnNumber + 1) % 16;
-            FieldAccessors.ExtendedPointDataRecord.SetReturnNumber(lastPoint,  (byte)returnNumber);
+            FieldAccessors.ExtendedPointDataRecord.SetReturnNumber(lastPoint, (byte)returnNumber);
         }
         else if ((changedValues & 3) is 2)
         {
             // return number minus 1 mod 16
             returnNumber = (lastReturnNumber + 15) % 16;
-            FieldAccessors.ExtendedPointDataRecord.SetReturnNumber(lastPoint,  (byte)returnNumber);
+            FieldAccessors.ExtendedPointDataRecord.SetReturnNumber(lastPoint, (byte)returnNumber);
         }
         else
         {

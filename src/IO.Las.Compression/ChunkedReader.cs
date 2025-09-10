@@ -670,10 +670,7 @@ internal abstract class ChunkedReader : IPointReader
             decompressor.Initialize();
             for (var i = 1; i <= numberChunks; i++)
             {
-                if (chunkTotals is not null)
-                {
-                    chunkTotals[i] = (uint)decompressor.Decompress(i > 1 ? (int)chunkTotals[i - 1] : 0);
-                }
+                chunkTotals?[i] = (uint)decompressor.Decompress(i > 1 ? (int)chunkTotals[i - 1] : 0);
 
                 chunkStarts[i] = decompressor.Decompress(i > 1 ? (int)chunkStarts[i - 1] : 0, 1U);
                 tabledChunks++;

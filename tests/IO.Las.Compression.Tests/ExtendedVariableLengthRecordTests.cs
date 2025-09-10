@@ -18,7 +18,7 @@ public class ExtendedVariableLengthRecordTests
         ExtendedVariableLengthRecord evlr = new UnknownExtendedVariableLengthRecord(
             new()
             {
-                UserId ="MINE",
+                UserId = "MINE",
                 RecordId = 1234,
                 Description = "This is my EVLR",
                 RecordLengthAfterHeader = 0

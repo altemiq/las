@@ -41,7 +41,12 @@ internal class RawReader(Readers.IPointDataRecordReader reader, long pointStart)
             this.buffer = new byte[pointDataLength];
         }
 
-        var bytesRead = await stream.ReadAsync(this.buffer, 0, pointDataLength, cancellationToken).ConfigureAwait(false);
+        var bytesRead =
+#if NETSTANDARD2_1_OR_GREATER || NETCOREAPP2_1_OR_GREATER
+            await stream.ReadAsync(this.buffer.AsMemory(0, pointDataLength), cancellationToken).ConfigureAwait(false);
+#else
+            await stream.ReadAsync(this.buffer, 0, pointDataLength, cancellationToken).ConfigureAwait(false);
+#endif
 
         return await reader.ReadAsync(this.buffer.AsMemory(0, bytesRead), cancellationToken).ConfigureAwait(false);
     }

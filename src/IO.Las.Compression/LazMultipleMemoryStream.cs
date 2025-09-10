@@ -9,7 +9,7 @@ namespace Altemiq.IO.Las;
 /// <summary>
 /// The LAZ <see cref="MemoryStream"/> <see cref="MultipleStream"/>.
 /// </summary>
-internal class LazMultipleMemoryStream : LasMultipleMemoryStream
+internal sealed class LazMultipleMemoryStream : LasMultipleMemoryStream
 {
     /// <summary>
     /// Initializes a new instance of the <see cref="LazMultipleMemoryStream"/> class.

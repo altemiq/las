@@ -38,12 +38,12 @@ public sealed record CopcInfo : VariableLengthRecord
     /// </summary>
     public CopcInfo()
         : base(new VariableLengthRecordHeader
-            {
-                UserId = CopcConstants.UserId,
-                RecordId = TagRecordId,
-                RecordLengthAfterHeader = TotalSize,
-                Description = "copc info",
-            })
+        {
+            UserId = CopcConstants.UserId,
+            RecordId = TagRecordId,
+            RecordLengthAfterHeader = TotalSize,
+            Description = "copc info",
+        })
     {
     }
 

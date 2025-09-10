@@ -26,7 +26,7 @@ public sealed class ExtendedVariableLengthRecordHeaderComparer : IEqualityCompar
 
     public bool Equals(ExtendedVariableLengthRecordHeader x, ExtendedVariableLengthRecordHeader y)
     {
-        return  x.UserId.Equals(y.UserId) && x.Description.Equals(y.Description) && x.RecordId == y.RecordId;
+        return x.UserId.Equals(y.UserId) && x.Description.Equals(y.Description) && x.RecordId == y.RecordId;
     }
 
     public int GetHashCode(ExtendedVariableLengthRecordHeader obj)

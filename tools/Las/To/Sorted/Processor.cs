@@ -241,7 +241,7 @@ internal static class Processor
 
         static List<(ExtendedVariableLengthRecord Record, bool Special)> GetExtendedVariableLengthRecords(IReadOnlyList<ExtendedVariableLengthRecord> records)
         {
-            return records.Where(static value => !value.IsForCompression() && !value.IsForCloudOptimization()).Select(r => (r, false)).ToList();
+            return [.. records.Where(static value => !value.IsForCompression() && !value.IsForCloudOptimization()).Select(r => (r, false))];
         }
     }
 }

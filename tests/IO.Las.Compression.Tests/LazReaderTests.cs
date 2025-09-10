@@ -30,7 +30,7 @@ public class LazReaderTests
         {
             await TestPoint(reader);
         }
-        
+
         async Task TestPoint(LasReader pointReader)
         {
             var record = pointReader.ReadPointDataRecord();
@@ -82,9 +82,9 @@ public class LazReaderTests
             {
                 break;
             }
-            
+
             byte[] extraBytes = record.ExtraBytes.ToArray();
-            
+
             _ = await Assert.That(point).IsTypeOf<GpsPointDataRecord>();
             _ = await Assert.That(extraBytes).IsNotEmpty();
 

@@ -119,7 +119,7 @@ internal abstract class ExtendedGpsPointDataRecordWriter<T> : Writers.PointDataR
         var bytesWritten = record.CopyTo(destination.Span);
         extraBytes.CopyTo(destination[bytesWritten..]);
         bytesWritten += extraBytes.Length;
-        _ = await this.WriteAsync(destination[..bytesWritten], default,  cancellationToken).ConfigureAwait(false);
+        _ = await this.WriteAsync(destination[..bytesWritten], default, cancellationToken).ConfigureAwait(false);
         return default;
     }
 

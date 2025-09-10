@@ -234,7 +234,7 @@ public class LazWriterTests
         ];
 
         using LazWriter writer = new(new MemoryStream());
-        await Assert.That([SuppressMessage("ReSharper", "AccessToDisposedClosure")]() => writer.Write(HeaderBlock.Default, records)).ThrowsNothing();
+        await Assert.That([SuppressMessage("ReSharper", "AccessToDisposedClosure")] () => writer.Write(HeaderBlock.Default, records)).ThrowsNothing();
         _ = await Assert.That(records).HasCount().EqualToOne();
     }
 

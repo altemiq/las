@@ -218,13 +218,13 @@ internal abstract class PointDataRecordReader<T>(IEntropyDecoder decoder, int po
         // decompress y coordinate
         median = this.lastYDiffMedian5[returnMap].Get();
         var kBits = this.deltaXIntegerDecompressor.K;
-        diff = this.deltaYIntegerDecompressor.Decompress(median, coordinateContext + (kBits < 20U ? Compression.ExtensionMethods.ZeroBit0(kBits) : 20U));
+        diff = this.deltaYIntegerDecompressor.Decompress(median, coordinateContext + (kBits < 20U ? kBits.ZeroBit0() : 20U));
         FieldAccessors.PointDataRecord.SetY(this.lastPoint, FieldAccessors.PointDataRecord.GetY(this.lastPoint) + diff);
         this.lastYDiffMedian5[returnMap].Add(diff);
 
         // decompress z coordinate
         kBits = (this.deltaXIntegerDecompressor.K + this.deltaYIntegerDecompressor.K) / 2;
-        var z = this.zIntegerDecompressor.Decompress(this.lastHeight[returnLevel], coordinateContext + (kBits < 18U ? Compression.ExtensionMethods.ZeroBit0(kBits) : 18U));
+        var z = this.zIntegerDecompressor.Decompress(this.lastHeight[returnLevel], coordinateContext + (kBits < 18U ? kBits.ZeroBit0() : 18U));
         FieldAccessors.PointDataRecord.SetZ(this.lastPoint, z);
         this.lastHeight[returnLevel] = z;
 
