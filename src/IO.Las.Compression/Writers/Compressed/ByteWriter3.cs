@@ -49,7 +49,7 @@ internal sealed class ByteWriter3 : IContextWriter
         // output the bytes of all layers
         foreach (var valueByte in this.valueBytes)
         {
-            valueByte.CopyToStreamIfChanged(writer);
+            valueByte.CopyToIfChanged(writer);
         }
 
         return true;

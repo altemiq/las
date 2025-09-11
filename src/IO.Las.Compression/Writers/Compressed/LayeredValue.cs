@@ -63,14 +63,14 @@ internal sealed class LayeredValue
     /// <returns>The byte count.</returns>
     public uint GetByteCount()
     {
-        if (this.stream is { Position: var position })
+        if (this.stream is not { Position: var position })
         {
-            var byteCount = (uint)position;
-            this.ByteCount += byteCount;
-            return byteCount;
+            return default;
         }
 
-        return default;
+        var byteCount = (uint)position;
+        this.ByteCount += byteCount;
+        return byteCount;
     }
 
     /// <summary>
@@ -82,25 +82,48 @@ internal sealed class LayeredValue
     /// <summary>
     /// Copies the data in the <see cref="LayeredValue"/> to the specified <see cref="BinaryWriter"/>.
     /// </summary>
-    /// <param name="stream">The stream to write to.</param>
-    public void CopyToStream(Stream stream)
+    /// <param name="destination">The stream to write to.</param>
+    public void CopyTo(Stream destination)
     {
-        if (this.stream is { Position: { } position } layeredValueStream)
+        if (this.stream is not { Position: var position } source)
         {
-            var byteCount = (int)position;
-            layeredValueStream.CopyToStream(stream, byteCount);
+            return;
+        }
+
+        // reset the position to the start
+        source.Position = 0;
+        var bytesLeft = (int)position;
+
+        var buffer = System.Buffers.ArrayPool<byte>.Shared.Rent(ArithmeticCoder.BufferSize);
+        try
+        {
+            while (bytesLeft > 0)
+            {
+                var bytesToRead = bytesLeft > buffer.Length ? buffer.Length : bytesLeft;
+                var bytesRead = source.Read(buffer, 0, bytesToRead);
+
+                destination.Write(buffer, 0, bytesRead);
+
+                bytesLeft -= bytesRead;
+            }
+
+            source.Position = position;
+        }
+        finally
+        {
+            System.Buffers.ArrayPool<byte>.Shared.Return(buffer);
         }
     }
 
     /// <summary>
     /// Copies the data in the <see cref="LayeredValue"/> to the specified <see cref="BinaryWriter"/> if <see cref="LayeredValue.Changed"/> is <see langword="true"/>.
     /// </summary>
-    /// <param name="stream">The stream to write to.</param>
-    public void CopyToStreamIfChanged(Stream stream)
+    /// <param name="destination">The stream to write to.</param>
+    public void CopyToIfChanged(Stream destination)
     {
         if (this.Changed)
         {
-            this.CopyToStream(stream);
+            this.CopyTo(destination);
         }
     }
 }

@@ -38,7 +38,7 @@ internal sealed class ColorWriter3 : IContextWriter
     {
         var stream = this.encoder.GetStream();
 
-        this.valueRgb.CopyToStreamIfChanged(stream);
+        this.valueRgb.CopyToIfChanged(stream);
 
         return true;
     }

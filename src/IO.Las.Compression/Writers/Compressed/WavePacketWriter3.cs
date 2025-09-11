@@ -38,7 +38,7 @@ internal sealed class WavePacketWriter3 : IContextWriter
     {
         var stream = this.encoder.GetStream();
 
-        this.valueWavePacket.CopyToStreamIfChanged(stream);
+        this.valueWavePacket.CopyToIfChanged(stream);
 
         return true;
     }

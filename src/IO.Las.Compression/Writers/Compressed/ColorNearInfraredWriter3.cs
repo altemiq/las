@@ -41,8 +41,8 @@ internal sealed class ColorNearInfraredWriter3 : IContextWriter
     {
         var stream = this.encoder.GetStream();
 
-        this.valueRgb.CopyToStreamIfChanged(stream);
-        this.valueNir.CopyToStreamIfChanged(stream);
+        this.valueRgb.CopyToIfChanged(stream);
+        this.valueNir.CopyToIfChanged(stream);
 
         return true;
     }

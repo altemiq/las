@@ -83,15 +83,15 @@ internal abstract class ExtendedGpsPointDataRecordWriter<T> : Writers.PointDataR
         var stream = this.encoder.GetStream();
 
         // output the bytes of all layers
-        this.valueChannelReturnsXY.CopyToStream(stream);
-        this.valueZ.CopyToStream(stream);
-        this.valueClassification.CopyToStreamIfChanged(stream);
-        this.valueFlags.CopyToStreamIfChanged(stream);
-        this.valueIntensity.CopyToStreamIfChanged(stream);
-        this.valueScanAngle.CopyToStreamIfChanged(stream);
-        this.valueUserData.CopyToStreamIfChanged(stream);
-        this.valuePointSource.CopyToStreamIfChanged(stream);
-        this.valueGpsTime.CopyToStreamIfChanged(stream);
+        this.valueChannelReturnsXY.CopyTo(stream);
+        this.valueZ.CopyTo(stream);
+        this.valueClassification.CopyToIfChanged(stream);
+        this.valueFlags.CopyToIfChanged(stream);
+        this.valueIntensity.CopyToIfChanged(stream);
+        this.valueScanAngle.CopyToIfChanged(stream);
+        this.valueUserData.CopyToIfChanged(stream);
+        this.valuePointSource.CopyToIfChanged(stream);
+        this.valueGpsTime.CopyToIfChanged(stream);
 
         return true;
     }

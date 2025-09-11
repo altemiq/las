@@ -14,36 +14,6 @@ using System.Runtime.CompilerServices;
 internal static class ExtensionMethods
 {
     /// <summary>
-    /// Copies a certain amount of bytes from a stream to a writer.
-    /// </summary>
-    /// <param name="source">The source.</param>
-    /// <param name="destination">The destination.</param>
-    /// <param name="byteCount">The bytes count.</param>
-    /// <param name="bufferSize">The buffer size.</param>
-    public static void CopyToStream(this Stream source, Stream destination, int byteCount, int bufferSize = ArithmeticCoder.BufferSize)
-    {
-        var position = source.Position;
-
-        source.Position = 0;
-        var buffer = System.Buffers.ArrayPool<byte>.Shared.Rent(bufferSize);
-        var bytesLeft = byteCount;
-
-        while (bytesLeft > 0)
-        {
-            var bytesToRead = bytesLeft > buffer.Length ? buffer.Length : bytesLeft;
-            var bytesRead = source.Read(buffer, 0, bytesToRead);
-
-            destination.Write(buffer, 0, bytesRead);
-
-            bytesLeft -= bytesRead;
-        }
-
-        source.Position = position;
-
-        System.Buffers.ArrayPool<byte>.Shared.Return(buffer);
-    }
-
-    /// <summary>
     /// Quantize the specified float to int.
     /// </summary>
     /// <param name="n">The value to quantize.</param>
