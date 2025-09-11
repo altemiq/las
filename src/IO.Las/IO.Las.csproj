@@ -123,4 +123,13 @@
                       ReferenceOutputAssembly="false" />
   </ItemGroup>
 
+  <Target Name="_DownloadStandardSystemIdentifiers" BeforeTargets="CoreCompile">
+    <DownloadFile SourceUrl="https://github.com/ASPRSorg/LAS/wiki/attachments/platforms.csv" DestinationFolder="$(IntermediateOutputPath)" SkipUnchangedFiles="true">
+      <Output TaskParameter="DownloadedFile" ItemName="AdditionalFiles"/>
+    </DownloadFile>
+    <DownloadFile SourceUrl="https://github.com/ASPRSorg/LAS/wiki/attachments/models.csv" DestinationFolder="$(IntermediateOutputPath)" SkipUnchangedFiles="true">
+      <Output TaskParameter="DownloadedFile" ItemName="AdditionalFiles"/>
+    </DownloadFile>
+  </Target>
+
 </Project>

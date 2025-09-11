@@ -13,10 +13,56 @@ using System.Runtime.InteropServices;
 /// </summary>
 [StructLayout(LayoutKind.Sequential, Pack = 1, Size = 192)]
 [System.Diagnostics.CodeAnalysis.SuppressMessage("Minor Code Smell", "S2292:Trivial properties should be auto-implemented", Justification = "This needs sequential layout.")]
-[System.Diagnostics.CodeAnalysis.SuppressMessage("ReSharper", "ConvertToAutoPropertyWhenPossible", Justification = "This needs sequential layout.")]
-[System.Diagnostics.CodeAnalysis.SuppressMessage("Roslynator", "RCS1085:Use auto-implemented property", Justification = "This needs sequential layout.")]
+[System.Diagnostics.CodeAnalysis.SuppressMessage("ReSharper", "PrivateFieldCanBeConvertedToLocalVariable", Justification = "This needs sequential layout.")]
+[System.Diagnostics.CodeAnalysis.SuppressMessage("ReSharper", "CollectionNeverQueried.Local", Justification = "This needs sequential layout.")]
 public readonly record struct ExtraBytesItem
 {
+    /// <summary>
+    /// The Beam ID extra bytes item.
+    /// </summary>
+    public static readonly ExtraBytesItem BeamId = new()
+    {
+        DataType = ExtraBytesDataType.UnsignedChar,
+        Name = "beam id",
+        Description = "Extended channel ID",
+        Options = ExtraBytesOptions.NoData | ExtraBytesOptions.Min | ExtraBytesOptions.Max,
+        Min = byte.MinValue,
+        Max = byte.MaxValue - 1,
+        NoData = byte.MaxValue,
+    };
+
+    /// <summary>
+    /// The echo width extra bytes item.
+    /// </summary>
+    public static readonly ExtraBytesItem EchoWidth = new()
+    {
+        DataType = ExtraBytesDataType.UnsignedShort,
+        Name = "echo width",
+        Description = "Full width at half maximum [ns]",
+        Offset = default,
+        Scale = 0.1,
+        Options = ExtraBytesOptions.All,
+        Min = (ushort)1,
+        Max = (ushort)10000,
+        NoData = (ushort)0,
+    };
+
+    /// <summary>
+    /// The height above ground extra bytes item.
+    /// </summary>
+    public static readonly ExtraBytesItem HeightAboveGround = new()
+    {
+        DataType = ExtraBytesDataType.Short,
+        Name = "height above ground",
+        Description = "Vertical point to TIN distance",
+        Offset = default,
+        Scale = 0.01,
+        Options = ExtraBytesOptions.All,
+        Min = short.MinValue,
+        Max = short.MaxValue,
+        NoData = unchecked((short)(short.MaxValue + 1)),
+    };
+
     private const int ReservedSize = 2;
     private const int NameSize = 32;
     private const int UnusedSize = 4;
@@ -185,9 +231,9 @@ public readonly record struct ExtraBytesItem
     /// <returns>The value.</returns>
     public object? GetValue(ReadOnlySpan<byte> source)
     {
-        return ScaleAndOffset(this, GetValue(this, source));
+        return ScaleAndOffset(this, GetItemValue(this, source));
 
-        static object? GetValue(ExtraBytesItem item, ReadOnlySpan<byte> source)
+        static object? GetItemValue(ExtraBytesItem item, ReadOnlySpan<byte> source)
         {
             return item.DataType switch
             {
