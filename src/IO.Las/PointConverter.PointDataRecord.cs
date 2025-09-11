@@ -41,6 +41,7 @@ internal static partial class PointConverter
                 PointSourceId = pointDataRecord.PointSourceId,
             };
 
+#if LAS1_4_OR_GREATER
         /// <summary>
         /// Creates a <see cref="PointDataRecord"/> from a <see cref="IExtendedPointDataRecord"/>.
         /// </summary>
@@ -65,5 +66,6 @@ internal static partial class PointConverter
                 UserData = pointDataRecord.UserData,
                 PointSourceId = pointDataRecord.PointSourceId,
             };
+#endif
     }
 }

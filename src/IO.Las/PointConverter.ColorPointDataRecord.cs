@@ -70,6 +70,7 @@ internal static partial class PointConverter
                 Color = pointDataRecord.Color,
             };
 
+#if LAS1_4_OR_GREATER
         /// <summary>
         /// Creates a <see cref="ColorPointDataRecord"/> from a <see cref="IExtendedPointDataRecord"/>.
         /// </summary>
@@ -123,5 +124,6 @@ internal static partial class PointConverter
                 PointSourceId = pointDataRecord.PointSourceId,
                 Color = pointDataRecord.Color,
             };
+#endif
     }
 }

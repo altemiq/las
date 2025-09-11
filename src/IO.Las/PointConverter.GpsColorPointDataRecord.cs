@@ -130,6 +130,7 @@ internal static partial class PointConverter
                 Color = pointDataRecord.Color,
             };
 
+#if LAS1_4_OR_GREATER
         /// <summary>
         /// Creates a <see cref="GpsColorPointDataRecord"/> from a <see cref="IExtendedPointDataRecord"/>.
         /// </summary>
@@ -185,5 +186,6 @@ internal static partial class PointConverter
                 GpsTime = pointDataRecord.GpsTime,
                 Color = pointDataRecord.Color,
             };
+#endif
     }
 }

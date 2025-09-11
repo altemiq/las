@@ -663,33 +663,32 @@ internal abstract class ChunkedReader : IPointReader
         chunkStarts = new long[numberChunks + 1];
         chunkStarts[0] = chunksStart;
         tabledChunks = 1U;
-        if (numberChunks > 0)
+        if (numberChunks <= 0)
         {
-            _ = decoder.Initialize(stream);
-            var decompressor = new IntegerDecompressor(decoder, 32, 2);
-            decompressor.Initialize();
-            for (var i = 1; i <= numberChunks; i++)
+            return;
+        }
+
+#pragma warning disable S1121
+        _ = decoder.Initialize(stream);
+        var decompressor = new IntegerDecompressor(decoder, 32, 2);
+        decompressor.Initialize();
+        for (var i = 1; i <= numberChunks; i++)
+        {
+            chunkTotals?[i] = (uint)decompressor.Decompress(i > 1 ? (int)chunkTotals[i - 1] : 0);
+            chunkStarts[i] = decompressor.Decompress(i > 1 ? (int)chunkStarts[i - 1] : 0, 1U);
+            tabledChunks++;
+        }
+
+        decoder.Done();
+        for (var i = 1; i <= numberChunks; i++)
+        {
+            chunkTotals?[i] += chunkTotals[i - 1];
+            chunkStarts[i] += chunkStarts[i - 1];
+            if (chunkStarts[i] <= chunkStarts[i - 1])
             {
-                chunkTotals?[i] = (uint)decompressor.Decompress(i > 1 ? (int)chunkTotals[i - 1] : 0);
-
-                chunkStarts[i] = decompressor.Decompress(i > 1 ? (int)chunkStarts[i - 1] : 0, 1U);
-                tabledChunks++;
-            }
-
-            decoder.Done();
-            for (var i = 1; i <= numberChunks; i++)
-            {
-                if (chunkTotals is not null)
-                {
-                    chunkTotals[i] += chunkTotals[i - 1];
-                }
-
-                chunkStarts[i] += chunkStarts[i - 1];
-                if (chunkStarts[i] <= chunkStarts[i - 1])
-                {
-                    throw new InvalidOperationException(Compression.Properties.Resources.ChunkStartsNotInOrder);
-                }
+                throw new InvalidOperationException(Compression.Properties.Resources.ChunkStartsNotInOrder);
             }
         }
+#pragma warning restore S1121
     }
 }

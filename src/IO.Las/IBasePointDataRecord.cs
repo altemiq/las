@@ -120,6 +120,7 @@ public interface IBasePointDataRecord
     /// <returns>The <see cref="GpsPointDataRecord"/>.</returns>
     GpsPointDataRecord ToGpsPointDataRecord();
 
+#if LAS1_2_OR_GREATER
     /// <summary>
     /// Converts this instance to a <see cref="ColorPointDataRecord"/>.
     /// </summary>
@@ -131,7 +132,9 @@ public interface IBasePointDataRecord
     /// </summary>
     /// <returns>The <see cref="GpsColorPointDataRecord"/>.</returns>
     GpsColorPointDataRecord ToGpsColorPointDataRecord();
+#endif
 
+#if LAS1_3_OR_GREATER
     /// <summary>
     /// Converts this instance to a <see cref="GpsWaveformPointDataRecord"/>.
     /// </summary>
@@ -143,7 +146,9 @@ public interface IBasePointDataRecord
     /// </summary>
     /// <returns>The <see cref="GpsColorWaveformPointDataRecord"/>.</returns>
     GpsColorWaveformPointDataRecord ToGpsColorWaveformPointDataRecord();
+#endif
 
+#if LAS1_4_OR_GREATER
     /// <summary>
     /// Converts this instance to a <see cref="ExtendedGpsPointDataRecord"/>.
     /// </summary>
@@ -173,4 +178,5 @@ public interface IBasePointDataRecord
     /// </summary>
     /// <returns>The <see cref="ExtendedGpsColorNearInfraredWaveformPointDataRecord"/>.</returns>
     ExtendedGpsColorNearInfraredWaveformPointDataRecord ToExtendedGpsColorNearInfraredWaveformPointDataRecord();
+#endif
 }

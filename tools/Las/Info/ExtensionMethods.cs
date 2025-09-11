@@ -131,7 +131,11 @@ internal static class ExtensionMethods
             };
         }
 
+#if LAS1_4_OR_GREATER
         while (reader.ReadPointDataRecord() is { PointDataRecord: { } record, ExtraBytes: var data })
+#else
+        while (reader.ReadPointDataRecord() is { PointDataRecord: { } record })
+#endif
         {
             if (!filter(record))
             {

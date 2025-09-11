@@ -18,4 +18,8 @@
     <EmbeddedResource Include="*.laz" />
   </ItemGroup>
 
+  <ItemGroup Condition=" '$(SupportLas14)' != 'true' ">
+    <Compile Remove="**\ExtendedVariableLengthRecord*.cs" />
+  </ItemGroup>
+
 </Project>

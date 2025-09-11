@@ -27,6 +27,7 @@ public interface IBasePointDataRecord<out TSelf> : IBasePointDataRecord
     /// <returns>The <typeparamref name="TSelf"/> instance.</returns>
     static abstract TSelf FromPointDataRecord(GpsPointDataRecord pointDataRecord);
 
+#if LAS1_2_OR_GREATER
     /// <summary>
     /// Creates a <typeparamref name="TSelf"/> from a <see cref="ColorPointDataRecord"/>.
     /// </summary>
@@ -40,7 +41,9 @@ public interface IBasePointDataRecord<out TSelf> : IBasePointDataRecord
     /// <param name="pointDataRecord">The point data record.</param>
     /// <returns>The <typeparamref name="TSelf"/> instance.</returns>
     static abstract TSelf FromPointDataRecord(GpsColorPointDataRecord pointDataRecord);
+#endif
 
+#if LAS1_3_OR_GREATER
     /// <summary>
     /// Creates a <typeparamref name="TSelf"/> from a <see cref="GpsWaveformPointDataRecord"/>.
     /// </summary>
@@ -54,7 +57,9 @@ public interface IBasePointDataRecord<out TSelf> : IBasePointDataRecord
     /// <param name="pointDataRecord">The point data record.</param>
     /// <returns>The <typeparamref name="TSelf"/> instance.</returns>
     static abstract TSelf FromPointDataRecord(GpsColorWaveformPointDataRecord pointDataRecord);
+#endif
 
+#if LAS1_4_OR_GREATER
     /// <summary>
     /// Creates a <typeparamref name="TSelf"/> from a <see cref="ExtendedGpsPointDataRecord"/>.
     /// </summary>
@@ -89,6 +94,7 @@ public interface IBasePointDataRecord<out TSelf> : IBasePointDataRecord
     /// <param name="pointDataRecord">The point data record.</param>
     /// <returns>The <typeparamref name="TSelf"/> instance.</returns>
     static abstract TSelf FromPointDataRecord(ExtendedGpsColorNearInfraredWaveformPointDataRecord pointDataRecord);
+#endif
 
     /// <summary>
     /// Creates a new instance of <typeparamref name="TSelf"/> from the data.

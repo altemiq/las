@@ -12,6 +12,19 @@
     <NoWarn>$(NoWarn);S1117</NoWarn>
   </PropertyGroup>
 
+  <ItemGroup Condition=" '$(SupportLas14)' != 'true' ">
+    <!-- Remove COPC -->
+    <Compile Remove="**\*Copc*\*.cs" />
+    <Compile Remove="**\*Copc*.cs" />
+
+    <!-- Remove Sorted -->
+    <Compile Remove="**\*Sorted*\*.cs" />
+    <Compile Remove="**\*Sorted*.cs" />
+
+    <!-- Remove v1.4 specific resources -->
+    <EmbeddedResource Remove="Properties\v1.4\*.resx" />
+  </ItemGroup>
+
   <ItemGroup>
     <ProjectReference Include="..\..\src\IO.Las.Cloud\IO.Las.Cloud.csproj" />
     <ProjectReference Include="..\..\src\IO.Las.Compression\IO.Las.Compression.csproj" />

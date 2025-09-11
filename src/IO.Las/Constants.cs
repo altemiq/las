@@ -21,20 +21,26 @@ internal static class Constants
         /// </summary>
         public const ushort GpsTime = sizeof(double);
 
+#if LAS1_2_OR_GREATER
         /// <summary>
         /// The <see cref="IColorPointDataRecord.Color"/> size.
         /// </summary>
         public const ushort Color = 3 * sizeof(ushort);
+#endif
 
+#if LAS1_3_OR_GREATER
         /// <summary>
         /// The <see cref="IWaveformPointDataRecord"/> size.
         /// </summary>
         public const ushort Waveform = sizeof(byte) + sizeof(ulong) + sizeof(uint) + sizeof(float) + sizeof(float) + sizeof(float) + sizeof(float);
+#endif
 
+#if LAS1_4_OR_GREATER
         /// <summary>
         /// The <see cref="INearInfraredPointDataRecord.NearInfrared"/> size.
         /// </summary>
         public const ushort NearInfrared = sizeof(ushort);
+#endif
     }
 
     /// <summary>
@@ -138,6 +144,7 @@ internal static class Constants
         /// </summary>
         public const int GpsTimeFieldOffset = PointSourceIdFieldOffset + sizeof(ushort);
 
+#if LAS1_2_OR_GREATER
         /// <summary>
         /// The <see cref="IColorPointDataRecord.Color"/> field offset.
         /// </summary>
@@ -147,7 +154,9 @@ internal static class Constants
         /// The <see cref="IColorPointDataRecord.Color"/> field offset.
         /// </summary>
         public const int GpsColorFieldOffset = GpsTimeFieldOffset + sizeof(double);
+#endif
 
+#if LAS1_3_OR_GREATER
         /// <summary>
         /// The <see cref="IWaveformPointDataRecord.WavePacketDescriptorIndex"/> field offset.
         /// </summary>
@@ -157,8 +166,10 @@ internal static class Constants
         /// The <see cref="IWaveformPointDataRecord.WavePacketDescriptorIndex"/> field offset.
         /// </summary>
         public const int GpsColorWaveformFieldOffset = GpsColorFieldOffset + (3 * sizeof(ushort));
+#endif
     }
 
+#if LAS1_4_OR_GREATER
     /// <summary>
     /// The <see cref="IExtendedPointDataRecord"/> constants.
     /// </summary>
@@ -229,6 +240,7 @@ internal static class Constants
         /// </summary>
         public const int NirFieldOffset = ColorFieldOffset + (3 * sizeof(ushort));
     }
+#endif
 
     /// <summary>
     /// The <see cref="VariableLengthRecordHeader"/> constants.
@@ -261,6 +273,7 @@ internal static class Constants
         public const int DescriptionFieldOffset = RecordLengthAfterHeaderFieldOffset + sizeof(ushort);
     }
 
+#if LAS1_3_OR_GREATER
     /// <summary>
     /// The <see cref="ExtendedVariableLengthRecordHeader"/> constants.
     /// </summary>
@@ -291,4 +304,5 @@ internal static class Constants
         /// </summary>
         public const int DescriptionFieldOffset = RecordLengthAfterHeaderFieldOffset + sizeof(ulong);
     }
+#endif
 }

@@ -119,6 +119,7 @@ internal static partial class PointConverter
                 ParametricDz = pointDataRecord.ParametricDz,
             };
 
+#if LAS1_4_OR_GREATER
         /// <summary>
         /// Creates a <see cref="GpsWaveformPointDataRecord"/> from a <see cref="IExtendedPointDataRecord"/>.
         /// </summary>
@@ -186,5 +187,6 @@ internal static partial class PointConverter
                 ParametricDy = pointDataRecord.ParametricDy,
                 ParametricDz = pointDataRecord.ParametricDz,
             };
+#endif
     }
 }

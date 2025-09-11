@@ -189,7 +189,9 @@ public sealed class LazWriter : LasWriter
 #else
         foreach (var point in points.Take(count))
         {
-            this.Write(point);
+            this.Write(
+                point.PointDataRecord ?? throw new InvalidOperationException(),
+                point.ExtraBytes.Span);
         }
 #endif
     }
@@ -218,7 +220,9 @@ public sealed class LazWriter : LasWriter
 #else
         foreach (var point in points)
         {
-            this.Write(point);
+            this.Write(
+                point.PointDataRecord ?? throw new InvalidOperationException(),
+                point.ExtraBytes.Span);
         }
 #endif
     }
@@ -320,7 +324,10 @@ public sealed class LazWriter : LasWriter
 #else
         foreach (var point in points.Take(count))
         {
-            await this.WriteAsync(point, cancellationToken).ConfigureAwait(false);
+            await this.WriteAsync(
+                point.PointDataRecord ?? throw new InvalidOperationException(),
+                point.ExtraBytes,
+                cancellationToken).ConfigureAwait(false);
         }
 #endif
     }
@@ -352,7 +359,10 @@ public sealed class LazWriter : LasWriter
 #else
         foreach (var point in points)
         {
-            await this.WriteAsync(point, cancellationToken).ConfigureAwait(false);
+            await this.WriteAsync(
+                point.PointDataRecord ?? throw new InvalidOperationException(),
+                point.ExtraBytes,
+                cancellationToken).ConfigureAwait(false);
         }
 #endif
     }
@@ -395,7 +405,10 @@ public sealed class LazWriter : LasWriter
         var current = default(int);
         await foreach (var point in points.WithCancellation(cancellationToken).ConfigureAwait(false))
         {
-            await this.WriteAsync(point, cancellationToken).ConfigureAwait(false);
+            await this.WriteAsync(
+                point.PointDataRecord ?? throw new InvalidOperationException(),
+                point.ExtraBytes,
+                cancellationToken).ConfigureAwait(false);
 
             current++;
             if (current == count)
@@ -536,30 +549,28 @@ public sealed class LazWriter : LasWriter
 #else
     private static IPointWriter GetPointWriter(
         in HeaderBlock header,
-        Writers.PointDataRecordWriter rawWriter,
+        Writers.IPointDataRecordWriter rawWriter,
         ICollection<VariableLengthRecord> records)
     {
         LasZip zip;
-        if (GetCompressedTagAndRemoveDuplicates(records) is CompressedTag compressedTag)
+        if (GetCompressedTagAndRemoveDuplicates(records) is { } compressedTag)
         {
             // use the current compressed tag as the ZIP
             zip = LasZip.From(compressedTag);
         }
         else
         {
-            zip = new LasZip(header.PointDataFormatId, Compressor.PointWiseChunked, LasZip.GetValidVersion(header.PointDataFormatId));
+            zip = new(header.PointDataFormatId, Compressor.PointWiseChunked, LasZip.GetValidVersion(header.PointDataFormatId));
             records.Add(new CompressedTag(zip));
         }
 
+        var pointDataRecordLength = header.GetPointDataRecordLength();
+
         return zip switch
         {
-            { Compressor: Compressor.None } => new RawWriter(rawWriter),
-            { Compressor: Compressor.PointWise } => new PointWiseWriter(rawWriter, header.PointDataFormatId, zip),
-            { Compressor: Compressor.PointWiseChunked } => new PointWiseChunkedWriter(rawWriter, header.PointDataFormatId, zip),
-#if LAS1_4_OR_GREATER
-            { Compressor: Compressor.LayeredChunked, ChunkSize: LasZip.VariableChunkSize } => new VariableLayeredChunkedWriter(rawWriter, header.PointDataFormatId, zip),
-            { Compressor: Compressor.LayeredChunked } => new FixedLayeredChunkedWriter(rawWriter, header.PointDataFormatId, zip),
-#endif
+            { Compressor: Compressor.None } => new RawWriter(rawWriter, pointDataRecordLength),
+            { Compressor: Compressor.PointWise } => new PointWiseWriter(rawWriter, pointDataRecordLength, header.PointDataFormatId, zip),
+            { Compressor: Compressor.PointWiseChunked } => new PointWiseChunkedWriter(rawWriter, pointDataRecordLength, header.PointDataFormatId, zip),
             _ => throw new InvalidOperationException(),
         };
 

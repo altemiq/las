@@ -61,7 +61,7 @@ public readonly record struct ExtendedGpsColorNearInfraredPointDataRecord :
         this.UserData = data[Constants.ExtendedPointDataRecord.UserDataFieldOffset];
         this.ScanAngle = FieldAccessors.ExtendedPointDataRecord.GetScanAngle(data);
         this.PointSourceId = FieldAccessors.ExtendedPointDataRecord.GetPointSourceId(data);
-        this.GpsTime = System.Buffers.Binary.BinaryPrimitives.ReadDoubleLittleEndian(data[Constants.ExtendedPointDataRecord.GpsTimeFieldOffset..Constants.ExtendedPointDataRecord.ColorFieldOffset]);
+        this.GpsTime = FieldAccessors.ExtendedPointDataRecord.GetGpsTime(data);
         this.Color = new()
         {
             R = System.Buffers.Binary.BinaryPrimitives.ReadUInt16LittleEndian(data[Constants.ExtendedPointDataRecord.ColorFieldOffset..]),

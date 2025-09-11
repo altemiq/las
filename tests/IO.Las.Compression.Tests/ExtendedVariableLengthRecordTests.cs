@@ -33,34 +33,34 @@ public class ExtendedVariableLengthRecordTests
             // write a point
             IBasePointDataRecord pt =
 #if LAS1_5_OR_GREATER
-                    new ExtendedGpsPointDataRecord
-                    {
-                        X = default,
-                        Y = default,
-                        Z = default,
-                        ReturnNumber = 1,
-                        NumberOfReturns = 1,
-                        ScanDirectionFlag = default,
-                        Classification = default,
-                        EdgeOfFlightLine = default,
-                        GpsTime = default,
-                        PointSourceId = default,
-                        ScanAngle = default,
-                    };
+                new ExtendedGpsPointDataRecord
+                {
+                    X = default,
+                    Y = default,
+                    Z = default,
+                    ReturnNumber = 1,
+                    NumberOfReturns = 1,
+                    ScanDirectionFlag = default,
+                    Classification = default,
+                    EdgeOfFlightLine = default,
+                    GpsTime = default,
+                    PointSourceId = default,
+                    ScanAngle = default,
+                };
 #else
-                    new PointDataRecord
-                    {
-                        X = default,
-                        Y = default,
-                        Z = default,
-                        ReturnNumber = 1,
-                        NumberOfReturns = 1,
-                        ScanDirectionFlag = default,
-                        Classification = default,
-                        EdgeOfFlightLine = default,
-                        PointSourceId = default,
-                        ScanAngle = default,
-                    }
+                new PointDataRecord
+                {
+                    X = default,
+                    Y = default,
+                    Z = default,
+                    ReturnNumber = 1,
+                    NumberOfReturns = 1,
+                    ScanDirectionFlag = default,
+                    Classification = default,
+                    EdgeOfFlightLine = default,
+                    PointSourceId = default,
+                    ScanAngleRank = default,
+                };
 #endif
             await writer.WriteAsync(pt);
             headerBuilder.Add(pt);

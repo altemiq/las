@@ -4,6 +4,15 @@
     <TargetFrameworks>net7.0;net5.0;netstandard2.1;netstandard2.0</TargetFrameworks>
   </PropertyGroup>
 
+  <PropertyGroup Condition=" '$(SupportLas14)' != 'true' ">
+    <IsPackable>false</IsPackable>
+    <IsPublishable>false</IsPublishable>
+  </PropertyGroup>
+
+  <ItemGroup Condition=" '$(SupportLas14)' != 'true' ">
+    <Compile Remove="@(Compile)" />
+  </ItemGroup>
+
   <ItemGroup>
     <ProjectReference Include="..\IO.Las.Compression\IO.Las.Compression.csproj" />
   </ItemGroup>

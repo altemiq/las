@@ -94,7 +94,7 @@ public class LasReader : ILasReader, IDisposable
                 out this.pointDataLength,
                 out this.endOfPointDataRecords);
 #else
-     (this.Header, this.VariableLengthRecords) =
+        (this.Header, this.VariableLengthRecords) =
             Initialize(
                 this.BaseStream,
                 fileSignature,
@@ -144,7 +144,7 @@ public class LasReader : ILasReader, IDisposable
 #else
         this.VariableLengthRecords =
             Initialize(
-                this.BaseReader,
+                this.BaseStream,
                 headerReader,
                 header,
                 out this.rawReader,

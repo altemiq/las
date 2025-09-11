@@ -18,4 +18,18 @@
     <EmbeddedResource Include="**/*.las;**/*.bin" />
   </ItemGroup>
 
+  <ItemGroup Condition=" '$(SupportLas12)' != 'true' ">
+    <Compile Remove="**\*Color*.cs" />
+  </ItemGroup>
+
+  <ItemGroup Condition=" '$(SupportLas13)' != 'true' ">
+    <Compile Remove="**\*Waveform*.cs" />
+  </ItemGroup>
+
+  <ItemGroup Condition=" '$(SupportLas14)' != 'true' ">
+    <!-- Remove extended point data records for versions below 1.4 -->
+    <Compile Remove="**\*Extended*Point*.cs" />
+    <Compile Remove="**\ExtendedVariableLengthRecord*.cs" />
+  </ItemGroup>
+
 </Project>

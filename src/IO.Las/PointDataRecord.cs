@@ -167,6 +167,7 @@ public readonly record struct PointDataRecord :
     /// <returns>The <see cref="PointDataRecord"/>.</returns>
     public static PointDataRecord FromPointDataRecord(GpsPointDataRecord pointDataRecord) => PointConverter.ToPointDataRecord.FromPointDataRecord(pointDataRecord);
 
+#if LAS1_2_OR_GREATER
     /// <summary>
     /// Creates a <see cref="PointDataRecord"/> from a <see cref="ColorPointDataRecord"/>.
     /// </summary>
@@ -180,7 +181,9 @@ public readonly record struct PointDataRecord :
     /// <param name="pointDataRecord">The point data record.</param>
     /// <returns>The <see cref="PointDataRecord"/>.</returns>
     public static PointDataRecord FromPointDataRecord(GpsColorPointDataRecord pointDataRecord) => PointConverter.ToPointDataRecord.FromPointDataRecord(pointDataRecord);
+#endif
 
+#if LAS1_3_OR_GREATER
     /// <summary>
     /// Creates a <see cref="PointDataRecord"/> from a <see cref="GpsWaveformPointDataRecord"/>.
     /// </summary>
@@ -194,7 +197,9 @@ public readonly record struct PointDataRecord :
     /// <param name="pointDataRecord">The point data record.</param>
     /// <returns>The <see cref="PointDataRecord"/>.</returns>
     public static PointDataRecord FromPointDataRecord(GpsColorWaveformPointDataRecord pointDataRecord) => PointConverter.ToPointDataRecord.FromPointDataRecord(pointDataRecord);
+#endif
 
+#if LAS1_4_OR_GREATER
     /// <summary>
     /// Creates a <see cref="PointDataRecord"/> from a <see cref="ExtendedGpsPointDataRecord"/>.
     /// </summary>
@@ -229,6 +234,7 @@ public readonly record struct PointDataRecord :
     /// <param name="pointDataRecord">The point data record.</param>
     /// <returns>The <see cref="PointDataRecord"/>.</returns>
     public static PointDataRecord FromPointDataRecord(ExtendedGpsColorNearInfraredWaveformPointDataRecord pointDataRecord) => PointConverter.ToPointDataRecord.FromExtendedPointDataRecord(pointDataRecord);
+#endif
 
     /// <summary>
     /// Creates a new instance of <see cref="PointDataRecord"/> from the data.
@@ -282,18 +288,23 @@ public readonly record struct PointDataRecord :
     /// <inheritdoc />
     public GpsPointDataRecord ToGpsPointDataRecord() => PointConverter.ToGpsPointDataRecord.FromPointDataRecord(this);
 
+#if LAS1_2_OR_GREATER
     /// <inheritdoc />
     public ColorPointDataRecord ToColorPointDataRecord() => PointConverter.ToColorPointDataRecord.FromPointDataRecord(this);
 
     /// <inheritdoc />
     public GpsColorPointDataRecord ToGpsColorPointDataRecord() => PointConverter.ToGpsColorPointDataRecord.FromPointDataRecord(this);
+#endif
 
+#if LAS1_3_OR_GREATER
     /// <inheritdoc />
     public GpsWaveformPointDataRecord ToGpsWaveformPointDataRecord() => PointConverter.ToGpsWaveformPointDataRecord.FromPointDataRecord(this);
 
     /// <inheritdoc />
     public GpsColorWaveformPointDataRecord ToGpsColorWaveformPointDataRecord() => PointConverter.ToGpsColorWaveformPointDataRecord.FromPointDataRecord(this);
+#endif
 
+#if LAS1_4_OR_GREATER
     /// <inheritdoc />
     public ExtendedGpsPointDataRecord ToExtendedGpsPointDataRecord() => PointConverter.ToExtendedGpsPointDataRecord.FromPointDataRecord(this);
 
@@ -308,4 +319,5 @@ public readonly record struct PointDataRecord :
 
     /// <inheritdoc />
     public ExtendedGpsColorNearInfraredWaveformPointDataRecord ToExtendedGpsColorNearInfraredWaveformPointDataRecord() => PointConverter.ToExtendedGpsColorNearInfraredWaveformPointDataRecord.FromPointDataRecord(this);
+#endif
 }

@@ -3,15 +3,24 @@
   <PropertyGroup>
     <TargetFrameworks>net9.0;net8.0</TargetFrameworks>
     <TargetFrameworks Condition=" '$(NetCoreOnly)' != 'true' ">$(TargetFrameworks);net472</TargetFrameworks>
+    <IsTestProject Condition=" '$(SupportLas14)' != 'true' ">false</IsTestProject>
   </PropertyGroup>
 
-  <ItemGroup>
+  <ItemGroup Condition=" '$(SupportLas14)' != 'true' ">
+    <Compile Remove="@(Compile)" />
+  </ItemGroup>
+
+  <ItemGroup Condition=" '@(Compile)' == '' ">
+    <Compile Include="..\Program.cs" />
+  </ItemGroup>
+
+  <ItemGroup Condition=" '$(IsTestProject)' != 'false' ">
     <PackageReference Include="Microsoft.Testing.Extensions.CodeCoverage" />
     <PackageReference Include="TUnit" />
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\..\src\IO.Las.Cloud\IO.Las.Cloud.csproj" />
+    <ProjectReference Include="..\..\src\IO.Las.Cloud\IO.Las.Cloud.csproj" Condition=" '$(SupportLas14)' == 'true' " />
   </ItemGroup>
 
 </Project>

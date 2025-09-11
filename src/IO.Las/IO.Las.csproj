@@ -73,7 +73,7 @@
     <Compile Remove="**\*Waveform*.cs" />
 
     <!-- Remove EVLRs -->
-    <Compile Remove="**\ExtendedVariableLengthRecord.cs" />
+    <Compile Remove="**\*ExtendedVariableLengthRecord*.cs" />
 
     <!-- Remove v1.3 specific resources -->
     <EmbeddedResource Remove="Properties\v1.3\*.resx" />
@@ -82,7 +82,7 @@
 
   <ItemGroup Condition=" '$(SupportLas14)' != 'true' ">
     <!-- Remove extended point data records for versions below 1.4 -->
-    <Compile Remove="**\Extended*PointDataRecord*.cs" />
+    <Compile Remove="**\*Extended*PointDataRecord*.cs" />
 
     <!-- Remove near-infrared point data records -->
     <Compile Remove="**\*NearInfrared*.cs" />

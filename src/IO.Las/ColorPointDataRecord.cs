@@ -206,6 +206,7 @@ public readonly record struct ColorPointDataRecord :
     /// <returns>The <see cref="ColorPointDataRecord"/>.</returns>
     public static ColorPointDataRecord FromPointDataRecord(GpsColorPointDataRecord pointDataRecord) => PointConverter.ToColorPointDataRecord.FromColorPointDataRecord(pointDataRecord);
 
+#if LAS1_3_OR_GREATER
     /// <summary>
     /// Creates a <see cref="ColorPointDataRecord"/> from a <see cref="GpsWaveformPointDataRecord"/>.
     /// </summary>
@@ -219,7 +220,9 @@ public readonly record struct ColorPointDataRecord :
     /// <param name="pointDataRecord">The point data record.</param>
     /// <returns>The <see cref="ColorPointDataRecord"/>.</returns>
     public static ColorPointDataRecord FromPointDataRecord(GpsColorWaveformPointDataRecord pointDataRecord) => PointConverter.ToColorPointDataRecord.FromColorPointDataRecord(pointDataRecord);
+#endif
 
+#if LAS1_4_OR_GREATER
     /// <summary>
     /// Creates a <see cref="ColorPointDataRecord"/> from a <see cref="ExtendedGpsPointDataRecord"/>.
     /// </summary>
@@ -254,6 +257,7 @@ public readonly record struct ColorPointDataRecord :
     /// <param name="pointDataRecord">The point data record.</param>
     /// <returns>The <see cref="ColorPointDataRecord"/>.</returns>
     public static ColorPointDataRecord FromPointDataRecord(ExtendedGpsColorNearInfraredWaveformPointDataRecord pointDataRecord) => PointConverter.ToColorPointDataRecord.FromExtendedColorPointDataRecord(pointDataRecord);
+#endif
 
     /// <summary>
     /// Creates a new instance of <see cref="ColorPointDataRecord"/> from the data.
@@ -292,12 +296,12 @@ public readonly record struct ColorPointDataRecord :
         FieldAccessors.PointDataRecord.SetX(destination, this.X);
         FieldAccessors.PointDataRecord.SetY(destination, this.Y);
         FieldAccessors.PointDataRecord.SetZ(destination, this.Z);
-        System.Buffers.Binary.BinaryPrimitives.WriteUInt16LittleEndian(destination[Constants.PointDataRecord.IntensityFieldOffset..Constants.PointDataRecord.FlagsFieldOffset], this.Intensity);
+        FieldAccessors.PointDataRecord.SetIntensity(destination, this.Intensity);
         destination[Constants.PointDataRecord.FlagsFieldOffset] = this.flags;
         destination[Constants.PointDataRecord.ClassificationFieldOffset] = this.classification;
         destination[Constants.PointDataRecord.ScanAngleRankFieldOffset] = (byte)this.ScanAngleRank;
         destination[Constants.PointDataRecord.UserDataFieldOffset] = this.UserData;
-        System.Buffers.Binary.BinaryPrimitives.WriteUInt16LittleEndian(destination[Constants.PointDataRecord.PointSourceIdFieldOffset..Constants.PointDataRecord.ColorFieldOffset], this.PointSourceId);
+        FieldAccessors.PointDataRecord.SetPointSourceId(destination, this.PointSourceId);
         System.Buffers.Binary.BinaryPrimitives.WriteUInt16LittleEndian(destination[Constants.PointDataRecord.ColorFieldOffset..], this.Color.R);
         System.Buffers.Binary.BinaryPrimitives.WriteUInt16LittleEndian(destination[(Constants.PointDataRecord.ColorFieldOffset + sizeof(ushort))..], this.Color.G);
         System.Buffers.Binary.BinaryPrimitives.WriteUInt16LittleEndian(destination[(Constants.PointDataRecord.ColorFieldOffset + sizeof(ushort) + sizeof(ushort))..], this.Color.B);
@@ -316,12 +320,15 @@ public readonly record struct ColorPointDataRecord :
     /// <inheritdoc />
     public GpsColorPointDataRecord ToGpsColorPointDataRecord() => PointConverter.ToGpsColorPointDataRecord.FromColorPointDataRecord(this);
 
+#if LAS1_3_OR_GREATER
     /// <inheritdoc />
     public GpsWaveformPointDataRecord ToGpsWaveformPointDataRecord() => PointConverter.ToGpsWaveformPointDataRecord.FromPointDataRecord(this);
 
     /// <inheritdoc />
     public GpsColorWaveformPointDataRecord ToGpsColorWaveformPointDataRecord() => PointConverter.ToGpsColorWaveformPointDataRecord.FromPointDataRecord(this);
+#endif
 
+#if LAS1_4_OR_GREATER
     /// <inheritdoc />
     public ExtendedGpsPointDataRecord ToExtendedGpsPointDataRecord() => PointConverter.ToExtendedGpsPointDataRecord.FromPointDataRecord(this);
 
@@ -336,4 +343,5 @@ public readonly record struct ColorPointDataRecord :
 
     /// <inheritdoc />
     public ExtendedGpsColorNearInfraredWaveformPointDataRecord ToExtendedGpsColorNearInfraredWaveformPointDataRecord() => PointConverter.ToExtendedGpsColorNearInfraredWaveformPointDataRecord.FromColorPointDataRecord(this);
+#endif
 }

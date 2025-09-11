@@ -56,11 +56,19 @@ public sealed record CompressedTag : VariableLengthRecord, IReadOnlyList<LasItem
 
     private const int ChunkSizeOffset = OptionsOffset + sizeof(uint);
 
+#if LAS1_4_OR_GREATER
     private const int NumOfSpecialEvlrsOffset = ChunkSizeOffset + sizeof(uint);
 
     private const int OffsetToSpecialEvlrsOffset = NumOfSpecialEvlrsOffset + sizeof(long);
 
     private const int NumItemsOffset = OffsetToSpecialEvlrsOffset + sizeof(long);
+#else
+    private const int NumPointsOffset = ChunkSizeOffset + sizeof(uint);
+
+    private const int NumBytesOffset = NumPointsOffset + sizeof(long);
+
+    private const int NumItemsOffset = NumBytesOffset + sizeof(long);
+#endif
 
     private const int ItemOffset = NumItemsOffset + sizeof(ushort);
 
@@ -125,9 +133,15 @@ public sealed record CompressedTag : VariableLengthRecord, IReadOnlyList<LasItem
         this.Coder = (Coder)System.Buffers.Binary.BinaryPrimitives.ReadUInt16LittleEndian(data[CoderOffset..VersionMajorOffset]);
         this.Version = new(data[VersionMajorOffset], data[VersionMinorOffset], 0, System.Buffers.Binary.BinaryPrimitives.ReadUInt16LittleEndian(data[VersionRevisionOffset..OptionsOffset]));
         this.Options = System.Buffers.Binary.BinaryPrimitives.ReadUInt32LittleEndian(data[OptionsOffset..ChunkSizeOffset]);
+#if LAS1_4_OR_GREATER
         this.ChunkSize = (int)System.Buffers.Binary.BinaryPrimitives.ReadUInt32LittleEndian(data[ChunkSizeOffset..NumOfSpecialEvlrsOffset]);
         this.NumOfSpecialEvlrs = System.Buffers.Binary.BinaryPrimitives.ReadInt64LittleEndian(data[NumOfSpecialEvlrsOffset..OffsetToSpecialEvlrsOffset]);
         this.OffsetToSpecialEvlrs = System.Buffers.Binary.BinaryPrimitives.ReadInt64LittleEndian(data[OffsetToSpecialEvlrsOffset..NumItemsOffset]);
+#else
+        this.ChunkSize = (int)System.Buffers.Binary.BinaryPrimitives.ReadUInt32LittleEndian(data[ChunkSizeOffset..NumItemsOffset]);
+        this.NumPoints = System.Buffers.Binary.BinaryPrimitives.ReadInt64LittleEndian(data[NumPointsOffset..NumBytesOffset]);
+        this.NumBytes = System.Buffers.Binary.BinaryPrimitives.ReadInt64LittleEndian(data[NumBytesOffset..NumItemsOffset]);
+#endif
         var count = System.Buffers.Binary.BinaryPrimitives.ReadUInt16LittleEndian(data[NumItemsOffset..ItemOffset]);
         var builder = new System.Runtime.CompilerServices.ReadOnlyCollectionBuilder<LasItem>(count);
         for (var i = 0; i < count; i++)
@@ -166,6 +180,9 @@ public sealed record CompressedTag : VariableLengthRecord, IReadOnlyList<LasItem
 #if LAS1_4_OR_GREATER
         this.NumOfSpecialEvlrs = -1;
         this.OffsetToSpecialEvlrs = -1;
+#else
+        this.NumPoints = -1;
+        this.NumBytes = -1;
 #endif
         this.items = [.. zip.Items];
     }
@@ -205,6 +222,16 @@ public sealed record CompressedTag : VariableLengthRecord, IReadOnlyList<LasItem
     /// Gets the offset to the special <see cref="ExtendedVariableLengthRecord"/> instances.
     /// </summary>
     public long OffsetToSpecialEvlrs { get; init; }
+#else
+    /// <summary>
+    /// Gets the number of points.
+    /// </summary>
+    public long NumPoints { get; init; }
+
+    /// <summary>
+    /// Gets the number of bytes.
+    /// </summary>
+    public long NumBytes { get; init; }
 #endif
 
     /// <inheritdoc />
@@ -233,9 +260,15 @@ public sealed record CompressedTag : VariableLengthRecord, IReadOnlyList<LasItem
         d[VersionMinorOffset] = (byte)this.Version.Minor;
         System.Buffers.Binary.BinaryPrimitives.WriteUInt16LittleEndian(d[VersionRevisionOffset..OptionsOffset], (ushort)this.Version.Revision);
         System.Buffers.Binary.BinaryPrimitives.WriteUInt32LittleEndian(d[OptionsOffset..ChunkSizeOffset], this.Options);
+#if LAS1_4_OR_GREATER
         System.Buffers.Binary.BinaryPrimitives.WriteUInt32LittleEndian(d[ChunkSizeOffset..NumOfSpecialEvlrsOffset], (uint)this.ChunkSize);
         System.Buffers.Binary.BinaryPrimitives.WriteInt64LittleEndian(d[NumOfSpecialEvlrsOffset..OffsetToSpecialEvlrsOffset], this.NumOfSpecialEvlrs);
         System.Buffers.Binary.BinaryPrimitives.WriteInt64LittleEndian(d[OffsetToSpecialEvlrsOffset..NumItemsOffset], this.OffsetToSpecialEvlrs);
+#else
+        System.Buffers.Binary.BinaryPrimitives.WriteUInt32LittleEndian(d[ChunkSizeOffset..NumPointsOffset], (uint)this.ChunkSize);
+        System.Buffers.Binary.BinaryPrimitives.WriteInt64LittleEndian(d[NumPointsOffset..NumBytesOffset], this.NumPoints);
+        System.Buffers.Binary.BinaryPrimitives.WriteInt64LittleEndian(d[NumBytesOffset..NumItemsOffset], this.NumBytes);
+#endif
         System.Buffers.Binary.BinaryPrimitives.WriteUInt16LittleEndian(d[NumItemsOffset..ItemOffset], (ushort)this.Count);
         bytesWritten += ItemOffset;
         for (var i = 0; i < this.Count; i++)

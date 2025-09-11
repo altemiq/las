@@ -69,7 +69,7 @@ public readonly record struct ExtendedGpsWaveformPointDataRecord :
         this.UserData = data[Constants.ExtendedPointDataRecord.UserDataFieldOffset];
         this.ScanAngle = FieldAccessors.ExtendedPointDataRecord.GetScanAngle(data);
         this.PointSourceId = FieldAccessors.ExtendedPointDataRecord.GetPointSourceId(data);
-        this.GpsTime = System.Buffers.Binary.BinaryPrimitives.ReadDoubleLittleEndian(data[Constants.ExtendedPointDataRecord.GpsTimeFieldOffset..WavePacketDescriptorIndexFieldOffset]);
+        this.GpsTime = FieldAccessors.ExtendedPointDataRecord.GetGpsTime(data);
         this.WavePacketDescriptorIndex = data[WavePacketDescriptorIndexFieldOffset];
         this.ByteOffsetToWaveformData = System.Buffers.Binary.BinaryPrimitives.ReadUInt64LittleEndian(data[ByteOffsetToWaveformDataFieldOffset..WaveformPacketSizeInBytesFieldOffset]);
         this.WaveformPacketSizeInBytes = System.Buffers.Binary.BinaryPrimitives.ReadUInt32LittleEndian(data[WaveformPacketSizeInBytesFieldOffset..ReturnPointWaveformLocationFieldOffset]);

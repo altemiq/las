@@ -9,7 +9,9 @@ namespace Altemiq.IO.Las;
 /// <summary>
 /// The LAZ <see cref="MemoryStream"/> <see cref="MultipleStream"/>.
 /// </summary>
-internal sealed class LazMultipleMemoryStream : LasMultipleMemoryStream
+[System.Diagnostics.CodeAnalysis.SuppressMessage("Mezianou", "MA0053:Make class sealed", Justification = "This is used in other projects.")]
+[System.Diagnostics.CodeAnalysis.SuppressMessage("CodeQuality", "IDE0079:Remove unnecessary suppression", Justification = "This is required for automated cleanup")]
+internal class LazMultipleMemoryStream : LasMultipleMemoryStream
 {
     /// <summary>
     /// Initializes a new instance of the <see cref="LazMultipleMemoryStream"/> class.

@@ -139,6 +139,7 @@ public class HeaderBlockValidator
         }
 #endif
 
+#if LAS1_5_OR_GREATER
         static void CheckAny<T>(System.Globalization.CultureInfo culture, IEnumerable<VariableLengthRecord> variableLengthRecords)
             where T : VariableLengthRecord
         {
@@ -147,6 +148,7 @@ public class HeaderBlockValidator
                 throw new InvalidOperationException(string.Format(culture, Properties.Resources.ResourceManager.GetString(nameof(Properties.Resources.InvalidVlrFound), culture)!, typeof(T)));
             }
         }
+#endif
 
         static void CheckMultiple<T>(System.Globalization.CultureInfo culture, IEnumerable<VariableLengthRecord> variableLengthRecords)
             where T : VariableLengthRecord

@@ -76,7 +76,7 @@ internal static class FieldAccessors
         /// Gets the point source ID.
         /// </summary>
         /// <param name="source">The data.</param>
-        /// <returns>The pointSourceId.</returns>
+        /// <returns>The point source ID.</returns>
         public static ushort GetPointSourceId(ReadOnlySpan<byte> source) => System.Buffers.Binary.BinaryPrimitives.ReadUInt16LittleEndian(source[Constants.PointDataRecord.PointSourceIdFieldOffset..Constants.PointDataRecord.GpsTimeFieldOffset]);
 
         /// <summary>
@@ -85,6 +85,20 @@ internal static class FieldAccessors
         /// <param name="destination">The destination.</param>
         /// <param name="value">The value.</param>
         public static void SetPointSourceId(Span<byte> destination, ushort value) => System.Buffers.Binary.BinaryPrimitives.WriteUInt16LittleEndian(destination[Constants.PointDataRecord.PointSourceIdFieldOffset..Constants.PointDataRecord.GpsTimeFieldOffset], value);
+
+        /// <summary>
+        /// Gets the GPS time.
+        /// </summary>
+        /// <param name="source">The data.</param>
+        /// <returns>The GPS time.</returns>
+        public static ushort GetGpsTime(ReadOnlySpan<byte> source) => System.Buffers.Binary.BinaryPrimitives.ReadUInt16LittleEndian(source[Constants.PointDataRecord.PointSourceIdFieldOffset..Constants.PointDataRecord.GpsTimeFieldOffset]);
+
+        /// <summary>
+        /// Sets the GPS time.
+        /// </summary>
+        /// <param name="destination">The destination.</param>
+        /// <param name="value">The value.</param>
+        public static void SetGpsTime(Span<byte> destination, double value) => System.Buffers.Binary.BinaryPrimitives.WriteDoubleLittleEndian(destination[Constants.PointDataRecord.GpsTimeFieldOffset..GpsPointDataRecord.Size], value);
 
         /// <summary>
         /// Gets the return number.
@@ -256,6 +270,7 @@ internal static class FieldAccessors
         public static void SetWithheld(ref byte classification, bool value) => BitManipulation.Apply(ref classification, Constants.BitMasks.Mask7, value);
     }
 
+#if LAS1_4_OR_GREATER
     /// <summary>
     /// The <see cref="IExtendedPointDataRecord"/> <see cref="FieldAccessors"/>.
     /// </summary>
@@ -541,4 +556,5 @@ internal static class FieldAccessors
         /// <param name="value">The value.</param>
         public static void SetGpsTime(Span<byte> destination, double value) => System.Buffers.Binary.BinaryPrimitives.WriteDoubleLittleEndian(destination[Constants.ExtendedPointDataRecord.GpsTimeFieldOffset..Constants.ExtendedPointDataRecord.ColorFieldOffset], value);
     }
+#endif
 }
