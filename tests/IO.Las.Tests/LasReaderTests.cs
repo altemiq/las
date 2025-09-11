@@ -157,7 +157,7 @@ public class LasReaderTests
         {
             _ = await Assert.That(point.PointDataRecord).IsAssignableTo<IGpsPointDataRecord>();
 
-            double value = await Assert.That(await extraBytes[0].GetDataAsync(point.ExtraBytes)).IsTypeOf<double>();
+            double value = await Assert.That(await extraBytes.GetValueAsync(0, point.ExtraBytes)).IsTypeOf<double>();
             if (value < min)
             {
                 min = value;

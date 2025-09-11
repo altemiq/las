@@ -478,7 +478,7 @@ public readonly record struct ExtraBytesItem
     /// </summary>
     /// <param name="source">The source.</param>
     /// <returns>The value.</returns>
-    public ValueTask<object?> GetDataAsync(ReadOnlyMemory<byte> source) => new(this.GetValue(source.Span));
+    public ValueTask<object?> GetValueAsync(ReadOnlyMemory<byte> source) => new(this.GetValue(source.Span));
 
     /// <summary>
     /// Reads an instance of <see cref="ExtraBytesItem"/> from the source.

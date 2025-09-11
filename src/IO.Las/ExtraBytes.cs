@@ -115,7 +115,7 @@ public sealed record ExtraBytes : VariableLengthRecord, IExtraBytes
     /// <param name="index">The index.</param>
     /// <param name="source">The source.</param>
     /// <returns>The value.</returns>
-    public ValueTask<object?> GetValueAsync(int index, ReadOnlyMemory<byte> source) => this.items[index].GetDataAsync(source[this.indexes[index]..]);
+    public ValueTask<object?> GetValueAsync(int index, ReadOnlyMemory<byte> source) => this.items[index].GetValueAsync(source[this.indexes[index]..]);
 
     /// <summary>
     /// Gets the data.
@@ -127,7 +127,7 @@ public sealed record ExtraBytes : VariableLengthRecord, IExtraBytes
         var values = new object?[this.items.Count];
         for (int i = 0; i < this.items.Count; i++)
         {
-            values[i] = await this.items[i].GetDataAsync(source[this.indexes[i]..]).ConfigureAwait(false);
+            values[i] = await this.items[i].GetValueAsync(source[this.indexes[i]..]).ConfigureAwait(false);
         }
 
         return values;

@@ -170,7 +170,7 @@ public class LazReaderTests
         {
             _ = await Assert.That(point.PointDataRecord).IsTypeOf<GpsPointDataRecord>();
             _ = await Assert.That(point.ExtraBytes.IsEmpty).IsFalse();
-            double value = await Assert.That(await extraBytes[0].GetDataAsync(point.ExtraBytes)).IsTypeOf<double>();
+            double value = await Assert.That(await extraBytes.GetValueAsync(0, point.ExtraBytes)).IsTypeOf<double>();
             min = Math.Min(value, min);
             max = Math.Max(value, max);
         }
