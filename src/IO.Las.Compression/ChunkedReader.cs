@@ -56,7 +56,7 @@ internal abstract class ChunkedReader : IPointReader
     }
 
     /// <inheritdoc/>
-    public LasPointSpan Read(Stream stream, int pointDataLength)
+    public LasPointSpan Read(Stream stream)
     {
         if (this.chunkCount == this.chunkSize)
         {
@@ -107,11 +107,11 @@ internal abstract class ChunkedReader : IPointReader
 
         this.chunkCount++;
 
-        return this.Reader.Read(stream, pointDataLength);
+        return this.Reader.Read(stream);
     }
 
     /// <inheritdoc/>
-    public async ValueTask<LasPointMemory> ReadAsync(Stream stream, int pointDataLength, CancellationToken cancellationToken = default)
+    public async ValueTask<LasPointMemory> ReadAsync(Stream stream, CancellationToken cancellationToken = default)
     {
         if (this.chunkCount == this.chunkSize)
         {
@@ -168,18 +168,17 @@ internal abstract class ChunkedReader : IPointReader
 
         this.chunkCount++;
 
-        return await this.Reader.ReadAsync(stream, pointDataLength, cancellationToken).ConfigureAwait(false);
+        return await this.Reader.ReadAsync(stream, cancellationToken).ConfigureAwait(false);
     }
 
     /// <summary>
     /// Moves to the specified chunk.
     /// </summary>
     /// <param name="stream">The input stream.</param>
-    /// <param name="pointDataLength">The point data length.</param>
     /// <param name="current">The current point index.</param>
     /// <param name="index">The chunk index.</param>
     /// <returns><see langword="true"/> if the move was successful; otherwise <see langword="false"/>.</returns>
-    public bool MoveToChunk(Stream stream, int pointDataLength, ulong current, int index)
+    public bool MoveToChunk(Stream stream, ulong current, int index)
     {
         if (index < 0)
         {
@@ -197,7 +196,7 @@ internal abstract class ChunkedReader : IPointReader
             return false;
         }
 
-        _ = this.MoveToPoint(stream, pointDataLength, current, this.GetFirstPoint(index));
+        _ = this.MoveToPoint(stream, current, this.GetFirstPoint(index));
         return true;
     }
 
@@ -205,12 +204,11 @@ internal abstract class ChunkedReader : IPointReader
     /// Moves to the specified chunk.
     /// </summary>
     /// <param name="stream">The input stream.</param>
-    /// <param name="pointDataLength">The point data length.</param>
     /// <param name="current">The current point index.</param>
     /// <param name="index">The chunk index.</param>
     /// <param name="cancellationToken">The cancellation token.</param>
     /// <returns><see langword="true"/> if the move was successful; otherwise <see langword="false"/>.</returns>
-    public async ValueTask<bool> MoveToChunkAsync(Stream stream, int pointDataLength, ulong current, int index, CancellationToken cancellationToken = default)
+    public async ValueTask<bool> MoveToChunkAsync(Stream stream, ulong current, int index, CancellationToken cancellationToken = default)
     {
         if (index < 0)
         {
@@ -228,7 +226,7 @@ internal abstract class ChunkedReader : IPointReader
             return false;
         }
 
-        _ = await this.MoveToPointAsync(stream, pointDataLength, current, this.GetFirstPoint(index), cancellationToken).ConfigureAwait(false);
+        _ = await this.MoveToPointAsync(stream, current, this.GetFirstPoint(index), cancellationToken).ConfigureAwait(false);
         return true;
     }
 
@@ -264,7 +262,7 @@ internal abstract class ChunkedReader : IPointReader
     }
 
     /// <inheritdoc/>
-    public bool MoveToPoint(Stream stream, int pointDataLength, ulong current, ulong target)
+    public bool MoveToPoint(Stream stream, ulong current, ulong target)
     {
         if (this.pointStart is 0)
         {
@@ -305,7 +303,7 @@ internal abstract class ChunkedReader : IPointReader
 
         while (delta > 0)
         {
-            _ = this.Read(stream, pointDataLength);
+            _ = this.Read(stream);
             delta--;
         }
 
@@ -324,7 +322,7 @@ internal abstract class ChunkedReader : IPointReader
     }
 
     /// <inheritdoc/>
-    public async ValueTask<bool> MoveToPointAsync(Stream stream, int pointDataLength, ulong current, ulong target, CancellationToken cancellationToken = default)
+    public async ValueTask<bool> MoveToPointAsync(Stream stream, ulong current, ulong target, CancellationToken cancellationToken = default)
     {
         if (this.pointStart is 0)
         {
@@ -365,7 +363,7 @@ internal abstract class ChunkedReader : IPointReader
 
         while (delta > 0)
         {
-            _ = await this.ReadAsync(stream, pointDataLength, cancellationToken).ConfigureAwait(false);
+            _ = await this.ReadAsync(stream, cancellationToken).ConfigureAwait(false);
             delta--;
         }
 

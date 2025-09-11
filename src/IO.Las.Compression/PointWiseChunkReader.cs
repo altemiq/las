@@ -15,8 +15,8 @@ internal sealed class PointWiseChunkReader : ChunkReader
     /// Initializes a new instance of the <see cref="PointWiseChunkReader"/> class.
     /// </summary>
     /// <inheritdoc cref="ChunkReader"/>
-    public PointWiseChunkReader(Readers.IPointDataRecordReader rawReader, in HeaderBlock header, LasZip zip)
-        : base(rawReader, header, zip)
+    public PointWiseChunkReader(Readers.IPointDataRecordReader rawReader, in HeaderBlock header, LasZip zip, int pointDataLength)
+        : base(rawReader, header, zip, pointDataLength)
     {
         if (zip.Compressor is Compressor.PointWise or Compressor.None)
         {

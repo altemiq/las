@@ -27,37 +27,33 @@ internal interface IPointReader
     /// Reads the point.
     /// </summary>
     /// <param name="stream">The stream.</param>
-    /// <param name="pointDataLength">The point data length.</param>
     /// <returns>The point.</returns>
-    LasPointSpan Read(Stream stream, int pointDataLength);
+    LasPointSpan Read(Stream stream);
 
     /// <summary>
     /// Reads the point asynchronously.
     /// </summary>
     /// <param name="stream">The stream.</param>
-    /// <param name="pointDataLength">The point data length.</param>
     /// <param name="cancellationToken">The cancellation token.</param>
     /// <returns>The point.</returns>
-    ValueTask<LasPointMemory> ReadAsync(Stream stream, int pointDataLength, CancellationToken cancellationToken = default);
+    ValueTask<LasPointMemory> ReadAsync(Stream stream, CancellationToken cancellationToken = default);
 
     /// <summary>
     /// Moves to the specified target point.
     /// </summary>
     /// <param name="stream">The stream.</param>
-    /// <param name="pointDataLength">The point data length.</param>
     /// <param name="current">The current point index.</param>
     /// <param name="target">The target point index.</param>
     /// <returns><see langword="true"/> if the reader is now at <paramref name="target"/>; otherwise <see langword="false"/>.</returns>
-    bool MoveToPoint(Stream stream, int pointDataLength, ulong current, ulong target);
+    bool MoveToPoint(Stream stream, ulong current, ulong target);
 
     /// <summary>
     /// Moves to the specified target point asynchronously.
     /// </summary>
     /// <param name="stream">The stream.</param>
-    /// <param name="pointDataLength">The point data length.</param>
     /// <param name="current">The current point index.</param>
     /// <param name="target">The target point index.</param>
     /// <param name="cancellationToken">The cancellation token.</param>
     /// <returns><see langword="true"/> if the reader is now at <paramref name="target"/>; otherwise <see langword="false"/>.</returns>
-    ValueTask<bool> MoveToPointAsync(Stream stream, int pointDataLength, ulong current, ulong target, CancellationToken cancellationToken = default);
+    ValueTask<bool> MoveToPointAsync(Stream stream, ulong current, ulong target, CancellationToken cancellationToken = default);
 }

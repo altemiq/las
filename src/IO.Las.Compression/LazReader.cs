@@ -78,7 +78,7 @@ public sealed class LazReader : LasReader, ILazReader
             return default;
         }
 
-        var point = this.pointReader.Read(this.BaseStream, this.PointDataLength);
+        var point = this.pointReader.Read(this.BaseStream);
         this.IncrementPointIndex();
         return point;
     }
@@ -91,7 +91,7 @@ public sealed class LazReader : LasReader, ILazReader
             return default;
         }
 
-        var point = await this.pointReader.ReadAsync(this.BaseStream, this.PointDataLength, cancellationToken).ConfigureAwait(false);
+        var point = await this.pointReader.ReadAsync(this.BaseStream, cancellationToken).ConfigureAwait(false);
         this.IncrementPointIndex();
         return point;
     }
@@ -101,7 +101,7 @@ public sealed class LazReader : LasReader, ILazReader
     /// </summary>
     /// <param name="index">The chunk index.</param>
     /// <returns><see langword="true"/> if the move was successful; otherwise <see langword="false"/>.</returns>
-    internal bool MoveToChunk(int index) => index >= 0 && this.pointReader is ChunkedReader chunkedReader && chunkedReader.MoveToChunk(this.BaseStream, this.PointDataLength, this.GetCurrentIndex(), index);
+    internal bool MoveToChunk(int index) => index >= 0 && this.pointReader is ChunkedReader chunkedReader && chunkedReader.MoveToChunk(this.BaseStream, this.GetCurrentIndex(), index);
 
     /// <summary>
     /// Moves to the specified chunk start.
@@ -116,7 +116,7 @@ public sealed class LazReader : LasReader, ILazReader
     /// <param name="index">The chunk index.</param>
     /// <param name="cancellationToken">The cancellation token.</param>
     /// <returns><see langword="true"/> if the move was successful; otherwise <see langword="false"/>.</returns>
-    internal async ValueTask<bool> MoveToChunkAsync(int index, CancellationToken cancellationToken = default) => index >= 0 && this.pointReader is ChunkedReader chunkedReader && await chunkedReader.MoveToChunkAsync(this.BaseStream, this.PointDataLength, this.GetCurrentIndex(), index, cancellationToken).ConfigureAwait(false);
+    internal async ValueTask<bool> MoveToChunkAsync(int index, CancellationToken cancellationToken = default) => index >= 0 && this.pointReader is ChunkedReader chunkedReader && await chunkedReader.MoveToChunkAsync(this.BaseStream, this.GetCurrentIndex(), index, cancellationToken).ConfigureAwait(false);
 
     /// <summary>
     /// Moves to the specified chunk start.
@@ -135,7 +135,7 @@ public sealed class LazReader : LasReader, ILazReader
 
     /// <inheritdoc/>
     protected override bool MoveToPoint(ulong current, ulong target)
-        => this.pointReader.MoveToPoint(this.BaseStream, this.PointDataLength, current, target);
+        => this.pointReader.MoveToPoint(this.BaseStream, current, target);
 
     private static Stream CreateStream(string path) => path switch
     {
@@ -148,12 +148,12 @@ public sealed class LazReader : LasReader, ILazReader
     {
         return GetLasZip(this.VariableLengthRecords) switch
         {
-            null or { Items: null } or { Compressor: Compressor.None } => new RawReader(this.RawReader, this.BaseStream.Position),
-            { Compressor: Compressor.PointWise } zip => new PointWiseReader(this.RawReader, this.Header, zip, this.BaseStream.Position),
-            { Compressor: Compressor.PointWiseChunked } zip => new PointWiseChunkedReader(this.RawReader, this.Header, zip),
+            null or { Items: null } or { Compressor: Compressor.None } => new RawReader(this.RawReader, this.PointDataLength, this.BaseStream.Position),
+            { Compressor: Compressor.PointWise } zip => new PointWiseReader(this.RawReader, this.Header, zip, this.PointDataLength, this.BaseStream.Position),
+            { Compressor: Compressor.PointWiseChunked } zip => new PointWiseChunkedReader(this.RawReader, this.Header, zip, this.PointDataLength),
 #if LAS1_4_OR_GREATER
-            { Compressor: Compressor.LayeredChunked, ChunkSize: LasZip.VariableChunkSize } zip => new VariableLayeredChunkedReader(this.RawReader, this.Header, zip),
-            { Compressor: Compressor.LayeredChunked } zip => new FixedLayeredChunkedReader(this.RawReader, this.Header, zip),
+            { Compressor: Compressor.LayeredChunked, ChunkSize: LasZip.VariableChunkSize } zip => new VariableLayeredChunkedReader(this.RawReader, this.Header, zip, this.PointDataLength),
+            { Compressor: Compressor.LayeredChunked } zip => new FixedLayeredChunkedReader(this.RawReader, this.Header, zip, this.PointDataLength),
 #endif
             _ => throw new InvalidOperationException(),
         };

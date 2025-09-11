@@ -10,4 +10,4 @@ namespace Altemiq.IO.Las;
 /// The <see cref="Compressor.LayeredChunked"/> <see cref="IPointReader"/>.
 /// </summary>
 /// <inheritdoc cref="ChunkedReader" />
-internal sealed class FixedLayeredChunkedReader(Readers.IPointDataRecordReader rawReader, in HeaderBlock header, LasZip zip) : ChunkedReader(new LayeredChunkReader(rawReader, header, zip), zip.ChunkSize);
+internal sealed class FixedLayeredChunkedReader(Readers.IPointDataRecordReader rawReader, in HeaderBlock header, LasZip zip, int pointDataLength) : ChunkedReader(new LayeredChunkReader(rawReader, header, zip, pointDataLength), zip.ChunkSize);

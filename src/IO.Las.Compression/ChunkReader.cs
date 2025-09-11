@@ -12,4 +12,5 @@ namespace Altemiq.IO.Las;
 /// <param name="rawReader">The raw reader.</param>
 /// <param name="header">The header block.</param>
 /// <param name="zip">The zip information.</param>
-internal class ChunkReader(Readers.IPointDataRecordReader rawReader, in HeaderBlock header, LasZip zip) : PointWiseReader(rawReader, header, zip, default);
+/// <param name="pointDataLength">The point data length.</param>
+internal class ChunkReader(Readers.IPointDataRecordReader rawReader, in HeaderBlock header, LasZip zip, int pointDataLength) : PointWiseReader(rawReader, header, zip, pointDataLength, default);

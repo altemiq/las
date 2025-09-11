@@ -19,12 +19,13 @@ internal static class ExtensionMethods
     /// <param name="source">The source.</param>
     /// <param name="destination">The destination.</param>
     /// <param name="byteCount">The bytes count.</param>
-    public static void CopyToStream(this Stream source, Stream destination, int byteCount)
+    /// <param name="bufferSize">The buffer size.</param>
+    public static void CopyToStream(this Stream source, Stream destination, int byteCount, int bufferSize = ArithmeticCoder.BufferSize)
     {
         var position = source.Position;
 
         source.Position = 0;
-        var buffer = System.Buffers.ArrayPool<byte>.Shared.Rent(ArithmeticCoder.BufferSize);
+        var buffer = System.Buffers.ArrayPool<byte>.Shared.Rent(bufferSize);
         var bytesLeft = byteCount;
 
         while (bytesLeft > 0)
@@ -56,11 +57,5 @@ internal static class ExtensionMethods
     /// <param name="value">The value.</param>
     /// <returns><see langword="true"/> if <paramref name="value"/> can be represented as an <see cref="int"/>.</returns>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static bool IsInt32(this long value)
-    {
-        const long MaxInt32Value = int.MaxValue;
-        const long MinInt32Value = int.MinValue;
-
-        return value is <= MaxInt32Value and >= MinInt32Value;
-    }
+    public static bool IsInt32(this long value) => value is <= int.MaxValue and >= int.MinValue;
 }

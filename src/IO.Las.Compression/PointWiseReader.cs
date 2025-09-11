@@ -19,9 +19,10 @@ internal class PointWiseReader : RawReader
     /// <param name="rawReader">The raw reader.</param>
     /// <param name="header">The header block.</param>
     /// <param name="zip">The zip information.</param>
+    /// <param name="pointDataLength">The point data length.</param>
     /// <param name="pointStart">The point start.</param>
-    public PointWiseReader(Readers.IPointDataRecordReader rawReader, in HeaderBlock header, LasZip zip, long pointStart)
-        : base(rawReader, pointStart)
+    public PointWiseReader(Readers.IPointDataRecordReader rawReader, in HeaderBlock header, LasZip zip, int pointDataLength, long pointStart)
+        : base(rawReader, pointDataLength, pointStart)
     {
         if (zip is { Compressor: Compressor.None } or { Items.Count: 0 })
         {
@@ -81,11 +82,11 @@ internal class PointWiseReader : RawReader
     public sealed override void Close(Stream stream) => this.Decoder.Done();
 
     /// <inheritdoc/>
-    public sealed override LasPointSpan Read(Stream stream, int pointDataLength)
+    public sealed override LasPointSpan Read(Stream stream)
     {
         if (this.Reader is null)
         {
-            var point = base.Read(stream, pointDataLength);
+            var point = base.Read(stream);
 
             this.InitializeCompression(stream, point.PointDataRecord!, point.ExtraBytes, this.compressedReader);
 
@@ -98,11 +99,11 @@ internal class PointWiseReader : RawReader
     }
 
     /// <inheritdoc/>
-    public sealed override async ValueTask<LasPointMemory> ReadAsync(Stream stream, int pointDataLength, CancellationToken cancellationToken = default)
+    public sealed override async ValueTask<LasPointMemory> ReadAsync(Stream stream, CancellationToken cancellationToken = default)
     {
         if (this.Reader is null)
         {
-            var point = await base.ReadAsync(stream, pointDataLength, cancellationToken).ConfigureAwait(false);
+            var point = await base.ReadAsync(stream, cancellationToken).ConfigureAwait(false);
 
             this.InitializeCompression(stream, point.PointDataRecord!, point.ExtraBytes.Span, this.compressedReader);
 
@@ -125,7 +126,7 @@ internal class PointWiseReader : RawReader
     }
 
     /// <inheritdoc/>
-    public sealed override bool MoveToPoint(Stream stream, int pointDataLength, ulong current, ulong target)
+    public sealed override bool MoveToPoint(Stream stream, ulong current, ulong target)
     {
         if (!stream.CanSeek)
         {
@@ -143,7 +144,7 @@ internal class PointWiseReader : RawReader
 
         while (delta > 0)
         {
-            _ = this.Read(stream, pointDataLength);
+            _ = this.Read(stream);
             delta--;
         }
 
@@ -151,7 +152,7 @@ internal class PointWiseReader : RawReader
     }
 
     /// <inheritdoc/>
-    public sealed override async ValueTask<bool> MoveToPointAsync(Stream stream, int pointDataLength, ulong current, ulong target, CancellationToken cancellationToken = default)
+    public sealed override async ValueTask<bool> MoveToPointAsync(Stream stream, ulong current, ulong target, CancellationToken cancellationToken = default)
     {
         if (!stream.CanSeek)
         {
@@ -169,7 +170,7 @@ internal class PointWiseReader : RawReader
 
         while (delta > 0)
         {
-            _ = await this.ReadAsync(stream, pointDataLength, cancellationToken).ConfigureAwait(false);
+            _ = await this.ReadAsync(stream, cancellationToken).ConfigureAwait(false);
             delta--;
         }
 

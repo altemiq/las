@@ -10,4 +10,4 @@ namespace Altemiq.IO.Las;
 /// The <see cref="Compressor.PointWiseChunked"/> <see cref="IPointReader"/>.
 /// </summary>
 /// <inheritdoc cref="ChunkedReader" />
-internal sealed class PointWiseChunkedReader(Readers.IPointDataRecordReader rawReader, in HeaderBlock header, LasZip zip) : ChunkedReader(new PointWiseChunkReader(rawReader, header, zip), zip.ChunkSize);
+internal sealed class PointWiseChunkedReader(Readers.IPointDataRecordReader rawReader, in HeaderBlock header, LasZip zip, int pointDataLength) : ChunkedReader(new PointWiseChunkReader(rawReader, header, zip, pointDataLength), zip.ChunkSize);
