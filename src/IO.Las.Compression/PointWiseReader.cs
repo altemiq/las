@@ -13,6 +13,8 @@ internal class PointWiseReader : RawReader
 {
     private readonly Readers.IPointDataRecordReader compressedReader;
 
+    private Readers.IPointDataRecordReader? reader;
+
     /// <summary>
     /// Initializes a new instance of the <see cref="PointWiseReader"/> class.
     /// </summary>
@@ -69,11 +71,6 @@ internal class PointWiseReader : RawReader
     }
 
     /// <summary>
-    /// Gets the reader.
-    /// </summary>
-    public Readers.IPointDataRecordReader? Reader { get; private set; }
-
-    /// <summary>
     /// Gets the decoder.
     /// </summary>
     public IEntropyDecoder Decoder { get; }
@@ -84,44 +81,44 @@ internal class PointWiseReader : RawReader
     /// <inheritdoc/>
     public sealed override LasPointSpan Read(Stream stream)
     {
-        if (this.Reader is null)
+        if (this.reader is not null)
         {
-            var point = base.Read(stream);
-
-            this.InitializeCompression(stream, point.PointDataRecord!, point.ExtraBytes, this.compressedReader);
-
-            this.Reader = this.compressedReader;
-
-            return point;
+            return this.reader.Read(default);
         }
 
-        return this.Reader.Read(default);
+        var point = base.Read(stream);
+
+        this.InitializeCompression(stream, point.PointDataRecord!, point.ExtraBytes, this.compressedReader);
+
+        this.reader = this.compressedReader;
+
+        return point;
     }
 
     /// <inheritdoc/>
     public sealed override async ValueTask<LasPointMemory> ReadAsync(Stream stream, CancellationToken cancellationToken = default)
     {
-        if (this.Reader is null)
+        if (this.reader is not null)
         {
-            var point = await base.ReadAsync(stream, cancellationToken).ConfigureAwait(false);
-
-            this.InitializeCompression(stream, point.PointDataRecord!, point.ExtraBytes.Span, this.compressedReader);
-
-            this.Reader = this.compressedReader;
-
-            return point;
+            return await this.reader.ReadAsync(default, cancellationToken).ConfigureAwait(false);
         }
 
-        return await this.Reader.ReadAsync(default, cancellationToken).ConfigureAwait(false);
+        var point = await base.ReadAsync(stream, cancellationToken).ConfigureAwait(false);
+
+        this.InitializeCompression(stream, point.PointDataRecord!, point.ExtraBytes.Span, this.compressedReader);
+
+        this.reader = this.compressedReader;
+
+        return point;
     }
 
     /// <summary>
     /// Initializes the decoder.
     /// </summary>
     /// <returns><see langword="true"/> if the decoder is initialized; otherwise <see langword="false"/>.</returns>
-    public virtual bool InitializeDecoder()
+    public bool InitializeDecoder()
     {
-        this.Reader = default;
+        this.reader = default;
         return true;
     }
 

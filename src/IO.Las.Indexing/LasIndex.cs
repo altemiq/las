@@ -137,13 +137,10 @@ public class LasIndex : IEnumerable<LasIndexCell>
         }
 
         // ignore 4..8
-        return Create(LasQuadTree.ReadFrom(source[8..52]), LasInterval.ReadFrom(source[52..]));
-
-        static LasIndex Create(LasQuadTree spatial, LasInterval interval)
-        {
-            ManageCells(interval, spatial);
-            return new(spatial, interval);
-        }
+        var tempSpatial = LasQuadTree.ReadFrom(source[8..52]);
+        var tempInterval = LasInterval.ReadFrom(source[52..]);
+        ManageCells(tempInterval, tempSpatial);
+        return new(tempSpatial, tempInterval);
 
 #if NET8_0_OR_GREATER
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Performance", "CA1863:Use 'CompositeFormat'", Justification = "This is a formatted string for an exception.")]
@@ -163,14 +160,14 @@ public class LasIndex : IEnumerable<LasIndexCell>
     /// <returns>The LAS index.</returns>
     public static async ValueTask<LasIndex> ReadFromAsync(Stream stream, CancellationToken cancellationToken = default)
     {
-        if (stream is IAsyncCacheStream asyncCacheStream)
+        switch (stream)
         {
-            await asyncCacheStream.CacheAsync(0, (int)stream.Length, cancellationToken).ConfigureAwait(false);
-        }
-        else if (stream is ICacheStream cacheStream)
-        {
-            // download the stream
-            cacheStream.Cache(0, (int)stream.Length);
+            case IAsyncCacheStream asyncCacheStream:
+                await asyncCacheStream.CacheAsync(0, (int)stream.Length, cancellationToken).ConfigureAwait(false);
+                break;
+            case ICacheStream cacheStream:
+                cacheStream.Cache(0, (int)stream.Length);
+                break;
         }
 
         var length = (int)(stream.Length - stream.Position);
@@ -249,39 +246,42 @@ public class LasIndex : IEnumerable<LasIndexCell>
                 while (enumerator.MoveNext())
                 {
                     var outer = enumerator.Current;
-                    if (outer.Value is not 0
-                        && this.spatial.Coarsen(outer.Key, out var coarserIndex, out var indices))
+                    if (outer.Value is 0 || !this.spatial.Coarsen(outer.Key, out var coarserIndex, out var indices))
                     {
-                        var full = default(uint);
-                        var numberFilled = default(uint);
-                        for (var i = 0U; i < indices.Length; i++)
-                        {
-                            KeyValuePair<int, uint> inner;
-                            if (outer.Key == indices[i])
-                            {
-                                inner = outer;
-                            }
-                            else if (cellHashes[firstHash].TryGetValue(indices[i], out var temp))
-                            {
-                                inner = new(indices[i], temp);
-                            }
-                            else
-                            {
-                                continue;
-                            }
-
-                            full += inner.Value;
-                            cellHashes[firstHash][inner.Key] = default;
-                            numberFilled++;
-                        }
-
-                        if ((full < minimumPoints) && (numberFilled == indices.Length))
-                        {
-                            _ = this.interval.MergeCells(indices, coarserIndex);
-                            coarsened = true;
-                            cellHashes[secondHash][coarserIndex] = full;
-                        }
+                        continue;
                     }
+
+                    var full = default(uint);
+                    var numberFilled = default(uint);
+                    for (var i = 0U; i < indices.Length; i++)
+                    {
+                        KeyValuePair<int, uint> inner;
+                        if (outer.Key == indices[i])
+                        {
+                            inner = outer;
+                        }
+                        else if (cellHashes[firstHash].TryGetValue(indices[i], out var temp))
+                        {
+                            inner = new(indices[i], temp);
+                        }
+                        else
+                        {
+                            continue;
+                        }
+
+                        full += inner.Value;
+                        cellHashes[firstHash][inner.Key] = default;
+                        numberFilled++;
+                    }
+
+                    if ((full >= minimumPoints) || (numberFilled != indices.Length))
+                    {
+                        continue;
+                    }
+
+                    _ = this.interval.MergeCells(indices, coarserIndex);
+                    coarsened = true;
+                    cellHashes[secondHash][coarserIndex] = full;
                 }
 
                 if (!coarsened)
@@ -430,12 +430,7 @@ public class LasIndex : IEnumerable<LasIndexCell>
         && this.interval.Equals(index.interval);
 
     /// <inheritdoc/>
-    public override int GetHashCode()
-#if NETSTANDARD2_0_OR_GREATER || NET46_OR_GREATER || NETCOREAPP2_1_OR_GREATER
-        => HashCode.Combine(this.spatial, this.interval);
-#else
-        => (this.spatial, this.interval).GetHashCode();
-#endif
+    public override int GetHashCode() => HashCode.Combine(this.spatial, this.interval);
 
     private static void ManageCells(LasInterval interval, LasQuadTree spatial)
     {
@@ -519,15 +514,13 @@ public class LasIndex : IEnumerable<LasIndexCell>
 
         private struct ReadOnlyEnumerator(LasIndexCell[] cells) : IEnumerator<LasIndexCell>
         {
-            private readonly LasIndexCell[] cells = cells;
-
             private int index = -1;
 
-            readonly LasIndexCell IEnumerator<LasIndexCell>.Current => this.cells[this.index];
+            readonly LasIndexCell IEnumerator<LasIndexCell>.Current => cells[this.index];
 
-            readonly object System.Collections.IEnumerator.Current => this.cells[this.index];
+            readonly object System.Collections.IEnumerator.Current => cells[this.index];
 
-            bool System.Collections.IEnumerator.MoveNext() => ++this.index < this.cells.Length;
+            bool System.Collections.IEnumerator.MoveNext() => ++this.index < cells.Length;
 
             void System.Collections.IEnumerator.Reset() => this.index = -1;
 

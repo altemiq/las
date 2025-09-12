@@ -62,7 +62,7 @@ public sealed class S3ChunkedStream : ChunkedStream
         : base(length) => (this.client, this.bucket, this.key) = (client, bucket, key);
 
     /// <inheritdoc/>
-    protected sealed override Stream? GetStream(long start, int length)
+    protected override Stream? GetStream(long start, int length)
     {
         var end = Math.Min(start + length - 1, this.Length - 1);
         if (start >= end)
@@ -102,7 +102,7 @@ public sealed class S3ChunkedStream : ChunkedStream
     }
 
     /// <inheritdoc/>
-    protected sealed override async ValueTask<Stream?> GetStreamAsync(long start, int length, CancellationToken cancellationToken = default)
+    protected override async ValueTask<Stream?> GetStreamAsync(long start, int length, CancellationToken cancellationToken = default)
     {
         var end = Math.Min(start + length - 1, this.Length - 1);
         if (start >= end)

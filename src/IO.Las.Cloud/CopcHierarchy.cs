@@ -129,7 +129,7 @@ public sealed record CopcHierarchy : ExtendedVariableLengthRecord
     /// An entry corresponds to a single key/value pair in an EPT hierarchy, but contains additional information to allow direct access and decoding of the corresponding point data.
     /// </summary>
     [System.Runtime.InteropServices.StructLayout(System.Runtime.InteropServices.LayoutKind.Sequential)]
-    public readonly struct Entry
+    public readonly record struct Entry
     {
         /// <summary>
         /// Initializes a new instance of the <see cref="Entry"/> struct.
@@ -189,37 +189,6 @@ public sealed record CopcHierarchy : ExtendedVariableLengthRecord
         /// </list>
         /// </summary>
         public int PointCount { get; }
-
-        /// <summary>
-        /// Implements the equals operator.
-        /// </summary>
-        /// <param name="left">The left operand.</param>
-        /// <param name="right">The right operand.</param>
-        /// <returns>The result of the operator.</returns>
-        public static bool operator ==(Entry left, Entry right) => left.Equals(right);
-
-        /// <summary>
-        /// Implements the not-equals operator.
-        /// </summary>
-        /// <param name="left">The left operand.</param>
-        /// <param name="right">The right operand.</param>
-        /// <returns>The result of the operator.</returns>
-        public static bool operator !=(Entry left, Entry right) => !(left == right);
-
-        /// <inheritdoc/>
-        public override bool Equals([System.Diagnostics.CodeAnalysis.NotNullWhen(true)] object? obj) => obj is Entry entry
-                                                                                                        && this.Key == entry.Key
-                                                                                                        && this.Offset == entry.Offset
-                                                                                                        && this.ByteSize == entry.ByteSize
-                                                                                                        && this.PointCount == entry.PointCount;
-
-        /// <inheritdoc/>
-        public override int GetHashCode() =>
-#if NETSTANDARD2_0_OR_GREATER || NET461_OR_GREATER || NETCOREAPP2_1_OR_GREATER
-            HashCode.Combine(this.Key, this.Offset, this.ByteSize, this.PointCount);
-#else
-            (this.Key, this.Offset, this.ByteSize, this.PointCount).GetHashCode();
-#endif
 
         /// <summary>
         /// Converts the value of this instance to its equivalent string representation.

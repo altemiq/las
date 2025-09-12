@@ -59,111 +59,125 @@ internal sealed class GpsTimeReader(IEntropyDecoder decoder) : ISimpleReader
         {
             var multi = (int)decoder.DecodeSymbol(this.gpsTimeZeroDiff);
 
-            // the difference can be represented with 32 bits
-            if (multi is 1)
+            switch (multi)
             {
-                this.lastGpsTimeDiff[this.last] = this.gpsTimeIntegerDecompressor.Decompress(0);
-                this.lastGpsTime[this.last] = (ulong)((long)this.lastGpsTime[this.last] + this.lastGpsTimeDiff[this.last]);
-                this.multiExtremeCounter[this.last] = default;
-            }
+                // the difference can be represented with 32 bits
+                case 1:
+                    this.lastGpsTimeDiff[this.last] = this.gpsTimeIntegerDecompressor.Decompress(0);
+                    this.lastGpsTime[this.last] = (ulong)((long)this.lastGpsTime[this.last] + this.lastGpsTimeDiff[this.last]);
+                    this.multiExtremeCounter[this.last] = default;
+                    break;
 
-            // the difference is huge
-            else if (multi is 2)
-            {
-                this.next = (this.next + 1) & 3;
-                this.lastGpsTime[this.next] = (ulong)this.gpsTimeIntegerDecompressor.Decompress((int)(this.lastGpsTime[this.last] >> 32), 8);
-                this.lastGpsTime[this.next] <<= 32;
-                this.lastGpsTime[this.next] |= decoder.ReadUInt32();
-                this.last = this.next;
-                this.lastGpsTimeDiff[this.last] = default;
-                this.multiExtremeCounter[this.last] = default;
-            }
+                // the difference is huge
+                case 2:
+                    this.next = (this.next + 1) & 3;
+                    this.lastGpsTime[this.next] = (ulong)this.gpsTimeIntegerDecompressor.Decompress((int)(this.lastGpsTime[this.last] >> 32), 8);
+                    this.lastGpsTime[this.next] <<= 32;
+                    this.lastGpsTime[this.next] |= decoder.ReadUInt32();
+                    this.last = this.next;
+                    this.lastGpsTimeDiff[this.last] = default;
+                    this.multiExtremeCounter[this.last] = default;
+                    break;
 
-            // we switch to another sequence
-            else if (multi > 2)
-            {
-                this.last = (uint)((this.last + multi - 2) & 3);
-                this.Read(item);
+                // we switch to another sequence
+                case > 2:
+                    this.last = (uint)((this.last + multi - 2) & 3);
+                    this.Read(item);
+                    break;
             }
         }
         else
         {
             var multi = (int)decoder.DecodeSymbol(this.gpsTimeMulti);
-            if (multi is 1)
+            switch (multi)
             {
-                this.lastGpsTime[this.last] = (ulong)((long)this.lastGpsTime[this.last] + this.gpsTimeIntegerDecompressor.Decompress(this.lastGpsTimeDiff[this.last], 1));
-                this.multiExtremeCounter[this.last] = default;
-            }
-            else if (multi < MultipleUnchanged)
-            {
-                int gpsTimeDiff;
-                if (multi is 0)
+                case 1:
+                    this.lastGpsTime[this.last] = (ulong)((long)this.lastGpsTime[this.last] + this.gpsTimeIntegerDecompressor.Decompress(this.lastGpsTimeDiff[this.last], 1));
+                    this.multiExtremeCounter[this.last] = default;
+                    break;
+                case < MultipleUnchanged:
                 {
-                    gpsTimeDiff = this.gpsTimeIntegerDecompressor.Decompress(0, 7);
-                    this.multiExtremeCounter[this.last]++;
-                    if (this.multiExtremeCounter[this.last] > 3)
+                    int gpsTimeDiff;
+                    switch (multi)
                     {
-                        this.lastGpsTimeDiff[this.last] = gpsTimeDiff;
-                        this.multiExtremeCounter[this.last] = default;
-                    }
-                }
-                else if (multi < Multiple)
-                {
-                    gpsTimeDiff = this.gpsTimeIntegerDecompressor.Decompress(multi * this.lastGpsTimeDiff[this.last], GetContext(multi));
-                    static uint GetContext(int multi)
-                    {
-                        return multi switch
+                        case 0:
                         {
-                            < 10 => 2,
-                            _ => 3,
-                        };
-                    }
-                }
-                else if (multi is Multiple)
-                {
-                    gpsTimeDiff = this.gpsTimeIntegerDecompressor.Decompress(Multiple * this.lastGpsTimeDiff[this.last], 4);
-                    this.multiExtremeCounter[this.last]++;
-                    if (this.multiExtremeCounter[this.last] > 3)
-                    {
-                        this.lastGpsTimeDiff[this.last] = gpsTimeDiff;
-                        this.multiExtremeCounter[this.last] = default;
-                    }
-                }
-                else
-                {
-                    multi = Multiple - multi;
-                    if (multi > MultipleMinus)
-                    {
-                        gpsTimeDiff = this.gpsTimeIntegerDecompressor.Decompress(multi * this.lastGpsTimeDiff[this.last], 5);
-                    }
-                    else
-                    {
-                        gpsTimeDiff = this.gpsTimeIntegerDecompressor.Decompress(MultipleMinus * this.lastGpsTimeDiff[this.last], 6);
-                        this.multiExtremeCounter[this.last]++;
-                        if (this.multiExtremeCounter[this.last] > 3)
+                            gpsTimeDiff = this.gpsTimeIntegerDecompressor.Decompress(0, 7);
+                            this.multiExtremeCounter[this.last]++;
+                            if (this.multiExtremeCounter[this.last] > 3)
+                            {
+                                this.lastGpsTimeDiff[this.last] = gpsTimeDiff;
+                                this.multiExtremeCounter[this.last] = default;
+                            }
+
+                            break;
+                        }
+
+                        case < Multiple:
                         {
-                            this.lastGpsTimeDiff[this.last] = gpsTimeDiff;
-                            this.multiExtremeCounter[this.last] = default;
+                            var context = multi switch
+                            {
+                                < 10 => 2U,
+                                _ => 3U,
+                            };
+
+                            gpsTimeDiff = this.gpsTimeIntegerDecompressor.Decompress(multi * this.lastGpsTimeDiff[this.last], context);
+
+                            break;
+                        }
+
+                        case Multiple:
+                        {
+                            gpsTimeDiff = this.gpsTimeIntegerDecompressor.Decompress(Multiple * this.lastGpsTimeDiff[this.last], 4);
+                            this.multiExtremeCounter[this.last]++;
+                            if (this.multiExtremeCounter[this.last] > 3)
+                            {
+                                this.lastGpsTimeDiff[this.last] = gpsTimeDiff;
+                                this.multiExtremeCounter[this.last] = default;
+                            }
+
+                            break;
+                        }
+
+                        default:
+                        {
+                            multi = Multiple - multi;
+                            if (multi > MultipleMinus)
+                            {
+                                gpsTimeDiff = this.gpsTimeIntegerDecompressor.Decompress(multi * this.lastGpsTimeDiff[this.last], 5);
+                            }
+                            else
+                            {
+                                gpsTimeDiff = this.gpsTimeIntegerDecompressor.Decompress(MultipleMinus * this.lastGpsTimeDiff[this.last], 6);
+                                this.multiExtremeCounter[this.last]++;
+                                if (this.multiExtremeCounter[this.last] > 3)
+                                {
+                                    this.lastGpsTimeDiff[this.last] = gpsTimeDiff;
+                                    this.multiExtremeCounter[this.last] = default;
+                                }
+                            }
+
+                            break;
                         }
                     }
+
+                    this.lastGpsTime[this.last] = (ulong)((long)this.lastGpsTime[this.last] + gpsTimeDiff);
+                    break;
                 }
 
-                this.lastGpsTime[this.last] = (ulong)((long)this.lastGpsTime[this.last] + gpsTimeDiff);
-            }
-            else if (multi is MultipleCodeFull)
-            {
-                this.next = (this.next + 1) & 3;
-                this.lastGpsTime[this.next] = (ulong)this.gpsTimeIntegerDecompressor.Decompress((int)(this.lastGpsTime[this.last] >> 32), 8);
-                this.lastGpsTime[this.next] <<= 32;
-                this.lastGpsTime[this.next] |= decoder.ReadUInt32();
-                this.last = this.next;
-                this.lastGpsTimeDiff[this.last] = default;
-                this.multiExtremeCounter[this.last] = default;
-            }
-            else if (multi >= MultipleCodeFull)
-            {
-                this.last = (uint)((this.last + multi - MultipleCodeFull) & 3);
-                this.Read(item);
+                case MultipleCodeFull:
+                    this.next = (this.next + 1) & 3;
+                    this.lastGpsTime[this.next] = (ulong)this.gpsTimeIntegerDecompressor.Decompress((int)(this.lastGpsTime[this.last] >> 32), 8);
+                    this.lastGpsTime[this.next] <<= 32;
+                    this.lastGpsTime[this.next] |= decoder.ReadUInt32();
+                    this.last = this.next;
+                    this.lastGpsTimeDiff[this.last] = default;
+                    this.multiExtremeCounter[this.last] = default;
+                    break;
+                case >= MultipleCodeFull:
+                    this.last = (uint)((this.last + multi - MultipleCodeFull) & 3);
+                    this.Read(item);
+                    break;
             }
         }
 

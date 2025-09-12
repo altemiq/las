@@ -28,14 +28,16 @@ internal sealed class ArithmeticDecoder : ArithmeticCoder, IEntropyDecoder
 
         this.inputStream = stream;
         this.length = MaxLength;
-        if (reallyInit)
+        if (!reallyInit)
         {
-            var tempValue = stream.ReadByte() << 24;
-            tempValue |= stream.ReadByte() << 16;
-            tempValue |= stream.ReadByte() << 8;
-            tempValue |= stream.ReadByte();
-            this.value = (uint)tempValue;
+            return true;
         }
+
+        var tempValue = stream.ReadByte() << 24;
+        tempValue |= stream.ReadByte() << 16;
+        tempValue |= stream.ReadByte() << 8;
+        tempValue |= stream.ReadByte();
+        this.value = (uint)tempValue;
 
         return true;
     }
@@ -98,10 +100,10 @@ internal sealed class ArithmeticDecoder : ArithmeticCoder, IEntropyDecoder
 
         var distribution = model.Distribution;
         var decoderTable = model.DecoderTable;
+        this.length >>= SymbolLengthShift;
         if (decoderTable is null)
         {
             // decode using only multiplications
-            this.length >>= SymbolLengthShift;
             var n = model.Symbols;
             var k = n >> 1;
 
@@ -127,7 +129,6 @@ internal sealed class ArithmeticDecoder : ArithmeticCoder, IEntropyDecoder
         else
         {
             // use table look-up for faster decoding
-            this.length >>= SymbolLengthShift;
             var dv = this.value / this.length;
             var t = dv >> (int)model.TableShift;
 

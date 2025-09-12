@@ -53,23 +53,21 @@ public abstract class ChunkedStream(long length) : Stream, ICacheStream, IAsyncC
 
         // bytes left
         var bytesLeft = (int)(this.streamLength - this.stream.Position);
-        var bytesRead = default(int);
 
-        if (count > bytesLeft)
+        if (count <= bytesLeft)
         {
-            // copy in what we have
-            bytesRead = this.stream.Read(buffer, offset, bytesLeft);
-            count -= bytesRead;
-            offset += bytesRead;
-
-            // get the rest of what we require
-            if (!this.CacheCore(this.streamStart + this.streamLength, count))
-            {
-                return bytesRead;
-            }
+            return this.stream.Read(buffer, offset, count);
         }
 
-        return bytesRead + this.stream.Read(buffer, offset, count);
+        // copy in what we have
+        var bytesRead = this.stream.Read(buffer, offset, bytesLeft);
+        count -= bytesRead;
+        offset += bytesRead;
+
+        // get the rest of what we require
+        return this.CacheCore(this.streamStart + this.streamLength, count)
+            ? bytesRead + this.stream.Read(buffer, offset, count)
+            : bytesRead;
     }
 
     /// <inheritdoc/>

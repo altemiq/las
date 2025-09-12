@@ -17,14 +17,14 @@ internal abstract class PointDataRecordReader<T>(int pointDataLength) : IPointDa
     /// <inheritdoc/>
     LasPointSpan IPointDataRecordReader.Read(ReadOnlySpan<byte> source) => new(this.Read(source[..pointDataLength]), source[pointDataLength..]);
 
-    /// <inheritdoc cref="IPointDataRecordReader.Read"/>
-    public abstract T Read(ReadOnlySpan<byte> source);
-
     /// <inheritdoc/>
     async ValueTask<LasPointMemory> IPointDataRecordReader.ReadAsync(ReadOnlyMemory<byte> source, CancellationToken cancellationToken) => new(await this.ReadAsync(source[..pointDataLength], cancellationToken).ConfigureAwait(false), source[pointDataLength..]);
 
+    /// <inheritdoc cref="IPointDataRecordReader.Read"/>
+    protected abstract T Read(ReadOnlySpan<byte> source);
+
     /// <inheritdoc cref="IPointDataRecordReader.ReadAsync"/>
-    public virtual ValueTask<T> ReadAsync(ReadOnlyMemory<byte> source, CancellationToken cancellationToken = default)
+    protected virtual ValueTask<T> ReadAsync(ReadOnlyMemory<byte> source, CancellationToken cancellationToken = default)
     {
         cancellationToken.ThrowIfCancellationRequested();
         return new(this.Read(source.Span));

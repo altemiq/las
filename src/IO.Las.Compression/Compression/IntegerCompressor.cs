@@ -173,45 +173,47 @@ internal sealed class IntegerCompressor
             if (this.K is not 0)
             {
                 // then c is either smaller than 0 or bigger than 1
-                if (this.K < 32)
+                if (this.K >= 32)
                 {
-                    // translate the corrector c into the k-bit interval [ 0 ... 2^k - 1 ]
-                    if (c < 0)
-                    {
-                        // then c is in the interval [ - (2^k - 1)  ...  - (2^(k-1)) ]
-                        // so we translate c into the interval [ 0 ...  + 2^(k-1) - 1 ] by adding (2^k - 1)
-                        c += (1 << (int)this.K) - 1;
-                    }
-                    else
-                    {
-                        // then c is in the interval [ 2^(k-1) + 1  ...  2^k ]
-                        // so we translate c into the interval [ 2^(k-1) ...  + 2^k - 1 ] by subtracting 1
-                        c--;
-                    }
+                    return;
+                }
 
-                    if (this.K <= this.bitsHigh)
-                    {
-                        // for small k we code the interval in one-step
-                        // compress c with the range coder
-                        this.encoder.EncodeSymbol(this.correctorModels[this.K], (uint)c);
-                    }
-                    else
-                    {
-                        // for larger k we need to code the interval in two steps figure out how many lower bits there are
-                        var k1 = (int)(this.K - this.bitsHigh);
+                // translate the corrector c into the k-bit interval [ 0 ... 2^k - 1 ]
+                if (c < 0)
+                {
+                    // then c is in the interval [ - (2^k - 1)  ...  - (2^(k-1)) ]
+                    // so we translate c into the interval [ 0 ...  + 2^(k-1) - 1 ] by adding (2^k - 1)
+                    c += (1 << (int)this.K) - 1;
+                }
+                else
+                {
+                    // then c is in the interval [ 2^(k-1) + 1  ...  2^k ]
+                    // so we translate c into the interval [ 2^(k-1) ...  + 2^k - 1 ] by subtracting 1
+                    c--;
+                }
 
-                        // c1 represents the lowest k-bitsHigh+1 bits
-                        c1 = (uint)(c & ((1 << k1) - 1));
+                if (this.K <= this.bitsHigh)
+                {
+                    // for small k we code the interval in one-step
+                    // compress c with the range coder
+                    this.encoder.EncodeSymbol(this.correctorModels[this.K], (uint)c);
+                }
+                else
+                {
+                    // for larger k we need to code the interval in two steps figure out how many lower bits there are
+                    var k1 = (int)(this.K - this.bitsHigh);
 
-                        // c represents the highest bitsHigh bits
-                        c >>= k1;
+                    // c1 represents the lowest k-bitsHigh+1 bits
+                    c1 = (uint)(c & ((1 << k1) - 1));
 
-                        // compress the higher bits using a context table
-                        this.encoder.EncodeSymbol(this.correctorModels[this.K], (uint)c);
+                    // c represents the highest bitsHigh bits
+                    c >>= k1;
 
-                        // store the lower k1 bits raw
-                        this.encoder.WriteBits((uint)k1, c1);
-                    }
+                    // compress the higher bits using a context table
+                    this.encoder.EncodeSymbol(this.correctorModels[this.K], (uint)c);
+
+                    // store the lower k1 bits raw
+                    this.encoder.WriteBits((uint)k1, c1);
                 }
             }
             else

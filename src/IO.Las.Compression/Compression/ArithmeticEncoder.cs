@@ -315,6 +315,7 @@ internal sealed class ArithmeticEncoder : ArithmeticCoder, IEntropyEncoder
     /// Gets the stream.
     /// </summary>
     /// <returns>The stream.</returns>
+    /// <exception cref="CompressionNotInitializedException">The compression has not been initialized.</exception>
     public Stream GetStream() => this.outputStream ?? throw new CompressionNotInitializedException();
 
     private void PropagateCarry()

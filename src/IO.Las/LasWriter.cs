@@ -20,8 +20,6 @@ public class LasWriter(Stream stream, bool leaveOpen = false) : ILasWriter, IDis
     protected static readonly Version EvlrVersion = new(1, 4);
 #endif
 
-    private readonly bool leaveOpen = leaveOpen;
-
     private byte[] buffer = [];
 
 #if LAS1_4_OR_GREATER
@@ -468,15 +466,17 @@ public class LasWriter(Stream stream, bool leaveOpen = false) : ILasWriter, IDis
     /// <param name="disposing"><see langword="true" /> to release both managed and unmanaged resources; <see langword="false" /> to release only unmanaged resources.</param>
     protected virtual void Dispose(bool disposing)
     {
-        if (!this.disposedValue)
+        if (this.disposedValue)
         {
-            if (disposing && !this.leaveOpen)
-            {
-                this.BaseStream.Dispose();
-            }
-
-            this.disposedValue = true;
+            return;
         }
+
+        if (disposing && !leaveOpen)
+        {
+            this.BaseStream.Dispose();
+        }
+
+        this.disposedValue = true;
     }
 
     private static Stream CreateStream(string path) => path switch

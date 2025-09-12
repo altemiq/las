@@ -263,13 +263,13 @@ public class LasReader : ILasReader, IDisposable
     /// <returns><see langword="true"/> if the move was successful; otherwise <see langword="false"/>.</returns>
     internal bool MoveToVariableLengthRecords()
     {
-        if (this.BaseStream.CanSeek)
+        if (!this.BaseStream.CanSeek)
         {
-            _ = this.BaseStream.Seek(this.offsetToVariableLengthRecords, SeekOrigin.Begin);
-            return this.BaseStream.Position == this.offsetToVariableLengthRecords;
+            return false;
         }
 
-        return false;
+        _ = this.BaseStream.Seek(this.offsetToVariableLengthRecords, SeekOrigin.Begin);
+        return this.BaseStream.Position == this.offsetToVariableLengthRecords;
     }
 
     /// <summary>
@@ -424,8 +424,7 @@ public class LasReader : ILasReader, IDisposable
         offsetToVariableLengthRecords = stream.Position;
         for (var i = 0; i < headerReader.VariableLengthRecordCount; i++)
         {
-            var record = headerReader.GetVariableLengthRecord();
-            variableLengthRecords[i] = record;
+            variableLengthRecords[i] = headerReader.GetVariableLengthRecord();
         }
 
 #if LAS1_4_OR_GREATER

@@ -100,7 +100,19 @@ internal abstract class ExtendedGpsPointDataRecordWriter<T> : Writers.PointDataR
     public virtual bool Initialize(ReadOnlySpan<byte> item, ref uint context) => this.Initialize(item, ref context, item.Length);
 
     /// <inheritdoc/>
-    public sealed override int Write(Span<byte> destination, [System.Diagnostics.CodeAnalysis.NotNull] T record, ReadOnlySpan<byte> extraBytes)
+    public virtual void Write(Span<byte> item, ref uint context) => this.Write(item, ref context, item.Length);
+
+    /// <inheritdoc/>
+    [System.Diagnostics.CodeAnalysis.SuppressMessage("Design", "MA0042:Do not use blocking calls in an async method", Justification = "This would cause recursion.")]
+    public virtual ValueTask<uint> WriteAsync(Memory<byte> item, uint context, CancellationToken cancellationToken = default)
+    {
+        cancellationToken.ThrowIfCancellationRequested();
+        this.Write(item.Span, ref context);
+        return new(context);
+    }
+
+    /// <inheritdoc/>
+    protected sealed override int Write(Span<byte> destination, [System.Diagnostics.CodeAnalysis.NotNull] T record, ReadOnlySpan<byte> extraBytes)
     {
         var context = default(uint);
         var bytesWritten = record.CopyTo(destination);
@@ -111,24 +123,13 @@ internal abstract class ExtendedGpsPointDataRecordWriter<T> : Writers.PointDataR
     }
 
     /// <inheritdoc/>
-    public virtual void Write(Span<byte> item, ref uint context) => this.Write(item, ref context, item.Length);
-
-    /// <inheritdoc/>
-    public sealed override async ValueTask<int> WriteAsync(Memory<byte> destination, [System.Diagnostics.CodeAnalysis.NotNull] T record, ReadOnlyMemory<byte> extraBytes, CancellationToken cancellationToken = default)
+    protected sealed override async ValueTask<int> WriteAsync(Memory<byte> destination, [System.Diagnostics.CodeAnalysis.NotNull] T record, ReadOnlyMemory<byte> extraBytes, CancellationToken cancellationToken = default)
     {
         var bytesWritten = record.CopyTo(destination.Span);
         extraBytes.CopyTo(destination[bytesWritten..]);
         bytesWritten += extraBytes.Length;
         _ = await this.WriteAsync(destination[..bytesWritten], default, cancellationToken).ConfigureAwait(false);
         return default;
-    }
-
-    /// <inheritdoc/>
-    public virtual ValueTask<uint> WriteAsync(Memory<byte> item, uint context, CancellationToken cancellationToken = default)
-    {
-        cancellationToken.ThrowIfCancellationRequested();
-        this.Write(item.Span, ref context);
-        return new(context);
     }
 
     /// <summary>
@@ -569,14 +570,16 @@ internal abstract class ExtendedGpsPointDataRecordWriter<T> : Writers.PointDataR
                 for (var i = 1U; i < 4U; i++)
                 {
                     var otherGpsTimeDiff64 = BitConverter.UInt64BitsToInt64Bits(gpsTime) - BitConverter.UInt64BitsToInt64Bits(processingContext.LastGpsTime[(processingContext.Last + i) & 3]);
-                    if (otherGpsTimeDiff64.IsInt32())
+                    if (!otherGpsTimeDiff64.IsInt32())
                     {
-                        // it belongs to another sequence
-                        this.valueGpsTime.Encoder.EncodeSymbol(processingContext.GpsTimeZeroDiffModel, i + 1);
-                        processingContext.Last = (processingContext.Last + i) & 3;
-                        this.WriteGpsTime(gpsTime);
-                        return;
+                        continue;
                     }
+
+                    // it belongs to another sequence
+                    this.valueGpsTime.Encoder.EncodeSymbol(processingContext.GpsTimeZeroDiffModel, i + 1);
+                    processingContext.Last = (processingContext.Last + i) & 3;
+                    this.WriteGpsTime(gpsTime);
+                    return;
                 }
 
                 // no other sequence found. start new sequence.
@@ -588,8 +591,6 @@ internal abstract class ExtendedGpsPointDataRecordWriter<T> : Writers.PointDataR
                 processingContext.LastGpsTimeDiff[processingContext.Last] = default;
                 processingContext.MultiExtremeCounter[processingContext.Last] = default;
             }
-
-            processingContext.LastGpsTime[processingContext.Last] = gpsTime;
         }
         else
         {
@@ -604,23 +605,21 @@ internal abstract class ExtendedGpsPointDataRecordWriter<T> : Writers.PointDataR
                 var currentGpsTimeDiff = (int)currentGpsTimeDiff64;
                 var multi = (currentGpsTimeDiff / (float)processingContext.LastGpsTimeDiff[processingContext.Last]).Quantize();
 
-                // compress the residual current GPS time difference in dependence on the multiplier
-                if (multi is 1)
+                switch (multi)
                 {
-                    // this is the case we assume we get most often for regular spaced pulses
-                    this.valueGpsTime.Encoder.EncodeSymbol(processingContext.GpsTimeMultiModel, 1);
-                    processingContext.GpsTimeIntegerCompressor.Compress(processingContext.LastGpsTimeDiff[processingContext.Last], currentGpsTimeDiff, 1);
-                    processingContext.MultiExtremeCounter[processingContext.Last] = default;
-                }
-                else if (multi > 0)
-                {
-                    if (multi < Multiple)
-                    {
+                    // compress the residual current GPS time difference in dependence on the multiplier
+                    case 1:
+                        // this is the case we assume we get most often for regular spaced pulses
+                        this.valueGpsTime.Encoder.EncodeSymbol(processingContext.GpsTimeMultiModel, 1);
+                        processingContext.GpsTimeIntegerCompressor.Compress(processingContext.LastGpsTimeDiff[processingContext.Last], currentGpsTimeDiff, 1);
+                        processingContext.MultiExtremeCounter[processingContext.Last] = default;
+                        break;
+                    case > 0 and < Multiple:
                         // positive multipliers up to LASZIPGPSTIMEMULTI are compressed directly
                         this.valueGpsTime.Encoder.EncodeSymbol(processingContext.GpsTimeMultiModel, (uint)multi);
                         processingContext.GpsTimeIntegerCompressor.Compress(multi * processingContext.LastGpsTimeDiff[processingContext.Last], currentGpsTimeDiff, multi < 10 ? 2U : 3U);
-                    }
-                    else
+                        break;
+                    case > 0:
                     {
                         this.valueGpsTime.Encoder.EncodeSymbol(processingContext.GpsTimeMultiModel, Multiple);
                         processingContext.GpsTimeIntegerCompressor.Compress(Multiple * processingContext.LastGpsTimeDiff[processingContext.Last], currentGpsTimeDiff, 4);
@@ -630,17 +629,16 @@ internal abstract class ExtendedGpsPointDataRecordWriter<T> : Writers.PointDataR
                             processingContext.LastGpsTimeDiff[processingContext.Last] = currentGpsTimeDiff;
                             processingContext.MultiExtremeCounter[processingContext.Last] = default;
                         }
+
+                        break;
                     }
-                }
-                else if (multi < 0)
-                {
-                    if (multi > MultipleMinus)
-                    {
+
+                    case < 0 and > MultipleMinus:
                         // negative multipliers larger than LASZIPGPSTIMEMULTIMINUS are compressed directly
                         this.valueGpsTime.Encoder.EncodeSymbol(processingContext.GpsTimeMultiModel, (uint)(Multiple - multi));
                         processingContext.GpsTimeIntegerCompressor.Compress(multi * processingContext.LastGpsTimeDiff[processingContext.Last], currentGpsTimeDiff, 5);
-                    }
-                    else
+                        break;
+                    case < 0:
                     {
                         this.valueGpsTime.Encoder.EncodeSymbol(processingContext.GpsTimeMultiModel, Multiple - MultipleMinus);
                         processingContext.GpsTimeIntegerCompressor.Compress(MultipleMinus * processingContext.LastGpsTimeDiff[processingContext.Last], currentGpsTimeDiff, 6);
@@ -650,17 +648,22 @@ internal abstract class ExtendedGpsPointDataRecordWriter<T> : Writers.PointDataR
                             processingContext.LastGpsTimeDiff[processingContext.Last] = currentGpsTimeDiff;
                             processingContext.MultiExtremeCounter[processingContext.Last] = default;
                         }
+
+                        break;
                     }
-                }
-                else
-                {
-                    this.valueGpsTime.Encoder.EncodeSymbol(processingContext.GpsTimeMultiModel, 0);
-                    processingContext.GpsTimeIntegerCompressor.Compress(0, currentGpsTimeDiff, 7);
-                    processingContext.MultiExtremeCounter[processingContext.Last]++;
-                    if (processingContext.MultiExtremeCounter[processingContext.Last] > 3)
+
+                    default:
                     {
-                        processingContext.LastGpsTimeDiff[processingContext.Last] = currentGpsTimeDiff;
-                        processingContext.MultiExtremeCounter[processingContext.Last] = default;
+                        this.valueGpsTime.Encoder.EncodeSymbol(processingContext.GpsTimeMultiModel, 0);
+                        processingContext.GpsTimeIntegerCompressor.Compress(0, currentGpsTimeDiff, 7);
+                        processingContext.MultiExtremeCounter[processingContext.Last]++;
+                        if (processingContext.MultiExtremeCounter[processingContext.Last] > 3)
+                        {
+                            processingContext.LastGpsTimeDiff[processingContext.Last] = currentGpsTimeDiff;
+                            processingContext.MultiExtremeCounter[processingContext.Last] = default;
+                        }
+
+                        break;
                     }
                 }
             }
@@ -671,14 +674,16 @@ internal abstract class ExtendedGpsPointDataRecordWriter<T> : Writers.PointDataR
                 for (var i = 1U; i < 4U; i++)
                 {
                     var otherGpsTimeDiff64 = BitConverter.UInt64BitsToInt64Bits(gpsTime) - BitConverter.UInt64BitsToInt64Bits(processingContext.LastGpsTime[(processingContext.Last + i) & 3]);
-                    if (otherGpsTimeDiff64.IsInt32())
+                    if (!otherGpsTimeDiff64.IsInt32())
                     {
-                        // it belongs to this sequence
-                        this.valueGpsTime.Encoder.EncodeSymbol(processingContext.GpsTimeMultiModel, MultipleCodeFull + i);
-                        processingContext.Last = (processingContext.Last + i) & 3;
-                        this.WriteGpsTime(gpsTime);
-                        return;
+                        continue;
                     }
+
+                    // it belongs to this sequence
+                    this.valueGpsTime.Encoder.EncodeSymbol(processingContext.GpsTimeMultiModel, MultipleCodeFull + i);
+                    processingContext.Last = (processingContext.Last + i) & 3;
+                    this.WriteGpsTime(gpsTime);
+                    return;
                 }
 
                 // no other sequence found. start new sequence.
@@ -690,9 +695,9 @@ internal abstract class ExtendedGpsPointDataRecordWriter<T> : Writers.PointDataR
                 processingContext.LastGpsTimeDiff[processingContext.Last] = default;
                 processingContext.MultiExtremeCounter[processingContext.Last] = default;
             }
-
-            processingContext.LastGpsTime[processingContext.Last] = gpsTime;
         }
+
+        processingContext.LastGpsTime[processingContext.Last] = gpsTime;
     }
 
     [System.Diagnostics.CodeAnalysis.SuppressMessage("StyleCop.CSharp.MaintainabilityRules", "SA1401:FieldsShouldBePrivate", Justification = "This is used as an internal property bag.")]
@@ -728,7 +733,6 @@ internal abstract class ExtendedGpsPointDataRecordWriter<T> : Writers.PointDataR
         public readonly IntegerCompressor PointSourceIdIntegerCompressor;
         public readonly IntegerCompressor GpsTimeIntegerCompressor;
 
-        // GPS time stuff
         public uint Last;
         public uint Next;
 

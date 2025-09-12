@@ -11,7 +11,7 @@ namespace Altemiq.IO.Las.Compression;
 /// </summary>
 internal static class ExtensionMethods
 {
-    private const int ByteMaxValuePlusOne = byte.MaxValue + 1; // 256
+    private const int ByteMaxValuePlusOne = byte.MaxValue + 1;
 
     /// <summary>
     /// Folds the specified int into a byte.

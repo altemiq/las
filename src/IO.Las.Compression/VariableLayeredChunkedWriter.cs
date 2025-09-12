@@ -94,13 +94,13 @@ internal sealed class VariableLayeredChunkedWriter(Writers.IPointDataRecordWrite
     /// <exception cref="ArgumentException"><paramref name="points"/> does not have <paramref name="count"/> items.</exception>
     public ValueTask WriteAsync(Stream stream, IEnumerable<LasPointMemory> points, int count, CancellationToken cancellationToken = default)
     {
-        if (this.GetWriter(DefaultChunkKey, stream) is not { Count: 0 } chunkWriter)
+        if (this.GetWriter(DefaultChunkKey, stream) is { Count: 0 } chunkWriter)
         {
-            ThrowAlreadyInChunkException();
-            return default;
+            return WriteAsyncCore(stream, points, count, cancellationToken);
         }
 
-        return WriteAsyncCore(stream, points, count, cancellationToken);
+        ThrowAlreadyInChunkException();
+        return default;
 
         async ValueTask WriteAsyncCore(Stream outputStream, IEnumerable<LasPointMemory> pointsToWrite, int pointCount, CancellationToken token)
         {
@@ -130,13 +130,13 @@ internal sealed class VariableLayeredChunkedWriter(Writers.IPointDataRecordWrite
     /// <exception cref="InvalidOperationException">Chunk is already being written.</exception>
     public ValueTask WriteAsync(Stream stream, IEnumerable<LasPointMemory> points, CancellationToken cancellationToken = default)
     {
-        if (this.GetWriter(DefaultChunkKey, stream) is not { Count: 0 } chunkWriter)
+        if (this.GetWriter(DefaultChunkKey, stream) is { Count: 0 } chunkWriter)
         {
-            ThrowAlreadyInChunkException();
-            return default;
+            return WriteAsyncCore(stream, points, cancellationToken);
         }
 
-        return WriteAsyncCore(stream, points, cancellationToken);
+        ThrowAlreadyInChunkException();
+        return default;
 
         async ValueTask WriteAsyncCore(Stream outputStream, IEnumerable<LasPointMemory> pointsToWrite, CancellationToken token)
         {
@@ -162,13 +162,13 @@ internal sealed class VariableLayeredChunkedWriter(Writers.IPointDataRecordWrite
     /// <exception cref="ArgumentException"><paramref name="points"/> does not have <paramref name="count"/> items.</exception>
     public ValueTask WriteAsync(Stream stream, IAsyncEnumerable<LasPointMemory> points, int count, CancellationToken cancellationToken = default)
     {
-        if (this.GetWriter(DefaultChunkKey, stream) is not { Count: 0 } chunkWriter)
+        if (this.GetWriter(DefaultChunkKey, stream) is { Count: 0 } chunkWriter)
         {
-            ThrowAlreadyInChunkException();
-            return default;
+            return WriteAsyncCore(stream, points, count, cancellationToken);
         }
 
-        return WriteAsyncCore(stream, points, count, cancellationToken);
+        ThrowAlreadyInChunkException();
+        return default;
 
         async ValueTask WriteAsyncCore(Stream outputStream, IAsyncEnumerable<LasPointMemory> pointsToWrite, int pointCount, CancellationToken token)
         {
@@ -198,13 +198,9 @@ internal sealed class VariableLayeredChunkedWriter(Writers.IPointDataRecordWrite
     /// <exception cref="InvalidOperationException">Chunk is already being written.</exception>
     public ValueTask WriteAsync(Stream stream, IAsyncEnumerable<LasPointMemory> points, CancellationToken cancellationToken = default)
     {
-        if (this.GetWriter(DefaultChunkKey, stream) is not { Count: 0 } chunkWriter)
-        {
-            // we are currently writing a chunk...
-            throw new InvalidOperationException(Compression.Properties.Resources.CannotWriteChunkWhenAlreadyWritingAChunk);
-        }
-
-        return WriteAsyncCore(stream, points, cancellationToken);
+        return this.GetWriter(DefaultChunkKey, stream) is { Count: 0 } chunkWriter
+            ? WriteAsyncCore(stream, points, cancellationToken)
+            : throw new InvalidOperationException(Compression.Properties.Resources.CannotWriteChunkWhenAlreadyWritingAChunk);
 
         async ValueTask WriteAsyncCore(Stream outputStream, IAsyncEnumerable<LasPointMemory> pointsToWrite, CancellationToken token)
         {

@@ -12,5 +12,5 @@ namespace Altemiq.IO.Las.Readers.Raw;
 internal sealed class PointDataRecordReader() : PointDataRecordReader<PointDataRecord>(PointDataRecord.Size)
 {
     /// <inheritdoc />
-    public override PointDataRecord Read(ReadOnlySpan<byte> source) => PointDataRecord.Create(source);
+    protected override PointDataRecord Read(ReadOnlySpan<byte> source) => PointDataRecord.Create(source);
 }

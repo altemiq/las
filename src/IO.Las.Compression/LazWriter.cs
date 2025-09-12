@@ -57,11 +57,13 @@ public sealed class LazWriter : LasWriter
         for (var i = 0; i < reader.VariableLengthRecords.Count; i++)
         {
             var position = reader.BaseStream.Position;
-            if (HeaderBlockReader.GetVariableLengthRecord(reader.BaseStream) is CompressedTag)
+            if (HeaderBlockReader.GetVariableLengthRecord(reader.BaseStream) is not CompressedTag)
             {
-                this.offsetToLasZipVlr = position;
-                break;
+                continue;
             }
+
+            this.offsetToLasZipVlr = position;
+            break;
         }
 
         (_, this.pointWriter) = GetExtraByteCountAndPointWriter(reader.Header, this.RawWriter, [.. reader.VariableLengthRecords]);
@@ -668,14 +670,16 @@ public sealed class LazWriter : LasWriter
 
             var position = this.BaseStream.Position;
 
-            if (numberOfSpecialEvlrs is not -1)
+            if (numberOfSpecialEvlrs is -1)
             {
-                _ = this.BaseStream.SwitchStreamIfMultiple(LasStreams.VariableLengthRecord);
-                _ = this.BaseStream.Seek(this.offsetToLasZipVlr + 54 + 16, SeekOrigin.Begin);
-                this.BaseStream.WriteInt64LittleEndian(numberOfSpecialEvlrs);
-                this.BaseStream.WriteInt64LittleEndian(offsetToSpecialEvlrs);
-                _ = this.BaseStream.Seek(position, SeekOrigin.Begin);
+                return;
             }
+
+            _ = this.BaseStream.SwitchStreamIfMultiple(LasStreams.VariableLengthRecord);
+            _ = this.BaseStream.Seek(this.offsetToLasZipVlr + 54 + 16, SeekOrigin.Begin);
+            this.BaseStream.WriteInt64LittleEndian(numberOfSpecialEvlrs);
+            this.BaseStream.WriteInt64LittleEndian(offsetToSpecialEvlrs);
+            _ = this.BaseStream.Seek(position, SeekOrigin.Begin);
         }
 #endif
     }

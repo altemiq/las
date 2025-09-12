@@ -29,59 +29,44 @@ public class HeaderBlockValidator
         in HeaderBlock header,
         IReadOnlyCollection<VariableLengthRecord> variableLengthRecords)
     {
-        // invalid version
-        if (header is { Version: { Major: not 1, Minor: < 1 or > HeaderBlock.MaxMinorVersion } })
+        switch (header)
         {
-            throw new InvalidOperationException(string.Format(this.Culture, Properties.Resources.ResourceManager.GetString(nameof(Properties.Resources.InvalidVersion), this.Culture)!, header.Version, new Version(1, 1), new Version(1, HeaderBlock.MaxMinorVersion)));
-        }
+            // invalid version
+            case { Version: { Major: not 1, Minor: < 1 or > HeaderBlock.MaxMinorVersion } }:
+                throw new InvalidOperationException(string.Format(this.Culture, Properties.Resources.ResourceManager.GetString(nameof(Properties.Resources.InvalidVersion), this.Culture)!, header.Version, new Version(1, 1), new Version(1, HeaderBlock.MaxMinorVersion)));
 
-        // invalid point format ID
-        if (header is { PointDataFormatId: > GpsPointDataRecord.Id, Version: { Major: 1, Minor: <= 1 } })
-        {
-            throw new InvalidOperationException(string.Format(this.Culture, Properties.Resources.ResourceManager.GetString(nameof(Properties.Resources.InvalidPointFormatId), this.Culture)!, header.PointDataFormatId, header.Version));
-        }
+            // invalid point format ID
+            case { PointDataFormatId: > GpsPointDataRecord.Id, Version: { Major: 1, Minor: <= 1 } }:
+                throw new InvalidOperationException(string.Format(this.Culture, Properties.Resources.ResourceManager.GetString(nameof(Properties.Resources.InvalidPointFormatId), this.Culture)!, header.PointDataFormatId, header.Version));
 
 #if LAS1_2_OR_GREATER
-        // invalid point format ID
-        if (header is { PointDataFormatId: > GpsColorPointDataRecord.Id, Version: { Major: 1, Minor: <= 2 } })
-        {
-            throw new InvalidOperationException(string.Format(this.Culture, Properties.Resources.ResourceManager.GetString(nameof(Properties.Resources.InvalidPointFormatId), this.Culture)!, header.PointDataFormatId, header.Version));
-        }
+            // invalid point format ID
+            case { PointDataFormatId: > GpsColorPointDataRecord.Id, Version: { Major: 1, Minor: <= 2 } }:
+                throw new InvalidOperationException(string.Format(this.Culture, Properties.Resources.ResourceManager.GetString(nameof(Properties.Resources.InvalidPointFormatId), this.Culture)!, header.PointDataFormatId, header.Version));
 #endif
 
 #if LAS1_3_OR_GREATER
-        // invalid point format ID
-        if (header is { PointDataFormatId: > GpsColorWaveformPointDataRecord.Id, Version: { Major: 1, Minor: <= 3 } })
-        {
-            throw new InvalidOperationException(string.Format(this.Culture, Properties.Resources.ResourceManager.GetString(nameof(Properties.Resources.InvalidPointFormatId), this.Culture)!, header.PointDataFormatId, header.Version));
-        }
+            // invalid point format ID
+            case { PointDataFormatId: > GpsColorWaveformPointDataRecord.Id, Version: { Major: 1, Minor: <= 3 } }:
+                throw new InvalidOperationException(string.Format(this.Culture, Properties.Resources.ResourceManager.GetString(nameof(Properties.Resources.InvalidPointFormatId), this.Culture)!, header.PointDataFormatId, header.Version));
 #endif
 
 #if LAS1_4_OR_GREATER
-        // if the point data format is >= 6, then WKT must be set
-        if (header is { PointDataFormatId: >= ExtendedGpsPointDataRecord.Id, Version: { Major: 1, Minor: >= 4 } }
-            && !header.GlobalEncoding.HasFlag(GlobalEncoding.Wkt))
-        {
-            throw new InvalidOperationException(Properties.v1_4.Resources.ResourceManager.GetString(nameof(Properties.v1_4.Resources.WktMustBeSet), this.Culture));
-        }
-
-        // invalid point format ID
-#if LAS1_5_OR_GREATER
-        if (header is { PointDataFormatId: > ExtendedGpsColorNearInfraredWaveformPointDataRecord.Id, Version: { Major: 1, Minor: <= 5 } })
-#else
-        if (header is { PointDataFormatId: > ExtendedGpsColorNearInfraredWaveformPointDataRecord.Id, Version: { Major: 1, Minor: <= 4 } })
-#endif
-        {
-            throw new InvalidOperationException(string.Format(this.Culture, Properties.Resources.ResourceManager.GetString(nameof(Properties.Resources.InvalidPointFormatId), this.Culture)!, header.PointDataFormatId, header.Version));
-        }
+            // if the point data format is >= 6, then WKT must be set
+            case { PointDataFormatId: >= ExtendedGpsPointDataRecord.Id, Version: { Major: 1, Minor: >= 4 } } when !header.GlobalEncoding.HasFlag(GlobalEncoding.Wkt):
+                throw new InvalidOperationException(Properties.v1_4.Resources.ResourceManager.GetString(nameof(Properties.v1_4.Resources.WktMustBeSet), this.Culture));
 #endif
 
 #if LAS1_5_OR_GREATER
-        if (header is { PointDataFormatId: < ExtendedGpsPointDataRecord.Id, Version: { Major: 1, Minor: >= 5 } })
-        {
-            throw new InvalidOperationException(Properties.v1_5.Resources.ResourceManager.GetString(nameof(Properties.v1_5.Resources.PointFormatIdHasBeenDeprecated), this.Culture));
+            // invalid point format ID
+            case { PointDataFormatId: > ExtendedGpsColorNearInfraredWaveformPointDataRecord.Id, Version: { Major: 1, Minor: <= 5 } }:
+                throw new InvalidOperationException(string.Format(this.Culture, Properties.Resources.ResourceManager.GetString(nameof(Properties.Resources.InvalidPointFormatId), this.Culture)!, header.PointDataFormatId, header.Version));
+            case { PointDataFormatId: < ExtendedGpsPointDataRecord.Id, Version: { Major: 1, Minor: >= 5 } }:
+                throw new InvalidOperationException(Properties.v1_5.Resources.ResourceManager.GetString(nameof(Properties.v1_5.Resources.PointFormatIdHasBeenDeprecated), this.Culture));
+#endif
         }
 
+#if LAS1_5_OR_GREATER
         if (header.GlobalEncoding.HasFlag(GlobalEncoding.TimeOffsetFlag) && !header.GlobalEncoding.HasFlag(GlobalEncoding.StandardGpsTime))
         {
             throw new InvalidOperationException(Properties.v1_5.Resources.ResourceManager.GetString(nameof(Properties.v1_5.Resources.GpsTimeFlagMustBeSet), this.Culture));
@@ -96,10 +81,8 @@ public class HeaderBlockValidator
         {
             throw new InvalidOperationException(Properties.v1_5.Resources.ResourceManager.GetString(nameof(Properties.v1_5.Resources.TimeOffsetMustBeZeroWithNoFlag), this.Culture));
         }
-#endif
 
         // check the VLRs
-#if LAS1_5_OR_GREATER
         if (header is { Version: { Major: 1, Minor: >= 5 } })
         {
             CheckAny<GeoKeyDirectoryTag>(this.Culture, variableLengthRecords);
@@ -113,11 +96,13 @@ public class HeaderBlockValidator
             CheckMultiple<GeoDoubleParamsTag>(this.Culture, variableLengthRecords);
         }
 #else
+        // check the VLRs
         CheckMultiple<GeoKeyDirectoryTag>(this.Culture, variableLengthRecords);
         CheckMultiple<GeoAsciiParamsTag>(this.Culture, variableLengthRecords);
         CheckMultiple<GeoDoubleParamsTag>(this.Culture, variableLengthRecords);
 #endif
 #if LAS1_4_OR_GREATER
+        // check the VLRs
         CheckMultiple<OgcCoordinateSystemWkt>(this.Culture, variableLengthRecords);
         CheckMultiple<OgcMathTransformWkt>(this.Culture, variableLengthRecords);
 #endif

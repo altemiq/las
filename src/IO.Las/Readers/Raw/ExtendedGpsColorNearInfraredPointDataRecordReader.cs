@@ -12,5 +12,5 @@ namespace Altemiq.IO.Las.Readers.Raw;
 internal sealed class ExtendedGpsColorNearInfraredPointDataRecordReader() : PointDataRecordReader<ExtendedGpsColorNearInfraredPointDataRecord>(ExtendedGpsColorNearInfraredPointDataRecord.Size)
 {
     /// <inheritdoc />
-    public override ExtendedGpsColorNearInfraredPointDataRecord Read(ReadOnlySpan<byte> source) => ExtendedGpsColorNearInfraredPointDataRecord.Create(source);
+    protected override ExtendedGpsColorNearInfraredPointDataRecord Read(ReadOnlySpan<byte> source) => ExtendedGpsColorNearInfraredPointDataRecord.Create(source);
 }

@@ -12,5 +12,5 @@ namespace Altemiq.IO.Las.Readers.Raw;
 internal sealed class GpsColorPointDataRecordReader() : PointDataRecordReader<GpsColorPointDataRecord>(GpsColorPointDataRecord.Size)
 {
     /// <inheritdoc />
-    public override GpsColorPointDataRecord Read(ReadOnlySpan<byte> source) => GpsColorPointDataRecord.Create(source);
+    protected override GpsColorPointDataRecord Read(ReadOnlySpan<byte> source) => GpsColorPointDataRecord.Create(source);
 }

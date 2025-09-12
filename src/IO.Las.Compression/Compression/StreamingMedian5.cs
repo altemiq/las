@@ -58,42 +58,39 @@ internal sealed class StreamingMedian5
                 this.high = false;
             }
         }
-        else
+        else if (this.values[2] < value)
         {
-            if (this.values[2] < value)
+            this.values[0] = this.values[1];
+            this.values[1] = this.values[2];
+            if (this.values[4] < value)
             {
-                this.values[0] = this.values[1];
-                this.values[1] = this.values[2];
-                if (this.values[4] < value)
-                {
-                    this.values[2] = this.values[3];
-                    this.values[3] = this.values[4];
-                    this.values[4] = value;
-                }
-                else if (this.values[3] < value)
-                {
-                    this.values[2] = this.values[3];
-                    this.values[3] = value;
-                }
-                else
-                {
-                    this.values[2] = value;
-                }
+                this.values[2] = this.values[3];
+                this.values[3] = this.values[4];
+                this.values[4] = value;
+            }
+            else if (this.values[3] < value)
+            {
+                this.values[2] = this.values[3];
+                this.values[3] = value;
             }
             else
             {
-                if (this.values[1] < value)
-                {
-                    this.values[0] = this.values[1];
-                    this.values[1] = value;
-                }
-                else
-                {
-                    this.values[0] = value;
-                }
-
-                this.high = true;
+                this.values[2] = value;
             }
+        }
+        else
+        {
+            if (this.values[1] < value)
+            {
+                this.values[0] = this.values[1];
+                this.values[1] = value;
+            }
+            else
+            {
+                this.values[0] = value;
+            }
+
+            this.high = true;
         }
     }
 

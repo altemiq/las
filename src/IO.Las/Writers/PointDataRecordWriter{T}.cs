@@ -20,8 +20,8 @@ internal abstract class PointDataRecordWriter<T> : IPointDataRecordWriter
     ValueTask<int> IPointDataRecordWriter.WriteAsync(Memory<byte> destination, IBasePointDataRecord record, ReadOnlyMemory<byte> extraBytes, CancellationToken cancellationToken) => record is T t ? this.WriteAsync(destination, t, extraBytes, cancellationToken) : throw new InvalidOperationException();
 
     /// <inheritdoc cref="IPointDataRecordWriter.Write"/>
-    public abstract int Write(Span<byte> destination, T record, ReadOnlySpan<byte> extraBytes);
+    protected abstract int Write(Span<byte> destination, T record, ReadOnlySpan<byte> extraBytes);
 
     /// <inheritdoc cref="IPointDataRecordWriter.WriteAsync"/>
-    public abstract ValueTask<int> WriteAsync(Memory<byte> destination, T record, ReadOnlyMemory<byte> extraBytes, CancellationToken cancellationToken = default);
+    protected abstract ValueTask<int> WriteAsync(Memory<byte> destination, T record, ReadOnlyMemory<byte> extraBytes, CancellationToken cancellationToken = default);
 }

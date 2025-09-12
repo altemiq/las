@@ -245,24 +245,24 @@ internal sealed class LasInterval : IEnumerable<KeyValuePair<int, LasIntervalSta
                 mergedCells = default;
             }
 
-            // are there cells to merge
-            if (cellsToMerge is { Count: 0 })
+            switch (cellsToMerge)
             {
-                return false;
-            }
+                // are there cells to merge
+                case { Count: 0 }:
+                    return false;
 
-            // is there just one cell
-            if (cellsToMerge is { Count: 1 })
-            {
-                this.mergedCellsTemporary = false;
+                // is there just one cell
+                case { Count: 1 }:
+                    this.mergedCellsTemporary = false;
 
-                // simply use this cell as the merge cell
-                mergedCells = cellsToMerge[0];
-            }
-            else
-            {
-                this.mergedCellsTemporary = true;
-                mergedCells = Merge(cellsToMerge, this.threshold, ref this.numberIntervals);
+                    // simply use this cell as the merge cell
+                    mergedCells = cellsToMerge[0];
+                    break;
+
+                default:
+                    this.mergedCellsTemporary = true;
+                    mergedCells = Merge(cellsToMerge, this.threshold, ref this.numberIntervals);
+                    break;
             }
 
             return true;
@@ -353,12 +353,9 @@ internal sealed class LasInterval : IEnumerable<KeyValuePair<int, LasIntervalSta
             }
         }
 
-        foreach (var startCell in sortedCells
+        this.numberIntervals -= (uint)sortedCells
             .Select(static item => item.Value)
-            .Where(static cell => cell is { Start: 1, End: 0 }))
-        {
-            this.numberIntervals--;
-        }
+            .Count(static cell => cell is { Start: 1, End: 0 });
 
         // update totals
         foreach (var startCell in this.cellsDictionary.Select(static item => item.Value))
@@ -439,42 +436,42 @@ internal sealed class LasInterval : IEnumerable<KeyValuePair<int, LasIntervalSta
     /// <inheritdoc/>
     public override bool Equals(object? obj)
     {
-        if (obj is LasInterval interval)
+        if (obj is not LasInterval interval)
         {
-            var firstEnumerator = this.cellsDictionary.GetEnumerator();
-            var secondEnumerator = interval.cellsDictionary.GetEnumerator();
+            return false;
+        }
 
-            if (firstEnumerator.MoveNext())
+        var firstEnumerator = this.cellsDictionary.GetEnumerator();
+        var secondEnumerator = interval.cellsDictionary.GetEnumerator();
+
+        if (firstEnumerator.MoveNext())
+        {
+            if (secondEnumerator.MoveNext())
             {
-                if (secondEnumerator.MoveNext())
+                var first = firstEnumerator.Current;
+                var second = secondEnumerator.Current;
+
+                if (first.Key != second.Key)
                 {
-                    var first = firstEnumerator.Current;
-                    var second = secondEnumerator.Current;
-
-                    if (first.Key != second.Key)
-                    {
-                        return false;
-                    }
-
-                    if (!CheckCell(first.Value, second.Value))
-                    {
-                        return false;
-                    }
+                    return false;
                 }
-                else
+
+                if (!CheckCell(first.Value, second.Value))
                 {
                     return false;
                 }
             }
-            else if (secondEnumerator.MoveNext())
+            else
             {
                 return false;
             }
-
-            return true;
+        }
+        else if (secondEnumerator.MoveNext())
+        {
+            return false;
         }
 
-        return false;
+        return true;
 
         static bool CheckCell(LasIntervalCell? first, LasIntervalCell? second)
         {
@@ -485,12 +482,7 @@ internal sealed class LasInterval : IEnumerable<KeyValuePair<int, LasIntervalSta
     }
 
     /// <inheritdoc/>
-    public override int GetHashCode()
-#if NETSTANDARD2_0_OR_GREATER || NET46_OR_GREATER || NETCOREAPP2_1_OR_GREATER
-        => HashCode.Combine(this.cellsDictionary, this.threshold);
-#else
-        => (this.cells, this.threshold).GetHashCode();
-#endif
+    public override int GetHashCode() => HashCode.Combine(this.cellsDictionary, this.threshold);
 
     /// <summary>
     /// Gets the cell at the specified index.
@@ -505,8 +497,8 @@ internal sealed class LasInterval : IEnumerable<KeyValuePair<int, LasIntervalSta
         return cells switch
         {
             null or { Count: 0 } => null,
-            { Count: 1 } c => c[0],
-            { Count: > 1 } c => MergeImpl(c, threshold, ref numberOfIntervals),
+            { Count: 1 } => cells[0],
+            { Count: > 1 } => MergeImpl(cells, threshold, ref numberOfIntervals),
         };
 
         static LasIntervalStartCell MergeImpl(IList<LasIntervalStartCell> cells, int threshold, ref uint numberOfIntervals)
@@ -576,7 +568,7 @@ internal sealed class LasInterval : IEnumerable<KeyValuePair<int, LasIntervalSta
         {
             // Handle equality as being lesser. Note: this will break Remove(key) or
             0 => -1,
-            { } i => i,
+            var i => i,
         };
     }
 }

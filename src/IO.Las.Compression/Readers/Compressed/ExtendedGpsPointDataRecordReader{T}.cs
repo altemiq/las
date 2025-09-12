@@ -274,47 +274,48 @@ internal abstract class ExtendedGpsPointDataRecordReader<T> : IPointDataRecordRe
 
         // how is the return number different
         uint returnNumber;
-        if ((changedValues & 3) is 0)
+        switch (changedValues & 3)
         {
-            // same return number
-            returnNumber = lastReturnNumber;
-        }
-        else if ((changedValues & 3) is 1)
-        {
-            // return number plus 1 mod 16
-            returnNumber = (lastReturnNumber + 1) % 16;
-            FieldAccessors.ExtendedPointDataRecord.SetReturnNumber(lastPoint, (byte)returnNumber);
-        }
-        else if ((changedValues & 3) is 2)
-        {
-            // return number minus 1 mod 16
-            returnNumber = (lastReturnNumber + 15) % 16;
-            FieldAccessors.ExtendedPointDataRecord.SetReturnNumber(lastPoint, (byte)returnNumber);
-        }
-        else
-        {
-            // the return number difference is bigger than +1 / -1 so we decompress how it is different
-            if (gpsTimeChange)
+            case 0:
+                // same return number
+                returnNumber = lastReturnNumber;
+                break;
+            case 1:
+                // return number plus 1 mod 16
+                returnNumber = (lastReturnNumber + 1) % 16;
+                FieldAccessors.ExtendedPointDataRecord.SetReturnNumber(lastPoint, (byte)returnNumber);
+                break;
+            case 2:
+                // return number minus 1 mod 16
+                returnNumber = (lastReturnNumber + 15) % 16;
+                FieldAccessors.ExtendedPointDataRecord.SetReturnNumber(lastPoint, (byte)returnNumber);
+                break;
+            default:
             {
-                // if the GPS time has changed
-                var model = processingContext.ReturnNumberModels[lastReturnNumber];
-                if (model is null)
+                // the return number difference is bigger than +1 / -1 so we decompress how it is different
+                if (gpsTimeChange)
                 {
-                    model = this.valueChannelReturnsXY.Decoder.CreateSymbolModel(16);
-                    processingContext.ReturnNumberModels[lastReturnNumber] = model;
-                    _ = model.Initialize();
+                    // if the GPS time has changed
+                    var model = processingContext.ReturnNumberModels[lastReturnNumber];
+                    if (model is null)
+                    {
+                        model = this.valueChannelReturnsXY.Decoder.CreateSymbolModel(16);
+                        processingContext.ReturnNumberModels[lastReturnNumber] = model;
+                        _ = model.Initialize();
+                    }
+
+                    returnNumber = this.valueChannelReturnsXY.Decoder.DecodeSymbol(model);
+                }
+                else
+                {
+                    // if the GPS time has not changed
+                    var sym = this.valueChannelReturnsXY.Decoder.DecodeSymbol(processingContext.ReturnNumberGpsSameModel);
+                    returnNumber = (lastReturnNumber + sym + 2) % 16;
                 }
 
-                returnNumber = this.valueChannelReturnsXY.Decoder.DecodeSymbol(model);
+                FieldAccessors.ExtendedPointDataRecord.SetReturnNumber(lastPoint, (byte)returnNumber);
+                break;
             }
-            else
-            {
-                // if the GPS time has not changed
-                var sym = this.valueChannelReturnsXY.Decoder.DecodeSymbol(processingContext.ReturnNumberGpsSameModel);
-                returnNumber = (lastReturnNumber + sym + 2) % 16;
-            }
-
-            FieldAccessors.ExtendedPointDataRecord.SetReturnNumber(lastPoint, (byte)returnNumber);
         }
 
         // get return map and return level context for current point
@@ -608,114 +609,134 @@ internal abstract class ExtendedGpsPointDataRecordReader<T> : IPointDataRecordRe
 
     private void ReadGpsTime()
     {
-        var processingContext = this.contexts[this.currentContext];
-
-        // if the last integer difference was zero
-        if (processingContext.LastGpsTimeDiff[processingContext.Last] is 0)
+        while (true)
         {
-            var multi = (int)this.valueGpsTime.Decoder.DecodeSymbol(processingContext.GpsTimeZeroDiffModel);
+            var processingContext = this.contexts[this.currentContext];
 
-            // the difference can be represented with 32 bits
-            if (multi is 0)
+            // if the last integer difference was zero
+            if (processingContext.LastGpsTimeDiff[processingContext.Last] is 0)
             {
-                processingContext.LastGpsTimeDiff[processingContext.Last] = processingContext.GpsTimeIntegerDecompressor.Decompress(0);
-                var value = BitConverter.UInt64BitsToInt64Bits(processingContext.LastGpsTime[processingContext.Last]) + processingContext.LastGpsTimeDiff[processingContext.Last];
-                processingContext.LastGpsTime[processingContext.Last] = BitConverter.Int64BitsToUInt64Bits(value);
+                var multi = (int)this.valueGpsTime.Decoder.DecodeSymbol(processingContext.GpsTimeZeroDiffModel);
+
+                switch (multi)
+                {
+                    // the difference can be represented with 32 bits
+                    case 0:
+                    {
+                        processingContext.LastGpsTimeDiff[processingContext.Last] = processingContext.GpsTimeIntegerDecompressor.Decompress(0);
+                        var value = BitConverter.UInt64BitsToInt64Bits(processingContext.LastGpsTime[processingContext.Last]) + processingContext.LastGpsTimeDiff[processingContext.Last];
+                        processingContext.LastGpsTime[processingContext.Last] = BitConverter.Int64BitsToUInt64Bits(value);
+                        break;
+                    }
+
+                    // the difference is huge
+                    case 1:
+                        processingContext.Next = (processingContext.Next + 1) & 3;
+                        processingContext.LastGpsTime[processingContext.Next] = (ulong)processingContext.GpsTimeIntegerDecompressor.Decompress((int)(processingContext.LastGpsTime[processingContext.Last] >> 32), 8);
+                        processingContext.LastGpsTime[processingContext.Next] <<= 32;
+                        processingContext.LastGpsTime[processingContext.Next] |= this.valueGpsTime.Decoder.ReadUInt32();
+                        processingContext.Last = processingContext.Next;
+                        processingContext.LastGpsTimeDiff[processingContext.Last] = default;
+                        break;
+
+                    // we switch to another sequence
+                    default:
+                        processingContext.Last = (uint)(processingContext.Last + multi - 1) & 3;
+                        continue;
+                }
+
                 processingContext.MultiExtremeCounter[processingContext.Last] = default;
             }
-
-            // the difference is huge
-            else if (multi is 1)
-            {
-                processingContext.Next = (processingContext.Next + 1) & 3;
-                processingContext.LastGpsTime[processingContext.Next] = (ulong)processingContext.GpsTimeIntegerDecompressor.Decompress((int)(processingContext.LastGpsTime[processingContext.Last] >> 32), 8);
-                processingContext.LastGpsTime[processingContext.Next] <<= 32;
-                processingContext.LastGpsTime[processingContext.Next] |= this.valueGpsTime.Decoder.ReadUInt32();
-                processingContext.Last = processingContext.Next;
-                processingContext.LastGpsTimeDiff[processingContext.Last] = default;
-                processingContext.MultiExtremeCounter[processingContext.Last] = default;
-            }
-
-            // we switch to another sequence
             else
             {
-                processingContext.Last = (uint)(processingContext.Last + multi - 1) & 3;
-                this.ReadGpsTime();
-            }
-        }
-        else
-        {
-            var multi = (int)this.valueGpsTime.Decoder.DecodeSymbol(processingContext.GpsTimeMultiModel);
-            if (multi is 1)
-            {
-                var value = BitConverter.UInt64BitsToInt64Bits(processingContext.LastGpsTime[processingContext.Last]) + processingContext.GpsTimeIntegerDecompressor.Decompress(processingContext.LastGpsTimeDiff[processingContext.Last], 1);
-                processingContext.LastGpsTime[processingContext.Last] = BitConverter.Int64BitsToUInt64Bits(value);
-                processingContext.MultiExtremeCounter[processingContext.Last] = default;
-            }
-            else if (multi < MultipleCodeFull)
-            {
-                int gpsTimeDiff;
-                if (multi is 0)
+                var multi = (int)this.valueGpsTime.Decoder.DecodeSymbol(processingContext.GpsTimeMultiModel);
+                switch (multi)
                 {
-                    gpsTimeDiff = processingContext.GpsTimeIntegerDecompressor.Decompress(0, 7);
-                    processingContext.MultiExtremeCounter[processingContext.Last]++;
-                    if (processingContext.MultiExtremeCounter[processingContext.Last] > 3)
+                    case 1:
                     {
-                        processingContext.LastGpsTimeDiff[processingContext.Last] = gpsTimeDiff;
+                        var value = BitConverter.UInt64BitsToInt64Bits(processingContext.LastGpsTime[processingContext.Last]) + processingContext.GpsTimeIntegerDecompressor.Decompress(processingContext.LastGpsTimeDiff[processingContext.Last], 1);
+                        processingContext.LastGpsTime[processingContext.Last] = BitConverter.Int64BitsToUInt64Bits(value);
                         processingContext.MultiExtremeCounter[processingContext.Last] = default;
+                        break;
                     }
-                }
-                else if (multi < Multiple)
-                {
-                    gpsTimeDiff = processingContext.GpsTimeIntegerDecompressor.Decompress(multi * processingContext.LastGpsTimeDiff[processingContext.Last], multi < 10 ? 2U : 3U);
-                }
-                else if (multi is Multiple)
-                {
-                    gpsTimeDiff = processingContext.GpsTimeIntegerDecompressor.Decompress(Multiple * processingContext.LastGpsTimeDiff[processingContext.Last], 4);
-                    processingContext.MultiExtremeCounter[processingContext.Last]++;
-                    if (processingContext.MultiExtremeCounter[processingContext.Last] > 3)
+
+                    case < MultipleCodeFull:
                     {
-                        processingContext.LastGpsTimeDiff[processingContext.Last] = gpsTimeDiff;
-                        processingContext.MultiExtremeCounter[processingContext.Last] = default;
-                    }
-                }
-                else
-                {
-                    multi = Multiple - multi;
-                    if (multi > MultipleMinus)
-                    {
-                        gpsTimeDiff = processingContext.GpsTimeIntegerDecompressor.Decompress(multi * processingContext.LastGpsTimeDiff[processingContext.Last], 5);
-                    }
-                    else
-                    {
-                        gpsTimeDiff = processingContext.GpsTimeIntegerDecompressor.Decompress(MultipleMinus * processingContext.LastGpsTimeDiff[processingContext.Last], 6);
-                        processingContext.MultiExtremeCounter[processingContext.Last]++;
-                        if (processingContext.MultiExtremeCounter[processingContext.Last] > 3)
+                        int gpsTimeDiff;
+                        switch (multi)
                         {
-                            processingContext.LastGpsTimeDiff[processingContext.Last] = gpsTimeDiff;
-                            processingContext.MultiExtremeCounter[processingContext.Last] = default;
-                        }
-                    }
-                }
+                            case 0:
+                            {
+                                gpsTimeDiff = processingContext.GpsTimeIntegerDecompressor.Decompress(0, 7);
+                                processingContext.MultiExtremeCounter[processingContext.Last]++;
+                                if (processingContext.MultiExtremeCounter[processingContext.Last] > 3)
+                                {
+                                    processingContext.LastGpsTimeDiff[processingContext.Last] = gpsTimeDiff;
+                                    processingContext.MultiExtremeCounter[processingContext.Last] = default;
+                                }
 
-                var value = BitConverter.UInt64BitsToInt64Bits(processingContext.LastGpsTime[processingContext.Last]) + gpsTimeDiff;
-                processingContext.LastGpsTime[processingContext.Last] = BitConverter.Int64BitsToUInt64Bits(value);
+                                break;
+                            }
+
+                            case < Multiple:
+                                gpsTimeDiff = processingContext.GpsTimeIntegerDecompressor.Decompress(multi * processingContext.LastGpsTimeDiff[processingContext.Last], multi < 10 ? 2U : 3U);
+                                break;
+                            case Multiple:
+                            {
+                                gpsTimeDiff = processingContext.GpsTimeIntegerDecompressor.Decompress(Multiple * processingContext.LastGpsTimeDiff[processingContext.Last], 4);
+                                processingContext.MultiExtremeCounter[processingContext.Last]++;
+                                if (processingContext.MultiExtremeCounter[processingContext.Last] > 3)
+                                {
+                                    processingContext.LastGpsTimeDiff[processingContext.Last] = gpsTimeDiff;
+                                    processingContext.MultiExtremeCounter[processingContext.Last] = default;
+                                }
+
+                                break;
+                            }
+
+                            default:
+                            {
+                                multi = Multiple - multi;
+                                if (multi > MultipleMinus)
+                                {
+                                    gpsTimeDiff = processingContext.GpsTimeIntegerDecompressor.Decompress(multi * processingContext.LastGpsTimeDiff[processingContext.Last], 5);
+                                }
+                                else
+                                {
+                                    gpsTimeDiff = processingContext.GpsTimeIntegerDecompressor.Decompress(MultipleMinus * processingContext.LastGpsTimeDiff[processingContext.Last], 6);
+                                    processingContext.MultiExtremeCounter[processingContext.Last]++;
+                                    if (processingContext.MultiExtremeCounter[processingContext.Last] > 3)
+                                    {
+                                        processingContext.LastGpsTimeDiff[processingContext.Last] = gpsTimeDiff;
+                                        processingContext.MultiExtremeCounter[processingContext.Last] = default;
+                                    }
+                                }
+
+                                break;
+                            }
+                        }
+
+                        var value = BitConverter.UInt64BitsToInt64Bits(processingContext.LastGpsTime[processingContext.Last]) + gpsTimeDiff;
+                        processingContext.LastGpsTime[processingContext.Last] = BitConverter.Int64BitsToUInt64Bits(value);
+                        break;
+                    }
+
+                    case MultipleCodeFull:
+                        processingContext.Next = (processingContext.Next + 1) & 3;
+                        processingContext.LastGpsTime[processingContext.Next] = (ulong)processingContext.GpsTimeIntegerDecompressor.Decompress((int)(processingContext.LastGpsTime[processingContext.Last] >> 32), 8);
+                        processingContext.LastGpsTime[processingContext.Next] <<= 32;
+                        processingContext.LastGpsTime[processingContext.Next] |= this.valueGpsTime.Decoder.ReadUInt32();
+                        processingContext.Last = processingContext.Next;
+                        processingContext.LastGpsTimeDiff[processingContext.Last] = default;
+                        processingContext.MultiExtremeCounter[processingContext.Last] = default;
+                        break;
+                    default:
+                        processingContext.Last = (uint)(processingContext.Last + multi - MultipleCodeFull) & 3;
+                        continue;
+                }
             }
-            else if (multi is MultipleCodeFull)
-            {
-                processingContext.Next = (processingContext.Next + 1) & 3;
-                processingContext.LastGpsTime[processingContext.Next] = (ulong)processingContext.GpsTimeIntegerDecompressor.Decompress((int)(processingContext.LastGpsTime[processingContext.Last] >> 32), 8);
-                processingContext.LastGpsTime[processingContext.Next] <<= 32;
-                processingContext.LastGpsTime[processingContext.Next] |= this.valueGpsTime.Decoder.ReadUInt32();
-                processingContext.Last = processingContext.Next;
-                processingContext.LastGpsTimeDiff[processingContext.Last] = default;
-                processingContext.MultiExtremeCounter[processingContext.Last] = default;
-            }
-            else
-            {
-                processingContext.Last = (uint)(processingContext.Last + multi - MultipleCodeFull) & 3;
-                this.ReadGpsTime();
-            }
+
+            break;
         }
     }
 
@@ -753,7 +774,6 @@ internal abstract class ExtendedGpsPointDataRecordReader<T> : IPointDataRecordRe
 
         public bool Unused;
 
-        // GPS time stuff
         public uint Last;
         public uint Next;
 

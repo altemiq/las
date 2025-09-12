@@ -16,6 +16,7 @@ using System.Runtime.InteropServices;
 [System.Diagnostics.CodeAnalysis.SuppressMessage("Roslynator", "RCS1085:Use auto-implemented property", Justification = "This needs sequential layout")]
 [System.Diagnostics.CodeAnalysis.SuppressMessage("ReSharper", "PrivateFieldCanBeConvertedToLocalVariable", Justification = "This needs sequential layout.")]
 [System.Diagnostics.CodeAnalysis.SuppressMessage("ReSharper", "CollectionNeverQueried.Local", Justification = "This needs sequential layout.")]
+[System.Diagnostics.CodeAnalysis.SuppressMessage("ReSharper", "ConvertToAutoPropertyWhenPossible", Justification = "This needs sequential layout.")]
 [System.Diagnostics.CodeAnalysis.SuppressMessage("CodeQuality", "IDE0079:Remove unnecessary suppression", Justification = "This is required for automated cleanup")]
 public readonly record struct ExtraBytesItem
 {
@@ -489,18 +490,13 @@ public readonly record struct ExtraBytesItem
     /// <returns>The instance of <see cref="ExtraBytesItem"/>.</returns>
     internal static ExtraBytesItem Read(ReadOnlySpan<byte> source)
     {
-        if (BitConverter.IsLittleEndian)
+        return BitConverter.IsLittleEndian ? Marshal.PtrToStructure<ExtraBytesItem>(GetIntPtrFromSpan(source)) : new(source);
+
+        static unsafe IntPtr GetIntPtrFromSpan<T>(ReadOnlySpan<T> span)
         {
-            return Marshal.PtrToStructure<ExtraBytesItem>(GetIntPtrFromSpan(source));
-
-            static unsafe IntPtr GetIntPtrFromSpan<T>(ReadOnlySpan<T> span)
-            {
-                // Cast the reference to an IntPtr
-                return (IntPtr)System.Runtime.CompilerServices.Unsafe.AsPointer(ref MemoryMarshal.GetReference(span));
-            }
+            // Cast the reference to an IntPtr
+            return (IntPtr)System.Runtime.CompilerServices.Unsafe.AsPointer(ref MemoryMarshal.GetReference(span));
         }
-
-        return new(source);
     }
 
     /// <summary>

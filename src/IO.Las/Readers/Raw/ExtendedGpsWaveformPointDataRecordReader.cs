@@ -12,5 +12,5 @@ namespace Altemiq.IO.Las.Readers.Raw;
 internal sealed class ExtendedGpsWaveformPointDataRecordReader() : PointDataRecordReader<ExtendedGpsWaveformPointDataRecord>(ExtendedGpsWaveformPointDataRecord.Size)
 {
     /// <inheritdoc />
-    public override ExtendedGpsWaveformPointDataRecord Read(ReadOnlySpan<byte> source) => ExtendedGpsWaveformPointDataRecord.Create(source);
+    protected override ExtendedGpsWaveformPointDataRecord Read(ReadOnlySpan<byte> source) => ExtendedGpsWaveformPointDataRecord.Create(source);
 }

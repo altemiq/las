@@ -41,15 +41,17 @@ internal sealed class ExtendedGpsColorNearInfraredWaveformPointDataRecordReader(
     /// <inheritdoc/>
     public void Dispose()
     {
-        if (!this.disposed)
+        if (this.disposed)
         {
-            if (this.byteReader is IDisposable disposableByteReader)
-            {
-                disposableByteReader.Dispose();
-            }
-
-            this.disposed = true;
+            return;
         }
+
+        if (this.byteReader is IDisposable disposableByteReader)
+        {
+            disposableByteReader.Dispose();
+        }
+
+        this.disposed = true;
     }
 
     /// <inheritdoc/>

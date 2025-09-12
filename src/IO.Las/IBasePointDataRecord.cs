@@ -15,12 +15,12 @@ public interface IBasePointDataRecord
     /// <summary>
     /// Gets the size of the point data record.
     /// </summary>
-    static virtual ushort Size { get; } = default;
+    static virtual ushort Size => default;
 
     /// <summary>
     /// Gets the ID of the point data record.
     /// </summary>
-    static virtual byte Id { get; } = default;
+    static virtual byte Id => default;
 #endif
 
     /// <summary>

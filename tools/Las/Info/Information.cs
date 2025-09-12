@@ -88,17 +88,17 @@ internal static class Information
             var y = point.Y;
             var z = point.Z;
 
-            if (scaleFactor is { } vector)
+            if (scaleFactor is not { } vector)
             {
-                var format = string.Concat("{0", Format(vector.X), "} {1", Format(vector.Y), "} {2", Format(vector.Z), "}");
-                return LazyFormattable.Create(format, x, y, z);
+#if NET46_OR_GREATER || NETCOREAPP
+                return LazyFormattable.Create((FormattableString)$"{x} {y} {z}");
+#else
+                return LazyFormattable.Create("{0} {1} {2}", x, y, z);
+#endif
             }
 
-#if NET46_OR_GREATER || NETCOREAPP
-            return LazyFormattable.Create((FormattableString)$"{x} {y} {z}");
-#else
-            return LazyFormattable.Create("{0} {1} {2}", x, y, z);
-#endif
+            var format = string.Concat("{0", Format(vector.X), "} {1", Format(vector.Y), "} {2", Format(vector.Z), "}");
+            return LazyFormattable.Create(format, x, y, z);
         }
     }
 
@@ -130,7 +130,7 @@ internal static class Information
             OgcMathTransformWkt ogcMathTransformWkt => GetOgcMathTransformWkt(ogcMathTransformWkt),
             Cloud.CopcInfo copcInfo => GetCopcInfo(header, copcInfo),
 #endif
-            Tiling tiling => GetTiling(tiling),
+            Tiling tiling => GetTiling(header.Min, header.Max, tiling),
             _ => [],
         };
 
@@ -151,29 +151,29 @@ internal static class Information
                         var stringBuilder = new System.Text.StringBuilder();
                         _ = stringBuilder
                             .Append("  ")
-                            .AppendFormat(formatProvider, "data type: {0} ({1})", (uint)item.DataType, GetName(item.DataType))
-                            .AppendFormat(formatProvider, ", name \"{0}\"", item.Name)
-                            .AppendFormat(formatProvider, ", description: \"{0}\"", item.Description);
+                            .Append(formatProvider, $"data type: {(uint)item.DataType} ({GetName(item.DataType)})")
+                            .Append(formatProvider, $", name \"{item.Name}\"")
+                            .Append(formatProvider, $", description: \"{item.Description}\"");
 
                         if (item.Options.HasFlag(ExtraBytesOptions.Min))
                         {
-                            _ = stringBuilder.AppendFormat(formatProvider, ", min: {0}", item.Min);
+                            _ = stringBuilder.Append(formatProvider, $", min: {item.Min}");
                         }
 
                         if (item.Options.HasFlag(ExtraBytesOptions.Max))
                         {
-                            _ = stringBuilder.AppendFormat(formatProvider, ", max: {0}", item.Max);
+                            _ = stringBuilder.Append(formatProvider, $", max: {item.Max}");
                         }
 
                         _ = stringBuilder.Append(", scale: ");
                         _ = item.HasScale
-                            ? stringBuilder.AppendFormat(formatProvider, "{0}", item.Scale)
-                            : stringBuilder.AppendFormat(formatProvider, "{0} (not set)", 1);
+                            ? stringBuilder.Append(formatProvider, $"{item.Scale}")
+                            : stringBuilder.Append(formatProvider, $"{1} (not set)");
 
                         _ = stringBuilder.Append(", offset: ");
                         _ = item.HasOffset
-                            ? stringBuilder.AppendFormat(formatProvider, "{0}", item.Offset)
-                            : stringBuilder.AppendFormat(formatProvider, "{0} (not set)", 0);
+                            ? stringBuilder.Append(formatProvider, $"{item.Offset}")
+                            : stringBuilder.Append(formatProvider, $"{0} (not set)");
 
                         return stringBuilder.ToString();
 
@@ -206,8 +206,7 @@ internal static class Information
             var stringBuilder = new System.Text.StringBuilder();
             foreach (var item in record)
             {
-                stringBuilder.Append(item);
-                stringBuilder.Append('|');
+                stringBuilder.Append(item).Append('|');
             }
 
             yield return (default, LazyFormattable.Create("  " + stringBuilder));
@@ -379,22 +378,22 @@ internal static class Information
                     { KeyId: GeoKey.EllipsoidGeoKey, ValueOffset: 7030 } => "Ellipse_WGS_84",
                     { KeyId: GeoKey.EllipsoidGeoKey, ValueOffset: 7034 } => "Ellipse_Clarke_1880",
                     { KeyId: GeoKey.ProjectedCRSGeoKey, ValueOffset: 32767 } => "user-defined",
-                    { KeyId: GeoKey.ProjectedCRSGeoKey, ValueOffset: >= 32601 and <= 32660 } v => FormatPcs("WGS 84", v.ValueOffset - 32600),
-                    { KeyId: GeoKey.ProjectedCRSGeoKey, ValueOffset: >= 32701 and <= 32760 } v => FormatPcs("WGS 84", v.ValueOffset - 32700, south: true),
-                    { KeyId: GeoKey.ProjectedCRSGeoKey, ValueOffset: >= 25828 and <= 25838 } v => FormatPcs("ETRS89", v.ValueOffset - 25800),
-                    { KeyId: GeoKey.ProjectedCRSGeoKey, ValueOffset: >= 26903 and <= 26923 } v => FormatPcs("NAD83", v.ValueOffset - 26900),
-                    { KeyId: GeoKey.ProjectedCRSGeoKey, ValueOffset: >= 3154 and <= 3160 } v => FormatPcs("NAD83(CSRS)", v.ValueOffset < 3158 ? v.ValueOffset - 3154 + 7 : v.ValueOffset - 3158 + 14),
-                    { KeyId: GeoKey.ProjectedCRSGeoKey, ValueOffset: >= 7846 and <= 7859 } v => FormatPcs("GDA2020", v.ValueOffset - 7800, south: true, "MGA"),
-                    { KeyId: GeoKey.ProjectedCRSGeoKey, ValueOffset: >= 28348 and <= 28358 } v => FormatPcs("GDA94", v.ValueOffset - 28300, south: true, "MGA"),
-                    { KeyId: GeoKey.ProjectedCRSGeoKey, ValueOffset: >= 29118 and <= 29118 } v => FormatPcs("SAD69", v.ValueOffset - 29100),
-                    { KeyId: GeoKey.ProjectedCRSGeoKey, ValueOffset: >= 29177 and <= 29185 } v => FormatPcs("SAD69", v.ValueOffset - 29160, south: true),
-                    { KeyId: GeoKey.ProjectedCRSGeoKey, ValueOffset: >= 32201 and <= 32260 } v => FormatPcs("WGS 72", v.ValueOffset - 32200),
-                    { KeyId: GeoKey.ProjectedCRSGeoKey, ValueOffset: >= 32301 and <= 32360 } v => FormatPcs("WGS 72", v.ValueOffset - 32300, south: true),
-                    { KeyId: GeoKey.ProjectedCRSGeoKey, ValueOffset: >= 32401 and <= 32460 } v => FormatPcs("WGS 72BE", v.ValueOffset - 32400),
-                    { KeyId: GeoKey.ProjectedCRSGeoKey, ValueOffset: >= 32501 and <= 32560 } v => FormatPcs("WGS 72BE", v.ValueOffset - 32500, south: true),
-                    { KeyId: GeoKey.ProjectedCRSGeoKey, ValueOffset: >= 26703 and <= 26723 } v => FormatPcs("NAD27", v.ValueOffset - 26700),
-                    { KeyId: GeoKey.ProjectionGeoKey, ValueOffset: >= 16001 and <= 16060 } v => LazyFormattable.Create("Proj_UTM_zone_{0}N", v.ValueOffset - 16000),
-                    { KeyId: GeoKey.ProjectionGeoKey, ValueOffset: >= 16101 and <= 16160 } v => LazyFormattable.Create("Proj_UTM_zone_{0}S", v.ValueOffset - 16100),
+                    { KeyId: GeoKey.ProjectedCRSGeoKey, ValueOffset: >= 32601 and <= 32660 } => FormatPcs("WGS 84", geoKeyEntry.ValueOffset - 32600),
+                    { KeyId: GeoKey.ProjectedCRSGeoKey, ValueOffset: >= 32701 and <= 32760 } => FormatPcs("WGS 84", geoKeyEntry.ValueOffset - 32700, south: true),
+                    { KeyId: GeoKey.ProjectedCRSGeoKey, ValueOffset: >= 25828 and <= 25838 } => FormatPcs("ETRS89", geoKeyEntry.ValueOffset - 25800),
+                    { KeyId: GeoKey.ProjectedCRSGeoKey, ValueOffset: >= 26903 and <= 26923 } => FormatPcs("NAD83", geoKeyEntry.ValueOffset - 26900),
+                    { KeyId: GeoKey.ProjectedCRSGeoKey, ValueOffset: >= 3154 and <= 3160 } => FormatPcs("NAD83(CSRS)", geoKeyEntry.ValueOffset < 3158 ? geoKeyEntry.ValueOffset - 3154 + 7 : geoKeyEntry.ValueOffset - 3158 + 14),
+                    { KeyId: GeoKey.ProjectedCRSGeoKey, ValueOffset: >= 7846 and <= 7859 } => FormatPcs("GDA2020", geoKeyEntry.ValueOffset - 7800, south: true, "MGA"),
+                    { KeyId: GeoKey.ProjectedCRSGeoKey, ValueOffset: >= 28348 and <= 28358 } => FormatPcs("GDA94", geoKeyEntry.ValueOffset - 28300, south: true, "MGA"),
+                    { KeyId: GeoKey.ProjectedCRSGeoKey, ValueOffset: >= 29118 and <= 29118 } => FormatPcs("SAD69", geoKeyEntry.ValueOffset - 29100),
+                    { KeyId: GeoKey.ProjectedCRSGeoKey, ValueOffset: >= 29177 and <= 29185 } => FormatPcs("SAD69", geoKeyEntry.ValueOffset - 29160, south: true),
+                    { KeyId: GeoKey.ProjectedCRSGeoKey, ValueOffset: >= 32201 and <= 32260 } => FormatPcs("WGS 72", geoKeyEntry.ValueOffset - 32200),
+                    { KeyId: GeoKey.ProjectedCRSGeoKey, ValueOffset: >= 32301 and <= 32360 } => FormatPcs("WGS 72", geoKeyEntry.ValueOffset - 32300, south: true),
+                    { KeyId: GeoKey.ProjectedCRSGeoKey, ValueOffset: >= 32401 and <= 32460 } => FormatPcs("WGS 72BE", geoKeyEntry.ValueOffset - 32400),
+                    { KeyId: GeoKey.ProjectedCRSGeoKey, ValueOffset: >= 32501 and <= 32560 } => FormatPcs("WGS 72BE", geoKeyEntry.ValueOffset - 32500, south: true),
+                    { KeyId: GeoKey.ProjectedCRSGeoKey, ValueOffset: >= 26703 and <= 26723 } => FormatPcs("NAD27", geoKeyEntry.ValueOffset - 26700),
+                    { KeyId: GeoKey.ProjectionGeoKey, ValueOffset: >= 16001 and <= 16060 } => LazyFormattable.Create("Proj_UTM_zone_{0}N", geoKeyEntry.ValueOffset - 16000),
+                    { KeyId: GeoKey.ProjectionGeoKey, ValueOffset: >= 16101 and <= 16160 } => LazyFormattable.Create("Proj_UTM_zone_{0}S", geoKeyEntry.ValueOffset - 16100),
                     { KeyId: GeoKey.ProjectionGeoKey, ValueOffset: 32767 } => "user-defined",
                     { KeyId: GeoKey.ProjectionGeoKey, ValueOffset: 10101 } => "Proj_Alabama_CS27_East",
                     { KeyId: GeoKey.ProjectionGeoKey, ValueOffset: 10102 } => "Proj_Alabama_CS27_West",
@@ -417,7 +416,7 @@ internal static class Information
                     { KeyId: GeoKey.ProjectionGeoKey, ValueOffset: 10405 } => "Proj_California_CS27_V",
                     { KeyId: GeoKey.ProjectionGeoKey, ValueOffset: 10406 } => "Proj_California_CS27_VI",
                     { KeyId: GeoKey.ProjectionGeoKey, ValueOffset: 10407 } => "Proj_California_CS27_VII",
-                    { KeyId: GeoKey.ProjectionGeoKey, ValueOffset: >= 10431 and <= 10436 } v => FormatProjection("California_CS83", v.ValueOffset - 10430),
+                    { KeyId: GeoKey.ProjectionGeoKey, ValueOffset: >= 10431 and <= 10436 } => FormatProjection("California_CS83", geoKeyEntry.ValueOffset - 10430),
                     { KeyId: GeoKey.ProjectionGeoKey, ValueOffset: 10501 } => "Proj_Colorado_CS27_North",
                     { KeyId: GeoKey.ProjectionGeoKey, ValueOffset: 10502 } => "Proj_Colorado_CS27_Central",
                     { KeyId: GeoKey.ProjectionGeoKey, ValueOffset: 10503 } => "Proj_Colorado_CS27_South",
@@ -611,10 +610,10 @@ internal static class Information
                     { KeyId: GeoKey.ProjectionGeoKey, ValueOffset: 14932 } => "Proj_Wyoming_CS83_East_Central",
                     { KeyId: GeoKey.ProjectionGeoKey, ValueOffset: 14933 } => "Proj_Wyoming_CS83_West_Central",
                     { KeyId: GeoKey.ProjectionGeoKey, ValueOffset: 14934 } => "Proj_Wyoming_CS83_West",
-                    { KeyId: GeoKey.ProjectionGeoKey, ValueOffset: >= 15001 and <= 15010 } v => FormatProjection("Alaska_CS27", v.ValueOffset - 15000),
-                    { KeyId: GeoKey.ProjectionGeoKey, ValueOffset: >= 15031 and <= 15040 } v => FormatProjection("Alaska_CS83", v.ValueOffset - 15030),
-                    { KeyId: GeoKey.ProjectionGeoKey, ValueOffset: >= 15101 and <= 15105 } v => FormatProjection("Hawaii_CS27", v.ValueOffset - 15100),
-                    { KeyId: GeoKey.ProjectionGeoKey, ValueOffset: >= 15131 and <= 15135 } v => FormatProjection("Hawaii_CS83", v.ValueOffset - 15130),
+                    { KeyId: GeoKey.ProjectionGeoKey, ValueOffset: >= 15001 and <= 15010 } => FormatProjection("Alaska_CS27", geoKeyEntry.ValueOffset - 15000),
+                    { KeyId: GeoKey.ProjectionGeoKey, ValueOffset: >= 15031 and <= 15040 } => FormatProjection("Alaska_CS83", geoKeyEntry.ValueOffset - 15030),
+                    { KeyId: GeoKey.ProjectionGeoKey, ValueOffset: >= 15101 and <= 15105 } => FormatProjection("Hawaii_CS27", geoKeyEntry.ValueOffset - 15100),
+                    { KeyId: GeoKey.ProjectionGeoKey, ValueOffset: >= 15131 and <= 15135 } => FormatProjection("Hawaii_CS83", geoKeyEntry.ValueOffset - 15130),
                     { KeyId: GeoKey.ProjectionGeoKey, ValueOffset: 15201 } => "Proj_Puerto_Rico_CS27",
                     { KeyId: GeoKey.ProjectionGeoKey, ValueOffset: 15202 } => "Proj_St_Croix",
                     { KeyId: GeoKey.ProjectionGeoKey, ValueOffset: 15230 } => "Proj_Puerto_Rico_Virgin_Is",
@@ -623,9 +622,9 @@ internal static class Information
                     { KeyId: GeoKey.ProjectionGeoKey, ValueOffset: 15916 } => "Proj_BLM_16N_feet",
                     { KeyId: GeoKey.ProjectionGeoKey, ValueOffset: 15917 } => "Proj_BLM_17N_feet",
                     { KeyId: GeoKey.ProjectionGeoKey, ValueOffset: 17333 } => "Proj_SWEREF99_TM",
-                    { KeyId: GeoKey.ProjectionGeoKey, ValueOffset: >= 17348 and <= 17358 } v => FormatProjection("Map_Grid_of_Australia", v.ValueOffset - 17300),
-                    { KeyId: GeoKey.ProjectionGeoKey, ValueOffset: >= 17448 and <= 17458 } v => FormatProjection("Australian_Map_Grid", v.ValueOffset - 17400),
-                    { KeyId: GeoKey.ProjectionGeoKey, ValueOffset: >= 18031 and <= 18037 } v => FormatProjection("Argentina", v.ValueOffset - 18030),
+                    { KeyId: GeoKey.ProjectionGeoKey, ValueOffset: >= 17348 and <= 17358 } => FormatProjection("Map_Grid_of_Australia", geoKeyEntry.ValueOffset - 17300),
+                    { KeyId: GeoKey.ProjectionGeoKey, ValueOffset: >= 17448 and <= 17458 } => FormatProjection("Australian_Map_Grid", geoKeyEntry.ValueOffset - 17400),
+                    { KeyId: GeoKey.ProjectionGeoKey, ValueOffset: >= 18031 and <= 18037 } => FormatProjection("Argentina", geoKeyEntry.ValueOffset - 18030),
                     { KeyId: GeoKey.ProjectionGeoKey, ValueOffset: 18051 } => "Proj_Colombia_3W",
                     { KeyId: GeoKey.ProjectionGeoKey, ValueOffset: 18052 } => "Proj_Colombia_Bogota",
                     { KeyId: GeoKey.ProjectionGeoKey, ValueOffset: 18053 } => "Proj_Colombia_3E",
@@ -754,16 +753,17 @@ internal static class Information
 #endif
 
 #if LAS1_3_OR_GREATER
-        IEnumerable<(object? Header, object? Value)> GetWaveformPacketDescriptor(WaveformPacketDescriptor record)
+        static IEnumerable<(object? Header, object? Value)> GetWaveformPacketDescriptor(WaveformPacketDescriptor record)
         {
             yield return (string.Empty, string.Create(System.Globalization.CultureInfo.InvariantCulture, $"index {record.Header.RecordId - WaveformPacketDescriptor.MinTagRecordId + 1} bits/sample {record.BitsPerSample} compression {record.WaveformCompressionType} samples {record.NumberOfSamples} temporal {record.TemporalSampleSpacing} gain {record.DigitizerGain}, offset {record.DigitizerOffset}"));
         }
 #endif
 
 #if LAS1_4_OR_GREATER
-        IEnumerable<(object? Header, object? Value)> GetCopcInfo(HeaderBlock header, Cloud.CopcInfo record)
+        static IEnumerable<(object? Header, object? Value)> GetCopcInfo(HeaderBlock header, Cloud.CopcInfo record)
         {
-            yield return (default, string.Format(System.Globalization.CultureInfo.InvariantCulture, "center x y z: {0" + Format(header.ScaleFactor.X) + "} {1" + Format(header.ScaleFactor.Y) + "} {2" + Format(header.ScaleFactor.Z) + "}", record.CentreX, record.CentreY, record.CentreZ));
+            var centerFormat = string.Concat("center x y z: {0", Format(header.ScaleFactor.X), "} {1", Format(header.ScaleFactor.Y), "} {2", Format(header.ScaleFactor.Z), "}");
+            yield return (default, string.Format(System.Globalization.CultureInfo.InvariantCulture, centerFormat, record.CentreX, record.CentreY, record.CentreZ));
             yield return (default, string.Create(System.Globalization.CultureInfo.InvariantCulture, $"root node halfsize: {record.HalfSize:0.000}"));
             yield return (default, string.Create(System.Globalization.CultureInfo.InvariantCulture, $"root node point spacing: {record.Spacing:0.000}"));
             yield return (default, string.Create(System.Globalization.CultureInfo.InvariantCulture, $"gpstime min/max: {record.GpsTimeMinimum:0.00}/{record.GpsTimeMaximum:0.00}"));
@@ -771,7 +771,7 @@ internal static class Information
         }
 #endif
 
-        IEnumerable<(object? Header, object? Value)> GetTiling(Tiling record)
+        static IEnumerable<(object? Header, object? Value)> GetTiling(Vector3D min, Vector3D max, Tiling record)
         {
             var quadTree = new Indexing.LasQuadTree(record.MinX, record.MaxX, record.MinY, record.MaxY, (int)record.Level, (int)record.LevelIndex, default);
             var (minimumX, minimumY, maximumX, maximumY) = quadTree.GetBounds(0, (int)record.LevelIndex);
@@ -779,10 +779,10 @@ internal static class Information
                 ? Math.Max(
                     Math.Max(
                         Math.Max(
-                            (float)(minimumX - header.Min.X),
-                            (float)(minimumY - header.Min.Y)),
-                        (float)(header.Max.X - maximumX)),
-                    (float)(header.Max.Y - maximumY))
+                            (float)(minimumX - min.X),
+                            (float)(minimumY - min.Y)),
+                        (float)(max.X - maximumX)),
+                    (float)(max.Y - maximumY))
                 : default;
 
             yield return (string.Empty, string.Create(System.Globalization.CultureInfo.InvariantCulture, $"LAStiling (idx {record.LevelIndex}, lvl {record.Level}, sub {record.ImplicitLevels}, bbox {record.MinX} {record.MinY} {record.MaxX} {record.MaxY}{(record.Buffer ? ", buffer" : string.Empty)}{(record.Reversible ? ", reversible" : string.Empty)}) (size {maximumX - minimumX} x {maximumY - minimumY}, buffer {buffer})"));
@@ -793,18 +793,18 @@ internal static class Information
     /// <summary>
     /// Gets the information about the <see cref="ExtendedVariableLengthRecord"/>.
     /// </summary>
-    /// <param name="evlr">The <see cref="ExtendedVariableLengthRecord"/>.</param>
+    /// <param name="record">The <see cref="ExtendedVariableLengthRecord"/>.</param>
     /// <returns>The information.</returns>
-    public static IEnumerable<(object? Header, object? Value)> GetInformation(ExtendedVariableLengthRecord evlr)
+    public static IEnumerable<(object? Header, object? Value)> GetInformation(ExtendedVariableLengthRecord record)
     {
         yield return ("reserved", 0);
-        yield return ("user ID", evlr.Header.UserId);
-        yield return ("record ID", evlr.Header.RecordId);
-        yield return ("length after header", evlr.Header.RecordLengthAfterHeader);
-        yield return ("description", evlr.Header.Description);
+        yield return ("user ID", record.Header.UserId);
+        yield return ("record ID", record.Header.RecordId);
+        yield return ("length after header", record.Header.RecordLengthAfterHeader);
+        yield return ("description", record.Header.Description);
 
 #if LAS1_4_OR_GREATER
-        var extra = evlr switch
+        var extra = record switch
         {
             Cloud.CopcHierarchy copcHierarchy => GetCopcHierarchy(copcHierarchy),
             _ => [],

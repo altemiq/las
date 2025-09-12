@@ -12,5 +12,5 @@ namespace Altemiq.IO.Las.Readers.Raw;
 internal sealed class ColorPointDataRecordReader() : PointDataRecordReader<ColorPointDataRecord>(ColorPointDataRecord.Size)
 {
     /// <inheritdoc />
-    public override ColorPointDataRecord Read(ReadOnlySpan<byte> source) => ColorPointDataRecord.Create(source);
+    protected override ColorPointDataRecord Read(ReadOnlySpan<byte> source) => ColorPointDataRecord.Create(source);
 }

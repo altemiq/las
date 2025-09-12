@@ -200,17 +200,14 @@ public static class CopcExtensions
                     return reader.ReadPointDataRecords(entry);
                 }
 
-                if (box.IntersectsWith(keyBox))
-                {
-                    // If the node only crosses the box then get subset of points within box
-                    return reader.ReadPointDataRecords(entry).Where(point =>
+                // If the node only crosses the box then get subset of points within box
+                return box.IntersectsWith(keyBox)
+                    ? reader.ReadPointDataRecords(entry).Where(point =>
                     {
                         var (x, y, z) = quantizer.Get(point.PointDataRecord!);
                         return box.Contains(x, y, z);
-                    });
-                }
-
-                return [];
+                    })
+                    : [];
             });
     }
 

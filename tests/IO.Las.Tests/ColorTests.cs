@@ -50,7 +50,7 @@ public class ColorTests
     [Test]
     public async Task KnownColors()
     {
-        var color = (System.Drawing.Color)Color.Blue;
+        System.Drawing.Color color = Color.Blue;
         _ = await Assert.That(color).IsEqualTo(System.Drawing.Color.Blue, ColorComparer.Instance);
     }
 

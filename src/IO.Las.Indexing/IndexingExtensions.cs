@@ -43,7 +43,7 @@ public static class IndexingExtensions
             .Select(idx => reader.ReadPointDataRecord(idx).PointDataRecord!)
             .Where(point =>
             {
-                var value = quantizer.GetX(point!.X);
+                var value = quantizer.GetX(point.X);
                 if (box.Left > value || box.Right < value)
                 {
                     return false;

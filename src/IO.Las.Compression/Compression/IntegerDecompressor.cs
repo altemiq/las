@@ -136,52 +136,46 @@ internal sealed class IntegerDecompressor
             // decode within which interval the corrector is falling
             this.K = this.decoder.DecodeSymbol(bitsModel);
 
-            // decode the exact location of the corrector within the interval\
-            // then c is either smaller than 0 or bigger than 1
-            if (this.K is not 0)
+            switch (this.K)
             {
-                if (this.K < 32)
-                {
-                    var k = (int)this.K;
-
-                    // for small k we can do this in one step
-                    var c = this.K <= this.bitsHigh
-                        ? (int)this.decoder.DecodeSymbol(this.correctorModels[k]) // decompress c with the range coder
-                        : GetLargeK(this.correctorModels[k]); // for larger k we need to do this in two steps
-
-                    // translate c back into its correct interval
-
-                    // if c is in the interval [ 2^(k-1)  ...  + 2^k - 1 ]
-                    if (c >= (1 << (k - 1)))
-                    {
-                        // so we translate c back into the interval [ 2^(k-1) + 1  ...  2^k ] by adding 1
-                        return c + 1;
-                    }
-
-                    // otherwise c is in the interval [ 0 ...  + 2^(k-1) - 1 ]
-                    // so we translate c back into the interval [ - (2^k - 1)  ...  - (2^(k-1)) ] by subtracting (2^k - 1)
-                    return c - ((1 << k) - 1);
-
-                    int GetLargeK(ISymbolModel model)
-                    {
-                        var k1 = this.K - this.bitsHigh;
-
-                        // decompress higher bits with table
-                        var high = (int)this.decoder.DecodeSymbol(model);
-
-                        // read lower bits raw
-                        var low = (int)this.decoder.ReadBits(k1);
-
-                        // put the corrector back together
-                        return (high << (int)k1) | low;
-                    }
-                }
-
-                return this.correctorMin;
+                // decode the exact location of the corrector within the interval\
+                // then c is either smaller than 0 or bigger than 1
+                case 0:
+                    return (int)this.decoder.DecodeBit(this.correctorBitModel);
+                case >= 32:
+                    return this.correctorMin;
             }
 
-            // then c is either 0 or 1
-            return (int)this.decoder.DecodeBit(this.correctorBitModel);
+            var k = (int)this.K;
+
+            // for small k we can do this in one step
+            var c = this.K <= this.bitsHigh
+                ? (int)this.decoder.DecodeSymbol(this.correctorModels[k]) // decompress c with the range coder
+                : GetLargeK(this.correctorModels[k]); // for larger k we need to do this in two steps
+
+            // translate c back into its correct interval
+            // if c is in the interval [ 2^(k-1)  ...  + 2^k - 1 ]
+            return c >= (1 << (k - 1))
+
+                // so we translate c back into the interval [ 2^(k-1) + 1  ...  2^k ] by adding 1
+                ? c + 1
+
+                // otherwise c is in the interval [ 0 ...  + 2^(k-1) - 1 ] so we translate c back into the interval [ - (2^k - 1)  ...  - (2^(k-1)) ] by subtracting (2^k - 1)
+                : c - ((1 << k) - 1);
+
+            int GetLargeK(ISymbolModel model)
+            {
+                var k1 = this.K - this.bitsHigh;
+
+                // decompress higher bits with table
+                var high = (int)this.decoder.DecodeSymbol(model);
+
+                // read lower bits raw
+                var low = (int)this.decoder.ReadBits(k1);
+
+                // put the corrector back together
+                return (high << (int)k1) | low;
+            }
         }
     }
 }

@@ -64,6 +64,7 @@ internal abstract class ChunkedWriter(Writers.IPointDataRecordWriter rawWriter, 
     /// <param name="record">The point.</param>
     /// <param name="extraBytes">The extra bytes.</param>
     /// <param name="chunkKey">The chunk key to writer to.</param>
+    /// <exception cref="InvalidOperationException">We are trying to close a chunk that we've been explicitly asked to write to.</exception>
     public virtual void Write(Stream stream, IBasePointDataRecord record, ReadOnlySpan<byte> extraBytes, int chunkKey)
     {
         var chunkWriter = this.GetWriter(chunkKey, stream);
@@ -71,7 +72,6 @@ internal abstract class ChunkedWriter(Writers.IPointDataRecordWriter rawWriter, 
         {
             if (chunkKey is not DefaultChunkKey)
             {
-                // we are trying to close a chunk that we've been explicitly asked to write to.
                 throw new InvalidOperationException();
             }
 
@@ -99,6 +99,7 @@ internal abstract class ChunkedWriter(Writers.IPointDataRecordWriter rawWriter, 
     /// <param name="chunkKey">The chunk key to writer to.</param>
     /// <param name="cancellationToken">The cancellation token.</param>
     /// <returns>The asynchronous task.</returns>
+    /// <exception cref="InvalidOperationException">We are trying to close a chunk that we've been explicitly asked to write to.</exception>
     public virtual async ValueTask WriteAsync(Stream stream, IBasePointDataRecord record, ReadOnlyMemory<byte> extraBytes, int chunkKey, CancellationToken cancellationToken = default)
     {
         var chunkWriter = this.GetWriter(chunkKey, stream);
@@ -106,7 +107,6 @@ internal abstract class ChunkedWriter(Writers.IPointDataRecordWriter rawWriter, 
         {
             if (chunkKey is not DefaultChunkKey)
             {
-                // we are trying to close a chunk that we've explicitly tried to write to.
                 throw new InvalidOperationException();
             }
 
@@ -303,13 +303,7 @@ internal abstract class ChunkedWriter(Writers.IPointDataRecordWriter rawWriter, 
     /// Gets the chunk writers.
     /// </summary>
     /// <returns>The chunk writers.</returns>
-    protected IEnumerable<ChunkWriter> GetWriters()
-    {
-        foreach (var writer in this.writers)
-        {
-            yield return writer.Value.Writer;
-        }
-    }
+    protected IEnumerable<ChunkWriter> GetWriters() => this.writers.Select(writer => writer.Value.Writer);
 
     /// <summary>
     /// The chunk writer wrapper.

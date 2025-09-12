@@ -70,12 +70,12 @@ internal class PointWiseWriter : RawWriter
     /// <summary>
     /// Gets the writer.
     /// </summary>
-    public Writers.IPointDataRecordWriter? Writer { get; private set; }
+    protected Writers.IPointDataRecordWriter? Writer { get; private set; }
 
     /// <summary>
     /// Gets the encoder.
     /// </summary>
-    public ArithmeticEncoder Encoder { get; }
+    protected ArithmeticEncoder Encoder { get; }
 
     /// <inheritdoc/>
     public override void Write(Stream stream, IBasePointDataRecord record, ReadOnlySpan<byte> extraBytes)

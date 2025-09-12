@@ -16,7 +16,6 @@ internal sealed class ArithmeticSymbolModel : ISymbolModel
     /// </summary>
     internal const uint LengthShift = 15;
 
-    // for adaptive models
     private const uint MaxCount = 1U << (int)LengthShift;
 
     private readonly bool compress;
@@ -122,6 +121,7 @@ internal sealed class ArithmeticSymbolModel : ISymbolModel
     /// <summary>
     /// Updates this instance.
     /// </summary>
+    /// <exception cref="CompressionNotInitializedException">The compression has not been initialized.</exception>
     public void Update()
     {
         // halve counts when a threshold is reached

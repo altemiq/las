@@ -89,14 +89,14 @@ internal sealed class LasStreamDictionary(IComparer<string> comparer) : IDiction
     /// <inheritdoc/>
     public bool Remove(string key)
     {
-        if (this.keys.IndexOf(key) is >= 0 and var index)
+        if (this.keys.IndexOf(key) is not (>= 0 and var index))
         {
-            this.keys.RemoveAt(index);
-            this.values.RemoveAt(index);
-            return true;
+            return false;
         }
 
-        return false;
+        this.keys.RemoveAt(index);
+        this.values.RemoveAt(index);
+        return true;
     }
 
     /// <inheritdoc/>

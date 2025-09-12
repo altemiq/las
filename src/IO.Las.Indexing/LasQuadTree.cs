@@ -246,14 +246,14 @@ public sealed class LasQuadTree : IEquatable<LasQuadTree>
         {
             null => false,
             not null when ReferenceEquals(this, other) => true,
-            { } spatial => CheckSequence(spatial.adaptive, this.adaptive)
-                && spatial.levels == this.levels
-                && spatial.maximumX.Equals(this.maximumX)
-                && spatial.maximumY.Equals(this.maximumY)
-                && spatial.minimumX.Equals(this.minimumX)
-                && spatial.minimumY.Equals(this.minimumY)
-                && spatial.sublevel == this.sublevel
-                && spatial.sublevelIndex == this.sublevelIndex,
+            not null => CheckSequence(other.adaptive, this.adaptive)
+                        && other.levels == this.levels
+                        && other.maximumX.Equals(this.maximumX)
+                        && other.maximumY.Equals(this.maximumY)
+                        && other.minimumX.Equals(this.minimumX)
+                        && other.minimumY.Equals(this.minimumY)
+                        && other.sublevel == this.sublevel
+                        && other.sublevelIndex == this.sublevelIndex,
         };
 
         static bool CheckSequence<T>(IEnumerable<T>? first, IEnumerable<T>? second)
@@ -269,7 +269,6 @@ public sealed class LasQuadTree : IEquatable<LasQuadTree>
 
     /// <inheritdoc/>
     public override int GetHashCode()
-#if NETSTANDARD2_0_OR_GREATER || NET46_OR_GREATER || NETCOREAPP2_1_OR_GREATER
     {
         var hashCode = default(HashCode);
         hashCode.Add(this.levels);
@@ -281,9 +280,6 @@ public sealed class LasQuadTree : IEquatable<LasQuadTree>
         hashCode.Add(this.sublevelIndex);
         return hashCode.ToHashCode();
     }
-#else
-        => (this.levels, maxX: this.maximumX, maxY: this.maximumY, minX: this.minimumX, minY: this.minimumY, subLevel: this.sublevel, subLevelIndex: this.sublevelIndex).GetHashCode();
-#endif
 
     /// <inheritdoc />
     public override string ToString() =>

@@ -142,18 +142,13 @@ public readonly record struct ExtendedVariableLengthRecordHeader
     /// <returns>The instance of <see cref="ExtendedVariableLengthRecordHeader"/>.</returns>
     public static ExtendedVariableLengthRecordHeader Read(ReadOnlySpan<byte> source)
     {
-        if (BitConverter.IsLittleEndian)
+        return BitConverter.IsLittleEndian ? System.Runtime.InteropServices.Marshal.PtrToStructure<ExtendedVariableLengthRecordHeader>(GetIntPtrFromSpan(source)) : new(source);
+
+        static unsafe IntPtr GetIntPtrFromSpan<T>(ReadOnlySpan<T> span)
         {
-            return System.Runtime.InteropServices.Marshal.PtrToStructure<ExtendedVariableLengthRecordHeader>(GetIntPtrFromSpan(source));
-
-            static unsafe IntPtr GetIntPtrFromSpan<T>(ReadOnlySpan<T> span)
-            {
-                // Cast the reference to an IntPtr
-                return (IntPtr)System.Runtime.CompilerServices.Unsafe.AsPointer(ref System.Runtime.InteropServices.MemoryMarshal.GetReference(span));
-            }
+            // Cast the reference to an IntPtr
+            return (IntPtr)System.Runtime.CompilerServices.Unsafe.AsPointer(ref System.Runtime.InteropServices.MemoryMarshal.GetReference(span));
         }
-
-        return new(source);
     }
 
     /// <summary>

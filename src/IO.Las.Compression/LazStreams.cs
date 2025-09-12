@@ -66,6 +66,7 @@ internal static class LazStreams
     /// </summary>
     /// <param name="s">The string containing the chunk to convert.</param>
     /// <returns>A 32-bit signed integer equivalent to the chunk contained in <paramref name="s"/>.</returns>
+    /// <exception cref="InvalidOperationException">The input is not a chunk number.</exception>
     public static int ParseChunkNumber(string s) => s.Split('_') switch
     {
         [Chunk, var v] => int.Parse(v, System.Globalization.CultureInfo.InvariantCulture),
@@ -107,6 +108,7 @@ internal static class LazStreams
         };
 
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Style", "IDE0046:Convert to conditional expression", Justification = "This makes it harder to read")]
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("ReSharper", "ConvertIfStatementToReturnStatement", Justification = "This makes it harder to read")]
         public override int Compare(string? x, string? y)
         {
             if (Ordinal.Compare(x, y) is 0)
@@ -125,17 +127,17 @@ internal static class LazStreams
                 return -1;
             }
 
-            if (TryGetValue(x, out var indexX))
+            if (!TryGetValue(x, out var indexX))
             {
-                if (TryGetValue(y, out var indexY))
-                {
-                    return indexX.CompareTo(indexY);
-                }
+                return 1;
+            }
 
+            if (!TryGetValue(y, out var indexY))
+            {
                 return -1;
             }
 
-            return 1;
+            return indexX.CompareTo(indexY);
 
             static bool TryGetValue(string s, out int result)
             {

@@ -136,13 +136,15 @@ public abstract class MultipleStream(IDictionary<string, Stream> dictionary) : S
     /// <inheritdoc/>
     public override void Flush()
     {
-        // flush all the buffers for this
-        if (dictionary.Values is IEnumerable<Stream> enumerable)
+        if (dictionary.Values is not IEnumerable<Stream> enumerable)
         {
-            foreach (var stream in enumerable)
-            {
-                stream.Flush();
-            }
+            return;
+        }
+
+        // flush all the buffers for this
+        foreach (var stream in enumerable)
+        {
+            stream.Flush();
         }
     }
 
@@ -393,13 +395,13 @@ public abstract class MultipleStream(IDictionary<string, Stream> dictionary) : S
     /// <returns><see langword="true" /> when the <paramref name="name"/> and result of <paramref name="func"/> are successfully added to this instance; <see langword="false" /> when this instance dictionary contains the specified <paramref name="name"/>, in which case nothing gets added.</returns>
     public bool TryAdd(string name, Func<Stream> func)
     {
-        if (!dictionary.ContainsKey(name))
+        if (dictionary.ContainsKey(name))
         {
-            dictionary.Add(name, func());
-            return true;
+            return false;
         }
 
-        return false;
+        dictionary.Add(name, func());
+        return true;
     }
 
     /// <summary>
@@ -526,17 +528,19 @@ public abstract class MultipleStream(IDictionary<string, Stream> dictionary) : S
             var length = kvp.Value.Length;
             streamOffset += length;
 
-            if (enumerator.Current.Value == this.currentStream)
+            if (enumerator.Current.Value != this.currentStream)
             {
-                if (enumerator.MoveNext())
-                {
-                    enumerator.Current.Value.Position = 0;
-                    this.SetCurrent(enumerator.Current.Key, enumerator.Current.Value, streamOffset);
-                    return true;
-                }
+                continue;
+            }
 
+            if (!enumerator.MoveNext())
+            {
                 return false;
             }
+
+            enumerator.Current.Value.Position = 0;
+            this.SetCurrent(enumerator.Current.Key, enumerator.Current.Value, streamOffset);
+            return true;
         }
 
         return false;

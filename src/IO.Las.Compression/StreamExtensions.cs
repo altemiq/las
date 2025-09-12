@@ -141,7 +141,7 @@ internal static class StreamExtensions
         }
 
         /// <summary>
-        /// Reads an <see cref="float"/> from the stream, as little endian.
+        /// Reads a <see cref="float"/> from the stream, as little endian.
         /// </summary>
         /// <returns>The little endian value.</returns>
         public float ReadSingleLittleEndian()
@@ -156,7 +156,7 @@ internal static class StreamExtensions
         }
 
         /// <summary>
-        /// Reads an <see cref="double"/> from the stream, as little endian.
+        /// Reads a <see cref="double"/> from the stream, as little endian.
         /// </summary>
         /// <returns>The little endian value.</returns>
         public double ReadDoubleLittleEndian()
@@ -170,6 +170,10 @@ internal static class StreamExtensions
             return System.Buffers.Binary.BinaryPrimitives.ReadDoubleLittleEndian(buffer);
         }
 
+        /// <summary>
+        /// Writes a <see cref="byte"/> into the stream, as little endian.
+        /// </summary>
+        /// <param name="value">The value to write.</param>
         public void WriteByteLittleEndian(byte value)
         {
 #if NET7_0_OR_GREATER
@@ -183,6 +187,10 @@ internal static class StreamExtensions
             stream.Write(buffer);
         }
 
+        /// <summary>
+        /// Writes a <see cref="sbyte"/> into the stream, as little endian.
+        /// </summary>
+        /// <param name="value">The value to write.</param>
         public void WriteSByteLittleEndian(sbyte value)
         {
 #if NET7_0_OR_GREATER
@@ -196,6 +204,10 @@ internal static class StreamExtensions
             stream.Write(buffer);
         }
 
+        /// <summary>
+        /// Writes a <see cref="short"/> into the stream, as little endian.
+        /// </summary>
+        /// <param name="value">The value to write.</param>
         public void WriteInt16LittleEndian(short value)
         {
 #if NETSTANDARD2_1_OR_GREATER || NETCOREAPP2_1_OR_GREATER
@@ -207,6 +219,10 @@ internal static class StreamExtensions
             stream.Write(buffer);
         }
 
+        /// <summary>
+        /// Writes an <see cref="ushort"/> into the stream, as little endian.
+        /// </summary>
+        /// <param name="value">The value to write.</param>
         public void WriteUInt16LittleEndian(ushort value)
         {
 #if NETSTANDARD2_1_OR_GREATER || NETCOREAPP2_1_OR_GREATER
@@ -218,6 +234,10 @@ internal static class StreamExtensions
             stream.Write(buffer);
         }
 
+        /// <summary>
+        /// Writes an <see cref="int"/> into the stream, as little endian.
+        /// </summary>
+        /// <param name="value">The value to write.</param>
         public void WriteInt32LittleEndian(int value)
         {
 #if NETSTANDARD2_1_OR_GREATER || NETCOREAPP2_1_OR_GREATER
@@ -229,6 +249,10 @@ internal static class StreamExtensions
             stream.Write(buffer);
         }
 
+        /// <summary>
+        /// Writes an <see cref="uint"/> into the stream, as little endian.
+        /// </summary>
+        /// <param name="value">The value to write.</param>
         public void WriteUInt32LittleEndian(uint value)
         {
 #if NETSTANDARD2_1_OR_GREATER || NETCOREAPP2_1_OR_GREATER
@@ -240,6 +264,10 @@ internal static class StreamExtensions
             stream.Write(buffer);
         }
 
+        /// <summary>
+        /// Writes a <see cref="long"/> into the stream, as little endian.
+        /// </summary>
+        /// <param name="value">The value to write.</param>
         public void WriteInt64LittleEndian(long value)
         {
 #if NETSTANDARD2_1_OR_GREATER || NETCOREAPP2_1_OR_GREATER
@@ -251,6 +279,10 @@ internal static class StreamExtensions
             stream.Write(buffer);
         }
 
+        /// <summary>
+        /// Writes an <see cref="ulong"/> into the stream, as little endian.
+        /// </summary>
+        /// <param name="value">The value to write.</param>
         public void WriteUInt64LittleEndian(ulong value)
         {
 #if NETSTANDARD2_1_OR_GREATER || NETCOREAPP2_1_OR_GREATER
@@ -262,6 +294,10 @@ internal static class StreamExtensions
             stream.Write(buffer);
         }
 
+        /// <summary>
+        /// Writes a <see cref="float"/> into the stream, as little endian.
+        /// </summary>
+        /// <param name="value">The value to write.</param>
         public void WriteSingleLittleEndian(float value)
         {
 #if NETSTANDARD2_1_OR_GREATER || NETCOREAPP2_1_OR_GREATER
@@ -273,6 +309,10 @@ internal static class StreamExtensions
             stream.Write(buffer);
         }
 
+        /// <summary>
+        /// Writes a <see cref="double"/> into the stream, as little endian.
+        /// </summary>
+        /// <param name="value">The value to write.</param>
         public void WriteDoubleLittleEndian(double value)
         {
 #if NETSTANDARD2_1_OR_GREATER || NETCOREAPP2_1_OR_GREATER
@@ -284,6 +324,10 @@ internal static class StreamExtensions
             stream.Write(buffer);
         }
 
+        /// <summary>
+        /// Writes an array of <see cref="byte"/> into the stream.
+        /// </summary>
+        /// <param name="buffer">The buffer to write.</param>
         public void Write(byte[] buffer) => stream.Write(buffer, 0, buffer.Length);
 
 #if !NET7_0_OR_GREATER

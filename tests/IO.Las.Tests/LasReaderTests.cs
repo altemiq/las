@@ -63,24 +63,21 @@ public class LasReaderTests
         var max = double.MinValue;
         var extraBytes = reader.VariableLengthRecords.OfType<ExtraBytes>().Single();
 
-        while (reader.ReadPointDataRecord() is { } point)
+        while (reader.ReadPointDataRecord() is { PointDataRecord: not null } point)
         {
-            if (point.PointDataRecord is null)
+            if (extraBytes[0].GetValue(point.ExtraBytes) is not double value)
             {
-                break;
+                continue;
             }
 
-            if (extraBytes[0].GetValue(point.ExtraBytes) is double value)
+            if (value < min)
             {
-                if (value < min)
-                {
-                    min = value;
-                }
+                min = value;
+            }
 
-                if (value > max)
-                {
-                    max = value;
-                }
+            if (value > max)
+            {
+                max = value;
             }
         }
 

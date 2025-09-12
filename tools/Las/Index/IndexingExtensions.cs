@@ -24,7 +24,7 @@ internal static class IndexingExtensions
     /// </summary>
     /// <param name="reader">The LAS reader.</param>
     /// <returns>The LAS index.</returns>
-    public static Indexing.LasIndex? ReadIndex(this LasReader reader) =>
+    public static Indexing.LasIndex ReadIndex(this LasReader reader) =>
         reader.ExtendedVariableLengthRecords.OfType<Indexing.LaxTag>().FirstOrDefault() is { } laxTag
             ? laxTag.GetIndex()
             : throw new InvalidOperationException();

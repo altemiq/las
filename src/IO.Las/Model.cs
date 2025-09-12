@@ -39,7 +39,7 @@ public readonly partial record struct Model
     /// Converts the value of this instance to its equivalent string representation.
     /// </summary>
     /// <returns>The string representation of the value of this instance.</returns>>
-    public override readonly string ToString() => $"{this.Brand.GetDescription()},{this.Name},{this.Code}";
+    public override string ToString() => $"{this.Brand.GetDescription()},{this.Name},{this.Code}";
 
     /// <summary>
     /// Parses the model from specified identifier.

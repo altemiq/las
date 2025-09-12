@@ -116,12 +116,7 @@ internal readonly struct WavePacket13
                                                                                                     && this.Z.Equals(wp.Z);
 
     /// <inheritdoc/>
-    public override int GetHashCode() =>
-#if NETSTANDARD2_0_OR_GREATER || NET461_OR_GREATER || NET
-        HashCode.Combine(this.Offset, this.PacketSize, this.ReturnPoint, this.X, this.Y, this.Z);
-#else
-        (this.Offset, this.PacketSize, this.ReturnPoint, this.X, this.Y, this.Z).GetHashCode();
-#endif
+    public override int GetHashCode() => HashCode.Combine(this.Offset, this.PacketSize, this.ReturnPoint, this.X, this.Y, this.Z);
 
     /// <inheritdoc/>
     public override string ToString() => $$"""

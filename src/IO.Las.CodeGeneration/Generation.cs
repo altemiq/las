@@ -619,7 +619,7 @@ internal static class Generation
             count++;
         }
 
-        id = new string(returnChars, 0, count);
+        id = new(returnChars, 0, count);
         id = id.Replace("+", " plus ");
         var split = id.Split(SpaceSeparator, StringSplitOptions.RemoveEmptyEntries);
 

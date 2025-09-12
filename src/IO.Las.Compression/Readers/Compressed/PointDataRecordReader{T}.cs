@@ -113,7 +113,11 @@ internal abstract class PointDataRecordReader<T>(IEntropyDecoder decoder, int po
     /// </summary>
     /// <param name="cancellationToken">The cancellation token.</param>
     /// <returns>The processed data.</returns>
-    protected virtual ValueTask<Memory<byte>> ProcessDataAsync(CancellationToken cancellationToken = default) => new(this.ProcessDataCore());
+    protected virtual ValueTask<Memory<byte>> ProcessDataAsync(CancellationToken cancellationToken = default)
+    {
+        cancellationToken.ThrowIfCancellationRequested();
+        return new(this.ProcessDataCore());
+    }
 
     private byte[] ProcessDataCore()
     {
@@ -175,7 +179,7 @@ internal abstract class PointDataRecordReader<T>(IEntropyDecoder decoder, int po
             {
                 var model = FieldAccessors.PointDataRecord.GetScanDirectionFlag(this.lastPoint) ? this.scanAngleRankModels1 : this.scanAngleRankModels0;
                 var val = (int)decoder.DecodeSymbol(model);
-                this.lastPoint[Constants.PointDataRecord.ScanAngleRankFieldOffset] = Compression.ExtensionMethods.Fold(val + this.lastPoint[Constants.PointDataRecord.ScanAngleRankFieldOffset]);
+                this.lastPoint[Constants.PointDataRecord.ScanAngleRankFieldOffset] = (val + this.lastPoint[Constants.PointDataRecord.ScanAngleRankFieldOffset]).Fold();
             }
 
             // decompress the user data ... if it has changed

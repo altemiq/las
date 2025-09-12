@@ -10,7 +10,7 @@ namespace Altemiq.IO.Las.Indexing;
 /// Represent a type can be used to index a collection either from the start or the end.
 /// </summary>
 [System.Runtime.InteropServices.StructLayout(System.Runtime.InteropServices.LayoutKind.Auto)]
-public readonly struct Index : System.IEquatable<Index>
+public readonly struct Index : IEquatable<Index>
 {
     private readonly long value;
 
@@ -29,7 +29,6 @@ public readonly struct Index : System.IEquatable<Index>
             : longValue;
     }
 
-    // The following private constructors mainly created for perf reason to avoid the checks
     private Index(long value) => this.value = value;
 
     /// <summary>Gets an <see cref="Index"/> pointing at first element.</summary>
@@ -107,17 +106,17 @@ public readonly struct Index : System.IEquatable<Index>
     public override string ToString() => this.ToString(default);
 
     /// <inheritdoc cref="System.IConvertible.ToString(System.IFormatProvider)" />
-    public string ToString(System.IFormatProvider? provider)
+    public string ToString(IFormatProvider? provider)
     {
         return this.IsFromEnd ? ToStringFromEnd(this.Value, provider) : this.Value.ToString(provider);
 
 #if NET6_0_OR_GREATER
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Minor Code Smell", "S3236:Caller information arguments should not be provided explicitly", Justification = "Checked")]
 #endif
-        static string ToStringFromEnd(uint value, System.IFormatProvider? formatProvider)
+        static string ToStringFromEnd(uint value, IFormatProvider? formatProvider)
         {
 #if NETSTANDARD2_1 || NETCOREAPP2_1_OR_GREATER
-            System.Span<char> span = stackalloc char[11]; // 1 for ^ and 10 for longest possible uint value
+            Span<char> span = stackalloc char[11]; // 1 for ^ and 10 for longest possible uint value
             var formatted = value.TryFormat(span[1..], out var charsWritten, provider: formatProvider);
             System.Diagnostics.Debug.Assert(formatted, $"Failed formatting in {nameof(Index)}.{nameof(ToStringFromEnd)}");
             span[0] = '^';

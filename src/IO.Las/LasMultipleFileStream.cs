@@ -89,15 +89,17 @@ internal class LasMultipleFileStream : MultipleStream
     {
         (this.baseDirectory, this.fileMode) = (directory, mode);
 
-        if (load)
+        if (!load)
         {
-            this.AddIfExists(LasStreams.Header, HeaderFileName);
-            this.AddIfExists(LasStreams.VariableLengthRecord, VariableLengthRecordFileName);
-            this.AddIfExists(LasStreams.PointData, PointDataFileName);
-#if LAS1_3_OR_GREATER
-            this.AddIfExists(LasStreams.ExtendedVariableLengthRecord, ExtendedVariableLengthRecordFileName);
-#endif
+            return;
         }
+
+        this.AddIfExists(LasStreams.Header, HeaderFileName);
+        this.AddIfExists(LasStreams.VariableLengthRecord, VariableLengthRecordFileName);
+        this.AddIfExists(LasStreams.PointData, PointDataFileName);
+#if LAS1_3_OR_GREATER
+        this.AddIfExists(LasStreams.ExtendedVariableLengthRecord, ExtendedVariableLengthRecordFileName);
+#endif
     }
 
     /// <summary>

@@ -190,11 +190,13 @@ internal static partial class RootCommandExtensions
                                 return;
                             }
 
-                            if (readEnumerator.MoveNext())
+                            if (!readEnumerator.MoveNext())
                             {
-                                error.WriteLine("More cells in read index");
-                                return;
+                                continue;
                             }
+
+                            error.WriteLine("More cells in read index");
+                            return;
                         }
                     });
 

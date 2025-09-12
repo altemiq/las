@@ -149,18 +149,24 @@ internal abstract class ChunkedReader : IPointReader
                 this.tabledChunksValue++;
             }
 
-            // read the chunk here
-            if (stream is IAsyncCacheStream asyncCacheStream)
+            switch (stream)
             {
-                var chunkStart = this.chunkStartValues[this.currentChunk];
-                var chunkLength = this.chunkStartValues[this.currentChunk + 1] - chunkStart;
-                await asyncCacheStream.CacheAsync(chunkStart, (int)chunkLength, cancellationToken).ConfigureAwait(false);
-            }
-            else if (stream is ICacheStream cacheStream)
-            {
-                var chunkStart = this.chunkStartValues[this.currentChunk];
-                var chunkLength = this.chunkStartValues[this.currentChunk + 1] - chunkStart;
-                cacheStream.Cache(chunkStart, (int)chunkLength);
+                // read the chunk here
+                case IAsyncCacheStream asyncCacheStream:
+                {
+                    var chunkStart = this.chunkStartValues[this.currentChunk];
+                    var chunkLength = this.chunkStartValues[this.currentChunk + 1] - chunkStart;
+                    await asyncCacheStream.CacheAsync(chunkStart, (int)chunkLength, cancellationToken).ConfigureAwait(false);
+                    break;
+                }
+
+                case ICacheStream cacheStream:
+                {
+                    var chunkStart = this.chunkStartValues[this.currentChunk];
+                    var chunkLength = this.chunkStartValues[this.currentChunk + 1] - chunkStart;
+                    cacheStream.Cache(chunkStart, (int)chunkLength);
+                    break;
+                }
             }
 
             this.chunkCount = default;
@@ -249,15 +255,22 @@ internal abstract class ChunkedReader : IPointReader
 
         int SearchChunkTable(long index, int lower, int upper)
         {
-            if (lower + 1 == upper)
+            while (true)
             {
-                return lower;
-            }
+                if (lower + 1 == upper)
+                {
+                    return lower;
+                }
 
-            var mid = (lower + upper) / 2;
-            return index >= this.chunkStartValues[mid]
-                ? SearchChunkTable(index, mid, upper)
-                : SearchChunkTable(index, lower, mid);
+                var mid = (lower + upper) / 2;
+                if (index >= this.chunkStartValues[mid])
+                {
+                    lower = mid;
+                    continue;
+                }
+
+                upper = mid;
+            }
         }
     }
 
@@ -312,12 +325,14 @@ internal abstract class ChunkedReader : IPointReader
         void Prepare()
         {
             // read the chunk here
-            if (stream is ICacheStream prepareStream)
+            if (stream is not ICacheStream prepareStream)
             {
-                var chunkStart = this.chunkStartValues[this.currentChunk];
-                var chunkLength = this.chunkStartValues[this.currentChunk + 1] - chunkStart;
-                prepareStream.Cache(chunkStart, (int)chunkLength);
+                return;
             }
+
+            var chunkStart = this.chunkStartValues[this.currentChunk];
+            var chunkLength = this.chunkStartValues[this.currentChunk + 1] - chunkStart;
+            prepareStream.Cache(chunkStart, (int)chunkLength);
         }
     }
 
@@ -371,18 +386,24 @@ internal abstract class ChunkedReader : IPointReader
 
         async ValueTask PrepareAsync()
         {
-            // read the chunk here
-            if (stream is IAsyncCacheStream asyncCacheStream)
+            switch (stream)
             {
-                var chunkStart = this.chunkStartValues[this.currentChunk];
-                var chunkLength = this.chunkStartValues[this.currentChunk + 1] - chunkStart;
-                await asyncCacheStream.CacheAsync(chunkStart, (int)chunkLength, cancellationToken).ConfigureAwait(false);
-            }
-            else if (stream is ICacheStream prepareStream)
-            {
-                var chunkStart = this.chunkStartValues[this.currentChunk];
-                var chunkLength = this.chunkStartValues[this.currentChunk + 1] - chunkStart;
-                prepareStream.Cache(chunkStart, (int)chunkLength);
+                // read the chunk here
+                case IAsyncCacheStream asyncCacheStream:
+                {
+                    var chunkStart = this.chunkStartValues[this.currentChunk];
+                    var chunkLength = this.chunkStartValues[this.currentChunk + 1] - chunkStart;
+                    await asyncCacheStream.CacheAsync(chunkStart, (int)chunkLength, cancellationToken).ConfigureAwait(false);
+                    break;
+                }
+
+                case ICacheStream prepareStream:
+                {
+                    var chunkStart = this.chunkStartValues[this.currentChunk];
+                    var chunkLength = this.chunkStartValues[this.currentChunk + 1] - chunkStart;
+                    prepareStream.Cache(chunkStart, (int)chunkLength);
+                    break;
+                }
             }
         }
     }

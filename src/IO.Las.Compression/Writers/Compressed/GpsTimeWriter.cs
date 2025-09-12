@@ -106,14 +106,16 @@ internal sealed class GpsTimeWriter : ISimpleWriter
                     for (var i = 1U; i < 4U; i++)
                     {
                         var otherGpsTimeDiff64 = BitConverter.UInt64BitsToInt64Bits(gpsTime) - BitConverter.UInt64BitsToInt64Bits(this.lastGpsTime[(this.last + i) & 3]);
-                        if (otherGpsTimeDiff64.IsInt32())
+                        if (!otherGpsTimeDiff64.IsInt32())
                         {
-                            // it belongs to another sequence
-                            this.encoder.EncodeSymbol(this.gpsTimeZeroDiffModel, i + 2);
-                            this.last = (this.last + i) & 3;
-                            this.Write(item);
-                            return;
+                            continue;
                         }
+
+                        // it belongs to another sequence
+                        this.encoder.EncodeSymbol(this.gpsTimeZeroDiffModel, i + 2);
+                        this.last = (this.last + i) & 3;
+                        this.Write(item);
+                        return;
                     }
 
                     // no other sequence found. start new sequence.
@@ -149,23 +151,21 @@ internal sealed class GpsTimeWriter : ISimpleWriter
                     // compute multiplier between current and last integer difference
                     var multi = (currentGpsTimeDiff / (float)this.lastGpsTimeDiff[this.last]).Quantize();
 
-                    // compress the residual current GPS time difference in dependence on the multiplier
-                    if (multi is 1)
+                    switch (multi)
                     {
-                        // this is the case we assume we get most often for regular spaced pulses
-                        this.encoder.EncodeSymbol(this.gpsTimeMultiModel, 1);
-                        this.gpsTimeIntegerCompressor.Compress(this.lastGpsTimeDiff[this.last], currentGpsTimeDiff, 1);
-                        this.multiExtremeCounter[this.last] = default;
-                    }
-                    else if (multi > 0)
-                    {
-                        if (multi < Multiple)
-                        {
+                        // compress the residual current GPS time difference in dependence on the multiplier
+                        case 1:
+                            // this is the case we assume we get most often for regular spaced pulses
+                            this.encoder.EncodeSymbol(this.gpsTimeMultiModel, 1);
+                            this.gpsTimeIntegerCompressor.Compress(this.lastGpsTimeDiff[this.last], currentGpsTimeDiff, 1);
+                            this.multiExtremeCounter[this.last] = default;
+                            break;
+                        case > 0 and < Multiple:
                             // positive multipliers up to LASZIPGPSTIMEMULTI are compressed directly
                             this.encoder.EncodeSymbol(this.gpsTimeMultiModel, (uint)multi);
                             this.gpsTimeIntegerCompressor.Compress(multi * this.lastGpsTimeDiff[this.last], currentGpsTimeDiff, multi < 10 ? 2U : 3U);
-                        }
-                        else
+                            break;
+                        case > 0:
                         {
                             this.encoder.EncodeSymbol(this.gpsTimeMultiModel, Multiple);
                             this.gpsTimeIntegerCompressor.Compress(Multiple * this.lastGpsTimeDiff[this.last], currentGpsTimeDiff, 4);
@@ -175,17 +175,16 @@ internal sealed class GpsTimeWriter : ISimpleWriter
                                 this.lastGpsTimeDiff[this.last] = currentGpsTimeDiff;
                                 this.multiExtremeCounter[this.last] = default;
                             }
+
+                            break;
                         }
-                    }
-                    else if (multi < 0)
-                    {
-                        if (multi > MultipleMinus)
-                        {
+
+                        case < 0 and > MultipleMinus:
                             // negative multipliers larger than LASZIPGPSTIMEMULTIMINUS are compressed directly
                             this.encoder.EncodeSymbol(this.gpsTimeMultiModel, (uint)(Multiple - multi));
                             this.gpsTimeIntegerCompressor.Compress(multi * this.lastGpsTimeDiff[this.last], currentGpsTimeDiff, 5);
-                        }
-                        else
+                            break;
+                        case < 0:
                         {
                             this.encoder.EncodeSymbol(this.gpsTimeMultiModel, Multiple - MultipleMinus);
                             this.gpsTimeIntegerCompressor.Compress(MultipleMinus * this.lastGpsTimeDiff[this.last], currentGpsTimeDiff, 6);
@@ -195,17 +194,22 @@ internal sealed class GpsTimeWriter : ISimpleWriter
                                 this.lastGpsTimeDiff[this.last] = currentGpsTimeDiff;
                                 this.multiExtremeCounter[this.last] = default;
                             }
+
+                            break;
                         }
-                    }
-                    else
-                    {
-                        this.encoder.EncodeSymbol(this.gpsTimeMultiModel, 0);
-                        this.gpsTimeIntegerCompressor.Compress(0, currentGpsTimeDiff, 7);
-                        this.multiExtremeCounter[this.last]++;
-                        if (this.multiExtremeCounter[this.last] > 3)
+
+                        default:
                         {
-                            this.lastGpsTimeDiff[this.last] = currentGpsTimeDiff;
-                            this.multiExtremeCounter[this.last] = default;
+                            this.encoder.EncodeSymbol(this.gpsTimeMultiModel, 0);
+                            this.gpsTimeIntegerCompressor.Compress(0, currentGpsTimeDiff, 7);
+                            this.multiExtremeCounter[this.last]++;
+                            if (this.multiExtremeCounter[this.last] > 3)
+                            {
+                                this.lastGpsTimeDiff[this.last] = currentGpsTimeDiff;
+                                this.multiExtremeCounter[this.last] = default;
+                            }
+
+                            break;
                         }
                     }
                 }
@@ -217,14 +221,16 @@ internal sealed class GpsTimeWriter : ISimpleWriter
                     {
                         var otherGpsTimeDiff64 = BitConverter.UInt64BitsToInt64Bits(gpsTime) - BitConverter.UInt64BitsToInt64Bits(this.lastGpsTime[(this.last + i) & 3]);
                         var otherGpsTimeDiff = (int)otherGpsTimeDiff64;
-                        if (otherGpsTimeDiff64 == otherGpsTimeDiff)
+                        if (otherGpsTimeDiff64 != otherGpsTimeDiff)
                         {
-                            // it belongs to this sequence
-                            this.encoder.EncodeSymbol(this.gpsTimeMultiModel, MultipleCodeFull + i);
-                            this.last = (this.last + i) & 3;
-                            this.Write(item);
-                            return;
+                            continue;
                         }
+
+                        // it belongs to this sequence
+                        this.encoder.EncodeSymbol(this.gpsTimeMultiModel, MultipleCodeFull + i);
+                        this.last = (this.last + i) & 3;
+                        this.Write(item);
+                        return;
                     }
 
                     // no other sequence found. start new sequence.

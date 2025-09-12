@@ -372,13 +372,14 @@ public readonly record struct ExtendedGpsWaveformPointDataRecord :
     /// <inheritdoc />
     public int CopyTo(Span<byte> destination)
     {
-        if (BitConverter.IsLittleEndian)
+        switch (BitConverter.IsLittleEndian)
         {
-            System.Runtime.InteropServices.MemoryMarshal.Write(destination, ref System.Runtime.CompilerServices.Unsafe.AsRef(this));
-            return Size;
+            case true:
+                System.Runtime.InteropServices.MemoryMarshal.Write(destination, ref System.Runtime.CompilerServices.Unsafe.AsRef(this));
+                return Size;
+            default:
+                return this.WriteLittleEndian(destination);
         }
-
-        return this.WriteLittleEndian(destination);
     }
 
     /// <summary>

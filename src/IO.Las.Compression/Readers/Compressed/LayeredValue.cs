@@ -66,18 +66,16 @@ internal sealed class LayeredValue(bool requested)
                 this.Changed = true;
                 return this.ByteCount;
             }
-
-            this.Changed = false;
         }
         else
         {
-            if (this.ByteCount is not 0 and { } count)
+            if (this.ByteCount is not 0 and var count)
             {
                 stream.Position += count;
             }
-
-            this.Changed = false;
         }
+
+        this.Changed = false;
 
         return default;
     }

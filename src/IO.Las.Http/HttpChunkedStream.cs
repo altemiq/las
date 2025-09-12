@@ -25,7 +25,7 @@ public sealed class HttpChunkedStream : ChunkedStream
         : base(length) => (this.httpClient, this.uri) = (httpClient, uri);
 
     /// <inheritdoc/>
-    protected sealed override Stream? GetStream(long start, int length)
+    protected override Stream? GetStream(long start, int length)
     {
         var request = new HttpRequestMessage { RequestUri = this.uri };
         request.Headers.Range = new(start, start + length - 1);
@@ -36,7 +36,7 @@ public sealed class HttpChunkedStream : ChunkedStream
     }
 
     /// <inheritdoc/>
-    protected sealed override async ValueTask<Stream?> GetStreamAsync(long start, int length, CancellationToken cancellationToken = default)
+    protected override async ValueTask<Stream?> GetStreamAsync(long start, int length, CancellationToken cancellationToken = default)
     {
         var request = new HttpRequestMessage { RequestUri = this.uri };
         request.Headers.Range = new(start, start + length - 1);

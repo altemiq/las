@@ -304,12 +304,14 @@ internal sealed class ColorNearInfraredReader3 : IContextReader
                 this.RgbDiffModels5 = rgb.Decoder.CreateSymbolModel(ArithmeticCoder.ModelCount);
             }
 
-            if (nir.Requested)
+            if (!nir.Requested)
             {
-                this.NirByteUsedModel = nir.Decoder.CreateSymbolModel(4);
-                this.NirDiffModels0 = nir.Decoder.CreateSymbolModel(ArithmeticCoder.ModelCount);
-                this.NirDiffModels1 = nir.Decoder.CreateSymbolModel(ArithmeticCoder.ModelCount);
+                return;
             }
+
+            this.NirByteUsedModel = nir.Decoder.CreateSymbolModel(4);
+            this.NirDiffModels0 = nir.Decoder.CreateSymbolModel(ArithmeticCoder.ModelCount);
+            this.NirDiffModels1 = nir.Decoder.CreateSymbolModel(ArithmeticCoder.ModelCount);
         }
 
         [System.Diagnostics.CodeAnalysis.MemberNotNullWhen(true, nameof(RgbByteUsedModel), nameof(RgbDiffModels0), nameof(RgbDiffModels1), nameof(RgbDiffModels2), nameof(RgbDiffModels3), nameof(RgbDiffModels4), nameof(RgbDiffModels5))]

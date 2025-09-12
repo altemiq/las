@@ -9,7 +9,7 @@ namespace Altemiq.IO.Las.Indexing;
 /// <summary>
 /// Represents a LAS index cell.
 /// </summary>
-public readonly struct LasIndexCell
+public readonly record struct LasIndexCell
 {
     /// <summary>
     /// Initializes a new instance of the <see cref="LasIndexCell"/> struct.
@@ -47,22 +47,6 @@ public readonly struct LasIndexCell
     public IEnumerable<Range> Intervals { get; } = [];
 
     /// <summary>
-    /// Implements the equals operator.
-    /// </summary>
-    /// <param name="left">The first operand.</param>
-    /// <param name="right">The second operand.</param>
-    /// <returns>The result of the operator.</returns>
-    public static bool operator ==(LasIndexCell left, LasIndexCell right) => left.Equals(right);
-
-    /// <summary>
-    /// Implements the not-equals operator.
-    /// </summary>
-    /// <param name="left">The first operand.</param>
-    /// <param name="right">The second operand.</param>
-    /// <returns>The result of the operator.</returns>
-    public static bool operator !=(LasIndexCell left, LasIndexCell right) => !(left == right);
-
-    /// <summary>
     /// Determines whether the specified coordinate is in this cell.
     /// </summary>
     /// <param name="x">The x-coordinate.</param>
@@ -92,20 +76,7 @@ public readonly struct LasIndexCell
     public bool ContainsY(double y) => this.MinimumY <= y && y < this.MaximumY;
 
     /// <inheritdoc/>
-    public override bool Equals([System.Diagnostics.CodeAnalysis.NotNullWhen(true)] object? obj) => obj is LasIndexCell lic
-                                                                                                    && this.MinimumX.Equals(lic.MinimumX)
-                                                                                                    && this.MaximumX.Equals(lic.MaximumX)
-                                                                                                    && this.MinimumY.Equals(lic.MinimumY)
-                                                                                                    && this.MaximumY.Equals(lic.MaximumY)
-                                                                                                    && this.Intervals.SequenceEqual(lic.Intervals);
-
-    /// <inheritdoc/>
-    public override int GetHashCode() =>
-#if NETSTANDARD2_0_OR_GREATER || NET461_OR_GREATER || NETCOREAPP2_1_OR_GREATER
-        HashCode.Combine(this.MinimumX, this.MaximumX, this.MinimumY, this.MaximumY);
-#else
-        (this.MinimumX, this.MaximumX, this.MinimumY, this.MaximumY).GetHashCode();
-#endif
+    public override int GetHashCode() => HashCode.Combine(this.MinimumX, this.MaximumX, this.MinimumY, this.MaximumY);
 
     /// <inheritdoc/>
     public override string ToString() => $"[ X: ({this.MinimumX} -> {this.MaximumX}), Y: ({this.MinimumY} -> {this.MaximumY}) ]";

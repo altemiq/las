@@ -12,8 +12,6 @@ namespace Altemiq.IO.Las.Writers.Compressed;
 /// <param name="encoder">The encoder.</param>
 internal sealed class ColorWriter2(IEntropyEncoder encoder) : ISimpleWriter
 {
-    private readonly IEntropyEncoder encoder = encoder;
-
     private readonly ISymbolModel byteUsedModel = encoder.CreateSymbolModel(ArithmeticCoder.HalfModelCount);
     private readonly ISymbolModel rgbDiffModels0 = encoder.CreateSymbolModel(ArithmeticCoder.ModelCount);
     private readonly ISymbolModel rgbDiffModels1 = encoder.CreateSymbolModel(ArithmeticCoder.ModelCount);
@@ -56,20 +54,20 @@ internal sealed class ColorWriter2(IEntropyEncoder encoder) : ISimpleWriter
             | ((System.Buffers.Binary.BinaryPrimitives.ReadUInt16LittleEndian(item) & 0x00FF) != (System.Buffers.Binary.BinaryPrimitives.ReadUInt16LittleEndian(item[(2 * sizeof(ushort))..]) & 0x00FF) ? 1U : 0U)
             | ((System.Buffers.Binary.BinaryPrimitives.ReadUInt16LittleEndian(item) & 0xFF00) != (System.Buffers.Binary.BinaryPrimitives.ReadUInt16LittleEndian(item[sizeof(ushort)..]) & 0xFF00) ? 1U : 0U)
             | ((System.Buffers.Binary.BinaryPrimitives.ReadUInt16LittleEndian(item) & 0xFF00) != (System.Buffers.Binary.BinaryPrimitives.ReadUInt16LittleEndian(item[(2 * sizeof(ushort))..]) & 0xFF00) ? 1U : 0U)) << 6;
-        this.encoder.EncodeSymbol(this.byteUsedModel, sym);
+        encoder.EncodeSymbol(this.byteUsedModel, sym);
 
         var diffL = default(int);
         if ((sym & 1) is not 0)
         {
             diffL = (System.Buffers.Binary.BinaryPrimitives.ReadUInt16LittleEndian(item) & 0xFF) - (this.lastItem[0] & 0xFF);
-            this.encoder.EncodeSymbol(this.rgbDiffModels0, diffL.Fold());
+            encoder.EncodeSymbol(this.rgbDiffModels0, diffL.Fold());
         }
 
         var diffH = default(int);
         if ((sym & (1 << 1)) is not 0)
         {
             diffH = (System.Buffers.Binary.BinaryPrimitives.ReadUInt16LittleEndian(item) >> 8) - (this.lastItem[0] >> 8);
-            this.encoder.EncodeSymbol(this.rgbDiffModels1, diffH.Fold());
+            encoder.EncodeSymbol(this.rgbDiffModels1, diffH.Fold());
         }
 
         if ((sym & (1 << 6)) is not 0)
@@ -77,27 +75,27 @@ internal sealed class ColorWriter2(IEntropyEncoder encoder) : ISimpleWriter
             if ((sym & (1 << 2)) is not 0)
             {
                 var corr = (System.Buffers.Binary.BinaryPrimitives.ReadUInt16LittleEndian(item[sizeof(ushort)..]) & 0xFF) - (diffL + (this.lastItem[1] & 0xFF).Clamp());
-                this.encoder.EncodeSymbol(this.rgbDiffModels2, corr.Fold());
+                encoder.EncodeSymbol(this.rgbDiffModels2, corr.Fold());
             }
 
             if ((sym & (1 << 4)) is not 0)
             {
                 diffL = (diffL + (System.Buffers.Binary.BinaryPrimitives.ReadUInt16LittleEndian(item[sizeof(ushort)..]) & 0xFF) - (this.lastItem[1] & 0xFF)) / 2;
                 var corr = (System.Buffers.Binary.BinaryPrimitives.ReadUInt16LittleEndian(item[(2 * sizeof(ushort))..]) & 0xFF) - (diffL + (this.lastItem[2] & 0xFF)).Clamp();
-                this.encoder.EncodeSymbol(this.rgbDiffModels4, corr.Fold());
+                encoder.EncodeSymbol(this.rgbDiffModels4, corr.Fold());
             }
 
             if ((sym & (1 << 3)) is not 0)
             {
                 var corr = (System.Buffers.Binary.BinaryPrimitives.ReadUInt16LittleEndian(item[sizeof(ushort)..]) >> 8) - (diffH + (this.lastItem[1] >> 8)).Clamp();
-                this.encoder.EncodeSymbol(this.rgbDiffModels3, corr.Fold());
+                encoder.EncodeSymbol(this.rgbDiffModels3, corr.Fold());
             }
 
             if ((sym & (1 << 5)) is not 0)
             {
                 diffH = (diffH + (System.Buffers.Binary.BinaryPrimitives.ReadUInt16LittleEndian(item[sizeof(ushort)..]) >> 8) - (this.lastItem[1] >> 8)) / 2;
                 var corr = (System.Buffers.Binary.BinaryPrimitives.ReadUInt16LittleEndian(item[(2 * sizeof(ushort))..]) >> 8) - (diffH + (this.lastItem[2] >> 8)).Clamp();
-                this.encoder.EncodeSymbol(this.rgbDiffModels5, corr.Fold());
+                encoder.EncodeSymbol(this.rgbDiffModels5, corr.Fold());
             }
         }
 

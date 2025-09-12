@@ -29,8 +29,7 @@ internal static class Models
         static IEnumerable<ClassDeclarationSyntax> GetBrandClasses(IReadOnlyCollection<(string? Brand, string? Model, string? Code)> models)
         {
             // get the brands
-            var brands = models.Select(m => m.Brand).Distinct(StringComparer.Ordinal);
-            foreach (var brand in brands)
+            foreach (var brand in models.Select(m => m.Brand).Distinct(StringComparer.Ordinal))
             {
                 if (brand is null)
                 {
@@ -89,8 +88,7 @@ internal static class Models
 
             static IEnumerable<MemberDeclarationSyntax> GetModelClasses(string brand, IReadOnlyCollection<(string? Model, string? Code)> models)
             {
-                var distinctModels = models.Select(m => m.Model).Distinct(StringComparer.Ordinal);
-                foreach (var model in distinctModels)
+                foreach (var model in models.Select(m => m.Model).Distinct(StringComparer.Ordinal))
                 {
                     if (model is null)
                     {
@@ -103,64 +101,67 @@ internal static class Models
                         .Select(m => m.Code)
                         .Cast<string>()
                         .ToArray();
-                    if (fields.Length > 1)
+                    switch (fields.Length)
                     {
-                        // return a class
-                        yield return ClassDeclaration(Generation.CleanupIdentifier(model))
-                            .WithModifiers(
-                            TokenList(
-                                Token(
-                                    TriviaList(
-                                        Trivia(
-                                            DocumentationCommentTrivia(
-                                                SyntaxKind.SingleLineDocumentationCommentTrivia,
-                                                List(
-                                                    new XmlNodeSyntax[]
-                                                    {
-                                                        XmlText()
-                                                        .WithTextTokens(
-                                                            TokenList(
-                                                                XmlTextLiteral(
-                                                                    TriviaList(
-                                                                        DocumentationCommentExterior("///")),
-                                                                    " ",
-                                                                    " ",
-                                                                    TriviaList()))),
-                                                        XmlExampleElement(
-                                                            SingletonList<XmlNodeSyntax>(
+                        case > 1:
+                            // return a class
+                            yield return ClassDeclaration(Generation.CleanupIdentifier(model))
+                                .WithModifiers(
+                                    TokenList(
+                                        Token(
+                                            TriviaList(
+                                                Trivia(
+                                                    DocumentationCommentTrivia(
+                                                        SyntaxKind.SingleLineDocumentationCommentTrivia,
+                                                        List(
+                                                            new XmlNodeSyntax[]
+                                                            {
                                                                 XmlText()
-                                                                .WithTextTokens(
-                                                                    TokenList(
-                                                                        XmlTextNewLine(Constants.NewLine, continueXmlDocumentationComment: false),
-                                                                        XmlTextLiteral(
-                                                                            TriviaList(
-                                                                                DocumentationCommentExterior("///")),
-                                                                            $" {model}",
-                                                                            $" {model}",
-                                                                            TriviaList()),
-                                                                        XmlTextNewLine(Constants.NewLine, continueXmlDocumentationComment: false),
-                                                                        XmlTextLiteral(
-                                                                            TriviaList(
-                                                                                DocumentationCommentExterior("///")),
-                                                                            " ",
-                                                                            " ",
-                                                                            TriviaList())))))
-                                                        .WithStartTag(XmlElementStartTag(XmlName(Identifier("summary"))))
-                                                        .WithEndTag(XmlElementEndTag(XmlName(Identifier("summary")))),
-                                                        XmlText()
-                                                        .WithTextTokens(TokenList(XmlTextNewLine(Constants.NewLine, continueXmlDocumentationComment: false))),
-                                                    })))),
-                                    SyntaxKind.PublicKeyword,
-                                    TriviaList()),
-                                Token(SyntaxKind.StaticKeyword)))
-                            .WithMembers(List(GetFields(fields.Select(f => (brand, model, f)), useModelAsIdentifier: false)));
-                    }
-                    else if (fields.Length > 0)
-                    {
-                        foreach (var field in GetFields(fields.Select(f => (brand, model, f)), useModelAsIdentifier: true))
-                        {
-                            yield return field;
-                        }
+                                                                    .WithTextTokens(
+                                                                        TokenList(
+                                                                            XmlTextLiteral(
+                                                                                TriviaList(
+                                                                                    DocumentationCommentExterior("///")),
+                                                                                " ",
+                                                                                " ",
+                                                                                TriviaList()))),
+                                                                XmlExampleElement(
+                                                                        SingletonList<XmlNodeSyntax>(
+                                                                            XmlText()
+                                                                                .WithTextTokens(
+                                                                                    TokenList(
+                                                                                        XmlTextNewLine(Constants.NewLine, continueXmlDocumentationComment: false),
+                                                                                        XmlTextLiteral(
+                                                                                            TriviaList(
+                                                                                                DocumentationCommentExterior("///")),
+                                                                                            $" {model}",
+                                                                                            $" {model}",
+                                                                                            TriviaList()),
+                                                                                        XmlTextNewLine(Constants.NewLine, continueXmlDocumentationComment: false),
+                                                                                        XmlTextLiteral(
+                                                                                            TriviaList(
+                                                                                                DocumentationCommentExterior("///")),
+                                                                                            " ",
+                                                                                            " ",
+                                                                                            TriviaList())))))
+                                                                    .WithStartTag(XmlElementStartTag(XmlName(Identifier("summary"))))
+                                                                    .WithEndTag(XmlElementEndTag(XmlName(Identifier("summary")))),
+                                                                XmlText()
+                                                                    .WithTextTokens(TokenList(XmlTextNewLine(Constants.NewLine, continueXmlDocumentationComment: false))),
+                                                            })))),
+                                            SyntaxKind.PublicKeyword,
+                                            TriviaList()),
+                                        Token(SyntaxKind.StaticKeyword)))
+                                .WithMembers(List(GetFields(fields.Select(f => (brand, model, f)), useModelAsIdentifier: false)));
+                            break;
+
+                        case > 0:
+                            foreach (var field in GetFields(fields.Select(f => (brand, model, f)), useModelAsIdentifier: true))
+                            {
+                                yield return field;
+                            }
+
+                            break;
                     }
                 }
 

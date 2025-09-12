@@ -168,13 +168,13 @@ internal sealed class OccupancyGrid(PointDataRecordQuantizer quantizer, float gr
 
         var posXBit = 1 << (posX % 32);
         var arrayPosXPos = arrayPosY[posXPos];
-        if ((arrayPosXPos & posXBit) is 0)
+        if ((arrayPosXPos & posXBit) is not 0)
         {
-            arrayPosY[posXPos] = arrayPosXPos | posXBit;
-            this.NumOccupied++;
-            return true;
+            return false;
         }
 
-        return false;
+        arrayPosY[posXPos] = arrayPosXPos | posXBit;
+        this.NumOccupied++;
+        return true;
     }
 }

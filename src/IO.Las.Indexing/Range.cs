@@ -115,9 +115,8 @@ public readonly struct Range(Index start, Index end) : IEquatable<Range>
     /// </summary>
     /// <param name="length">A positive integer that represents the length of that the range will be used with.</param>
     /// <returns>The start offset and length of the range.</returns>
-    /// <remarks>
-    /// For performance reasons, this method doesn't validate <paramref name="length"/> to ensure that it is not negative. It does ensure that <paramref name="length"/> is within the current <see cref="Range"/> instance.
-    /// </remarks>
+    /// <remarks>For performance reasons, this method doesn't validate <paramref name="length"/> to ensure that it is not negative. It does ensure that <paramref name="length"/> is within the current <see cref="Range"/> instance.</remarks>
+    /// <exception cref="ArgumentOutOfRangeException">The offset is invalid.</exception>
     [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
     public (uint Offset, uint Length) GetOffsetAndLength(uint length)
     {

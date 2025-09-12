@@ -94,37 +94,39 @@ internal sealed class WavePacketReader3 : IContextReader
         }
 
         // decompress
-        if (this.valueWavePacket.Changed && processingContext.Requested)
+        if (!this.valueWavePacket.Changed || !processingContext.Requested)
         {
-            item[0] = (byte)this.valueWavePacket.Decoder.DecodeSymbol(processingContext.PacketIndex);
+            return;
+        }
 
-            var lastWavePacket = new WavePacket13(lastItem, 1);
+        item[0] = (byte)this.valueWavePacket.Decoder.DecodeSymbol(processingContext.PacketIndex);
 
-            processingContext.SymLastOffsetDiff = this.valueWavePacket.Decoder.DecodeSymbol(processingContext.OffsetDiff[processingContext.SymLastOffsetDiff]);
+        var lastWavePacket = new WavePacket13(lastItem, 1);
 
-            var currentWavePacket = new WavePacket13(
-                processingContext.SymLastOffsetDiff switch
-                {
-                    0 => lastWavePacket.Offset,
-                    1 => lastWavePacket.Offset + lastWavePacket.PacketSize,
-                    2 => lastWavePacket.Offset + GetLastDiff(processingContext),
-                    _ => this.valueWavePacket.Decoder.ReadUInt64(),
-                },
-                (uint)processingContext.IcPacketSize.Decompress((int)lastWavePacket.PacketSize),
-                BitConverter.Int32BitsToSingle(processingContext.IcReturnPoint.Decompress(BitConverter.SingleToInt32Bits(lastWavePacket.ReturnPoint))),
-                BitConverter.Int32BitsToSingle(processingContext.IcXyz.Decompress(BitConverter.SingleToInt32Bits(lastWavePacket.X))),
-                BitConverter.Int32BitsToSingle(processingContext.IcXyz.Decompress(BitConverter.SingleToInt32Bits(lastWavePacket.Y), 1)),
-                BitConverter.Int32BitsToSingle(processingContext.IcXyz.Decompress(BitConverter.SingleToInt32Bits(lastWavePacket.Z), 2)));
+        processingContext.SymLastOffsetDiff = this.valueWavePacket.Decoder.DecodeSymbol(processingContext.OffsetDiff[processingContext.SymLastOffsetDiff]);
 
-            currentWavePacket.WriteTo(item[1..]);
-
-            item[..lastItem.Length].CopyTo(lastItem);
-
-            static ulong GetLastDiff(Context context)
+        var currentWavePacket = new WavePacket13(
+            processingContext.SymLastOffsetDiff switch
             {
-                context.LastDiff32 = context.IcOffsetDiff!.Decompress(context.LastDiff32);
-                return (ulong)context.LastDiff32;
-            }
+                0 => lastWavePacket.Offset,
+                1 => lastWavePacket.Offset + lastWavePacket.PacketSize,
+                2 => lastWavePacket.Offset + GetLastDiff(processingContext),
+                _ => this.valueWavePacket.Decoder.ReadUInt64(),
+            },
+            (uint)processingContext.IcPacketSize.Decompress((int)lastWavePacket.PacketSize),
+            BitConverter.Int32BitsToSingle(processingContext.IcReturnPoint.Decompress(BitConverter.SingleToInt32Bits(lastWavePacket.ReturnPoint))),
+            BitConverter.Int32BitsToSingle(processingContext.IcXyz.Decompress(BitConverter.SingleToInt32Bits(lastWavePacket.X))),
+            BitConverter.Int32BitsToSingle(processingContext.IcXyz.Decompress(BitConverter.SingleToInt32Bits(lastWavePacket.Y), 1)),
+            BitConverter.Int32BitsToSingle(processingContext.IcXyz.Decompress(BitConverter.SingleToInt32Bits(lastWavePacket.Z), 2)));
+
+        currentWavePacket.WriteTo(item[1..]);
+
+        item[..lastItem.Length].CopyTo(lastItem);
+
+        static ulong GetLastDiff(Context context)
+        {
+            context.LastDiff32 = context.IcOffsetDiff!.Decompress(context.LastDiff32);
+            return (ulong)context.LastDiff32;
         }
     }
 
@@ -178,18 +180,20 @@ internal sealed class WavePacketReader3 : IContextReader
 
         public Context(LayeredValue layeredValue)
         {
-            if (layeredValue.Requested)
+            if (!layeredValue.Requested)
             {
-                this.PacketIndex = layeredValue.Decoder.CreateSymbolModel(ArithmeticCoder.ModelCount);
-                this.OffsetDiff[0] = layeredValue.Decoder.CreateSymbolModel(4);
-                this.OffsetDiff[1] = layeredValue.Decoder.CreateSymbolModel(4);
-                this.OffsetDiff[2] = layeredValue.Decoder.CreateSymbolModel(4);
-                this.OffsetDiff[3] = layeredValue.Decoder.CreateSymbolModel(4);
-                this.IcOffsetDiff = new(layeredValue.Decoder, 32);
-                this.IcPacketSize = new(layeredValue.Decoder, 32);
-                this.IcReturnPoint = new(layeredValue.Decoder, 32);
-                this.IcXyz = new(layeredValue.Decoder, 32, 3);
+                return;
             }
+
+            this.PacketIndex = layeredValue.Decoder.CreateSymbolModel(ArithmeticCoder.ModelCount);
+            this.OffsetDiff[0] = layeredValue.Decoder.CreateSymbolModel(4);
+            this.OffsetDiff[1] = layeredValue.Decoder.CreateSymbolModel(4);
+            this.OffsetDiff[2] = layeredValue.Decoder.CreateSymbolModel(4);
+            this.OffsetDiff[3] = layeredValue.Decoder.CreateSymbolModel(4);
+            this.IcOffsetDiff = new(layeredValue.Decoder, 32);
+            this.IcPacketSize = new(layeredValue.Decoder, 32);
+            this.IcReturnPoint = new(layeredValue.Decoder, 32);
+            this.IcXyz = new(layeredValue.Decoder, 32, 3);
         }
 
         [System.Diagnostics.CodeAnalysis.MemberNotNullWhen(true, nameof(PacketIndex))]

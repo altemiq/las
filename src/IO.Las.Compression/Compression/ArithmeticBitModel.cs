@@ -16,7 +16,6 @@ internal sealed class ArithmeticBitModel : IBitModel
     /// </summary>
     internal const uint LengthShift = 13;
 
-    // for adaptive models
     private const uint MaxCount = 1U << (int)LengthShift;
 
     private uint updateCycle;

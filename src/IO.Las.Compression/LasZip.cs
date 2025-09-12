@@ -65,7 +65,7 @@ internal sealed class LasZip
         {
             (not Compressor.None and not Compressor.LayeredChunked, true) => throw new ArgumentException(Compression.Properties.v1_4.Resources.MustUseLayeredChunkedCompression, nameof(compressor)),
             (Compressor.LayeredChunked, false) => Compressor.PointWiseChunked,
-            ({ } c, _) => c,
+            var (c, _) => c,
         };
 
         if (this.Compressor is not Compressor.PointWise)
@@ -163,6 +163,9 @@ internal sealed class LasZip
     /// Checks this instance.
     /// </summary>
     /// <param name="pointSize">The point size.</param>
+    /// <exception cref="InvalidOperationException">The compressor is invalid.</exception>
+    /// <exception cref="InvalidOperationException">The coder is invalid.</exception>
+    /// <exception cref="InvalidOperationException">The point size is invalid.</exception>
     public void Validate(ushort pointSize)
     {
         if (!IsDefined(this.Compressor))

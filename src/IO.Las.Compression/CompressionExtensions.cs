@@ -26,6 +26,7 @@ public static class CompressionExtensions
     /// <returns><see langword="true"/> is <paramref name="record"/> is for compression; otherwise <see langword="false"/>.</returns>
     [System.Diagnostics.CodeAnalysis.SuppressMessage("Roslynator", "RCS1175:Unused 'this' parameter.", Justification = "This is required for extension methods")]
     [System.Diagnostics.CodeAnalysis.SuppressMessage("Style", "IDE0060:Remove unused parameter", Justification = "This is required for extension methods")]
+    [System.Diagnostics.CodeAnalysis.SuppressMessage("Roslynator", "RCS1175:Unused \'this\' parameter", Justification = "This is required for extension methods")]
     public static bool IsForCompression(this ExtendedVariableLengthRecord record) => false;
 #endif
 

@@ -114,19 +114,23 @@ internal sealed class ByteWriter3 : IContextWriter
             }
         }
 
-        // compress
-        if (processingContext.BytesModels is { } bytesModels)
+        if (processingContext.BytesModels is not { } bytesModels)
         {
-            for (var i = 0; i < this.valueBytes.Length; i++)
+            return;
+        }
+
+        // compress
+        for (var i = 0; i < this.valueBytes.Length; i++)
+        {
+            var diff = item[i] - lastItem[i];
+            this.valueBytes[i].Encoder.EncodeSymbol(bytesModels[i], diff.Fold());
+            if (diff is 0)
             {
-                var diff = item[i] - lastItem[i];
-                this.valueBytes[i].Encoder.EncodeSymbol(bytesModels[i], diff.Fold());
-                if (diff is not 0)
-                {
-                    this.valueBytes[i].Changed = true;
-                    lastItem[i] = item[i];
-                }
+                continue;
             }
+
+            this.valueBytes[i].Changed = true;
+            lastItem[i] = item[i];
         }
     }
 
@@ -142,10 +146,9 @@ internal sealed class ByteWriter3 : IContextWriter
     {
         // first create all entropy models and last items (if needed)
         var processingContext = this.contexts[context];
-        var bytesModels = processingContext.BytesModels;
 
         // then init entropy models
-        foreach (var byteModel in bytesModels)
+        foreach (var byteModel in processingContext.BytesModels)
         {
             _ = byteModel.Initialize();
         }

@@ -376,18 +376,18 @@ public readonly struct HeaderBlock : IEquatable<HeaderBlock>
     /// <summary>
     /// Gets the maximum GPS time.
     /// </summary>
-    public readonly double MaxGpsTime { get; }
+    public double MaxGpsTime { get; }
 
     /// <summary>
     /// Gets the minimum GPS time.
     /// </summary>
-    public readonly double MinGpsTime { get; }
+    public double MinGpsTime { get; }
 
     /// <summary>
     /// Gets the time offset.
     /// </summary>
     /// <remarks>The Time Offset field can be used to optimize GPS Time precision for a desired time period. Offset GPS Time for a point record is equal to standard GPS Time, minus 106 * Time Offset.</remarks>
-    public readonly ushort TimeOffset { get; }
+    public ushort TimeOffset { get; }
 #endif
 
     /// <summary>
@@ -613,13 +613,13 @@ public readonly struct HeaderBlock : IEquatable<HeaderBlock>
         bool IEquatable<IReadOnlyList<ulong>>.Equals(IReadOnlyList<ulong>? other) => other switch
         {
             ReadOnlyLegacy rol => this.source.Equals(rol.source),
-            { } rol => this.source.Equals(rol),
+            not null => this.source.Equals(other),
             _ => false,
         };
 
         bool IEquatable<IReadOnlyList<uint>>.Equals(IReadOnlyList<uint>? other) => other switch
         {
-            { } rol => this.source.Equals(rol),
+            not null => this.source.Equals(other),
             _ => false,
         };
 

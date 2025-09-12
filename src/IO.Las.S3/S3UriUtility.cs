@@ -88,13 +88,13 @@ public static
     /// <returns><see langword="true"/> if <paramref name="uri"/> was transformed; otherwise <see langword="false"/>.</returns>
     public static bool TryTransformUri(Uri uri, [System.Diagnostics.CodeAnalysis.NotNullWhen(true)] out Uri? output)
     {
-        if (HasS3Scheme(uri))
+        if (!HasS3Scheme(uri))
         {
-            output = uri;
-            return true;
+            return TryMakeUri(uri.OriginalString, out output);
         }
 
-        return TryMakeUri(uri.OriginalString, out output);
+        output = uri;
+        return true;
     }
 
     /// <summary>
@@ -126,6 +126,7 @@ public static
     /// </summary>
     /// <param name="uri">The S3 URL.</param>
     /// <returns>The bucket name and key from <paramref name="uri"/>.</returns>
+    /// <exception cref="KeyNotFoundException">The bucket name and keys was not found.</exception>
     internal static (string BucketName, string Key) GetBucketNameAndKey(Uri uri)
     {
         return TryGetBucketNameAndKey(System.Net.WebUtility.UrlDecode(uri.OriginalString), out var tuple)

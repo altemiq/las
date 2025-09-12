@@ -49,11 +49,13 @@ internal static class Processor
             {
                 // open the file for reading
                 using var reader = LazReader.Create(File.Open(file, FileMode.Open, services));
-                if (reader is LazReader lazReader)
+                if (reader is not LazReader lazReader)
                 {
-                    using var writer = new LazWriter(lazReader, leaveOpen: true);
-                    writer.Write(new Indexing.LaxTag(index), special: true);
+                    continue;
                 }
+
+                using var writer = new LazWriter(lazReader, leaveOpen: true);
+                writer.Write(new Indexing.LaxTag(index), special: true);
             }
             else
             {

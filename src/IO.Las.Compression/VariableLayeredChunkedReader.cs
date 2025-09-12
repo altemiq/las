@@ -39,15 +39,22 @@ internal sealed class VariableLayeredChunkedReader(Readers.IPointDataRecordReade
 
         uint SearchChunkTable(uint index, uint lower, uint upper)
         {
-            if (lower + 1 == upper)
+            while (true)
             {
-                return lower;
-            }
+                if (lower + 1 == upper)
+                {
+                    return lower;
+                }
 
-            var mid = (lower + upper) / 2;
-            return index >= this.chunkTotals[mid]
-                ? SearchChunkTable(index, mid, upper)
-                : SearchChunkTable(index, lower, mid);
+                var mid = (lower + upper) / 2;
+                if (index >= this.chunkTotals[mid])
+                {
+                    lower = mid;
+                    continue;
+                }
+
+                upper = mid;
+            }
         }
     }
 }
