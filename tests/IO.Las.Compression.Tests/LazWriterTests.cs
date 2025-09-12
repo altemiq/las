@@ -275,7 +275,10 @@ public class LazWriterTests
         ];
 #endif
 
-        await using LasMultipleMemoryStream stream = new();
+#if NETSTANDARD2_1_OR_GREATER || NETCOREAPP3_0_OR_GREATER
+        await
+#endif
+        using LasMultipleMemoryStream stream = new();
 
 #if LAS1_4_OR_GREATER
         const double ExtraValue = 123.34;
@@ -618,7 +621,10 @@ public class LazWriterTests
                 RecordLengthAfterHeader = 0,
             },
             []);
-        await using Stream stream = exploded
+#if NETSTANDARD2_1_OR_GREATER || NETCOREAPP3_0_OR_GREATER
+        await
+#endif
+        using Stream stream = exploded
             ? new LasMultipleMemoryStream()
             : new MemoryStream();
         using (LazWriter writer = new(stream, leaveOpen: true))
@@ -647,7 +653,10 @@ public class LazWriterTests
                 RecordLengthAfterHeader = 0,
             },
             []);
-        await using Stream memoryStream = exploded
+#if NETSTANDARD2_1_OR_GREATER || NETCOREAPP3_0_OR_GREATER
+        await
+#endif
+        using Stream memoryStream = exploded
             ? new LasMultipleMemoryStream()
             : new MemoryStream();
         using (LazWriter writer = new(memoryStream, leaveOpen: true))

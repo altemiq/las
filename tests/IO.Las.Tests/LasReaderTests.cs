@@ -5,7 +5,10 @@ public class LasReaderTests
     [Test]
     public async Task ReadLas()
     {
-        await using Stream stream = typeof(LasReaderTests).Assembly.GetManifestResourceStream(typeof(LasReaderTests), "fusa.las")
+#if NETSTANDARD2_1_OR_GREATER || NETCOREAPP3_0_OR_GREATER
+        await
+#endif
+        using Stream stream = typeof(LasReaderTests).Assembly.GetManifestResourceStream(typeof(LasReaderTests), "fusa.las")
                               ?? throw new InvalidOperationException("Failed to get stream");
         using LasReader reader = new(stream);
         await CheckHeader(reader.Header, new(1, 1));
@@ -22,7 +25,10 @@ public class LasReaderTests
     [Test]
     public async Task ReadLasWithFileSignature()
     {
-        await using Stream stream = typeof(LasReaderTests).Assembly.GetManifestResourceStream(typeof(LasReaderTests), "fusa.las")
+#if NETSTANDARD2_1_OR_GREATER || NETCOREAPP3_0_OR_GREATER
+        await
+#endif
+        using Stream stream = typeof(LasReaderTests).Assembly.GetManifestResourceStream(typeof(LasReaderTests), "fusa.las")
                               ?? throw new InvalidOperationException("Failed to get stream");
         byte[] bytes = new byte[4];
 
@@ -44,7 +50,10 @@ public class LasReaderTests
     [Test]
     public async Task ReadWithExtraBytes()
     {
-        await using Stream stream = typeof(LasReaderTests).Assembly.GetManifestResourceStream(typeof(LasReaderTests), "fusa_height.las")
+#if NETSTANDARD2_1_OR_GREATER || NETCOREAPP3_0_OR_GREATER
+        await
+#endif
+        using Stream stream = typeof(LasReaderTests).Assembly.GetManifestResourceStream(typeof(LasReaderTests), "fusa_height.las")
                                     ?? throw new InvalidOperationException("Failed to get stream");
         using LasReader reader = new(stream);
         await CheckHeader(reader.Header, new(1, 4));
@@ -83,7 +92,10 @@ public class LasReaderTests
     [Test]
     public async Task ReadByPointIndex()
     {
-        await using Stream stream = typeof(LasReaderTests).Assembly.GetManifestResourceStream(typeof(LasReaderTests), "fusa.las")
+#if NETSTANDARD2_1_OR_GREATER || NETCOREAPP3_0_OR_GREATER
+        await
+#endif
+        using Stream stream = typeof(LasReaderTests).Assembly.GetManifestResourceStream(typeof(LasReaderTests), "fusa.las")
                                     ?? throw new InvalidOperationException("Failed to get stream");
         using LasReader reader = new(stream);
         await CheckHeader(reader.Header, new(1, 1));
@@ -110,7 +122,10 @@ public class LasReaderTests
     [Test]
     public async Task ReadLasAsync()
     {
-        await using Stream stream = typeof(LasReaderTests).Assembly.GetManifestResourceStream(typeof(LasReaderTests), "fusa.las")
+#if NETSTANDARD2_1_OR_GREATER || NETCOREAPP3_0_OR_GREATER
+        await
+#endif
+        using Stream stream = typeof(LasReaderTests).Assembly.GetManifestResourceStream(typeof(LasReaderTests), "fusa.las")
                                     ?? throw new InvalidOperationException("Failed to get stream");
         using LasReader reader = new(stream);
         await CheckHeader(reader.Header, new(1, 1));
@@ -124,7 +139,10 @@ public class LasReaderTests
     [Test]
     public async Task ReadLasWithFileSignatureAsync()
     {
-        await using Stream stream = typeof(LasReaderTests).Assembly.GetManifestResourceStream(typeof(LasReaderTests), "fusa.las")
+#if NETSTANDARD2_1_OR_GREATER || NETCOREAPP3_0_OR_GREATER
+        await
+#endif
+        using Stream stream = typeof(LasReaderTests).Assembly.GetManifestResourceStream(typeof(LasReaderTests), "fusa.las")
                                     ?? throw new InvalidOperationException("Failed to get stream");
         byte[] bytes = new byte[4];
         await Assert.That(stream.ReadAsync(bytes, 0, bytes.Length)).IsEqualTo(bytes.Length);
@@ -142,7 +160,10 @@ public class LasReaderTests
     [Test]
     public async Task ReadWithExtraBytesAsync()
     {
-        await using Stream stream = typeof(LasReaderTests).Assembly.GetManifestResourceStream(typeof(LasReaderTests), "fusa_height.las")
+#if NETSTANDARD2_1_OR_GREATER || NETCOREAPP3_0_OR_GREATER
+        await
+#endif
+        using Stream stream = typeof(LasReaderTests).Assembly.GetManifestResourceStream(typeof(LasReaderTests), "fusa_height.las")
                                     ?? throw new InvalidOperationException("Failed to get stream");
         using LasReader reader = new(stream);
         await CheckHeader(reader.Header, new(1, 4));

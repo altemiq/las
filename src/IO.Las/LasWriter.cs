@@ -127,7 +127,7 @@ public class LasWriter(Stream stream, bool leaveOpen = false) : ILasWriter, IDis
         }
 
         _ = this.BaseStream.SwitchStreamIfMultiple(LasStreams.VariableLengthRecord);
-        byte[] byteArray = System.Buffers.ArrayPool<byte>.Shared.Rent(0);
+        var byteArray = System.Buffers.ArrayPool<byte>.Shared.Rent(0);
         foreach (var record in recordsList)
         {
             var size = record.Size();
@@ -170,7 +170,7 @@ public class LasWriter(Stream stream, bool leaveOpen = false) : ILasWriter, IDis
 #endif
 
     /// <inheritdoc/>
-    public async virtual ValueTask WriteAsync(IBasePointDataRecord record, ReadOnlyMemory<byte> extraBytes = default, CancellationToken cancellationToken = default)
+    public virtual async ValueTask WriteAsync(IBasePointDataRecord record, ReadOnlyMemory<byte> extraBytes = default, CancellationToken cancellationToken = default)
     {
 #if NET6_0_OR_GREATER
         ArgumentNullException.ThrowIfNull(record);
@@ -327,7 +327,7 @@ public class LasWriter(Stream stream, bool leaveOpen = false) : ILasWriter, IDis
             uint recordCount,
             uint recordSize)
         {
-            ushort size = header.Version switch
+            var size = header.Version switch
             {
                 { Major: 1, Minor: 0 or 1 } => HeaderBlock.Size10,
 #if LAS1_2_OR_GREATER
@@ -398,7 +398,7 @@ public class LasWriter(Stream stream, bool leaveOpen = false) : ILasWriter, IDis
             System.Buffers.Binary.BinaryPrimitives.WriteUInt16LittleEndian(destination[105..107], pointDataRecordSize);
 #if LAS1_4_OR_GREATER
             System.Buffers.Binary.BinaryPrimitives.WriteUInt32LittleEndian(destination[107..111], header.LegacyNumberOfPointRecords);
-            for (int i = 0; i < 5; i++)
+            for (var i = 0; i < 5; i++)
             {
                 var start = 111 + (i * sizeof(uint));
                 System.Buffers.Binary.BinaryPrimitives.WriteUInt32LittleEndian(destination[start..(start + sizeof(uint))], header.LegacyNumberOfPointsByReturn[i]);
@@ -437,7 +437,7 @@ public class LasWriter(Stream stream, bool leaveOpen = false) : ILasWriter, IDis
                 System.Buffers.Binary.BinaryPrimitives.WriteUInt64LittleEndian(destination[235..243], extendedVariableLengthRecordsPosition);
                 System.Buffers.Binary.BinaryPrimitives.WriteUInt32LittleEndian(destination[243..247], extendedVariableLengthRecordCount);
                 System.Buffers.Binary.BinaryPrimitives.WriteUInt64LittleEndian(destination[247..255], header.NumberOfPointRecords);
-                for (int i = 0; i < 15; i++)
+                for (var i = 0; i < 15; i++)
                 {
                     var start = 255 + (i * sizeof(ulong));
                     System.Buffers.Binary.BinaryPrimitives.WriteUInt64LittleEndian(destination[start..(start + sizeof(ulong))], header.NumberOfPointsByReturn[i]);

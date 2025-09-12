@@ -66,6 +66,11 @@ public static partial class ExtensionMethods
         /// <returns>The number of encoded bytes.</returns>
         public unsafe int GetBytes(ReadOnlySpan<char> chars, Span<byte> bytes)
         {
+            if (chars.Length is 0)
+            {
+                return 0;
+            }
+
             var charsPtr = (char*)System.Runtime.CompilerServices.Unsafe.AsPointer(ref System.Runtime.InteropServices.MemoryMarshal.GetReference(chars));
             var bytesPtr = (byte*)System.Runtime.CompilerServices.Unsafe.AsPointer(ref System.Runtime.InteropServices.MemoryMarshal.GetReference(bytes));
             return encoding.GetBytes(charsPtr, chars.Length, bytesPtr, bytes.Length);

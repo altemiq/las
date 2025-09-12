@@ -88,7 +88,10 @@ public class SystemIdentifierTests
     [Test]
     public async Task RieglTripodFromLas()
     {
-        await using Stream stream = typeof(SystemIdentifierTests).Assembly.GetManifestResourceStream(typeof(SystemIdentifierTests), "systemid_examples.1sensor.las")
+#if NETSTANDARD2_1_OR_GREATER || NETCOREAPP3_0_OR_GREATER
+        await
+#endif
+        using Stream stream = typeof(SystemIdentifierTests).Assembly.GetManifestResourceStream(typeof(SystemIdentifierTests), "systemid_examples.1sensor.las")
                                     ?? throw new InvalidOperationException("Failed to get stream");
         HeaderBlockReader header = new(stream);
 
@@ -103,7 +106,10 @@ public class SystemIdentifierTests
     [Test]
     public async Task LineOfSightTripodFromLas()
     {
-        await using Stream stream = typeof(SystemIdentifierTests).Assembly.GetManifestResourceStream(typeof(SystemIdentifierTests), "systemid_examples.1sensor_generic.las")
+#if NETSTANDARD2_1_OR_GREATER || NETCOREAPP3_0_OR_GREATER
+        await
+#endif
+        using Stream stream = typeof(SystemIdentifierTests).Assembly.GetManifestResourceStream(typeof(SystemIdentifierTests), "systemid_examples.1sensor_generic.las")
                                     ?? throw new InvalidOperationException("Failed to get stream");
         HeaderBlockReader header = new(stream);
 
@@ -119,7 +125,10 @@ public class SystemIdentifierTests
     [Test]
     public async Task FiveSensorsFromLas()
     {
-        await using Stream stream = typeof(SystemIdentifierTests).Assembly.GetManifestResourceStream(typeof(SystemIdentifierTests), "systemid_examples.5sensor.las")
+#if NETSTANDARD2_1_OR_GREATER || NETCOREAPP3_0_OR_GREATER
+        await
+#endif
+        using Stream stream = typeof(SystemIdentifierTests).Assembly.GetManifestResourceStream(typeof(SystemIdentifierTests), "systemid_examples.5sensor.las")
                                     ?? throw new InvalidOperationException("Failed to get stream");
         HeaderBlockReader header = new(stream);
 

@@ -1,7 +1,7 @@
 <Project>
 
   <Choose>
-    <When Condition=" '$([MSBuild]::GetTargetFrameworkIdentifier($(TargetFramework)))' == '.NETFramework' AND '$(EnableTUnitPolyfills)' == 'true' ">
+    <When Condition=" '$([MSBuild]::GetTargetFrameworkIdentifier($(TargetFramework)))' == '.NETFramework' ">
       <PropertyGroup>
         <EnableTUnitPolyfills>false</EnableTUnitPolyfills>
       </PropertyGroup>

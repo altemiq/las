@@ -25,7 +25,10 @@ public class ExtendedVariableLengthRecordTests
             },
             []);
         HeaderBlockBuilder headerBuilder = new();
-        await using Stream stream = Activator.CreateInstance(type) as Stream ?? throw new InvalidCastException();
+#if NETSTANDARD2_1_OR_GREATER || NETCOREAPP3_0_OR_GREATER
+        await
+#endif
+        using Stream stream = Activator.CreateInstance(type) as Stream ?? throw new InvalidCastException();
         using (LasWriter writer = new(stream, true))
         {
             writer.Write(headerBuilder.HeaderBlock);

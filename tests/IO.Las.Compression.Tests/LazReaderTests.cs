@@ -20,7 +20,10 @@ public class LazReaderTests
     public async Task ReadLaz(string file, Type expectedType, int vlrCount)
 #endif
     {
-        await using Stream stream = typeof(LazReaderTests).Assembly.GetManifestResourceStream(typeof(LazReaderTests), file)
+#if NETSTANDARD2_1_OR_GREATER || NETCOREAPP3_0_OR_GREATER
+        await
+#endif
+        using Stream stream = typeof(LazReaderTests).Assembly.GetManifestResourceStream(typeof(LazReaderTests), file)
             ?? throw new InvalidOperationException("Failed to get stream");
         using LazReader reader = new(stream);
         _ = await Assert.That(reader.VariableLengthRecords).HasCount().EqualTo(vlrCount);
@@ -51,7 +54,10 @@ public class LazReaderTests
 #endif
     public async Task Create(string resource)
     {
-        await using Stream stream = typeof(LazReaderTests).Assembly.GetManifestResourceStream(typeof(LazReaderTests), resource)
+#if NETSTANDARD2_1_OR_GREATER || NETCOREAPP3_0_OR_GREATER
+        await
+#endif
+        using Stream stream = typeof(LazReaderTests).Assembly.GetManifestResourceStream(typeof(LazReaderTests), resource)
             ?? throw new InvalidOperationException("Failed to get stream");
 
         LasReader reader = LazReader.Create(stream);
@@ -65,7 +71,10 @@ public class LazReaderTests
     [Test]
     public async Task ReadWithExtraBytes()
     {
-        await using Stream stream = typeof(LazReaderTests).Assembly.GetManifestResourceStream(typeof(LazReaderTests), "fusa_height.laz")
+#if NETSTANDARD2_1_OR_GREATER || NETCOREAPP3_0_OR_GREATER
+        await
+#endif
+        using Stream stream = typeof(LazReaderTests).Assembly.GetManifestResourceStream(typeof(LazReaderTests), "fusa_height.laz")
             ?? throw new InvalidOperationException("Failed to get stream");
         using LazReader reader = new(stream);
         await CheckHeader(reader.Header, new(1, 4));
@@ -105,7 +114,10 @@ public class LazReaderTests
 #endif
     public async Task ReadByPointIndex(string resource, int major, int minor)
     {
-        await using Stream stream = typeof(LazReaderTests).Assembly.GetManifestResourceStream(typeof(LazReaderTests), resource)
+#if NETSTANDARD2_1_OR_GREATER || NETCOREAPP3_0_OR_GREATER
+        await
+#endif
+        using Stream stream = typeof(LazReaderTests).Assembly.GetManifestResourceStream(typeof(LazReaderTests), resource)
             ?? throw new InvalidOperationException("Failed to get stream");
         using LazReader reader = new(stream);
         await CheckHeader(reader.Header, new(major, minor));
@@ -133,7 +145,10 @@ public class LazReaderTests
 #endif
     public async Task ReadLazAsync(string file, Type expectedType, int vlrCount, bool hasExtraBytes)
     {
-        await using Stream stream = typeof(LazReaderTests).Assembly.GetManifestResourceStream(typeof(LazReaderTests), file)
+#if NETSTANDARD2_1_OR_GREATER || NETCOREAPP3_0_OR_GREATER
+        await
+#endif
+        using Stream stream = typeof(LazReaderTests).Assembly.GetManifestResourceStream(typeof(LazReaderTests), file)
             ?? throw new InvalidOperationException("Failed to get stream");
         using LazReader reader = new(stream);
         _ = await Assert.That(reader.VariableLengthRecords).HasCount().EqualTo(vlrCount);
@@ -156,7 +171,10 @@ public class LazReaderTests
     [Test]
     public async Task ReadWithExtraBytesAsync()
     {
-        await using Stream stream = typeof(LazReaderTests).Assembly.GetManifestResourceStream(typeof(LazReaderTests), "fusa_height.laz")
+#if NETSTANDARD2_1_OR_GREATER || NETCOREAPP3_0_OR_GREATER
+        await
+#endif
+        using Stream stream = typeof(LazReaderTests).Assembly.GetManifestResourceStream(typeof(LazReaderTests), "fusa_height.laz")
             ?? throw new InvalidOperationException("Failed to get stream");
         using LazReader reader = new(stream);
         await CheckHeader(reader.Header, new(1, 4));
@@ -187,7 +205,10 @@ public class LazReaderTests
 #endif
     public async Task ReadByPointIndexAsync(string resource, int major, int minor)
     {
-        await using Stream stream = typeof(LazReaderTests).Assembly.GetManifestResourceStream(typeof(LazReaderTests), resource)
+#if NETSTANDARD2_1_OR_GREATER || NETCOREAPP3_0_OR_GREATER
+        await
+#endif
+        using Stream stream = typeof(LazReaderTests).Assembly.GetManifestResourceStream(typeof(LazReaderTests), resource)
             ?? throw new InvalidOperationException("Failed to get stream");
         using LazReader reader = new(stream);
         await CheckHeader(reader.Header, new(major, minor));
