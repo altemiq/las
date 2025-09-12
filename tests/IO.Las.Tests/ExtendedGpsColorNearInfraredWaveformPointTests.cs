@@ -1,6 +1,5 @@
-using System.Runtime.InteropServices;
-
 namespace Altemiq.IO.Las;
+using System.Runtime.InteropServices;
 
 public class ExtendedGpsColorNearInfraredWaveformPointTests
 {
@@ -76,13 +75,13 @@ public class ExtendedGpsColorNearInfraredWaveformPointTests
     public async Task ToBytes()
     {
         var destination = new byte[Bytes.Length];
-        Point.WriteLittleEndian(destination);
-        await Assert.That(destination).IsEquivalentTo(Bytes);
+        _ = Point.WriteLittleEndian(destination);
+        _ = await Assert.That(destination).IsEquivalentTo(Bytes);
     }
 
     private static async Task CheckPoint(ExtendedGpsColorNearInfraredWaveformPointDataRecord record)
     {
-        await Assert.That(record)
+        _ = await Assert.That(record)
             .Satisfies(p => p.X, x => x.IsEqualTo(5977566))
             .Satisfies(p => p.Y, y => y.IsEqualTo(957396))
             .Satisfies(p => p.Z, z => z.IsEqualTo(-513145))

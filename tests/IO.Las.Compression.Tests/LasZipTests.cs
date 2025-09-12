@@ -23,7 +23,7 @@ public class LasZipTests
     [Arguments(ExtendedGpsPointDataRecord.Id, LasItemType.Byte14)]
     public async Task AddExtraBytes(byte pointDataFormatId, LasItemType lasItemType)
     {
-        ushort version = LasZip.GetValidVersion(pointDataFormatId);
+        var version = LasZip.GetValidVersion(pointDataFormatId);
         LasZip lasZip = new(pointDataFormatId, 2, Compressor.None, version);
         _ = await Assert.That(lasZip.Items).Contains(new LasItem { Type = lasItemType, Version = version, Size = 2 });
     }

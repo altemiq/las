@@ -8,7 +8,7 @@ public class LasReaderTests
 #if NETSTANDARD2_1_OR_GREATER || NETCOREAPP3_0_OR_GREATER
         await
 #endif
-        using Stream stream = typeof(LasReaderTests).Assembly.GetManifestResourceStream(typeof(LasReaderTests), "fusa.las")
+        using var stream = typeof(LasReaderTests).Assembly.GetManifestResourceStream(typeof(LasReaderTests), "fusa.las")
                               ?? throw new InvalidOperationException("Failed to get stream");
         using LasReader reader = new(stream);
         await CheckHeader(reader.Header, new(1, 1));
@@ -28,9 +28,9 @@ public class LasReaderTests
 #if NETSTANDARD2_1_OR_GREATER || NETCOREAPP3_0_OR_GREATER
         await
 #endif
-        using Stream stream = typeof(LasReaderTests).Assembly.GetManifestResourceStream(typeof(LasReaderTests), "fusa.las")
+        using var stream = typeof(LasReaderTests).Assembly.GetManifestResourceStream(typeof(LasReaderTests), "fusa.las")
                               ?? throw new InvalidOperationException("Failed to get stream");
-        byte[] bytes = new byte[4];
+        var bytes = new byte[4];
 
         await Assert.That(await stream.ReadAsync(bytes)).IsEqualTo(bytes.Length);
 
@@ -53,14 +53,14 @@ public class LasReaderTests
 #if NETSTANDARD2_1_OR_GREATER || NETCOREAPP3_0_OR_GREATER
         await
 #endif
-        using Stream stream = typeof(LasReaderTests).Assembly.GetManifestResourceStream(typeof(LasReaderTests), "fusa_height.las")
+        using var stream = typeof(LasReaderTests).Assembly.GetManifestResourceStream(typeof(LasReaderTests), "fusa_height.las")
                                     ?? throw new InvalidOperationException("Failed to get stream");
         using LasReader reader = new(stream);
         await CheckHeader(reader.Header, new(1, 4));
         _ = await Assert.That(reader.VariableLengthRecords).HasCount().EqualTo(2);
 
-        double min = double.MaxValue;
-        double max = double.MinValue;
+        var min = double.MaxValue;
+        var max = double.MinValue;
         var extraBytes = reader.VariableLengthRecords.OfType<ExtraBytes>().Single();
 
         while (reader.ReadPointDataRecord() is { } point)
@@ -95,7 +95,7 @@ public class LasReaderTests
 #if NETSTANDARD2_1_OR_GREATER || NETCOREAPP3_0_OR_GREATER
         await
 #endif
-        using Stream stream = typeof(LasReaderTests).Assembly.GetManifestResourceStream(typeof(LasReaderTests), "fusa.las")
+        using var stream = typeof(LasReaderTests).Assembly.GetManifestResourceStream(typeof(LasReaderTests), "fusa.las")
                                     ?? throw new InvalidOperationException("Failed to get stream");
         using LasReader reader = new(stream);
         await CheckHeader(reader.Header, new(1, 1));
@@ -125,7 +125,7 @@ public class LasReaderTests
 #if NETSTANDARD2_1_OR_GREATER || NETCOREAPP3_0_OR_GREATER
         await
 #endif
-        using Stream stream = typeof(LasReaderTests).Assembly.GetManifestResourceStream(typeof(LasReaderTests), "fusa.las")
+        using var stream = typeof(LasReaderTests).Assembly.GetManifestResourceStream(typeof(LasReaderTests), "fusa.las")
                                     ?? throw new InvalidOperationException("Failed to get stream");
         using LasReader reader = new(stream);
         await CheckHeader(reader.Header, new(1, 1));
@@ -142,9 +142,9 @@ public class LasReaderTests
 #if NETSTANDARD2_1_OR_GREATER || NETCOREAPP3_0_OR_GREATER
         await
 #endif
-        using Stream stream = typeof(LasReaderTests).Assembly.GetManifestResourceStream(typeof(LasReaderTests), "fusa.las")
+        using var stream = typeof(LasReaderTests).Assembly.GetManifestResourceStream(typeof(LasReaderTests), "fusa.las")
                                     ?? throw new InvalidOperationException("Failed to get stream");
-        byte[] bytes = new byte[4];
+        var bytes = new byte[4];
         await Assert.That(stream.ReadAsync(bytes, 0, bytes.Length)).IsEqualTo(bytes.Length);
         using LasReader reader = new(stream, System.Text.Encoding.UTF8.GetString(bytes));
         await CheckHeader(reader.Header, new(1, 1));
@@ -163,7 +163,7 @@ public class LasReaderTests
 #if NETSTANDARD2_1_OR_GREATER || NETCOREAPP3_0_OR_GREATER
         await
 #endif
-        using Stream stream = typeof(LasReaderTests).Assembly.GetManifestResourceStream(typeof(LasReaderTests), "fusa_height.las")
+        using var stream = typeof(LasReaderTests).Assembly.GetManifestResourceStream(typeof(LasReaderTests), "fusa_height.las")
                                     ?? throw new InvalidOperationException("Failed to get stream");
         using LasReader reader = new(stream);
         await CheckHeader(reader.Header, new(1, 4));
@@ -171,14 +171,14 @@ public class LasReaderTests
 
         var extraBytes = reader.VariableLengthRecords.OfType<ExtraBytes>().Single();
 
-        double min = double.MaxValue;
-        double max = double.MinValue;
+        var min = double.MaxValue;
+        var max = double.MinValue;
 
         while (await reader.ReadPointDataRecordAsync() is { PointDataRecord: not null } point)
         {
             _ = await Assert.That(point.PointDataRecord).IsAssignableTo<IGpsPointDataRecord>();
 
-            double value = await Assert.That(await extraBytes.GetValueAsync(0, point.ExtraBytes)).IsTypeOf<double>();
+            var value = await Assert.That(await extraBytes.GetValueAsync(0, point.ExtraBytes)).IsTypeOf<double>();
             if (value < min)
             {
                 min = value;
@@ -198,7 +198,7 @@ public class LasReaderTests
     [Test]
     public async Task ReadByPointIndexAsync()
     {
-        using Stream stream = typeof(LasReaderTests).Assembly.GetManifestResourceStream(typeof(LasReaderTests), "fusa.las")
+        using var stream = typeof(LasReaderTests).Assembly.GetManifestResourceStream(typeof(LasReaderTests), "fusa.las")
                               ?? throw new InvalidOperationException("Failed to get stream");
         using LasReader reader = new(stream);
         await CheckHeader(reader.Header, new(1, 1));
@@ -206,7 +206,7 @@ public class LasReaderTests
         var quantizer = new PointDataRecordQuantizer(reader.Header);
         var fileCreation = reader.Header.FileCreation.GetValueOrDefault();
         var point = await reader.ReadPointDataRecordAsync(10);
-        await Assert.That(point.PointDataRecord)
+        _ = await Assert.That(point.PointDataRecord)
             .IsNotNull()
             .Satisfies(p => p.X, x => x.IsEqualTo(27799961))
             .Satisfies(p => p.Y, y => y.IsEqualTo(612234368))
@@ -215,7 +215,7 @@ public class LasReaderTests
             .Satisfies(p => quantizer.GetDateTime(p.GpsTime), gpsTime => gpsTime.IsBetween(fileCreation - TimeSpan.FromDays(7), fileCreation + TimeSpan.FromDays(7)));
 
         point = await reader.ReadPointDataRecordAsync(277500);
-        await Assert.That(point.PointDataRecord)
+        _ = await Assert.That(point.PointDataRecord)
             .Satisfies(p => p.X, x => x.IsEqualTo(27775097))
             .Satisfies(p => p.Y, y => y.IsEqualTo(612225071))
             .Satisfies(p => p.Z, z => z.IsEqualTo(4228))

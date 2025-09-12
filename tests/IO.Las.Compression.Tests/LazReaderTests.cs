@@ -23,12 +23,12 @@ public class LazReaderTests
 #if NETSTANDARD2_1_OR_GREATER || NETCOREAPP3_0_OR_GREATER
         await
 #endif
-        using Stream stream = typeof(LazReaderTests).Assembly.GetManifestResourceStream(typeof(LazReaderTests), file)
+        using var stream = typeof(LazReaderTests).Assembly.GetManifestResourceStream(typeof(LazReaderTests), file)
             ?? throw new InvalidOperationException("Failed to get stream");
         using LazReader reader = new(stream);
         _ = await Assert.That(reader.VariableLengthRecords).HasCount().EqualTo(vlrCount);
 
-        int count = 10;
+        var count = 10;
         while (--count > 0)
         {
             await TestPoint(reader);
@@ -57,10 +57,10 @@ public class LazReaderTests
 #if NETSTANDARD2_1_OR_GREATER || NETCOREAPP3_0_OR_GREATER
         await
 #endif
-        using Stream stream = typeof(LazReaderTests).Assembly.GetManifestResourceStream(typeof(LazReaderTests), resource)
+        using var stream = typeof(LazReaderTests).Assembly.GetManifestResourceStream(typeof(LazReaderTests), resource)
             ?? throw new InvalidOperationException("Failed to get stream");
 
-        LasReader reader = LazReader.Create(stream);
+        var reader = LazReader.Create(stream);
         _ = await Assert.That(reader)
             .IsNotNull()
             .And.IsTypeOf<LazReader>()
@@ -74,15 +74,15 @@ public class LazReaderTests
 #if NETSTANDARD2_1_OR_GREATER || NETCOREAPP3_0_OR_GREATER
         await
 #endif
-        using Stream stream = typeof(LazReaderTests).Assembly.GetManifestResourceStream(typeof(LazReaderTests), "fusa_height.laz")
+        using var stream = typeof(LazReaderTests).Assembly.GetManifestResourceStream(typeof(LazReaderTests), "fusa_height.laz")
             ?? throw new InvalidOperationException("Failed to get stream");
         using LazReader reader = new(stream);
         await CheckHeader(reader.Header, new(1, 4));
         _ = await Assert.That(reader.VariableLengthRecords).HasCount().EqualTo(3);
         var extraBytesTag = reader.VariableLengthRecords.OfType<ExtraBytes>().Single();
 
-        double min = double.MaxValue;
-        double max = double.MinValue;
+        var min = double.MaxValue;
+        var max = double.MinValue;
 
         while (true)
         {
@@ -92,12 +92,12 @@ public class LazReaderTests
                 break;
             }
 
-            byte[] extraBytes = record.ExtraBytes.ToArray();
+            var extraBytes = record.ExtraBytes.ToArray();
 
             _ = await Assert.That(point).IsTypeOf<GpsPointDataRecord>();
             _ = await Assert.That(extraBytes).IsNotEmpty();
 
-            double value = await Assert.That(extraBytesTag[0].GetValue(extraBytes.AsSpan())).IsTypeOf<double>();
+            var value = await Assert.That(extraBytesTag[0].GetValue(extraBytes.AsSpan())).IsTypeOf<double>();
             min = Math.Min(value, min);
             max = Math.Max(value, max);
         }
@@ -117,7 +117,7 @@ public class LazReaderTests
 #if NETSTANDARD2_1_OR_GREATER || NETCOREAPP3_0_OR_GREATER
         await
 #endif
-        using Stream stream = typeof(LazReaderTests).Assembly.GetManifestResourceStream(typeof(LazReaderTests), resource)
+        using var stream = typeof(LazReaderTests).Assembly.GetManifestResourceStream(typeof(LazReaderTests), resource)
             ?? throw new InvalidOperationException("Failed to get stream");
         using LazReader reader = new(stream);
         await CheckHeader(reader.Header, new(major, minor));
@@ -148,7 +148,7 @@ public class LazReaderTests
 #if NETSTANDARD2_1_OR_GREATER || NETCOREAPP3_0_OR_GREATER
         await
 #endif
-        using Stream stream = typeof(LazReaderTests).Assembly.GetManifestResourceStream(typeof(LazReaderTests), file)
+        using var stream = typeof(LazReaderTests).Assembly.GetManifestResourceStream(typeof(LazReaderTests), file)
             ?? throw new InvalidOperationException("Failed to get stream");
         using LazReader reader = new(stream);
         _ = await Assert.That(reader.VariableLengthRecords).HasCount().EqualTo(vlrCount);
@@ -174,21 +174,21 @@ public class LazReaderTests
 #if NETSTANDARD2_1_OR_GREATER || NETCOREAPP3_0_OR_GREATER
         await
 #endif
-        using Stream stream = typeof(LazReaderTests).Assembly.GetManifestResourceStream(typeof(LazReaderTests), "fusa_height.laz")
+        using var stream = typeof(LazReaderTests).Assembly.GetManifestResourceStream(typeof(LazReaderTests), "fusa_height.laz")
             ?? throw new InvalidOperationException("Failed to get stream");
         using LazReader reader = new(stream);
         await CheckHeader(reader.Header, new(1, 4));
         _ = await Assert.That(reader.VariableLengthRecords).HasCount().EqualTo(3);
         var extraBytes = reader.VariableLengthRecords.OfType<ExtraBytes>().Single();
 
-        double min = double.MaxValue;
-        double max = double.MinValue;
+        var min = double.MaxValue;
+        var max = double.MinValue;
 
         while (await reader.ReadPointDataRecordAsync() is { PointDataRecord: not null } point)
         {
             _ = await Assert.That(point.PointDataRecord).IsTypeOf<GpsPointDataRecord>();
             _ = await Assert.That(point.ExtraBytes.IsEmpty).IsFalse();
-            double value = await Assert.That(await extraBytes.GetValueAsync(0, point.ExtraBytes)).IsTypeOf<double>();
+            var value = await Assert.That(await extraBytes.GetValueAsync(0, point.ExtraBytes)).IsTypeOf<double>();
             min = Math.Min(value, min);
             max = Math.Max(value, max);
         }
@@ -208,7 +208,7 @@ public class LazReaderTests
 #if NETSTANDARD2_1_OR_GREATER || NETCOREAPP3_0_OR_GREATER
         await
 #endif
-        using Stream stream = typeof(LazReaderTests).Assembly.GetManifestResourceStream(typeof(LazReaderTests), resource)
+        using var stream = typeof(LazReaderTests).Assembly.GetManifestResourceStream(typeof(LazReaderTests), resource)
             ?? throw new InvalidOperationException("Failed to get stream");
         using LazReader reader = new(stream);
         await CheckHeader(reader.Header, new(major, minor));

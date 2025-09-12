@@ -836,7 +836,7 @@ internal static class Information
                 voxelCount[entry.Key.Level]++;
             }
 
-            for (int i = 0; i < maxOctreeLevel; i++)
+            for (var i = 0; i < maxOctreeLevel; i++)
             {
                 if (pointCount[i] is not 0)
                 {
@@ -854,6 +854,7 @@ internal static class Information
     /// <param name="reader">The reader.</param>
     /// <param name="name">The name.</param>
     /// <returns>The value.</returns>
+    [System.Diagnostics.CodeAnalysis.SuppressMessage("CodeQuality", "IDE0079:Remove unnecessary suppression", Justification = "False positive")]
     [System.Diagnostics.CodeAnalysis.SuppressMessage("Major Code Smell", "S3011:Reflection should not be used to increase accessibility of classes, methods, or fields", Justification = "This is by design.")]
     [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
     public static object? GetValue(LasReader reader, string name)

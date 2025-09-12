@@ -152,7 +152,7 @@ internal static partial class RootCommandExtensions
                         }
 
                         var bytes = System.Buffers.ArrayPool<byte>.Shared.Rent(info.Size());
-                        info.CopyTo(bytes);
+                        _ = info.CopyTo(bytes);
                         for (var i = 0; i < 11; ++i)
                         {
                             if (bytes[160 - 11 + i] is not 0)

@@ -153,7 +153,7 @@ internal static class FileExtensions
             _ => throw new NotSupportedException(),
         };
 
-#pragma warning disable S1144
+#pragma warning disable IDE0051, S1144
         private static void CreateDirectoryIfPossible(string path)
         {
             if (File.Exists(path))
@@ -178,6 +178,6 @@ internal static class FileExtensions
         }
 
         private static HttpClient CreateHttpClient() => new();
-#pragma warning restore S1144
+#pragma warning restore IDE0051, S1144
     }
 }

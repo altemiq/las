@@ -68,7 +68,6 @@ internal sealed class ByteWriter2 : ISimpleWriter
     }
 
     /// <inheritdoc/>
-    [System.Diagnostics.CodeAnalysis.SuppressMessage("Design", "MA0042:Do not use blocking calls in an async method", Justification = "This would cause recursion")]
     public ValueTask WriteAsync(Memory<byte> item, CancellationToken cancellationToken = default)
     {
         cancellationToken.ThrowIfCancellationRequested();

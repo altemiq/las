@@ -75,9 +75,6 @@ public readonly struct Range(Index start, Index end) : IEquatable<Range>
 
 #if NETSTANDARD2_1 || NETCOREAPP2_1_OR_GREATER
     /// <inheritdoc cref="IConvertible.ToString(IFormatProvider)" />
-#if NET6_0_OR_GREATER
-    [System.Diagnostics.CodeAnalysis.SuppressMessage("Minor Code Smell", "S3236:Caller information arguments should not be provided explicitly", Justification = "Checked")]
-#endif
     public string ToString(IFormatProvider? provider)
     {
         // 2 for the dots, then for each index 1 for '^' and 10 for longest possible uint
@@ -90,7 +87,7 @@ public readonly struct Range(Index start, Index end) : IEquatable<Range>
             pos = 1;
         }
 
-        var formatted = this.Start.Value.TryFormat(span[pos..], out int charsWritten, provider: provider);
+        var formatted = this.Start.Value.TryFormat(span[pos..], out var charsWritten, provider: provider);
         System.Diagnostics.Debug.Assert(formatted, $"Failed to format {nameof(this.Start)} in {nameof(Range)}.{nameof(this.ToString)}");
         pos += charsWritten;
 

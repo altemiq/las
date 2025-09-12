@@ -84,7 +84,7 @@ internal static class Models
                                     SyntaxKind.PublicKeyword,
                                     TriviaList()),
                                 Token(SyntaxKind.StaticKeyword)))
-                    .WithMembers(List(GetModelClasses(brand, models.Where(m => string.Equals(m.Brand, brand, StringComparison.Ordinal)).Select(m => (m.Model, m.Code)).ToList())));
+                    .WithMembers(List(GetModelClasses(brand, [.. models.Where(m => string.Equals(m.Brand, brand, StringComparison.Ordinal)).Select(m => (m.Model, m.Code))])));
             }
 
             static IEnumerable<MemberDeclarationSyntax> GetModelClasses(string brand, IReadOnlyCollection<(string? Model, string? Code)> models)
@@ -561,7 +561,7 @@ internal static class Models
     /// </summary>
     /// <param name="input">The input CSV.</param>
     /// <returns>The brands.</returns>
-    public static IReadOnlyCollection<string?> GetBrands(AdditionalText input) => input.GetLines().Select(static line => line.Substring(0, line.IndexOf(','))).Distinct(StringComparer.Ordinal).ToList();
+    public static IReadOnlyCollection<string?> GetBrands(AdditionalText input) => [.. input.GetLines().Select(static line => line.Substring(0, line.IndexOf(','))).Distinct(StringComparer.Ordinal)];
 
     /// <summary>
     /// Gets the models from the CSV.
@@ -570,10 +570,9 @@ internal static class Models
     /// <returns>The models.</returns>
     public static IReadOnlyCollection<(string? Brand, string? Model, string? Code)> GetModels(AdditionalText input)
     {
-        return input.GetLines()
+        return [.. input.GetLines()
             .Select(static line => line.Split(','))
-            .Select(static record => (Brand: CheckNull(record[0]), Model: CheckNull(record[1]), Code: CheckNull(record[2])))
-            .ToList();
+            .Select(static record => (Brand: CheckNull(record[0]), Model: CheckNull(record[1]), Code: CheckNull(record[2]))),];
 
         static string? CheckNull(string input)
         {

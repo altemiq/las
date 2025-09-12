@@ -17,8 +17,8 @@ public class HeaderBlockTests
     public async Task Equal()
     {
         HeaderBlockBuilder builder = new();
-        HeaderBlock first = builder.HeaderBlock;
-        HeaderBlock second = builder.HeaderBlock;
+        var first = builder.HeaderBlock;
+        var second = builder.HeaderBlock;
 
         _ = await Assert.That(first).IsEqualTo(second);
     }
@@ -27,9 +27,9 @@ public class HeaderBlockTests
     public async Task NotEqual()
     {
         HeaderBlockBuilder builder = new();
-        HeaderBlock first = builder.HeaderBlock;
+        var first = builder.HeaderBlock;
         builder.ProjectId = Guid.NewGuid();
-        HeaderBlock second = builder.HeaderBlock;
+        var second = builder.HeaderBlock;
 
         _ = await Assert.That(first).IsNotEqualTo(second);
     }
@@ -163,7 +163,7 @@ public class HeaderBlockTests
 #endif
     {
         HeaderBlockBuilder builder = new(pointDataTypeId);
-        HeaderBlock header = builder.HeaderBlock;
+        var header = builder.HeaderBlock;
         await Assert.That(header.FileSourceId).IsEqualTo((ushort)0);
         await Assert.That(header.ProjectId).IsEqualTo(Guid.Empty);
 #if LAS1_2_OR_GREATER
@@ -194,12 +194,12 @@ public class HeaderBlockTests
     [MethodDataSource(nameof(GetPointTypes))]
     public async Task CreateFromType(Type type, byte number)
     {
-        _ = await Assert.That(typeof(HeaderBlockBuilder).GetMethod(nameof(HeaderBlockBuilder.FromPointType))!.MakeGenericMethod(type).Invoke(default, default)).IsTypeOf<HeaderBlockBuilder>().And.Satisfies(x => ((HeaderBlockBuilder)x).PointDataFormatId, pointDataFormatId => pointDataFormatId.IsEqualTo(number));
+        _ = await Assert.That(typeof(HeaderBlockBuilder).GetMethod(nameof(HeaderBlockBuilder.FromPointType))!.MakeGenericMethod(type).Invoke(default, default)).IsTypeOf<HeaderBlockBuilder>().And.Satisfies(x => x.PointDataFormatId, pointDataFormatId => pointDataFormatId.IsEqualTo(number));
     }
 
     public static IEnumerable<Func<(int, bool)>> GetReturnNumbers()
     {
-        foreach (int value in Enumerable.Range(1, MaxReturnNumbers))
+        foreach (var value in Enumerable.Range(1, MaxReturnNumbers))
         {
             yield return () => (value, true);
             yield return () => (value, false);

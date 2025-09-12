@@ -42,7 +42,7 @@ public class CopcHierarchyTests
 
         Span<byte> data = stackalloc byte[(int)hierarchy.Size()];
 
-        hierarchy.CopyTo(data);
+        _ = hierarchy.CopyTo(data);
 
         var recordHeader = ExtendedVariableLengthRecordHeader.Read(data);
         var recordData = data[ExtendedVariableLengthRecordHeader.Size..];
@@ -56,7 +56,7 @@ public class CopcHierarchyTests
     public async Task WriteEntryToMemory()
     {
         CopcHierarchy.Entry input = new(new(1, 2, 3, 4), 5, 6, 7);
-        byte[] bytes = System.Buffers.ArrayPool<byte>.Shared.Rent(1024);
+        var bytes = System.Buffers.ArrayPool<byte>.Shared.Rent(1024);
         input.CopyTo(bytes.AsSpan(10));
 
         CopcHierarchy.Entry output = new(bytes.AsSpan(10));

@@ -14,6 +14,7 @@ namespace Altemiq.IO.Las.Compression;
 [System.Diagnostics.CodeAnalysis.SuppressMessage("Meziantou.Design", "MA0062:NonFlagsEnumsShouldNotBeMarkedWithFlagsAttribute", Justification = "This is defined externally")]
 [System.Diagnostics.CodeAnalysis.SuppressMessage("Major Code Smell", "S4070:Non-flags enums should not be marked with \"FlagsAttribute\"", Justification = "This is defined externally")]
 [System.Diagnostics.CodeAnalysis.SuppressMessage("Critical Code Smell", "S2346:Flags enumerations zero-value members should be named \"None\"", Justification = "This is the default, but not \"None\"")]
+[System.Diagnostics.CodeAnalysis.SuppressMessage("CodeQuality", "IDE0079:Remove unnecessary suppression", Justification = "This is required for automated cleanup")]
 internal enum DecompressSelections : uint
 {
     /// <summary>

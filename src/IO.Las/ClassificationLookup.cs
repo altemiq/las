@@ -96,7 +96,7 @@ public sealed record ClassificationLookup : VariableLengthRecord, IReadOnlyList<
             else
             {
                 d[0] = value.ClassNumber;
-                System.Text.Encoding.UTF8.GetBytes(value.Description, d[1..]);
+                _ = System.Text.Encoding.UTF8.GetBytes(value.Description, d[1..]);
             }
 
             bytesWritten += ValueSize;
@@ -113,7 +113,7 @@ public sealed record ClassificationLookup : VariableLengthRecord, IReadOnlyList<
     {
         var builder = new System.Runtime.CompilerServices.ReadOnlyCollectionBuilder<ClassificationLookupItem>(ValueCount);
 
-        for (int i = 0; i < ValueCount; i++)
+        for (var i = 0; i < ValueCount; i++)
         {
             var index = i * 16;
             var s = source[index..];

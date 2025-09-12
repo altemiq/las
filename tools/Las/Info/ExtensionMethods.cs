@@ -440,6 +440,7 @@ internal static class ExtensionMethods
 
         public override int GetHashCode() => default;
 
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("CodeQuality", "IDE0079:Remove unnecessary suppression", Justification = "False positive")]
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Critical Code Smell", "S3218:Inner class members should not shadow outer class \"static\" or type members", Justification = "Checked")]
         public override string ToString() => nameof(NullExtraBytes);
 

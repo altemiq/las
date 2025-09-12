@@ -213,7 +213,7 @@ public class LasReader : ILasReader, IDisposable
     }
 
     /// <inheritdoc/>
-    public async virtual ValueTask<LasPointMemory> ReadPointDataRecordAsync(CancellationToken cancellationToken = default)
+    public virtual async ValueTask<LasPointMemory> ReadPointDataRecordAsync(CancellationToken cancellationToken = default)
     {
         if (!this.CheckEndOfPointData() || !this.CheckPointIndex())
         {

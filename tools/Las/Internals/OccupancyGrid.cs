@@ -13,14 +13,16 @@ namespace Altemiq.IO.Las.Internals;
 /// <param name="gridSpacing">The grid spacing.</param>
 internal sealed class OccupancyGrid(PointDataRecordQuantizer quantizer, float gridSpacing)
 {
-#pragma warning disable S2933 // Fields that are only assigned in the constructor should be "readonly"
+#pragma warning disable IDE0079
+#pragma warning disable RCS1222
+#pragma warning disable S2933
     private int[] minusAnchors = [];
     private int[]?[] minusMinus = [];
     private int[]?[] minusPlus = [];
     private int[] plusAnchors = [];
     private int[]?[] plusMinus = [];
     private int[]?[] plusPlus = [];
-#pragma warning restore S2933 // Fields that are only assigned in the constructor should be "readonly"
+#pragma warning restore IDE0079, RCS1222, S2933
 
     private float gridSpacing = -gridSpacing;
     private int anker;
@@ -82,8 +84,10 @@ internal sealed class OccupancyGrid(PointDataRecordQuantizer quantizer, float gr
     {
         posY -= this.anker;
         var noXAnchor = false;
+#pragma warning disable IDE0007
         ref int[] anchors = ref this.minusAnchors;
         ref int[]?[] array = ref this.minusMinus;
+#pragma warning restore IDE0007
         if (posY < 0)
         {
             posY = -posY - 1;

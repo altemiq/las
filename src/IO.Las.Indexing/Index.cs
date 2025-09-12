@@ -118,7 +118,7 @@ public readonly struct Index : System.IEquatable<Index>
         {
 #if NETSTANDARD2_1 || NETCOREAPP2_1_OR_GREATER
             System.Span<char> span = stackalloc char[11]; // 1 for ^ and 10 for longest possible uint value
-            bool formatted = value.TryFormat(span[1..], out int charsWritten, provider: formatProvider);
+            var formatted = value.TryFormat(span[1..], out var charsWritten, provider: formatProvider);
             System.Diagnostics.Debug.Assert(formatted, $"Failed formatting in {nameof(Index)}.{nameof(ToStringFromEnd)}");
             span[0] = '^';
             return new(span[..(charsWritten + 1)]);

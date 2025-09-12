@@ -101,7 +101,7 @@ public sealed record ExtraBytes : VariableLengthRecord, IExtraBytes
     public IReadOnlyList<object?> GetValues(ReadOnlySpan<byte> source)
     {
         var values = new object?[this.items.Count];
-        for (int i = 0; i < this.items.Count; i++)
+        for (var i = 0; i < this.items.Count; i++)
         {
             values[i] = this.items[i].GetValue(source[this.indexes[i]..]);
         }
@@ -125,7 +125,7 @@ public sealed record ExtraBytes : VariableLengthRecord, IExtraBytes
     public async ValueTask<IReadOnlyList<object?>> GetValuesAsync(ReadOnlyMemory<byte> source)
     {
         var values = new object?[this.items.Count];
-        for (int i = 0; i < this.items.Count; i++)
+        for (var i = 0; i < this.items.Count; i++)
         {
             values[i] = await this.items[i].GetValueAsync(source[this.indexes[i]..]).ConfigureAwait(false);
         }
@@ -168,7 +168,7 @@ public sealed record ExtraBytes : VariableLengthRecord, IExtraBytes
         var count = source.Length / 192;
         var builder = new System.Runtime.CompilerServices.ReadOnlyCollectionBuilder<ExtraBytesItem>(count);
 
-        for (int i = 0; i < count; i++)
+        for (var i = 0; i < count; i++)
         {
             var index = i * 192;
             builder.Add(ExtraBytesItem.Read(source[index..]));

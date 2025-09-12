@@ -163,7 +163,7 @@ public readonly partial struct Color : IEquatable<Color>
         var (min, max) = MinMaxRgb(r, g, b);
 
         float delta = max - min;
-        float hue = (r, g) switch
+        var hue = (r, g) switch
         {
             var (red, _) when red == max => (g - b) / delta,
             var (_, green) when green == max => ((b - r) / delta) + 2F,

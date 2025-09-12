@@ -13,6 +13,7 @@ namespace Altemiq.IO.Las;
 [System.Runtime.InteropServices.StructLayout(System.Runtime.InteropServices.LayoutKind.Sequential, Size = Size)]
 [System.Diagnostics.CodeAnalysis.SuppressMessage("Minor Code Smell", "S2292:Trivial properties should be auto-implemented", Justification = "This needs sequential layout")]
 [System.Diagnostics.CodeAnalysis.SuppressMessage("Roslynator", "RCS1085:Use auto-implemented property", Justification = "This needs sequential layout")]
+[System.Diagnostics.CodeAnalysis.SuppressMessage("CodeQuality", "IDE0079:Remove unnecessary suppression", Justification = "This is required for automated cleanup")]
 public readonly record struct VariableLengthRecordHeader
 {
     /// <summary>
@@ -63,10 +64,10 @@ public readonly record struct VariableLengthRecordHeader
 #else
     {
         this.reserved = System.Buffers.Binary.BinaryPrimitives.ReadUInt16LittleEndian(data.AsSpan(Constants.VariableLengthRecord.ReservedFieldOffset, sizeof(ushort)));
-        this.userId = System.Text.Encoding.UTF8.GetString(data, Constants.VariableLengthRecord.UserIdFieldOffset,  GetNullChar(data, Constants.VariableLengthRecord.UserIdFieldOffset) - Constants.VariableLengthRecord.UserIdFieldOffset);
+        this.userId = System.Text.Encoding.UTF8.GetString(data, Constants.VariableLengthRecord.UserIdFieldOffset, GetNullChar(data, Constants.VariableLengthRecord.UserIdFieldOffset) - Constants.VariableLengthRecord.UserIdFieldOffset);
         this.recordId = System.Buffers.Binary.BinaryPrimitives.ReadUInt16LittleEndian(data.AsSpan(Constants.VariableLengthRecord.RecordIdFieldOffset, sizeof(ushort)));
         this.recordLengthAfterHeader = System.Buffers.Binary.BinaryPrimitives.ReadUInt16LittleEndian(data.AsSpan(Constants.VariableLengthRecord.RecordLengthAfterHeaderFieldOffset, sizeof(ushort)));
-        this.description = System.Text.Encoding.UTF8.GetString(data, Constants.VariableLengthRecord.DescriptionFieldOffset,  GetNullChar(data, Constants.VariableLengthRecord.DescriptionFieldOffset) - Constants.VariableLengthRecord.DescriptionFieldOffset);
+        this.description = System.Text.Encoding.UTF8.GetString(data, Constants.VariableLengthRecord.DescriptionFieldOffset, GetNullChar(data, Constants.VariableLengthRecord.DescriptionFieldOffset) - Constants.VariableLengthRecord.DescriptionFieldOffset);
 
         static int GetNullChar(byte[] source, int startIndex = 0)
         {

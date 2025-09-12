@@ -94,7 +94,7 @@ public static partial class ExtensionMethods
         var count = source.Length;
         var builder = new System.Runtime.CompilerServices.ReadOnlyCollectionBuilder<T>(count);
 
-        for (int i = 0; i < count; i++)
+        for (var i = 0; i < count; i++)
         {
             builder.Add(source[i]);
         }

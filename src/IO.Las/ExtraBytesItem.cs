@@ -12,9 +12,11 @@ using System.Runtime.InteropServices;
 /// The <see cref="ExtraBytes"/> item.
 /// </summary>
 [StructLayout(LayoutKind.Sequential, Pack = 1, Size = 192)]
-[System.Diagnostics.CodeAnalysis.SuppressMessage("Minor Code Smell", "S2292:Trivial properties should be auto-implemented", Justification = "This needs sequential layout.")]
+[System.Diagnostics.CodeAnalysis.SuppressMessage("Minor Code Smell", "S2292:Trivial properties should be auto-implemented", Justification = "This needs sequential layout")]
+[System.Diagnostics.CodeAnalysis.SuppressMessage("Roslynator", "RCS1085:Use auto-implemented property", Justification = "This needs sequential layout")]
 [System.Diagnostics.CodeAnalysis.SuppressMessage("ReSharper", "PrivateFieldCanBeConvertedToLocalVariable", Justification = "This needs sequential layout.")]
 [System.Diagnostics.CodeAnalysis.SuppressMessage("ReSharper", "CollectionNeverQueried.Local", Justification = "This needs sequential layout.")]
+[System.Diagnostics.CodeAnalysis.SuppressMessage("CodeQuality", "IDE0079:Remove unnecessary suppression", Justification = "This is required for automated cleanup")]
 public readonly record struct ExtraBytesItem
 {
     /// <summary>

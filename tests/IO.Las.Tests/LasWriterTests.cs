@@ -102,7 +102,7 @@ public class LasWriterTests
                 GpsTime = 0
             };
 
-            extraBytes.Write(span, ExtraValue);
+            _ = extraBytes.Write(span, ExtraValue);
             lasWriter.Write(point, span);
         }
 
@@ -185,7 +185,7 @@ public class LasWriterTests
                 GpsTime = 0
             };
 
-            extraBytes.Write(span, ExtraValue);
+            _ = extraBytes.Write(span, ExtraValue);
             await lasWriter.WriteAsync(point, span);
         }
 

@@ -96,7 +96,6 @@ internal abstract class PointDataRecordReader<T>(IEntropyDecoder decoder, int po
     protected abstract T Read(ReadOnlySpan<byte> source);
 
     /// <inheritdoc cref="IPointDataRecordReader.ReadAsync"/>
-    [System.Diagnostics.CodeAnalysis.SuppressMessage("Design", "MA0042:Do not use blocking calls in an async method", Justification = "This would cause recursion.")]
     protected virtual ValueTask<T> ReadAsync(ReadOnlyMemory<byte> source, CancellationToken cancellationToken = default)
     {
         cancellationToken.ThrowIfCancellationRequested();

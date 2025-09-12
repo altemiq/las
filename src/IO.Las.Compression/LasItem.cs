@@ -45,9 +45,7 @@ public readonly record struct LasItem
     /// <summary>
     /// Gets the name.
     /// </summary>
-#pragma warning disable MA0011 // IFormatProvider is missing
     public string Name => this.Type.ToString().ToUpperInvariant();
-#pragma warning restore MA0011 // IFormatProvider is missing
 
     /// <summary>
     /// Tests if this instance if of the specified type.

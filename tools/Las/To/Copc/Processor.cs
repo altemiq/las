@@ -645,8 +645,6 @@ internal static class Processor
     private sealed class EptOctree
     {
         private readonly double maxX;
-        private readonly double maxY;
-        private readonly double maxZ;
 
         public EptOctree(in HeaderBlock header)
         {
@@ -659,8 +657,8 @@ internal static class Processor
             this.MinY = centerY - halfSize;
             this.MinZ = centerZ - halfSize;
             this.maxX = centerX + halfSize;
-            this.maxY = centerY + halfSize;
-            this.maxZ = centerZ + halfSize;
+            this.CentreY = centerY + halfSize;
+            this.CentreZ = centerZ + halfSize;
         }
 
         public int GridSize { get; init; }
@@ -669,9 +667,9 @@ internal static class Processor
 
         public double CentreX => (this.MinX + this.maxX) / 2;
 
-        public double CentreY => (this.MinY + this.maxY) / 2;
+        public double CentreY => (this.MinY + field) / 2;
 
-        public double CentreZ => (this.MinZ + this.maxZ) / 2;
+        public double CentreZ => (this.MinZ + field) / 2;
 
         public double HalfSize => (this.maxX - this.MinX) / 2;
 
@@ -786,7 +784,10 @@ internal static class Processor
         {
             this.points.Sort(CompareBuffers);
 
-            static int CompareBuffers(LasPointMemory first, LasPointMemory second) => ComparePointDataRecord(first.PointDataRecord, second.PointDataRecord);
+            static int CompareBuffers(LasPointMemory first, LasPointMemory second)
+            {
+                return ComparePointDataRecord(first.PointDataRecord, second.PointDataRecord);
+            }
 
             static int ComparePointDataRecord(IBasePointDataRecord? first, IBasePointDataRecord? second)
             {

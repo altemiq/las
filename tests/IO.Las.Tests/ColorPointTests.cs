@@ -1,6 +1,5 @@
-using System.Runtime.InteropServices;
-
 namespace Altemiq.IO.Las;
+using System.Runtime.InteropServices;
 
 public class ColorPointTests
 {
@@ -63,13 +62,13 @@ public class ColorPointTests
     public async Task ToBytes()
     {
         var destination = new byte[Bytes.Length];
-        Point.WriteLittleEndian(destination);
-        await Assert.That(destination).IsEquivalentTo(Bytes);
+        _ = Point.WriteLittleEndian(destination);
+        _ = await Assert.That(destination).IsEquivalentTo(Bytes);
     }
 
     private static async Task CheckPoint(ColorPointDataRecord record)
     {
-        await Assert.That(record)
+        _ = await Assert.That(record)
             .Satisfies(p => p.X, x => x.IsEqualTo(2757))
             .Satisfies(p => p.Y, y => y.IsEqualTo(-1377))
             .Satisfies(p => p.Z, z => z.IsEqualTo(-6717))

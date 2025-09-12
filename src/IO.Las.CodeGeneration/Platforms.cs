@@ -440,10 +440,9 @@ internal static class Platforms
     /// <returns>The platforms.</returns>
     public static IReadOnlyCollection<(string? Id, string? Type, char Code)> GetPlatforms(AdditionalText input)
     {
-        return input.GetLines()
+        return [.. input.GetLines()
             .Select(static line => line.Split(','))
-            .Select(static record => (Id: CheckNull(record[0]), Type: CheckNull(record[1]), Code: record[2][0]))
-            .ToList();
+            .Select(static record => (Id: CheckNull(record[0]), Type: CheckNull(record[1]), Code: record[2][0])),];
 
         static string? CheckNull(string input)
         {

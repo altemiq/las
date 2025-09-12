@@ -55,9 +55,6 @@ internal sealed class LasIntervalStartCell : LasIntervalCell
     /// <param name="pointIndex">The point index.</param>
     /// <param name="threshold">The threshold.</param>
     /// <returns><see langword="true"/> if a new interval is created for this point; otherwise <see langword="false" />.</returns>
-#if NET6_0_OR_GREATER
-    [System.Diagnostics.CodeAnalysis.SuppressMessage("Minor Code Smell", "S3236:Caller information arguments should not be provided explicitly", Justification = "Checked")]
-#endif
     public bool Add(uint pointIndex, int threshold)
     {
         var currentEnd = this.last?.End ?? this.End;

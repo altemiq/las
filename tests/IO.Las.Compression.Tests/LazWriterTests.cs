@@ -51,7 +51,7 @@ public class LazWriterTests
         using (LazWriter lasWriter = new(memoryStream, true))
         {
             lasWriter.Write(builder.HeaderBlock, geoKeyDirectoryTag, extraBytes);
-            extraBytes.Write(span, 124.56);
+            _ = extraBytes.Write(span, 124.56);
             lasWriter.Write(
                 new GpsPointDataRecord
                 {
@@ -69,7 +69,7 @@ public class LazWriterTests
                 },
                 span);
 
-            extraBytes.Write(span, ExtraValue);
+            _ = extraBytes.Write(span, ExtraValue);
             lasWriter.Write(
                 new GpsPointDataRecord
                 {
@@ -153,7 +153,7 @@ public class LazWriterTests
         using (LazWriter lasWriter = new(memoryStream, true))
         {
             lasWriter.Write(builder.HeaderBlock, geoKeyDirectoryTag, extraBytes);
-            extraBytes.Write(memory.Span, 124.56);
+            _ = extraBytes.Write(memory.Span, 124.56);
             await lasWriter.WriteAsync(
                 new GpsPointDataRecord
                 {
@@ -171,7 +171,7 @@ public class LazWriterTests
                 },
                 memory);
 
-            extraBytes.Write(memory.Span, ExtraValue);
+            _ = extraBytes.Write(memory.Span, ExtraValue);
             await lasWriter.WriteAsync(
                 new GpsPointDataRecord
                 {
@@ -438,7 +438,7 @@ public class LazWriterTests
             {
                 Random random = new(size);
 
-                for (int i = 0; i < size; i++)
+                for (var i = 0; i < size; i++)
                 {
                     yield return new ExtendedGpsPointDataRecord
                     {
@@ -489,7 +489,7 @@ public class LazWriterTests
 
         static async Task CheckPointReader(LazReader reader, Type expectedType, int numberChunksValue)
         {
-            object pointReader = await Assert.That(reader.GetType()
+            var pointReader = await Assert.That(reader.GetType()
                 .GetFields(System.Reflection.BindingFlags.Instance | System.Reflection.BindingFlags.NonPublic)
                 .Single(static fi => fi.FieldType == typeof(IPointReader))
                 .GetValue(reader)).IsTypeOf(expectedType);
@@ -548,7 +548,7 @@ public class LazWriterTests
             {
                 Random random = new(size);
 
-                for (int i = 0; i < size; i++)
+                for (var i = 0; i < size; i++)
                 {
                     yield return new ExtendedGpsPointDataRecord
                     {
@@ -729,7 +729,7 @@ public class LazWriterTests
         MemoryStream stream = new();
         using (LazWriter writer = new(stream, leaveOpen: true))
         {
-            HeaderBlockBuilder headerBuilder = HeaderBlockBuilder.FromPointType<ExtendedGpsColorNearInfraredWaveformPointDataRecord>();
+            var headerBuilder = HeaderBlockBuilder.FromPointType<ExtendedGpsColorNearInfraredWaveformPointDataRecord>();
             headerBuilder.NumberOfPointRecords = 2;
             headerBuilder.FileCreation = DateTime.UtcNow.Date;
             headerBuilder.GlobalEncoding = GlobalEncoding.StandardGpsTime;
@@ -808,7 +808,7 @@ public class LazWriterTests
         MemoryStream stream = new();
         using (LazWriter writer = new(stream, leaveOpen: true))
         {
-            HeaderBlockBuilder headerBuilder = HeaderBlockBuilder.FromPointType<ExtendedGpsColorPointDataRecord>();
+            var headerBuilder = HeaderBlockBuilder.FromPointType<ExtendedGpsColorPointDataRecord>();
             headerBuilder.NumberOfPointRecords = 3;
             headerBuilder.FileCreation = DateTime.UtcNow.Date;
             headerBuilder.GlobalEncoding = GlobalEncoding.StandardGpsTime;

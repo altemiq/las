@@ -76,10 +76,10 @@ public sealed class LasQuadTree : IEquatable<LasQuadTree>
         // enlarge bounding box to quad tree size
         c = (uint)(1 << this.levels) - horizonalCells;
         this.minimumX -= (c - (c / 2F)) * cellSize;
-        this.maximumX += (c / 2F) * cellSize;
+        this.maximumX += c / 2F * cellSize;
         c = (uint)(1 << this.levels) - verticalCells;
         this.minimumY -= (c - (c / 2F)) * cellSize;
-        this.maximumY += (c / 2F) * cellSize;
+        this.maximumY += c / 2F * cellSize;
 
         static uint UInt32Quantize(float n)
         {

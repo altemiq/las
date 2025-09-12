@@ -21,10 +21,10 @@ public class ProjectGuidTests
 #if NET
         await
 #endif
-        using Stream stream = typeof(ProjectGuidTests).Assembly.GetManifestResourceStream(typeof(ProjectGuidTests), resource)
+        using var stream = typeof(ProjectGuidTests).Assembly.GetManifestResourceStream(typeof(ProjectGuidTests), resource)
                               ?? throw new InvalidOperationException("Failed to get stream");
         var length = (int)stream.Length;
-        byte[] bytes = System.Buffers.ArrayPool<byte>.Shared.Rent(length);
+        var bytes = System.Buffers.ArrayPool<byte>.Shared.Rent(length);
 #if NET
         _ = await Assert.That(await stream.ReadAsync(bytes.AsMemory(0, length))).IsEqualTo(length);
 #else
@@ -45,7 +45,7 @@ public class ProjectGuidTests
 #if NET
         await
 #endif
-        using Stream stream = typeof(ProjectGuidTests).Assembly.GetManifestResourceStream(typeof(ProjectGuidTests), resource)
+        using var stream = typeof(ProjectGuidTests).Assembly.GetManifestResourceStream(typeof(ProjectGuidTests), resource)
                               ?? throw new InvalidOperationException("Failed to get stream");
         HeaderBlockReader headerReader = new(stream);
         var headerBlock = headerReader.GetHeaderBlock();

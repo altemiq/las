@@ -7,7 +7,7 @@ public class S3UriUtilityTests
     private const string Region = "ap-southeast-2";
     private const string Scheme = "s3";
     private const string Host = "amazonaws.com";
-    
+
     private const string S3Scheme = $"{Scheme}://{BucketName}/{Path}";
     private const string PathStyleNoRegion = $"https://{Scheme}.{Host}/{BucketName}/{Path}";
     private const string PathStyle = $"https://{Scheme}.{Region}.{Host}/{BucketName}/{Path}";
@@ -25,7 +25,7 @@ public class S3UriUtilityTests
     [MethodDataSource(nameof(GetUris))]
     public async Task TryTransformUri(string url)
     {
-        _ = await Assert.That(S3UriUtility.TryTransformUri(url, out string output)).IsTrue();
+        _ = await Assert.That(S3UriUtility.TryTransformUri(url, out var output)).IsTrue();
         _ = await Assert.That(output).IsNotNull().And.IsEqualTo(S3Scheme);
     }
 

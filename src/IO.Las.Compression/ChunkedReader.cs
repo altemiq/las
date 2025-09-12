@@ -672,7 +672,7 @@ internal abstract class ChunkedReader : IPointReader
         decompressor.Initialize();
         for (var i = 1; i <= numberChunks; i++)
         {
-            chunkTotals?[i] = (uint)decompressor.Decompress(i > 1 ? (int)chunkTotals[i - 1] : 0);
+            _ = chunkTotals?[i] = (uint)decompressor.Decompress(i > 1 ? (int)chunkTotals[i - 1] : 0);
             chunkStarts[i] = decompressor.Decompress(i > 1 ? (int)chunkStarts[i - 1] : 0, 1U);
             tabledChunks++;
         }
@@ -680,7 +680,7 @@ internal abstract class ChunkedReader : IPointReader
         decoder.Done();
         for (var i = 1; i <= numberChunks; i++)
         {
-            chunkTotals?[i] += chunkTotals[i - 1];
+            _ = chunkTotals?[i] += chunkTotals[i - 1];
             chunkStarts[i] += chunkStarts[i - 1];
             if (chunkStarts[i] <= chunkStarts[i - 1])
             {

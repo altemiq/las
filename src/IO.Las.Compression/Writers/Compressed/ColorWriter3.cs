@@ -155,7 +155,6 @@ internal sealed class ColorWriter3 : IContextWriter
     }
 
     /// <inheritdoc/>
-    [System.Diagnostics.CodeAnalysis.SuppressMessage("Design", "MA0042:Do not use blocking calls in an async method", Justification = "This would cause recursion")]
     public ValueTask<uint> WriteAsync(Memory<byte> item, uint context, CancellationToken cancellationToken = default)
     {
         cancellationToken.ThrowIfCancellationRequested();

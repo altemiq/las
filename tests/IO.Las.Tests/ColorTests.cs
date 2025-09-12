@@ -5,7 +5,7 @@ public class ColorTests
     [Test]
     public async Task SetValues()
     {
-        Color color = Color.FromRgb(12345, 54321, 12457);
+        var color = Color.FromRgb(12345, 54321, 12457);
         _ = await Assert.That(color.R).IsEqualTo((ushort)12345);
         _ = await Assert.That(color.G).IsEqualTo((ushort)54321);
         _ = await Assert.That(color.B).IsEqualTo((ushort)12457);
@@ -14,7 +14,7 @@ public class ColorTests
     [Test]
     public async Task FromKnown()
     {
-        Color color = Color.Lime;
+        var color = Color.Lime;
         _ = await Assert.That(color.R).IsEqualTo(ushort.MinValue);
         _ = await Assert.That(color.G).IsEqualTo(ushort.MaxValue);
         _ = await Assert.That(color.B).IsEqualTo(ushort.MinValue);
@@ -25,7 +25,7 @@ public class ColorTests
     [Arguments(ushort.MinValue)]
     public async Task TestRange(ushort value)
     {
-        Color color = Color.FromRgb(value, value, value);
+        var color = Color.FromRgb(value, value, value);
         _ = await Assert.That(color.R).IsEqualTo(value);
         _ = await Assert.That(color.G).IsEqualTo(value);
         _ = await Assert.That(color.B).IsEqualTo(value);
@@ -34,15 +34,15 @@ public class ColorTests
     [Test]
     public async Task RoundTrip()
     {
-        Color color = Color.FromRgb(12345, 54321, 12457);
-        Color next = Color.FromRgb(color.R, color.G, color.B);
+        var color = Color.FromRgb(12345, 54321, 12457);
+        var next = Color.FromRgb(color.R, color.G, color.B);
         _ = await Assert.That(color).IsEqualTo(next);
     }
 
     [Test]
     public async Task ConvertToFromSystemColor()
     {
-        Color fuchsia = (Color)System.Drawing.Color.Fuchsia;
+        var fuchsia = (Color)System.Drawing.Color.Fuchsia;
         System.Drawing.Color next = fuchsia;
         _ = await Assert.That(System.Drawing.Color.Fuchsia).IsEqualTo(next, ColorComparer.Instance);
     }
@@ -50,15 +50,15 @@ public class ColorTests
     [Test]
     public async Task KnownColors()
     {
-        System.Drawing.Color color = (System.Drawing.Color)Color.Blue;
+        var color = (System.Drawing.Color)Color.Blue;
         _ = await Assert.That(color).IsEqualTo(System.Drawing.Color.Blue, ColorComparer.Instance);
     }
 
     [Test]
     public async Task HSL()
     {
-        System.Drawing.Color systemColor = System.Drawing.Color.Fuchsia;
-        Color color = Color.Fuchsia;
+        var systemColor = System.Drawing.Color.Fuchsia;
+        var color = Color.Fuchsia;
 
         _ = await Assert.That(systemColor.GetHue()).IsEqualTo(color.GetHue());
         _ = await Assert.That(systemColor.GetSaturation()).IsEqualTo(color.GetSaturation());

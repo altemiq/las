@@ -113,7 +113,7 @@ public record GeoDoubleParamsTag : VariableLengthRecord, IReadOnlyList<double>
     private static System.Collections.ObjectModel.ReadOnlyCollection<double> GetValues(ReadOnlySpan<byte> data)
     {
         var builder = new System.Runtime.CompilerServices.ReadOnlyCollectionBuilder<double>();
-        for (int i = 0; i < data.Length; i += sizeof(double))
+        for (var i = 0; i < data.Length; i += sizeof(double))
         {
             builder.Add(System.Buffers.Binary.BinaryPrimitives.ReadDoubleLittleEndian(data.Slice(i, sizeof(double))));
         }

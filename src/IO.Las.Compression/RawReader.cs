@@ -30,7 +30,7 @@ internal class RawReader(Readers.IPointDataRecordReader reader, int pointDataLen
     }
 
     /// <inheritdoc/>
-    public async virtual ValueTask<LasPointMemory> ReadAsync(Stream stream, CancellationToken cancellationToken = default)
+    public virtual async ValueTask<LasPointMemory> ReadAsync(Stream stream, CancellationToken cancellationToken = default)
     {
         var bytesRead =
 #if NETSTANDARD2_1_OR_GREATER || NETCOREAPP2_1_OR_GREATER

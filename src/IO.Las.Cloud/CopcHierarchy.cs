@@ -379,7 +379,7 @@ public sealed record CopcHierarchy : ExtendedVariableLengthRecord
         internal Page(ReadOnlySpan<byte> data, int count)
         {
             var array = new Entry[count];
-            for (int i = 0; i < count; i++)
+            for (var i = 0; i < count; i++)
             {
                 var start = i * EntrySize;
                 array[i] = new(data[start..]);

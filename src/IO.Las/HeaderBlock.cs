@@ -133,7 +133,6 @@ public readonly struct HeaderBlock : IEquatable<HeaderBlock>
 #endif
     }
 
-#pragma warning disable SA1642
 #if LAS1_5_OR_GREATER
     /// <include file="Properties/v1.5/Documentation.xml" path="doc/members/member[@name='M:Altemiq.IO.Las.HeaderBlock.Constructor']/*" />
 #elif LAS1_4_OR_GREATER
@@ -143,7 +142,6 @@ public readonly struct HeaderBlock : IEquatable<HeaderBlock>
 #else
     /// <include file="Properties/v1.1/Documentation.xml" path="doc/members/member[@name='M:Altemiq.IO.Las.HeaderBlock.Constructor']/*" />
 #endif
-#pragma warning restore SA1642
     internal HeaderBlock(
         ushort fileSourceId,
 #if LAS1_2_OR_GREATER

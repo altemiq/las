@@ -381,9 +381,7 @@ public abstract class MultipleStream(IDictionary<string, Stream> dictionary) : S
         }
 
         await base.DisposeAsync().ConfigureAwait(false);
-#pragma warning disable S3971 // "GC.SuppressFinalize" should not be called
         GC.SuppressFinalize(this);
-#pragma warning restore S3971 // "GC.SuppressFinalize" should not be called
     }
 #endif
 

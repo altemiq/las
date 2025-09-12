@@ -59,7 +59,7 @@ internal static class PathExtensions
             return builder.Uri;
         }
 
-#pragma warning disable S1144
+#pragma warning disable IDE0051, S1144
         private static Func<HttpClient> CreateHttpClient(IServiceProvider? serviceProvider)
         {
             if (serviceProvider is not null)
@@ -71,6 +71,6 @@ internal static class PathExtensions
         }
 
         private static HttpClient CreateHttpClient() => new();
-#pragma warning restore S1144
+#pragma warning restore IDE0051, S1144
     }
 }

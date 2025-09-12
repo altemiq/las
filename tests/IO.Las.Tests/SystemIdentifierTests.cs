@@ -41,7 +41,7 @@ public class SystemIdentifierTests
     [Test]
     public async Task RieglTripod()
     {
-        SystemIdentifier si = SystemIdentifier.Parse("TRTA0");
+        var si = SystemIdentifier.Parse("TRTA0");
         _ = await Assert.That(si.Platform).IsEqualTo(Platforms.StaticTripod);
         _ = await Assert.That(si.Model).IsEqualTo(Models.Riegl.VZ1000);
     }
@@ -49,7 +49,7 @@ public class SystemIdentifierTests
     [Test]
     public async Task TeledyneOptechTruck()
     {
-        SystemIdentifier si = SystemIdentifier.Parse("MO000");
+        var si = SystemIdentifier.Parse("MO000");
         _ = await Assert.That(si.Platform).IsEqualTo(Platforms.CrewedTruckVanVehicle);
         _ = await Assert.That(si.Model).IsEqualTo(Models.TeledyneOptech.GenericOptech);
     }
@@ -57,7 +57,7 @@ public class SystemIdentifierTests
     [Test]
     public async Task LineOfSightTripod()
     {
-        SystemIdentifier si = SystemIdentifier.Parse("T000L");
+        var si = SystemIdentifier.Parse("T000L");
         _ = await Assert.That(si.Platform).IsEqualTo(Platforms.StaticTripod);
         _ = await Assert.That(si.Model).IsEqualTo(Models.Generic.AnyTofLidar);
     }
@@ -91,15 +91,15 @@ public class SystemIdentifierTests
 #if NETSTANDARD2_1_OR_GREATER || NETCOREAPP3_0_OR_GREATER
         await
 #endif
-        using Stream stream = typeof(SystemIdentifierTests).Assembly.GetManifestResourceStream(typeof(SystemIdentifierTests), "systemid_examples.1sensor.las")
+        using var stream = typeof(SystemIdentifierTests).Assembly.GetManifestResourceStream(typeof(SystemIdentifierTests), "systemid_examples.1sensor.las")
                                     ?? throw new InvalidOperationException("Failed to get stream");
         HeaderBlockReader header = new(stream);
 
-        HeaderBlock headerBlock = header.GetHeaderBlock();
+        var headerBlock = header.GetHeaderBlock();
 
         _ = await Assert.That(headerBlock.SystemIdentifier).IsNotNull();
 
-        SystemIdentifier identifier = SystemIdentifier.Parse(headerBlock.SystemIdentifier!);
+        var identifier = SystemIdentifier.Parse(headerBlock.SystemIdentifier!);
         _ = await Assert.That(identifier).IsEqualTo(new(Platforms.StaticTripod, Models.Riegl.VZ1000));
     }
 
@@ -109,15 +109,15 @@ public class SystemIdentifierTests
 #if NETSTANDARD2_1_OR_GREATER || NETCOREAPP3_0_OR_GREATER
         await
 #endif
-        using Stream stream = typeof(SystemIdentifierTests).Assembly.GetManifestResourceStream(typeof(SystemIdentifierTests), "systemid_examples.1sensor_generic.las")
+        using var stream = typeof(SystemIdentifierTests).Assembly.GetManifestResourceStream(typeof(SystemIdentifierTests), "systemid_examples.1sensor_generic.las")
                                     ?? throw new InvalidOperationException("Failed to get stream");
         HeaderBlockReader header = new(stream);
 
-        HeaderBlock headerBlock = header.GetHeaderBlock();
+        var headerBlock = header.GetHeaderBlock();
 
         _ = await Assert.That(headerBlock.SystemIdentifier).IsNotNull();
 
-        SystemIdentifier si = SystemIdentifier.Parse(headerBlock.SystemIdentifier!);
+        var si = SystemIdentifier.Parse(headerBlock.SystemIdentifier!);
         _ = await Assert.That(si.Platform).IsEqualTo(Platforms.StaticTripod);
         _ = await Assert.That(si.Model).IsEqualTo(Models.Generic.AnyTofLidar);
     }
@@ -128,15 +128,15 @@ public class SystemIdentifierTests
 #if NETSTANDARD2_1_OR_GREATER || NETCOREAPP3_0_OR_GREATER
         await
 #endif
-        using Stream stream = typeof(SystemIdentifierTests).Assembly.GetManifestResourceStream(typeof(SystemIdentifierTests), "systemid_examples.5sensor.las")
+        using var stream = typeof(SystemIdentifierTests).Assembly.GetManifestResourceStream(typeof(SystemIdentifierTests), "systemid_examples.5sensor.las")
                                     ?? throw new InvalidOperationException("Failed to get stream");
         HeaderBlockReader header = new(stream);
 
-        HeaderBlock headerBlock = header.GetHeaderBlock();
+        var headerBlock = header.GetHeaderBlock();
 
         _ = await Assert.That(headerBlock.SystemIdentifier).IsNotNull();
 
-        IEnumerable<SystemIdentifier> identifiers = SystemIdentifier.ParseMultiple(headerBlock.SystemIdentifier!);
+        var identifiers = SystemIdentifier.ParseMultiple(headerBlock.SystemIdentifier!);
         _ = await Assert.That(identifiers).IsEquivalentTo(
             [
                 new(Platforms.CrewedHelicopterRotary, Models.Riegl.Vux240),
