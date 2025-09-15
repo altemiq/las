@@ -110,7 +110,7 @@
     <InternalsVisibleTo Include="las" />
   </ItemGroup>
   
-  <ItemGroup Label="Tests">
+  <ItemGroup Label="Tests" Condition=" '$(Configuration)' == 'Debug' ">
     <InternalsVisibleTo Include="$(AssemblyName).Compression.Tests" />
     <InternalsVisibleTo Include="$(AssemblyName).Tests" />
   </ItemGroup>

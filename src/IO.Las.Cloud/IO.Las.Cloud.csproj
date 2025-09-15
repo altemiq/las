@@ -16,8 +16,8 @@
   <ItemGroup>
     <ProjectReference Include="..\IO.Las.Compression\IO.Las.Compression.csproj" />
   </ItemGroup>
-  
-  <ItemGroup>
+
+  <ItemGroup Label="Tests" Condition=" '$(Configuration)' == 'Debug' ">
     <InternalsVisibleTo Include="$(AssemblyName).Tests" />
   </ItemGroup>
 

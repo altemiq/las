@@ -52,9 +52,12 @@
   </ItemGroup>
   
   <ItemGroup>
-    <InternalsVisibleTo Include="$(AssemblyName).Tests" />
     <InternalsVisibleTo Include="$(AssemblyName.Replace('.Compression', '')).Cloud" />
     <InternalsVisibleTo Include="las" />
+  </ItemGroup>
+
+  <ItemGroup Label="Tests" Condition=" '$(Configuration)' == 'Debug' ">
+    <InternalsVisibleTo Include="$(AssemblyName).Tests" />
   </ItemGroup>
   
   <ItemGroup>

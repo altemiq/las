@@ -37,7 +37,7 @@
   <PropertyGroup Label="Signing" Condition=" '$(Configuration)' != '' AND '$(Configuration)' != 'Debug' ">
     <SignAssembly>true</SignAssembly>
     <AssemblyOriginatorKeyFile>$([MSBuild]::GetPathOfFileAbove(Las.snk))</AssemblyOriginatorKeyFile>
-    <PublicKey>002400000480000094000000060200000024000052534131000400000100010095e864d575cc14c8873fc39f8497976caa11c567b8fb62208efc332418833e7902fd73655b8aa51611ae0b00c3e58ae0a9147978f62de10cc1620cc3e48bc6c12fd361fabb9dc1f4e72d4837e0d1a99aab45a9fb14332f65d427ba361f225ee672bb6857ace94005bb338034eb4c2c351b0e50f858f98b14148a2af99a0d7acd</PublicKey>
+    <PublicKey>0024000004800000940000000602000000240000525341310004000001000100456b8fd2019183152ee79c69ed82b79375e258515290849ea4ed5b9c0301cebc52d17cb5e39ed8884d1baa126fb469e17d6869a352aa21b2c3059116246c31e9415cbdfe03fd09ce09cac79c8e870d133c80d3774dd0cadf65db139af6652b71c5b45361bd5ac7cd0733a4b27f86e2b6e7da20722bbc1657da2f06c68053eaad</PublicKey>
   </PropertyGroup>
 
   <PropertyGroup Label="Analyzers">
