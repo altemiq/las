@@ -30,24 +30,24 @@ public sealed class VariableLengthRecordProcessor
 
     private VariableLengthRecordProcessor()
     {
-        this.Register(VariableLengthRecordHeader.ProjectionUserId, GeoKeyDirectoryTag.TagRecordId, (header, data) => new GeoKeyDirectoryTag(header, data));
-        this.Register(VariableLengthRecordHeader.ProjectionUserId, GeoDoubleParamsTag.TagRecordId, (header, data) => new GeoDoubleParamsTag(header, data));
-        this.Register(VariableLengthRecordHeader.ProjectionUserId, GeoAsciiParamsTag.TagRecordId, (header, data) => new GeoAsciiParamsTag(header, data));
-        this.Register(VariableLengthRecordHeader.SpecUserId, ClassificationLookup.TagRecordId, (header, data) => new ClassificationLookup(header, data));
-        this.Register(VariableLengthRecordHeader.SpecUserId, TextAreaDescription.TagRecordId, (header, data) => new TextAreaDescription(header, data));
+        this.Register(VariableLengthRecordHeader.ProjectionUserId, GeoKeyDirectoryTag.TagRecordId, static (header, data) => new GeoKeyDirectoryTag(header, data));
+        this.Register(VariableLengthRecordHeader.ProjectionUserId, GeoDoubleParamsTag.TagRecordId, static (header, data) => new GeoDoubleParamsTag(header, data));
+        this.Register(VariableLengthRecordHeader.ProjectionUserId, GeoAsciiParamsTag.TagRecordId, static (header, data) => new GeoAsciiParamsTag(header, data));
+        this.Register(VariableLengthRecordHeader.SpecUserId, ClassificationLookup.TagRecordId, static (header, data) => new ClassificationLookup(header, data));
+        this.Register(VariableLengthRecordHeader.SpecUserId, TextAreaDescription.TagRecordId, static (header, data) => new TextAreaDescription(header, data));
 #if LAS1_3_OR_GREATER
         for (var i = WaveformPacketDescriptor.MinTagRecordId; i <= WaveformPacketDescriptor.MaxTagRecordId; i++)
         {
-            this.Register(VariableLengthRecordHeader.SpecUserId, i, (header, data) => new WaveformPacketDescriptor(header, data));
+            this.Register(VariableLengthRecordHeader.SpecUserId, i, static (header, data) => new WaveformPacketDescriptor(header, data));
         }
 
-        this.Register(VariableLengthRecordHeader.SpecUserId, WaveformDataPackets.TagRecordId, (header, _, _, data) => new WaveformDataPackets(header, data));
+        this.Register(VariableLengthRecordHeader.SpecUserId, WaveformDataPackets.TagRecordId, static (header, _, _, data) => new WaveformDataPackets(header, data));
 #endif
 #if LAS1_4_OR_GREATER
-        this.Register(VariableLengthRecordHeader.ProjectionUserId, OgcMathTransformWkt.TagRecordId, (header, data) => new OgcMathTransformWkt(header, data));
-        this.Register(VariableLengthRecordHeader.ProjectionUserId, OgcCoordinateSystemWkt.TagRecordId, (header, data) => new OgcCoordinateSystemWkt(header, data));
-        this.Register(VariableLengthRecordHeader.SpecUserId, ExtraBytes.TagRecordId, (header, bytes) => new ExtraBytes(header, bytes));
-        this.Register(VariableLengthRecordHeader.SpecUserId, Superseded.TagRecordId, (header, _) => new Superseded(header));
+        this.Register(VariableLengthRecordHeader.ProjectionUserId, OgcMathTransformWkt.TagRecordId, static (header, data) => new OgcMathTransformWkt(header, data));
+        this.Register(VariableLengthRecordHeader.ProjectionUserId, OgcCoordinateSystemWkt.TagRecordId, static (header, data) => new OgcCoordinateSystemWkt(header, data));
+        this.Register(VariableLengthRecordHeader.SpecUserId, ExtraBytes.TagRecordId, static (header, bytes) => new ExtraBytes(header, bytes));
+        this.Register(VariableLengthRecordHeader.SpecUserId, Superseded.TagRecordId, static (header, _) => new Superseded(header));
 #endif
     }
 

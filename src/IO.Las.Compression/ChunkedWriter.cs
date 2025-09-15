@@ -303,7 +303,7 @@ internal abstract class ChunkedWriter(Writers.IPointDataRecordWriter rawWriter, 
     /// Gets the chunk writers.
     /// </summary>
     /// <returns>The chunk writers.</returns>
-    protected IEnumerable<ChunkWriter> GetWriters() => this.writers.Select(writer => writer.Value.Writer);
+    protected IEnumerable<ChunkWriter> GetWriters() => this.writers.Select(static writer => writer.Value.Writer);
 
     /// <summary>
     /// The chunk writer wrapper.

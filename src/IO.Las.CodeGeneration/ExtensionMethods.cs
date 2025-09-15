@@ -22,7 +22,7 @@ internal static class ExtensionMethods
 
         static IEnumerable<string> GetLinesCore(Microsoft.CodeAnalysis.Text.SourceText? input)
         {
-            return input?.Lines.Skip(1).Where(static line => line.End != line.Start).Select(line => line.ToString()) ?? [];
+            return input?.Lines.Skip(1).Where(static line => line.End != line.Start).Select(static line => line.ToString()) ?? [];
         }
     }
 }

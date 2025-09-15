@@ -97,7 +97,7 @@ public sealed class LazWriter : LasWriter
 #endif
 
         // offset to point data
-        var recordSize = recordsList.Aggregate(0u, (current, record) => current + record.Size());
+        var recordSize = recordsList.Aggregate(0u, static (current, record) => current + record.Size());
 
 #if LAS1_4_OR_GREATER
         this.WriteHeader(header, (uint)recordsList.Count, recordSize, extraByteCount);
@@ -106,7 +106,7 @@ public sealed class LazWriter : LasWriter
 #endif
 
         _ = this.BaseStream.SwitchStreamIfMultiple(LasStreams.VariableLengthRecord);
-        var buffer = System.Buffers.ArrayPool<byte>.Shared.Rent(recordsList.Max(x => x.Size()));
+        var buffer = System.Buffers.ArrayPool<byte>.Shared.Rent(recordsList.Max(static x => x.Size()));
         foreach (var record in recordsList)
         {
 #if LAS1_4_OR_GREATER

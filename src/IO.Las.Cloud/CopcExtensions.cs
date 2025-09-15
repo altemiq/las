@@ -41,7 +41,7 @@ public static class CopcExtensions
     /// </summary>
     /// <param name="reader">The reader.</param>
     /// <returns><see langword="true"/> if the reader is cloud optimized.</returns>
-    public static bool IsCloudOptimized(this LazReader reader) => reader.VariableLengthRecords.Any(vlr => vlr is Cloud.CopcInfo);
+    public static bool IsCloudOptimized(this LazReader reader) => reader.VariableLengthRecords.Any(static vlr => vlr is Cloud.CopcInfo);
 
     /// <summary>
     /// Registers cloud optimized VLRs.

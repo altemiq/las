@@ -20,7 +20,7 @@ internal sealed class PointWiseChunkedWriter(Writers.IPointDataRecordWriter rawW
         static IEnumerable<uint> Accumulate(IEnumerable<int> source)
         {
             uint start = 0;
-            foreach (var value in source.Select(x => (uint)x))
+            foreach (var value in source.Select(static x => (uint)x))
             {
                 yield return start + value;
                 start += value;

@@ -110,7 +110,7 @@ public class LasWriter(Stream stream, bool leaveOpen = false) : ILasWriter, IDis
         _ = this.BaseStream.SwitchStreamIfMultiple(LasStreams.PointData);
 
         // offset to point data
-        var recordSize = recordsList.Aggregate(0u, (current, record) => current + record.Size());
+        var recordSize = recordsList.Aggregate(0u, static (current, record) => current + record.Size());
         var pointDataRecordSize =
 #if LAS1_4_OR_GREATER
             this.WriteHeader(header, (uint)recordsList.Count, recordSize, extraByteCount);

@@ -49,7 +49,7 @@ internal sealed class LazMultipleFileStream : LasMultipleFileStream
         // open any chunk file
         foreach (var file in Directory
             .EnumerateFiles(directory, ChunkFileGlob)
-            .OrderBy(p => LazStreams.ParseChunkNumber(Path.GetFileNameWithoutExtension(p))))
+            .OrderBy(static p => LazStreams.ParseChunkNumber(Path.GetFileNameWithoutExtension(p))))
         {
             this.AddIfExists(Path.GetFileNameWithoutExtension(file), file);
         }

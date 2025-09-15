@@ -347,10 +347,10 @@ internal static class Models
             static IEnumerable<SyntaxNodeOrToken> GetSwitchExpressionArms(IEnumerable<(string? Brand, string? Model, string? Code)> models)
             {
                 var brandLookup = models
-                    .Where(m => m.Brand is not null && m.Model is not null && m.Code is not null)
+                    .Where(static m => m.Brand is not null && m.Model is not null && m.Code is not null)
                     .ToLookup(
-                        x => x.Brand!,
-                        x => (x.Model!, x.Code!),
+                        static x => x.Brand!,
+                        static x => (x.Model!, x.Code!),
                         StringComparer.Ordinal);
 
                 foreach (var brandGroup in brandLookup)
@@ -358,8 +358,8 @@ internal static class Models
                     var brand = brandGroup.Key;
                     var modelLookup = brandGroup
                         .ToLookup(
-                            i => i.Item1,
-                            i => i.Item2,
+                            static i => i.Item1,
+                            static i => i.Item2,
                             StringComparer.Ordinal);
 
                     foreach (var modelGroup in modelLookup)
@@ -481,10 +481,10 @@ internal static class Models
             static IEnumerable<SyntaxNodeOrToken> GetSwitchExpressionArms(IEnumerable<(string? Brand, string? Model, string? Code)> models)
             {
                 var brandLookup = models
-                    .Where(m => m.Brand is not null && m.Model is not null && m.Code is not null)
+                    .Where(static m => m.Brand is not null && m.Model is not null && m.Code is not null)
                     .ToLookup(
-                        x => x.Brand!,
-                        x => (x.Model!, x.Code!),
+                        static x => x.Brand!,
+                        static x => (x.Model!, x.Code!),
                         StringComparer.Ordinal);
 
                 foreach (var brandGroup in brandLookup)
@@ -492,8 +492,8 @@ internal static class Models
                     var brand = brandGroup.Key;
                     var modelLookup = brandGroup
                         .ToLookup(
-                            i => i.Item1,
-                            i => i.Item2,
+                            static i => i.Item1,
+                            static i => i.Item2,
                             StringComparer.Ordinal);
 
                     foreach (var modelGroup in modelLookup)

@@ -32,7 +32,7 @@ public record GeoAsciiParamsTag : VariableLengthRecord, IReadOnlyList<string>
             {
                 UserId = VariableLengthRecordHeader.ProjectionUserId,
                 RecordId = TagRecordId,
-                RecordLengthAfterHeader = (ushort)strings.Sum(s => System.Text.Encoding.UTF8.GetByteCount(s) + 1),
+                RecordLengthAfterHeader = (ushort)strings.Sum(static s => System.Text.Encoding.UTF8.GetByteCount(s) + 1),
             },
             strings)
     {

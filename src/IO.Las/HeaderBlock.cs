@@ -613,7 +613,7 @@ public readonly struct HeaderBlock : IEquatable<HeaderBlock>
         bool IEquatable<IReadOnlyList<ulong>>.Equals(IReadOnlyList<ulong>? other) => other switch
         {
             ReadOnlyLegacy rol => this.source.Equals(rol.source),
-            not null => this.source.Equals(other),
+            not null => this.source.Select(static x => (ulong)x).Equals(other),
             _ => false,
         };
 
@@ -625,7 +625,7 @@ public readonly struct HeaderBlock : IEquatable<HeaderBlock>
 
         public override bool Equals([System.Diagnostics.CodeAnalysis.NotNullWhen(true)] object? obj) => obj switch
         {
-            IReadOnlyList<uint> rol => this.Equals(rol),
+            IReadOnlyList<uint> rol => this.Select(static x => (uint)x).Equals(rol),
             IReadOnlyList<ulong> rol => this.Equals(rol),
             _ => false,
         };
