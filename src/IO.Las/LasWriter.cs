@@ -198,7 +198,13 @@ public class LasWriter(Stream stream, bool leaveOpen = false) : ILasWriter, IDis
 
 #if NETSTANDARD2_0_OR_GREATER || NETFRAMEWORK || NET
     /// <inheritdoc cref="Stream.Close" />
-    public virtual void Close() => this.BaseStream.Close();
+    public virtual void Close()
+    {
+        if (!leaveOpen)
+        {
+            this.BaseStream.Close();
+        }
+    }
 #endif
 
     /// <inheritdoc cref="Stream.Flush" />

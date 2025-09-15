@@ -628,18 +628,12 @@ public sealed class LazWriter : LasWriter
         {
             if (!special)
             {
-                var startPosition = this.WriteExtendedVariableLengthRecord(record);
-                callback?.Invoke(startPosition);
+                callback?.Invoke(this.WriteExtendedVariableLengthRecord(record));
                 return;
             }
 
-            // write this as a special EVLR in the compressed tag
-            if (!this.BaseStream.CanSeek)
-            {
-                return;
-            }
-
-            if (this.offsetToLasZipVlr < 0)
+            // write this as a special EVLR in the compressed tag, if we can
+            if (!this.BaseStream.CanSeek || this.offsetToLasZipVlr < 0)
             {
                 return;
             }
