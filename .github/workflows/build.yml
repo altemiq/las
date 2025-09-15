@@ -1,0 +1,381 @@
+name: build
+
+on:
+  push:
+    branches:
+      - main
+    paths-ignore:
+      - docs/**
+      - .github/workflows/docs.yml
+      - .github/workflows/release.yml
+  pull_request:
+    branches:
+      - main
+  workflow_dispatch:
+
+jobs:
+  run-tests:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        las-version: [1.1, 1.2, 1.3, 1.4, 1.5]
+
+    env:
+      DOTNET_NOLOGO: true
+      DOTNET_CLI_TELEMETRY_OPTOUT: true
+      DOTNET_MULTILEVEL_LOOKUP: false
+      MaximumLasVersion: ${{ matrix.las-version }}
+
+    steps:
+    - uses: actions/checkout@v5
+      with:
+        lfs: true
+
+    # Install .NET
+    - uses: actions/setup-dotnet@v5
+      with:
+        dotnet-version: |
+          8.0.x
+          9.0.x
+        source-url: https://nuget.pkg.github.com/${{ github.repository_owner }}/index.json
+      env:
+        NUGET_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+    # Restore
+    - name: Run local/dotnet-restore@v1
+      run: dotnet restore
+
+    # Build
+    - name: Run local/dotnet-build@v1
+      run: |
+        dotnet build src/IO.Las.CodeGeneration --no-restore
+        dotnet build --no-restore
+
+    # Test
+    - name: Run local/dotnet-test@v1
+      run: dotnet test --no-build -- --results-directory ${{ github.workspace }}/coverage/results --coverage --coverage-output-format cobertura
+
+    - uses: danielpalme/ReportGenerator-GitHub-Action@v5
+      with:
+        reports: ${{ github.workspace }}/coverage/results/*.cobertura.xml
+        targetdir: ${{ github.workspace }}/coverage/reports
+        reporttypes: HtmlInline;Cobertura;MarkdownSummaryGithub
+        verbosity: Verbose
+
+    - name: Run local/update-step-summary@v1
+      run: cat '${{ github.workspace }}/coverage/reports/SummaryGithub.md' >> $GITHUB_STEP_SUMMARY
+
+    - uses: actions/upload-artifact@v4
+      with:
+        name: CoverageReports-${{ matrix.las-version }}
+        path: ${{ github.workspace }}/coverage/reports
+
+  get-version:
+    runs-on: ubuntu-latest
+
+    env:
+      DOTNET_NOLOGO: true
+      DOTNET_CLI_TELEMETRY_OPTOUT: true
+      DOTNET_MULTILEVEL_LOOKUP: false
+      RunAnalyzers: false
+
+    outputs:
+      version: ${{ steps.semver.outputs.Version }}
+      release-version: ${{ steps.release.outputs.Version }}
+      suffix: ${{ steps.suffix.outputs.Suffix }}
+
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Run local/get-suffix@v1
+        id: suffix
+        run: |
+          suffix=alpha
+          if [ ${{ github.event_name }} == push ];
+          then
+            suffix=beta;
+          fi
+          
+          echo "Suffix=$suffix" >> $GITHUB_OUTPUT
+      
+      # Install .NET
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: 9.0.x
+          source-url: https://nuget.pkg.github.com/${{ github.repository_owner }}/index.json
+        env:
+          NUGET_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      
+      # Debug
+      - name: Run local/dotnet-build@v1
+        run: |
+          dotnet build src/IO.Las.CodeGeneration --configuration Debug
+          dotnet build --configuration Debug
+      
+      # SemVer
+      - id: semver
+        uses: altemiq/semver@v1
+        with:
+          solution: ${{ github.workspace }}/Las.sln
+          isDefaultBranch: false
+          versionSuffix: ${{ steps.suffix.outputs.Suffix }}
+          increment: ReleaseLabel
+          workingDirectory: ${{ github.workspace }}
+
+      - name: Run local/get-release-version@v1
+        id: release
+        run: |
+          pre_release_version=${{ steps.semver.outputs.Version }}
+          release_version=${pre_release_version%%'-'*}
+          echo $release_version
+          echo "Version=$release_version" >> $GITHUB_OUTPUT
+
+  create-nuget:
+    runs-on: ubuntu-latest
+    needs: [ get-version ]
+    
+    env:
+      DOTNET_NOLOGO: true
+      DOTNET_CLI_TELEMETRY_OPTOUT: true
+      DOTNET_MULTILEVEL_LOOKUP: false
+
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0 # get all history here, for semantic versioning
+      
+      # Install the .NET workload
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: 9.0.x
+          source-url: https://nuget.pkg.github.com/${{ github.repository_owner }}/index.json
+        env:
+          NUGET_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Run local/dotnet-restore@v1
+        run: dotnet restore
+
+      - name: Run local/dotnet-build@v1
+        run: |
+          dotnet build src/IO.Las.CodeGeneration --no-restore
+          dotnet build --no-restore
+
+      - name: Run local/get-suffix@v1
+        id: suffix
+        run: |
+          suffix=alpha
+          if [ ${{ github.event_name }} == push ];
+          then
+            suffix=beta;
+          fi
+          
+          echo "value=$suffix" >> $GITHUB_OUTPUT
+      
+      # Pack
+      - name: Run local/dotnet-pack@v1
+        run: |
+          dotnet build src/IO.Las.CodeGeneration --no-restore --configuration Release
+          dotnet pack --output ${{ github.workspace }}/nupkg -property:ComputeSemanticVersion=true -property:SemanticVersionOutputPath=${{ github.workspace }}/versions -property:SemanticVersionIncrement=ReleaseLabel --version-suffix ${{ steps.suffix.outputs.value }}
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: NuPkg
+          if-no-files-found: error
+          retention-days: 7
+          path: ${{ github.workspace }}/nupkg
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: Versions
+          if-no-files-found: error
+          retention-days: 7
+          path: ${{ github.workspace }}/versions
+
+  publish:
+    runs-on: ubuntu-latest
+    needs: [ get-version ]
+    strategy:
+      matrix:
+        os: [win, linux]
+        arch: [x64, arm64]
+
+    env:
+      DOTNET_NOLOGO: true
+      DOTNET_CLI_TELEMETRY_OPTOUT: true
+      DOTNET_MULTILEVEL_LOOKUP: false
+
+    steps:
+    - uses: actions/checkout@v5
+      with:
+        lfs: true
+
+    # Install .NET
+    - uses: actions/setup-dotnet@v5
+      with:
+        dotnet-version: 9.0.x
+        source-url: https://nuget.pkg.github.com/${{ github.repository_owner }}/index.json
+      env:
+        NUGET_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+    # Publish
+    - name: Run local/dotnet-publish@v1
+      env:
+        DOTNET_CLI_ENABLE_PUBLISH_RELEASE_FOR_SOLUTIONS: true
+      run: |
+        dotnet build src/IO.Las.CodeGeneration --configuration Release
+        dotnet publish tools/Las --configuration Release --os ${{ matrix.os }} --arch ${{ matrix.arch }} -property:PublishDir=${{ github.workspace }}/publish/${{ matrix.os }}-${{ matrix.arch }}
+
+    - uses: actions/upload-artifact@v4
+      with:
+        name: tools-${{ matrix.os }}-${{ matrix.arch }}
+        if-no-files-found: error
+        retention-days: 7
+        path: ${{ github.workspace }}/publish/${{ matrix.os }}-${{ matrix.arch }}
+
+  docker:
+    runs-on: ubuntu-latest
+    needs: [ get-version ]
+
+    env:
+      DOTNET_NOLOGO: true
+      DOTNET_CLI_TELEMETRY_OPTOUT: true
+      DOTNET_MULTILEVEL_LOOKUP: false
+
+    steps:
+    - uses: actions/checkout@v5
+      with:
+        lfs: true
+
+    # Install .NET
+    - uses: actions/setup-dotnet@v5
+      with:
+        dotnet-version: 9.0.x
+        source-url: https://nuget.pkg.github.com/${{ github.repository_owner }}/index.json
+      env:
+        NUGET_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+    - name: Run local/dotnet-publish@v1
+      working-directory: ${{ github.workspace }}
+      env:
+        ContainerRepository: ghcr.io/${{ github.repository_owner }}/io/las
+        ContainerImageTags: ${{ needs.get-version.outputs.version }};${{ needs.get-version.outputs.suffix }}
+        ContainerArchiveOutputPath: ${{ github.workspace }}/container
+      run: dotnet publish tools/Las /t:PublishContainer
+
+    - uses: actions/upload-artifact@v4
+      with:
+        name: containers
+        if-no-files-found: error
+        retention-days: 7
+        path: ${{ github.workspace }}/container
+
+  deploy:
+    if: github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    needs: [ create-nuget, run-tests, publish, docker, get-version ]
+
+    env:
+      DOTNET_NOLOGO: true
+      DOTNET_CLI_TELEMETRY_OPTOUT: true
+      DOTNET_MULTILEVEL_LOOKUP: false
+
+    steps:
+    - uses: actions/download-artifact@v4
+      with:
+        name: nuget
+        path: ${{ github.workspace }}/nupkg
+
+    - name: Run local/dotnet-nuget-push@v1
+      id: push-nuget
+      working-directory: ${{ github.workspace }}/nupkg
+      run: dotnet nuget push *.nupkg --source https://nuget.pkg.github.com/${{ github.repository_owner }}/index.json --api-key ${{ secrets.GITHUB_TOKEN }} --skip-duplicate
+
+    - uses: GeekyEggo/delete-artifact@v5
+      if: ${{ steps.push-nuget.conclusion == 'success' }}
+      with:
+        name: nuget
+
+    - uses: actions/download-artifact@v4
+      with:
+        pattern: containers
+        merge-multiple: true
+        path: ${{ github.workspace }}/container
+
+    - name: Run local/push-containers@v1
+      id: push-containers
+      working-directory: ${{ github.workspace }}/container
+      run: |
+        ### Push docker images ###
+
+        # login to ghcr.io
+        echo ${{ secrets.GITHUB_TOKEN }} | docker login ghcr.io -u ${{ github.actor }} --password-stdin
+
+        # setup the values
+        registry='ghcr.io'
+        image="$registry/${{ github.repository_owner }}/io/las"
+
+        # load all the images
+        for f in $image-*.tar.gz
+        do
+          docker image load --input="$f"
+        done
+
+        containerTags=($(docker images --filter "reference=$image" --format '{{.Tag}}'))
+
+        # push the images with all tags
+        docker image push $image --all-tags
+
+        # create the manifest
+        tags=('${{ needs.get-version.outputs.version }}' '${{ needs.get-version.outputs.suffix }}')
+        for t in ${tags[@]}
+        do
+          ts=($(printf '%s\n' "${containerTags[@]}" | awk "/$t-/"))
+          ts=("${ts[@]/#/$image:}")
+          img="$image:$t"
+          echo "Creating manifest for $img using tags: ${ts[*]}"
+          docker manifest create $img ${ts[*]}
+          docker manifest push $img
+        done
+
+    - uses: GeekyEggo/delete-artifact@v5
+      if: ${{ steps.push-containers.conclusion == 'success' }}
+      with:
+        name: container.*
+
+    - uses: actions/download-artifact@v4
+      with:
+        pattern: tools-*
+        path: ${{ github.workspace }}/tools
+
+    - name: Run local/compress-linux-tools@v1
+      id: compress-linux-tools
+      working-directory: ${{ github.workspace }}/tools/tools-linux-x64
+      run: |
+        tar --file ${{ github.workspace }}/tools/tools-linux-x64.tar.gz --gzip --create .
+
+    - uses: GeekyEggo/delete-artifact@v5
+      if: ${{ steps.compress-linux-tools.conclusion == 'success' }}
+      with:
+        name: tools-linux-*
+
+    - name: Run local/compress-windows-tools@v1
+      id: compress-windows-tools
+      working-directory: ${{ github.workspace }}/tools/tools-win-x64
+      run: |
+        zip -9 -r ${{ github.workspace }}/tools/tools-win-x64.zip .
+
+    - uses: GeekyEggo/delete-artifact@v5
+      if: ${{ steps.compress-windows-tools.conclusion == 'success' }}
+      with:
+        name: tools-win-*
+
+    - uses: altemiq/update-existing-release@v1
+      with:
+        release: v${{ needs.get-version.outputs.release-version }}
+        tag: v${{ needs.get-version.outputs.version }}
+        files: >
+          ${{ github.workspace }}/tools/tools-linux-x64.tar.gz
+          ${{ github.workspace }}/tools/tools-win-x64.zip
+        prerelease: true
