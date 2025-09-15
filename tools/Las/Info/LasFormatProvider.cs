@@ -28,6 +28,6 @@ internal sealed class LasFormatProvider(IFormatProvider? baseFormatProvider, ILa
         IConvertible convertible => convertible.ToString(formatProvider),
 #endif
         not null when arg.ToString() is { } argString => argString,
-        _ => throw new ArgumentException("Failed to format string", nameof(arg)),
+        _ => throw new ArgumentException(Tool.Properties.Resources.Exception_FailedToFormatString, nameof(arg)),
     };
 }

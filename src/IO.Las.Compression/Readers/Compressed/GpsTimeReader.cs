@@ -96,12 +96,10 @@ internal sealed class GpsTimeReader(IEntropyDecoder decoder) : ISimpleReader
                     this.multiExtremeCounter[this.last] = default;
                     break;
                 case < MultipleUnchanged:
-                {
                     int gpsTimeDiff;
                     switch (multi)
                     {
                         case 0:
-                        {
                             gpsTimeDiff = this.gpsTimeIntegerDecompressor.Decompress(0, 7);
                             this.multiExtremeCounter[this.last]++;
                             if (this.multiExtremeCounter[this.last] > 3)
@@ -111,10 +109,8 @@ internal sealed class GpsTimeReader(IEntropyDecoder decoder) : ISimpleReader
                             }
 
                             break;
-                        }
 
                         case < Multiple:
-                        {
                             var context = multi switch
                             {
                                 < 10 => 2U,
@@ -124,10 +120,8 @@ internal sealed class GpsTimeReader(IEntropyDecoder decoder) : ISimpleReader
                             gpsTimeDiff = this.gpsTimeIntegerDecompressor.Decompress(multi * this.lastGpsTimeDiff[this.last], context);
 
                             break;
-                        }
 
                         case Multiple:
-                        {
                             gpsTimeDiff = this.gpsTimeIntegerDecompressor.Decompress(Multiple * this.lastGpsTimeDiff[this.last], 4);
                             this.multiExtremeCounter[this.last]++;
                             if (this.multiExtremeCounter[this.last] > 3)
@@ -137,10 +131,8 @@ internal sealed class GpsTimeReader(IEntropyDecoder decoder) : ISimpleReader
                             }
 
                             break;
-                        }
 
                         default:
-                        {
                             multi = Multiple - multi;
                             if (multi > MultipleMinus)
                             {
@@ -158,12 +150,10 @@ internal sealed class GpsTimeReader(IEntropyDecoder decoder) : ISimpleReader
                             }
 
                             break;
-                        }
                     }
 
                     this.lastGpsTime[this.last] = (ulong)((long)this.lastGpsTime[this.last] + gpsTimeDiff);
                     break;
-                }
 
                 case MultipleCodeFull:
                     this.next = (this.next + 1) & 3;

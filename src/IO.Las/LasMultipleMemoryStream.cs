@@ -9,7 +9,7 @@ namespace Altemiq.IO.Las;
 /// <summary>
 /// The <see cref="Las"/> <see cref="MultipleMemoryStream"/>.
 /// </summary>
-[System.Diagnostics.CodeAnalysis.SuppressMessage("Mezianou", "MA0053:Make class sealed", Justification = "This is used in other projects.")]
+[System.Diagnostics.CodeAnalysis.SuppressMessage("Meziantou", "MA0053:Make class sealed", Justification = "This is used in other projects.")]
 [System.Diagnostics.CodeAnalysis.SuppressMessage("CodeQuality", "IDE0079:Remove unnecessary suppression", Justification = "This is required for automated cleanup")]
 internal class LasMultipleMemoryStream : MultipleStream
 {

@@ -9,9 +9,6 @@ namespace Altemiq.IO.Las;
 /// <summary>
 /// A chunked <see cref="Las"/> <see cref="Stream"/>.
 /// </summary>
-/// <remarks>
-/// Initializes a new instance of the <see cref="ChunkedStream"/> class.
-/// </remarks>
 /// <param name="length">The length of the resource.</param>
 public abstract class ChunkedStream(long length) : Stream, ICacheStream, IAsyncCacheStream
 {

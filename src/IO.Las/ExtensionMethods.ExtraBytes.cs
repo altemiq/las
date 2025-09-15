@@ -62,66 +62,77 @@ public static partial class ExtensionMethods
             _ => throw new ArgumentOutOfRangeException(nameof(value)),
         };
 
+        [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
         static int WriteByte(Span<byte> destination, byte value)
         {
             destination[0] = value;
             return sizeof(byte);
         }
 
+        [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
         static int WriteSByte(Span<byte> destination, sbyte value)
         {
             destination[0] = (byte)value;
             return sizeof(sbyte);
         }
 
+        [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
         static int WriteInt16(Span<byte> destination, short value)
         {
             System.Buffers.Binary.BinaryPrimitives.WriteInt16LittleEndian(destination, value);
             return sizeof(short);
         }
 
+        [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
         static int WriteUInt16(Span<byte> destination, ushort value)
         {
             System.Buffers.Binary.BinaryPrimitives.WriteUInt16LittleEndian(destination, value);
             return sizeof(ushort);
         }
 
+        [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
         static int WriteInt32(Span<byte> destination, int value)
         {
             System.Buffers.Binary.BinaryPrimitives.WriteInt32LittleEndian(destination, value);
             return sizeof(int);
         }
 
+        [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
         static int WriteUInt32(Span<byte> destination, uint value)
         {
             System.Buffers.Binary.BinaryPrimitives.WriteUInt32LittleEndian(destination, value);
             return sizeof(uint);
         }
 
+        [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
         static int WriteInt64(Span<byte> destination, long value)
         {
             System.Buffers.Binary.BinaryPrimitives.WriteInt64LittleEndian(destination, value);
             return sizeof(long);
         }
 
+        [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
         static int WriteUInt64(Span<byte> destination, ulong value)
         {
             System.Buffers.Binary.BinaryPrimitives.WriteUInt64LittleEndian(destination, value);
             return sizeof(ulong);
         }
 
+        [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
         static int WriteSingle(Span<byte> destination, float value)
         {
             System.Buffers.Binary.BinaryPrimitives.WriteSingleLittleEndian(destination, value);
             return sizeof(ulong);
         }
 
+        [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
         static int WriteDouble(Span<byte> destination, double value)
         {
             System.Buffers.Binary.BinaryPrimitives.WriteDoubleLittleEndian(destination, value);
             return sizeof(ulong);
         }
 
+        [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
         static int WriteBytes(Span<byte> destination, byte[] value)
         {
             value.AsSpan().CopyTo(destination);

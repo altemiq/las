@@ -7,7 +7,7 @@
 namespace Altemiq.IO.Las.To.Sorted;
 
 /// <summary>
-/// The las2sorted processor.
+/// The sorted LAS processor.
 /// </summary>
 internal static class Processor
 {
@@ -195,9 +195,9 @@ internal static class Processor
             };
         }
 
-        static List<VariableLengthRecord> GetVariableLengthRecords(in HeaderBlock header, IReadOnlyList<VariableLengthRecord> vlrs)
+        static List<VariableLengthRecord> GetVariableLengthRecords(in HeaderBlock header, IReadOnlyList<VariableLengthRecord> records)
         {
-            var values = vlrs.Select(static x => x).ToList();
+            var values = records.Select(static x => x).ToList();
             var geoTiffTags = new List<VariableLengthRecord>();
             var hasWkt = false;
 

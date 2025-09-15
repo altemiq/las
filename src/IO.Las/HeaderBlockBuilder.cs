@@ -9,7 +9,7 @@ namespace Altemiq.IO.Las;
 /// <summary>
 /// The builder for <see cref="HeaderBlock"/> instances.
 /// </summary>
-public partial class HeaderBlockBuilder
+public class HeaderBlockBuilder
 {
 #if LAS1_5_OR_GREATER
     private const double DefaultMinGps = double.MaxValue;
@@ -211,6 +211,26 @@ public partial class HeaderBlockBuilder
     /// <param name="year">The year.</param>
     /// <returns>The suggested time offset.</returns>
     public static ushort GetSuggestedTimeOffset(int year) => GpsTime.GetTimeOffset(year);
+#endif
+
+    /// <summary>
+    /// Creates a <see cref="HeaderBlockBuilder"/> from the specified typeof <see cref="PointDataFormat"/>.
+    /// </summary>
+    /// <typeparam name="T">The type of point data record.</typeparam>
+    /// <returns>The header block builder.</returns>
+    /// <exception cref="InvalidOperationException">Invalid point data type.</exception>
+#if NET7_0_OR_GREATER
+    public static HeaderBlockBuilder FromPointType<T>()
+#else
+    public static HeaderBlockBuilder FromPointType<[System.Diagnostics.CodeAnalysis.DynamicallyAccessedMembers(System.Diagnostics.CodeAnalysis.DynamicallyAccessedMemberTypes.PublicFields | System.Diagnostics.CodeAnalysis.DynamicallyAccessedMemberTypes.NonPublicFields)] T>()
+#endif
+        where T : IBasePointDataRecord =>
+#if NET7_0_OR_GREATER
+        new(T.Id);
+#else
+        System.Reflection.IntrospectionExtensions.GetTypeInfo(typeof(T)).GetDeclaredField(nameof(PointDataRecord.Id))?.GetValue(null) is byte pointTypeId
+            ? new(pointTypeId)
+            : throw new InvalidOperationException();
 #endif
 
     /// <summary>

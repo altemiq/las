@@ -63,4 +63,7 @@
   <data name="CompletedWritingTo" xml:space="preserve">
     <value>Completed writing to '{0}'</value>
   </data>
+  <data name="Exception_FailedToFormatString" xml:space="preserve">
+    <value>Failed to format string.</value>
+  </data>
 </root>

@@ -6,6 +6,8 @@
 
 namespace Altemiq.IO.Las.Internals;
 
+using System.Numerics;
+
 /// <summary>
 /// <see cref="Interlocked"/> extension.
 /// </summary>
@@ -14,12 +16,14 @@ internal static class InterlockedExtension
     /// <summary>
     /// Exchanges the value if it is less.
     /// </summary>
+    /// <typeparam name="T">The type of value.</typeparam>
     /// <param name="location1">The target.</param>
     /// <param name="value">The new value.</param>
     /// <returns><see langword="true"/> if the value is updated; otherwise <see langword="false"/>.</returns>
-    public static bool ExchangeIfLessThan(ref double location1, double value)
+    public static bool ExchangeIfLessThan<T>(ref T location1, T value)
+        where T : IComparisonOperators<T, T, bool>
     {
-        double snapshot;
+        T snapshot;
         bool stillLess;
         do
         {
@@ -34,12 +38,14 @@ internal static class InterlockedExtension
     /// <summary>
     /// Exchanges the value if it is greater.
     /// </summary>
+    /// <typeparam name="T">The type of value.</typeparam>
     /// <param name="location1">The target.</param>
     /// <param name="value">The new value.</param>
     /// <returns><see langword="true"/> if the value is updated; otherwise <see langword="false"/>.</returns>
-    public static bool ExchangeIfGreaterThan(ref double location1, double value)
+    public static bool ExchangeIfGreaterThan<T>(ref T location1, T value)
+        where T : IComparisonOperators<T, T, bool>
     {
-        double snapshot;
+        T snapshot;
         bool stillMore;
         do
         {

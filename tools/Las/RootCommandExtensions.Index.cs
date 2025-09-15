@@ -71,7 +71,6 @@ internal static partial class RootCommandExtensions
                     {
                         var services = parseResult.GetServices();
                         var output = parseResult.InvocationConfiguration.Output;
-                        var error = parseResult.InvocationConfiguration.Error;
                         var input = parseResult.GetRequiredValue(Arguments.Input);
 
 #if LAS1_4_OR_GREATER
@@ -84,12 +83,6 @@ internal static partial class RootCommandExtensions
                             ? CreateFromLax(lax, services)
                             : throw new InvalidOperationException();
 #endif
-
-                        if (index is null)
-                        {
-                            error.WriteLine("Failed to read index from either LAX file or Compressed TAG");
-                            return;
-                        }
 
                         foreach (var item in index)
                         {
@@ -104,7 +97,7 @@ internal static partial class RootCommandExtensions
                         }
 
 #if LAS1_4_OR_GREATER
-                        static Indexing.LasIndex? CreateFromReader(Uri file, IServiceProvider? services)
+                        static Indexing.LasIndex CreateFromReader(Uri file, IServiceProvider? services)
                         {
                             using var reader = new LasReader(File.OpenRead(file, services), leaveOpen: false);
                             return Index.IndexingExtensions.ReadIndex(reader);
@@ -204,7 +197,7 @@ internal static partial class RootCommandExtensions
             }
 
 #if LAS1_4_OR_GREATER
-            static Indexing.LasIndex? CreateFromReader(Uri file, IServiceProvider? services)
+            static Indexing.LasIndex CreateFromReader(Uri file, IServiceProvider? services)
             {
                 using var reader = new LasReader(File.OpenRead(file, services), leaveOpen: false);
                 return Index.IndexingExtensions.ReadIndex(reader);

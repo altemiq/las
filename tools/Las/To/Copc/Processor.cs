@@ -58,7 +58,7 @@ internal static class Processor
     /// <param name="minPointsPerOctant">The minimum number of points per octant.</param>
     /// <param name="occupancyResolution">The occupancy resolution.</param>
     /// <param name="rootGridSize">The root grid size.</param>
-    /// <param name="probaSwapEvent">The probablity swap event.</param>
+    /// <param name="probabilitySwapEvent">The probability swap event.</param>
     /// <param name="unordered">Set to <see langword="true"/> to leave points unordered.</param>
     /// <param name="bufferSize">The buffer size.</param>
     /// <param name="swap">Set to <see langword="true"/> to swap the points.</param>
@@ -72,7 +72,7 @@ internal static class Processor
         int minPointsPerOctant = 100,
         float occupancyResolution = 50F,
         int rootGridSize = 256,
-        float probaSwapEvent = 0.95F,
+        float probabilitySwapEvent = 0.95F,
         bool unordered = false,
         int bufferSize = 1000000,
         bool swap = true,
@@ -96,11 +96,9 @@ internal static class Processor
         var header = reader.Header;
         variableLengthRecords.Add(new CompressedTag(header, variableLengthRecords, Compressor.LayeredChunked) { ChunkSize = CompressedTag.VariableChunkSize });
 
-        var tempMaxDepth = maxDepth;
-        if (tempMaxDepth < 0)
-        {
-            tempMaxDepth = Math.Min(EptOctree.ComputeMaxDepth(header, maxPointsPerOctant), LimitDepth);
-        }
+        var tempMaxDepth = maxDepth < 0
+            ? Math.Min(EptOctree.ComputeMaxDepth(header, maxPointsPerOctant), LimitDepth)
+            : maxDepth;
 
         var quantizer = new PointDataRecordQuantizer(header);
         var finalizer = new Finalizer(header, quantizer, 2 << tempMaxDepth);
@@ -126,7 +124,8 @@ internal static class Processor
             {
                 UpdateMinMax(ref gpsTimeMinimum, ref gpsTimeMaximum, gpsPointDataRecord.GpsTime);
 
-                static void UpdateMinMax(ref double minimum, ref double maximum, double value)
+                static void UpdateMinMax<T>(ref T minimum, ref T maximum, T value)
+                    where T : System.Numerics.IComparisonOperators<T, T, bool>
                 {
                     _ = Internals.InterlockedExtension.ExchangeIfLessThan(ref minimum, value);
                     _ = Internals.InterlockedExtension.ExchangeIfGreaterThan(ref maximum, value);
@@ -153,7 +152,7 @@ internal static class Processor
         for (var i = 0; i <= LimitDepth; i++)
         {
             var expectedNumPoint = (int)(voxelSizes * voxelSizes * density);
-            swapProbabilities[i] = (expectedNumPoint >= 5) ? 1D - Math.Pow(1D - probaSwapEvent, 1D / expectedNumPoint) : 0D;
+            swapProbabilities[i] = (expectedNumPoint >= 5) ? 1D - Math.Pow(1D - probabilitySwapEvent, 1D / expectedNumPoint) : 0D;
             voxelSizes /= 2;
         }
 
@@ -283,9 +282,9 @@ internal static class Processor
                     }
 
                     // We put the incoming points (coming in a random order) in the octree
-                    for (var i = 0; i < buffer.Count; i++)
+                    foreach (var item in buffer)
                     {
-                        var lasPoint = buffer[i];
+                        var lasPoint = item;
                         point = lasPoint.PointDataRecord!;
                         var (x, y, z) = quantizer.Get(point);
                         finalizer.Remove(x, y, z);
@@ -317,7 +316,7 @@ internal static class Processor
                                 && voxel.BufferId != bufferId
                                 && ((float)random.Next(short.MaxValue) / short.MaxValue) < swapProbabilities[level])
                             {
-                                // only swap if bufid != id_buffer: save the heavy cost (on disk) of swapping.
+                                // only swap if the voxel buffer ID does not equal the current buffer ID: save the heavy cost (on disk) of swapping.
                                 // No need to swap two points from the same buffer: they are already shuffled.
                                 octant.Swap(ref lasPoint, voxel.PositionId);
                                 voxel.BufferId = bufferId;
@@ -328,7 +327,7 @@ internal static class Processor
                         while (!accepted);
 
                         // insert the point
-                        octant!.Add(lasPoint, cell, bufferId);
+                        octant.Add(lasPoint, cell, bufferId);
 
                         // Check if we finalized a cell of the finalizer.
                         // We can potentially write some chunks in the .copc.laz and free up memory
@@ -568,8 +567,6 @@ internal static class Processor
             this.Add(x, y, z);
         }
 
-        public void Add(double x, double y, double z) => this.grid[this.CellFromXyz(x, y, z)]++;
-
         public void Remove(double x, double y, double z)
         {
             this.AreAnyFinalized = false;
@@ -611,6 +608,8 @@ internal static class Processor
 
             return true;
         }
+
+        private void Add(double x, double y, double z) => this.grid[this.CellFromXyz(x, y, z)]++;
 
         private int CellFromXyz(double x, double y, double z)
         {
@@ -760,6 +759,7 @@ internal static class Processor
         public int Count => this.points.Count;
 
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Major Code Smell", "S1144:Unused private types or members should be removed", Justification = "This is public")]
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("ReSharper", "UnusedMember.Local", Justification = "This is public")]
         [System.Diagnostics.CodeAnalysis.SuppressMessage("CodeQuality", "IDE0079:Remove unnecessary suppression", Justification = "This is required")]
         public LasPointMemory this[int i] => this.points[i];
 

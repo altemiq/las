@@ -22,4 +22,9 @@
     <NoWarn>$(NoWarn);CS8002</NoWarn>
   </PropertyGroup>
   
+  <PropertyGroup Label="Signing" Condition=" '$(Configuration)' != '' AND '$(Configuration)' != 'Debug' ">
+    <SignAssembly>true</SignAssembly>
+    <AssemblyOriginatorKeyFile>$([MSBuild]::GetPathOfFileAbove(Las.snk))</AssemblyOriginatorKeyFile>
+  </PropertyGroup>
+  
 </Project>

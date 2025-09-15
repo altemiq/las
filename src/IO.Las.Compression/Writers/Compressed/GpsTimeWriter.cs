@@ -166,7 +166,6 @@ internal sealed class GpsTimeWriter : ISimpleWriter
                             this.gpsTimeIntegerCompressor.Compress(multi * this.lastGpsTimeDiff[this.last], currentGpsTimeDiff, multi < 10 ? 2U : 3U);
                             break;
                         case > 0:
-                        {
                             this.encoder.EncodeSymbol(this.gpsTimeMultiModel, Multiple);
                             this.gpsTimeIntegerCompressor.Compress(Multiple * this.lastGpsTimeDiff[this.last], currentGpsTimeDiff, 4);
                             this.multiExtremeCounter[this.last]++;
@@ -177,7 +176,6 @@ internal sealed class GpsTimeWriter : ISimpleWriter
                             }
 
                             break;
-                        }
 
                         case < 0 and > MultipleMinus:
                             // negative multipliers larger than LASZIPGPSTIMEMULTIMINUS are compressed directly
@@ -185,7 +183,6 @@ internal sealed class GpsTimeWriter : ISimpleWriter
                             this.gpsTimeIntegerCompressor.Compress(multi * this.lastGpsTimeDiff[this.last], currentGpsTimeDiff, 5);
                             break;
                         case < 0:
-                        {
                             this.encoder.EncodeSymbol(this.gpsTimeMultiModel, Multiple - MultipleMinus);
                             this.gpsTimeIntegerCompressor.Compress(MultipleMinus * this.lastGpsTimeDiff[this.last], currentGpsTimeDiff, 6);
                             this.multiExtremeCounter[this.last]++;
@@ -196,10 +193,8 @@ internal sealed class GpsTimeWriter : ISimpleWriter
                             }
 
                             break;
-                        }
 
                         default:
-                        {
                             this.encoder.EncodeSymbol(this.gpsTimeMultiModel, 0);
                             this.gpsTimeIntegerCompressor.Compress(0, currentGpsTimeDiff, 7);
                             this.multiExtremeCounter[this.last]++;
@@ -210,7 +205,6 @@ internal sealed class GpsTimeWriter : ISimpleWriter
                             }
 
                             break;
-                        }
                     }
                 }
                 else

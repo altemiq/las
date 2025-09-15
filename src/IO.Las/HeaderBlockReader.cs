@@ -126,20 +126,20 @@ public class HeaderBlockReader(Stream stream)
     /// <summary>
     /// Moves to the extended variable length records.
     /// </summary>
-    /// <param name="startOfFirstExtendedVariableLengthRecord">The start of the first extended variable length record.</param>
+    /// <param name="position">The start of the first extended variable length record.</param>
     /// <returns><see langword="true"/> if the current position is at the start of the extended variable length records.</returns>
-    public bool MoveToExtendedVariableLengthRecords(long startOfFirstExtendedVariableLengthRecord)
+    public bool MoveToExtendedVariableLengthRecords(long position)
     {
         _ = stream.SwitchStreamIfMultiple(LasStreams.ExtendedVariableLengthRecord);
 
         if (stream is ICacheStream prepareStream)
         {
-            prepareStream.Cache(startOfFirstExtendedVariableLengthRecord);
+            prepareStream.Cache(position);
         }
 
-        stream.MoveToPositionForwardsOnly(startOfFirstExtendedVariableLengthRecord);
+        stream.MoveToPositionForwardsOnly(position);
 
-        return stream.Position == startOfFirstExtendedVariableLengthRecord;
+        return stream.Position == position;
     }
 #endif
 
@@ -157,9 +157,9 @@ public class HeaderBlockReader(Stream stream)
     /// <summary>
     /// Gets the extended variable length record.
     /// </summary>
-    /// <param name="vlrs">The variable length records.</param>
+    /// <param name="records">The variable length records.</param>
     /// <returns>The next <see cref="ExtendedVariableLengthRecord"/>.</returns>
-    public ExtendedVariableLengthRecord GetExtendedVariableLengthRecord(IEnumerable<VariableLengthRecord> vlrs) => this.GetExtendedVariableLengthRecord(vlrs, (long)this.startOfFirstExtendedVariableLengthRecord);
+    public ExtendedVariableLengthRecord GetExtendedVariableLengthRecord(IEnumerable<VariableLengthRecord> records) => this.GetExtendedVariableLengthRecord(records, (long)this.startOfFirstExtendedVariableLengthRecord);
 #endif
 
 #if LAS1_4_OR_GREATER
@@ -228,9 +228,9 @@ public class HeaderBlockReader(Stream stream)
     /// Gets the extended variable length record.
     /// </summary>
     /// <param name="stream">The stream.</param>
-    /// <param name="vlrs">The variable length records.</param>
+    /// <param name="records">The variable length records.</param>
     /// <returns>The next <see cref="ExtendedVariableLengthRecord"/>.</returns>
-    internal static ExtendedVariableLengthRecord GetExtendedVariableLengthRecord(Stream stream, IEnumerable<VariableLengthRecord> vlrs)
+    internal static ExtendedVariableLengthRecord GetExtendedVariableLengthRecord(Stream stream, IEnumerable<VariableLengthRecord> records)
     {
         var position = stream.Position;
         var byteArray = new byte[60];
@@ -240,19 +240,19 @@ public class HeaderBlockReader(Stream stream)
         byteArray = new byte[header.RecordLengthAfterHeader];
         _ = stream.Read(byteArray, 0, byteArray.Length);
 
-        return VariableLengthRecordProcessor.Instance.Process(header, vlrs, position, byteArray);
+        return VariableLengthRecordProcessor.Instance.Process(header, records, position, byteArray);
     }
 
     /// <summary>
     /// Gets the extended variable length record.
     /// </summary>
-    /// <param name="vlrs">The variable length records.</param>
-    /// <param name="startOfFirstExtendedVariableLengthRecord">The start of the first extended variable length record.</param>
+    /// <param name="records">The variable length records.</param>
+    /// <param name="extendedVariableLengthRecordPosition">The start of the first extended variable length record.</param>
     /// <returns>The next <see cref="ExtendedVariableLengthRecord"/>.</returns>
-    internal ExtendedVariableLengthRecord GetExtendedVariableLengthRecord(IEnumerable<VariableLengthRecord> vlrs, long startOfFirstExtendedVariableLengthRecord)
+    internal ExtendedVariableLengthRecord GetExtendedVariableLengthRecord(IEnumerable<VariableLengthRecord> records, long extendedVariableLengthRecordPosition)
     {
-        _ = this.MoveToExtendedVariableLengthRecords(startOfFirstExtendedVariableLengthRecord);
-        return GetExtendedVariableLengthRecord(stream, vlrs);
+        _ = this.MoveToExtendedVariableLengthRecords(extendedVariableLengthRecordPosition);
+        return GetExtendedVariableLengthRecord(stream, records);
     }
 #endif
 

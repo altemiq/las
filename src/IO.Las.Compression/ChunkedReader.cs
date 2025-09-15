@@ -153,20 +153,16 @@ internal abstract class ChunkedReader : IPointReader
             {
                 // read the chunk here
                 case IAsyncCacheStream asyncCacheStream:
-                {
-                    var chunkStart = this.chunkStartValues[this.currentChunk];
-                    var chunkLength = this.chunkStartValues[this.currentChunk + 1] - chunkStart;
-                    await asyncCacheStream.CacheAsync(chunkStart, (int)chunkLength, cancellationToken).ConfigureAwait(false);
+                    var asyncChunkStart = this.chunkStartValues[this.currentChunk];
+                    var asyncChunkLength = this.chunkStartValues[this.currentChunk + 1] - asyncChunkStart;
+                    await asyncCacheStream.CacheAsync(asyncChunkStart, (int)asyncChunkLength, cancellationToken).ConfigureAwait(false);
                     break;
-                }
 
                 case ICacheStream cacheStream:
-                {
                     var chunkStart = this.chunkStartValues[this.currentChunk];
                     var chunkLength = this.chunkStartValues[this.currentChunk + 1] - chunkStart;
                     cacheStream.Cache(chunkStart, (int)chunkLength);
                     break;
-                }
             }
 
             this.chunkCount = default;
@@ -390,20 +386,16 @@ internal abstract class ChunkedReader : IPointReader
             {
                 // read the chunk here
                 case IAsyncCacheStream asyncCacheStream:
-                {
-                    var chunkStart = this.chunkStartValues[this.currentChunk];
-                    var chunkLength = this.chunkStartValues[this.currentChunk + 1] - chunkStart;
-                    await asyncCacheStream.CacheAsync(chunkStart, (int)chunkLength, cancellationToken).ConfigureAwait(false);
+                    var asyncChunkStart = this.chunkStartValues[this.currentChunk];
+                    var asyncChunkLength = this.chunkStartValues[this.currentChunk + 1] - asyncChunkStart;
+                    await asyncCacheStream.CacheAsync(asyncChunkStart, (int)asyncChunkLength, cancellationToken).ConfigureAwait(false);
                     break;
-                }
 
                 case ICacheStream prepareStream:
-                {
                     var chunkStart = this.chunkStartValues[this.currentChunk];
                     var chunkLength = this.chunkStartValues[this.currentChunk + 1] - chunkStart;
                     prepareStream.Cache(chunkStart, (int)chunkLength);
                     break;
-                }
             }
         }
     }
