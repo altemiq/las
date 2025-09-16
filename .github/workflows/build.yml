@@ -67,7 +67,7 @@ jobs:
 
     - uses: actions/upload-artifact@v4
       with:
-        name: CoverageReports-${{ matrix.las-version }}
+        name: coverage-${{ matrix.las-version }}
         path: ${{ github.workspace }}/coverage/reports
 
   get-version:
@@ -181,14 +181,14 @@ jobs:
 
       - uses: actions/upload-artifact@v4
         with:
-          name: NuPkg
+          name: nuget
           if-no-files-found: error
           retention-days: 7
           path: ${{ github.workspace }}/nupkg
 
       - uses: actions/upload-artifact@v4
         with:
-          name: Versions
+          name: versions
           if-no-files-found: error
           retention-days: 7
           path: ${{ github.workspace }}/versions
