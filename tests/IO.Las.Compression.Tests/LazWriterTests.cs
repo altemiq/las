@@ -636,7 +636,9 @@ public class LazWriterTests
 
         stream.Position = 0;
         using LazReader reader = new(stream);
-        _ = await Assert.That(reader.ExtendedVariableLengthRecords).ContainsOnly(e => ExtendedVariableLengthRecordComparer.Instance.Equals(e, record));
+        _ = await Assert.That(reader.ExtendedVariableLengthRecords)
+            .HasSingleItem()
+            .ContainsOnly(e => ExtendedVariableLengthRecordComparer.Instance.Equals(e, record));
     }
 
     [Test]
@@ -671,8 +673,9 @@ public class LazWriterTests
         using LazReader reader = new(memoryStream);
         _ = await Assert.That(reader.ExtendedVariableLengthRecords).IsEmpty();
 
-        _ = await Assert.That(reader.VariableLengthRecords.OfType<CompressedTag>()).HasSingleItem()
-            .And.Satisfies(x => x.Single().NumOfSpecialEvlrs, x => x.IsEqualTo(1));
+        _ = await Assert.That(reader.VariableLengthRecords.OfType<CompressedTag>())
+            .HasSingleItem()
+            .Satisfies(x => x.Single().NumOfSpecialEvlrs, x => x.IsEqualTo(1));
     }
 
     [Test]

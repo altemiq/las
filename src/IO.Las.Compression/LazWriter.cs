@@ -628,7 +628,8 @@ public sealed class LazWriter : LasWriter
         {
             if (!special)
             {
-                callback?.Invoke(this.WriteExtendedVariableLengthRecord(record));
+                var startPosition = this.WriteExtendedVariableLengthRecord(record);
+                callback?.Invoke(startPosition);
                 return;
             }
 
