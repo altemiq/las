@@ -305,6 +305,11 @@ public class HeaderBlockReader(Stream stream)
         var years = System.Buffers.Binary.BinaryPrimitives.ReadUInt16LittleEndian(source[88..90]);
         if (years is not 0)
         {
+            if (years > 9999)
+            {
+                throw new InvalidOperationException($"Years must not be greater than 9999, but found {years}.");
+            }
+
             var fileCreation = new DateTime(years, 1, 1, 0, 0, 0, DateTimeKind.Unspecified);
             if (days > 0)
             {
