@@ -17,7 +17,7 @@ using static Microsoft.CodeAnalysis.CSharp.SyntaxFactory;
 internal static class Platforms
 {
     /// <summary>
-    /// Creates the platorms.
+    /// Creates the platforms.
     /// </summary>
     /// <param name="namespace">The namespace.</param>
     /// <param name="platforms">The platforms to create.</param>
@@ -425,7 +425,7 @@ internal static class Platforms
     /// <returns>The IDs and Types.</returns>
     public static (IReadOnlyCollection<string?> Ids, IReadOnlyCollection<string?> Types) GetIdsAndTypes(AdditionalText input)
     {
-        var records = input.GetLines().Select(static line => line.Split(',')).ToList();
+        IReadOnlyCollection<string[]> records = [.. input.GetLines().Select(static line => line.Split(','))];
 
         var ids = records.Select(static record => record[0]).ToArray();
         var types = records.Select(static record => record[1]).Distinct(StringComparer.Ordinal).ToArray();
@@ -440,13 +440,18 @@ internal static class Platforms
     /// <returns>The platforms.</returns>
     public static IReadOnlyCollection<(string? Id, string? Type, char Code)> GetPlatforms(AdditionalText input)
     {
-        return [.. input.GetLines()
-            .Select(static line => line.Split(','))
-            .Select(static record => (Id: CheckNull(record[0]), Type: CheckNull(record[1]), Code: record[2][0])),];
+        return [.. ProcessLines(input)];
 
-        static string? CheckNull(string input)
+        static IEnumerable<(string? Id, string? Type, char Code)> ProcessLines(AdditionalText input)
         {
-            return string.IsNullOrEmpty(input) ? null : input;
+            return input.GetLines()
+                .Select(static line => line.Split(','))
+                .Select(static record => (Id: CheckNull(record[0]), Type: CheckNull(record[1]), Code: record[2][0]));
+
+            static string? CheckNull(string input)
+            {
+                return string.IsNullOrEmpty(input) ? null : input;
+            }
         }
     }
 }

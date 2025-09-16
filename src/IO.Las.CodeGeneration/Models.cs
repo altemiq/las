@@ -571,13 +571,18 @@ internal static class Models
     /// <returns>The models.</returns>
     public static IReadOnlyCollection<(string? Brand, string? Model, string? Code)> GetModels(AdditionalText input)
     {
-        return [.. input.GetLines()
-            .Select(static line => line.Split(','))
-            .Select(static record => (Brand: CheckNull(record[0]), Model: CheckNull(record[1]), Code: CheckNull(record[2]))),];
+        return [.. ProcessLines(input)];
 
-        static string? CheckNull(string input)
+        static IEnumerable<(string? Brand, string? Model, string? Code)> ProcessLines(AdditionalText input)
         {
-            return string.IsNullOrEmpty(input) ? null : input;
+            return input.GetLines()
+                .Select(static line => line.Split(','))
+                .Select(static record => (Brand: CheckNull(record[0]), Model: CheckNull(record[1]), Code: CheckNull(record[2])));
+
+            static string? CheckNull(string input)
+            {
+                return string.IsNullOrEmpty(input) ? null : input;
+            }
         }
     }
 
