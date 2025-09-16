@@ -387,6 +387,11 @@ public class LasWriter(Stream stream, bool leaveOpen = false) : ILasWriter, IDis
                 System.Buffers.Binary.BinaryPrimitives.WriteUInt16LittleEndian(destination[90..92], (ushort)fileCreation.DayOfYear);
                 System.Buffers.Binary.BinaryPrimitives.WriteUInt16LittleEndian(destination[92..94], (ushort)fileCreation.Year);
             }
+            else
+            {
+                // ensure that these values are cleared
+                destination[90..94].Clear();
+            }
 
             System.Buffers.Binary.BinaryPrimitives.WriteUInt16LittleEndian(destination[94..96], size);
             System.Buffers.Binary.BinaryPrimitives.WriteUInt32LittleEndian(destination[96..100], size + recordSize);
