@@ -291,11 +291,6 @@ jobs:
       working-directory: ${{ github.workspace }}/nupkg
       run: dotnet nuget push *.nupkg --source https://nuget.pkg.github.com/${{ github.repository_owner }}/index.json --api-key ${{ secrets.GITHUB_TOKEN }} --skip-duplicate
 
-    - uses: GeekyEggo/delete-artifact@v5
-      if: ${{ steps.push-nuget.conclusion == 'success' }}
-      with:
-        name: nuget
-
     - uses: actions/download-artifact@v4
       with:
         pattern: containers
@@ -303,7 +298,6 @@ jobs:
         path: ${{ github.workspace }}/container
         
     - uses: oras-project/setup-oras@v1
-      
     - name: Run local/push-containers@v1
       id: push-containers
       working-directory: ${{ github.workspace }}/container
@@ -312,11 +306,6 @@ jobs:
         echo ${{ secrets.GITHUB_TOKEN }} | oras login ghcr.io -u ${{ github.actor }} --password-stdin
         oras cp --from-oci-layout las.tar.gz:${{ needs.get-version.outputs.version }} ghcr.io/${{ github.repository_owner }}/io/las:${{ needs.get-version.outputs.version }}
         oras cp --from-oci-layout las.tar.gz:${{ needs.get-version.outputs.version }} ghcr.io/${{ github.repository_owner }}/io/las:${{ needs.get-version.outputs.suffix }}
-
-    - uses: GeekyEggo/delete-artifact@v5
-      if: ${{ steps.push-containers.conclusion == 'success' }}
-      with:
-        name: container.*
 
     - uses: actions/download-artifact@v4
       with:
@@ -329,21 +318,11 @@ jobs:
       run: |
         tar --file ${{ github.workspace }}/tools/tools-linux-x64.tar.gz --gzip --create .
 
-    - uses: GeekyEggo/delete-artifact@v5
-      if: ${{ steps.compress-linux-tools.conclusion == 'success' }}
-      with:
-        name: tools-linux-*
-
     - name: Run local/compress-windows-tools@v1
       id: compress-windows-tools
       working-directory: ${{ github.workspace }}/tools/tools-win-x64
       run: |
         zip -9 -r ${{ github.workspace }}/tools/tools-win-x64.zip .
-
-    - uses: GeekyEggo/delete-artifact@v5
-      if: ${{ steps.compress-windows-tools.conclusion == 'success' }}
-      with:
-        name: tools-win-*
 
     - uses: altemiq/update-existing-release@v1
       with:
@@ -353,3 +332,23 @@ jobs:
           ${{ github.workspace }}/tools/tools-linux-x64.tar.gz
           ${{ github.workspace }}/tools/tools-win-x64.zip
         prerelease: true
+
+    - uses: GeekyEggo/delete-artifact@v5
+      if: ${{ steps.push-nuget.conclusion == 'success' }}
+      with:
+        name: nuget
+
+    - uses: GeekyEggo/delete-artifact@v5
+      if: ${{ steps.push-containers.conclusion == 'success' }}
+      with:
+        name: container.*
+    
+    - uses: GeekyEggo/delete-artifact@v5
+      if: ${{ steps.compress-linux-tools.conclusion == 'success' }}
+      with:
+        name: tools-linux-*
+
+    - uses: GeekyEggo/delete-artifact@v5
+      if: ${{ steps.compress-windows-tools.conclusion == 'success' }}
+      with:
+        name: tools-win-*
