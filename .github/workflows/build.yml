@@ -257,12 +257,7 @@ jobs:
         NUGET_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
     - name: Run local/dotnet-publish@v1
-      working-directory: ${{ github.workspace }}
-      env:
-        ContainerRepository: ghcr.io/${{ github.repository_owner }}/io/las
-        ContainerImageTags: ${{ needs.get-version.outputs.version }};${{ needs.get-version.outputs.suffix }}
-        ContainerArchiveOutputPath: ${{ github.workspace }}/container
-      run: dotnet publish tools/Las /t:PublishContainer
+      run: dotnet publish tools/Las /t:PublishContainer /p:ContainerArchiveOutputPath=${{ github.workspace }}/container /p:ContainerImageTag=${{ needs.get-version.outputs.version }}
 
     - uses: actions/upload-artifact@v4
       with:
@@ -276,6 +271,7 @@ jobs:
     permissions:
       packages: write
       actions: write
+      contents: write
     runs-on: ubuntu-latest
     needs: [ create-nuget, run-tests, publish, docker, get-version ]
 
@@ -305,42 +301,17 @@ jobs:
         pattern: containers
         merge-multiple: true
         path: ${{ github.workspace }}/container
-
+        
+    - uses: oras-project/setup-oras@v1
+      
     - name: Run local/push-containers@v1
       id: push-containers
       working-directory: ${{ github.workspace }}/container
       run: |
-        ### Push docker images ###
-
         # login to ghcr.io
-        echo ${{ secrets.GITHUB_TOKEN }} | docker login ghcr.io -u ${{ github.actor }} --password-stdin
-
-        # setup the values
-        registry='ghcr.io'
-        image="$registry/${{ github.repository_owner }}/io/las"
-
-        # load all the images
-        for f in $image-*.tar.gz
-        do
-          docker image load --input="$f"
-        done
-
-        containerTags=($(docker images --filter "reference=$image" --format '{{.Tag}}'))
-
-        # push the images with all tags
-        docker image push $image --all-tags
-
-        # create the manifest
-        tags=('${{ needs.get-version.outputs.version }}' '${{ needs.get-version.outputs.suffix }}')
-        for t in ${tags[@]}
-        do
-          ts=($(printf '%s\n' "${containerTags[@]}" | awk "/$t-/"))
-          ts=("${ts[@]/#/$image:}")
-          img="$image:$t"
-          echo "Creating manifest for $img using tags: ${ts[*]}"
-          docker manifest create $img ${ts[*]}
-          docker manifest push $img
-        done
+        echo ${{ secrets.GITHUB_TOKEN }} | oras login ghcr.io -u ${{ github.actor }} --password-stdin
+        oras cp --from-oci-layout las.tar.gz:${{ needs.get-version.outputs.version }} ghcr.io/${{ github.repository_owner }}/io/las:${{ needs.get-version.outputs.version }}
+        oras cp --from-oci-layout las.tar.gz:${{ needs.get-version.outputs.version }} ghcr.io/${{ github.repository_owner }}/io/las:${{ needs.get-version.outputs.suffix }}
 
     - uses: GeekyEggo/delete-artifact@v5
       if: ${{ steps.push-containers.conclusion == 'success' }}
