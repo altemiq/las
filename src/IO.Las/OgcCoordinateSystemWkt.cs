@@ -24,11 +24,18 @@ public sealed record OgcCoordinateSystemWkt : VariableLengthRecord
         : base(
             new VariableLengthRecordHeader
             {
-                UserId = VariableLengthRecordHeader.ProjectionUserId,
-                RecordId = 2112,
-                RecordLengthAfterHeader = (ushort)(System.Text.Encoding.UTF8.GetByteCount(wkt) + 1),
-                Description = "OGC COORDINATE SYSTEM WKT",
-            }) => this.Wkt = wkt;
+                UserId = VariableLengthRecordHeader.ProjectionUserId, RecordId = 2112, RecordLengthAfterHeader = (ushort)(System.Text.Encoding.UTF8.GetByteCount(wkt) + 1), Description = "OGC COORDINATE SYSTEM WKT",
+            })
+#if NETSTANDARD2_1_OR_GREATER || NETCOREAPP2_1_OR_GREATER
+        => this.Wkt = WellKnownTextNode.Parse(wkt);
+#else
+    {
+        var byteCount = System.Text.Encoding.UTF8.GetByteCount(wkt);
+        Span<byte> buffer = stackalloc byte[byteCount];
+        System.Text.Encoding.UTF8.GetBytes(wkt, buffer);
+        this.Wkt = WellKnownTextNode.Parse(buffer);
+    }
+#endif
 
     /// <summary>
     /// Initializes a new instance of the <see cref="OgcCoordinateSystemWkt"/> class.
@@ -36,12 +43,12 @@ public sealed record OgcCoordinateSystemWkt : VariableLengthRecord
     /// <param name="header">The header.</param>
     /// <param name="data">The data.</param>
     internal OgcCoordinateSystemWkt(VariableLengthRecordHeader header, ReadOnlySpan<byte> data)
-        : base(header) => this.Wkt = System.Text.Encoding.UTF8.GetString(data[..^1]);
+        : base(header) => this.Wkt = WellKnownTextNode.Parse(data);
 
     /// <summary>
     /// Gets the well-known text.
     /// </summary>
-    public string Wkt { get; }
+    public WellKnownTextNode Wkt { get; }
 
     /// <inheritdoc />
     public override int CopyTo(Span<byte> destination)
@@ -50,7 +57,7 @@ public sealed record OgcCoordinateSystemWkt : VariableLengthRecord
         int bytesWritten = VariableLengthRecordHeader.Size;
         var d = destination[bytesWritten..];
 
-        bytesWritten += System.Text.Encoding.UTF8.GetBytes(this.Wkt, d);
+        bytesWritten += this.Wkt.CopyTo(d);
         d[bytesWritten] = 0;
 
         return bytesWritten + 1;

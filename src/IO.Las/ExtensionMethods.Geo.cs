@@ -12,6 +12,52 @@ namespace Altemiq.IO.Las;
 public static partial class ExtensionMethods
 {
     /// <summary>
+    /// Gets a value indicating whether the specified variable length record is a <c>GeoTIFF</c> tag.
+    /// </summary>
+    /// <param name="record">The variable length record.</param>
+    /// <returns><see langword="true"/> is <paramref name="record"/> is a <c>GeoTIFF</c> tag; otherwise <see langword="false"/>.</returns>
+    public static bool IsGeoTiff(this VariableLengthRecord record) => record is GeoAsciiParamsTag or GeoDoubleParamsTag or GeoKeyDirectoryTag;
+
+    /// <summary>
+    /// Removes the <c>GeoTIFF</c> tags from the list.
+    /// </summary>
+    /// <param name="records">The list of variable length records.</param>
+    public static void RemoveGeoTiff(this IList<VariableLengthRecord> records)
+    {
+        for (var i = records.Count - 1; i >= 0; i--)
+        {
+            if (records[i].IsGeoTiff())
+            {
+                records.RemoveAt(0);
+            }
+        }
+    }
+
+#if LAS1_4_OR_GREATER
+    /// <summary>
+    /// Gets a value indicating whether the specified variable length record is a <c>WKT</c> tag.
+    /// </summary>
+    /// <param name="record">The variable length record.</param>
+    /// <returns><see langword="true"/> is <paramref name="record"/> is a <c>WKT</c> tag; otherwise <see langword="false"/>.</returns>
+    public static bool IsWkt(this VariableLengthRecord record) => record is OgcCoordinateSystemWkt or OgcMathTransformWkt;
+
+    /// <summary>
+    /// Removes the <c>WKT</c> tags from the list.
+    /// </summary>
+    /// <param name="records">The list of variable length records.</param>
+    public static void RemoveWkt(this IList<VariableLengthRecord> records)
+    {
+        for (var i = records.Count - 1; i >= 0; i--)
+        {
+            if (records[i].IsWkt())
+            {
+                records.RemoveAt(0);
+            }
+        }
+    }
+#endif
+
+    /// <summary>
     /// Gets the ASCII value associated with the <see cref="GeoKey"/> from the <see cref="ILasReader"/>.
     /// </summary>
     /// <param name="reader">The reader.</param>
