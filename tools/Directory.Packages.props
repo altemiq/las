@@ -7,14 +7,15 @@
   <ItemGroup>
     <PackageVersion Include="Altemiq.CommandLine.DependencyInjection" Version="1.0.0-beta7.3" />
     <PackageVersion Include="Altemiq.CommandLine.Spectre" Version="1.0.0-beta7.3" />
-    <PackageVersion Include="Microsoft.Extensions.Http" Version="9.0.1" />
+    <PackageVersion Include="Microsoft.Data.Sqlite" Version="9.0.9" />
+    <PackageVersion Include="Microsoft.Extensions.Http" Version="9.0.9" />
     <PackageVersion Include="System.CommandLine" Version="2.0.0-beta7.25380.108" />
     <PackageVersion Include="Spectre.Console" Version="0.50.0" />
     <PackageVersion Include="Spectre.Console.Analyzer" Version="1.0.0" />
   </ItemGroup>
   
   <ItemGroup Label="Coding Standards">
-    <GlobalPackageReference Include="Altemiq.DotNet.CodingStandard" Version="1.0.104" />
+    <GlobalPackageReference Include="Altemiq.DotNet.CodingStandard" Version="1.0.105" />
   </ItemGroup>
 
 </Project>
