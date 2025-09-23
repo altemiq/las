@@ -9,6 +9,8 @@ namespace Altemiq.IO.Las.Geodesy;
 /// <summary>
 /// The well-known text version.
 /// </summary>
+[System.Diagnostics.CodeAnalysis.SuppressMessage("ReSharper", "InconsistentNaming", Justification = "This is required.")]
+[System.Diagnostics.CodeAnalysis.SuppressMessage("Naming", "CA1707:Identifiers should not contain underscores", Justification = "This is required.")]
 public enum WellKnownTextVersion
 {
     /// <summary>
