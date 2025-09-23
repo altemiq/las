@@ -85,6 +85,7 @@ public sealed record GeoKeyDirectoryTag : VariableLengthRecord, IReadOnlyList<Ge
     /// <param name="key">The key.</param>
     /// <param name="entry">The entry.</param>
     /// <returns><see langword="true"/> if an entry with <paramref name="key"/> was found; otherwise <see langword="false"/>.</returns>
+    [System.Diagnostics.CodeAnalysis.SuppressMessage("Major Bug", "S1751:Loops with at most one iteration should be refactored", Justification = "Checked")]
     public bool TryGetValue(GeoKey key, out GeoKeyEntry entry)
     {
         foreach (var value in this.values.Where(x => x.KeyId == key))

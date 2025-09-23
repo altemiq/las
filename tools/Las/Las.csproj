@@ -38,6 +38,7 @@
   <ItemGroup>
     <PackageReference Include="Altemiq.CommandLine.DependencyInjection" />
     <PackageReference Include="Altemiq.CommandLine.Spectre" />
+    <PackageReference Include="Microsoft.Data.Sqlite" />
     <PackageReference Include="Microsoft.Extensions.Http" />
     <PackageReference Include="Spectre.Console.Analyzer" />
   </ItemGroup>
@@ -50,6 +51,10 @@
     <Compile Update="ExtensionMethods.*.cs;Options.*.cs;RootCommandExtensions.*.cs">
       <DependentUpon>$([System.Text.RegularExpressions.Regex]::Replace('%(Filename)%(Extension)', '\.[^.]+\%(Extension)$', '%(Extension)'))</DependentUpon>
     </Compile>
+  </ItemGroup>
+
+  <ItemGroup>
+    <Content Include="..\..\data\proj.db" CopyToOutputDirectory="PreserveNewest" CopyToPublishDirectory="Always" />
   </ItemGroup>
 
   <Target Name="_SetContainerLabels"

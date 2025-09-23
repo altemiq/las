@@ -10,6 +10,7 @@ namespace Altemiq.IO.Las;
 /// Represents the LAS item type.
 /// </summary>
 /// <remarks>The number in the name, e.g. in <see cref="LasItemType.Point10"/>, refers to the LAS and LAZ version where that type got added.</remarks>
+[System.Diagnostics.CodeAnalysis.SuppressMessage("Naming", "CA1720:Identifier contains type name", Justification = "This represents the type name")]
 public enum LasItemType : ushort
 {
     /// <summary>
