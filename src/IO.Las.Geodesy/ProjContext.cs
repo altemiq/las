@@ -51,8 +51,22 @@ public sealed partial class ProjContext :
         };
 
         this.connection = new(builder.ConnectionString);
-        this.connection.Open();
     }
+
+    /// <inheritdoc cref="System.Data.Common.DbConnection.State" />
+    public System.Data.ConnectionState State => this.connection.State;
+
+    /// <inheritdoc cref="System.Data.Common.DbConnection.Open" />
+    public void Open() => this.connection.Open();
+
+    /// <inheritdoc cref="System.Data.Common.DbConnection.OpenAsync()" />
+    public Task OpenAsync() => this.connection.OpenAsync();
+
+    /// <inheritdoc cref="System.Data.Common.DbConnection.OpenAsync(CancellationToken)" />
+    public Task OpenAsync(CancellationToken cancellationToken) => this.connection.OpenAsync(cancellationToken);
+
+    /// <inheritdoc cref="System.Data.Common.DbConnection.Close" />
+    public void Close() => this.connection.Close();
 
     /// <summary>
     /// Gets the <see cref="WellKnownTextNode"/> for the specified SRID.

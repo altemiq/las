@@ -146,7 +146,7 @@ public partial class ProjContext
                         reader.GetInt32(5),
                         version);
 
-                    var axisName = name.StartsWith(orientation,  StringComparison.OrdinalIgnoreCase)
+                    var axisName = name.StartsWith(orientation, StringComparison.OrdinalIgnoreCase)
                         ? $"({abbreviation})"
                         : $"{name} ({abbreviation})";
 

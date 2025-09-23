@@ -82,22 +82,29 @@ public static class GeodesyExtensions
 
     private static IEnumerable<VariableLengthRecord> GetWellKnownTextFromSrid(ushort srid)
     {
-        var context = new ProjContext();
+        using var context = new ProjContext();
+        context.Open();
         var wkt = context.GetWkt(srid);
         yield return new OgcCoordinateSystemWkt(wkt);
+        context.Close();
     }
 
     private static IEnumerable<VariableLengthRecord> GetGeoTiffFromSrid(ushort srid)
     {
-        var context = new ProjContext();
-        if (context.IsGeodeticCoordinateReferenceSystem(srid))
+        using (var context = new ProjContext())
         {
-            yield return new GeoKeyDirectoryTag(new GeoKeyEntry { KeyId = GeoKey.GeodeticCRSGeoKey, ValueOffset = srid, Count = 1 });
-        }
+            context.Open();
+            if (context.IsGeodeticCoordinateReferenceSystem(srid))
+            {
+                yield return new GeoKeyDirectoryTag(new GeoKeyEntry { KeyId = GeoKey.GeodeticCRSGeoKey, ValueOffset = srid, Count = 1 });
+                yield break;
+            }
 
-        if (context.IsProjectedCoordinateReferenceSystem(srid))
-        {
-            yield return new GeoKeyDirectoryTag(new GeoKeyEntry { KeyId = GeoKey.ProjectedCRSGeoKey, ValueOffset = srid, Count = 1 });
+            if (context.IsProjectedCoordinateReferenceSystem(srid))
+            {
+                yield return new GeoKeyDirectoryTag(new GeoKeyEntry { KeyId = GeoKey.ProjectedCRSGeoKey, ValueOffset = srid, Count = 1 });
+                yield break;
+            }
         }
 
         throw new KeyNotFoundException();

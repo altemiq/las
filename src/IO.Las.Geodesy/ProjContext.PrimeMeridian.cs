@@ -43,6 +43,11 @@ public partial class ProjContext
         int uomCode;
         using (var reader = command.ExecuteReader())
         {
+            if (!reader.Read())
+            {
+                throw new KeyNotFoundException();
+            }
+
             values.Add(reader.GetString(0));
             values.Add(reader.GetDouble(3));
             uomAuthName = reader.GetString(4);
