@@ -9,6 +9,7 @@ namespace Altemiq.IO.Las;
 /// <summary>
 /// The values for the <see cref="ExtraBytesItem.DataType"/>.
 /// </summary>
+[System.Diagnostics.CodeAnalysis.SuppressMessage("Naming", "CA1720:Identifier contains type name", Justification = "These represent those types.")]
 public enum ExtraBytesDataType : byte
 {
     /// <summary>

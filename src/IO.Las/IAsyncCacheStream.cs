@@ -9,6 +9,7 @@ namespace Altemiq.IO.Las;
 /// <summary>
 /// Interface for asynchronously caching a specific part in a stream.
 /// </summary>
+[System.Diagnostics.CodeAnalysis.SuppressMessage("Naming", "CA1711:Identifiers should not have incorrect suffix", Justification = "This is an extension for streams.")]
 public interface IAsyncCacheStream
 {
     /// <summary>

@@ -55,24 +55,85 @@ public sealed partial class ProjContext :
     }
 
     /// <summary>
+    /// Gets the <see cref="WellKnownTextNode"/> for the specified SRID.
+    /// </summary>
+    /// <param name="srid">The SRID.</param>
+    /// <param name="version">The version.</param>
+    /// <returns>The <see cref="WellKnownTextNode"/>.</returns>
+    /// <exception cref="KeyNotFoundException"><paramref name="srid"/> was not found.</exception>
+    public WellKnownTextNode GetWellKnownTextNode(ushort srid, WellKnownTextVersion version = WellKnownTextVersion.Wkt1) =>
+        this.TryGetWellKnownTextNode(srid, out var node, version)
+            ? node
+            : throw new KeyNotFoundException();
+
+    /// <summary>
+    /// Tries to get the <see cref="WellKnownTextNode"/> for the specified SRID.
+    /// </summary>
+    /// <param name="srid">The SRID.</param>
+    /// <param name="node">The <see cref="WellKnownTextNode"/>.</param>
+    /// <param name="version">The version.</param>
+    /// <returns><see langword="true"/> if the SRID was found; otherwise <see langword="false"/>.</returns>
+    public bool TryGetWellKnownTextNode(ushort srid, out WellKnownTextNode node, WellKnownTextVersion version = WellKnownTextVersion.Wkt1)
+    {
+        const string DefaultAuthName = "EPSG";
+        using var command = this.connection.CreateCommand();
+        return TryGetGeodeticCoordinateReferenceSystem(command, DefaultAuthName, srid, version, out node)
+               || TryGetProjectedCoordinateReferenceSystem(command, DefaultAuthName, srid, version, out node);
+    }
+
+    /// <summary>
     /// Gets the WKT for the specified SRID.
     /// </summary>
     /// <param name="srid">The SRID.</param>
     /// <param name="version">The version.</param>
     /// <returns>The WKT.</returns>
-    public string GetWkt(ushort srid, WellKnownTextVersion version = WellKnownTextVersion.Wkt1)
-    {
-        return TryGetCoordinateReferenceSystem(out var node)
-            ? node.ToString()
+    /// <exception cref="KeyNotFoundException"><paramref name="srid"/> was not found.</exception>
+    public string GetWkt(ushort srid, WellKnownTextVersion version = WellKnownTextVersion.Wkt1) =>
+        this.TryGetWkt(srid, out var wkt, version)
+            ? wkt
             : throw new KeyNotFoundException();
 
-        bool TryGetCoordinateReferenceSystem(out WellKnownTextNode output)
+    /// <summary>
+    /// Tries to get the WKT for the specified SRID.
+    /// </summary>
+    /// <param name="srid">The SRID.</param>
+    /// <param name="wkt">The WKT.</param>
+    /// <param name="version">The version.</param>
+    /// <returns><see langword="true"/> if the SRID was found; otherwise <see langword="false"/>.</returns>
+    public bool TryGetWkt(ushort srid, [System.Diagnostics.CodeAnalysis.NotNullWhen(true)] out string? wkt, WellKnownTextVersion version = WellKnownTextVersion.Wkt1)
+    {
+        if (this.TryGetWellKnownTextNode(srid, out var node, version))
         {
-            const string DefaultAuthName = "EPSG";
-            using var command = this.connection.CreateCommand();
-            return TryGetGeodeticCoordinateReferenceSystem(command, DefaultAuthName, srid, version, out output)
-                   || TryGetProjectedCoordinateReferenceSystem(command, DefaultAuthName, srid, version, out output);
+            wkt = node.ToString();
+            return true;
         }
+
+        wkt = default;
+        return false;
+    }
+
+    /// <summary>
+    /// Gets a value indicating whether the specified SRID represents a Geodetic Coordinate Reference System.
+    /// </summary>
+    /// <param name="srid">The SRID.</param>
+    /// <returns><see langword="true"/> is <paramref name="srid"/> represents a Geodetic Coordinate Reference System; otherwise <see langword="false"/>.</returns>
+    public bool IsGeodeticCoordinateReferenceSystem(ushort srid)
+    {
+        const string DefaultAuthName = "EPSG";
+        using var command = this.connection.CreateCommand();
+        return IsGeodeticCoordinateReferenceSystem(command, DefaultAuthName, srid);
+    }
+
+    /// <summary>
+    /// Gets a value indicating whether the specified SRID represents a Projected Coordinate Reference System.
+    /// </summary>
+    /// <param name="srid">The SRID.</param>
+    /// <returns><see langword="true"/> is <paramref name="srid"/> represents a Projected Coordinate Reference System; otherwise <see langword="false"/>.</returns>
+    public bool IsProjectedCoordinateReferenceSystem(ushort srid)
+    {
+        const string DefaultAuthName = "EPSG";
+        using var command = this.connection.CreateCommand();
+        return IsProjectedCoordinateReferenceSystem(command, DefaultAuthName, srid);
     }
 
     /// <inheritdoc />
@@ -196,7 +257,7 @@ public sealed partial class ProjContext :
                 continue;
             }
 
-            return name.Substring(0, i + 1);
+            return name[..(i + 1)];
         }
 
         return string.Empty;

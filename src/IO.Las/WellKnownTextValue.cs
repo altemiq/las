@@ -70,7 +70,7 @@ public readonly struct WellKnownTextValue
         this.value switch
         {
             string s => $"\"{s}\"",
-            double d => d.ToString("G15"),
+            double d => d.ToString("G15", System.Globalization.CultureInfo.InvariantCulture),
             not null => this.value.ToString(),
             _ => null,
         };

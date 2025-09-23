@@ -79,6 +79,24 @@ public sealed record GeoKeyDirectoryTag : VariableLengthRecord, IReadOnlyList<Ge
     /// <returns>The <see cref="GeoKeyDirectoryTag"/>.</returns>
     public static GeoKeyDirectoryTag Create(ReadOnlySpan<GeoKeyEntry> items) => new(items.ToReadOnlyList());
 
+    /// <summary>
+    /// Tries to get the value with the specified key.
+    /// </summary>
+    /// <param name="key">The key.</param>
+    /// <param name="entry">The entry.</param>
+    /// <returns><see langword="true"/> if an entry with <paramref name="key"/> was found; otherwise <see langword="false"/>.</returns>
+    public bool TryGetValue(GeoKey key, out GeoKeyEntry entry)
+    {
+        foreach (var value in this.values.Where(x => x.KeyId == key))
+        {
+            entry = value;
+            return true;
+        }
+
+        entry = default;
+        return false;
+    }
+
     /// <inheritdoc />
     public override int CopyTo(Span<byte> destination)
     {
