@@ -97,7 +97,7 @@ internal static class Processor
             writer.Write(header, variableLengthRecords);
 
             // read via cells
-            var quantizer = new PointDataRecordQuantizer(header);
+            var quantizer = new PointDataRecordQuantizer(reader.Header);
 
             while (reader.ReadPointDataRecord() is { PointDataRecord: { } point } record)
             {
@@ -231,7 +231,7 @@ internal static class Processor
             if (geoTiffTags.Count is not 0 && !hasWkt)
             {
                 // convert the GeoTIFF flags to WKT
-                values.AddRange(geoTiffTags.ToWkt());
+                values.AddRange(Geodesy.GeodesyExtensions.ToWkt(geoTiffTags));
             }
 
             values.Add(new CompressedTag(header.PointDataFormatId, extraBytesCount, Compressor.LayeredChunked) { ChunkSize = -1, Options = default, NumOfSpecialEvlrs = -1, });

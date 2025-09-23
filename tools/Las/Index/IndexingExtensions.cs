@@ -17,7 +17,10 @@ internal static class IndexingExtensions
     /// </summary>
     /// <param name="reader">The reader.</param>
     /// <returns>The LAS index.</returns>
-    public static Indexing.LasIndex ReadOrCreateIndex(this LasReader reader) => reader.ReadIndex() ?? Indexing.LasIndex.Create(reader);
+    public static Indexing.LasIndex ReadOrCreateIndex(this LasReader reader) =>
+        TryReadIndex(reader, out var index)
+            ? index
+            : Indexing.LasIndex.Create(reader);
 
     /// <summary>
     /// Reads the index from the reader.
@@ -25,8 +28,21 @@ internal static class IndexingExtensions
     /// <param name="reader">The LAS reader.</param>
     /// <returns>The LAS index.</returns>
     public static Indexing.LasIndex ReadIndex(this LasReader reader) =>
-        reader.ExtendedVariableLengthRecords.OfType<Indexing.LaxTag>().FirstOrDefault() is { } laxTag
-            ? laxTag.GetIndex()
+        TryReadIndex(reader, out var index)
+            ? index
             : throw new InvalidOperationException();
+
+    [System.Diagnostics.CodeAnalysis.SuppressMessage("Major Bug", "S1751:Loops with at most one iteration should be refactored", Justification = "Checked")]
+    private static bool TryReadIndex(LasReader reader, [System.Diagnostics.CodeAnalysis.NotNullWhen(true)] out Indexing.LasIndex? index)
+    {
+        foreach (var tag in reader.ExtendedVariableLengthRecords.OfType<Indexing.LaxTag>())
+        {
+            index = tag.GetIndex();
+            return true;
+        }
+
+        index = default;
+        return false;
+    }
 #endif
 }

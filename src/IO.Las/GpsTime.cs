@@ -68,43 +68,50 @@ internal static class GpsTime
     /// </summary>
     /// <param name="header">The header.</param>
     /// <returns>The offset.</returns>
-    /// <exception cref="InvalidOperationException">Unable to determine offset.</exception>
     public static double GetOffset(in HeaderBlock header)
     {
+        // if our points do not have a GPS time.
+        return header.PointDataFormatId is PointDataRecord.Id or ColorPointDataRecord.Id
+            ? default
+            : GetOffsetOrThrow(header);
+
+        static double GetOffsetOrThrow(in HeaderBlock header)
+        {
 #if LAS1_2_OR_GREATER
-        return HasFlag(header.GlobalEncoding, GlobalEncoding.StandardGpsTime)
+            return HasFlag(header.GlobalEncoding, GlobalEncoding.StandardGpsTime)
 #if LAS1_5_OR_GREATER
-            ? GetAdjusted(header)
+                ? GetAdjusted(header)
 #else
-            ? StandardOffset
+                ? StandardOffset
 #endif
-            : GetOffset(CalculateGpsWeek(header));
+                : GetOffset(CalculateGpsWeek(header));
 
 #if LAS1_5_OR_GREATER
-        static double GetAdjusted(in HeaderBlock header)
-        {
-            return HasFlag(header.GlobalEncoding, GlobalEncoding.TimeOffsetFlag)
-                ? header.TimeOffset
-                : StandardOffset;
-        }
-#endif
-
-        [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
-        static bool HasFlag(GlobalEncoding globalEncoding, GlobalEncoding flag)
-        {
-            return (globalEncoding & flag) == flag;
-        }
-#else
-        return GetOffset(CalculateGpsWeek(header));
-#endif
-
-        static int CalculateGpsWeek(in HeaderBlock header)
-        {
-            return header.FileCreation switch
+            static double GetAdjusted(in HeaderBlock header)
             {
-                { } fileCreation => (int)Math.Floor((fileCreation - BaseGpsTime).TotalDays / 7D),
-                _ => throw new InvalidOperationException(Properties.Resources.CannotDetermineGpsWeek),
-            };
+                return HasFlag(header.GlobalEncoding, GlobalEncoding.TimeOffsetFlag)
+                    ? header.TimeOffset
+                    : StandardOffset;
+            }
+#endif
+
+            [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
+            static bool HasFlag(GlobalEncoding globalEncoding, GlobalEncoding flag)
+            {
+                return (globalEncoding & flag) == flag;
+            }
+#else
+            return GetOffset(CalculateGpsWeek(header));
+#endif
+
+            static int CalculateGpsWeek(in HeaderBlock header)
+            {
+                return header.FileCreation switch
+                {
+                    { } fileCreation => (int)Math.Floor((fileCreation - BaseGpsTime).TotalDays / 7D),
+                    _ => default,
+                };
+            }
         }
     }
 
