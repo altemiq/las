@@ -13,7 +13,7 @@ public sealed class ProjContextTests
     [After(Class)]
     public static void Cleanup()
     {
-        Context.Dispose();   
+        Context.Dispose();
     }
 
     [Test]

@@ -24,7 +24,10 @@ public sealed record OgcCoordinateSystemWkt : VariableLengthRecord
         : base(
             new VariableLengthRecordHeader
             {
-                UserId = VariableLengthRecordHeader.ProjectionUserId, RecordId = 2112, RecordLengthAfterHeader = (ushort)(System.Text.Encoding.UTF8.GetByteCount(wkt) + 1), Description = "OGC COORDINATE SYSTEM WKT",
+                UserId = VariableLengthRecordHeader.ProjectionUserId,
+                RecordId = 2112,
+                RecordLengthAfterHeader = (ushort)(System.Text.Encoding.UTF8.GetByteCount(wkt) + 1),
+                Description = "OGC COORDINATE SYSTEM WKT",
             })
 #if NETSTANDARD2_1_OR_GREATER || NETCOREAPP2_1_OR_GREATER
         => this.Wkt = WellKnownTextNode.Parse(wkt);

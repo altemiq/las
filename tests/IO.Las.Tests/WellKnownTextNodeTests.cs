@@ -52,7 +52,7 @@ public class WellKnownTextNodeTests
         await Assert.That(WellKnownTextNode.Parse(wkt)).IsNotDefault();
     }
 #endif
-    
+
     [Test]
     [Arguments("""
                PROJCRS["GDA2020 / Vicgrid",

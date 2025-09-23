@@ -1,4 +1,5 @@
 namespace Altemiq.IO.Las;
+
 using System.Runtime.InteropServices;
 
 public class ExtendedGpsColorNearInfraredWaveformPointTests
