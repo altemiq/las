@@ -70,10 +70,19 @@ internal static class GpsTime
     /// <returns>The offset.</returns>
     public static double GetOffset(in HeaderBlock header)
     {
-        // if our points do not have a GPS time.
-        return header.PointDataFormatId is PointDataRecord.Id or ColorPointDataRecord.Id
-            ? default
-            : GetOffsetOrThrow(header);
+        // if our points have a GPS time.
+        return IsValidPointDataFormat(header)
+            ? GetOffsetOrThrow(header)
+            : default;
+
+        static bool IsValidPointDataFormat(in HeaderBlock header)
+        {
+#if LAS1_2_OR_GREATER
+            return header.PointDataFormatId is not PointDataRecord.Id and not ColorPointDataRecord.Id;
+#else
+            return header.PointDataFormatId is not PointDataRecord.Id;
+#endif
+        }
 
         static double GetOffsetOrThrow(in HeaderBlock header)
         {

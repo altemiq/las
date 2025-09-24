@@ -11,8 +11,7 @@ namespace Altemiq.IO.Las.Geodesy;
 /// </summary>
 public static class GeodesyExtensions
 {
-    private const ushort UserDefinedValue = (ushort)short.MaxValue;
-
+#if LAS1_4_OR_GREATER
     /// <summary>
     /// Gets the WKT from the list of <c>GeoTIFF</c> tags.
     /// </summary>
@@ -21,6 +20,7 @@ public static class GeodesyExtensions
     /// <exception cref="ArgumentNullException"><paramref name="records"/> is <see langword="null"/>.</exception>
     public static IEnumerable<VariableLengthRecord> ToWkt(this IReadOnlyCollection<VariableLengthRecord> records)
     {
+        const ushort UserDefinedValue = (ushort)short.MaxValue;
 #if NET6_0_OR_GREATER
         ArgumentNullException.ThrowIfNull(records);
 #else
@@ -48,6 +48,7 @@ public static class GeodesyExtensions
 
         return [];
     }
+#endif
 
     /// <summary>
     /// Writes the header.
@@ -67,18 +68,15 @@ public static class GeodesyExtensions
 #endif
 
 #if LAS1_4_OR_GREATER
-        writer.Write(header, ToVariableLengthRecords(srid, header.GlobalEncoding));
+        writer.Write(header, GetVariableLengthRecords(srid, header.GlobalEncoding));
 #else
-        writer.Write(header, ToVariableLengthRecords(srid));
+        writer.Write(header, GetVariableLengthRecords(srid));
 #endif
     }
 
 #if LAS1_4_OR_GREATER
-    private static IEnumerable<VariableLengthRecord> ToVariableLengthRecords(ushort srid, GlobalEncoding globalEncoding = GlobalEncoding.Wkt)
+    private static IEnumerable<VariableLengthRecord> GetVariableLengthRecords(ushort srid, GlobalEncoding globalEncoding = GlobalEncoding.Wkt)
         => globalEncoding.HasFlag(GlobalEncoding.Wkt) ? GetWellKnownTextFromSrid(srid) : GetGeoTiffFromSrid(srid);
-#else
-    public static IEnumerable<VariableLengthRecord> ToVariableLengthRecords(this short epsgSrid) => GetGeoTiffFromSrid(srid);
-#endif
 
     private static IEnumerable<VariableLengthRecord> GetWellKnownTextFromSrid(ushort srid)
     {
@@ -88,23 +86,24 @@ public static class GeodesyExtensions
         yield return new OgcCoordinateSystemWkt(wkt);
         context.Close();
     }
+#else
+    private static IEnumerable<VariableLengthRecord> GetVariableLengthRecords(this ushort srid) => GetGeoTiffFromSrid(srid);
+#endif
 
     private static IEnumerable<VariableLengthRecord> GetGeoTiffFromSrid(ushort srid)
     {
-        using (var context = new ProjContext())
+        using var context = new ProjContext();
+        context.Open();
+        if (context.IsGeodeticCoordinateReferenceSystem(srid))
         {
-            context.Open();
-            if (context.IsGeodeticCoordinateReferenceSystem(srid))
-            {
-                yield return new GeoKeyDirectoryTag(new GeoKeyEntry { KeyId = GeoKey.GeodeticCRSGeoKey, ValueOffset = srid, Count = 1 });
-                yield break;
-            }
+            yield return new GeoKeyDirectoryTag(new GeoKeyEntry { KeyId = GeoKey.GeodeticCRSGeoKey, ValueOffset = srid, Count = 1 });
+            yield break;
+        }
 
-            if (context.IsProjectedCoordinateReferenceSystem(srid))
-            {
-                yield return new GeoKeyDirectoryTag(new GeoKeyEntry { KeyId = GeoKey.ProjectedCRSGeoKey, ValueOffset = srid, Count = 1 });
-                yield break;
-            }
+        if (context.IsProjectedCoordinateReferenceSystem(srid))
+        {
+            yield return new GeoKeyDirectoryTag(new GeoKeyEntry { KeyId = GeoKey.ProjectedCRSGeoKey, ValueOffset = srid, Count = 1 });
+            yield break;
         }
 
         throw new KeyNotFoundException();
