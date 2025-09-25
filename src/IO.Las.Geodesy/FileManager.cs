@@ -15,6 +15,8 @@ internal static class FileManager
 
     private const string ProjLib = "PROJ_LIB";
 
+    private static readonly string ProjDirectory = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "proj");
+
     /// <summary>
     /// Finds the <c>proj.db</c>.
     /// </summary>
@@ -36,9 +38,14 @@ internal static class FileManager
     /// <returns>The resource path.</returns>
     public static IEnumerable<string> GetResourcePaths(string name)
     {
+        yield return ProjDirectory;
+
         if (Environment.GetEnvironmentVariable(ProjData) is { } projData)
         {
-            yield return Path.Combine(projData, name);
+            foreach (var projDataPath in projData.Split(Path.PathSeparator))
+            {
+                yield return Path.Combine(projDataPath, name);
+            }
         }
 
         if (Environment.GetEnvironmentVariable(ProjLib) is { } projLib)
@@ -48,9 +55,13 @@ internal static class FileManager
                 Console.Error.WriteLine($"{ProjLib} environment variable is deprecated, and will be removed in a future release. You are encouraged to set {ProjData} instead");
             }
 
-            yield return Path.Combine(projLib, name);
+            foreach (var projLibPath in projLib.Split(Path.PathSeparator))
+            {
+                yield return Path.Combine(projLibPath, name);
+            }
         }
 
         yield return Path.Combine(Environment.CurrentDirectory, name);
+        yield return Path.Combine(AppContext.BaseDirectory, name);
     }
 }
