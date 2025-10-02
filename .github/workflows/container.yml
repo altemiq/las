@@ -9,23 +9,39 @@ jobs:
   linux:
     runs-on: ubuntu-latest
 
-    services:
-      registry:
-        image: registry:3
-        ports:
-          - 5000:5000
+    permissions:
+      packages: write
     
     steps:
-      - name: Set up QEMU
-        uses: docker/setup-qemu-action@v3
-
       - uses: docker/setup-buildx-action@v3
         with:
           driver-opts: network=host
       
       - uses: docker/build-push-action@v6
+        id: build
         with:
-          context: {{defaultContext}}:container
+          context: '{{defaultContext}}:container'
           push: false
-          tags: localhost:5000/${{ github.repository_owner }}/lastools:latest-ubuntu
+          tags: ghcr.io/${{ github.repository_owner }}/lastools:ubuntu-latest
           file: ContainerFile.ubuntu
+          load: true
+        
+      - name: Run local/get-version@v1
+        id: version
+        run: |
+          version=$((docker run --rm ${{ steps.build.outputs.imageid }} lasinfo64 -version) 2> >(grep -o '[^ ]\+$'))
+          echo "lastools=$version" >> $GITHUB_OUTPUT
+          
+      - name: Run local/tag-lastools-version@v1
+        run: |
+          docker tag ${{ steps.build.outputs.imageid }} ghcr.io/${{ github.repository_owner }}/lastools:ubuntu-${{ steps.version.outputs.lastools }}
+
+      - uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }} 
+      
+      - name: Run local/push-containers@v1
+        run: |
+          docker push ghcr.io/${{ github.repository_owner }}/lastools --all-tags
