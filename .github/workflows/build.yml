@@ -6,8 +6,9 @@ on:
       - main
     paths-ignore:
       - docs/**
-      - .github/workflows/docs.yml
       - .github/workflows/release.yml
+      - container/**
+      - .github/workflows/container.yml
   pull_request:
     branches:
       - main
