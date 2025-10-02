@@ -1,0 +1,12 @@
+FROM ubuntu:latest
+
+RUN apt-get update && \
+  apt-get install -y wget libjpeg62 libpng-dev libtiff-dev libjpeg-dev libz-dev libproj-dev liblzma-dev libjbig-dev libzstd-dev libgeotiff-dev libwebp-dev proj-data && \
+  rm -rf /var/lib/apt/lists/*
+  
+RUN mkdir /LAStools && \
+  wget https://downloads.rapidlasso.de/LAStools.tar.gz --quiet -O - | tar -z -C /LAStools -x bin/ && \
+  rm LAStools/bin/*_README.*  
+
+ENV PROJ_LIB=/usr/share/proj/
+ENV PATH="/LAStools/bin:${PATH}"

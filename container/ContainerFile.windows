@@ -1,0 +1,16 @@
+FROM mcr.microsoft.com/windows/nanoserver:ltsc2022-amd64
+
+COPY VC_redist.x64 C:\\Windows\\System32
+	
+COPY PROJ C:\\Data\\PROJ
+ENV PROJ_DATA=C:\\Data\\PROJ
+
+RUN cd %TMP% & \
+	curl -kLO https://downloads.rapidlasso.de/LAStools.zip & \
+	tar -xvf LAStools.zip & \
+	del LAStools.zip & \
+	mkdir "C:\LAStools\bin" & \
+	move "LAStools\bin\*.exe" "C:\LAStools\bin" & \
+	move "LAStools\bin\*.dll" "C:\LAStools\bin" & \
+	rmdir /q /s LAStools & \
+	setx PATH "C:\LAStools\bin;%PATH%"
