@@ -8,6 +8,7 @@ EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{944B06C2-3216-44EC-A43A-DAF9200A05C8}"
 	ProjectSection(SolutionItems) = preProject
 		Directory.Versions.props = Directory.Versions.props
+		nuget.config = nuget.config
 	EndProjectSection
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "src", "src", "{94D31DAF-54FD-47A1-ABC5-DE0D31E8A7ED}"

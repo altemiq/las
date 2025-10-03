@@ -86,7 +86,7 @@ jobs:
       suffix: ${{ steps.suffix.outputs.Suffix }}
 
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
         with:
           fetch-depth: 0
 
@@ -102,7 +102,7 @@ jobs:
           echo "Suffix=$suffix" >> $GITHUB_OUTPUT
       
       # Install .NET
-      - uses: actions/setup-dotnet@v4
+      - uses: actions/setup-dotnet@v5
         with:
           dotnet-version: 9.0.x
           source-url: https://nuget.pkg.github.com/${{ github.repository_owner }}/index.json
@@ -143,12 +143,12 @@ jobs:
       DOTNET_MULTILEVEL_LOOKUP: false
 
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
         with:
           fetch-depth: 0 # get all history here, for semantic versioning
       
       # Install the .NET workload
-      - uses: actions/setup-dotnet@v4
+      - uses: actions/setup-dotnet@v5
         with:
           dotnet-version: 9.0.x
           source-url: https://nuget.pkg.github.com/${{ github.repository_owner }}/index.json
@@ -282,7 +282,7 @@ jobs:
       DOTNET_MULTILEVEL_LOOKUP: false
 
     steps:
-    - uses: actions/download-artifact@v4
+    - uses: actions/download-artifact@v5
       with:
         name: nuget
         path: ${{ github.workspace }}/nupkg
@@ -292,7 +292,7 @@ jobs:
       working-directory: ${{ github.workspace }}/nupkg
       run: dotnet nuget push *.nupkg --source https://nuget.pkg.github.com/${{ github.repository_owner }}/index.json --api-key ${{ secrets.GITHUB_TOKEN }} --skip-duplicate
 
-    - uses: actions/download-artifact@v4
+    - uses: actions/download-artifact@v5
       with:
         pattern: containers
         merge-multiple: true
@@ -308,7 +308,7 @@ jobs:
         oras cp --from-oci-layout las.tar.gz:${{ needs.get-version.outputs.version }} ghcr.io/${{ github.repository_owner }}/io/las:${{ needs.get-version.outputs.version }}
         oras cp --from-oci-layout las.tar.gz:${{ needs.get-version.outputs.version }} ghcr.io/${{ github.repository_owner }}/io/las:${{ needs.get-version.outputs.suffix }}
 
-    - uses: actions/download-artifact@v4
+    - uses: actions/download-artifact@v5
       with:
         pattern: tools-*
         path: ${{ github.workspace }}/tools
