@@ -8,6 +8,7 @@
   <ItemGroup>
     <PackageVersion Include="Altemiq.CommandLine.DependencyInjection" Version="1.0.0-rc.1.4" />
     <PackageVersion Include="Altemiq.CommandLine.Spectre" Version="1.0.0-rc.1.4" />
+    <PackageVersion Include="AWSSDK.S3" Version="4.0.7.7" />
     <PackageVersion Include="Microsoft.Data.Sqlite" Version="9.0.9" />
     <PackageVersion Include="Microsoft.Extensions.Http" Version="9.0.9" />
     <PackageVersion Include="Spectre.Console" Version="0.51.1" />
@@ -15,7 +16,7 @@
   </ItemGroup>
   
   <ItemGroup Label="Coding Standards">
-    <GlobalPackageReference Include="Altemiq.DotNet.CodingStandard" Version="1.0.106" />
+    <GlobalPackageReference Include="Altemiq.DotNet.CodingStandard" Version="1.0.112" />
   </ItemGroup>
 
 </Project>
