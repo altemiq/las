@@ -8,6 +8,7 @@
   <ItemGroup>
     <PackageVersion Include="Altemiq.CommandLine.DependencyInjection" Version="1.0.0-rc.1.4" />
     <PackageVersion Include="Altemiq.CommandLine.Spectre" Version="1.0.0-rc.1.4" />
+    <PackageVersion Include="Altemiq.CommandLine" Version="1.0.0-rc.1.4" />
     <PackageVersion Include="AWSSDK.S3" Version="4.0.7.7" />
     <PackageVersion Include="Microsoft.Data.Sqlite" Version="9.0.9" />
     <PackageVersion Include="Microsoft.Extensions.Http" Version="9.0.9" />
