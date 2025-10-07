@@ -10,10 +10,15 @@
     <PackageVersion Include="Altemiq.CommandLine.Spectre" Version="1.0.0-rc.1.4" />
     <PackageVersion Include="Altemiq.CommandLine" Version="1.0.0-rc.1.4" />
     <PackageVersion Include="AWSSDK.S3" Version="4.0.7.7" />
-    <PackageVersion Include="Microsoft.Data.Sqlite" Version="9.0.9" />
     <PackageVersion Include="Microsoft.Extensions.Http" Version="9.0.9" />
     <PackageVersion Include="Spectre.Console" Version="0.51.1" />
     <PackageVersion Include="Spectre.Console.Analyzer" Version="1.0.0" />
+  </ItemGroup>
+  
+  <ItemGroup Label="SQLite">
+    <PackageVersion Include="Microsoft.Data.Sqlite" Version="9.0.9" />
+    <PackageVersion Include="SQLitePCLRaw.bundle_e_sqlite3" Version="3.0.2" />
+    <PackageVersion Include="SQLitePCLRaw.core" Version="3.0.2" />
   </ItemGroup>
   
   <ItemGroup Label="Coding Standards">

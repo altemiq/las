@@ -8,11 +8,16 @@
   <Import Project="$([MSBuild]::GetPathOfFileAbove('$(MSBuildThisFileName.Replace('Packages', 'Versions'))$(MSBuildThisFileExtension)', '$(MSBuildThisFileDirectory)'))" />
 
   <ItemGroup>
-    <PackageVersion Include="Microsoft.Data.Sqlite" Version="9.0.9" />
     <PackageVersion Include="Microsoft.Testing.Extensions.CodeCoverage" Version="18.0.4" />
     <PackageVersion Include="Microsoft.Testing.Platform.MSBuild" Version="1.9.0" />
     <PackageVersion Include="Polyfill" Version="8.8.0" />
     <PackageVersion Include="TUnit" Version="0.67.0" />
+  </ItemGroup>
+
+  <ItemGroup Label="SQLite">
+    <PackageVersion Include="Microsoft.Data.Sqlite" Version="9.0.9" />
+    <PackageVersion Include="SQLitePCLRaw.bundle_e_sqlite3" Version="3.0.2" />
+    <PackageVersion Include="SQLitePCLRaw.core" Version="3.0.2" />
   </ItemGroup>
 
 </Project>
