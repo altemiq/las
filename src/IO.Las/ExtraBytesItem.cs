@@ -118,7 +118,7 @@ public readonly record struct ExtraBytesItem
     private readonly string description;
 
     /// <summary>
-    /// Initialises a new instance of the <see cref="ExtraBytesItem"/> struct.
+    /// Initializes a new instance of the <see cref="ExtraBytesItem"/> struct.
     /// </summary>
     /// <param name="source">The source.</param>
     internal ExtraBytesItem(ReadOnlySpan<byte> source)

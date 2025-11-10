@@ -26,7 +26,7 @@ public sealed record ClassificationLookup : VariableLengthRecord, IReadOnlyList<
     private readonly IReadOnlyList<ClassificationLookupItem> values;
 
     /// <summary>
-    /// Initialises a new instance of the <see cref="ClassificationLookup"/> class.
+    /// Initializes a new instance of the <see cref="ClassificationLookup"/> class.
     /// </summary>
     /// <param name="values">The values.</param>
     public ClassificationLookup(params IReadOnlyList<ClassificationLookupItem> values)
@@ -42,7 +42,7 @@ public sealed record ClassificationLookup : VariableLengthRecord, IReadOnlyList<
     }
 
     /// <summary>
-    /// Initialises a new instance of the <see cref="ClassificationLookup"/> class.
+    /// Initializes a new instance of the <see cref="ClassificationLookup"/> class.
     /// </summary>
     /// <param name="header">The header.</param>
     /// <param name="data">The data.</param>

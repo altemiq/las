@@ -165,7 +165,7 @@ internal static class Constants
         /// <summary>
         /// The <see cref="IWaveformPointDataRecord.WavePacketDescriptorIndex"/> field offset.
         /// </summary>
-        public const int GpsColorWaveformFieldOffset = GpsColorFieldOffset + (3 * sizeof(ushort));
+        public const int GpsColorWaveformFieldOffset = GpsColorFieldOffset + Constants.Size.Color;
 #endif
     }
 
@@ -238,7 +238,7 @@ internal static class Constants
         /// <summary>
         /// The <see cref="INearInfraredPointDataRecord.NearInfrared"/> field offset.
         /// </summary>
-        public const int NirFieldOffset = ColorFieldOffset + (3 * sizeof(ushort));
+        public const int NirFieldOffset = ColorFieldOffset + Constants.Size.Color;
     }
 #endif
 

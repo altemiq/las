@@ -126,9 +126,9 @@ public readonly record struct VariableLengthRecordHeader
     /// <returns>The instance of <see cref="VariableLengthRecordHeader"/>.</returns>
     public static VariableLengthRecordHeader Read(ReadOnlySpan<byte> source)
     {
-        return BitConverter.IsLittleEndian ? System.Runtime.InteropServices.Marshal.PtrToStructure<VariableLengthRecordHeader>(GetIntPtrFromSpan(source)) : new(source);
+        return BitConverter.IsLittleEndian ? System.Runtime.InteropServices.Marshal.PtrToStructure<VariableLengthRecordHeader>(GetIntPtrFromReadOnlySpan(source)) : new(source);
 
-        static unsafe IntPtr GetIntPtrFromSpan<T>(ReadOnlySpan<T> span)
+        static unsafe IntPtr GetIntPtrFromReadOnlySpan<T>(ReadOnlySpan<T> span)
         {
             // Cast the reference to an IntPtr
             return (IntPtr)System.Runtime.CompilerServices.Unsafe.AsPointer(ref System.Runtime.InteropServices.MemoryMarshal.GetReference(span));

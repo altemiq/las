@@ -244,9 +244,12 @@ public readonly struct HeaderBlock : IEquatable<HeaderBlock>
     /// <remarks>
     /// <para>
     /// This field should be set to a value from 0 to 65,535.
-    /// A value of zero is interpreted to mean that an ID has not been assigned, which is the norm for a LAS file resulting from an aggregation of multiple independent sources (e.g., a tile merged from multiple swaths).</para>
+    /// A value of zero is interpreted to mean that an ID has not been assigned, which is the norm for a LAS file resulting from an aggregation of multiple independent sources (e.g., a tile merged from multiple swaths).
+    /// </para>
     /// <para>
     /// Note that this scheme allows a project to contain up to 65,535 unique sources.
+    /// </para>
+    /// <para>
     /// Example sources can include a data repository ID or an original collection of temporally consistent data such as a flight line or sortie number for airborne systems, a route number for mobile systems, or a setup identifier for static systems.
     /// </para>
     /// </remarks>

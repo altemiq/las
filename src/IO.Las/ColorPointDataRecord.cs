@@ -21,7 +21,7 @@ public readonly record struct ColorPointDataRecord :
     /// <summary>
     /// The size of a point data record.
     /// </summary>
-    public const ushort Size = Constants.PointDataRecord.ColorFieldOffset + (3 * sizeof(ushort));
+    public const ushort Size = Constants.PointDataRecord.ColorFieldOffset + Constants.Size.Color;
 
     /// <summary>
     /// The point data format ID.

@@ -22,7 +22,7 @@ public sealed record ExtraBytes : VariableLengthRecord, IExtraBytes
     private readonly int[] indexes;
 
     /// <summary>
-    /// Initialises a new instance of the <see cref="ExtraBytes"/> class.
+    /// Initializes a new instance of the <see cref="ExtraBytes"/> class.
     /// </summary>
     /// <param name="items">The items.</param>
     public ExtraBytes(params IReadOnlyList<ExtraBytesItem> items)
@@ -38,7 +38,7 @@ public sealed record ExtraBytes : VariableLengthRecord, IExtraBytes
     }
 
     /// <summary>
-    /// Initialises a new instance of the <see cref="ExtraBytes"/> class.
+    /// Initializes a new instance of the <see cref="ExtraBytes"/> class.
     /// </summary>
     /// <param name="header">The header.</param>
     /// <param name="data">The items.</param>

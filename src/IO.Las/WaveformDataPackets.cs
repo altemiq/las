@@ -8,7 +8,7 @@ namespace Altemiq.IO.Las;
 
 /// <summary>
 /// The packet of Raw Waveform Amplitude values for all records immediately follow this VLR header.
-/// Note that when using a bit resolution that is not an even increment of 8, the last byte of each waveform packet must be padded such that the next waveform record will start on an even byte boundary.
+/// Note that when using a <c>bit</c> resolution that is not an even increment of 8, the last byte of each waveform packet must be padded such that the next waveform record will start on an even byte boundary.
 /// </summary>
 public sealed record WaveformDataPackets : ExtendedVariableLengthRecord
 {
@@ -18,7 +18,7 @@ public sealed record WaveformDataPackets : ExtendedVariableLengthRecord
     public const ushort TagRecordId = 65535;
 
     /// <summary>
-    /// Initialises a new instance of the <see cref="WaveformDataPackets"/> class.
+    /// Initializes a new instance of the <see cref="WaveformDataPackets"/> class.
     /// </summary>
     /// <param name="data">The data.</param>
     public WaveformDataPackets(ReadOnlySpan<byte> data)
@@ -34,7 +34,7 @@ public sealed record WaveformDataPackets : ExtendedVariableLengthRecord
     }
 
     /// <summary>
-    /// Initialises a new instance of the <see cref="WaveformDataPackets"/> class.
+    /// Initializes a new instance of the <see cref="WaveformDataPackets"/> class.
     /// </summary>
     /// <param name="header">The header.</param>
     /// <param name="data">The data.</param>

@@ -28,7 +28,7 @@ public readonly record struct ExtendedGpsWaveformPointDataRecord :
     /// </summary>
     public const byte Id = 9;
 
-    private const int WavePacketDescriptorIndexFieldOffset = Constants.ExtendedPointDataRecord.GpsTimeFieldOffset + sizeof(double);
+    private const int WavePacketDescriptorIndexFieldOffset = Constants.ExtendedPointDataRecord.GpsTimeFieldOffset + Constants.Size.GpsTime;
     private const int ByteOffsetToWaveformDataFieldOffset = WavePacketDescriptorIndexFieldOffset + sizeof(byte);
     private const int WaveformPacketSizeInBytesFieldOffset = ByteOffsetToWaveformDataFieldOffset + sizeof(ulong);
     private const int ReturnPointWaveformLocationFieldOffset = WaveformPacketSizeInBytesFieldOffset + sizeof(uint);

@@ -27,7 +27,7 @@ public sealed record Superseded : VariableLengthRecord
         });
 
     /// <summary>
-    /// Initialises a new instance of the <see cref="Superseded"/> class.
+    /// Initializes a new instance of the <see cref="Superseded"/> class.
     /// </summary>
     /// <param name="header">The header.</param>
     internal Superseded(VariableLengthRecordHeader header)

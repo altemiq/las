@@ -13,6 +13,40 @@ namespace Altemiq.IO.Las;
 public static partial class ExtensionMethods
 {
     /// <summary>
+    /// The <see cref="Stream"/> extensions.
+    /// </summary>
+    extension(Stream stream)
+    {
+        /// <summary>
+        /// Moves to <paramref name="stream"/> to the specified <paramref name="position"/>.
+        /// </summary>
+        /// <param name="position">The position.</param>
+        internal void MoveToPositionForwardsOnly(long position)
+        {
+            var streamPosition = stream.Position;
+            if (streamPosition < position)
+            {
+                MoveToPosition(stream, streamPosition, position);
+            }
+        }
+
+        /// <summary>
+        /// Moves the <paramref name="stream"/> to the specified <paramref name="position"/>.
+        /// </summary>
+        /// <param name="position">The position.</param>
+        internal void MoveToPositionAbsolute(long position)
+        {
+            var streamPosition = stream.Position;
+            if (streamPosition == position)
+            {
+                return;
+            }
+
+            MoveToPosition(stream, streamPosition, position);
+        }
+    }
+
+    /// <summary>
     /// Gets the point data record length.
     /// </summary>
     /// <param name="header">The header.</param>
@@ -53,36 +87,6 @@ public static partial class ExtensionMethods
 #endif
         _ => throw new InvalidCastException(),
     };
-
-    /// <summary>
-    /// Moves to <paramref name="stream"/> to the specified <paramref name="position"/>.
-    /// </summary>
-    /// <param name="stream">The stream.</param>
-    /// <param name="position">The position.</param>
-    internal static void MoveToPositionForwardsOnly(this Stream stream, long position)
-    {
-        var streamPosition = stream.Position;
-        if (streamPosition < position)
-        {
-            MoveToPosition(stream, streamPosition, position);
-        }
-    }
-
-    /// <summary>
-    /// Moves the <paramref name="stream"/> to the specified <paramref name="position"/>.
-    /// </summary>
-    /// <param name="stream">The stream.</param>
-    /// <param name="position">The position.</param>
-    internal static void MoveToPositionAbsolute(this Stream stream, long position)
-    {
-        var streamPosition = stream.Position;
-        if (streamPosition == position)
-        {
-            return;
-        }
-
-        MoveToPosition(stream, streamPosition, position);
-    }
 
     /// <summary>
     /// Converts the <see cref="ReadOnlySpan{T}"/> to a <see cref="IReadOnlyList{T}"/>.

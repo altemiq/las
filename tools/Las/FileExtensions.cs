@@ -28,7 +28,7 @@ internal static class FileExtensions
         /// <param name="uri">The uri to check.</param>
         /// <param name="serviceProvider">The service provider.</param>
         /// <returns><see langword="true"/> if <paramref name="uri"/> exists; otherwise <see langword="false"/>.</returns>
-        public static bool Exists(Uri uri, IServiceProvider? serviceProvider) => Exists(uri, CreateHttpClient(serviceProvider));
+        public static bool Exists(Uri uri, IServiceProvider? serviceProvider) => Exists(uri, File.CreateHttpClient(serviceProvider));
 
         /// <summary>
         /// Determines whether the specified uri exists.
@@ -59,7 +59,7 @@ internal static class FileExtensions
         /// <param name="serviceProvider">The service provider.</param>
         /// <returns>The stream from URI.</returns>
         /// <exception cref="InvalidOperationException">The uri scheme is not supported.</exception>
-        public static Stream OpenRead(Uri uri, IServiceProvider? serviceProvider) => OpenRead(uri, CreateHttpClient(serviceProvider));
+        public static Stream OpenRead(Uri uri, IServiceProvider? serviceProvider) => OpenRead(uri, File.CreateHttpClient(serviceProvider));
 
         /// <summary>
         /// Opens an existing URI for reading.
@@ -83,7 +83,7 @@ internal static class FileExtensions
         /// <param name="uri">The uri.</param>
         /// <returns>The stream from URI.</returns>
         /// <exception cref="InvalidOperationException">The uri scheme is not supported.</exception>
-        public static Stream OpenWrite(Uri uri) => OpenWrite(uri, CreateHttpClient);
+        public static Stream OpenWrite(Uri uri) => OpenWrite(uri, File.CreateHttpClient);
 
         /// <summary>
         /// Opens an existing URI for writing.
@@ -92,7 +92,7 @@ internal static class FileExtensions
         /// <param name="serviceProvider">The service provider.</param>
         /// <returns>The stream from URI.</returns>
         /// <exception cref="InvalidOperationException">The uri scheme is not supported.</exception>
-        public static Stream OpenWrite(Uri uri, IServiceProvider? serviceProvider) => OpenWrite(uri, CreateHttpClient(serviceProvider));
+        public static Stream OpenWrite(Uri uri, IServiceProvider? serviceProvider) => OpenWrite(uri, File.CreateHttpClient(serviceProvider));
 
         /// <summary>
         /// Opens an existing URI for writing.
@@ -113,7 +113,7 @@ internal static class FileExtensions
 
             static Stream FileOpenWrite(string path)
             {
-                CreateDirectoryIfPossible(path);
+                File.CreateDirectoryIfPossible(path);
                 return File.Open(path, FileMode.Create);
             }
         }
@@ -135,7 +135,7 @@ internal static class FileExtensions
         /// <param name="serviceProvider">The service provider.</param>
         /// <returns>The stream from URI.</returns>
         /// <exception cref="InvalidOperationException">The uri scheme is not supported.</exception>
-        public static Stream Open(Uri uri, FileMode mode, IServiceProvider? serviceProvider) => Open(uri, mode, CreateHttpClient(serviceProvider));
+        public static Stream Open(Uri uri, FileMode mode, IServiceProvider? serviceProvider) => Open(uri, mode, File.CreateHttpClient(serviceProvider));
 
         /// <summary>
         /// Opens an existing URI for reading.
@@ -153,7 +153,6 @@ internal static class FileExtensions
             _ => throw new NotSupportedException(),
         };
 
-#pragma warning disable IDE0051, S1144
         private static void CreateDirectoryIfPossible(string path)
         {
             if (File.Exists(path))
@@ -174,10 +173,9 @@ internal static class FileExtensions
                 return serviceProvider.GetRequiredService<HttpClient>;
             }
 
-            return CreateHttpClient;
+            return File.CreateHttpClient;
         }
 
         private static HttpClient CreateHttpClient() => new();
-#pragma warning restore IDE0051, S1144
     }
 }

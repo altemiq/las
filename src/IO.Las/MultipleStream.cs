@@ -19,7 +19,7 @@ public abstract class MultipleStream(IDictionary<string, Stream> dictionary) : S
     private long currentOffset;
 
     /// <summary>
-    /// Initialises a new instance of the <see cref="MultipleStream"/> class.
+    /// Initializes a new instance of the <see cref="MultipleStream"/> class.
     /// </summary>
     protected MultipleStream()
         : this(default(StringComparer))
@@ -27,7 +27,7 @@ public abstract class MultipleStream(IDictionary<string, Stream> dictionary) : S
     }
 
     /// <summary>
-    /// Initialises a new instance of the <see cref="MultipleStream"/> class.
+    /// Initializes a new instance of the <see cref="MultipleStream"/> class.
     /// </summary>
     /// <param name="comparer">The <see cref="IEqualityComparer{T}"/> implementation to use when comparing keys, or <see langword="null"/> to use <see cref="StringComparer.Ordinal"/>.</param>
     protected MultipleStream(IEqualityComparer<string>? comparer)

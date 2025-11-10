@@ -48,7 +48,7 @@ public static partial class ExtensionMethods
         }
 
         /// <summary>
-        /// Calculates the number of bytes produced by encoding the characters in the specified character span..
+        /// Calculates the number of bytes produced by encoding the characters in the specified character span.
         /// </summary>
         /// <param name="chars">The span of characters to encode.</param>
         /// <returns>The number of bytes produced by encoding the specified character span.</returns>

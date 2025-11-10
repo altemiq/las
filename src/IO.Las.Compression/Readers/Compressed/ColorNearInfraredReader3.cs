@@ -207,31 +207,31 @@ internal sealed class ColorNearInfraredReader3 : IContextReader
             {
                 var corr = (byte)this.valueNir.Decoder.DecodeSymbol(processingContext.NirDiffModels0);
                 var value = (ushort)(corr + (processingContext.LastNir & 0xFF)).Fold();
-                System.Buffers.Binary.BinaryPrimitives.WriteUInt16LittleEndian(item[(3 * sizeof(ushort))..], value);
+                System.Buffers.Binary.BinaryPrimitives.WriteUInt16LittleEndian(item[Constants.Size.Color..], value);
             }
             else
             {
-                System.Buffers.Binary.BinaryPrimitives.WriteUInt16LittleEndian(item[(3 * sizeof(ushort))..], (ushort)(processingContext.LastNir & 0xFF));
+                System.Buffers.Binary.BinaryPrimitives.WriteUInt16LittleEndian(item[Constants.Size.Color..], (ushort)(processingContext.LastNir & 0xFF));
             }
 
             if ((sym & (1 << 1)) is not 0)
             {
                 var corr = (byte)this.valueNir.Decoder.DecodeSymbol(processingContext.NirDiffModels1);
-                var original = System.Buffers.Binary.BinaryPrimitives.ReadUInt16LittleEndian(item[(3 * sizeof(ushort))..]);
+                var original = System.Buffers.Binary.BinaryPrimitives.ReadUInt16LittleEndian(item[Constants.Size.Color..]);
                 var value = (ushort)((corr + (processingContext.LastNir >> 8)).Fold() << 8);
                 original |= value;
-                System.Buffers.Binary.BinaryPrimitives.WriteUInt16LittleEndian(item[(3 * sizeof(ushort))..], original);
+                System.Buffers.Binary.BinaryPrimitives.WriteUInt16LittleEndian(item[Constants.Size.Color..], original);
             }
             else
             {
-                System.Buffers.Binary.BinaryPrimitives.WriteUInt16LittleEndian(item[(3 * sizeof(ushort))..], (ushort)(processingContext.LastNir & 0xFF00));
+                System.Buffers.Binary.BinaryPrimitives.WriteUInt16LittleEndian(item[Constants.Size.Color..], (ushort)(processingContext.LastNir & 0xFF00));
             }
 
-            processingContext.LastNir = System.Buffers.Binary.BinaryPrimitives.ReadUInt16LittleEndian(item[(3 * sizeof(ushort))..]);
+            processingContext.LastNir = System.Buffers.Binary.BinaryPrimitives.ReadUInt16LittleEndian(item[Constants.Size.Color..]);
         }
         else
         {
-            System.Buffers.Binary.BinaryPrimitives.WriteUInt16LittleEndian(item[(3 * sizeof(ushort))..], processingContext.LastNir);
+            System.Buffers.Binary.BinaryPrimitives.WriteUInt16LittleEndian(item[Constants.Size.Color..], processingContext.LastNir);
         }
     }
 
@@ -263,7 +263,7 @@ internal sealed class ColorNearInfraredReader3 : IContextReader
         contextToInitialize.LastRed = System.Buffers.Binary.BinaryPrimitives.ReadUInt16LittleEndian(item);
         contextToInitialize.LastGreen = System.Buffers.Binary.BinaryPrimitives.ReadUInt16LittleEndian(item[sizeof(ushort)..]);
         contextToInitialize.LastBlue = System.Buffers.Binary.BinaryPrimitives.ReadUInt16LittleEndian(item[(2 * sizeof(ushort))..]);
-        contextToInitialize.LastNir = System.Buffers.Binary.BinaryPrimitives.ReadUInt16LittleEndian(item[(3 * sizeof(ushort))..]);
+        contextToInitialize.LastNir = System.Buffers.Binary.BinaryPrimitives.ReadUInt16LittleEndian(item[Constants.Size.Color..]);
 
         contextToInitialize.Unused = false;
     }

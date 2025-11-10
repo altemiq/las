@@ -30,7 +30,7 @@ public sealed partial class ProjContext :
     private readonly Microsoft.Data.Sqlite.SqliteConnection connection;
 
     /// <summary>
-    /// Initialises a new instance of the <see cref="ProjContext"/> class.
+    /// Initializes a new instance of the <see cref="ProjContext"/> class.
     /// </summary>
     public ProjContext()
         : this(FileManager.FindProjDb())
@@ -38,7 +38,7 @@ public sealed partial class ProjContext :
     }
 
     /// <summary>
-    /// Initialises a new instance of the <see cref="ProjContext"/> class.
+    /// Initializes a new instance of the <see cref="ProjContext"/> class.
     /// </summary>
     /// <param name="path">The PROJ database path.</param>
     public ProjContext(string path)

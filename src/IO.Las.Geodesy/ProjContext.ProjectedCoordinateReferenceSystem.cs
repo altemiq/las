@@ -162,8 +162,6 @@ public partial class ProjContext
         command.CommandText = ConversionCommandText;
         AddAuthClause(command, auth, code);
 
-        IEnumerable<Parameter> parameters;
-
         if (version is WellKnownTextVersion.Wkt1)
         {
             using var reader = command.ExecuteReader();
@@ -224,6 +222,7 @@ public partial class ProjContext
         else if (version is WellKnownTextVersion.Wkt2_2015 or WellKnownTextVersion.Wkt2_2019)
         {
             IList<WellKnownTextValue> values = [];
+            IEnumerable<Parameter> parameters;
             using (var reader = command.ExecuteReader())
             {
                 if (!reader.Read())

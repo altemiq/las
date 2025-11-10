@@ -24,7 +24,7 @@ public readonly struct WellKnownTextNode
     private const byte SeparatorByte = (byte)SeparatorChar;
 
     /// <summary>
-    /// Initialises a new instance of the <see cref="WellKnownTextNode"/> class.
+    /// Initializes a new instance of the <see cref="WellKnownTextNode"/> class.
     /// </summary>
     /// <param name="id">The ID.</param>
     /// <param name="value">The string value.</param>
@@ -34,7 +34,7 @@ public readonly struct WellKnownTextNode
     }
 
     /// <summary>
-    /// Initialises a new instance of the <see cref="WellKnownTextNode"/> class.
+    /// Initializes a new instance of the <see cref="WellKnownTextNode"/> class.
     /// </summary>
     /// <param name="id">The ID.</param>
     /// <param name="values">The values.</param>

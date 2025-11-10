@@ -41,7 +41,7 @@ public sealed record WaveformPacketDescriptor : VariableLengthRecord
     }
 
     /// <summary>
-    /// Initialises a new instance of the <see cref="WaveformPacketDescriptor"/> class.
+    /// Initializes a new instance of the <see cref="WaveformPacketDescriptor"/> class.
     /// </summary>
     /// <param name="header">The header.</param>
     /// <param name="data">The data.</param>

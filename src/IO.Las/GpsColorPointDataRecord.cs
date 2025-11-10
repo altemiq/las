@@ -22,7 +22,7 @@ public readonly record struct GpsColorPointDataRecord :
     /// <summary>
     /// The size of a point data record.
     /// </summary>
-    public const ushort Size = Constants.PointDataRecord.GpsColorFieldOffset + (3 * sizeof(ushort));
+    public const ushort Size = Constants.PointDataRecord.GpsColorFieldOffset + Constants.Size.Color;
 
     /// <summary>
     /// The point data format ID.

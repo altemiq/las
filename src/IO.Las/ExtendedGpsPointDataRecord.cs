@@ -20,7 +20,7 @@ public readonly record struct ExtendedGpsPointDataRecord :
     /// <summary>
     /// The size of a point data record.
     /// </summary>
-    public const ushort Size = Constants.ExtendedPointDataRecord.GpsTimeFieldOffset + sizeof(double);
+    public const ushort Size = Constants.ExtendedPointDataRecord.GpsTimeFieldOffset + Constants.Size.GpsTime;
 
     /// <summary>
     /// The point data format ID.

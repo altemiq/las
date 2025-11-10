@@ -9,9 +9,6 @@ namespace Altemiq.IO.Las;
 /// <summary>
 /// The point converter.
 /// </summary>
-/// <remarks>
-/// Initializes a new instance of the <see cref="PointDataRecordQuantizer"/> class.
-/// </remarks>
 /// <param name="scaleFactor">The scale factor.</param>
 /// <param name="offset">The offset.</param>
 /// <param name="gpsOffset">The GPS offset.</param>

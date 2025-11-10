@@ -11,21 +11,29 @@ namespace Altemiq.IO.Las;
 /// <summary>
 /// <see cref="Indexing"/> extensions.
 /// </summary>
+[System.Diagnostics.CodeAnalysis.SuppressMessage("StyleCop.CSharp.ReadabilityRules", "SA1101:Prefix local calls with this", Justification = "False positive")]
+[System.Diagnostics.CodeAnalysis.SuppressMessage("Minor Code Smell", "S2325:Methods and properties that don't access instance data should be static", Justification = "False positive")]
 public static class IndexingExtensions
 {
 #if LAS1_4_OR_GREATER
     /// <summary>
-    /// Registers index VLRs.
+    /// The <see cref="VariableLengthRecordProcessor"/> extensions.
     /// </summary>
-    /// <param name="processor">The VLR processor.</param>
-    public static void RegisterIndexing(this VariableLengthRecordProcessor processor) => processor.Register(Indexing.LaxTag.TagRecordId, ProcessLaxTag);
+    extension(VariableLengthRecordProcessor processor)
+    {
+        /// <summary>
+        /// Registers index VLRs.
+        /// </summary>
+        public void RegisterIndexing() => processor.Register(Indexing.LaxTag.TagRecordId, VariableLengthRecordProcessor.ProcessLaxTag);
 
-    /// <summary>
-    /// Registers index VLRs.
-    /// </summary>
-    /// <param name="processor">The VLR processor.</param>
-    /// <returns><see langword="true" /> when the compression processors are successfully added to the dictionary; <see langword="false" /> when the dictionary already contains the processors, in which case nothing gets added.</returns>
-    public static bool TryRegisterIndexing(this VariableLengthRecordProcessor processor) => processor.TryRegister(Indexing.LaxTag.TagRecordId, ProcessLaxTag);
+        /// <summary>
+        /// Registers index VLRs.
+        /// </summary>
+        /// <returns><see langword="true" /> when the compression processors are successfully added to the dictionary; <see langword="false" /> when the dictionary already contains the processors, in which case nothing gets added.</returns>
+        public bool TryRegisterIndexing() => processor.TryRegister(Indexing.LaxTag.TagRecordId, VariableLengthRecordProcessor.ProcessLaxTag);
+
+        private static Indexing.LaxTag ProcessLaxTag(ExtendedVariableLengthRecordHeader header, IEnumerable<VariableLengthRecord> records, long position, ReadOnlySpan<byte> data) => new(header, data);
+    }
 #endif
 
     /// <summary>
@@ -67,8 +75,4 @@ public static class IndexingExtensions
     /// <param name="box">The bounding box.</param>
     /// <returns>The point indexes within <paramref name="box"/>.</returns>
     public static IEnumerable<uint> GetPointDataRecordIndexes(this Indexing.LasIndex index, BoundingBox box) => index.WithinRectangle(box.Left, box.Bottom, box.Right, box.Top).SelectMany(Indexing.RangeExtensions.GetIndexes);
-
-#if LAS1_4_OR_GREATER
-    private static Indexing.LaxTag ProcessLaxTag(ExtendedVariableLengthRecordHeader header, IEnumerable<VariableLengthRecord> records, long position, ReadOnlySpan<byte> data) => new(header, data);
-#endif
 }

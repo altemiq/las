@@ -9,20 +9,26 @@ namespace Altemiq.IO.Las;
 /// <summary>
 /// <see cref="Tiling"/> extensions.
 /// </summary>
+[System.Diagnostics.CodeAnalysis.SuppressMessage("StyleCop.CSharp.ReadabilityRules", "SA1101:Prefix local calls with this", Justification = "False positive")]
+[System.Diagnostics.CodeAnalysis.SuppressMessage("Minor Code Smell", "S2325:Methods and properties that don't access instance data should be static", Justification = "False positive")]
 public static class TilingExtensions
 {
     /// <summary>
-    /// Registers tiling VLRs.
+    /// The <see cref="VariableLengthRecordProcessor"/> extensions.
     /// </summary>
-    /// <param name="processor">The VLR processor.</param>
-    public static void RegisterTiling(this VariableLengthRecordProcessor processor) => processor.Register(Tiling.LasToolsUserId, Tiling.TagRecordId, ProcessTiling);
+    extension(VariableLengthRecordProcessor processor)
+    {
+        /// <summary>
+        /// Registers tiling VLRs.
+        /// </summary>
+        public void RegisterTiling() => processor.Register(Tiling.LasToolsUserId, Tiling.TagRecordId, VariableLengthRecordProcessor.ProcessTiling);
 
-    /// <summary>
-    /// Registers tiling VLRs.
-    /// </summary>
-    /// <param name="processor">The VLR processor.</param>
-    /// <returns><see langword="true" /> when the compression processors are successfully added to the dictionary; <see langword="false" /> when the dictionary already contains the processors, in which case nothing gets added.</returns>
-    public static bool TryRegisterCompression(this VariableLengthRecordProcessor processor) => processor.TryRegister(Tiling.LasToolsUserId, Tiling.TagRecordId, ProcessTiling);
+        /// <summary>
+        /// Registers tiling VLRs.
+        /// </summary>
+        /// <returns><see langword="true" /> when the compression processors are successfully added to the dictionary; <see langword="false" /> when the dictionary already contains the processors, in which case nothing gets added.</returns>
+        public bool TryRegisterCompression() => processor.TryRegister(Tiling.LasToolsUserId, Tiling.TagRecordId, VariableLengthRecordProcessor.ProcessTiling);
 
-    private static Tiling ProcessTiling(VariableLengthRecordHeader header, ReadOnlySpan<byte> data) => new(header, data);
+        private static Tiling ProcessTiling(VariableLengthRecordHeader header, ReadOnlySpan<byte> data) => new(header, data);
+    }
 }

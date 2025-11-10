@@ -39,7 +39,7 @@ public readonly partial record struct Platform
     /// Converts the value of this instance to its equivalent string representation.
     /// </summary>
     /// <returns>The string representation of the value of this instance.</returns>>
-    public override readonly string ToString() => $"{this.Id.GetDescription()},{this.Type},{this.Code}";
+    public override string ToString() => $"{this.Id.GetDescription()},{this.Type},{this.Code}";
 
     /// <summary>
     /// Parses the platform from specified identifier.
