@@ -24,9 +24,9 @@ public class VariableLengthRecordHeaderTests
     {
         _ = await Assert.That(Marshal.PtrToStructure<VariableLengthRecordHeader>(Marshal.UnsafeAddrOfPinnedArrayElement(Bytes, 0)))
             .IsNotDefault()
-            .Satisfies(h => h.UserId, userId => userId.IsEqualTo(VariableLengthRecordHeader.ProjectionUserId))
-            .Satisfies(h => h.RecordId, recordId => recordId.IsEqualTo((ushort)34735))
-            .Satisfies(h => h.Description, description => description.IsEqualTo("by LAStools of Martin Isenburg"));
+            .And.Member(h => h.UserId, userId => userId.IsEqualTo(VariableLengthRecordHeader.ProjectionUserId))
+            .And.Member(h => h.RecordId, recordId => recordId.IsEqualTo((ushort)34735))
+            .And.Member(h => h.Description, description => description.IsEqualTo("by LAStools of Martin Isenburg"));
     }
 
     [Test]
@@ -34,9 +34,9 @@ public class VariableLengthRecordHeaderTests
     {
         _ = await Assert.That(new VariableLengthRecordHeader(Bytes))
             .IsNotDefault()
-            .Satisfies(h => h.UserId, userId => userId.IsEqualTo(VariableLengthRecordHeader.ProjectionUserId))
-            .Satisfies(h => h.RecordId, recordId => recordId.IsEqualTo((ushort)34735))
-            .Satisfies(h => h.Description, description => description.IsEqualTo("by LAStools of Martin Isenburg"));
+            .And.Member(h => h.UserId, userId => userId.IsEqualTo(VariableLengthRecordHeader.ProjectionUserId))
+            .And.Member(h => h.RecordId, recordId => recordId.IsEqualTo((ushort)34735))
+            .And.Member(h => h.Description, description => description.IsEqualTo("by LAStools of Martin Isenburg"));
     }
 
     [Test]

@@ -25,7 +25,7 @@ public class LasWriterTests
             new() { Count = 1, KeyId = GeoKey.GTModelTypeGeoKey, ValueOffset = 1 },
             new() { Count = 1, KeyId = GeoKey.ProjectedCRSGeoKey, ValueOffset = 32754 },
             new() { Count = 1, KeyId = GeoKey.ProjLinearUnitsGeoKey, ValueOffset = 9001 },
-            new() { Count = 1, KeyId = GeoKey.VerticalUnitsGeoKey, ValueOffset = 9001 }
+            new() { Count = 1, KeyId = GeoKey.VerticalUnitsGeoKey, ValueOffset = 9001 },
         ];
 
         MemoryStream memoryStream = new();
@@ -76,8 +76,8 @@ public class LasWriterTests
                 Scale = 0.01,
                 Offset = 250,
                 Name = "height above ground",
-                Description = "vertical point to TIN distance"
-            }
+                Description = "vertical point to TIN distance",
+            },
         ];
 
         MemoryStream memoryStream = new();
@@ -99,7 +99,7 @@ public class LasWriterTests
                 EdgeOfFlightLine = false,
                 ScanAngleRank = 0,
                 PointSourceId = 0,
-                GpsTime = 0
+                GpsTime = 0,
             };
 
             _ = extraBytes.Write(span, ExtraValue);
@@ -124,8 +124,8 @@ public class LasWriterTests
 
         _ = await Assert.That(outputPoint)
             .IsNotNull()
-            .IsAssignableTo<IPointDataRecord>()
-            .Satisfies(p => p.Classification, classification => classification.IsEqualTo(Classification.LowVegetation));
+            .And.IsTypeOf<IPointDataRecord>()
+            .And.Member(p => p.Classification, classification => classification.IsEqualTo(Classification.LowVegetation));
 
         _ = await Assert.That(extraBytes.GetValue(0, extra)).IsEqualTo(ExtraValue);
     }
@@ -159,8 +159,8 @@ public class LasWriterTests
                 Scale = 0.01,
                 Offset = 250,
                 Name = "height above ground",
-                Description = "vertical point to TIN distance"
-            }
+                Description = "vertical point to TIN distance",
+            },
         ];
 
         MemoryStream memoryStream = new();
@@ -182,7 +182,7 @@ public class LasWriterTests
                 EdgeOfFlightLine = false,
                 ScanAngleRank = 0,
                 PointSourceId = 0,
-                GpsTime = 0
+                GpsTime = 0,
             };
 
             _ = extraBytes.Write(span, ExtraValue);
@@ -204,8 +204,8 @@ public class LasWriterTests
 
         _ = await Assert.That(outputPoint.PointDataRecord)
             .IsNotNull()
-            .IsAssignableTo<IPointDataRecord>()
-            .Satisfies(p => p.Classification, classification => classification.IsEqualTo(Classification.LowVegetation));
+            .And.IsTypeOf<IPointDataRecord>()
+            .And.Member(p => p.Classification, classification => classification.IsEqualTo(Classification.LowVegetation));
 
         _ = await Assert.That(await extraBytes.GetValueAsync(0, outputPoint.ExtraBytes)).IsEqualTo(ExtraValue);
     }
@@ -352,8 +352,8 @@ public class LasWriterTests
 
         _ = await Assert.That(outputPoint)
             .IsNotNull()
-            .IsAssignableTo<IPointDataRecord>()
-            .Satisfies(p => p.Classification, classification => classification.IsEqualTo(Classification.LowVegetation));
+            .And.IsTypeOf<IPointDataRecord>()
+            .And.Member(p => p.Classification, classification => classification.IsEqualTo(Classification.LowVegetation));
 
 #if LAS1_4_OR_GREATER
         _ = await Assert.That(extraBytes.GetValue(0, bytes)).IsTypeOf<double>().And.IsEqualTo(ExtraValue);
@@ -390,7 +390,7 @@ public class LasWriterTests
         memoryStream.Position = 0;
         using LasReader reader = new(memoryStream);
         _ = await Assert.That(reader.ExtendedVariableLengthRecords).HasSingleItem()
-            .And.Satisfies(static x => x.Single(), x => x.IsEquivalentTo(record));
+            .And.Member(static x => x.Single(), x => x.IsEquivalentTo(record));
     }
 #endif
 }

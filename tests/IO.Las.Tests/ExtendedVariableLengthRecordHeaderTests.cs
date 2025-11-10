@@ -7,7 +7,7 @@ public class ExtendedVariableLengthRecordHeaderTests
     private static readonly byte[] Bytes =
     [
         0x00, 0x00, 0x63, 0x6F, 0x70, 0x63, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0xE8, 0x03, 0xC0, 0x22, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x45, 0x50, 0x54, 0x20, 0x48, 0x69, 0x65, 0x72, 0x61, 0x72,
-        0x63, 0x68, 0x79, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00
+        0x63, 0x68, 0x79, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
     ];
 
     private static readonly ExtendedVariableLengthRecordHeader Header = new()
@@ -24,9 +24,9 @@ public class ExtendedVariableLengthRecordHeaderTests
     {
         _ = await Assert.That(Marshal.PtrToStructure<ExtendedVariableLengthRecordHeader>(Marshal.UnsafeAddrOfPinnedArrayElement(Bytes, 0)))
             .IsNotDefault()
-            .Satisfies(h => h.UserId, userId => userId.IsEqualTo("copc"))
-            .Satisfies(h => h.RecordId, recordId => recordId.IsEqualTo((ushort)1000))
-            .Satisfies(h => h.Description, description => description.IsEqualTo("EPT Hierarchy"));
+            .And.Member(h => h.UserId, userId => userId.IsEqualTo("copc"))
+            .And.Member(h => h.RecordId, recordId => recordId.IsEqualTo((ushort)1000))
+            .And.Member(h => h.Description, description => description.IsEqualTo("EPT Hierarchy"));
     }
 
     [Test]
@@ -34,9 +34,9 @@ public class ExtendedVariableLengthRecordHeaderTests
     {
         _ = await Assert.That(new ExtendedVariableLengthRecordHeader(Bytes))
             .IsNotDefault()
-            .Satisfies(h => h.UserId, userId => userId.IsEqualTo("copc"))
-            .Satisfies(h => h.RecordId, recordId => recordId.IsEqualTo((ushort)1000))
-            .Satisfies(h => h.Description, description => description.IsEqualTo("EPT Hierarchy"));
+            .And.Member(h => h.UserId, userId => userId.IsEqualTo("copc"))
+            .And.Member(h => h.RecordId, recordId => recordId.IsEqualTo((ushort)1000))
+            .And.Member(h => h.Description, description => description.IsEqualTo("EPT Hierarchy"));
     }
 
     [Test]

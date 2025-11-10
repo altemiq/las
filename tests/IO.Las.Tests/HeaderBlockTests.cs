@@ -100,7 +100,7 @@ public class HeaderBlockTests
     {
         HeaderBlockBuilder headerBlockBuilder = new();
         headerBlockBuilder.SetOffset(123456.123, 234567.321, 123.456);
-        _ = await Assert.That(headerBlockBuilder.Offset).IsEqualTo(new(123000D, 234000D, 100D));
+        _ = await Assert.That(headerBlockBuilder.Offset).IsEqualTo(new Vector3D(123000D, 234000D, 100D));
     }
 
     [Test]
@@ -114,20 +114,22 @@ public class HeaderBlockTests
 #endif
         if (checkHeader)
         {
-            await Assert.That(headerBlockBuilder.HeaderBlock.Min).IsEqualTo(default);
-            await Assert.That(headerBlockBuilder.HeaderBlock.Max).IsEqualTo(default);
+            await Assert.That(headerBlockBuilder).IsNotNull()
+                .And.Member(static headerBlockBuilder => headerBlockBuilder.HeaderBlock.Min, min => min.IsDefault())
+                .And.Member(static headerBlockBuilder => headerBlockBuilder.HeaderBlock.Max, max => max.IsDefault());
         }
 
         headerBlockBuilder.Add(X, Y, Z, returnNumber);
+        await Assert.That(headerBlockBuilder).IsNotNull()
 #if LAS1_4_OR_GREATER
-        await Assert.That(headerBlockBuilder.LegacyNumberOfPointRecords).IsEqualTo(1U);
-        await Assert.That(headerBlockBuilder.LegacyNumberOfPointsByReturn).Satisfies(x => x.ElementAt(returnNumber - 1), static x => x.IsEqualTo(1U));
+            .And.Member(static headerBlockBuilder => headerBlockBuilder.LegacyNumberOfPointRecords, numberOfPointRecords => numberOfPointRecords.IsEqualTo(1U))
+            .And.Member(static headerBlockBuilder => headerBlockBuilder.LegacyNumberOfPointsByReturn, numberOfPointsByReturn => numberOfPointsByReturn.Member(x => x.ElementAt(returnNumber - 1), static x => x.IsEqualTo(1U)))
 #else
-        await Assert.That(headerBlockBuilder.NumberOfPointRecords).IsEqualTo(1U);
-        await Assert.That(headerBlockBuilder.NumberOfPointsByReturn).Satisfies(x => x.ElementAt(returnNumber - 1), x => x.IsEqualTo(1U));
+            .And.Member(static headerBlockBuilder => headerBlockBuilder.LegacyNumberOfPointRecords, numberOfPointRecords => numberOfPointRecords.IsEqualTo(1U))
+            .And.Member(static headerBlockBuilder => headerBlockBuilder.LegacyNumberOfPointsByReturn, numberOfPointsByReturn => numberOfPointsByReturn.Member(x => x.ElementAt(returnNumber - 1), static x => x.IsEqualTo(1U)))
 #endif
-        await Assert.That(headerBlockBuilder.Min).IsEqualTo(new(X, Y, Z));
-        await Assert.That(headerBlockBuilder.Max).IsEqualTo(new(X, Y, Z));
+            .And.Member(static headerBlockBuilder => headerBlockBuilder.Min, min => min.IsEqualTo(new Vector3D(X, Y, Z)))
+            .And.Member(static headerBlockBuilder => headerBlockBuilder.Max, max => max.IsEqualTo(new Vector3D(X, Y, Z)));
     }
 
     [Test]
@@ -137,20 +139,22 @@ public class HeaderBlockTests
         HeaderBlockBuilder headerBlockBuilder = new() { PointDataFormatId = 6 };
         if (checkHeader)
         {
-            await Assert.That(headerBlockBuilder.HeaderBlock.Min).IsEqualTo(default);
-            await Assert.That(headerBlockBuilder.HeaderBlock.Max).IsEqualTo(default);
+            await Assert.That(headerBlockBuilder).IsNotNull()
+                .And.Member(static headerBlockBuilder => headerBlockBuilder.HeaderBlock.Min, min => min.IsDefault())
+                .And.Member(static headerBlockBuilder => headerBlockBuilder.HeaderBlock.Max, max => max.IsDefault());
         }
 
         headerBlockBuilder.Add(X, Y, Z, returnNumber);
+        await Assert.That(headerBlockBuilder).IsNotNull()
 #if LAS1_4_OR_GREATER
-        await Assert.That(headerBlockBuilder.NumberOfPointRecords).IsEqualTo(1UL);
-        await Assert.That(headerBlockBuilder.NumberOfPointsByReturn).Satisfies(x => x.ElementAt(returnNumber - 1), static x => x.IsEqualTo(1UL));
+            .And.Member(static headerBlockBuilder => headerBlockBuilder.NumberOfPointRecords, numberOfPointRecords => numberOfPointRecords.IsEqualTo(1UL))
+            .And.Member(static headerBlockBuilder => headerBlockBuilder.NumberOfPointsByReturn, numberOfPointsByReturn => numberOfPointsByReturn.Member(x => x.ElementAt(returnNumber - 1), static x => x.IsEqualTo(1UL)))
 #else
-        await Assert.That(headerBlockBuilder.NumberOfPointRecords).IsEqualTo(1U);
-        await Assert.That(headerBlockBuilder.NumberOfPointsByReturn).Satisfies(x => x.ElementAt(returnNumber - 1), static x => x.IsEqualTo(1U));
+            .And.Member(static headerBlockBuilder => headerBlockBuilder.NumberOfPointRecords, numberOfPointRecords => numberOfPointRecords.IsEqualTo(1UL))
+            .And.Member(static headerBlockBuilder => headerBlockBuilder.NumberOfPointsByReturn, numberOfPointsByReturn => numberOfPointsByReturn.Member(x => x.ElementAt(returnNumber - 1), static x => x.IsEqualTo(1UL)))
 #endif
-        await Assert.That(headerBlockBuilder.Min).IsEqualTo(new(X, Y, Z));
-        await Assert.That(headerBlockBuilder.Max).IsEqualTo(new(X, Y, Z));
+            .And.Member(static headerBlockBuilder => headerBlockBuilder.Min, min => min.IsEqualTo(new Vector3D(X, Y, Z)))
+            .And.Member(static headerBlockBuilder => headerBlockBuilder.Max, max => max.IsEqualTo(new Vector3D(X, Y, Z)));
     }
 
     [Test]
@@ -164,28 +168,28 @@ public class HeaderBlockTests
     {
         HeaderBlockBuilder builder = new(pointDataTypeId);
         var header = builder.HeaderBlock;
-        await Assert.That(header.FileSourceId).IsEqualTo((ushort)0);
+        await Assert.That(header.FileSourceId).IsDefault();
         await Assert.That(header.ProjectId).IsEqualTo(Guid.Empty);
 #if LAS1_2_OR_GREATER
         await Assert.That(header.GlobalEncoding).IsEqualTo(globalEncoding);
 #endif
         await Assert.That(header.Version).IsEqualTo(HeaderBlock.DefaultVersion);
-        await Assert.That(header.SystemIdentifier).IsNull();
-        await Assert.That(header.GeneratingSoftware).IsNull();
+        await Assert.That(header.SystemIdentifier).IsDefault();
+        await Assert.That(header.GeneratingSoftware).IsDefault();
         await Assert.That(header.PointDataFormatId).IsEqualTo(pointDataTypeId);
 #if LAS1_4_OR_GREATER
-        await Assert.That(header.LegacyNumberOfPointRecords).IsEqualTo(0U);
+        await Assert.That(header.LegacyNumberOfPointRecords).IsDefault();
         await Assert.That(header.LegacyNumberOfPointsByReturn).IsEquivalentTo(Enumerable.Repeat(0U, 5));
 #else
-        await Assert.That(header.NumberOfPointRecords).IsEqualTo(0U);
+        await Assert.That(header.NumberOfPointRecords).IsDefault();
         await Assert.That(header.NumberOfPointsByReturn).IsEquivalentTo(Enumerable.Repeat(0U, 5));
 #endif
-        await Assert.That(header.ScaleFactor).IsEqualTo(new(0.001));
+        await Assert.That(header.ScaleFactor).IsEqualTo(new Vector3D(0.001));
         await Assert.That(header.Min).IsEqualTo(Vector3D.Zero);
         await Assert.That(header.Max).IsEqualTo(Vector3D.Zero);
         await Assert.That(header.Offset).IsEqualTo(Vector3D.Zero);
 #if LAS1_4_OR_GREATER
-        await Assert.That(header.NumberOfPointRecords).IsEqualTo(0UL);
+        await Assert.That(header.NumberOfPointRecords).IsDefault();
         await Assert.That(header.NumberOfPointsByReturn).IsEquivalentTo(Enumerable.Repeat(0UL, 15));
 #endif
     }
@@ -194,7 +198,7 @@ public class HeaderBlockTests
     [MethodDataSource(nameof(GetPointTypes))]
     public async Task CreateFromType(Type type, byte number)
     {
-        _ = await Assert.That(typeof(HeaderBlockBuilder).GetMethod(nameof(HeaderBlockBuilder.FromPointType))!.MakeGenericMethod(type).Invoke(default, default)).IsTypeOf<HeaderBlockBuilder>().And.Satisfies(x => x.PointDataFormatId, pointDataFormatId => pointDataFormatId.IsEqualTo(number));
+        _ = await Assert.That(typeof(HeaderBlockBuilder).GetMethod(nameof(HeaderBlockBuilder.FromPointType))!.MakeGenericMethod(type).Invoke(default, default)).IsTypeOf<HeaderBlockBuilder>().And.Member(x => x.PointDataFormatId, pointDataFormatId => pointDataFormatId.IsEqualTo(number));
     }
 
     public static IEnumerable<Func<(int, bool)>> GetReturnNumbers()

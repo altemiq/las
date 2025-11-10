@@ -100,7 +100,7 @@ public class SystemIdentifierTests
         _ = await Assert.That(headerBlock.SystemIdentifier).IsNotNull();
 
         var identifier = SystemIdentifier.Parse(headerBlock.SystemIdentifier!);
-        _ = await Assert.That(identifier).IsEqualTo(new(Platforms.StaticTripod, Models.Riegl.VZ1000));
+        _ = await Assert.That(identifier).IsEqualTo(new SystemIdentifier(Platforms.StaticTripod, Models.Riegl.VZ1000));
     }
 
     [Test]

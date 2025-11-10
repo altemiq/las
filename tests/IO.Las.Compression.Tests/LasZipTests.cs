@@ -14,8 +14,9 @@ public class LasZipTests
     public async Task DowngradeCompressor()
     {
         LasZip lasZip = new(GpsPointDataRecord.Id, 0, Compressor.LayeredChunked);
-        _ = await Assert.That(lasZip.Compressor).IsEqualTo(Compressor.PointWiseChunked);
-        _ = await Assert.That(lasZip.ChunkSize).IsEqualTo(50000U);
+        _ = await Assert.That(lasZip)
+            .Member(static lasZip => lasZip.Compressor, static compressor => compressor.IsEqualTo(Compressor.PointWiseChunked))
+            .And.Member(static lasZip => lasZip.ChunkSize, static chunkSize => chunkSize.IsEqualTo(50000U));
     }
 
     [Test]

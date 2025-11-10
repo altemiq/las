@@ -64,7 +64,7 @@ public class LazReaderTests
         _ = await Assert.That(reader)
             .IsNotNull()
             .And.IsTypeOf<LazReader>()
-            .And.Satisfies(static x => x.IsCompressed, x => x.IsTrue());
+            .And.Member(static x => x.IsCompressed, x => x.IsTrue());
     }
 
 #if LAS1_4_OR_GREATER
@@ -124,15 +124,15 @@ public class LazReaderTests
 
         var point = reader.ReadPointDataRecord(10).PointDataRecord!;
         await Assert.That(point).IsNotNull()
-            .Satisfies(p => p.X, x => x.IsEqualTo(27799961))
-            .Satisfies(p => p.Y, y => y.IsEqualTo(612234368))
-            .Satisfies(p => p.Z, z => z.IsEqualTo(6222));
+            .And.Member(p => p.X, x => x.IsEqualTo(27799961))
+            .And.Member(p => p.Y, y => y.IsEqualTo(612234368))
+            .And.Member(p => p.Z, z => z.IsEqualTo(6222));
 
         point = reader.ReadPointDataRecord(277500).PointDataRecord!;
         await Assert.That(point).IsNotNull()
-            .Satisfies(p => p.X, x => x.IsEqualTo(27775097))
-            .Satisfies(p => p.Y, y => y.IsEqualTo(612225071))
-            .Satisfies(p => p.Z, z => z.IsEqualTo(4228));
+            .And.Member(p => p.X, x => x.IsEqualTo(27775097))
+            .And.Member(p => p.Y, y => y.IsEqualTo(612225071))
+            .And.Member(p => p.Z, z => z.IsEqualTo(4228));
     }
 
 
@@ -159,7 +159,7 @@ public class LazReaderTests
         static async Task TestPointAsync(LasReader pointReader, Type expectedType, bool hasExtraBytes)
         {
             var point = await pointReader.ReadPointDataRecordAsync();
-            _ = await Assert.That(point.PointDataRecord).IsNotNull()
+            _ = await Assert.That(point.PointDataRecord)
                 .IsNotNull()
                 .And.IsTypeOf(expectedType);
             _ = hasExtraBytes ? await Assert.That(point.ExtraBytes.IsEmpty).IsFalse() : await Assert.That(point.ExtraBytes.IsEmpty).IsTrue();
@@ -215,41 +215,43 @@ public class LazReaderTests
 
         var record = await reader.ReadPointDataRecordAsync(10);
         await Assert.That(record.PointDataRecord).IsNotNull()
-            .Satisfies(p => p.X, x => x.IsEqualTo(27799961))
-            .Satisfies(p => p.Y, y => y.IsEqualTo(612234368))
-            .Satisfies(p => p.Z, z => z.IsEqualTo(6222));
+            .And.Member(p => p.X, x => x.IsEqualTo(27799961))
+            .And.Member(p => p.Y, y => y.IsEqualTo(612234368))
+            .And.Member(p => p.Z, z => z.IsEqualTo(6222));
 
         record = await reader.ReadPointDataRecordAsync(277500);
         await Assert.That(record.PointDataRecord).IsNotNull()
-            .Satisfies(p => p.X, x => x.IsEqualTo(27775097))
-            .Satisfies(p => p.Y, y => y.IsEqualTo(612225071))
-            .Satisfies(p => p.Z, z => z.IsEqualTo(4228));
+            .And.Member(p => p.X, x => x.IsEqualTo(27775097))
+            .And.Member(p => p.Y, y => y.IsEqualTo(612225071))
+            .And.Member(p => p.Z, z => z.IsEqualTo(4228));
     }
 
-    private static async Task CheckHeader(HeaderBlock headerBlock, Version version)
+    private static async Task CheckHeader(HeaderBlock headerBlock, Version expectedVersion)
     {
-        _ = await Assert.That(headerBlock.FileSignature).IsEqualTo("LASF");
-        _ = await Assert.That(headerBlock.FileSourceId).IsEqualTo((ushort)0);
+        _ = await Assert.That(headerBlock)
+            .Member(static headerBlock => headerBlock.FileSignature, static fileSignature => fileSignature.IsEqualTo("LASF"))
+            .And.Member(static headerBlock => headerBlock.FileSourceId, static fileSourceId => fileSourceId.IsDefault())
 #if LAS1_2_OR_GREATER
-        _ = await Assert.That(headerBlock.GlobalEncoding).IsEqualTo(GlobalEncoding.None);
+            .And.Member(static headerBlock => headerBlock.GlobalEncoding, static globalEncoding => globalEncoding.IsEqualTo(GlobalEncoding.None))
 #endif
-        _ = await Assert.That(headerBlock.ProjectId).IsEqualTo(Guid.Empty);
-        _ = await Assert.That(headerBlock.Version).IsEqualTo(version);
-        _ = await Assert.That(headerBlock.SystemIdentifier).IsEqualTo("LAStools (c) by rapidlasso GmbH");
-        _ = await Assert.That(headerBlock.FileCreation).Satisfies(static x => x!.Value.Date, static x => x.IsEqualTo(new(2010, 2, 9)));
+            .And.Member(static headerBlock => headerBlock.ProjectId, static projectId => projectId.IsEqualTo(Guid.Empty))
+            .And.Member(static headerBlock => headerBlock.Version, version => version.IsEqualTo(expectedVersion))
+            .And.Member(static headerBlock => headerBlock.SystemIdentifier, static systemIdentifier => systemIdentifier.IsEqualTo("LAStools (c) by rapidlasso GmbH"))
+            .And.Member(static headerBlock => headerBlock.FileCreation.GetValueOrDefault(), static fileCreation => fileCreation.IsEqualTo(new DateTime(2010, 2, 9)))
 #if LAS1_4_OR_GREATER
-        _ = await Assert.That(headerBlock.NumberOfPointRecords).IsEqualTo(277573UL);
-        _ = await Assert.That(headerBlock.LegacyNumberOfPointsByReturn).IsEquivalentTo([263413U, 13879U, 281U, 0U, 0U]);
-        _ = version < new Version(1, 4)
-            ? await Assert.That(headerBlock.NumberOfPointsByReturn).IsEquivalentTo([263413UL, 13879UL, 281UL, 0UL, 0UL])
-            : await Assert.That(headerBlock.NumberOfPointsByReturn).IsEquivalentTo([263413UL, 13879UL, 281UL, 0UL, 0UL, 0UL, 0UL, 0UL, 0UL, 0UL, 0UL, 0UL, 0UL, 0UL, 0UL]);
+            .And.Member(static headerBlock => headerBlock.NumberOfPointRecords, static numberOfPointRecords => numberOfPointRecords.IsEqualTo(277573UL))
+            .And.Member(static headerBlock => headerBlock.LegacyNumberOfPointsByReturn, static legacyNumberOfPointsByReturn => legacyNumberOfPointsByReturn.IsEquivalentTo([263413U, 13879U, 281U, 0U, 0U]))
+            .And.Member(static headerBlock => headerBlock.NumberOfPointsByReturn, numberOfPointsByReturn =>
+                expectedVersion < new Version(1, 4)
+                    ? numberOfPointsByReturn.IsEquivalentTo([263413UL, 13879UL, 281UL, 0UL, 0UL])
+                    : numberOfPointsByReturn.IsEquivalentTo([263413UL, 13879UL, 281UL, 0UL, 0UL, 0UL, 0UL, 0UL, 0UL, 0UL, 0UL, 0UL, 0UL, 0UL, 0UL]))
 #else
-        _ = await Assert.That(headerBlock.NumberOfPointRecords).IsEqualTo(277573U);
-        _ = await Assert.That(headerBlock.NumberOfPointsByReturn).IsEquivalentTo([263413U, 13879U, 281U, 0U, 0U]);
+            .And.Member(static headerBlock => headerBlock.NumberOfPointRecords, numberOfPointRecords => numberOfPointRecords.IsEqualTo(277573U);
+            .And.Member(static headerBlock => headerBlock.NumberOfPointsByReturn, numberOfPointsByReturn => numberOfPointsByReturn.IsEquivalentTo([263413U, 13879U, 281U, 0U, 0U]);
 #endif
-        _ = await Assert.That(headerBlock.ScaleFactor).IsEqualTo(new(0.01, 0.01, 0.01));
-        _ = await Assert.That(headerBlock.Offset).IsEqualTo(new(0.0, 0.0, 0.0));
-        _ = await Assert.That(headerBlock.Min).IsEqualTo(new(277750.0, 6122250.0, 42.21));
-        _ = await Assert.That(headerBlock.Max).IsEqualTo(new(277999.99, 6122499.99, 64.35));
+            .And.Member(static headerBlock => headerBlock.ScaleFactor, scaleFactor => scaleFactor.IsEqualTo(new Vector3D(0.01, 0.01, 0.01)))
+            .And.Member(static headerBlock => headerBlock.Offset, offset => offset.IsDefault())
+            .And.Member(static headerBlock => headerBlock.Min, min => min.IsEqualTo(new Vector3D(277750.0, 6122250.0, 42.21)))
+            .And.Member(static headerBlock => headerBlock.Max, max => max.IsEqualTo(new Vector3D(277999.99, 6122499.99, 64.35)));
     }
 }

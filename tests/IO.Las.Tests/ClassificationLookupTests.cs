@@ -10,9 +10,7 @@ public class ClassificationLookupTests
             new ClassificationLookupItem { ClassNumber = 113, Description = "Classification 113" },
             new ClassificationLookupItem { ClassNumber = 132, Description = "Classification 132" });
 
-        _ = await Assert.That(lookup[0].ClassNumber).IsEqualTo((byte)112);
-        _ = await Assert.That(lookup[1].ClassNumber).IsEqualTo((byte)113);
-        _ = await Assert.That(lookup[2].ClassNumber).IsEqualTo((byte)132);
+        _ = await Assert.That(lookup.Select(l => l.ClassNumber)).IsEquivalentTo([(byte)112, (byte)113, (byte)132]);
     }
 
     [Test]

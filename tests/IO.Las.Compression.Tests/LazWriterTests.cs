@@ -22,7 +22,6 @@ public class LazWriterTests
             FileCreation = new DateTime(2010, 1, 1).AddDays(40),
             PointDataFormatId = 1,
             LegacyNumberOfPointRecords = 2,
-
         };
 
         builder.SetCompressed();
@@ -41,8 +40,8 @@ public class LazWriterTests
                 Scale = 0.01,
                 Offset = 250,
                 Name = "height above ground",
-                Description = "vertical point to TIN distance"
-            }
+                Description = "vertical point to TIN distance",
+            },
         ];
 
         MemoryStream memoryStream = new();
@@ -107,8 +106,8 @@ public class LazWriterTests
 
         _ = await Assert.That(outputPoint)
             .IsNotNull()
-            .IsAssignableTo<IPointDataRecord>()
-            .Satisfies(p => p.Classification, classification => classification.IsEqualTo(Classification.LowVegetation));
+            .And.IsTypeOf<IPointDataRecord>()
+            .And.Member(p => p.Classification, classification => classification.IsEqualTo(Classification.LowVegetation));
 
         _ = await Assert.That(extraBytes.GetValue(0, bytes)).IsTypeOf<double>().And.IsEqualTo(ExtraValue);
     }
@@ -143,8 +142,8 @@ public class LazWriterTests
                 Scale = 0.01,
                 Offset = 250,
                 Name = "height above ground",
-                Description = "vertical point to TIN distance"
-            }
+                Description = "vertical point to TIN distance",
+            },
         ];
 
         MemoryStream memoryStream = new();
@@ -209,8 +208,8 @@ public class LazWriterTests
 
         _ = await Assert.That(outputPoint)
             .IsNotNull()
-            .IsAssignableTo<IPointDataRecord>()
-            .Satisfies(p => p.Classification, classification => classification.IsEqualTo(Classification.LowVegetation));
+            .And.IsTypeOf<IPointDataRecord>()
+            .And.Member(p => p.Classification, classification => classification.IsEqualTo(Classification.LowVegetation));
 
         _ = await Assert.That(extraBytes.GetValue(0, bytes.Span)).IsTypeOf<double>().And.IsEqualTo(ExtraValue);
     }
@@ -235,7 +234,7 @@ public class LazWriterTests
 
         using LazWriter writer = new(new MemoryStream());
         await Assert.That([SuppressMessage("ReSharper", "AccessToDisposedClosure")] () => writer.Write(HeaderBlock.Default, records)).ThrowsNothing();
-        _ = await Assert.That(records).HasCount().EqualToOne();
+        _ = await Assert.That(records).HasSingleItem();
     }
 
     [Test]
@@ -379,8 +378,8 @@ public class LazWriterTests
 
         _ = await Assert.That(outputPoint)
             .IsNotNull()
-            .IsAssignableTo<IPointDataRecord>()
-            .Satisfies(p => p.Classification, classification => classification.IsEqualTo(Classification.LowVegetation));
+            .And.IsTypeOf<IPointDataRecord>()
+            .And.Member(p => p.Classification, classification => classification.IsEqualTo(Classification.LowVegetation));
 
 #if LAS1_4_OR_GREATER
         _ = await Assert.That(extraBytes.GetValue(0, bytes)).IsTypeOf<double>().And.IsEqualTo(ExtraValue);
@@ -466,9 +465,9 @@ public class LazWriterTests
             outputHeader = lasReader.Header;
 
             _ = await Assert.That(lasReader.VariableLengthRecords).Contains(vlr => vlr is CompressedTag)
-                .And.Satisfies(
+                .And.Member(
                     records => records.OfType<CompressedTag>().Single(),
-                    record => record.IsNotNull().And.Satisfies(
+                    record => record.IsNotNull().And.Member(
                             ct => ct.Compressor,
                             compressor => compressor.IsEqualTo(Compressor.LayeredChunked))
                         .And.IsAssignableTo<CompressedTag>());
@@ -576,9 +575,9 @@ public class LazWriterTests
             outputHeader = lasReader.Header;
 
             _ = await Assert.That(lasReader.VariableLengthRecords).Contains(vlr => vlr is CompressedTag)
-                .And.Satisfies(
+                .And.Member(
                     records => records.OfType<CompressedTag>().Single(),
-                    record => record.IsNotNull().And.Satisfies(
+                    record => record.IsNotNull().And.Member(
                             tag => tag.Compressor,
                             compressor => compressor.IsEqualTo(Compressor.LayeredChunked))
                         .And.IsAssignableTo<CompressedTag>());
@@ -675,7 +674,7 @@ public class LazWriterTests
 
         _ = await Assert.That(reader.VariableLengthRecords.OfType<CompressedTag>())
             .HasSingleItem()
-            .Satisfies(x => x.Single().NumOfSpecialEvlrs, x => x.IsEqualTo(1));
+            .And.Member(x => x.Single().NumOfSpecialEvlrs, x => x.IsEqualTo(1));
     }
 
     [Test]

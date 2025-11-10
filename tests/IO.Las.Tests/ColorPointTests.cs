@@ -6,7 +6,7 @@ public class ColorPointTests
 {
     private static readonly byte[] Bytes =
     [
-        0xC5, 0x0A, 0x00, 0x00, 0x9F, 0xFA, 0xFF, 0xFF, 0xC3, 0xE5, 0xFF, 0xFF, 0xAE, 0x01, 0x09, 0x01, 0xE3, 0x00, 0x00, 0x00, 0x00, 0x68, 0x90, 0xA2, 0x64, 0x0B
+        0xC5, 0x0A, 0x00, 0x00, 0x9F, 0xFA, 0xFF, 0xFF, 0xC3, 0xE5, 0xFF, 0xFF, 0xAE, 0x01, 0x09, 0x01, 0xE3, 0x00, 0x00, 0x00, 0x00, 0x68, 0x90, 0xA2, 0x64, 0x0B,
     ];
 
     private static
@@ -70,26 +70,26 @@ public class ColorPointTests
     private static async Task CheckPoint(ColorPointDataRecord record)
     {
         _ = await Assert.That(record)
-            .Satisfies(p => p.X, x => x.IsEqualTo(2757))
-            .Satisfies(p => p.Y, y => y.IsEqualTo(-1377))
-            .Satisfies(p => p.Z, z => z.IsEqualTo(-6717))
-            .Satisfies(p => p.Intensity, intensity => intensity.IsEqualTo((ushort)430))
-            .Satisfies(p => p.ReturnNumber, returnNumber => returnNumber.IsEqualTo((byte)1))
-            .Satisfies(p => p.NumberOfReturns, numberOfReturns => numberOfReturns.IsEqualTo((byte)1))
-            .Satisfies(p => p.ScanDirectionFlag, scanDirectionFlag => scanDirectionFlag.IsFalse())
-            .Satisfies(p => p.EdgeOfFlightLine, edgeOfFlightLine => edgeOfFlightLine.IsFalse())
-            .Satisfies(p => p.Classification, classification => classification.IsEqualTo(Classification.Unclassified))
-            .Satisfies(p => p.Synthetic, synthetic => synthetic.IsFalse())
-            .Satisfies(p => p.KeyPoint, keyPoint => keyPoint.IsFalse())
-            .Satisfies(p => p.Withheld, withheld => withheld.IsFalse())
-            .Satisfies(p => p.ScanAngleRank, scanAngleRank => scanAngleRank.IsEqualTo((sbyte)-29))
-            .Satisfies(p => p.UserData, userData => userData.IsDefault())
-            .Satisfies(p => p.PointSourceId, pointSourceId => pointSourceId.IsDefault())
-            .Satisfies(
+            .Member(p => p.X, x => x.IsEqualTo(2757))
+            .And.Member(p => p.Y, y => y.IsEqualTo(-1377))
+            .And.Member(p => p.Z, z => z.IsEqualTo(-6717))
+            .And.Member(p => p.Intensity, intensity => intensity.IsEqualTo((ushort)430))
+            .And.Member(p => p.ReturnNumber, returnNumber => returnNumber.IsEqualTo((byte)1))
+            .And.Member(p => p.NumberOfReturns, numberOfReturns => numberOfReturns.IsEqualTo((byte)1))
+            .And.Member(p => p.ScanDirectionFlag, scanDirectionFlag => scanDirectionFlag.IsFalse())
+            .And.Member(p => p.EdgeOfFlightLine, edgeOfFlightLine => edgeOfFlightLine.IsFalse())
+            .And.Member(p => p.Classification, classification => classification.IsEqualTo(Classification.Unclassified))
+            .And.Member(p => p.Synthetic, synthetic => synthetic.IsFalse())
+            .And.Member(p => p.KeyPoint, keyPoint => keyPoint.IsFalse())
+            .And.Member(p => p.Withheld, withheld => withheld.IsFalse())
+            .And.Member(p => p.ScanAngleRank, scanAngleRank => scanAngleRank.IsEqualTo((sbyte)-29))
+            .And.Member(p => p.UserData, userData => userData.IsDefault())
+            .And.Member(p => p.PointSourceId, pointSourceId => pointSourceId.IsDefault())
+            .And.Member(
                 p => p.Color,
                 color => color
-                    .Satisfies(c => c.R, r => r.IsNotDefault())
-                    .Satisfies(c => c.G, g => g.IsNotDefault())
-                    .Satisfies(c => c.B, b => b.IsNotDefault()));
+                    .Member(c => c.R, r => r.IsNotDefault())
+                    .And.Member(c => c.G, g => g.IsNotDefault())
+                    .And.Member(c => c.B, b => b.IsNotDefault()));
     }
 }

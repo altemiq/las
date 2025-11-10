@@ -21,7 +21,7 @@ public class ExtendedVariableLengthRecordTests
                 UserId = "MINE",
                 RecordId = 1234,
                 Description = "This is my EVLR",
-                RecordLengthAfterHeader = 0
+                RecordLengthAfterHeader = 0,
             },
             []);
         HeaderBlockBuilder headerBuilder = new();
@@ -85,7 +85,7 @@ public class ExtendedVariableLengthRecordTests
         _ = await Assert.That(reader.Header.LegacyNumberOfPointRecords).IsEqualTo(2U);
 #endif
         _ = await Assert.That(reader.ExtendedVariableLengthRecords).HasCount().EqualTo(1)
-            .And.Satisfies(x => x.First(), x => x.IsEqualTo(evlr, ExtendedVariableLengthRecordComparer.Instance));
+            .And.Member(x => x.First(), x => x.IsEqualTo(evlr, ExtendedVariableLengthRecordComparer.Instance));
     }
 
     internal sealed class ForwardOnlyMemoryStream : MemoryStream

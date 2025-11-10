@@ -23,8 +23,7 @@ public class CopcHierarchyTests
         _ = await Assert.That(info.RootHierOffset).IsEqualTo((ulong)CopcHierarchy.HeaderSize);
         _ = await Assert.That(info.RootHierSize).IsEqualTo(64UL);
 
-        _ = await Assert.That(hierarchy.Root).IsNotNull();
-        _ = await Assert.That(hierarchy.Root).IsEquivalentTo([first, second]);
+        _ = await Assert.That(hierarchy.Root).IsNotNull().And.IsEquivalentTo([first, second]);
     }
 
     [Test]
@@ -48,8 +47,7 @@ public class CopcHierarchyTests
         var recordData = data[ExtendedVariableLengthRecordHeader.Size..];
         hierarchy = new(recordHeader, info, default, recordData);
 
-        _ = await Assert.That(hierarchy.Root).IsNotNull();
-        _ = await Assert.That(hierarchy.Root).IsEquivalentTo([first, second]);
+        _ = await Assert.That(hierarchy.Root).IsNotNull().And.IsEquivalentTo([first, second]);
     }
 
     [Test]

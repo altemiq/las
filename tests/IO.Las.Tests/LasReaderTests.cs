@@ -18,7 +18,7 @@ public class LasReaderTests
         var pointDataRecord = point.PointDataRecord;
         var data = point.ExtraBytes.ToArray();
 
-        await Assert.That(pointDataRecord).IsTypeOf<GpsPointDataRecord>().Satisfies(p => p.X, x => x.IsNotDefault());
+        await Assert.That(pointDataRecord).IsTypeOf<GpsPointDataRecord>().And.Member(p => p.X, x => x.IsNotDefault());
         await Assert.That(data).IsEmpty();
     }
 
@@ -36,7 +36,7 @@ public class LasReaderTests
 
         using LasReader reader = new(stream, System.Text.Encoding.UTF8.GetString(bytes));
         await CheckHeader(reader.Header, new(1, 1));
-        _ = await Assert.That(reader.VariableLengthRecords).HasCount().EqualToOne();
+        _ = await Assert.That(reader.VariableLengthRecords).HasSingleItem();
 
         var point = reader.ReadPointDataRecord();
         var pointDataRecord = point.PointDataRecord;
@@ -101,19 +101,19 @@ public class LasReaderTests
         var fileCreation = reader.Header.FileCreation.GetValueOrDefault();
         await Assert.That(reader.ReadPointDataRecord(10).PointDataRecord)
             .IsNotNull()
-            .Satisfies(p => p.X, x => x.IsEqualTo(27799961))
-            .Satisfies(p => p.Y, y => y.IsEqualTo(612234368))
-            .Satisfies(p => p.Z, z => z.IsEqualTo(6222))
-            .IsAssignableTo<IGpsPointDataRecord>()
-            .Satisfies(p => quantizer.GetDateTime(p.GpsTime), gpsTime => gpsTime.IsBetween(fileCreation - TimeSpan.FromDays(7), fileCreation + TimeSpan.FromDays(7)));
+            .And.Member(p => p.X, x => x.IsEqualTo(27799961))
+            .And.Member(p => p.Y, y => y.IsEqualTo(612234368))
+            .And.Member(p => p.Z, z => z.IsEqualTo(6222))
+            .And.IsTypeOf<IGpsPointDataRecord>()
+            .And.Member(p => quantizer.GetDateTime(p.GpsTime), gpsTime => gpsTime.IsBetween(fileCreation - TimeSpan.FromDays(7), fileCreation + TimeSpan.FromDays(7)));
 
         await Assert.That(reader.ReadPointDataRecord(277500).PointDataRecord)
             .IsNotNull()
-            .Satisfies(p => p.X, x => x.IsEqualTo(27775097))
-            .Satisfies(p => p.Y, y => y.IsEqualTo(612225071))
-            .Satisfies(p => p.Z, z => z.IsEqualTo(4228))
-            .IsAssignableTo<IGpsPointDataRecord>()
-            .Satisfies(p => quantizer.GetDateTime(p.GpsTime), gpsTime => gpsTime.IsBetween(fileCreation - TimeSpan.FromDays(7), fileCreation + TimeSpan.FromDays(7)));
+            .And.Member(p => p.X, x => x.IsEqualTo(27775097))
+            .And.Member(p => p.Y, y => y.IsEqualTo(612225071))
+            .And.Member(p => p.Z, z => z.IsEqualTo(4228))
+            .And.IsTypeOf<IGpsPointDataRecord>()
+            .And.Member(p => quantizer.GetDateTime(p.GpsTime), gpsTime => gpsTime.IsBetween(fileCreation - TimeSpan.FromDays(7), fileCreation + TimeSpan.FromDays(7)));
     }
 
     [Test]
@@ -126,11 +126,11 @@ public class LasReaderTests
                                     ?? throw new InvalidOperationException("Failed to get stream");
         using LasReader reader = new(stream);
         await CheckHeader(reader.Header, new(1, 1));
-        _ = await Assert.That(reader.VariableLengthRecords).HasCount().EqualToOne();
+        _ = await Assert.That(reader.VariableLengthRecords).HasSingleItem();
 
         _ = await Assert.That(await reader.ReadPointDataRecordAsync())
-            .Satisfies(p => p.PointDataRecord, p => p.IsNotNull().And.Satisfies(pt => pt.X, x => x.IsNotDefault()))
-            .Satisfies(p => p.ExtraBytes, extraBytes => extraBytes.Satisfies(e => e.IsEmpty, empty => empty.IsTrue()));
+            .Member(p => p.PointDataRecord, p => p.IsNotNull().And.Member(pt => pt.X, x => x.IsNotDefault()))
+            .And.Member(p => p.ExtraBytes.IsEmpty, empty => empty.IsTrue());
     }
 
     [Test]
@@ -145,7 +145,7 @@ public class LasReaderTests
         await Assert.That(stream.ReadAsync(bytes, 0, bytes.Length)).IsEqualTo(bytes.Length);
         using LasReader reader = new(stream, System.Text.Encoding.UTF8.GetString(bytes));
         await CheckHeader(reader.Header, new(1, 1));
-        _ = await Assert.That(reader.VariableLengthRecords).HasCount().EqualToOne();
+        _ = await Assert.That(reader.VariableLengthRecords).HasSingleItem();
 
         var point = await reader.ReadPointDataRecordAsync();
 
@@ -205,45 +205,47 @@ public class LasReaderTests
         var point = await reader.ReadPointDataRecordAsync(10);
         _ = await Assert.That(point.PointDataRecord)
             .IsNotNull()
-            .Satisfies(p => p.X, x => x.IsEqualTo(27799961))
-            .Satisfies(p => p.Y, y => y.IsEqualTo(612234368))
-            .Satisfies(p => p.Z, z => z.IsEqualTo(6222))
-            .IsTypeOf<GpsPointDataRecord>()
-            .Satisfies(p => quantizer.GetDateTime(p.GpsTime), gpsTime => gpsTime.IsBetween(fileCreation - TimeSpan.FromDays(7), fileCreation + TimeSpan.FromDays(7)));
+            .And.Member(p => p.X, x => x.IsEqualTo(27799961))
+            .And.Member(p => p.Y, y => y.IsEqualTo(612234368))
+            .And.Member(p => p.Z, z => z.IsEqualTo(6222))
+            .And.IsTypeOf<GpsPointDataRecord>()
+            .And.Member(p => quantizer.GetDateTime(p.GpsTime), gpsTime => gpsTime.IsBetween(fileCreation - TimeSpan.FromDays(7), fileCreation + TimeSpan.FromDays(7)));
 
         point = await reader.ReadPointDataRecordAsync(277500);
         _ = await Assert.That(point.PointDataRecord)
-            .Satisfies(p => p.X, x => x.IsEqualTo(27775097))
-            .Satisfies(p => p.Y, y => y.IsEqualTo(612225071))
-            .Satisfies(p => p.Z, z => z.IsEqualTo(4228))
-            .IsAssignableTo<IGpsPointDataRecord>()
-            .Satisfies(p => quantizer.GetDateTime(p.GpsTime), gpsTime => gpsTime.IsBetween(fileCreation - TimeSpan.FromDays(7), fileCreation + TimeSpan.FromDays(7)));
+            .Member(p => p.X, x => x.IsEqualTo(27775097))
+            .And.Member(p => p.Y, y => y.IsEqualTo(612225071))
+            .And.Member(p => p.Z, z => z.IsEqualTo(4228))
+            .And.IsTypeOf<IGpsPointDataRecord>()
+            .And.Member(p => quantizer.GetDateTime(p.GpsTime), gpsTime => gpsTime.IsBetween(fileCreation - TimeSpan.FromDays(7), fileCreation + TimeSpan.FromDays(7)));
     }
 
-    private static async Task CheckHeader(HeaderBlock headerBlock, Version version)
+    private static async Task CheckHeader(HeaderBlock headerBlock, Version expectedVersion)
     {
-        _ = await Assert.That(headerBlock.FileSignature).IsEqualTo("LASF");
-        _ = await Assert.That(headerBlock.FileSourceId).IsEqualTo((ushort)0);
+        _ = await Assert.That(headerBlock)
+            .Member(static headerBlock => headerBlock.FileSignature, static fileSignature => fileSignature.IsEqualTo("LASF"))
+            .And.Member(static headerBlock => headerBlock.FileSourceId, static fileSourceId => fileSourceId.IsDefault())
 #if LAS1_2_OR_GREATER
-        _ = await Assert.That(headerBlock.GlobalEncoding).IsEqualTo(GlobalEncoding.None);
+            .And.Member(static headerBlock => headerBlock.GlobalEncoding, static globalEncoding => globalEncoding.IsEqualTo(GlobalEncoding.None))
 #endif
-        _ = await Assert.That(headerBlock.ProjectId).IsEqualTo(Guid.Empty);
-        _ = await Assert.That(headerBlock.Version).IsEqualTo(version);
-        _ = await Assert.That(headerBlock.SystemIdentifier).IsEqualTo("LAStools (c) by rapidlasso GmbH");
-        _ = await Assert.That(headerBlock.FileCreation).Satisfies(static x => x!.Value.Date, static x => x.IsEqualTo(new(2010, 2, 9)));
+            .And.Member(static headerBlock => headerBlock.ProjectId, static projectId => projectId.IsEqualTo(Guid.Empty))
+            .And.Member(static headerBlock => headerBlock.Version, version => version.IsEqualTo(expectedVersion))
+            .And.Member(static headerBlock => headerBlock.SystemIdentifier, static systemIdentifier => systemIdentifier.IsEqualTo("LAStools (c) by rapidlasso GmbH"))
+            .And.Member(static headerBlock => headerBlock.FileCreation.GetValueOrDefault(), static fileCreation => fileCreation.IsEqualTo(new DateTime(2010, 2, 9)))
 #if LAS1_4_OR_GREATER
-        _ = await Assert.That(headerBlock.NumberOfPointRecords).IsEqualTo(277573UL);
-        _ = await Assert.That(headerBlock.LegacyNumberOfPointsByReturn).IsEquivalentTo([263413U, 13879U, 281U, 0U, 0U]);
-        _ = version < new Version(1, 4)
-            ? await Assert.That(headerBlock.NumberOfPointsByReturn).IsEquivalentTo([263413UL, 13879UL, 281UL, 0UL, 0UL])
-            : await Assert.That(headerBlock.NumberOfPointsByReturn).IsEquivalentTo([263413UL, 13879UL, 281UL, 0UL, 0UL, 0UL, 0UL, 0UL, 0UL, 0UL, 0UL, 0UL, 0UL, 0UL, 0UL]);
+            .And.Member(static headerBlock => headerBlock.NumberOfPointRecords, static numberOfPointRecords => numberOfPointRecords.IsEqualTo(277573UL))
+            .And.Member(static headerBlock => headerBlock.LegacyNumberOfPointsByReturn, static legacyNumberOfPointsByReturn => legacyNumberOfPointsByReturn.IsEquivalentTo([263413U, 13879U, 281U, 0U, 0U]))
+            .And.Member(static headerBlock => headerBlock.NumberOfPointsByReturn, numberOfPointsByReturn =>
+                expectedVersion < new Version(1, 4)
+                    ? numberOfPointsByReturn.IsEquivalentTo([263413UL, 13879UL, 281UL, 0UL, 0UL])
+                    : numberOfPointsByReturn.IsEquivalentTo([263413UL, 13879UL, 281UL, 0UL, 0UL, 0UL, 0UL, 0UL, 0UL, 0UL, 0UL, 0UL, 0UL, 0UL, 0UL]))
 #else
-        _ = await Assert.That(headerBlock.NumberOfPointRecords).IsEqualTo(277573U);
-        _ = await Assert.That(headerBlock.NumberOfPointsByReturn).IsEquivalentTo([263413U, 13879U, 281U, 0U, 0U]);
+            .And.Member(static headerBlock => headerBlock.NumberOfPointRecords, numberOfPointRecords => numberOfPointRecords.IsEqualTo(277573U);
+            .And.Member(static headerBlock => headerBlock.NumberOfPointsByReturn, numberOfPointsByReturn => numberOfPointsByReturn.IsEquivalentTo([263413U, 13879U, 281U, 0U, 0U]);
 #endif
-        _ = await Assert.That(headerBlock.ScaleFactor).IsEqualTo(new(0.01, 0.01, 0.01));
-        _ = await Assert.That(headerBlock.Offset).IsEqualTo(new(0.0, 0.0, 0.0));
-        _ = await Assert.That(headerBlock.Min).IsEqualTo(new(277750.0, 6122250.0, 42.21));
-        _ = await Assert.That(headerBlock.Max).IsEqualTo(new(277999.99, 6122499.99, 64.35));
+            .And.Member(static headerBlock => headerBlock.ScaleFactor, scaleFactor => scaleFactor.IsEqualTo(new Vector3D(0.01, 0.01, 0.01)))
+            .And.Member(static headerBlock => headerBlock.Offset, offset => offset.IsDefault())
+            .And.Member(static headerBlock => headerBlock.Min, min => min.IsEqualTo(new Vector3D(277750.0, 6122250.0, 42.21)))
+            .And.Member(static headerBlock => headerBlock.Max, max => max.IsEqualTo(new Vector3D(277999.99, 6122499.99, 64.35)));
     }
 }
