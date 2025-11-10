@@ -14,7 +14,7 @@
   </ItemGroup>
 
   <ItemGroup Label="SQLite">
-    <PackageVersion Include="Microsoft.Data.Sqlite" Version="9.0.9" />
+    <PackageVersion Include="Microsoft.Data.Sqlite" Version="9.0.10" />
     <PackageVersion Include="SQLitePCLRaw.bundle_e_sqlite3" Version="3.0.2" />
     <PackageVersion Include="SQLitePCLRaw.core" Version="3.0.2" />
   </ItemGroup>
