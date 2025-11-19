@@ -4,7 +4,7 @@
   <PropertyGroup>
     <AssemblyName>$(MSBuildProjectName.ToLower())</AssemblyName>
 
-    <DefaultTargetFramework>net9.0</DefaultTargetFramework>
+    <DefaultTargetFramework>net10.0</DefaultTargetFramework>
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
     <LangVersion>preview</LangVersion>

@@ -38,6 +38,7 @@ jobs:
         dotnet-version: |
           8.0.x
           9.0.x
+          10.0.x
         source-url: https://nuget.pkg.github.com/${{ github.repository_owner }}/index.json
       env:
         NUGET_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -54,7 +55,7 @@ jobs:
 
     # Test
     - name: Run local/dotnet-test@v1
-      run: dotnet test --no-build -- --results-directory ${{ github.workspace }}/coverage/results --coverage --coverage-output-format cobertura
+      run: dotnet test --no-build --results-directory ${{ github.workspace }}/coverage/results --coverage --coverage-output-format cobertura
 
     - uses: danielpalme/ReportGenerator-GitHub-Action@v5
       with:
@@ -104,7 +105,7 @@ jobs:
       # Install .NET
       - uses: actions/setup-dotnet@v5
         with:
-          dotnet-version: 9.0.x
+          dotnet-version: 10.0.x
           source-url: https://nuget.pkg.github.com/${{ github.repository_owner }}/index.json
         env:
           NUGET_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -150,7 +151,7 @@ jobs:
       # Install the .NET workload
       - uses: actions/setup-dotnet@v5
         with:
-          dotnet-version: 9.0.x
+          dotnet-version: 10.0.x
           source-url: https://nuget.pkg.github.com/${{ github.repository_owner }}/index.json
         env:
           NUGET_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -215,7 +216,7 @@ jobs:
     # Install .NET
     - uses: actions/setup-dotnet@v5
       with:
-        dotnet-version: 9.0.x
+        dotnet-version: 10.0.x
         source-url: https://nuget.pkg.github.com/${{ github.repository_owner }}/index.json
       env:
         NUGET_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -252,7 +253,7 @@ jobs:
     # Install .NET
     - uses: actions/setup-dotnet@v5
       with:
-        dotnet-version: 9.0.x
+        dotnet-version: 10.0.x
         source-url: https://nuget.pkg.github.com/${{ github.repository_owner }}/index.json
       env:
         NUGET_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}

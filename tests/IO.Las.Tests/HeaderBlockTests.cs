@@ -125,8 +125,8 @@ public class HeaderBlockTests
             .And.Member(static headerBlockBuilder => headerBlockBuilder.LegacyNumberOfPointRecords, numberOfPointRecords => numberOfPointRecords.IsEqualTo(1U))
             .And.Member(static headerBlockBuilder => headerBlockBuilder.LegacyNumberOfPointsByReturn, numberOfPointsByReturn => numberOfPointsByReturn.Member(x => x.ElementAt(returnNumber - 1), static x => x.IsEqualTo(1U)))
 #else
-            .And.Member(static headerBlockBuilder => headerBlockBuilder.LegacyNumberOfPointRecords, numberOfPointRecords => numberOfPointRecords.IsEqualTo(1U))
-            .And.Member(static headerBlockBuilder => headerBlockBuilder.LegacyNumberOfPointsByReturn, numberOfPointsByReturn => numberOfPointsByReturn.Member(x => x.ElementAt(returnNumber - 1), static x => x.IsEqualTo(1U)))
+            .And.Member(static headerBlockBuilder => headerBlockBuilder.NumberOfPointRecords, numberOfPointRecords => numberOfPointRecords.IsEqualTo(1U))
+            .And.Member(static headerBlockBuilder => headerBlockBuilder.NumberOfPointsByReturn, numberOfPointsByReturn => numberOfPointsByReturn.Member(x => x.ElementAt(returnNumber - 1), static x => x.IsEqualTo(1U)))
 #endif
             .And.Member(static headerBlockBuilder => headerBlockBuilder.Min, min => min.IsEqualTo(new Vector3D(X, Y, Z)))
             .And.Member(static headerBlockBuilder => headerBlockBuilder.Max, max => max.IsEqualTo(new Vector3D(X, Y, Z)));
@@ -150,8 +150,8 @@ public class HeaderBlockTests
             .And.Member(static headerBlockBuilder => headerBlockBuilder.NumberOfPointRecords, numberOfPointRecords => numberOfPointRecords.IsEqualTo(1UL))
             .And.Member(static headerBlockBuilder => headerBlockBuilder.NumberOfPointsByReturn, numberOfPointsByReturn => numberOfPointsByReturn.Member(x => x.ElementAt(returnNumber - 1), static x => x.IsEqualTo(1UL)))
 #else
-            .And.Member(static headerBlockBuilder => headerBlockBuilder.NumberOfPointRecords, numberOfPointRecords => numberOfPointRecords.IsEqualTo(1UL))
-            .And.Member(static headerBlockBuilder => headerBlockBuilder.NumberOfPointsByReturn, numberOfPointsByReturn => numberOfPointsByReturn.Member(x => x.ElementAt(returnNumber - 1), static x => x.IsEqualTo(1UL)))
+            .And.Member(static headerBlockBuilder => headerBlockBuilder.NumberOfPointRecords, numberOfPointRecords => numberOfPointRecords.IsEqualTo(1U))
+            .And.Member(static headerBlockBuilder => headerBlockBuilder.NumberOfPointsByReturn, numberOfPointsByReturn => numberOfPointsByReturn.Member(x => x.ElementAt(returnNumber - 1), static x => x.IsEqualTo(1U)))
 #endif
             .And.Member(static headerBlockBuilder => headerBlockBuilder.Min, min => min.IsEqualTo(new Vector3D(X, Y, Z)))
             .And.Member(static headerBlockBuilder => headerBlockBuilder.Max, max => max.IsEqualTo(new Vector3D(X, Y, Z)));
