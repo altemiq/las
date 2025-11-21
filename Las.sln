@@ -62,7 +62,7 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "IO.Las.Compression", "src\I
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "IO.Las.Compression.Tests", "tests\IO.Las.Compression.Tests\IO.Las.Compression.Tests.csproj", "{72FF4124-72F5-48C2-8C4E-5A74359E98D9}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "IO.Las.CodeGeneration", "src\IO.Las.CodeGeneration\IO.Las.CodeGeneration.csproj", "{F3080DB0-14D7-42F8-A55D-3A4AAB738F0E}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "IO.Las.CodeGeneration", "generators\IO.Las.CodeGeneration\IO.Las.CodeGeneration.csproj", "{F3080DB0-14D7-42F8-A55D-3A4AAB738F0E}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "IO.Las.Cloud", "src\IO.Las.Cloud\IO.Las.Cloud.csproj", "{14418C5F-304E-465D-AC0A-569B6C92E872}"
 EndProject
@@ -73,6 +73,13 @@ EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "IO.Las.Geodesy", "src\IO.Las.Geodesy\IO.Las.Geodesy.csproj", "{D74518A6-3BFD-4790-88A3-74A44DEF4AE9}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "IO.Las.Geodesy.Tests", "tests\IO.Las.Geodesy.Tests\IO.Las.Geodesy.Tests.csproj", "{99C8C40F-4B5A-4318-81CF-024B72B0B57C}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "generators", "generators", "{540BA777-84CD-4005-BEED-BF92528011B0}"
+	ProjectSection(SolutionItems) = preProject
+		generators\Directory.Build.props = generators\Directory.Build.props
+		generators\Directory.Build.targets = generators\Directory.Build.targets
+		generators\Directory.Packages.props = generators\Directory.Packages.props
+	EndProjectSection
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -286,11 +293,11 @@ Global
 		{D3D27BD5-DB4C-4349-AF06-9AFA6B7431A1} = {94D31DAF-54FD-47A1-ABC5-DE0D31E8A7ED}
 		{2B7168FE-4E3D-4095-B391-F998E389B41C} = {94D31DAF-54FD-47A1-ABC5-DE0D31E8A7ED}
 		{72FF4124-72F5-48C2-8C4E-5A74359E98D9} = {1D3F3E65-48DE-4C8F-BE82-CF9C2D8D930C}
-		{F3080DB0-14D7-42F8-A55D-3A4AAB738F0E} = {94D31DAF-54FD-47A1-ABC5-DE0D31E8A7ED}
 		{14418C5F-304E-465D-AC0A-569B6C92E872} = {94D31DAF-54FD-47A1-ABC5-DE0D31E8A7ED}
 		{1D5EB8AF-0729-4A2A-965D-CD5FC2740E6B} = {1D3F3E65-48DE-4C8F-BE82-CF9C2D8D930C}
 		{F61BF85D-5E76-4F84-9A71-5B27295062FA} = {1D3F3E65-48DE-4C8F-BE82-CF9C2D8D930C}
 		{D74518A6-3BFD-4790-88A3-74A44DEF4AE9} = {94D31DAF-54FD-47A1-ABC5-DE0D31E8A7ED}
 		{99C8C40F-4B5A-4318-81CF-024B72B0B57C} = {1D3F3E65-48DE-4C8F-BE82-CF9C2D8D930C}
+		{F3080DB0-14D7-42F8-A55D-3A4AAB738F0E} = {540BA777-84CD-4005-BEED-BF92528011B0}
 	EndGlobalSection
 EndGlobal

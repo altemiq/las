@@ -50,7 +50,7 @@ jobs:
     # Build
     - name: Run local/dotnet-build@v1
       run: |
-        dotnet build src/IO.Las.CodeGeneration --no-restore
+        dotnet build generators/IO.Las.CodeGeneration --no-restore
         dotnet build --no-restore
 
     # Test
@@ -113,7 +113,7 @@ jobs:
       # Debug
       - name: Run local/dotnet-build@v1
         run: |
-          dotnet build src/IO.Las.CodeGeneration --configuration Debug
+          dotnet build generators/IO.Las.CodeGeneration --configuration Debug
           dotnet build --configuration Debug
       
       # SemVer
@@ -161,7 +161,7 @@ jobs:
 
       - name: Run local/dotnet-build@v1
         run: |
-          dotnet build src/IO.Las.CodeGeneration --no-restore
+          dotnet build generators/IO.Las.CodeGeneration --no-restore
           dotnet build --no-restore
 
       - name: Run local/get-suffix@v1
@@ -178,7 +178,7 @@ jobs:
       # Pack
       - name: Run local/dotnet-pack@v1
         run: |
-          dotnet build src/IO.Las.CodeGeneration --no-restore --configuration Release
+          dotnet build generators/IO.Las.CodeGeneration --no-restore --configuration Release
           dotnet pack --output ${{ github.workspace }}/nupkg -property:ComputeSemanticVersion=true -property:SemanticVersionOutputPath=${{ github.workspace }}/versions -property:SemanticVersionIncrement=ReleaseLabel --version-suffix ${{ steps.suffix.outputs.value }}
 
       - uses: actions/upload-artifact@v4
@@ -226,7 +226,7 @@ jobs:
       env:
         DOTNET_CLI_ENABLE_PUBLISH_RELEASE_FOR_SOLUTIONS: true
       run: |
-        dotnet build src/IO.Las.CodeGeneration --configuration Release
+        dotnet build generators/IO.Las.CodeGeneration --configuration Release
         dotnet publish tools/Las --configuration Release --os ${{ matrix.os }} --arch ${{ matrix.arch }} -property:PublishDir=${{ github.workspace }}/publish/${{ matrix.os }}-${{ matrix.arch }}
 
     - uses: actions/upload-artifact@v4
