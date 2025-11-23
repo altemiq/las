@@ -1,12 +1,10 @@
-using System.Reflection;
-
 namespace Altemiq.IO.Las.Geodesy;
 
 public static class LifeCycle
 {
     public static string TestLocation { get; private set; }
 
-    [Before(HookType.Assembly)]
+    [Before(Assembly)]
     public static void Setup(AssemblyHookContext context)
     {
         using var manifestStream = context.Assembly.GetManifestResourceStream(typeof(ProjContextTests), "proj.db")
@@ -19,7 +17,7 @@ public static class LifeCycle
         manifestStream.CopyTo(fileStream);
     }
 
-    [After(HookType.Assembly)]
+    [After(Assembly)]
     public static void Close(AssemblyHookContext context)
     {
         if (TestLocation is null || !File.Exists(TestLocation))

@@ -2,13 +2,13 @@
 
   <PropertyGroup>
     <TargetFrameworks>net7.0;net5.0;netstandard2.1;netstandard2.0</TargetFrameworks>
-    <PackageTags>$(PackageTags) HTTP</PackageTags>
   </PropertyGroup>
 
   <PropertyGroup Label="Packaging">
     <_Tag>HTTP</_Tag>
     <Product>$(Product.Replace('{Type}', '$(_Tag)'))</Product>
-    <Description>$(Description.Replace('{Type}', '$(_Tag)'))</Description>
+    <Description>Provides support for reading LAS/LAZ files through HTTP(S)</Description>
+    <PackageReadmeFile>README.md</PackageReadmeFile>
     <PackageTags>$(PackageTags);$(_Tag)</PackageTags>
   </PropertyGroup>
 
@@ -18,6 +18,10 @@
 
   <ItemGroup>
     <Using Include="System.Net.Http" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Include="README.md" Pack="true" PackagePath="\"/>
   </ItemGroup>
 
 </Project>

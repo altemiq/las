@@ -23,20 +23,9 @@ internal static class FileManager
     /// <returns>The path to <c>proj.db</c>.</returns>
     public static string FindProjDb() => FindResource("proj.db");
 
-    /// <summary>
-    /// Finds the resource.
-    /// </summary>
-    /// <param name="name">The name of the resource.</param>
-    /// <returns>The path to the file.</returns>
-    /// <exception cref="FileNotFoundException">The resource was not found.</exception>
-    public static string FindResource(string name) => GetResourcePaths(name).FirstOrDefault(File.Exists) ?? throw new FileNotFoundException($"Cannot find {name}");
+    private static string FindResource(string name) => GetResourcePaths(name).FirstOrDefault(File.Exists) ?? throw new FileNotFoundException($"Cannot find {name}");
 
-    /// <summary>
-    /// Gets the resource paths.
-    /// </summary>
-    /// <param name="name">The resource name.</param>
-    /// <returns>The resource path.</returns>
-    public static IEnumerable<string> GetResourcePaths(string name)
+    private static IEnumerable<string> GetResourcePaths(string name)
     {
         yield return ProjDirectory;
 

@@ -25,6 +25,14 @@
     <NoWarn>$(NoWarn);S1117</NoWarn>
   </PropertyGroup>
 
+  <PropertyGroup Label="Packaging">
+    <_Tag />
+    <Product>$(Product.Replace('{Type}', '$(_Tag)'))</Product>
+    <Description>Provides high-performance and low-allocating types that read and write LAS points to streams.</Description>
+    <PackageReadmeFile>README.md</PackageReadmeFile>
+    <PackageTags>$(PackageTags);$(_Tag)</PackageTags>
+  </PropertyGroup>
+
   <ItemGroup>
     <PackageReference Include="PolySharp">
       <PrivateAssets>all</PrivateAssets>
@@ -121,6 +129,10 @@
                       SetTargetFramework="TargetFramework=netstandard2.0"
                       OutputItemType="Analyzer"
                       ReferenceOutputAssembly="false" />
+  </ItemGroup>
+  
+  <ItemGroup>
+    <None Include="README.md" Pack="true" PackagePath="\"/>
   </ItemGroup>
 
   <Target Name="_DownloadStandardSystemIdentifiers" BeforeTargets="CoreCompile">

@@ -23,12 +23,18 @@
   <PropertyGroup Label="Packaging">
     <_Tag>Tiling</_Tag>
     <Product>$(Product.Replace('{Type}', '$(_Tag)'))</Product>
-    <Description>$(Description.Replace('{Type}', '$(_Tag)'))</Description>
+    <Description>Provides support for tiled LAS/LAZ files</Description>
+    <PackageReadmeFile>README.md</PackageReadmeFile>
     <PackageTags>$(PackageTags);$(_Tag)</PackageTags>
+    <PackageLicenseExpression>LGPL-2.1-only</PackageLicenseExpression>
   </PropertyGroup>
 
   <ItemGroup>
     <ProjectReference Include="..\IO.Las\IO.Las.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Include="README.md" Pack="true" PackagePath="\"/>
   </ItemGroup>
 
 </Project>

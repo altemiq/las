@@ -14,6 +14,14 @@
     <NoWarn>$(NoWarn);S1117</NoWarn>
   </PropertyGroup>
 
+  <PropertyGroup Label="Packaging">
+    <_Tag>Compression</_Tag>
+    <Product>$(Product.Replace('{Type}', '$(_Tag)'))</Product>
+    <Description>Provides support for LAZ compression for Altemiq.IO.Las</Description>
+    <PackageReadmeFile>README.md</PackageReadmeFile>
+    <PackageTags>$(PackageTags);$(_Tag);LAZ</PackageTags>
+  </PropertyGroup>
+
   <ItemGroup>
     <PackageReference Include="PolySharp">
       <PrivateAssets>all</PrivateAssets>
@@ -62,6 +70,10 @@
   
   <ItemGroup>
     <Using Include="$(RootNamespace).Compression" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Include="README.md" Pack="true" PackagePath="\"/>
   </ItemGroup>
 
 </Project>

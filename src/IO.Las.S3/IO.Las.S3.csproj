@@ -2,7 +2,6 @@
 
   <PropertyGroup>
     <TargetFrameworks>net7.0;net5.0;netstandard2.1;netstandard2.0</TargetFrameworks>
-    <PackageTags>$(PackageTags) AWS S3</PackageTags>
     <PolySharpIncludeGeneratedTypes>
       $(PolySharpIncludeGeneratedTypes);
       System.Diagnostics.CodeAnalysis.DoesNotReturnAttribute;
@@ -11,9 +10,11 @@
   </PropertyGroup>
 
   <PropertyGroup Label="Packaging">
-    <Product>$(Product.Replace('{Type}', 'AWS S3'))</Product>
-    <Description>$(Description.Replace('{Type}', 'AWS S3'))</Description>
-    <PackageTags>$(PackageTags);AWS;S3</PackageTags>
+    <_Tag>S3</_Tag>
+    <Product>$(Product.Replace('{Type}', '$(_Tag)'))</Product>
+    <Description>Provides support for reading LAS/LAZ files through Amazon S3</Description>
+    <PackageReadmeFile>README.md</PackageReadmeFile>
+    <PackageTags>$(PackageTags);$(_Tag);Amazon;AWS</PackageTags>
   </PropertyGroup>
 
   <ItemGroup>
@@ -26,6 +27,13 @@
 
   <ItemGroup>
     <ProjectReference Include="..\IO.Las\IO.Las.csproj" />
+  </ItemGroup>
+
+  <PropertyGroup>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <None Include="README.md" Pack="true" PackagePath="\"/>
   </ItemGroup>
 
 </Project>

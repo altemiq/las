@@ -25,9 +25,11 @@
   
   <PropertyGroup Label="Packaging">
     <Authors>rsking;altemiq</Authors>
-    <Description>A collection of base classes.</Description>
+    <Description>||PlaceHolder||</Description>
+    <Product>LAS IO {Type} assembly</Product>
     <PackageLicenseExpression>MIT</PackageLicenseExpression>
-    <PackageTags>Core</PackageTags>    
+    <PackageTags>IO;Las;PointClouds</PackageTags>
+    <PackageIcon>icon.png</PackageIcon>
   </PropertyGroup>
 
   <PropertyGroup Condition=" $([MSBuild]::GetTargetFrameworkIdentifier('$(TargetFramework)')) == '.NETStandard' and $([MSBuild]::VersionLessThan($([MSBuild]::GetTargetFrameworkVersion('$(TargetFramework)')), '2.0')) ">
@@ -57,5 +59,9 @@
     <UseGenericMath Condition=" $([MSBuild]::IsTargetFrameworkCompatible('$(TargetFramework)', 'net7.0')) ">true</UseGenericMath>
     <DefineConstants Condition=" '$(UseGenericMath)' == 'true' ">$(DefineConstants);USE_GENERIC_MATH</DefineConstants>
   </PropertyGroup>
+  
+  <ItemGroup>
+    <None Include="$(MSBuildThisFileDirectory)icon.png" Pack="true" PackagePath="\"/>
+  </ItemGroup>
 
 </Project>

@@ -27,8 +27,14 @@ public sealed class HttpChunkedStream : ChunkedStream
     /// <inheritdoc/>
     protected override Stream? GetStream(long start, int length)
     {
-        var request = new HttpRequestMessage { RequestUri = this.uri };
-        request.Headers.Range = new(start, start + length - 1);
+        var request = new HttpRequestMessage
+        {
+            RequestUri = this.uri,
+            Headers =
+            {
+                Range = new(start, start + length - 1),
+            },
+        };
 
         return this.httpClient.SendAsync(request).Result is { IsSuccessStatusCode: true } response
             ? response.Content.ReadAsStreamAsync().GetAwaiter().GetResult()
@@ -38,8 +44,14 @@ public sealed class HttpChunkedStream : ChunkedStream
     /// <inheritdoc/>
     protected override async ValueTask<Stream?> GetStreamAsync(long start, int length, CancellationToken cancellationToken = default)
     {
-        var request = new HttpRequestMessage { RequestUri = this.uri };
-        request.Headers.Range = new(start, start + length - 1);
+        var request = new HttpRequestMessage
+        {
+            RequestUri = this.uri,
+            Headers =
+            {
+                Range = new(start, start + length - 1),
+            },
+        };
 
         return await this.httpClient.SendAsync(request, cancellationToken).ConfigureAwait(false) is { IsSuccessStatusCode: true } response
 #if NET5_0_OR_GREATER
