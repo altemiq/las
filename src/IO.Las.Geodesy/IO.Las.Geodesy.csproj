@@ -2,14 +2,14 @@
 
   <PropertyGroup>
     <TargetFrameworks>net7.0;net5.0;netstandard2.1;netstandard2.0</TargetFrameworks>
-    <PolySharpIncludeGeneratedTypes>
-      $(PolySharpIncludeGeneratedTypes);
-      System.Index;
-      System.Range;
-      System.Diagnostics.CodeAnalysis.DoesNotReturnAttribute;
-      System.Diagnostics.CodeAnalysis.NotNullWhenAttribute;
-      System.Runtime.CompilerServices.IsExternalInit;
-    </PolySharpIncludeGeneratedTypes>
+    <MeziantouPolyfill_IncludedPolyfills>
+      $(MeziantouPolyfill_IncludedPolyfills)|
+      T:System.Index|
+      T:System.Range|
+      T:System.Diagnostics.CodeAnalysis.DoesNotReturnAttribute|
+      T:System.Diagnostics.CodeAnalysis.NotNullWhenAttribute|
+      T:System.Runtime.CompilerServices.IsExternalInit|
+    </MeziantouPolyfill_IncludedPolyfills>
   </PropertyGroup>
 
   <PropertyGroup Label="Packaging">
@@ -22,7 +22,7 @@
 
   <ItemGroup>
     <PackageReference Include="Microsoft.Data.Sqlite.Core" VersionOverride="2.1.0" />
-    <PackageReference Include="PolySharp">
+    <PackageReference Include="Meziantou.Polyfill">
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>

@@ -8,4 +8,22 @@
     <ResourceNamespace>$(Company).$(MSBuildProjectName)</ResourceNamespace>
   </PropertyGroup>
 
+  <Target Name="_UpdateMeziantouPolyfill"
+          BeforeTargets="GenerateMSBuildEditorConfigFileCore"
+          DependsOnTargets="_UpdateMeziantouPolyfill_IncludedPolyfills;_UpdateMeziantouPolyfill_ExcludedPolyfills" />
+
+  <Target Name="_UpdateMeziantouPolyfill_IncludedPolyfills"
+          Condition=" '$(MeziantouPolyfill_IncludedPolyfills)' != '' ">
+    <PropertyGroup>
+      <MeziantouPolyfill_IncludedPolyfills Condition=" '$(MeziantouPolyfill_IncludedPolyfills)' != '' ">$([System.String]::Copy('$(MeziantouPolyfill_IncludedPolyfills)').Replace($([System.Environment]::NewLine), '').Replace('\n', '').Replace('\r', ''))</MeziantouPolyfill_IncludedPolyfills>
+    </PropertyGroup>
+  </Target>
+
+  <Target Name="_UpdateMeziantouPolyfill_ExcludedPolyfills"
+          Condition=" '$(MeziantouPolyfill_ExcludedPolyfills)' != '' ">
+    <PropertyGroup>
+      <MeziantouPolyfill_ExcludedPolyfills Condition=" '$(MeziantouPolyfill_ExcludedPolyfills)' != '' ">$([System.String]::Copy('$(MeziantouPolyfill_ExcludedPolyfills)').Replace($([System.Environment]::NewLine), '').Replace('\n', '').Replace('\r', ''))</MeziantouPolyfill_ExcludedPolyfills>
+    </PropertyGroup>
+  </Target>
+
 </Project>

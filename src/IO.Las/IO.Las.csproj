@@ -2,24 +2,24 @@
 
   <PropertyGroup>
     <TargetFrameworks>net7.0;net5.0;netstandard2.1;netstandard2.0</TargetFrameworks>
-    <PolySharpIncludeGeneratedTypes>
-      $(PolySharpIncludeGeneratedTypes);
-      System.Index;
-      System.Range;
-      System.Diagnostics.CodeAnalysis.DoesNotReturnAttribute;
-      System.Diagnostics.CodeAnalysis.DynamicallyAccessedMembersAttribute;
-      System.Diagnostics.CodeAnalysis.DynamicallyAccessedMemberTypes;
-      System.Diagnostics.CodeAnalysis.MemberNotNullWhenAttribute;
-      System.Diagnostics.CodeAnalysis.NotNullAttribute;
-      System.Diagnostics.CodeAnalysis.NotNullWhenAttribute;
-      System.Diagnostics.CodeAnalysis.StringSyntaxAttribute;
-      System.Runtime.CompilerServices.CallerArgumentExpressionAttribute;
-      System.Runtime.CompilerServices.CollectionBuilderAttribute;
-      System.Runtime.CompilerServices.CompilerFeatureRequiredAttribute;
-      System.Runtime.CompilerServices.IsExternalInit;
-      System.Runtime.CompilerServices.RequiredMemberAttribute;
-      System.Diagnostics.CodeAnalysis.SetsRequiredMembersAttribute;
-    </PolySharpIncludeGeneratedTypes>
+    <MeziantouPolyfill_IncludedPolyfills>
+      $(MeziantouPolyfill_IncludedPolyfills)|
+      T:System.Index|
+      T:System.Range|
+      T:System.Diagnostics.CodeAnalysis.DoesNotReturnAttribute|
+      T:System.Diagnostics.CodeAnalysis.DynamicallyAccessedMembersAttribute|
+      T:System.Diagnostics.CodeAnalysis.DynamicallyAccessedMemberTypes|
+      T:System.Diagnostics.CodeAnalysis.MemberNotNullWhenAttribute|
+      T:System.Diagnostics.CodeAnalysis.NotNullAttribute|
+      T:System.Diagnostics.CodeAnalysis.NotNullWhenAttribute|
+      T:System.Diagnostics.CodeAnalysis.StringSyntaxAttribute|
+      T:System.Runtime.CompilerServices.CallerArgumentExpressionAttribute|
+      T:System.Runtime.CompilerServices.CollectionBuilderAttribute|
+      T:System.Runtime.CompilerServices.CompilerFeatureRequiredAttribute|
+      T:System.Runtime.CompilerServices.IsExternalInit|
+      T:System.Runtime.CompilerServices.RequiredMemberAttribute|
+      T:System.Diagnostics.CodeAnalysis.SetsRequiredMembersAttribute|
+    </MeziantouPolyfill_IncludedPolyfills>
 
     <!-- turn off buggy analyzer -->
     <NoWarn>$(NoWarn);S1117</NoWarn>
@@ -34,7 +34,7 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="PolySharp">
+    <PackageReference Include="Meziantou.Polyfill">
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>

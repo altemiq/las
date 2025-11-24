@@ -3,12 +3,12 @@
   <PropertyGroup>
     <TargetFrameworks>net7.0;net5.0;netstandard2.1;netstandard2.0</TargetFrameworks>
     <RootNamespace>$(RootNamespace.Replace('.Compression', ''))</RootNamespace>
-    <PolySharpIncludeGeneratedTypes>
-      $(PolySharpIncludeGeneratedTypes);
-      System.Diagnostics.CodeAnalysis.DoesNotReturnIfAttribute;
-      System.Diagnostics.CodeAnalysis.NotNullIfNotNullAttribute;
-      System.Diagnostics.CodeAnalysis.UnscopedRefAttribute;
-    </PolySharpIncludeGeneratedTypes>
+    <MeziantouPolyfill_IncludedPolyfills>
+      $(MeziantouPolyfill_IncludedPolyfills)|
+      T:System.Diagnostics.CodeAnalysis.DoesNotReturnIfAttribute|
+      T:System.Diagnostics.CodeAnalysis.NotNullIfNotNullAttribute|
+      T:System.Diagnostics.CodeAnalysis.UnscopedRefAttribute|
+    </MeziantouPolyfill_IncludedPolyfills>
 
     <!-- turn off buggy analyzer -->
     <NoWarn>$(NoWarn);S1117</NoWarn>
@@ -23,7 +23,7 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="PolySharp">
+    <PackageReference Include="Meziantou.Polyfill">
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>

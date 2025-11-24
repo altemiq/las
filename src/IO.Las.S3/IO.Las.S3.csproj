@@ -2,11 +2,11 @@
 
   <PropertyGroup>
     <TargetFrameworks>net7.0;net5.0;netstandard2.1;netstandard2.0</TargetFrameworks>
-    <PolySharpIncludeGeneratedTypes>
-      $(PolySharpIncludeGeneratedTypes);
-      System.Diagnostics.CodeAnalysis.DoesNotReturnAttribute;
-      System.Diagnostics.CodeAnalysis.NotNullWhenAttribute;
-    </PolySharpIncludeGeneratedTypes>
+    <MeziantouPolyfill_IncludedPolyfills>
+      $(MeziantouPolyfill_IncludedPolyfills)|
+      T:System.Diagnostics.CodeAnalysis.DoesNotReturnAttribute|
+      T:System.Diagnostics.CodeAnalysis.NotNullWhenAttribute|
+    </MeziantouPolyfill_IncludedPolyfills>
   </PropertyGroup>
 
   <PropertyGroup Label="Packaging">
@@ -19,7 +19,7 @@
 
   <ItemGroup>
     <PackageReference Include="AWSSDK.S3" VersionOverride="4.0.0" />
-    <PackageReference Include="PolySharp">
+    <PackageReference Include="Meziantou.Polyfill">
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
