@@ -1,9 +1,5 @@
 ﻿<Project>
 
-  <ItemGroup>
-    <PackageVersion Include="PolySharp" Version="1.15.0" />
-  </ItemGroup>
-
   <PropertyGroup Label="LAS versions">
     <MaximumLasVersion Condition=" '$(MaximumLasVersion)' == '' ">1.5</MaximumLasVersion>
 
