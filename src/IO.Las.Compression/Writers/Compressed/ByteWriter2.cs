@@ -24,12 +24,8 @@ internal sealed class ByteWriter2 : ISimpleWriter
     /// <param name="number">The number of values.</param>
     public ByteWriter2(IEntropyEncoder encoder, uint number)
     {
-#if NET6_0_OR_GREATER
         ArgumentNullException.ThrowIfNull(encoder);
         this.encoder = encoder;
-#else
-        this.encoder = encoder ?? throw new ArgumentNullException(nameof(encoder));
-#endif
         this.bytesModels = new ISymbolModel[number];
 
         for (var i = 0; i < number; i++)

@@ -2,6 +2,10 @@
 
   <PropertyGroup>
     <TargetFrameworks>net7.0;net5.0;netstandard2.1;netstandard2.0</TargetFrameworks>
+    <MeziantouPolyfill_IncludedPolyfills>
+      $(MeziantouPolyfill_IncludedPolyfills)|
+      M:System.IO.Stream.ReadAsync(System.Memory{System.Byte},System.Threading.CancellationToken)|
+    </MeziantouPolyfill_IncludedPolyfills>
   </PropertyGroup>
 
   <PropertyGroup Label="Packaging">
@@ -12,6 +16,13 @@
     <PackageTags>$(PackageTags);$(_Tag);Spatial</PackageTags>
     <PackageLicenseExpression>LGPL-2.1-only</PackageLicenseExpression>
   </PropertyGroup>
+  
+  <ItemGroup>
+    <PackageReference Include="Meziantou.Polyfill">
+      <PrivateAssets>all</PrivateAssets>
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+    </PackageReference>
+  </ItemGroup>
 
   <ItemGroup>
     <ProjectReference Include="..\IO.Las\IO.Las.csproj" />

@@ -92,12 +92,7 @@ public sealed class S3ChunkedStream : ChunkedStream
 
         static Amazon.S3.Model.GetObjectResponse GetResponse(Amazon.S3.IAmazonS3 client, Amazon.S3.Model.GetObjectRequest request)
         {
-            return
-#if NETFRAMEWORK
-                client.GetObject(request);
-#else
-                client.GetObjectAsync(request).GetAwaiter().GetResult();
-#endif
+            return client.GetObjectAsync(request).GetAwaiter().GetResult();
         }
     }
 

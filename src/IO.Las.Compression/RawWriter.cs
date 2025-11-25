@@ -54,10 +54,6 @@ internal class RawWriter(Writers.IPointDataRecordWriter writer, int pointDataLen
     protected async ValueTask WriteAsync(Stream stream, Writers.IPointDataRecordWriter pointWriter, IBasePointDataRecord record, ReadOnlyMemory<byte> extraBytes, CancellationToken cancellationToken = default)
     {
         var bytesWritten = pointWriter.Write(this.buffer, record, extraBytes.Span);
-#if NETSTANDARD2_1_OR_GREATER || NETCOREAPP2_1_OR_GREATER
         await stream.WriteAsync(this.buffer.AsMemory(0, bytesWritten), cancellationToken).ConfigureAwait(false);
-#else
-        await stream.WriteAsync(this.buffer, 0, bytesWritten, cancellationToken).ConfigureAwait(false);
-#endif
     }
 }

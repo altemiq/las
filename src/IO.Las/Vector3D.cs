@@ -396,20 +396,7 @@ public readonly struct Vector3D : IFormattable, IEquatable<Vector3D>
         Math.Sqrt(value.Z));
 
     /// <inheritdoc/>
-    public override int GetHashCode()
-#if NETCOREAPP2_1_OR_GREATER || NETSTANDARD2_0_OR_GREATER || NET461_OR_GREATER
-        => HashCode.Combine(this.X, this.Y, this.Z);
-#else
-    {
-        return Combine(Combine(this.X.GetHashCode(), this.Y.GetHashCode()), this.Z.GetHashCode());
-
-        static int Combine(int h1, int h2)
-        {
-            var num = (uint)(h1 << 5) | ((uint)h1 >> 27);
-            return ((int)num + h1) ^ h2;
-        }
-    }
-#endif
+    public override int GetHashCode() => HashCode.Combine(this.X, this.Y, this.Z);
 
     /// <inheritdoc/>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -484,14 +471,7 @@ public readonly struct Vector3D : IFormattable, IEquatable<Vector3D>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public void CopyTo(double[] array, int index)
     {
-#if NET6_0_OR_GREATER
         ArgumentNullException.ThrowIfNull(array);
-#else
-        if (array is null)
-        {
-            throw new ArgumentNullException(nameof(array));
-        }
-#endif
 
         if (index < 0 || index >= array.Length)
         {

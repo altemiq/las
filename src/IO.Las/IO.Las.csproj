@@ -4,8 +4,9 @@
     <TargetFrameworks>net7.0;net5.0;netstandard2.1;netstandard2.0</TargetFrameworks>
     <MeziantouPolyfill_IncludedPolyfills>
       $(MeziantouPolyfill_IncludedPolyfills)|
-      T:System.Index|
-      T:System.Range|
+      M:System.ArgumentNullException.ThrowIfNull(System.Object,System.String)|
+      M:System.IO.Stream.ReadAsync(System.Memory{System.Byte},System.Threading.CancellationToken)|
+      M:System.IO.Stream.WriteAsync(System.ReadOnlyMemory{System.Byte},System.Threading.CancellationToken)|
       T:System.Diagnostics.CodeAnalysis.DoesNotReturnAttribute|
       T:System.Diagnostics.CodeAnalysis.DynamicallyAccessedMembersAttribute|
       T:System.Diagnostics.CodeAnalysis.DynamicallyAccessedMemberTypes|
@@ -13,6 +14,9 @@
       T:System.Diagnostics.CodeAnalysis.NotNullAttribute|
       T:System.Diagnostics.CodeAnalysis.NotNullWhenAttribute|
       T:System.Diagnostics.CodeAnalysis.StringSyntaxAttribute|
+      T:System.HashCode|
+      T:System.Index|
+      T:System.Range|
       T:System.Runtime.CompilerServices.CallerArgumentExpressionAttribute|
       T:System.Runtime.CompilerServices.CollectionBuilderAttribute|
       T:System.Runtime.CompilerServices.CompilerFeatureRequiredAttribute|

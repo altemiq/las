@@ -372,23 +372,8 @@ public sealed record CopcHierarchy : ExtendedVariableLengthRecord
         /// <inheritdoc/>
         public override string ToString() => this.ToString(default);
 
-#if NETSTANDARD1_1
-        /// <summary>
-        /// Converts the value of this instance to an equivalent <see cref="string" /> using the specified culture-specific formatting information.
-        /// </summary>
-        /// <param name="provider">An <see cref="IFormatProvider" /> interface implementation that supplies culture-specific formatting information.</param>
-        /// <returns>A <see cref="string" /> instance equivalent to the value of this instance.</returns>
-#else
         /// <inheritdoc cref="IConvertible.ToString(IFormatProvider)" />
-#endif
-        public string ToString(IFormatProvider? provider)
-#if NETCOREAPP6_0_OR_GREATER
-            => string.Create(formatProvider, $"Count: {this.Count}");
-#elif NETCOREAPP1_0_OR_GREATER || NET46_OR_GREATER || NETSTANDARD1_3_OR_GREATER
-            => ((FormattableString)$"Count: {this.Count}").ToString(provider);
-#else
-            => string.Format(provider, "Count: {0}", this.Count);
-#endif
+        public string ToString(IFormatProvider? provider) => string.Create(provider, $"Count: {this.Count}");
     }
 
     private sealed class EntryComparer : IComparer<Entry>

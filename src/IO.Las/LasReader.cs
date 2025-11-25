@@ -224,11 +224,7 @@ public class LasReader : ILasReader, IDisposable
         this.MoveToPointData();
 
         // read the data
-#if NETSTANDARD2_1_OR_GREATER || NETCOREAPP2_1_OR_GREATER
         _ = await this.BaseStream.ReadAsync(this.buffer, cancellationToken).ConfigureAwait(false);
-#else
-        _ = await this.BaseStream.ReadAsync(this.buffer, 0, this.buffer.Length, cancellationToken).ConfigureAwait(false);
-#endif
 
         // read the point.
         var point = await this.rawReader.ReadAsync(this.buffer, cancellationToken).ConfigureAwait(false);

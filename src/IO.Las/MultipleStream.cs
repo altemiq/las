@@ -106,31 +106,11 @@ public abstract class MultipleStream(IDictionary<string, Stream> dictionary) : S
             var kvp = enumerator.Current;
             this.SetCurrent(kvp.Key, kvp.Value, streamOffset);
 
-#if NETSTANDARD2_1_OR_GREATER || NETCOREAPP
             // ignore the buffer size here, and use the best size for each stream
             await this.currentStream.CopyToAsync(destination, cancellationToken).ConfigureAwait(false);
-#else
-            await GetTask(this.currentStream, destination, cancellationToken).ConfigureAwait(false);
-#endif
             streamOffset += kvp.Value.Length;
         }
         while (enumerator.MoveNext());
-
-#if !NETSTANDARD2_1_OR_GREATER && !NETCOREAPP
-        static Task GetTask(Stream source, Stream destination, CancellationToken cancellationToken)
-        {
-            if (cancellationToken.IsCancellationRequested)
-            {
-#if NETSTANDARD1_3_OR_GREATER || NET46_OR_GREATER
-                return Task.FromCanceled(cancellationToken);
-#else
-                return Task.Run(static () => { }, cancellationToken);
-#endif
-            }
-
-            return source.CopyToAsync(destination);
-        }
-#endif
     }
 
     /// <inheritdoc/>

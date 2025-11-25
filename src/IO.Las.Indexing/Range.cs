@@ -59,16 +59,7 @@ public readonly struct Range(Index start, Index end) : IEquatable<Range>
     public bool Equals(Range other) => other.Start.Equals(this.Start) && other.End.Equals(this.End);
 
     /// <inheritdoc/>
-    public override int GetHashCode()
-#if NETSTANDARD2_0_OR_GREATER || NET46_OR_GREATER || NETCOREAPP2_1_OR_GREATER
-        => HashCode.Combine(this.Start.GetHashCode(), this.End.GetHashCode());
-#else
-    {
-        var h1 = this.Start.GetHashCode();
-        var rol5 = ((uint)h1 << 5) | ((uint)h1 >> 27);
-        return ((int)rol5 + h1) ^ this.End.GetHashCode();
-    }
-#endif
+    public override int GetHashCode() => HashCode.Combine(this.Start.GetHashCode(), this.End.GetHashCode());
 
     /// <inheritdoc/>
     public override string ToString() => this.ToString(default);

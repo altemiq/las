@@ -43,20 +43,7 @@ internal static class ExtensionMethods
     /// <param name="n">The value to clamp.</param>
     /// <returns>The clamped value.</returns>
     [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
-    public static byte Clamp(this int n)
-#if NETCOREAPP2_0_OR_GREATER || NETSTANDARD2_1_OR_GREATER
-         => (byte)Math.Clamp(n, byte.MinValue, byte.MaxValue);
-#else
-    {
-        return n < byte.MinValue ? byte.MinValue : ClampMax(n);
-
-        [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
-        static byte ClampMax(int n)
-        {
-            return n > byte.MaxValue ? byte.MaxValue : (byte)n;
-        }
-    }
-#endif
+    public static byte Clamp(this int n) => (byte)Math.Clamp(n, byte.MinValue, byte.MaxValue);
 
     /// <summary>
     /// Clamps the specified short into a byte.
@@ -64,20 +51,7 @@ internal static class ExtensionMethods
     /// <param name="n">The value to clamp.</param>
     /// <returns>The clamped value.</returns>
     [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
-    public static byte Clamp(this short n)
-#if NETCOREAPP2_0_OR_GREATER || NETSTANDARD2_1_OR_GREATER
-         => (byte)Math.Clamp(n, byte.MinValue, byte.MaxValue);
-#else
-    {
-        return n < byte.MinValue ? byte.MinValue : ClampMax(n);
-
-        [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
-        static byte ClampMax(short n)
-        {
-            return n > byte.MaxValue ? byte.MaxValue : (byte)n;
-        }
-    }
-#endif
+    public static byte Clamp(this short n) => (byte)Math.Clamp(n, byte.MinValue, byte.MaxValue);
 
     /// <summary>
     /// Zero's the bit 0.

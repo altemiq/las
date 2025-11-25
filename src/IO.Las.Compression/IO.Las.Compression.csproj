@@ -5,9 +5,19 @@
     <RootNamespace>$(RootNamespace.Replace('.Compression', ''))</RootNamespace>
     <MeziantouPolyfill_IncludedPolyfills>
       $(MeziantouPolyfill_IncludedPolyfills)|
+      M:System.ArgumentNullException.ThrowIfNull(System.Object,System.String)|
+      M:System.IO.Stream.ReadAsync(System.Memory{System.Byte},System.Threading.CancellationToken)|
+      M:System.IO.Stream.WriteAsync(System.ReadOnlyMemory{System.Byte},System.Threading.CancellationToken)|
+      M:System.Math.Clamp(System.Int32,System.Int32,System.Int32)|
+      M:System.String.CopyTo(System.Span{System.Char})|
+      M:System.String.Create(System.IFormatProvider,System.Runtime.CompilerServices.DefaultInterpolatedStringHandler@)|
+      M:System.String.TryCopyTo(System.Span{System.Char})|
       T:System.Diagnostics.CodeAnalysis.DoesNotReturnIfAttribute|
       T:System.Diagnostics.CodeAnalysis.NotNullIfNotNullAttribute|
       T:System.Diagnostics.CodeAnalysis.UnscopedRefAttribute|
+      T:System.Runtime.CompilerServices.DefaultInterpolatedStringHandler|
+      T:System.Runtime.CompilerServices.InterpolatedStringHandlerArgumentAttribute|
+      T:System.Runtime.CompilerServices.InterpolatedStringHandlerAttribute|
     </MeziantouPolyfill_IncludedPolyfills>
 
     <!-- turn off buggy analyzer -->

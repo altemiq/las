@@ -165,23 +165,8 @@ public static partial class ExtensionMethods
     /// <returns><see langword="true"/> if <paramref name="key"/> was successfully extracted; otherwise <see langword="false"/>.</returns>
     public static bool TryGetAsciiValue(this GeoKeyDirectoryTag keyDirectory, GeoKey key, GeoAsciiParamsTag asciiParams, [System.Diagnostics.CodeAnalysis.NotNullWhen(true)] out string? value)
     {
-#if NET6_0_OR_GREATER
         ArgumentNullException.ThrowIfNull(keyDirectory);
-#else
-        if (keyDirectory is null)
-        {
-            throw new ArgumentNullException(nameof(keyDirectory));
-        }
-#endif
-
-#if NET6_0_OR_GREATER
         ArgumentNullException.ThrowIfNull(asciiParams);
-#else
-        if (asciiParams is null)
-        {
-            throw new ArgumentNullException(nameof(asciiParams));
-        }
-#endif
 
         if (keyDirectory[key] is { TiffTagLocation: GeoAsciiParamsTag.TagRecordId } geoKeyEntry)
         {
@@ -225,14 +210,7 @@ public static partial class ExtensionMethods
     /// <returns><see langword="true"/> if <paramref name="keyEntry"/> was successfully extracted; otherwise <see langword="false"/>.</returns>
     public static bool TryGetAsciiValue(this GeoKeyEntry keyEntry, GeoAsciiParamsTag asciiParams, [System.Diagnostics.CodeAnalysis.NotNullWhen(true)] out string? value)
     {
-#if NET6_0_OR_GREATER
         ArgumentNullException.ThrowIfNull(asciiParams);
-#else
-        if (asciiParams is null)
-        {
-            throw new ArgumentNullException(nameof(asciiParams));
-        }
-#endif
 
         if (keyEntry is { TiffTagLocation: GeoAsciiParamsTag.TagRecordId })
         {
@@ -349,23 +327,8 @@ public static partial class ExtensionMethods
     /// <returns><see langword="true"/> if <paramref name="key"/> was successfully extracted; otherwise <see langword="false"/>.</returns>
     public static bool TryGetDoubleValue(this GeoKeyDirectoryTag keyDirectory, GeoKey key, GeoDoubleParamsTag doubleParams, out double value)
     {
-#if NET6_0_OR_GREATER
         ArgumentNullException.ThrowIfNull(keyDirectory);
-#else
-        if (keyDirectory is null)
-        {
-            throw new ArgumentNullException(nameof(keyDirectory));
-        }
-#endif
-
-#if NET6_0_OR_GREATER
         ArgumentNullException.ThrowIfNull(doubleParams);
-#else
-        if (doubleParams is null)
-        {
-            throw new ArgumentNullException(nameof(doubleParams));
-        }
-#endif
 
         if (keyDirectory[key] is { TiffTagLocation: GeoDoubleParamsTag.TagRecordId } geoKeyEntry)
         {
@@ -406,14 +369,7 @@ public static partial class ExtensionMethods
     /// <returns><see langword="true"/> if <paramref name="keyEntry"/> was successfully extracted; otherwise <see langword="false"/>.</returns>
     public static bool TryGetDoubleValue(this GeoKeyEntry keyEntry, GeoDoubleParamsTag doubleParams, out double value)
     {
-#if NET6_0_OR_GREATER
         ArgumentNullException.ThrowIfNull(doubleParams);
-#else
-        if (doubleParams is null)
-        {
-            throw new ArgumentNullException(nameof(doubleParams));
-        }
-#endif
 
         if (keyEntry is { TiffTagLocation: GeoDoubleParamsTag.TagRecordId })
         {
@@ -530,23 +486,8 @@ public static partial class ExtensionMethods
     /// <returns><see langword="true"/> if <paramref name="key"/> was successfully extracted; otherwise <see langword="false"/>.</returns>
     public static bool TryGetDoubleValues(this GeoKeyDirectoryTag keyDirectory, GeoKey key, GeoDoubleParamsTag doubleParams, [System.Diagnostics.CodeAnalysis.NotNullWhen(true)] out IEnumerable<double>? values)
     {
-#if NET6_0_OR_GREATER
         ArgumentNullException.ThrowIfNull(keyDirectory);
-#else
-        if (keyDirectory is null)
-        {
-            throw new ArgumentNullException(nameof(keyDirectory));
-        }
-#endif
-
-#if NET6_0_OR_GREATER
         ArgumentNullException.ThrowIfNull(doubleParams);
-#else
-        if (doubleParams is null)
-        {
-            throw new ArgumentNullException(nameof(doubleParams));
-        }
-#endif
 
         if (keyDirectory[key] is { TiffTagLocation: GeoDoubleParamsTag.TagRecordId } geoKeyEntry)
         {
@@ -587,14 +528,7 @@ public static partial class ExtensionMethods
     /// <returns><see langword="true"/> if <paramref name="keyEntry"/> was successfully extracted; otherwise <see langword="false"/>.</returns>
     public static bool TryGetDoubleValues(this GeoKeyEntry keyEntry, GeoDoubleParamsTag doubleParams, [System.Diagnostics.CodeAnalysis.NotNullWhen(true)] out IEnumerable<double>? values)
     {
-#if NET6_0_OR_GREATER
         ArgumentNullException.ThrowIfNull(doubleParams);
-#else
-        if (doubleParams is null)
-        {
-            throw new ArgumentNullException(nameof(doubleParams));
-        }
-#endif
 
         if (keyEntry is { TiffTagLocation: GeoDoubleParamsTag.TagRecordId })
         {

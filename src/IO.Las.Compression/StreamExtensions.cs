@@ -182,7 +182,7 @@ internal static class StreamExtensions
             Span<byte> buffer = stackalloc byte[sizeof(byte)];
             buffer[0] = value;
 #else
-            var buffer = new byte[] { value };
+            var buffer = new[] { value };
 #endif
             stream.Write(buffer);
         }
@@ -199,7 +199,7 @@ internal static class StreamExtensions
             Span<byte> buffer = stackalloc byte[sizeof(sbyte)];
             buffer[0] = (byte)value;
 #else
-            var buffer = new byte[] { (byte)value };
+            var buffer = new[] { (byte)value };
 #endif
             stream.Write(buffer);
         }

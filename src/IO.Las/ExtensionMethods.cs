@@ -44,6 +44,21 @@ public static partial class ExtensionMethods
 
             MoveToPosition(stream, streamPosition, position);
         }
+
+#if !NETSTANDARD2_1_OR_GREATER && !NETCOREAPP
+        /// <summary>
+        /// Asynchronously reads the bytes from the current stream and writes them to another stream, using a specified cancellation token. Both streams positions are advanced by the number of bytes copied.
+        /// </summary>
+        /// <param name="destination">The stream to which the contents of the current stream will be copied.</param>
+        /// <param name="cancellationToken">The token to monitor for cancellation requests. The default value is <see cref="CancellationToken.None"/>.</param>
+        /// <returns>A task that represents the asynchronous copy operation.</returns>
+#pragma warning disable MA0040
+        internal Task CopyToAsync(Stream destination, CancellationToken cancellationToken) =>
+            cancellationToken.IsCancellationRequested
+                ? Task.FromCanceled(cancellationToken)
+                : stream.CopyToAsync(destination);
+#pragma warning restore MA0040
+#endif
     }
 
     /// <summary>

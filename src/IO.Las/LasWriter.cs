@@ -145,14 +145,7 @@ public class LasWriter(Stream stream, bool leaveOpen = false) : ILasWriter, IDis
     /// <inheritdoc />
     public virtual void Write(IBasePointDataRecord record, ReadOnlySpan<byte> extraBytes = default)
     {
-#if NET6_0_OR_GREATER
         ArgumentNullException.ThrowIfNull(record);
-#else
-        if (record is null)
-        {
-            throw new ArgumentNullException(nameof(record));
-        }
-#endif
 
         var written = this.RawWriter.Write(this.buffer, record, extraBytes);
         _ = this.BaseStream.SwitchStreamIfMultiple(LasStreams.PointData);
@@ -170,22 +163,11 @@ public class LasWriter(Stream stream, bool leaveOpen = false) : ILasWriter, IDis
     /// <inheritdoc/>
     public virtual async ValueTask WriteAsync(IBasePointDataRecord record, ReadOnlyMemory<byte> extraBytes = default, CancellationToken cancellationToken = default)
     {
-#if NET6_0_OR_GREATER
         ArgumentNullException.ThrowIfNull(record);
-#else
-        if (record is null)
-        {
-            throw new ArgumentNullException(nameof(record));
-        }
-#endif
 
         var written = await this.RawWriter.WriteAsync(this.buffer, record, extraBytes, cancellationToken).ConfigureAwait(false);
         _ = this.BaseStream.SwitchStreamIfMultiple(LasStreams.PointData);
-#if NETSTANDARD2_1_OR_GREATER || NETCOREAPP2_1_OR_GREATER
         await this.BaseStream.WriteAsync(this.buffer.AsMemory(0, written), cancellationToken).ConfigureAwait(false);
-#else
-        await this.BaseStream.WriteAsync(this.buffer, 0, written, cancellationToken).ConfigureAwait(false);
-#endif
     }
 
     /// <inheritdoc />
@@ -220,14 +202,7 @@ public class LasWriter(Stream stream, bool leaveOpen = false) : ILasWriter, IDis
     /// <exception cref="InvalidOperationException">Cannot write <see cref="ExtendedVariableLengthRecord"/> values to this instance.</exception>
     protected long WriteExtendedVariableLengthRecord(ExtendedVariableLengthRecord record)
     {
-#if NET6_0_OR_GREATER
         ArgumentNullException.ThrowIfNull(record);
-#else
-        if (record is null)
-        {
-            throw new ArgumentNullException(nameof(record));
-        }
-#endif
 
         // if we can't seek, then we can't write out the EVLR information
         if (!this.canWriteExtendedVariableLengthRecords)

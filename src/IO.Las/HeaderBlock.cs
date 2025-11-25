@@ -460,7 +460,6 @@ public readonly struct HeaderBlock : IEquatable<HeaderBlock>
 
     /// <inheritdoc/>
     public override int GetHashCode()
-#if NETSTANDARD2_0_OR_GREATER || NET461_OR_GREATER || NET
     {
         var hashCode = default(HashCode);
         hashCode.Add(this.FileSignature, StringComparer.Ordinal);
@@ -495,32 +494,6 @@ public readonly struct HeaderBlock : IEquatable<HeaderBlock>
 #endif
         return hashCode.ToHashCode();
     }
-#else
-        => StringComparer.Ordinal.GetHashCode(this.FileSignature)
-            ^ this.FileSourceId.GetHashCode()
-#if LAS1_2_OR_GREATER
-            ^ this.GlobalEncoding.GetHashCode()
-#endif
-            ^ this.ProjectId.GetHashCode()
-            ^ this.Version.GetHashCode()
-            ^ (this.SystemIdentifier is { } systemIdentifier ? StringComparer.Ordinal.GetHashCode(systemIdentifier) : 0)
-            ^ (this.GeneratingSoftware is { } generatingSoftware ? StringComparer.Ordinal.GetHashCode(generatingSoftware) : 0)
-            ^ this.FileCreation.GetHashCode()
-            ^ this.PointDataFormat.GetHashCode()
-            ^ this.ScaleFactor.GetHashCode()
-            ^ this.Offset.GetHashCode()
-            ^ this.Min.GetHashCode()
-            ^ this.Max.GetHashCode()
-            ^ this.NumberOfPointRecords.GetHashCode()
-#if LAS1_5_OR_GREATER
-            ^ this.NumberOfPointsByReturn.GetHashCode()
-            ^ this.MaxGpsTime.GetHashCode()
-            ^ this.MinGpsTime.GetHashCode()
-            ^ this.TimeOffset.GetHashCode();
-#else
-            ^ this.NumberOfPointsByReturn.GetHashCode();
-#endif
-#endif
 
 #if LAS1_5_OR_GREATER
     /// <summary>

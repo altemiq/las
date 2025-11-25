@@ -21,14 +21,7 @@ public static class GeodesyExtensions
     public static IEnumerable<VariableLengthRecord> ToWkt(this IReadOnlyCollection<VariableLengthRecord> records)
     {
         const ushort UserDefinedValue = (ushort)short.MaxValue;
-#if NET6_0_OR_GREATER
         ArgumentNullException.ThrowIfNull(records);
-#else
-        if (records is null)
-        {
-            throw new ArgumentNullException(nameof(records));
-        }
-#endif
 
         // get the geo key
         if (records.OfType<GeoKeyDirectoryTag>().FirstOrDefault() is { } directory)
@@ -58,14 +51,7 @@ public static class GeodesyExtensions
     /// <param name="srid">The SRID value.</param>
     public static void Write(this ILasWriter writer, in HeaderBlock header, ushort srid)
     {
-#if NET6_0_OR_GREATER
         ArgumentNullException.ThrowIfNull(writer);
-#else
-        if (writer is null)
-        {
-            throw new ArgumentNullException(nameof(writer));
-        }
-#endif
 
 #if LAS1_4_OR_GREATER
         writer.Write(header, GetVariableLengthRecords(srid, header.GlobalEncoding));

@@ -170,11 +170,7 @@ public sealed partial class ProjContext :
 
     private static void AddAuthClause(Microsoft.Data.Sqlite.SqliteCommand command, string authName, object code, string? alias = default, string? prefix = default, string? orderBy = default, int limit = default)
     {
-#if NETSTANDARD2_1_OR_GREATER || NETCOREAPP2_1_OR_GREATER
         if (alias?.Contains('.', StringComparison.Ordinal) is false)
-#else
-        if (alias?.Contains('.') is false)
-#endif
         {
             alias += ".";
         }
@@ -187,11 +183,7 @@ public sealed partial class ProjContext :
 
         if (limit != default)
         {
-#if NET6_0_OR_GREATER
             command.CommandText += string.Create(System.Globalization.CultureInfo.InvariantCulture, $" LIMIT {limit}");
-#else
-            command.CommandText += FormattableString.Invariant($" LIMIT {limit}");
-#endif
         }
 
         _ = AddOrUpdate(command.Parameters, $"${prefix}{AuthNameField}", authName);
@@ -253,12 +245,7 @@ public sealed partial class ProjContext :
 
     private static string GetUnitName(string name)
     {
-        var index =
-#if NETSTANDARD2_1_OR_GREATER || NETCOREAPP2_1_OR_GREATER
-            name.IndexOf('(', StringComparison.Ordinal);
-#else
-            name.IndexOf('(');
-#endif
+        var index = name.IndexOf('(', StringComparison.Ordinal);
         if (index is -1)
         {
             return name;

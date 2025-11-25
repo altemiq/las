@@ -172,12 +172,7 @@ public class LasIndex : IEnumerable<LasIndexCell>
 
         var length = (int)(stream.Length - stream.Position);
         var bytes = System.Buffers.ArrayPool<byte>.Shared.Rent(length);
-        var bytesRead
-#if NETSTANDARD2_1_OR_GREATER || NETCOREAPP2_1_OR_GREATER
-            = await stream.ReadAsync(bytes.AsMemory(0, length), cancellationToken).ConfigureAwait(false);
-#else
-            = await stream.ReadAsync(bytes, 0, length, cancellationToken).ConfigureAwait(false);
-#endif
+        var bytesRead = await stream.ReadAsync(bytes.AsMemory(0, length), cancellationToken).ConfigureAwait(false);
 
         var index = ReadFrom(bytes.AsSpan(0, bytesRead));
         System.Buffers.ArrayPool<byte>.Shared.Return(bytes);

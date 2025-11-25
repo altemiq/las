@@ -133,11 +133,7 @@ public sealed class LazWriter : LasWriter
     /// <inheritdoc/>
     public override void Write(IBasePointDataRecord record, ReadOnlySpan<byte> extraBytes = default)
     {
-#if NET6_0_OR_GREATER
         ArgumentNullException.ThrowIfNull(record);
-#else
-        ThrowIfNull(record);
-#endif
         this.pointWriter!.Write(this.BaseStream, record, extraBytes);
     }
 
@@ -149,11 +145,7 @@ public sealed class LazWriter : LasWriter
     /// <param name="chunkKey">The chunk key to write to.</param>
     public void Write(IBasePointDataRecord record, ReadOnlySpan<byte> extraBytes, int chunkKey)
     {
-#if NET6_0_OR_GREATER
         ArgumentNullException.ThrowIfNull(record);
-#else
-        ThrowIfNull(record);
-#endif
 
         if (this.pointWriter is ChunkedWriter chunkedWriter && this.BaseStream.CanSwitchStream())
         {
@@ -269,11 +261,7 @@ public sealed class LazWriter : LasWriter
     /// <inheritdoc/>
     public override ValueTask WriteAsync(IBasePointDataRecord record, ReadOnlyMemory<byte> extraBytes = default, CancellationToken cancellationToken = default)
     {
-#if NET6_0_OR_GREATER
         ArgumentNullException.ThrowIfNull(record);
-#else
-        ThrowIfNull(record);
-#endif
         return this.pointWriter!.WriteAsync(this.BaseStream, record, extraBytes, cancellationToken);
     }
 
@@ -287,11 +275,7 @@ public sealed class LazWriter : LasWriter
     /// <returns>The asynchronous task.</returns>
     public ValueTask WriteAsync(IBasePointDataRecord record, ReadOnlyMemory<byte> extraBytes, int chunkKey, CancellationToken cancellationToken = default)
     {
-#if NET6_0_OR_GREATER
         ArgumentNullException.ThrowIfNull(record);
-#else
-        ThrowIfNull(record);
-#endif
         return this.pointWriter is ChunkedWriter chunkedWriter && this.BaseStream.CanSwitchStream()
             ? chunkedWriter.WriteAsync(this.BaseStream, record, extraBytes, chunkKey, cancellationToken)
             : this.pointWriter!.WriteAsync(this.BaseStream, record, extraBytes, cancellationToken);
@@ -469,17 +453,6 @@ public sealed class LazWriter : LasWriter
         not null => File.Open(path, FileMode.Create),
         _ => throw new NotSupportedException(),
     };
-
-#if !NET6_0_OR_GREATER
-    [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
-    private static void ThrowIfNull(IBasePointDataRecord record)
-    {
-        if (record is null)
-        {
-            throw new ArgumentNullException(nameof(record));
-        }
-    }
-#endif
 
 #if LAS1_4_OR_GREATER
     private static (ushort ExtraBytesCount, IPointWriter PointWriter) GetExtraByteCountAndPointWriter(
