@@ -18,8 +18,4 @@
     <GlobalPackageReference Include="Altemiq.DotNet.CodingStandard" Version="1.0.140" />
   </ItemGroup>
 
-  <ItemGroup Label="Build">
-    <GlobalPackageReference Include="Altemiq.SemanticVersioning.MSBuild" Version="2.1.9" />
-  </ItemGroup>
-
 </Project>
