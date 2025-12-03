@@ -4,30 +4,46 @@
 // </copyright>
 // -----------------------------------------------------------------------
 
+#pragma warning disable SA1200
+global using Statistics = (
+    Altemiq.IO.Las.Info.IMinMax<int> X,
+    Altemiq.IO.Las.Info.IMinMax<int> Y,
+    Altemiq.IO.Las.Info.IMinMax<int> Z,
+    Altemiq.IO.Las.Info.IMinMax<int> Intensity,
+    Altemiq.IO.Las.Info.IMinMax<int> ReturnNumber,
+    Altemiq.IO.Las.Info.IMinMax<int> NumberOfReturns,
+    bool EdgeOfFlightLine,
+    bool ScanDirectionFlag,
+    Altemiq.IO.Las.Info.IMinMax<byte> Classification,
+    Altemiq.IO.Las.Info.IMinMax<sbyte>? ScanAngleRank,
+    Altemiq.IO.Las.Info.IMinMax<byte> UserData,
+    Altemiq.IO.Las.Info.IMinMax<ushort> PointSourceId,
+#if LAS1_4_OR_GREATER
+    Altemiq.IO.Las.Info.IMinMax<short>? ScanAngle,
+#endif
+    Altemiq.IO.Las.Info.IMinMax<double>? Gps,
+#if LAS1_3_OR_GREATER
+    Altemiq.IO.Las.Info.IMinMax<byte>? WavePacketDescriptorIndex,
+    Altemiq.IO.Las.Info.IMinMax<ulong>? ByteOffsetToWaveformData,
+    Altemiq.IO.Las.Info.IMinMax<uint>? WaveformPacketSizeInBytes,
+    Altemiq.IO.Las.Info.IMinMax<float>? ReturnPointWaveformLocation,
+    Altemiq.IO.Las.Info.IMinMax<float>? ParametricDx,
+    Altemiq.IO.Las.Info.IMinMax<float>? ParametricDy,
+    Altemiq.IO.Las.Info.IMinMax<float>? ParametricDz,
+#endif
+#if LAS1_4_OR_GREATER
+    System.Collections.Generic.IEnumerable<Altemiq.IO.Las.Info.IMinMax> ExtraBytes,
+#endif
+    int FirstReturns,
+    int IntermediateReturns,
+    int LastReturns,
+    int SingleReturns,
+    long[] OverviewReturnNumber,
+    long[] OverviewNumberOfReturns,
+    int[] Histogram);
+#pragma warning restore SA1200
+
 namespace Altemiq.IO.Las.Info;
-
-/// <summary>
-/// The append format delegate.
-/// </summary>
-/// <param name="style">The style.</param>
-/// <param name="formatProvider">The format provider.</param>
-/// <param name="format">The format.</param>
-/// <param name="args">The arguments.</param>
-public delegate void AppendFormat(Style? style, IFormatProvider formatProvider, string format, params object?[] args);
-
-/// <summary>
-/// The append delegate.
-/// </summary>
-/// <param name="value">The text to append.</param>
-/// <param name="style">The style.</param>
-public delegate void Append(string value, Style? style = default);
-
-/// <summary>
-/// The append line delegate.
-/// </summary>
-/// <param name="value">The value.</param>
-/// <param name="style">The style.</param>
-public delegate void AppendLine(string? value = default, Style? style = default);
 
 /// <summary>
 /// Extension methods.
@@ -35,47 +51,56 @@ public delegate void AppendLine(string? value = default, Style? style = default)
 internal static class ExtensionMethods
 {
     /// <summary>
-    /// Gets the LAS statistics.
+    /// Returns a string that represents the <see cref="LasReader"/> by using the formatting conventions of a specified culture.
     /// </summary>
-    /// <param name="reader">The LAS reader.</param>
-    /// <param name="box">The bounding box.</param>
-    /// <returns>The LAS statistics.</returns>
-    public static (
-        IMinMax<int> X,
-        IMinMax<int> Y,
-        IMinMax<int> Z,
-        IMinMax<int> Intensity,
-        IMinMax<int> ReturnNumber,
-        IMinMax<int> NumberOfReturns,
-        bool EdgeOfFlightLine,
-        bool ScanDirectionFlag,
-        IMinMax<byte> Classification,
-        IMinMax<sbyte>? ScanAngleRank,
-        IMinMax<byte> UserData,
-        IMinMax<ushort> PointSourceId,
-#if LAS1_4_OR_GREATER
-        IMinMax<short>? ScanAngle,
-#endif
-        IMinMax<double>? Gps,
-#if LAS1_3_OR_GREATER
-        IMinMax<byte>? WavePacketDescriptorIndex,
-        IMinMax<ulong>? ByteOffsetToWaveformData,
-        IMinMax<uint>? WaveformPacketSizeInBytes,
-        IMinMax<float>? ReturnPointWaveformLocation,
-        IMinMax<float>? ParametricDx,
-        IMinMax<float>? ParametricDy,
-        IMinMax<float>? ParametricDz,
-#endif
-#if LAS1_4_OR_GREATER
-        IEnumerable<IMinMax> ExtraBytes,
-#endif
-        int FirstReturns,
-        int IntermediateReturns,
-        int LastReturns,
-        int SingleReturns,
-        long[] OverviewReturnNumber,
-        long[] OverviewNumberOfReturns,
-        int[] Histogram) GetStatistics(this ILasReader reader, BoundingBox? box)
+    /// <param name="lasReader">The LAS reader.</param>
+    /// <param name="formatProvider">An object that provides culture-specific formatting information.</param>
+    /// <returns>A result string formatted by using the conventions of <paramref name="formatProvider"/>.</returns>
+    public static string ToString(this LasReader lasReader, IFormatProvider? formatProvider)
+    {
+        var formatter = new StringBuilderLasReaderFormatter(formatProvider);
+        formatter.Format(lasReader, noMinMax: true, noReturns: true);
+        return formatter.ToString();
+    }
+
+    /// <summary>
+    /// Formats the <see cref="LasReader"/> by using the formatting conventions of a specified formatter.
+    /// </summary>
+    /// <param name="builder">The builder.</param>
+    /// <param name="lasReader">The LAS reader.</param>
+    /// <param name="noMinMax">Set to <see langword="true"/> to not report the min/max statistics.</param>
+    /// <param name="noReturns">Set to <see langword="true"/> to not report the return statistics.</param>
+    /// <param name="boundingBox">The optional bounding box.</param>
+    public static void Format(this ILasReaderFormatter builder, LasReader lasReader, bool noMinMax, bool noReturns, BoundingBox? boundingBox = default)
+    {
+        _ = builder
+            .AppendHeader(lasReader)
+            .AppendVariableLengthRecords(lasReader)
+            .AppendExtendedVariableLengthRecords(lasReader);
+
+        Statistics? statistics = default;
+        if (!noMinMax)
+        {
+            _ = builder.AppendStatistics(lasReader, GetStatisticsValue);
+        }
+
+        if (!noReturns)
+        {
+            _ = builder.AppendReturns(lasReader, GetStatisticsValue);
+        }
+
+        if (!noMinMax)
+        {
+            builder.AppendHistograms(lasReader, GetStatisticsValue);
+        }
+
+        Statistics GetStatisticsValue(LasReader reader)
+        {
+            return statistics ??= GetStatistics(reader, boundingBox);
+        }
+    }
+
+    private static Statistics GetStatistics(LasReader reader, BoundingBox? box = default)
     {
         var x = MinMax.Create<int>();
         var y = MinMax.Create<int>();
@@ -174,26 +199,30 @@ internal static class ExtensionMethods
 
             edgeOfFlightLine |= record.EdgeOfFlightLine;
             scanDirectionFlag |= record.ScanDirectionFlag;
+            switch (record)
+            {
 #if LAS1_4_OR_GREATER
-            if (record is IExtendedPointDataRecord extendedPointDataRecord)
-            {
-                scanAngle ??= MinMax.Create<short>();
-                var classificationValue = (byte)extendedPointDataRecord.Classification;
-                classification.Update(classificationValue);
-                scanAngle.Update(extendedPointDataRecord.ScanAngle);
+                case IExtendedPointDataRecord extendedPointDataRecord:
+                {
+                    scanAngle ??= MinMax.Create<short>();
+                    var classificationValue = (byte)extendedPointDataRecord.Classification;
+                    classification.Update(classificationValue);
+                    scanAngle.Update(extendedPointDataRecord.ScanAngle);
 
-                histogram[classificationValue]++;
-            }
+                    histogram[classificationValue]++;
+                    break;
+                }
 #endif
+                case IPointDataRecord pointDataRecord:
+                {
+                    scanAngleRank ??= MinMax.Create<sbyte>();
+                    var classificationValue = (byte)pointDataRecord.Classification;
+                    classification.Update(classificationValue);
+                    scanAngleRank.Update(pointDataRecord.ScanAngleRank);
 
-            if (record is IPointDataRecord pointDataRecord)
-            {
-                scanAngleRank ??= MinMax.Create<sbyte>();
-                var classificationValue = (byte)pointDataRecord.Classification;
-                classification.Update(classificationValue);
-                scanAngleRank.Update(pointDataRecord.ScanAngleRank);
-
-                histogram[classificationValue]++;
+                    histogram[classificationValue]++;
+                    break;
+                }
             }
 
             userData.Update(record.UserData);
@@ -272,157 +301,6 @@ internal static class ExtensionMethods
             numberOfPointsByReturn,
             numberOfReturnsArray,
             histogram);
-    }
-
-    /// <summary>
-    /// Returns a string that represents the <see cref="LasReader"/> by using the formatting conventions of a specified culture.
-    /// </summary>
-    /// <param name="lasReader">The LAS reader.</param>
-    /// <param name="formatProvider">An object that provides culture-specific formatting information.</param>
-    /// <returns>A result string formatted by using the conventions of <paramref name="formatProvider"/>.</returns>
-    public static string ToString(this LasReader lasReader, IFormatProvider? formatProvider)
-    {
-        var stringBuilder = new System.Text.StringBuilder();
-        Format(
-            lasReader,
-            formatProvider,
-            (_, fp, format, args) => stringBuilder.AppendFormat(fp, format, args),
-            (header, _) => stringBuilder.Append(header),
-            (value, _) => stringBuilder.AppendLine(value));
-        return stringBuilder.ToString();
-    }
-
-    /// <summary>
-    /// Formats the <see cref="LasReader"/> by using the formatting conventions of a specified culture.
-    /// </summary>
-    /// <param name="lasReader">The LAS reader.</param>
-    /// <param name="formatProvider">An object that provides culture-specific formatting information.</param>
-    /// <param name="format">The function to format the data.</param>
-    /// <param name="append">The function to append the data.</param>
-    /// <param name="newLine">The function to add a new line to the data.</param>
-    public static void Format(
-        this LasReader lasReader,
-        IFormatProvider? formatProvider,
-        AppendFormat format,
-        Append append,
-        AppendLine newLine)
-    {
-        formatProvider = new LasFormatProvider(formatProvider, lasReader);
-        newLine("reporting all LAS header entries:", AnsiConsoleStyles.MajorHeader);
-        foreach (var (header, value) in Information.GetInformation(lasReader))
-        {
-            if (header is null)
-            {
-                // just data
-                format(default, formatProvider, "    {0}", value);
-            }
-            else if (value is string stringValue)
-            {
-                append($"{header,-27}", AnsiConsoleStyles.Header);
-                format(default, formatProvider, " '{0}'", stringValue);
-            }
-            else
-            {
-                append($"{header,-27}", AnsiConsoleStyles.Header);
-                format(default, formatProvider, " {0}", value);
-            }
-
-            newLine();
-        }
-
-        for (var i = 0; i < lasReader.VariableLengthRecords.Count; i++)
-        {
-            format(AnsiConsoleStyles.MajorHeader, formatProvider, "variable length header record {0} of {1}:", i + 1, lasReader.VariableLengthRecords.Count);
-            newLine();
-            foreach (var (header, value) in Information.GetInformation(lasReader.Header, lasReader.VariableLengthRecords[i]))
-            {
-                var actualValue = value switch
-                {
-                    GeoKeyEntry keyEntry when lasReader.TryGetAsciiValue(keyEntry, out var asciiValue) => asciiValue,
-                    GeoKeyEntry keyEntry when lasReader.TryGetDoubleValue(keyEntry, out var doubleValue) => doubleValue,
-                    _ => value,
-                };
-
-                if (header is null)
-                {
-                    // just data
-                    format(
-                        default,
-                        formatProvider,
-                        "    {0}",
-                        actualValue);
-                }
-                else if (header is string { Length: 0 })
-                {
-                    // just information
-                    format(
-                        default,
-                        formatProvider,
-                        "  {0}",
-                        actualValue);
-                }
-                else if (actualValue is string stringValue)
-                {
-                    append($"  {header,-20}", AnsiConsoleStyles.Header);
-                    format(
-                        default,
-                        formatProvider,
-                        " '{0}'",
-                        stringValue);
-                }
-                else
-                {
-                    append($"  {header,-20}", AnsiConsoleStyles.Header);
-                    format(
-                        default,
-                        formatProvider,
-                        " {0}",
-                        actualValue);
-                }
-
-                newLine();
-            }
-        }
-
-#if LAS1_4_OR_GREATER
-        for (var i = 0; i < lasReader.ExtendedVariableLengthRecords.Count; i++)
-        {
-            format(AnsiConsoleStyles.MajorHeader, formatProvider, "extended variable length header record {0} of {1}:", i + 1, lasReader.ExtendedVariableLengthRecords.Count);
-            newLine();
-            foreach (var (header, value) in Information.GetInformation(lasReader.ExtendedVariableLengthRecords[i]))
-            {
-                if (header is null)
-                {
-                    // just data
-                    format(
-                        default,
-                        formatProvider,
-                        "    {0}",
-                        value);
-                }
-                else if (value is string stringValue)
-                {
-                    append($"  {header,-20}");
-                    format(
-                        default,
-                        formatProvider,
-                        " '{0}'",
-                        stringValue);
-                }
-                else
-                {
-                    append($"  {header,-20}");
-                    format(
-                        default,
-                        formatProvider,
-                        " {0}",
-                        value);
-                }
-
-                newLine();
-            }
-        }
-#endif
     }
 
 #if LAS1_4_OR_GREATER

@@ -29,15 +29,15 @@ public static class PointDataRecordExtensions
     /// Gets a value indicating whether this is an intermediate return.
     /// </summary>
     /// <param name="record">The record.</param>
-    /// <returns><see langword="true"/> if this is a intermediate return; otherwise <see langword="false"/>.</returns>
-    public static bool IsIntermediate(this IBasePointDataRecord record) => !record.IsFirst() && !record.IsLast();
+    /// <returns><see langword="true"/> if this is an intermediate return; otherwise <see langword="false"/>.</returns>
+    public static bool IsIntermediate(this IBasePointDataRecord record) => record.ReturnNumber.IsIntermediate(record.NumberOfReturns);
 
     /// <summary>
     /// Gets a value indicating whether this is an intermediate return.
     /// </summary>
     /// <param name="returnNumber">The return number.</param>
     /// <param name="numberOfReturns">The number of returns.</param>
-    /// <returns><see langword="true"/> if this is a intermediate return; otherwise <see langword="false"/>.</returns>
+    /// <returns><see langword="true"/> if this is an intermediate return; otherwise <see langword="false"/>.</returns>
     public static bool IsIntermediate(this byte returnNumber, byte numberOfReturns) => !returnNumber.IsFirst() && !returnNumber.IsLast(numberOfReturns);
 
     /// <summary>

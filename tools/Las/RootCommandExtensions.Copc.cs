@@ -76,15 +76,15 @@ internal static partial class RootCommandExtensions
                             output.WriteLine("\tSoftware ID: {0}", h.GeneratingSoftware);
                             output.WriteLine("\tCreation day/year: {0} / {1}", h.FileCreation?.DayOfYear, h.FileCreation?.Year);
 
-                            output.WriteLine("\tHeader Size: {0}", Info.Information.GetValue(reader, "offsetToVariableLengthRecords"));
-                            output.WriteLine("\tPoint Offset: {0}", Info.Information.GetValue(reader, "offsetToPointData"));
+                            // TODO: output.WriteLine("\tHeader Size: {0}", Info.Information.GetValue(reader, "offsetToVariableLengthRecords"));
+                            // TODO: output.WriteLine("\tPoint Offset: {0}", Info.Information.GetValue(reader, "offsetToPointData"));
                             output.WriteLine("\tVLR Count: {0}", reader.VariableLengthRecords.Count);
                             output.WriteLine("\tEVLR Count: {0}", reader.ExtendedVariableLengthRecords.Count);
 
                             //// writer.WriteLine("\tEVLR Offset: {0}", h.evlr_offset);
                             output.WriteLine("\tPoint Format: {0}", h.PointDataFormatId);
 
-                            output.WriteLine("\tPoint Length: {0}", Info.Information.GetValue(reader, "pointDataLength"));
+                            // TODO: output.WriteLine("\tPoint Length: {0}", Info.Information.GetValue(reader, "pointDataLength"));
                             output.WriteLine("\tNumber of Points old/1.4: {0} / {1}", h.LegacyNumberOfPointRecords, h.RawNumberOfPointRecords);
                             output.WriteLine("\tScale X Y Z: {0} {1} {2}", h.ScaleFactor.X, h.ScaleFactor.Y, h.ScaleFactor.Z);
                             output.WriteLine("\tOffset X Y Z: {0} {1} {2}", h.Offset.X, h.Offset.Y, h.Offset.Z);
@@ -117,7 +117,7 @@ internal static partial class RootCommandExtensions
                         error.WriteLine("Invalid COPC file. Found version {0} instead of 1.4", header.Version);
                     }
 
-                    if (Info.Information.GetValue(reader, "offsetToVariableLengthRecords") is int headerSize and not HeaderBlock.Size14)
+                    if (GetOffsetToVariableLengthRecords(reader) is var headerSize and not HeaderBlock.Size14)
                     {
                         error.WriteLine("Invalid COPC file. Found header size of {0} instead of {1}.", headerSize, HeaderBlock.Size14);
                     }
@@ -429,5 +429,8 @@ internal static partial class RootCommandExtensions
                 return command;
             }
         }
+
+        [System.Runtime.CompilerServices.UnsafeAccessor(System.Runtime.CompilerServices.UnsafeAccessorKind.Field, Name = "offsetToVariableLengthRecords")]
+        static extern ref int GetOffsetToVariableLengthRecords(LasReader reader);
     }
 }
