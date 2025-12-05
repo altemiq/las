@@ -105,6 +105,14 @@ public sealed record GeoKeyDirectoryTag : VariableLengthRecord, IReadOnlyList<Ge
         int bytesWritten = VariableLengthRecordHeader.Size;
         var d = destination[bytesWritten..];
 
+        // write the version
+        System.Buffers.Binary.BinaryPrimitives.WriteUInt16LittleEndian(d, 1);
+        System.Buffers.Binary.BinaryPrimitives.WriteUInt16LittleEndian(d[2..], (ushort)this.Version.Major);
+        System.Buffers.Binary.BinaryPrimitives.WriteUInt16LittleEndian(d[4..], (ushort)this.Version.Minor);
+        System.Buffers.Binary.BinaryPrimitives.WriteUInt16LittleEndian(d[6..], (ushort)this.Version.Build);
+        bytesWritten += 8;
+        d = destination[bytesWritten..];
+
         foreach (var value in this.values)
         {
             if (BitConverter.IsLittleEndian)

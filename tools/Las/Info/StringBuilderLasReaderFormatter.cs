@@ -9,7 +9,7 @@ namespace Altemiq.IO.Las.Info;
 /// <summary>
 /// The <see cref="System.Text.StringBuilder"/> <see cref="ILasReaderFormatter"/>.
 /// </summary>
-internal class StringBuilderLasReaderFormatter : DefaultLasReaderFormatter
+internal sealed class StringBuilderLasReaderFormatter : DefaultLasReaderFormatter
 {
     private readonly StringBuilderFormatBuilder formatBuilder;
 
@@ -43,8 +43,8 @@ internal class StringBuilderLasReaderFormatter : DefaultLasReaderFormatter
 
         public IFormatBuilder Append(string value, Style? style = default)
         {
-             stringBuilder.Append(value);
-             return this;
+            stringBuilder.Append(value);
+            return this;
         }
 
         public IFormatBuilder AppendLine(string? value = default, Style? style = default)

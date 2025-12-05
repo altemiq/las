@@ -30,13 +30,14 @@ internal static partial class RootCommandExtensions
 
             var noReturnsOption = new Option<bool>("--no-returns");
 
-            var outputOption = new Option<FileInfo>("-o", "--output");
+            var jsonOption = new Option<bool>("-j", "--json");
 
             var command = new Command("info", Tool.Properties.Resources.Command_InfoDescription)
             {
                 Arguments.Inputs,
                 noMinMaxOption,
                 noReturnsOption,
+                jsonOption,
                 Options.Output,
                 Options.InsideRectangle,
             };
@@ -44,15 +45,15 @@ internal static partial class RootCommandExtensions
             command.SetAction(parseResult =>
             {
                 var services = parseResult.GetServices();
-                var console = parseResult.CreateConsole(outputOption);
+                var console = parseResult.CreateConsole(Options.Output);
                 var noMinMax = parseResult.GetValue(noMinMaxOption);
                 var noReturns = parseResult.GetValue(noReturnsOption);
+                var json = parseResult.GetValue(jsonOption);
                 var boundingBox = parseResult.GetValue(Options.InsideRectangle);
                 foreach (var file in parseResult.GetRequiredValue(Arguments.Inputs))
                 {
-                    console.WriteLine(string.Format(System.Globalization.CultureInfo.InvariantCulture, "las info report for '{0}'", file.LocalPath), AnsiConsoleStyles.Title);
                     using var stream = File.OpenRead(file, services);
-                    Info.Processor.Process(stream, console, System.Globalization.CultureInfo.InvariantCulture, noMinMax, noReturns, boundingBox);
+                    Info.Processor.Process(stream, console, System.Globalization.CultureInfo.InvariantCulture, noMinMax, noReturns, json, boundingBox);
                 }
             });
 

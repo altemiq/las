@@ -27,6 +27,12 @@ public class LasReader : ILasReader, IDisposable
 
     private readonly long offsetToVariableLengthRecords;
 
+#if LAS1_4_OR_GREATER
+#pragma warning disable S4487
+    private readonly long offsetToEntendedVariableLengthRecords;
+#pragma warning restore S4487
+#endif
+
     private readonly long endOfPointDataRecords;
 
     private readonly byte[] buffer;
@@ -53,7 +59,7 @@ public class LasReader : ILasReader, IDisposable
                 out this.rawReader,
                 out this.offsetToPointData,
                 out this.offsetToVariableLengthRecords,
-                out _,
+                out this.offsetToEntendedVariableLengthRecords,
                 out this.pointDataLength,
                 out this.endOfPointDataRecords);
 #else
@@ -90,7 +96,7 @@ public class LasReader : ILasReader, IDisposable
                 out this.rawReader,
                 out this.offsetToPointData,
                 out this.offsetToVariableLengthRecords,
-                out _,
+                out this.offsetToEntendedVariableLengthRecords,
                 out this.pointDataLength,
                 out this.endOfPointDataRecords);
 #else
@@ -138,7 +144,7 @@ public class LasReader : ILasReader, IDisposable
                 out this.rawReader,
                 out this.offsetToPointData,
                 out this.offsetToVariableLengthRecords,
-                out _,
+                out this.offsetToEntendedVariableLengthRecords,
                 out this.pointDataLength,
                 out this.endOfPointDataRecords);
 #else

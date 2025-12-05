@@ -4,45 +4,6 @@
 // </copyright>
 // -----------------------------------------------------------------------
 
-#pragma warning disable SA1200
-global using Statistics = (
-    Altemiq.IO.Las.Info.IMinMax<int> X,
-    Altemiq.IO.Las.Info.IMinMax<int> Y,
-    Altemiq.IO.Las.Info.IMinMax<int> Z,
-    Altemiq.IO.Las.Info.IMinMax<int> Intensity,
-    Altemiq.IO.Las.Info.IMinMax<int> ReturnNumber,
-    Altemiq.IO.Las.Info.IMinMax<int> NumberOfReturns,
-    bool EdgeOfFlightLine,
-    bool ScanDirectionFlag,
-    Altemiq.IO.Las.Info.IMinMax<byte> Classification,
-    Altemiq.IO.Las.Info.IMinMax<sbyte>? ScanAngleRank,
-    Altemiq.IO.Las.Info.IMinMax<byte> UserData,
-    Altemiq.IO.Las.Info.IMinMax<ushort> PointSourceId,
-#if LAS1_4_OR_GREATER
-    Altemiq.IO.Las.Info.IMinMax<short>? ScanAngle,
-#endif
-    Altemiq.IO.Las.Info.IMinMax<double>? Gps,
-#if LAS1_3_OR_GREATER
-    Altemiq.IO.Las.Info.IMinMax<byte>? WavePacketDescriptorIndex,
-    Altemiq.IO.Las.Info.IMinMax<ulong>? ByteOffsetToWaveformData,
-    Altemiq.IO.Las.Info.IMinMax<uint>? WaveformPacketSizeInBytes,
-    Altemiq.IO.Las.Info.IMinMax<float>? ReturnPointWaveformLocation,
-    Altemiq.IO.Las.Info.IMinMax<float>? ParametricDx,
-    Altemiq.IO.Las.Info.IMinMax<float>? ParametricDy,
-    Altemiq.IO.Las.Info.IMinMax<float>? ParametricDz,
-#endif
-#if LAS1_4_OR_GREATER
-    System.Collections.Generic.IEnumerable<Altemiq.IO.Las.Info.IMinMax> ExtraBytes,
-#endif
-    int FirstReturns,
-    int IntermediateReturns,
-    int LastReturns,
-    int SingleReturns,
-    long[] OverviewReturnNumber,
-    long[] OverviewNumberOfReturns,
-    int[] Histogram);
-#pragma warning restore SA1200
-
 namespace Altemiq.IO.Las.Info;
 
 /// <summary>
@@ -203,26 +164,26 @@ internal static class ExtensionMethods
             {
 #if LAS1_4_OR_GREATER
                 case IExtendedPointDataRecord extendedPointDataRecord:
-                {
-                    scanAngle ??= MinMax.Create<short>();
-                    var classificationValue = (byte)extendedPointDataRecord.Classification;
-                    classification.Update(classificationValue);
-                    scanAngle.Update(extendedPointDataRecord.ScanAngle);
+                    {
+                        scanAngle ??= MinMax.Create<short>();
+                        var classificationValue = (byte)extendedPointDataRecord.Classification;
+                        classification.Update(classificationValue);
+                        scanAngle.Update(extendedPointDataRecord.ScanAngle);
 
-                    histogram[classificationValue]++;
-                    break;
-                }
+                        histogram[classificationValue]++;
+                        break;
+                    }
 #endif
                 case IPointDataRecord pointDataRecord:
-                {
-                    scanAngleRank ??= MinMax.Create<sbyte>();
-                    var classificationValue = (byte)pointDataRecord.Classification;
-                    classification.Update(classificationValue);
-                    scanAngleRank.Update(pointDataRecord.ScanAngleRank);
+                    {
+                        scanAngleRank ??= MinMax.Create<sbyte>();
+                        var classificationValue = (byte)pointDataRecord.Classification;
+                        classification.Update(classificationValue);
+                        scanAngleRank.Update(pointDataRecord.ScanAngleRank);
 
-                    histogram[classificationValue]++;
-                    break;
-                }
+                        histogram[classificationValue]++;
+                        break;
+                    }
             }
 
             userData.Update(record.UserData);
@@ -265,7 +226,7 @@ internal static class ExtensionMethods
 #endif
         }
 
-        return (
+        return new(
             x,
             y,
             z,

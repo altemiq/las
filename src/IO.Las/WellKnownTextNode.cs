@@ -87,7 +87,7 @@ public readonly struct WellKnownTextNode
             }
             else
             {
-                list.Add(new WellKnownTextLiteral(item.ToString()));
+                list.Add(new WellKnownTextLiteral(System.Text.Encoding.UTF8.GetString(item)));
             }
         }
 
@@ -165,7 +165,7 @@ public readonly struct WellKnownTextNode
             }
             else
             {
-                list.Add(new WellKnownTextLiteral(item.ToString()));
+                list.Add(new WellKnownTextLiteral(new(item)));
             }
         }
 
