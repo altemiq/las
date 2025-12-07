@@ -10,8 +10,23 @@ namespace Altemiq.IO.Las.Info;
 /// The <see cref="IAnsiConsole"/> format builder.
 /// </summary>
 /// <param name="console">The console.</param>
+/// <param name="formatProvider">The format provider.</param>
 public class ConsoleFormatBuilder(IAnsiConsole console, IFormatProvider formatProvider) : IFormatBuilder
 {
+    /// <inheritdoc />
+    public IFormatBuilder AppendFormat(Style? style, string format, object? arg0)
+    {
+        console.Write(string.Format(formatProvider, format, arg0), style);
+        return this;
+    }
+
+    /// <inheritdoc />
+    public IFormatBuilder AppendFormat(Style? style, string format, object? arg0, object? arg1, object? arg2)
+    {
+        console.Write(string.Format(formatProvider, format, arg0, arg1, arg2), style);
+        return this;
+    }
+
     /// <inheritdoc />
     public IFormatBuilder AppendFormat(Style? style, string format, params object?[] args)
     {

@@ -13,6 +13,20 @@ namespace Altemiq.IO.Las.Info;
 public class FileFormatBuilder(TextWriter writer) : IFormatBuilder
 {
     /// <inheritdoc />
+    public IFormatBuilder AppendFormat(Style? style, string format, object? arg0)
+    {
+        writer.Write(format, arg0);
+        return this;
+    }
+
+    /// <inheritdoc />
+    public IFormatBuilder AppendFormat(Style? style, string format, object? arg0, object? arg1, object? arg2)
+    {
+        writer.Write(format, arg0, arg1, arg2);
+        return this;
+    }
+
+    /// <inheritdoc />
     public IFormatBuilder AppendFormat(Style? style, string format, params object?[] args)
     {
         writer.Write(format, args);

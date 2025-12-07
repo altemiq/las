@@ -18,9 +18,27 @@ internal static class FormatBuilderExtensions
         /// Writes the format values.
         /// </summary>
         /// <param name="format">The format.</param>
+        /// <param name="arg0">The argument.</param>
+        /// <returns>The input console.</returns>
+        public IFormatBuilder AppendFormat([System.Diagnostics.CodeAnalysis.StringSyntax(System.Diagnostics.CodeAnalysis.StringSyntaxAttribute.CompositeFormat)] string format, object? arg0) => builder.AppendFormat(default, format, arg0);
+
+        /// <summary>
+        /// Writes the format values.
+        /// </summary>
+        /// <param name="format">The format.</param>
+        /// <param name="arg0">The first argument.</param>
+        /// <param name="arg1">The second argument.</param>
+        /// <param name="arg2">The third argument.</param>
+        /// <returns>The input console.</returns>
+        public IFormatBuilder AppendFormat([System.Diagnostics.CodeAnalysis.StringSyntax(System.Diagnostics.CodeAnalysis.StringSyntaxAttribute.CompositeFormat)] string format, object? arg0, object? arg1, object? arg2) => builder.AppendFormat(default, format, arg0, arg1, arg2);
+
+        /// <summary>
+        /// Writes the format values.
+        /// </summary>
+        /// <param name="format">The format.</param>
         /// <param name="args">The arguments.</param>
         /// <returns>The input console.</returns>
-        public IFormatBuilder AppendFormat(string format, params object?[] args) => builder.AppendFormat(default, format, args);
+        public IFormatBuilder AppendFormat([System.Diagnostics.CodeAnalysis.StringSyntax(System.Diagnostics.CodeAnalysis.StringSyntaxAttribute.CompositeFormat)] string format, params object?[] args) => builder.AppendFormat(default, format, args);
 
         /// <summary>
         /// Writes the major header.
@@ -35,7 +53,7 @@ internal static class FormatBuilderExtensions
         /// <param name="format">The format.</param>
         /// <param name="args">The arguments.</param>
         /// <returns>The input console.</returns>
-        public IFormatBuilder AppendMajorHeader(string format, params object[] args) => builder.AppendFormat(AnsiConsoleStyles.MajorHeader, format, args);
+        public IFormatBuilder AppendMajorHeader([System.Diagnostics.CodeAnalysis.StringSyntax(System.Diagnostics.CodeAnalysis.StringSyntaxAttribute.CompositeFormat)] string format, params object?[] args) => builder.AppendFormat(AnsiConsoleStyles.MajorHeader, format, args);
 
         /// <summary>
         /// Writes the header.
@@ -50,7 +68,7 @@ internal static class FormatBuilderExtensions
         /// <param name="format">The format.</param>
         /// <param name="args">The arguments.</param>
         /// <returns>The input console.</returns>
-        public IFormatBuilder AppendHeader(string format, params object[] args) => builder.AppendFormat(AnsiConsoleStyles.Header, format, args);
+        public IFormatBuilder AppendHeader([System.Diagnostics.CodeAnalysis.StringSyntax(System.Diagnostics.CodeAnalysis.StringSyntaxAttribute.CompositeFormat)] string format, params object?[] args) => builder.AppendFormat(AnsiConsoleStyles.Header, format, args);
 
         /// <summary>
         /// Writes the minor header.
@@ -65,7 +83,7 @@ internal static class FormatBuilderExtensions
         /// <param name="format">The format.</param>
         /// <param name="args">The arguments.</param>
         /// <returns>The input console.</returns>
-        public IFormatBuilder AppendMinorHeader(string format, params object[] args) => builder.AppendFormat(AnsiConsoleStyles.MinorHeader, format, args);
+        public IFormatBuilder AppendMinorHeader([System.Diagnostics.CodeAnalysis.StringSyntax(System.Diagnostics.CodeAnalysis.StringSyntaxAttribute.CompositeFormat)] string format, params object?[] args) => builder.AppendFormat(AnsiConsoleStyles.MinorHeader, format, args);
 
         /// <summary>
         /// Writes the caption.
@@ -80,7 +98,7 @@ internal static class FormatBuilderExtensions
         /// <param name="format">The format.</param>
         /// <param name="args">The arguments.</param>
         /// <returns>The input console.</returns>
-        public IFormatBuilder AppendCaption(string format, params object[] args) => builder.AppendFormat(AnsiConsoleStyles.Caption, format, args);
+        public IFormatBuilder AppendCaption([System.Diagnostics.CodeAnalysis.StringSyntax(System.Diagnostics.CodeAnalysis.StringSyntaxAttribute.CompositeFormat)] string format, params object?[] args) => builder.AppendFormat(AnsiConsoleStyles.Caption, format, args);
 
         /// <summary>
         /// Writes the value.
@@ -102,7 +120,7 @@ internal static class FormatBuilderExtensions
         /// <param name="format">The format.</param>
         /// <param name="args">The arguments.</param>
         /// <returns>The input console.</returns>
-        public IFormatBuilder AppendCount(string format, params object[] args) => builder.AppendFormat(AnsiConsoleStyles.Count, format, args);
+        public IFormatBuilder AppendCount([System.Diagnostics.CodeAnalysis.StringSyntax(System.Diagnostics.CodeAnalysis.StringSyntaxAttribute.CompositeFormat)] string format, params object?[] args) => builder.AppendFormat(AnsiConsoleStyles.Count, format, args);
 #pragma warning restore S2325, SA1101
     }
 }

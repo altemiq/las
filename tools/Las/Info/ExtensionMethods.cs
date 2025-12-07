@@ -36,8 +36,11 @@ internal static class ExtensionMethods
     {
         _ = builder
             .AppendHeader(lasReader)
-            .AppendVariableLengthRecords(lasReader)
-            .AppendExtendedVariableLengthRecords(lasReader);
+            .AppendVariableLengthRecords(lasReader);
+
+#if LAS1_4_OR_GREATER
+        _ = builder.AppendExtendedVariableLengthRecords(lasReader);
+#endif
 
         Statistics? statistics = default;
         if (!noMinMax)

@@ -35,6 +35,18 @@ internal sealed class StringBuilderLasReaderFormatter : DefaultLasReaderFormatte
         {
         }
 
+        public IFormatBuilder AppendFormat(Style? style, string format, object? arg0)
+        {
+            stringBuilder.AppendFormat(formatProvider, format, arg0);
+            return this;
+        }
+
+        public IFormatBuilder AppendFormat(Style? style, string format, object? arg0, object? arg1, object? arg2)
+        {
+            stringBuilder.AppendFormat(formatProvider, format, arg0, arg1, arg2);
+            return this;
+        }
+
         public IFormatBuilder AppendFormat(Style? style, string format, params object?[] args)
         {
             stringBuilder.AppendFormat(formatProvider, format, args);

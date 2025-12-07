@@ -22,7 +22,9 @@ internal sealed class JsonLasReaderFormatter(System.Text.Json.Utf8JsonWriter wri
         var header = reader.Header;
         writer.WriteString("file_signature", header.FileSignature);
         writer.WriteNumber("file_source_id", header.FileSourceId);
+#if LAS1_2_OR_GREATER
         writer.WriteNumber("global_encoding", (ushort)header.GlobalEncoding);
+#endif
         writer.WriteString("project_id_guid_data", header.ProjectId);
         writer.WriteString("version_major_minor", header.Version.ToString());
         writer.WriteString("system_identifier", header.SystemIdentifier);
@@ -164,12 +166,6 @@ internal sealed class JsonLasReaderFormatter(System.Text.Json.Utf8JsonWriter wri
                     writer.WriteEndArray();
                     writer.WriteEndObject();
                     break;
-                case OgcMathTransformWkt mathTransformWkt:
-                    WriteWkt(writer, "wkt_ogc_math_transform", mathTransformWkt.Wkt.ToString());
-                    break;
-                case OgcCoordinateSystemWkt coordinateSystemWkt:
-                    WriteWkt(writer, "wkt_ogc_coordinate_system", coordinateSystemWkt.Wkt.ToString());
-                    break;
                 case ClassificationLookup classificationLookup:
                     writer.WriteStartArray("classification");
                     foreach (var item in classificationLookup)
@@ -184,6 +180,13 @@ internal sealed class JsonLasReaderFormatter(System.Text.Json.Utf8JsonWriter wri
                     break;
                 case TextAreaDescription textAreaDescription:
                     writer.WriteString("text_area_description", textAreaDescription.Value);
+                    break;
+#if LAS1_4_OR_GREATER
+                case OgcMathTransformWkt mathTransformWkt:
+                    WriteWkt(writer, "wkt_ogc_math_transform", mathTransformWkt.Wkt.ToString());
+                    break;
+                case OgcCoordinateSystemWkt coordinateSystemWkt:
+                    WriteWkt(writer, "wkt_ogc_coordinate_system", coordinateSystemWkt.Wkt.ToString());
                     break;
                 case ExtraBytes extraBytes:
                     writer.WriteStartArray("extra_byte_descriptions");
@@ -252,6 +255,7 @@ internal sealed class JsonLasReaderFormatter(System.Text.Json.Utf8JsonWriter wri
                     writer.WriteEndArray();
 
                     break;
+#endif
                 case CompressedTag compressedTag:
                     writer.WriteStartObject("laszip_compression");
 
@@ -341,6 +345,7 @@ internal sealed class JsonLasReaderFormatter(System.Text.Json.Utf8JsonWriter wri
 
             writer.WriteEndObject();
 
+#if LAS1_4_OR_GREATER
             static void WriteWkt(System.Text.Json.Utf8JsonWriter writer, string name, string wkt)
             {
                 writer.WritePropertyName(name);
@@ -348,12 +353,14 @@ internal sealed class JsonLasReaderFormatter(System.Text.Json.Utf8JsonWriter wri
                 // ensure we escape the WKT
                 writer.WriteRawValue($"\"{wkt.Replace("\"", "\\\"", StringComparison.Ordinal)}\"");
             }
+#endif
         }
 
         writer.WriteEndArray();
         return this;
     }
 
+#if LAS1_4_OR_GREATER
     /// <inheritdoc/>
     public ILasReaderFormatter AppendExtendedVariableLengthRecords(LasReader reader)
     {
@@ -420,6 +427,7 @@ internal sealed class JsonLasReaderFormatter(System.Text.Json.Utf8JsonWriter wri
 
         return this;
     }
+#endif
 
     /// <inheritdoc/>
     public ILasReaderFormatter AppendStatistics(LasReader reader, Func<LasReader, Statistics> statisticsFunc)
@@ -521,13 +529,11 @@ internal sealed class JsonLasReaderFormatter(System.Text.Json.Utf8JsonWriter wri
 #endif
 
         FormatOverviewReturnNumber(warnings, statistics.OverviewReturnNumber[0], 0);
-#if LAS1_4_OR_GREATER
         if (reader.Header.Version.Minor < 4)
         {
             FormatOverviewReturnNumber(warnings, statistics.OverviewReturnNumber[6], 6);
             FormatOverviewReturnNumber(warnings, statistics.OverviewReturnNumber[7], 7);
         }
-#endif
 
         writer.WriteStartObject("points_by_return");
         WriteWarnings(writer, warnings);
@@ -571,7 +577,9 @@ internal sealed class JsonLasReaderFormatter(System.Text.Json.Utf8JsonWriter wri
                 return;
             }
 
-            warnings.Add(string.Format(System.Globalization.CultureInfo.InvariantCulture, "WARNING: there {0} {1} point{2} with return number {3}", value > 1 ? "are" : "is", value, value > 1 ? "s" : string.Empty, returnNumber));
+            warnings.Add(value is 1
+                ? string.Create(System.Globalization.CultureInfo.InvariantCulture, $"WARNING: there is {value} point with return number {returnNumber}")
+                : string.Create(System.Globalization.CultureInfo.InvariantCulture, $"WARNING: there are {value} points with return number {returnNumber}"));
         }
     }
 

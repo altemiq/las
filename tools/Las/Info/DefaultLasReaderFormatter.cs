@@ -639,7 +639,7 @@ internal class DefaultLasReaderFormatter(IFormatBuilder builder) : ILasReaderFor
         }
     }
 
-#if LAS1_3_OR_GREATER
+#if LAS1_4_OR_GREATER
     private static IEnumerable<(object? Header, object? Value)> GetInformation(ExtendedVariableLengthRecord record)
     {
         yield return ("reserved", 0);
@@ -648,7 +648,6 @@ internal class DefaultLasReaderFormatter(IFormatBuilder builder) : ILasReaderFor
         yield return ("length after header", record.Header.RecordLengthAfterHeader);
         yield return ("description", record.Header.Description);
 
-#if LAS1_4_OR_GREATER
         var extra = record switch
         {
             Cloud.CopcHierarchy copcHierarchy => GetCopcHierarchy(copcHierarchy),
@@ -689,7 +688,6 @@ internal class DefaultLasReaderFormatter(IFormatBuilder builder) : ILasReaderFor
                 }
             }
         }
-#endif
     }
 #endif
 
