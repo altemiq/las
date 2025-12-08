@@ -30,9 +30,9 @@ public sealed record GeoKeyDirectoryTag : VariableLengthRecord, IReadOnlyList<Ge
             {
                 UserId = VariableLengthRecordHeader.ProjectionUserId,
                 RecordId = TagRecordId,
-                RecordLengthAfterHeader = (ushort)(4 * sizeof(ushort) * entries.Count),
+                RecordLengthAfterHeader = (ushort)(4 * sizeof(ushort) * (entries.Count + 1)),
             },
-            new(1, 1),
+            new(1, 1, 0),
             entries)
     {
     }
@@ -106,11 +106,15 @@ public sealed record GeoKeyDirectoryTag : VariableLengthRecord, IReadOnlyList<Ge
         var d = destination[bytesWritten..];
 
         // write the version
-        System.Buffers.Binary.BinaryPrimitives.WriteUInt16LittleEndian(d, 1);
-        System.Buffers.Binary.BinaryPrimitives.WriteUInt16LittleEndian(d[2..], (ushort)this.Version.Major);
-        System.Buffers.Binary.BinaryPrimitives.WriteUInt16LittleEndian(d[4..], (ushort)this.Version.Minor);
-        System.Buffers.Binary.BinaryPrimitives.WriteUInt16LittleEndian(d[6..], (ushort)this.Version.Build);
-        bytesWritten += 8;
+        System.Buffers.Binary.BinaryPrimitives.WriteUInt16LittleEndian(d[..2], (ushort)this.Version.Major);
+        System.Buffers.Binary.BinaryPrimitives.WriteUInt16LittleEndian(d[2..4], (ushort)this.Version.Minor);
+        System.Buffers.Binary.BinaryPrimitives.WriteUInt16LittleEndian(d[4..6], (ushort)this.Version.Build);
+        bytesWritten += sizeof(ushort) * 3;
+        d = destination[bytesWritten..];
+
+        // write the number of values
+        System.Buffers.Binary.BinaryPrimitives.WriteUInt16LittleEndian(d[..2], (ushort)this.values.Count);
+        bytesWritten += sizeof(ushort);
         d = destination[bytesWritten..];
 
         foreach (var value in this.values)
@@ -163,5 +167,5 @@ public sealed record GeoKeyDirectoryTag : VariableLengthRecord, IReadOnlyList<Ge
         return builder.ToReadOnlyCollection();
     }
 
-    private static Version GetVersion(ReadOnlySpan<byte> source) => new(System.Buffers.Binary.BinaryPrimitives.ReadUInt16LittleEndian(source[2..4]), System.Buffers.Binary.BinaryPrimitives.ReadUInt16LittleEndian(source[2..4]), System.Buffers.Binary.BinaryPrimitives.ReadUInt16LittleEndian(source[4..6]));
+    private static Version GetVersion(ReadOnlySpan<byte> source) => new(System.Buffers.Binary.BinaryPrimitives.ReadUInt16LittleEndian(source[..2]), System.Buffers.Binary.BinaryPrimitives.ReadUInt16LittleEndian(source[2..4]), System.Buffers.Binary.BinaryPrimitives.ReadUInt16LittleEndian(source[4..6]));
 }

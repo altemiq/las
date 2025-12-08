@@ -549,11 +549,7 @@ internal class DefaultLasReaderFormatter(IFormatBuilder builder) : ILasReaderFor
         static IEnumerable<(object? Header, object? Value)> GetGeoDoubleParamsTag(GeoDoubleParamsTag record)
         {
             yield return (default, LazyFormattable.Create("GeoDoubleParamsTag  (number of doubles {0})", record.Count));
-#if NETFRAMEWORK || NETCOREAPP
             yield return (default, LazyFormattable.Create(GetEnumerable()));
-#else
-            yield return (default, LazyFormattable.Create(GetEnumerable(), (formatProvider, value) => value.ToString(formatProvider)));
-#endif
 
             IEnumerable<double> GetEnumerable()
             {
