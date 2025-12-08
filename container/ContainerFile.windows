@@ -1,5 +1,5 @@
 FROM mcr.microsoft.com/windows/nanoserver:ltsc2022-amd64
-LABEL org.opencontainers.image.description 'LAStools for Windows'
+LABEL org.opencontainers.image.description='LAStools for Windows'
 
 COPY VC_redist.x64 C:\\Windows\\System32
 	
