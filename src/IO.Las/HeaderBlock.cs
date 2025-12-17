@@ -180,11 +180,8 @@ public readonly struct HeaderBlock : IEquatable<HeaderBlock>
 #if LAS1_2_OR_GREATER
         this.GlobalEncoding = globalEncoding;
 #endif
-        if (version is not { Major: 1, Minor: >= 0 and <= MaxMinorVersion })
-        {
-            // invalid version.
-            throw new ArgumentOutOfRangeException(nameof(version));
-        }
+        ArgumentOutOfRangeException.ThrowIfEqual(version, new Version(1, 0));
+        ArgumentOutOfRangeException.ThrowIfGreaterThan(version, new Version(1, MaxMinorVersion));
 
         this.Version = version;
         this.SystemIdentifier = systemIdentifier;
@@ -196,7 +193,7 @@ public readonly struct HeaderBlock : IEquatable<HeaderBlock>
         if (legacyPointsByReturn is not { Length: 5 })
         {
             // invalid legacy array.
-            throw new ArgumentOutOfRangeException(nameof(legacyPointsByReturn));
+            throw new ArgumentOutOfRangeException(nameof(legacyPointsByReturn), legacyPointsByReturn, default);
         }
 
         this.LegacyNumberOfPointsByReturn = legacyPointsByReturn;
@@ -205,7 +202,7 @@ public readonly struct HeaderBlock : IEquatable<HeaderBlock>
         if (pointsByReturn is not { Length: 5 })
         {
             // invalid legacy array.
-            throw new ArgumentOutOfRangeException(nameof(pointsByReturn));
+            throw new ArgumentOutOfRangeException(nameof(pointsByReturn), pointsByReturn, default);
         }
 
         this.NumberOfPointsByReturn = pointsByReturn;
@@ -219,7 +216,7 @@ public readonly struct HeaderBlock : IEquatable<HeaderBlock>
         if (pointsByReturn is not { Length: 15 })
         {
             // invalid array.
-            throw new ArgumentOutOfRangeException(nameof(pointsByReturn));
+            throw new ArgumentOutOfRangeException(nameof(pointsByReturn), pointsByReturn, default);
         }
 
         this.RawNumberOfPointsByReturn = pointsByReturn;

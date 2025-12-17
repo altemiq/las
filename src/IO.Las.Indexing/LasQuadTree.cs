@@ -56,13 +56,13 @@ public sealed class LasQuadTree : IEquatable<LasQuadTree>
         var horizonalCells = UInt32Quantize((this.maximumX - this.minimumX) / cellSize);
         if (horizonalCells is 0)
         {
-            throw new ArgumentOutOfRangeException(nameof(cellSize), Properties.Resources.NoHorizontalCellsFound);
+            throw new ArgumentOutOfRangeException(nameof(cellSize), cellSize, Properties.Resources.NoHorizontalCellsFound);
         }
 
         var verticalCells = UInt32Quantize((this.maximumY - this.minimumY) / cellSize);
         if (verticalCells is 0)
         {
-            throw new ArgumentOutOfRangeException(nameof(cellSize), Properties.Resources.NoVerticalCellsFound);
+            throw new ArgumentOutOfRangeException(nameof(cellSize), cellSize, Properties.Resources.NoVerticalCellsFound);
         }
 
         // how many quad tree levels to get to that many cells

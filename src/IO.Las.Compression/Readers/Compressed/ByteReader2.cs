@@ -24,7 +24,8 @@ internal sealed class ByteReader2 : ISimpleReader
     /// <param name="number">The number.</param>
     public ByteReader2(IEntropyDecoder decoder, uint number)
     {
-        this.decoder = decoder ?? throw new ArgumentNullException(nameof(decoder));
+        ArgumentNullException.ThrowIfNull(decoder);
+        this.decoder = decoder;
 
         // create models and integer compressors
         this.byteModels = new ISymbolModel[number];

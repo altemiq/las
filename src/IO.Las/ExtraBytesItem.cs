@@ -551,7 +551,7 @@ public readonly record struct ExtraBytesItem
         ExtraBytesDataType.Char or ExtraBytesDataType.Short or ExtraBytesDataType.Long or ExtraBytesDataType.LongLong => System.Buffers.Binary.BinaryPrimitives.ReadInt64LittleEndian(data),
         ExtraBytesDataType.Float or ExtraBytesDataType.Double => System.Buffers.Binary.BinaryPrimitives.ReadDoubleLittleEndian(data),
         ExtraBytesDataType.Undocumented => data,
-        _ => throw new ArgumentOutOfRangeException(nameof(dataType), string.Format(Properties.Resources.Culture, Properties.Resources.CannotSetOn, "data-type", dataType)),
+        _ => throw new ArgumentOutOfRangeException(nameof(dataType), dataType, string.Format(Properties.Resources.Culture, Properties.Resources.CannotSetOn, "data-type", dataType)),
     };
 
     private static void SetDataAsFull(byte[] data, object? value, ExtraBytesDataType dataType)

@@ -472,12 +472,8 @@ public readonly struct Vector3D : IFormattable, IEquatable<Vector3D>
     public void CopyTo(double[] array, int index)
     {
         ArgumentNullException.ThrowIfNull(array);
-
-        if (index < 0 || index >= array.Length)
-        {
-            throw new ArgumentOutOfRangeException(nameof(index));
-        }
-
+        ArgumentOutOfRangeException.ThrowIfLessThan(index, 0);
+        ArgumentOutOfRangeException.ThrowIfGreaterThanOrEqual(index, array.Length);
         if (array.Length - index < 3)
         {
             throw new ArgumentException(Properties.Resources.ElementsInSourceIsGreaterThanDestination, nameof(index));

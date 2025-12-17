@@ -37,7 +37,8 @@ internal sealed class WavePacketReader1 : ISimpleReader
     /// <param name="decoder">The decoder.</param>
     public WavePacketReader1(IEntropyDecoder decoder)
     {
-        this.decoder = decoder ?? throw new ArgumentNullException(nameof(decoder));
+        ArgumentNullException.ThrowIfNull(decoder);
+        this.decoder = decoder;
 
         // create models and integer compressors
         this.packetIndex = decoder.CreateSymbolModel(ArithmeticCoder.ModelCount);

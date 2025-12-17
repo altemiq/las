@@ -5,6 +5,11 @@
     <MeziantouPolyfill_IncludedPolyfills>
       $(MeziantouPolyfill_IncludedPolyfills)|
       M:System.ArgumentNullException.ThrowIfNull(System.Object,System.String)|
+      M:System.ArgumentOutOfRangeException.ThrowIfEqual``1(``0,``0,System.String)|
+      M:System.ArgumentOutOfRangeException.ThrowIfGreaterThanOrEqual``1(``0,``0,System.String)|
+      M:System.ArgumentOutOfRangeException.ThrowIfGreaterThan``1(``0,``0,System.String)|
+      M:System.ArgumentOutOfRangeException.ThrowIfLessThanOrEqual``1(``0,``0,System.String)|
+      M:System.ArgumentOutOfRangeException.ThrowIfLessThan``1(``0,``0,System.String)|
       M:System.IO.Stream.Read(System.Span{System.Byte})|
       M:System.IO.Stream.ReadAsync(System.Memory{System.Byte},System.Threading.CancellationToken)|
       M:System.IO.Stream.Write(System.ReadOnlySpan{System.Byte})|

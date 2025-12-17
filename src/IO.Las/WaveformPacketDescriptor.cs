@@ -117,5 +117,10 @@ public sealed record WaveformPacketDescriptor : VariableLengthRecord
         return VariableLengthRecordHeader.Size + 26;
     }
 
-    private static ushort CheckRecordId(int recordId) => recordId is >= MinTagRecordId and <= MaxTagRecordId ? (ushort)recordId : throw new ArgumentOutOfRangeException(nameof(recordId));
+    private static ushort CheckRecordId(int recordId)
+    {
+        ArgumentOutOfRangeException.ThrowIfLessThan(recordId, MinTagRecordId);
+        ArgumentOutOfRangeException.ThrowIfGreaterThan(recordId, MaxTagRecordId);
+        return (ushort)recordId;
+    }
 }

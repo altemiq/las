@@ -334,11 +334,7 @@ public class LasReader : ILasReader, IDisposable
     /// <param name="pointIndex">The point index.</param>
     protected void MoveToPoint(ulong pointIndex)
     {
-        if (!this.CheckPointIndex(pointIndex))
-        {
-            throw new ArgumentOutOfRangeException(nameof(pointIndex));
-        }
-
+        ArgumentOutOfRangeException.ThrowIfGreaterThanOrEqual(pointIndex, this.numberOfPointRecords);
         if (!this.MoveToPoint(this.currentPointIndex, pointIndex))
         {
             ThrowInvalidOperationException(pointIndex);

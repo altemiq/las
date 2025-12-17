@@ -176,7 +176,7 @@ internal static class GpsTime
         >= 2023 and < 2031 => 150,
         >= 2031 and < 2039 => 175,
         >= 2039 and < 2047 => 200,
-        _ => throw new ArgumentOutOfRangeException(nameof(year)),
+        _ => throw new ArgumentOutOfRangeException(nameof(year), year, default),
     };
 #endif
 

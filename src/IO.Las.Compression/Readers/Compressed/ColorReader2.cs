@@ -32,7 +32,8 @@ internal sealed class ColorReader2 : ISimpleReader
     /// <param name="decoder">The decoder.</param>
     public ColorReader2(IEntropyDecoder decoder)
     {
-        this.decoder = decoder ?? throw new ArgumentNullException(nameof(decoder));
+        ArgumentNullException.ThrowIfNull(decoder);
+        this.decoder = decoder;
 
         // create models and integer compressors
         this.byteUsedModel = this.decoder.CreateSymbolModel(ArithmeticCoder.HalfModelCount);

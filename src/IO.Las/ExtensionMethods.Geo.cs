@@ -63,9 +63,11 @@ public static partial class ExtensionMethods
     /// <param name="reader">The reader.</param>
     /// <param name="key">The GEO key.</param>
     /// <returns>The ASCII value.</returns>
-    public static string GetAsciiValue(this ILasReader reader, GeoKey key) => reader is null
-        ? throw new ArgumentNullException(nameof(reader))
-        : GetAsciiValue(reader.VariableLengthRecords, key);
+    public static string GetAsciiValue(this ILasReader reader, GeoKey key)
+    {
+        ArgumentNullException.ThrowIfNull(reader);
+        return GetAsciiValue(reader.VariableLengthRecords, key);
+    }
 
     /// <summary>
     /// Gets the ASCII value associated with the <see cref="GeoKey"/> from the <see cref="VariableLengthRecord"/> instances.
@@ -107,9 +109,11 @@ public static partial class ExtensionMethods
     /// <param name="reader">The reader.</param>
     /// <param name="keyEntry">The GEO key entry.</param>
     /// <returns>The ASCII value.</returns>
-    public static string GetAsciiValue(this ILasReader reader, GeoKeyEntry keyEntry) => reader is not null
-        ? GetAsciiValue(reader.VariableLengthRecords, keyEntry)
-        : throw new ArgumentNullException(nameof(reader));
+    public static string GetAsciiValue(this ILasReader reader, GeoKeyEntry keyEntry)
+    {
+        ArgumentNullException.ThrowIfNull(reader);
+        return GetAsciiValue(reader.VariableLengthRecords, keyEntry);
+    }
 
     /// <summary>
     /// Gets the ASCII value associated with the <see cref="GeoKey"/> from the <see cref="VariableLengthRecord"/> instances.
@@ -140,9 +144,11 @@ public static partial class ExtensionMethods
     /// <param name="key">The GEO key.</param>
     /// <param name="value">When this method returns and if the conversion succeeded, contains the string from the <paramref name="key"/>.</param>
     /// <returns><see langword="true"/> if <paramref name="key"/> was successfully extracted; otherwise <see langword="false"/>.</returns>
-    public static bool TryGetAsciiValue(this ILasReader reader, GeoKey key, [System.Diagnostics.CodeAnalysis.NotNullWhen(true)] out string? value) => reader is not null
-        ? TryGetAsciiValue(reader.VariableLengthRecords, key, out value)
-        : throw new ArgumentNullException(nameof(reader));
+    public static bool TryGetAsciiValue(this ILasReader reader, GeoKey key, [System.Diagnostics.CodeAnalysis.NotNullWhen(true)] out string? value)
+    {
+        ArgumentNullException.ThrowIfNull(reader);
+        return TryGetAsciiValue(reader.VariableLengthRecords, key, out value);
+    }
 
     /// <summary>
     /// Tries to get the ASCII value associated with the <see cref="GeoKey"/> from the <see cref="VariableLengthRecord"/> instances.
@@ -186,9 +192,11 @@ public static partial class ExtensionMethods
     /// <param name="keyEntry">The GEO key entry.</param>
     /// <param name="value">When this method returns and if the conversion succeeded, contains the string from the <paramref name="keyEntry"/>.</param>
     /// <returns><see langword="true"/> if <paramref name="keyEntry"/> was successfully extracted; otherwise <see langword="false"/>.</returns>
-    public static bool TryGetAsciiValue(this ILasReader reader, GeoKeyEntry keyEntry, [System.Diagnostics.CodeAnalysis.NotNullWhen(true)] out string? value) => reader is not null
-        ? TryGetAsciiValue(reader.VariableLengthRecords, keyEntry, out value)
-        : throw new ArgumentNullException(nameof(reader));
+    public static bool TryGetAsciiValue(this ILasReader reader, GeoKeyEntry keyEntry, [System.Diagnostics.CodeAnalysis.NotNullWhen(true)] out string? value)
+    {
+        ArgumentNullException.ThrowIfNull(reader);
+        return TryGetAsciiValue(reader.VariableLengthRecords, keyEntry, out value);
+    }
 
     /// <summary>
     /// Tries to get the ASCII value associated with the <see cref="GeoKeyEntry"/> from the <see cref="VariableLengthRecord"/> instances.
@@ -228,9 +236,11 @@ public static partial class ExtensionMethods
     /// <param name="reader">The reader.</param>
     /// <param name="key">The GEO key.</param>
     /// <returns>The double-precision value.</returns>
-    public static double GetDoubleValue(this ILasReader reader, GeoKey key) => reader is not null
-        ? GetDoubleValue(reader.VariableLengthRecords, key)
-        : throw new ArgumentNullException(nameof(reader));
+    public static double GetDoubleValue(this ILasReader reader, GeoKey key)
+    {
+        ArgumentNullException.ThrowIfNull(reader);
+        return GetDoubleValue(reader.VariableLengthRecords, key);
+    }
 
     /// <summary>
     /// Gets the double-precision value associated with the <see cref="GeoKey"/> from the <see cref="VariableLengthRecord"/> instances.
@@ -272,9 +282,11 @@ public static partial class ExtensionMethods
     /// <param name="reader">The reader.</param>
     /// <param name="keyEntry">The GEO key entry.</param>
     /// <returns>The double-precision value.</returns>
-    public static double GetDoubleValue(this ILasReader reader, GeoKeyEntry keyEntry) => reader is not null
-        ? GetDoubleValue(reader.VariableLengthRecords, keyEntry)
-        : throw new ArgumentNullException(nameof(reader));
+    public static double GetDoubleValue(this ILasReader reader, GeoKeyEntry keyEntry)
+    {
+        ArgumentNullException.ThrowIfNull(reader);
+        return GetDoubleValue(reader.VariableLengthRecords, keyEntry);
+    }
 
     /// <summary>
     /// Gets the double-precision value associated with the <see cref="GeoKey"/> from the <see cref="VariableLengthRecord"/> instances.
@@ -304,9 +316,11 @@ public static partial class ExtensionMethods
     /// <param name="key">The GEO key.</param>
     /// <param name="value">When this method returns and if the conversion succeeded, contains the double-precision floating-point number from the <paramref name="key"/>.</param>
     /// <returns><see langword="true"/> if <paramref name="key"/> was successfully extracted; otherwise <see langword="false"/>.</returns>
-    public static bool TryGetDoubleValue(this ILasReader reader, GeoKey key, out double value) => reader is not null
-        ? TryGetDoubleValue(reader.VariableLengthRecords, key, out value)
-        : throw new ArgumentNullException(nameof(reader));
+    public static bool TryGetDoubleValue(this ILasReader reader, GeoKey key, out double value)
+    {
+        ArgumentNullException.ThrowIfNull(reader);
+        return TryGetDoubleValue(reader.VariableLengthRecords, key, out value);
+    }
 
     /// <summary>
     /// Tries to get the double-precision value associated with the <see cref="GeoKey"/> from the <see cref="VariableLengthRecord"/> instances.
@@ -347,9 +361,11 @@ public static partial class ExtensionMethods
     /// <param name="keyEntry">The GEO key entry.</param>
     /// <param name="value">When this method returns and if the conversion succeeded, contains the double-precision floating-point number from the <paramref name="keyEntry"/>.</param>
     /// <returns><see langword="true"/> if <paramref name="keyEntry"/> was successfully extracted; otherwise <see langword="false"/>.</returns>
-    public static bool TryGetDoubleValue(this ILasReader reader, GeoKeyEntry keyEntry, out double value) => reader is not null
-        ? TryGetDoubleValue(reader.VariableLengthRecords, keyEntry, out value)
-        : throw new ArgumentNullException(nameof(reader));
+    public static bool TryGetDoubleValue(this ILasReader reader, GeoKeyEntry keyEntry, out double value)
+    {
+        ArgumentNullException.ThrowIfNull(reader);
+        return TryGetDoubleValue(reader.VariableLengthRecords, keyEntry, out value);
+    }
 
     /// <summary>
     /// Tries to get the double-precision value associated with the <see cref="GeoKey"/> from the <see cref="VariableLengthRecord"/> instances.
@@ -387,9 +403,11 @@ public static partial class ExtensionMethods
     /// <param name="reader">The reader.</param>
     /// <param name="key">The GEO key.</param>
     /// <returns>The double-precision values.</returns>
-    public static IEnumerable<double> GetDoubleValues(this ILasReader reader, GeoKey key) => reader is not null
-        ? GetDoubleValues(reader.VariableLengthRecords, key)
-        : throw new ArgumentNullException(nameof(reader));
+    public static IEnumerable<double> GetDoubleValues(this ILasReader reader, GeoKey key)
+    {
+        ArgumentNullException.ThrowIfNull(reader);
+        return GetDoubleValues(reader.VariableLengthRecords, key);
+    }
 
     /// <summary>
     /// Gets the double-precision values associated with the <see cref="GeoKey"/> from the <see cref="VariableLengthRecord"/> instances.
@@ -420,7 +438,7 @@ public static partial class ExtensionMethods
             return keyDirectory[key] switch
             {
                 { TiffTagLocation: GeoDoubleParamsTag.TagRecordId } geoKeyEntry => doubleParams.GetValues(geoKeyEntry.ValueOffset, geoKeyEntry.Count),
-                _ => ThrowIsNotAValue<IEnumerable<double>>(nameof(IEnumerable<double>), nameof(key)),
+                _ => ThrowIsNotAValue<IEnumerable<double>>(nameof(IEnumerable<>), nameof(key)),
             };
         }
     }
@@ -431,9 +449,11 @@ public static partial class ExtensionMethods
     /// <param name="reader">The reader.</param>
     /// <param name="keyEntry">The GEO key entry.</param>
     /// <returns>The double-precision values.</returns>
-    public static IEnumerable<double> GetDoubleValues(this ILasReader reader, GeoKeyEntry keyEntry) => reader is not null
-        ? GetDoubleValues(reader.VariableLengthRecords, keyEntry)
-        : throw new ArgumentNullException(nameof(reader));
+    public static IEnumerable<double> GetDoubleValues(this ILasReader reader, GeoKeyEntry keyEntry)
+    {
+        ArgumentNullException.ThrowIfNull(reader);
+        return GetDoubleValues(reader.VariableLengthRecords, keyEntry);
+    }
 
     /// <summary>
     /// Gets the double-precision values associated with the <see cref="GeoKey"/> from the <see cref="VariableLengthRecord"/> instances.
@@ -453,7 +473,7 @@ public static partial class ExtensionMethods
     {
         (null, _) => throw new ArgumentNullException(nameof(doubleParams)),
         (not null, { TiffTagLocation: GeoDoubleParamsTag.TagRecordId }) => doubleParams.GetValues(keyEntry.ValueOffset, keyEntry.Count),
-        _ => ThrowIsNotAValue<IEnumerable<double>>(nameof(IEnumerable<double>), nameof(keyEntry)),
+        _ => ThrowIsNotAValue<IEnumerable<double>>(nameof(IEnumerable<>), nameof(keyEntry)),
     };
 
     /// <summary>
@@ -463,9 +483,11 @@ public static partial class ExtensionMethods
     /// <param name="key">The GEO key.</param>
     /// <param name="values">When this method returns and if the conversion succeeded, contains the double-precision floating-point numbers from the <paramref name="key"/>.</param>
     /// <returns><see langword="true"/> if <paramref name="key"/> was successfully extracted; otherwise <see langword="false"/>.</returns>
-    public static bool TryGetDoubleValues(this ILasReader reader, GeoKey key, [System.Diagnostics.CodeAnalysis.NotNullWhen(true)] out IEnumerable<double>? values) => reader is not null
-        ? TryGetDoubleValues(reader.VariableLengthRecords, key, out values)
-        : throw new ArgumentNullException(nameof(reader));
+    public static bool TryGetDoubleValues(this ILasReader reader, GeoKey key, [System.Diagnostics.CodeAnalysis.NotNullWhen(true)] out IEnumerable<double>? values)
+    {
+        ArgumentNullException.ThrowIfNull(reader);
+        return TryGetDoubleValues(reader.VariableLengthRecords, key, out values);
+    }
 
     /// <summary>
     /// Tries to get the double-precision values associated with the <see cref="GeoKey"/> from the <see cref="VariableLengthRecord"/> instances.
@@ -506,9 +528,11 @@ public static partial class ExtensionMethods
     /// <param name="keyEntry">The GEO key entry.</param>
     /// <param name="values">When this method returns and if the conversion succeeded, contains the double-precision floating-point numbers from the <paramref name="keyEntry"/>.</param>
     /// <returns><see langword="true"/> if <paramref name="keyEntry"/> was successfully extracted; otherwise <see langword="false"/>.</returns>
-    public static bool TryGetDoubleValues(this ILasReader reader, GeoKeyEntry keyEntry, [System.Diagnostics.CodeAnalysis.NotNullWhen(true)] out IEnumerable<double>? values) => reader is not null
-        ? TryGetDoubleValues(reader.VariableLengthRecords, keyEntry, out values)
-        : throw new ArgumentNullException(nameof(reader));
+    public static bool TryGetDoubleValues(this ILasReader reader, GeoKeyEntry keyEntry, [System.Diagnostics.CodeAnalysis.NotNullWhen(true)] out IEnumerable<double>? values)
+    {
+        ArgumentNullException.ThrowIfNull(reader);
+        return TryGetDoubleValues(reader.VariableLengthRecords, keyEntry, out values);
+    }
 
     /// <summary>
     /// Tries to get the double-precision values associated with the <see cref="GeoKey"/> from the <see cref="VariableLengthRecord"/> instances.

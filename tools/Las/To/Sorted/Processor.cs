@@ -191,7 +191,7 @@ internal static class Processor
                 ExtendedGpsColorNearInfraredPointDataRecord.Id => ExtendedGpsColorNearInfraredPointDataRecord.Id,
                 ExtendedGpsWaveformPointDataRecord.Id => ExtendedGpsWaveformPointDataRecord.Id,
                 ExtendedGpsColorNearInfraredWaveformPointDataRecord.Id => ExtendedGpsColorNearInfraredWaveformPointDataRecord.Id,
-                _ => throw new ArgumentOutOfRangeException(nameof(pointDataFormatId)),
+                _ => throw new ArgumentOutOfRangeException(nameof(pointDataFormatId), pointDataFormatId, default),
             };
         }
 
