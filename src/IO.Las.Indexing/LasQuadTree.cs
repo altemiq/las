@@ -146,13 +146,8 @@ public sealed class LasQuadTree : IEquatable<LasQuadTree>
     /// <returns>The LAS quad-tree.</returns>
     public static LasQuadTree ReadFrom(Stream stream)
     {
-#if NETSTANDARD2_1 || NETCOREAPP3_1 || NET5_0_OR_GREATER
         Span<byte> bytes = stackalloc byte[44];
         _ = stream.Read(bytes);
-#else
-        var bytes = new byte[44];
-        _ = stream.Read(bytes, 0, bytes.Length);
-#endif
         return ReadFrom(bytes);
     }
 

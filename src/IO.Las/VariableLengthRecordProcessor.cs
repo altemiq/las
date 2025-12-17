@@ -109,7 +109,7 @@ public sealed class VariableLengthRecordProcessor
     /// <param name="recordId">The record ID.</param>
     /// <param name="processor">The processor.</param>
     /// <returns><see langword="true" /> when the processor is successfully added to the dictionary; <see langword="false" /> when the dictionary already contains the processor, in which case nothing gets added.</returns>
-    public bool TryRegister(ushort recordId, CreateVariableLengthRecord processor) => TryAdd(this.processors, (default, recordId), processor);
+    public bool TryRegister(ushort recordId, CreateVariableLengthRecord processor) => this.processors.TryAdd((default, recordId), processor);
 
     /// <summary>
     /// Tries to register the processor.
@@ -118,7 +118,7 @@ public sealed class VariableLengthRecordProcessor
     /// <param name="recordId">The record ID.</param>
     /// <param name="processor">The processor.</param>
     /// <returns><see langword="true" /> when the processor is successfully added to the dictionary; <see langword="false" /> when the dictionary already contains the processor, in which case nothing gets added.</returns>
-    public bool TryRegister(string userId, ushort recordId, CreateVariableLengthRecord processor) => TryAdd(this.processors, (userId, recordId), processor);
+    public bool TryRegister(string userId, ushort recordId, CreateVariableLengthRecord processor) => this.processors.TryAdd((userId, recordId), processor);
 
 #if LAS1_3_OR_GREATER
     /// <summary>
@@ -127,7 +127,7 @@ public sealed class VariableLengthRecordProcessor
     /// <param name="recordId">The record ID.</param>
     /// <param name="processor">The processor.</param>
     /// <returns><see langword="true" /> when the processor is successfully added to the dictionary; <see langword="false" /> when the dictionary already contains the processor, in which case nothing gets added.</returns>
-    public bool TryRegister(ushort recordId, CreateExtendedVariableLengthRecord processor) => TryAdd(this.extendedProcessors, (default, recordId), processor);
+    public bool TryRegister(ushort recordId, CreateExtendedVariableLengthRecord processor) => this.extendedProcessors.TryAdd((default, recordId), processor);
 
     /// <summary>
     /// Tries to register the processor.
@@ -136,7 +136,7 @@ public sealed class VariableLengthRecordProcessor
     /// <param name="recordId">The record ID.</param>
     /// <param name="processor">The processor.</param>
     /// <returns><see langword="true" /> when the processor is successfully added to the dictionary; <see langword="false" /> when the dictionary already contains the processor, in which case nothing gets added.</returns>
-    public bool TryRegister(string userId, ushort recordId, CreateExtendedVariableLengthRecord processor) => TryAdd(this.extendedProcessors, (userId, recordId), processor);
+    public bool TryRegister(string userId, ushort recordId, CreateExtendedVariableLengthRecord processor) => this.extendedProcessors.TryAdd((userId, recordId), processor);
 #endif
 
     /// <summary>
@@ -178,20 +178,4 @@ public sealed class VariableLengthRecordProcessor
             }
         }
     }
-
-#if NETSTANDARD2_1_OR_GREATER || NETCOREAPP2_0_OR_GREATER
-    private static bool TryAdd<TKey, TValue>(Dictionary<TKey, TValue> dictionary, TKey key, TValue value)
-        where TKey : notnull => dictionary.TryAdd(key, value);
-#else
-    private static bool TryAdd<TKey, TValue>(Dictionary<TKey, TValue> dictionary, TKey key, TValue value)
-    {
-        if (dictionary.ContainsKey(key))
-        {
-            return false;
-        }
-
-        dictionary.Add(key, value);
-        return true;
-    }
-#endif
 }

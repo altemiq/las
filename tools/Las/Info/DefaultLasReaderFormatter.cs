@@ -425,11 +425,7 @@ internal class DefaultLasReaderFormatter(IFormatBuilder builder) : ILasReaderFor
 
             if (scaleFactor is not { } vector)
             {
-#if NET46_OR_GREATER || NETCOREAPP
                 return LazyFormattable.Create((FormattableString)$"{x} {y} {z}");
-#else
-                return LazyFormattable.Create("{0} {1} {2}", x, y, z);
-#endif
             }
 
             var format = string.Concat("{0", Format(vector.X), "} {1", Format(vector.Y), "} {2", Format(vector.Z), "}");

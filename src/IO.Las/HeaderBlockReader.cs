@@ -83,16 +83,9 @@ public class HeaderBlockReader(Stream stream)
         }
 
         // read this
-#if NETSTANDARD2_1_OR_GREATER || NETCOREAPP2_1_OR_GREATER
         Span<byte> buffer = stackalloc byte[4];
         _ = stream.Read(buffer);
         var stringValue = System.Text.Encoding.ASCII.GetString(buffer);
-#else
-        var byteArray = System.Buffers.ArrayPool<byte>.Shared.Rent(4);
-        _ = stream.Read(byteArray, 0, 4);
-        var stringValue = System.Text.Encoding.ASCII.GetString(byteArray, 0, 4);
-        System.Buffers.ArrayPool<byte>.Shared.Return(byteArray);
-#endif
         return stringValue;
     }
 
@@ -202,25 +195,15 @@ public class HeaderBlockReader(Stream stream)
     /// <returns>The next <see cref="VariableLengthRecord"/>.</returns>
     internal static VariableLengthRecord GetVariableLengthRecord(Stream stream)
     {
-#if NETSTANDARD2_1_OR_GREATER || NETCOREAPP2_1_OR_GREATER
         Span<byte> byteArray = stackalloc byte[54];
         _ = stream.Read(byteArray);
+
         var header = VariableLengthRecordHeader.Read(byteArray);
 
         byteArray = stackalloc byte[header.RecordLengthAfterHeader];
         _ = stream.Read(byteArray);
 
         return VariableLengthRecordProcessor.Instance.Process(header, byteArray);
-#else
-        var byteArray = new byte[54];
-        _ = stream.Read(byteArray, 0, byteArray.Length);
-        var header = VariableLengthRecordHeader.Read(byteArray);
-
-        byteArray = new byte[header.RecordLengthAfterHeader];
-        _ = stream.Read(byteArray, 0, header.RecordLengthAfterHeader);
-
-        return VariableLengthRecordProcessor.Instance.Process(header, byteArray);
-#endif
     }
 
 #if LAS1_3_OR_GREATER

@@ -25,30 +25,22 @@ internal static class StreamExtensions
         /// </summary>
         /// <returns>The little endian value.</returns>
         public byte ReadByteLittleEndian()
-#if NETSTANDARD2_1_OR_GREATER || NETCOREAPP2_1_OR_GREATER
         {
             Span<byte> buffer = stackalloc byte[sizeof(byte)];
             stream.ReadExactly(buffer);
             return buffer[0];
         }
-#else
-            => (byte)stream.ReadByte();
-#endif
 
         /// <summary>
         /// Reads an <see cref="sbyte"/> from the stream, as little endian.
         /// </summary>
         /// <returns>The little endian value.</returns>
         public sbyte ReadSByteLittleEndian()
-#if NETSTANDARD2_1_OR_GREATER || NETCOREAPP2_1_OR_GREATER
         {
             Span<byte> buffer = stackalloc byte[sizeof(sbyte)];
             stream.ReadExactly(buffer);
             return (sbyte)buffer[0];
         }
-#else
-            => (sbyte)stream.ReadByte();
-#endif
 
         /// <summary>
         /// Reads an <see cref="short"/> from the stream, as little endian.
@@ -56,11 +48,7 @@ internal static class StreamExtensions
         /// <returns>The little endian value.</returns>
         public short ReadInt16LittleEndian()
         {
-#if NETSTANDARD2_1_OR_GREATER || NETCOREAPP2_1_OR_GREATER
             Span<byte> buffer = stackalloc byte[sizeof(short)];
-#else
-            var buffer = new byte[sizeof(short)];
-#endif
             stream.ReadExactly(buffer);
             return System.Buffers.Binary.BinaryPrimitives.ReadInt16LittleEndian(buffer);
         }
@@ -71,11 +59,7 @@ internal static class StreamExtensions
         /// <returns>The little endian value.</returns>
         public ushort ReadUInt16LittleEndian()
         {
-#if NETSTANDARD2_1_OR_GREATER || NETCOREAPP2_1_OR_GREATER
             Span<byte> buffer = stackalloc byte[sizeof(ushort)];
-#else
-            var buffer = new byte[sizeof(ushort)];
-#endif
             stream.ReadExactly(buffer);
             return System.Buffers.Binary.BinaryPrimitives.ReadUInt16LittleEndian(buffer);
         }
@@ -86,11 +70,7 @@ internal static class StreamExtensions
         /// <returns>The little endian value.</returns>
         public int ReadInt32LittleEndian()
         {
-#if NETSTANDARD2_1_OR_GREATER || NETCOREAPP2_1_OR_GREATER
             Span<byte> buffer = stackalloc byte[sizeof(int)];
-#else
-            var buffer = new byte[sizeof(int)];
-#endif
             stream.ReadExactly(buffer);
             return System.Buffers.Binary.BinaryPrimitives.ReadInt32LittleEndian(buffer);
         }
@@ -101,11 +81,7 @@ internal static class StreamExtensions
         /// <returns>The little endian value.</returns>
         public uint ReadUInt32LittleEndian()
         {
-#if NETSTANDARD2_1_OR_GREATER || NETCOREAPP2_1_OR_GREATER
             Span<byte> buffer = stackalloc byte[sizeof(uint)];
-#else
-            var buffer = new byte[sizeof(uint)];
-#endif
             stream.ReadExactly(buffer);
             return System.Buffers.Binary.BinaryPrimitives.ReadUInt32LittleEndian(buffer);
         }
@@ -116,11 +92,7 @@ internal static class StreamExtensions
         /// <returns>The little endian value.</returns>
         public long ReadInt64LittleEndian()
         {
-#if NETSTANDARD2_1_OR_GREATER || NETCOREAPP2_1_OR_GREATER
             Span<byte> buffer = stackalloc byte[sizeof(long)];
-#else
-            var buffer = new byte[sizeof(long)];
-#endif
             stream.ReadExactly(buffer);
             return System.Buffers.Binary.BinaryPrimitives.ReadInt64LittleEndian(buffer);
         }
@@ -131,11 +103,7 @@ internal static class StreamExtensions
         /// <returns>The little endian value.</returns>
         public ulong ReadUInt64LittleEndian()
         {
-#if NETSTANDARD2_1_OR_GREATER || NETCOREAPP2_1_OR_GREATER
             Span<byte> buffer = stackalloc byte[sizeof(ulong)];
-#else
-            var buffer = new byte[sizeof(ulong)];
-#endif
             stream.ReadExactly(buffer);
             return System.Buffers.Binary.BinaryPrimitives.ReadUInt64LittleEndian(buffer);
         }
@@ -146,11 +114,7 @@ internal static class StreamExtensions
         /// <returns>The little endian value.</returns>
         public float ReadSingleLittleEndian()
         {
-#if NETSTANDARD2_1_OR_GREATER || NETCOREAPP2_1_OR_GREATER
             Span<byte> buffer = stackalloc byte[sizeof(float)];
-#else
-            var buffer = new byte[sizeof(float)];
-#endif
             stream.ReadExactly(buffer);
             return System.Buffers.Binary.BinaryPrimitives.ReadSingleLittleEndian(buffer);
         }
@@ -161,11 +125,7 @@ internal static class StreamExtensions
         /// <returns>The little endian value.</returns>
         public double ReadDoubleLittleEndian()
         {
-#if NETSTANDARD2_1_OR_GREATER || NETCOREAPP2_1_OR_GREATER
             Span<byte> buffer = stackalloc byte[sizeof(double)];
-#else
-            var buffer = new byte[sizeof(double)];
-#endif
             stream.ReadExactly(buffer);
             return System.Buffers.Binary.BinaryPrimitives.ReadDoubleLittleEndian(buffer);
         }
@@ -178,11 +138,9 @@ internal static class StreamExtensions
         {
 #if NET7_0_OR_GREATER
             var buffer = new ReadOnlySpan<byte>(value);
-#elif NETSTANDARD2_1_OR_GREATER || NETCOREAPP2_1_OR_GREATER
+#else
             Span<byte> buffer = stackalloc byte[sizeof(byte)];
             buffer[0] = value;
-#else
-            var buffer = new[] { value };
 #endif
             stream.Write(buffer);
         }
@@ -195,11 +153,9 @@ internal static class StreamExtensions
         {
 #if NET7_0_OR_GREATER
             var buffer = new ReadOnlySpan<byte>((byte)value);
-#elif NETSTANDARD2_1_OR_GREATER || NETCOREAPP2_1_OR_GREATER
+#else
             Span<byte> buffer = stackalloc byte[sizeof(sbyte)];
             buffer[0] = (byte)value;
-#else
-            var buffer = new[] { (byte)value };
 #endif
             stream.Write(buffer);
         }
@@ -210,11 +166,7 @@ internal static class StreamExtensions
         /// <param name="value">The value to write.</param>
         public void WriteInt16LittleEndian(short value)
         {
-#if NETSTANDARD2_1_OR_GREATER || NETCOREAPP2_1_OR_GREATER
             Span<byte> buffer = stackalloc byte[sizeof(short)];
-#else
-            var buffer = new byte[sizeof(short)];
-#endif
             System.Buffers.Binary.BinaryPrimitives.WriteInt16LittleEndian(buffer, value);
             stream.Write(buffer);
         }
@@ -225,11 +177,7 @@ internal static class StreamExtensions
         /// <param name="value">The value to write.</param>
         public void WriteUInt16LittleEndian(ushort value)
         {
-#if NETSTANDARD2_1_OR_GREATER || NETCOREAPP2_1_OR_GREATER
             Span<byte> buffer = stackalloc byte[sizeof(ushort)];
-#else
-            var buffer = new byte[sizeof(ushort)];
-#endif
             System.Buffers.Binary.BinaryPrimitives.WriteUInt16LittleEndian(buffer, value);
             stream.Write(buffer);
         }
@@ -240,11 +188,7 @@ internal static class StreamExtensions
         /// <param name="value">The value to write.</param>
         public void WriteInt32LittleEndian(int value)
         {
-#if NETSTANDARD2_1_OR_GREATER || NETCOREAPP2_1_OR_GREATER
             Span<byte> buffer = stackalloc byte[sizeof(int)];
-#else
-            var buffer = new byte[sizeof(int)];
-#endif
             System.Buffers.Binary.BinaryPrimitives.WriteInt32LittleEndian(buffer, value);
             stream.Write(buffer);
         }
@@ -255,11 +199,7 @@ internal static class StreamExtensions
         /// <param name="value">The value to write.</param>
         public void WriteUInt32LittleEndian(uint value)
         {
-#if NETSTANDARD2_1_OR_GREATER || NETCOREAPP2_1_OR_GREATER
             Span<byte> buffer = stackalloc byte[sizeof(uint)];
-#else
-            var buffer = new byte[sizeof(uint)];
-#endif
             System.Buffers.Binary.BinaryPrimitives.WriteUInt32LittleEndian(buffer, value);
             stream.Write(buffer);
         }
@@ -270,11 +210,7 @@ internal static class StreamExtensions
         /// <param name="value">The value to write.</param>
         public void WriteInt64LittleEndian(long value)
         {
-#if NETSTANDARD2_1_OR_GREATER || NETCOREAPP2_1_OR_GREATER
             Span<byte> buffer = stackalloc byte[sizeof(long)];
-#else
-            var buffer = new byte[sizeof(long)];
-#endif
             System.Buffers.Binary.BinaryPrimitives.WriteInt64LittleEndian(buffer, value);
             stream.Write(buffer);
         }
@@ -285,11 +221,7 @@ internal static class StreamExtensions
         /// <param name="value">The value to write.</param>
         public void WriteUInt64LittleEndian(ulong value)
         {
-#if NETSTANDARD2_1_OR_GREATER || NETCOREAPP2_1_OR_GREATER
             Span<byte> buffer = stackalloc byte[sizeof(ulong)];
-#else
-            var buffer = new byte[sizeof(ulong)];
-#endif
             System.Buffers.Binary.BinaryPrimitives.WriteUInt64LittleEndian(buffer, value);
             stream.Write(buffer);
         }
@@ -300,11 +232,7 @@ internal static class StreamExtensions
         /// <param name="value">The value to write.</param>
         public void WriteSingleLittleEndian(float value)
         {
-#if NETSTANDARD2_1_OR_GREATER || NETCOREAPP2_1_OR_GREATER
             Span<byte> buffer = stackalloc byte[sizeof(float)];
-#else
-            var buffer = new byte[sizeof(float)];
-#endif
             System.Buffers.Binary.BinaryPrimitives.WriteSingleLittleEndian(buffer, value);
             stream.Write(buffer);
         }
@@ -315,37 +243,12 @@ internal static class StreamExtensions
         /// <param name="value">The value to write.</param>
         public void WriteDoubleLittleEndian(double value)
         {
-#if NETSTANDARD2_1_OR_GREATER || NETCOREAPP2_1_OR_GREATER
             Span<byte> buffer = stackalloc byte[sizeof(double)];
-#else
-            var buffer = new byte[sizeof(double)];
-#endif
             System.Buffers.Binary.BinaryPrimitives.WriteDoubleLittleEndian(buffer, value);
             stream.Write(buffer);
         }
 
-        /// <summary>
-        /// Writes an array of <see cref="byte"/> into the stream.
-        /// </summary>
-        /// <param name="buffer">The buffer to write.</param>
-        public void Write(byte[] buffer) => stream.Write(buffer, 0, buffer.Length);
-
 #if !NET7_0_OR_GREATER
-        /// <summary>
-        /// Reads bytes from the current stream and advances the position within the stream until the <paramref name="buffer"/> is filled.
-        /// </summary>
-        /// <param name="buffer">An array of bytes. When this method returns, the buffer contains the specified byte array with the values between <paramref name="offset"/> and (<paramref name="offset"/> + <paramref name="count"/> - 1) replaced by the bytes read from the current stream.</param>
-        /// <param name="offset">The byte offset in buffer at which to begin storing the data read from the current stream.</param>
-        /// <param name="count">The number of bytes to be read from the current stream.</param>
-        /// <exception cref="EndOfStreamException">The end of the stream is reached before reading <paramref name="count"/> number of bytes.</exception>
-        public void ReadExactly(byte[] buffer, int offset, int count)
-        {
-            if (stream.Read(buffer, offset, count) < count)
-            {
-                throw new EndOfStreamException();
-            }
-        }
-#if NETSTANDARD2_1_OR_GREATER || NETCOREAPP2_1_OR_GREATER
         /// <summary>
         /// Reads bytes from the current stream and advances the position within the stream until the <paramref name="buffer"/> is filled.
         /// </summary>
@@ -353,14 +256,21 @@ internal static class StreamExtensions
         /// <exception cref="EndOfStreamException">The end of the stream is reached before filling the <paramref name="buffer"/>.</exception>
         public void ReadExactly(Span<byte> buffer)
         {
+#if NETSTANDARD2_1_OR_GREATER || NETCOREAPP2_1_OR_GREATER
             if (stream.Read(buffer) < buffer.Length)
             {
                 throw new EndOfStreamException();
             }
-        }
 #else
-        private void ReadExactly(byte[] buffer) => stream.ReadExactly(buffer, 0, buffer.Length);
+            var bufferTemp = new byte[buffer.Length];
+            if (stream.Read(bufferTemp, 0, bufferTemp.Length) < bufferTemp.Length)
+            {
+                throw new EndOfStreamException();
+            }
+
+            bufferTemp.AsSpan().CopyTo(buffer);
 #endif
+        }
 #endif
     }
 }

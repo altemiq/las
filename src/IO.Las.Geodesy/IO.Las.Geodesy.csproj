@@ -5,6 +5,7 @@
     <MeziantouPolyfill_IncludedPolyfills>
       $(MeziantouPolyfill_IncludedPolyfills)|
       M:System.ArgumentNullException.ThrowIfNull(System.Object,System.String)|
+      M:System.Collections.Concurrent.ConcurrentDictionary`2.GetOrAdd``1(`0,System.Func{`0,``0,`1},``0)|
       M:System.String.Contains(System.Char,System.StringComparison)|
       M:System.String.CopyTo(System.Span{System.Char})|
       M:System.String.Create(System.IFormatProvider,System.Runtime.CompilerServices.DefaultInterpolatedStringHandler@)|

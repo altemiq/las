@@ -158,23 +158,7 @@ internal sealed class LasInterval : IEnumerable<KeyValuePair<int, LasIntervalSta
     /// <param name="cellIndex">The cell index.</param>
     /// <param name="cell">The cell to add.</param>
     /// <returns><see langword="true"/> if successful; otherwise <see langword="false" />.</returns>
-    public bool Add(int cellIndex, LasIntervalStartCell cell)
-#if NETSTANDARD2_1_OR_GREATER || NETCOREAPP2_0_OR_GREATER
-        => this.cellsDictionary.TryAdd(cellIndex, cell);
-#else
-    {
-        try
-        {
-            this.cellsDictionary.Add(cellIndex, cell);
-        }
-        catch
-        {
-            return false;
-        }
-
-        return true;
-    }
-#endif
+    public bool Add(int cellIndex, LasIntervalStartCell cell) => this.cellsDictionary.TryAdd(cellIndex, cell);
 
     /// <inheritdoc/>
     public IEnumerator<KeyValuePair<int, LasIntervalStartCell>> GetEnumerator() => this.cellsDictionary.GetEnumerator();

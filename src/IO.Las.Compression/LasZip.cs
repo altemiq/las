@@ -168,27 +168,17 @@ internal sealed class LasZip
     /// <exception cref="InvalidOperationException">The point size is invalid.</exception>
     public void Validate(ushort pointSize)
     {
-        if (!IsDefined(this.Compressor))
+        if (!Enum.IsDefined(this.Compressor))
         {
             throw new InvalidOperationException($"Invalid {nameof(Las.Compressor)} value: {this.Compressor}");
         }
 
-        if (!IsDefined(this.Coder))
+        if (!Enum.IsDefined(this.Coder))
         {
             throw new InvalidOperationException($"Invalid {nameof(Las.Coder)} value: {this.Coder}");
         }
 
         ValidateItems(this.Items, pointSize);
-
-        static bool IsDefined<TEnum>(TEnum value)
-            where TEnum : struct, Enum
-        {
-#if NET5_0_OR_GREATER
-            return Enum.IsDefined<TEnum>(value);
-#else
-            return Enum.IsDefined(typeof(TEnum), value);
-#endif
-        }
 
         static void ValidateItems(IEnumerable<LasItem> items, ushort pointSize)
         {

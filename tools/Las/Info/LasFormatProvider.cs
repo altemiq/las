@@ -24,9 +24,7 @@ internal sealed class LasFormatProvider(IFormatProvider? baseFormatProvider, ILa
         GeoKeyEntry { TiffTagLocation: GeoDoubleParamsTag.TagRecordId } keyEntry => reader.GetDoubleValue(keyEntry).ToString(format, formatProvider),
         GeoKeyEntry { TiffTagLocation: GeoAsciiParamsTag.TagRecordId } keyEntry => reader.GetAsciiValue(keyEntry),
         IFormattable formattable => formattable.ToString(format, formatProvider),
-#if NETFRAMEWORK || NETCOREAPP || NETSTANDARD1_3_OR_GREATER
         IConvertible convertible => convertible.ToString(formatProvider),
-#endif
         not null when arg.ToString() is { } argString => argString,
         _ => throw new ArgumentException(Tool.Properties.Resources.Exception_FailedToFormatString, nameof(arg)),
     };

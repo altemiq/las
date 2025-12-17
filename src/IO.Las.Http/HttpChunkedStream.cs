@@ -54,11 +54,7 @@ public sealed class HttpChunkedStream : ChunkedStream
         };
 
         return await this.httpClient.SendAsync(request, cancellationToken).ConfigureAwait(false) is { IsSuccessStatusCode: true } response
-#if NET5_0_OR_GREATER
             ? await response.Content.ReadAsStreamAsync(cancellationToken).ConfigureAwait(false)
-#else
-            ? await response.Content.ReadAsStreamAsync().ConfigureAwait(false)
-#endif
             : default;
     }
 }

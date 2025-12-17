@@ -216,32 +216,22 @@ public sealed partial class ProjContext :
     }
 
     private static WellKnownTextNode GetUnitNode(Microsoft.Data.Sqlite.SqliteCommand command, string auth, int uom, WellKnownTextVersion version) =>
-#if NETSTANDARD2_1_OR_GREATER || NETCOREAPP2_0_OR_GREATER || NET472_OR_GREATER
         UnitNodes.GetOrAdd(
             (uom, version),
             static (key, a) =>
             {
+#pragma warning disable SA1142, PreferExplicitlyProvidedTupleComponentName
+                var code = key.Item1;
+                var version = key.Item2;
+#pragma warning restore SA1142, PreferExplicitlyProvidedTupleComponentName
                 a.Command.CommandText = "SELECT type, name, conv_factor, auth_name, code FROM unit_of_measure WHERE deprecated = 0";
-                AddAuthClause(a.Command, a.Auth, key.Code, limit: 1);
+                AddAuthClause(a.Command, a.Auth, code, limit: 1);
                 using var reader = a.Command.ExecuteReader();
                 return reader.Read()
-                    ? GetUnitNode(reader.GetString(0), reader.GetString(1), reader.GetDouble(2), reader.GetString(3), reader.GetInt32(4), key.Version)
+                    ? GetUnitNode(reader.GetString(0), reader.GetString(1), reader.GetDouble(2), reader.GetString(3), reader.GetInt32(4), version)
                     : default;
             },
             (Command: command, Auth: auth));
-#else
-        UnitNodes.GetOrAdd(
-            (uom, version),
-            key =>
-            {
-                command.CommandText = "SELECT type, name, conv_factor, auth_name, code FROM unit_of_measure WHERE deprecated = 0";
-                AddAuthClause(command, auth, key.Code, limit: 1);
-                using var reader = command.ExecuteReader();
-                return reader.Read()
-                    ? GetUnitNode(reader.GetString(0), reader.GetString(1), reader.GetDouble(2), reader.GetString(3), reader.GetInt32(4), key.Version)
-                    : default;
-            });
-#endif
 
     private static string GetUnitName(string name)
     {

@@ -337,11 +337,7 @@ public class LasWriter(Stream stream, bool leaveOpen = false) : ILasWriter, IDis
 #if LAS1_2_OR_GREATER
             System.Buffers.Binary.BinaryPrimitives.WriteUInt16LittleEndian(destination[6..8], (ushort)header.GlobalEncoding);
 #endif
-#if NETSTANDARD2_1_OR_GREATER || NETCOREAPP2_1_OR_GREATER
             _ = header.ProjectId.TryWriteBytes(destination[8..24]);
-#else
-            header.ProjectId.ToByteArray().CopyTo(destination[8..24]);
-#endif
 
             // version
             destination[24] = (byte)header.Version.Major;

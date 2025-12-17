@@ -47,7 +47,6 @@ public readonly partial struct Color : IEquatable<Color>
     [field: System.Runtime.InteropServices.FieldOffset(4)]
     public ushort B { get; init; }
 
-#if NETSTANDARD2_0_OR_GREATER || NETFRAMEWORK || NETCOREAPP
     /// <summary>
     /// Converts a <see cref="Color" /> to a <see cref="System.Drawing.Color" />.
     /// </summary>
@@ -59,7 +58,6 @@ public readonly partial struct Color : IEquatable<Color>
     /// </summary>
     /// <param name="color">The color.</param>
     public static explicit operator Color(System.Drawing.Color color) => FromColor(color);
-#endif
 
     /// <summary>Tests whether two specified <see cref="Color" /> structures are equivalent.</summary>
     /// <param name="left">The <see cref="Color" /> that is to the left of the equality operator. </param>
@@ -96,7 +94,6 @@ public readonly partial struct Color : IEquatable<Color>
     /// <returns>The color.</returns>
     public static Color FromIntensity(int intensity) => FromRgb(intensity, intensity, intensity);
 
-#if NETSTANDARD2_0_OR_GREATER || NETFRAMEWORK || NETCOREAPP
     /// <summary>
     /// Converts a <see cref="System.Drawing.Color" /> to a <see cref="Color" />.
     /// </summary>
@@ -107,7 +104,6 @@ public readonly partial struct Color : IEquatable<Color>
             (color.R << 8) | color.R,
             (color.G << 8) | color.G,
             (color.B << 8) | color.B);
-#endif
 
     /// <summary>
     /// Converts this instance to an RGB value.
@@ -115,14 +111,12 @@ public readonly partial struct Color : IEquatable<Color>
     /// <returns>The RGB value.</returns>
     public long ToRgb() => GetValue(this.R, this.G, this.B);
 
-#if NETSTANDARD2_0_OR_GREATER || NETFRAMEWORK || NETCOREAPP
     /// <summary>
     /// Converts this instance into a <see cref="System.Drawing.Color"/>.
     /// </summary>
     /// <param name="alpha">The alpha to apply to the output.</param>
     /// <returns>An instance of <see cref="System.Drawing.Color"/>.</returns>
     public System.Drawing.Color ToColor(int alpha = byte.MaxValue) => System.Drawing.Color.FromArgb(alpha, this.R >> 8, this.G >> 8, this.B >> 8);
-#endif
 
     /// <inheritdoc/>
     public bool Equals(Color other) => this.R == other.R && this.G == other.G && this.B == other.B;

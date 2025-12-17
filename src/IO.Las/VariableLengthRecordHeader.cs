@@ -57,32 +57,9 @@ public readonly record struct VariableLengthRecordHeader
     /// <param name="data">The input data.</param>
     [System.Diagnostics.CodeAnalysis.SetsRequiredMembers]
     public VariableLengthRecordHeader(byte[] data)
-#if NETSTANDARD2_1_OR_GREATER || NETCOREAPP2_1_OR_GREATER
         : this(new ReadOnlySpan<byte>(data))
     {
     }
-#else
-    {
-        this.reserved = System.Buffers.Binary.BinaryPrimitives.ReadUInt16LittleEndian(data.AsSpan(Constants.VariableLengthRecord.ReservedFieldOffset, sizeof(ushort)));
-        this.userId = System.Text.Encoding.UTF8.GetString(data, Constants.VariableLengthRecord.UserIdFieldOffset, GetNullChar(data, Constants.VariableLengthRecord.UserIdFieldOffset) - Constants.VariableLengthRecord.UserIdFieldOffset);
-        this.recordId = System.Buffers.Binary.BinaryPrimitives.ReadUInt16LittleEndian(data.AsSpan(Constants.VariableLengthRecord.RecordIdFieldOffset, sizeof(ushort)));
-        this.recordLengthAfterHeader = System.Buffers.Binary.BinaryPrimitives.ReadUInt16LittleEndian(data.AsSpan(Constants.VariableLengthRecord.RecordLengthAfterHeaderFieldOffset, sizeof(ushort)));
-        this.description = System.Text.Encoding.UTF8.GetString(data, Constants.VariableLengthRecord.DescriptionFieldOffset, GetNullChar(data, Constants.VariableLengthRecord.DescriptionFieldOffset) - Constants.VariableLengthRecord.DescriptionFieldOffset);
-
-        static int GetNullChar(byte[] source, int startIndex = 0)
-        {
-            for (var i = startIndex; i < source.Length; i++)
-            {
-                if (source[i] is 0)
-                {
-                    return i;
-                }
-            }
-
-            return source.Length;
-        }
-    }
-#endif
 
     /// <summary>
     /// Initializes a new instance of the <see cref="VariableLengthRecordHeader"/> struct.

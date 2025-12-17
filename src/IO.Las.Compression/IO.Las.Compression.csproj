@@ -6,7 +6,10 @@
     <MeziantouPolyfill_IncludedPolyfills>
       $(MeziantouPolyfill_IncludedPolyfills)|
       M:System.ArgumentNullException.ThrowIfNull(System.Object,System.String)|
+      M:System.Enum.IsDefined``1(``0)|
+      M:System.IO.Stream.Read(System.Span{System.Byte})|
       M:System.IO.Stream.ReadAsync(System.Memory{System.Byte},System.Threading.CancellationToken)|
+      M:System.IO.Stream.Write(System.ReadOnlySpan{System.Byte})|
       M:System.IO.Stream.WriteAsync(System.ReadOnlyMemory{System.Byte},System.Threading.CancellationToken)|
       M:System.Math.Clamp(System.Int32,System.Int32,System.Int32)|
       M:System.String.CopyTo(System.Span{System.Char})|

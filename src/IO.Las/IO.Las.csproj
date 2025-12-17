@@ -5,8 +5,11 @@
     <MeziantouPolyfill_IncludedPolyfills>
       $(MeziantouPolyfill_IncludedPolyfills)|
       M:System.ArgumentNullException.ThrowIfNull(System.Object,System.String)|
+      M:System.IO.Stream.Read(System.Span{System.Byte})|
       M:System.IO.Stream.ReadAsync(System.Memory{System.Byte},System.Threading.CancellationToken)|
+      M:System.IO.Stream.Write(System.ReadOnlySpan{System.Byte})|
       M:System.IO.Stream.WriteAsync(System.ReadOnlyMemory{System.Byte},System.Threading.CancellationToken)|
+      M:System.Text.Encoding.GetString(System.ReadOnlySpan{System.Byte})|
       T:System.Diagnostics.CodeAnalysis.DoesNotReturnAttribute|
       T:System.Diagnostics.CodeAnalysis.DynamicallyAccessedMembersAttribute|
       T:System.Diagnostics.CodeAnalysis.DynamicallyAccessedMemberTypes|

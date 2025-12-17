@@ -31,13 +31,8 @@ internal sealed class LayeredChunkReader : ChunkReader
         _ = this.Decoder.Initialize(stream, reallyInit: false);
 
         // read how many points are in the chunk
-#if NETSTANDARD2_1_OR_GREATER || NETCOREAPP2_1_OR_GREATER
         Span<byte> buffer = stackalloc byte[4];
         _ = stream.Read(buffer);
-#else
-        var buffer = new byte[4];
-        _ = stream.Read(buffer, 0, 4);
-#endif
 
         InitializeCompression(point, extraBytes, recordReader);
     }
