@@ -1,5 +1,5 @@
 ﻿// -----------------------------------------------------------------------
-// <copyright file="ByteReader3.cs" company="Altemiq">
+// <copyright file="ByteReader4.cs" company="Altemiq">
 // Copyright (c) Altemiq. All rights reserved.
 // </copyright>
 // -----------------------------------------------------------------------
@@ -7,9 +7,9 @@
 namespace Altemiq.IO.Las.Readers.Compressed;
 
 /// <summary>
-/// The compressed byte reader, version 3.
+/// The compressed byte reader, version 4.
 /// </summary>
-internal sealed class ByteReader3 : IContextReader
+internal sealed class ByteReader4 : IContextReader
 {
     private readonly IEntropyDecoder decoder;
 
@@ -22,12 +22,12 @@ internal sealed class ByteReader3 : IContextReader
     private uint currentContext;
 
     /// <summary>
-    /// Initializes a new instance of the <see cref="ByteReader3"/> class.
+    /// Initializes a new instance of the <see cref="ByteReader4"/> class.
     /// </summary>
     /// <param name="decoder">The decoder.</param>
     /// <param name="number">The number.</param>
     /// <param name="decompressSelective">The selective decompress value.</param>
-    public ByteReader3(IEntropyDecoder decoder, uint number, DecompressSelections decompressSelective = DecompressSelections.All)
+    public ByteReader4(IEntropyDecoder decoder, uint number, DecompressSelections decompressSelective = DecompressSelections.All)
     {
         const int Byte0 = (int)DecompressSelections.Byte0;
         this.decoder = decoder;
@@ -115,9 +115,10 @@ internal sealed class ByteReader3 : IContextReader
             if (this.contexts[this.currentContext].Unused)
             {
                 this.CreateAndInitModelsAndDecompressors(this.currentContext, lastItem);
-                processingContext = this.contexts[this.currentContext];
-                lastItem = processingContext.LastItem;
             }
+
+            processingContext = this.contexts[this.currentContext];
+            lastItem = processingContext.LastItem;
         }
 
         // decompress

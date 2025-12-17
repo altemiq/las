@@ -79,7 +79,7 @@ internal sealed class ColorWriter3 : IContextWriter
         if (this.currentContext != context)
         {
             this.currentContext = context; // all other items use context set by POINT14 writer
-            if (processingContext.Unused)
+            if (this.contexts[this.currentContext].Unused)
             {
                 Span<byte> bytes = stackalloc byte[sizeof(ushort) * 3];
                 System.Buffers.Binary.BinaryPrimitives.WriteUInt16LittleEndian(bytes, lastItem[0]);

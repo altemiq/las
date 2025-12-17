@@ -19,7 +19,7 @@ internal sealed class LasZip
     /// <summary>
     /// Get the current version.
     /// </summary>
-    public static readonly Version Version = new(3, 4, 0, 3);
+    public static readonly Version Version = new(3, 5, 0, 0);
 
     private const int GpsItemSize = sizeof(double);
 
@@ -48,23 +48,23 @@ internal sealed class LasZip
     public LasZip(byte pointDataFormatId, ushort extraByteCount, Compressor compressor, ushort requestedVersion = 2)
     {
         var items = GetItems(pointDataFormatId, requestedVersion).ToList();
-        var point14 = items[0].IsType(LasItemType.Point14);
+        requestedVersion = items.GetPointVersion(requestedVersion);
 
         // add the extra bytes
         if (extraByteCount is not 0)
         {
             items.Add(new()
             {
-                Type = point14 ? LasItemType.Byte14 : LasItemType.Byte,
+                Type = requestedVersion > 3 ? LasItemType.Byte14 : LasItemType.Byte,
                 Size = extraByteCount,
-                Version = point14 ? (ushort)3 : requestedVersion,
+                Version = requestedVersion,
             });
         }
 
-        this.Compressor = (compressor, point14) switch
+        this.Compressor = (compressor, requestedVersion) switch
         {
-            (not Compressor.None and not Compressor.LayeredChunked, true) => throw new ArgumentException(Compression.Properties.v1_4.Resources.MustUseLayeredChunkedCompression, nameof(compressor)),
-            (Compressor.LayeredChunked, false) => Compressor.PointWiseChunked,
+            (not Compressor.None and not Compressor.LayeredChunked, >= 3) => throw new ArgumentException(Compression.Properties.v1_4.Resources.MustUseLayeredChunkedCompression, nameof(compressor)),
+            (Compressor.LayeredChunked, < 3) => Compressor.PointWiseChunked,
             var (c, _) => c,
         };
 
@@ -151,13 +151,23 @@ internal sealed class LasZip
     /// <summary>
     /// Get valid version for the specified point data format ID.
     /// </summary>
-    /// <param name="pointDataFormatId">The point data format ID.</param>
+    /// <param name="headerBlock">The header block.</param>
     /// <returns>The valid version.</returns>
-    public static ushort GetValidVersion(byte pointDataFormatId) => pointDataFormatId switch
-    {
-        >= 6 => 3,
-        _ => 2,
-    };
+    public static ushort GetValidVersion(in HeaderBlock headerBlock) => GetValidVersion(headerBlock.PointDataFormatId, headerBlock.Version);
+
+    /// <summary>
+    /// Get valid version for the specified point data format ID.
+    /// </summary>
+    /// <param name="pointDataFormatId">The point data format ID.</param>
+    /// <param name="version">The LAS version.</param>
+    /// <returns>The valid version.</returns>
+    public static ushort GetValidVersion(byte pointDataFormatId, Version version) =>
+        (pointDataFormatId, version) switch
+        {
+            (>= 6, { Major: 1, Minor: >= 5 }) => 4,
+            (>= 6, _) => 3,
+            _ => 2,
+        };
 
     /// <summary>
     /// Checks this instance.
@@ -250,8 +260,16 @@ internal sealed class LasZip
         }
     }
 
+    [System.Diagnostics.CodeAnalysis.SuppressMessage("StyleCop.CSharp.SpacingRules", "SA1008:Opening parenthesis should be spaced correctly", Justification = "Checked")]
     private static IEnumerable<LasItem> GetItems(byte pointType, ushort requestedVersion) => (pointType, requestedVersion) switch
     {
+#if LAS1_5_OR_GREATER
+        (_, not 2 and not 3 and not 4) => throw new ArgumentOutOfRangeException(nameof(requestedVersion), requestedVersion, default),
+#elif LAS1_4_OR_GREATER
+        (_, not 2 and not 3) => throw new ArgumentOutOfRangeException(nameof(requestedVersion), requestedVersion, default),
+#else
+        (_, not 2) => throw new ArgumentOutOfRangeException(nameof(requestedVersion), requestedVersion, default),
+#endif
         (PointDataRecord.Id, 2) =>
         [
             new() { Type = LasItemType.Point10, Size = PointDataRecord.Size, Version = requestedVersion },
@@ -290,33 +308,62 @@ internal sealed class LasZip
         ],
 #endif
 #if LAS1_4_OR_GREATER
-        (ExtendedGpsPointDataRecord.Id, 0 or 3 or 4) =>
+        (ExtendedGpsPointDataRecord.Id, 3) =>
         [
             new() { Type = LasItemType.Point14, Size = ExtendedGpsPointDataRecord.Size, Version = 3 },
         ],
-        (ExtendedGpsColorPointDataRecord.Id, 0 or 3 or 4) =>
+        (ExtendedGpsColorPointDataRecord.Id, 3) =>
         [
             new() { Type = LasItemType.Point14, Size = ExtendedGpsPointDataRecord.Size, Version = 3 },
             new() { Type = LasItemType.Rgb14, Size = ColorItemSize, Version = 3 },
         ],
-        (ExtendedGpsColorNearInfraredPointDataRecord.Id, 0 or 3 or 4) =>
+        (ExtendedGpsColorNearInfraredPointDataRecord.Id, 3) =>
         [
             new() { Type = LasItemType.Point14, Size = ExtendedGpsPointDataRecord.Size, Version = 3 },
             new() { Type = LasItemType.RgbNir14, Size = ColorNearInfraredItemSize, Version = 3 },
         ],
-        (ExtendedGpsWaveformPointDataRecord.Id, 0 or 3 or 4) =>
+        (ExtendedGpsWaveformPointDataRecord.Id, 3) =>
         [
             new() { Type = LasItemType.Point14, Size = ExtendedGpsPointDataRecord.Size, Version = 3 },
             new() { Type = LasItemType.WavePacket14, Size = WavePacketItemSize, Version = 3 },
         ],
-        (ExtendedGpsColorNearInfraredWaveformPointDataRecord.Id, 0 or 3 or 4) =>
+        (ExtendedGpsColorNearInfraredWaveformPointDataRecord.Id, 3) =>
         [
             new() { Type = LasItemType.Point14, Size = ExtendedGpsPointDataRecord.Size, Version = 3 },
             new() { Type = LasItemType.RgbNir14, Size = ColorNearInfraredItemSize, Version = 3 },
             new() { Type = LasItemType.WavePacket14, Size = WavePacketItemSize, Version = 3 },
         ],
 #endif
-#if LAS1_4_OR_GREATER
+#if LAS1_5_OR_GREATER
+        (ExtendedGpsPointDataRecord.Id, 4) =>
+        [
+            new() { Type = LasItemType.Point14, Size = ExtendedGpsPointDataRecord.Size, Version = 4 },
+        ],
+        (ExtendedGpsColorPointDataRecord.Id, 4) =>
+        [
+            new() { Type = LasItemType.Point14, Size = ExtendedGpsPointDataRecord.Size, Version = 4 },
+            new() { Type = LasItemType.Rgb14, Size = ColorItemSize, Version = 4 },
+        ],
+        (ExtendedGpsColorNearInfraredPointDataRecord.Id, 4) =>
+        [
+            new() { Type = LasItemType.Point14, Size = ExtendedGpsPointDataRecord.Size, Version = 4 },
+            new() { Type = LasItemType.RgbNir14, Size = ColorNearInfraredItemSize, Version = 4 },
+        ],
+        (ExtendedGpsWaveformPointDataRecord.Id, 4) =>
+        [
+            new() { Type = LasItemType.Point14, Size = ExtendedGpsPointDataRecord.Size, Version = 4 },
+            new() { Type = LasItemType.WavePacket14, Size = WavePacketItemSize, Version = 4 },
+        ],
+        (ExtendedGpsColorNearInfraredWaveformPointDataRecord.Id, 4) =>
+        [
+            new() { Type = LasItemType.Point14, Size = ExtendedGpsPointDataRecord.Size, Version = 4 },
+            new() { Type = LasItemType.RgbNir14, Size = ColorNearInfraredItemSize, Version = 4 },
+            new() { Type = LasItemType.WavePacket14, Size = WavePacketItemSize, Version = 4 },
+        ],
+#endif
+#if LAS1_5_OR_GREATER
+        _ => throw new NotSupportedException(Properties.v1_5.Resources.OnlyDataPointsAreAllowed),
+#elif LAS1_4_OR_GREATER
         _ => throw new NotSupportedException(Properties.v1_4.Resources.OnlyDataPointsAreAllowed),
 #elif LAS1_3_OR_GREATER
         _ => throw new NotSupportedException(Properties.v1_3.Resources.OnlyDataPointsAreAllowed),

@@ -1,5 +1,5 @@
 ﻿// -----------------------------------------------------------------------
-// <copyright file="ExtendedGpsPointDataRecordWriter.cs" company="Altemiq">
+// <copyright file="ExtendedGpsPointDataRecordWriter4.cs" company="Altemiq">
 // Copyright (c) Altemiq. All rights reserved.
 // </copyright>
 // -----------------------------------------------------------------------
@@ -11,12 +11,12 @@ namespace Altemiq.IO.Las.Writers.Compressed;
 /// </summary>
 /// <param name="encoder">The encoder.</param>
 /// <param name="extraBytes">The number of extra bytes.</param>
-internal sealed class ExtendedGpsPointDataRecordWriter(IEntropyEncoder encoder, int extraBytes) : ExtendedGpsPointDataRecordWriter<ExtendedGpsPointDataRecord>(encoder)
+internal sealed class ExtendedGpsPointDataRecordWriter4(IEntropyEncoder encoder, int extraBytes) : ExtendedGpsPointDataRecordWriter4<ExtendedGpsPointDataRecord>(encoder)
 {
     private readonly IContextWriter byteWriter = extraBytes switch
     {
         0 => NullContextWriter.Instance,
-        _ => new ByteWriter3(encoder, (uint)extraBytes),
+        _ => new ByteWriter4(encoder, (uint)extraBytes),
     };
 
     /// <inheritdoc/>

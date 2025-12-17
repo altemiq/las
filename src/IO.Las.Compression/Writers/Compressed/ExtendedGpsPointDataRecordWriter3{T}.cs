@@ -1,5 +1,5 @@
 ﻿// -----------------------------------------------------------------------
-// <copyright file="ExtendedGpsPointDataRecordWriter{T}.cs" company="Altemiq">
+// <copyright file="ExtendedGpsPointDataRecordWriter3{T}.cs" company="Altemiq">
 // Copyright (c) Altemiq. All rights reserved.
 // </copyright>
 // -----------------------------------------------------------------------
@@ -10,7 +10,7 @@ namespace Altemiq.IO.Las.Writers.Compressed;
 /// The compressed <see cref="Writers.IPointDataRecordWriter"/> for <see cref="IExtendedPointDataRecord"/> instances.
 /// </summary>
 /// <typeparam name="T">The type of extended point data record.</typeparam>
-internal abstract class ExtendedGpsPointDataRecordWriter<T> : Writers.PointDataRecordWriter<T>, IContextWriter
+internal abstract class ExtendedGpsPointDataRecordWriter3<T> : Writers.PointDataRecordWriter<T>, IContextWriter
     where T : IExtendedPointDataRecord
 {
     private const int Multiple = 500;
@@ -32,13 +32,14 @@ internal abstract class ExtendedGpsPointDataRecordWriter<T> : Writers.PointDataR
     private readonly LayeredValue valueUserData = new();
     private readonly LayeredValue valuePointSource = new();
     private readonly LayeredValue valueGpsTime = new();
+
     private uint currentContext;
 
     /// <summary>
-    /// Initializes a new instance of the <see cref="ExtendedGpsPointDataRecordWriter{T}"/> class.
+    /// Initializes a new instance of the <see cref="ExtendedGpsPointDataRecordWriter3"/> class.
     /// </summary>
     /// <param name="encoder">The Encoder.</param>
-    protected ExtendedGpsPointDataRecordWriter(IEntropyEncoder encoder)
+    protected ExtendedGpsPointDataRecordWriter3(IEntropyEncoder encoder)
     {
         this.encoder = encoder;
         this.contexts[0] = new(this.valueChannelReturnsXY, this.valueZ, this.valueIntensity, this.valueScanAngle, this.valuePointSource, this.valueGpsTime);

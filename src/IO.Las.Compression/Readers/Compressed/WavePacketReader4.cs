@@ -1,5 +1,5 @@
 ﻿// -----------------------------------------------------------------------
-// <copyright file="WavePacketReader3.cs" company="Altemiq">
+// <copyright file="WavePacketReader4.cs" company="Altemiq">
 // Copyright (c) Altemiq. All rights reserved.
 // </copyright>
 // -----------------------------------------------------------------------
@@ -7,9 +7,9 @@
 namespace Altemiq.IO.Las.Readers.Compressed;
 
 /// <summary>
-/// The compressed wave-packet reader, version 3.
+/// The compressed wave-packet reader, version 4.
 /// </summary>
-internal sealed class WavePacketReader3 : IContextReader
+internal sealed class WavePacketReader4 : IContextReader
 {
     private readonly IEntropyDecoder decoder;
 
@@ -22,11 +22,11 @@ internal sealed class WavePacketReader3 : IContextReader
     private uint currentContext;
 
     /// <summary>
-    /// Initializes a new instance of the <see cref="WavePacketReader3"/> class.
+    /// Initializes a new instance of the <see cref="WavePacketReader4"/> class.
     /// </summary>
     /// <param name="decoder">The decoder.</param>
     /// <param name="decompressSelective">The selective decompress value.</param>
-    public WavePacketReader3(IEntropyDecoder decoder, DecompressSelections decompressSelective = DecompressSelections.All)
+    public WavePacketReader4(IEntropyDecoder decoder, DecompressSelections decompressSelective = DecompressSelections.All)
     {
         this.decoder = decoder;
         this.valueWavePacket = new(decompressSelective.HasFlag(DecompressSelections.WavePacket));
@@ -88,9 +88,10 @@ internal sealed class WavePacketReader3 : IContextReader
             if (this.contexts[this.currentContext].Unused)
             {
                 this.CreateAndInitModelsAndDecompressors(this.currentContext, lastItem);
-                processingContext = this.contexts[this.currentContext];
-                lastItem = processingContext.LastItem;
             }
+
+            processingContext = this.contexts[this.currentContext];
+            lastItem = processingContext.LastItem;
         }
 
         // decompress

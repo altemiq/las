@@ -95,7 +95,18 @@ public sealed record CompressedTag : VariableLengthRecord, IReadOnlyList<LasItem
     /// <param name="extraBytes">The extra bytes record.</param>
     /// <param name="compressor">The compressor.</param>
     public CompressedTag(in HeaderBlock header, IExtraBytes? extraBytes, Compressor compressor)
-        : this(header.PointDataFormatId, (ushort)(extraBytes?.Sum(ExtraBytes.GetByteCount) ?? 0), compressor)
+        : this(header, (ushort)(extraBytes?.Sum(ExtraBytes.GetByteCount) ?? 0), compressor)
+    {
+    }
+
+    /// <summary>
+    /// Initializes a new instance of the <see cref="CompressedTag"/> class.
+    /// </summary>
+    /// <param name="header">The header block.</param>
+    /// <param name="extraBytesCount">The extra-bytes count.</param>
+    /// <param name="compressor">The compressor.</param>
+    public CompressedTag(in HeaderBlock header, ushort extraBytesCount, Compressor compressor)
+        : this(new LasZip(header.PointDataFormatId, extraBytesCount, compressor, LasZip.GetValidVersion(header)))
     {
     }
 
@@ -105,8 +116,9 @@ public sealed record CompressedTag : VariableLengthRecord, IReadOnlyList<LasItem
     /// <param name="pointDataFormatId">The point data format ID.</param>
     /// <param name="extraBytesCount">The extra-bytes count.</param>
     /// <param name="compressor">The compressor.</param>
-    public CompressedTag(byte pointDataFormatId, ushort extraBytesCount, Compressor compressor)
-        : this(new LasZip(pointDataFormatId, extraBytesCount, compressor, LasZip.GetValidVersion(pointDataFormatId)))
+    /// <param name="version">The LAS version.</param>
+    public CompressedTag(byte pointDataFormatId, ushort extraBytesCount, Compressor compressor, Version version)
+        : this(new LasZip(pointDataFormatId, extraBytesCount, compressor, LasZip.GetValidVersion(pointDataFormatId, version)))
     {
     }
 #else

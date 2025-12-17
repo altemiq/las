@@ -38,6 +38,9 @@ internal class PointWiseReader : RawReader
         };
 
         var extraBytes = zip.Items.GetExtraBytesCount();
+#if LAS1_5_OR_GREATER
+        var requiredVersion = zip.Items.GetPointVersion();
+#endif
 
         this.compressedReader = header.PointDataFormatId switch
         {
@@ -51,14 +54,23 @@ internal class PointWiseReader : RawReader
             GpsWaveformPointDataRecord.Id => new Readers.Compressed.GpsWaveformPointDataRecordReader(this.Decoder, extraBytes),
             GpsColorWaveformPointDataRecord.Id => new Readers.Compressed.GpsColorPointDataRecordReader(this.Decoder, extraBytes),
 #endif
-#if LAS1_4_OR_GREATER
-            ExtendedGpsPointDataRecord.Id => new Readers.Compressed.ExtendedGpsPointDataRecordReader(this.Decoder, extraBytes),
-            ExtendedGpsColorPointDataRecord.Id => new Readers.Compressed.ExtendedGpsColorPointDataRecordReader(this.Decoder, extraBytes),
-            ExtendedGpsColorNearInfraredPointDataRecord.Id => new Readers.Compressed.ExtendedGpsColorNearInfraredPointDataRecordReader(this.Decoder, extraBytes),
-            ExtendedGpsWaveformPointDataRecord.Id => new Readers.Compressed.ExtendedGpsWaveformPointDataRecordReader(this.Decoder, extraBytes),
-            ExtendedGpsColorNearInfraredWaveformPointDataRecord.Id => new Readers.Compressed.ExtendedGpsColorNearInfraredWaveformPointDataRecordReader(this.Decoder, extraBytes),
+#if LAS1_5_OR_GREATER
+            ExtendedGpsPointDataRecord.Id when requiredVersion is 4 => new Readers.Compressed.ExtendedGpsPointDataRecordReader4(this.Decoder, extraBytes),
+            ExtendedGpsColorPointDataRecord.Id when requiredVersion is 4 => new Readers.Compressed.ExtendedGpsColorPointDataRecordReader4(this.Decoder, extraBytes),
+            ExtendedGpsColorNearInfraredPointDataRecord.Id when requiredVersion is 4 => new Readers.Compressed.ExtendedGpsColorNearInfraredPointDataRecordReader4(this.Decoder, extraBytes),
+            ExtendedGpsWaveformPointDataRecord.Id when requiredVersion is 4 => new Readers.Compressed.ExtendedGpsWaveformPointDataRecordReader4(this.Decoder, extraBytes),
+            ExtendedGpsColorNearInfraredWaveformPointDataRecord.Id when requiredVersion is 4 => new Readers.Compressed.ExtendedGpsColorNearInfraredWaveformPointDataRecordReader4(this.Decoder, extraBytes),
 #endif
 #if LAS1_4_OR_GREATER
+            ExtendedGpsPointDataRecord.Id => new Readers.Compressed.ExtendedGpsPointDataRecordReader3(this.Decoder, extraBytes),
+            ExtendedGpsColorPointDataRecord.Id => new Readers.Compressed.ExtendedGpsColorPointDataRecordReader3(this.Decoder, extraBytes),
+            ExtendedGpsColorNearInfraredPointDataRecord.Id => new Readers.Compressed.ExtendedGpsColorNearInfraredPointDataRecordReader3(this.Decoder, extraBytes),
+            ExtendedGpsWaveformPointDataRecord.Id => new Readers.Compressed.ExtendedGpsWaveformPointDataRecordReader3(this.Decoder, extraBytes),
+            ExtendedGpsColorNearInfraredWaveformPointDataRecord.Id => new Readers.Compressed.ExtendedGpsColorNearInfraredWaveformPointDataRecordReader3(this.Decoder, extraBytes),
+#endif
+#if LAS1_5_OR_GREATER
+            _ => throw new InvalidOperationException(Properties.v1_5.Resources.OnlyDataPointsAreAllowed),
+#elif LAS1_4_OR_GREATER
             _ => throw new InvalidOperationException(Properties.v1_4.Resources.OnlyDataPointsAreAllowed),
 #elif LAS1_3_OR_GREATER
             _ => throw new InvalidOperationException(Properties.v1_3.Resources.OnlyDataPointsAreAllowed),

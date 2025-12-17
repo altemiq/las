@@ -1,5 +1,5 @@
 ﻿// -----------------------------------------------------------------------
-// <copyright file="ColorNearInfraredReader3.cs" company="Altemiq">
+// <copyright file="ColorNearInfraredReader4.cs" company="Altemiq">
 // Copyright (c) Altemiq. All rights reserved.
 // </copyright>
 // -----------------------------------------------------------------------
@@ -7,9 +7,9 @@
 namespace Altemiq.IO.Las.Readers.Compressed;
 
 /// <summary>
-/// The compressed reader for <see cref="Color"/> with near-infrared values, version 3.
+/// The compressed reader for <see cref="Color"/> with near-infrared values, version 4.
 /// </summary>
-internal sealed class ColorNearInfraredReader3 : IContextReader
+internal sealed class ColorNearInfraredReader4 : IContextReader
 {
     private readonly Context[] contexts = new Context[4];
 
@@ -24,11 +24,11 @@ internal sealed class ColorNearInfraredReader3 : IContextReader
     private uint currentContext;
 
     /// <summary>
-    /// Initializes a new instance of the <see cref="ColorNearInfraredReader3"/> class.
+    /// Initializes a new instance of the <see cref="ColorNearInfraredReader4"/> class.
     /// </summary>
     /// <param name="decoder">The decoder.</param>
     /// <param name="decompressSelective">The selective decompress value.</param>
-    public ColorNearInfraredReader3(IEntropyDecoder decoder, DecompressSelections decompressSelective = DecompressSelections.All)
+    public ColorNearInfraredReader4(IEntropyDecoder decoder, DecompressSelections decompressSelective = DecompressSelections.All)
     {
         this.decoder = decoder;
         this.valueRgb = new(decompressSelective.HasFlag(DecompressSelections.RGB));
@@ -98,8 +98,9 @@ internal sealed class ColorNearInfraredReader3 : IContextReader
                 System.Buffers.Binary.BinaryPrimitives.WriteUInt16LittleEndian(byteArray[sizeof(ushort)..], processingContext.LastGreen);
                 System.Buffers.Binary.BinaryPrimitives.WriteUInt16LittleEndian(byteArray[(2 * sizeof(ushort))..], processingContext.LastBlue);
                 this.CreateAndInitModelsAndDecompressors(this.currentContext, byteArray);
-                processingContext = this.contexts[this.currentContext];
             }
+
+            processingContext = this.contexts[this.currentContext];
         }
 
         // decompress

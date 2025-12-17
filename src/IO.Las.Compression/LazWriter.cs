@@ -476,7 +476,7 @@ public sealed class LazWriter : LasWriter
         }
         else
         {
-            zip = new(header.PointDataFormatId, extraByteCount, Compressor.LayeredChunked, LasZip.GetValidVersion(header.PointDataFormatId));
+            zip = new(header.PointDataFormatId, extraByteCount, Compressor.LayeredChunked, LasZip.GetValidVersion(header));
             records.Add(new CompressedTag(zip));
         }
 

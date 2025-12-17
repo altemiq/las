@@ -1,5 +1,5 @@
 ﻿// -----------------------------------------------------------------------
-// <copyright file="ByteWriter3.cs" company="Altemiq">
+// <copyright file="ByteWriter4.cs" company="Altemiq">
 // Copyright (c) Altemiq. All rights reserved.
 // </copyright>
 // -----------------------------------------------------------------------
@@ -9,7 +9,7 @@ namespace Altemiq.IO.Las.Writers.Compressed;
 /// <summary>
 /// The compressed writer for <see cref="byte"/> values, version 3.
 /// </summary>
-internal sealed class ByteWriter3 : IContextWriter
+internal sealed class ByteWriter4 : IContextWriter
 {
     private readonly IEntropyEncoder encoder;
 
@@ -20,11 +20,11 @@ internal sealed class ByteWriter3 : IContextWriter
     private uint currentContext;
 
     /// <summary>
-    /// Initializes a new instance of the <see cref="ByteWriter3"/> class.
+    /// Initializes a new instance of the <see cref="ByteWriter4"/> class.
     /// </summary>
     /// <param name="encoder">The encoder.</param>
     /// <param name="number">The number of values.</param>
-    public ByteWriter3(IEntropyEncoder encoder, uint number)
+    public ByteWriter4(IEntropyEncoder encoder, uint number)
     {
         this.encoder = encoder;
 
@@ -109,9 +109,10 @@ internal sealed class ByteWriter3 : IContextWriter
             if (this.contexts[this.currentContext].Unused)
             {
                 this.CreateAndInitModelsAndCompressors(this.currentContext, lastItem);
-                processingContext = this.contexts[this.currentContext];
-                lastItem = processingContext.LastItem;
             }
+
+            processingContext = this.contexts[this.currentContext];
+            lastItem = processingContext.LastItem;
         }
 
         if (processingContext.BytesModels is not { } bytesModels)

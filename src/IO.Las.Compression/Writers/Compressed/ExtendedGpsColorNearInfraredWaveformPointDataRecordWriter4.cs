@@ -1,5 +1,5 @@
 ﻿// -----------------------------------------------------------------------
-// <copyright file="ExtendedGpsColorNearInfraredPointDataRecordWriter.cs" company="Altemiq">
+// <copyright file="ExtendedGpsColorNearInfraredWaveformPointDataRecordWriter4.cs" company="Altemiq">
 // Copyright (c) Altemiq. All rights reserved.
 // </copyright>
 // -----------------------------------------------------------------------
@@ -11,29 +11,34 @@ namespace Altemiq.IO.Las.Writers.Compressed;
 /// </summary>
 /// <param name="encoder">The encoder.</param>
 /// <param name="extraBytes">The number of extra bytes.</param>
-internal sealed class ExtendedGpsColorNearInfraredPointDataRecordWriter(IEntropyEncoder encoder, int extraBytes) : ExtendedGpsPointDataRecordWriter<ExtendedGpsColorNearInfraredPointDataRecord>(encoder)
+internal sealed class ExtendedGpsColorNearInfraredWaveformPointDataRecordWriter4(IEntropyEncoder encoder, int extraBytes) : ExtendedGpsPointDataRecordWriter4<ExtendedGpsColorNearInfraredWaveformPointDataRecord>(encoder)
 {
-    private readonly ColorNearInfraredWriter3 colorNearInfraredWriter = new(encoder);
+    private readonly ColorNearInfraredWriter4 colorNearInfraredWriter = new(encoder);
+
+    private readonly WavePacketWriter4 wavePacketWriter = new(encoder);
 
     private readonly IContextWriter byteWriter = extraBytes switch
     {
         0 => NullContextWriter.Instance,
-        _ => new ByteWriter3(encoder, (uint)extraBytes),
+        _ => new ByteWriter4(encoder, (uint)extraBytes),
     };
 
     /// <inheritdoc/>
     public override bool Initialize(ReadOnlySpan<byte> item, ref uint context) => base.Initialize(item, ref context)
         && this.colorNearInfraredWriter.Initialize(item[ExtendedGpsPointDataRecord.Size..], ref context)
-        && this.byteWriter.Initialize(item[ExtendedGpsColorNearInfraredPointDataRecord.Size..], ref context);
+        && this.wavePacketWriter.Initialize(item[ExtendedGpsColorNearInfraredPointDataRecord.Size..], ref context)
+        && this.byteWriter.Initialize(item[ExtendedGpsColorNearInfraredWaveformPointDataRecord.Size..], ref context);
 
     /// <inheritdoc/>
     public override bool ChunkSizes() => base.ChunkSizes()
         && this.colorNearInfraredWriter.ChunkSizes()
+        && this.wavePacketWriter.ChunkSizes()
         && this.byteWriter.ChunkSizes();
 
     /// <inheritdoc/>
     public override bool ChunkBytes() => base.ChunkBytes()
         && this.colorNearInfraredWriter.ChunkBytes()
+        && this.wavePacketWriter.ChunkBytes()
         && this.byteWriter.ChunkBytes();
 
     /// <inheritdoc/>
@@ -41,7 +46,8 @@ internal sealed class ExtendedGpsColorNearInfraredPointDataRecordWriter(IEntropy
     {
         base.Write(item, ref context);
         this.colorNearInfraredWriter.Write(item[ExtendedGpsPointDataRecord.Size..], ref context);
-        this.byteWriter.Write(item[ExtendedGpsColorNearInfraredPointDataRecord.Size..], ref context);
+        this.wavePacketWriter.Write(item[ExtendedGpsColorNearInfraredPointDataRecord.Size..], ref context);
+        this.byteWriter.Write(item[ExtendedGpsColorNearInfraredWaveformPointDataRecord.Size..], ref context);
     }
 
     /// <inheritdoc/>
@@ -49,6 +55,7 @@ internal sealed class ExtendedGpsColorNearInfraredPointDataRecordWriter(IEntropy
     {
         context = await base.WriteAsync(item, context, cancellationToken).ConfigureAwait(false);
         context = await this.colorNearInfraredWriter.WriteAsync(item[ExtendedGpsPointDataRecord.Size..], context, cancellationToken).ConfigureAwait(false);
-        return await this.byteWriter.WriteAsync(item[ExtendedGpsColorNearInfraredPointDataRecord.Size..], context, cancellationToken).ConfigureAwait(false);
+        context = await this.wavePacketWriter.WriteAsync(item[ExtendedGpsColorNearInfraredPointDataRecord.Size..], context, cancellationToken).ConfigureAwait(false);
+        return await this.byteWriter.WriteAsync(item[ExtendedGpsColorNearInfraredWaveformPointDataRecord.Size..], context, cancellationToken).ConfigureAwait(false);
     }
 }

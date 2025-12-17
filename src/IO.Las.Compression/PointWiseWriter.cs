@@ -35,6 +35,9 @@ internal class PointWiseWriter : RawWriter
         };
 
         var extraBytes = zip.Items.GetExtraBytesCount();
+#if LAS1_5_OR_GREATER
+        var requiredVersion = zip.Items.GetPointVersion();
+#endif
 
         this.compressedWriter = pointDataFormatId switch
         {
@@ -48,14 +51,23 @@ internal class PointWiseWriter : RawWriter
             GpsWaveformPointDataRecord.Id => new Writers.Compressed.GpsWaveformPointDataRecordWriter(this.Encoder, extraBytes),
             GpsColorWaveformPointDataRecord.Id => new Writers.Compressed.GpsColorWaveformPointDataRecordWriter(this.Encoder, extraBytes),
 #endif
-#if LAS1_4_OR_GREATER
-            ExtendedGpsPointDataRecord.Id => new Writers.Compressed.ExtendedGpsPointDataRecordWriter(this.Encoder, extraBytes),
-            ExtendedGpsColorPointDataRecord.Id => new Writers.Compressed.ExtendedGpsColorPointDataRecordWriter(this.Encoder, extraBytes),
-            ExtendedGpsColorNearInfraredPointDataRecord.Id => new Writers.Compressed.ExtendedGpsColorNearInfraredPointDataRecordWriter(this.Encoder, extraBytes),
-            ExtendedGpsWaveformPointDataRecord.Id => new Writers.Compressed.ExtendedGpsWaveformPointDataRecordWriter(this.Encoder, extraBytes),
-            ExtendedGpsColorNearInfraredWaveformPointDataRecord.Id => new Writers.Compressed.ExtendedGpsColorNearInfraredWaveformPointDataRecordWriter(this.Encoder, extraBytes),
+#if LAS1_5_OR_GREATER
+            ExtendedGpsPointDataRecord.Id when requiredVersion is 4 => new Writers.Compressed.ExtendedGpsPointDataRecordWriter4(this.Encoder, extraBytes),
+            ExtendedGpsColorPointDataRecord.Id when requiredVersion is 4 => new Writers.Compressed.ExtendedGpsColorPointDataRecordWriter4(this.Encoder, extraBytes),
+            ExtendedGpsColorNearInfraredPointDataRecord.Id when requiredVersion is 4 => new Writers.Compressed.ExtendedGpsColorNearInfraredPointDataRecordWriter4(this.Encoder, extraBytes),
+            ExtendedGpsWaveformPointDataRecord.Id when requiredVersion is 4 => new Writers.Compressed.ExtendedGpsWaveformPointDataRecordWriter4(this.Encoder, extraBytes),
+            ExtendedGpsColorNearInfraredWaveformPointDataRecord.Id when requiredVersion is 4 => new Writers.Compressed.ExtendedGpsColorNearInfraredWaveformPointDataRecordWriter4(this.Encoder, extraBytes),
 #endif
 #if LAS1_4_OR_GREATER
+            ExtendedGpsPointDataRecord.Id => new Writers.Compressed.ExtendedGpsPointDataRecordWriter3(this.Encoder, extraBytes),
+            ExtendedGpsColorPointDataRecord.Id => new Writers.Compressed.ExtendedGpsColorPointDataRecordWriter3(this.Encoder, extraBytes),
+            ExtendedGpsColorNearInfraredPointDataRecord.Id => new Writers.Compressed.ExtendedGpsColorNearInfraredPointDataRecordWriter3(this.Encoder, extraBytes),
+            ExtendedGpsWaveformPointDataRecord.Id => new Writers.Compressed.ExtendedGpsWaveformPointDataRecordWriter3(this.Encoder, extraBytes),
+            ExtendedGpsColorNearInfraredWaveformPointDataRecord.Id => new Writers.Compressed.ExtendedGpsColorNearInfraredWaveformPointDataRecordWriter3(this.Encoder, extraBytes),
+#endif
+#if LAS1_5_OR_GREATER
+            _ => throw new InvalidOperationException(Properties.v1_5.Resources.OnlyDataPointsAreAllowed),
+#elif LAS1_4_OR_GREATER
             _ => throw new InvalidOperationException(Properties.v1_4.Resources.OnlyDataPointsAreAllowed),
 #elif LAS1_3_OR_GREATER
             _ => throw new InvalidOperationException(Properties.v1_3.Resources.OnlyDataPointsAreAllowed),

@@ -71,6 +71,15 @@
     <!-- Remove v1.4 specific resources -->
     <EmbeddedResource Remove="Properties\v1.4\*.resx" />
   </ItemGroup>
+
+  <ItemGroup Condition=" '$(SupportLas15)' != 'true' ">
+    <!-- Remove version 4 below 1.5 -->
+    <Compile Remove="**\*Reader4.cs" />
+    <Compile Remove="**\*Writer4.cs" />
+
+    <!-- Remove v1.5 specific resources -->
+    <EmbeddedResource Remove="Properties\v1.5\*.resx" />
+  </ItemGroup>
   
   <ItemGroup>
     <InternalsVisibleTo Include="$(AssemblyName.Replace('.Compression', '')).Cloud" />

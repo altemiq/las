@@ -1,5 +1,5 @@
 ﻿// -----------------------------------------------------------------------
-// <copyright file="ColorReader3.cs" company="Altemiq">
+// <copyright file="ColorReader4.cs" company="Altemiq">
 // Copyright (c) Altemiq. All rights reserved.
 // </copyright>
 // -----------------------------------------------------------------------
@@ -7,11 +7,11 @@
 namespace Altemiq.IO.Las.Readers.Compressed;
 
 /// <summary>
-/// The compressed reader for <see cref="Color"/> values, version 3.
+/// The compressed reader for <see cref="Color"/> values, version 4.
 /// </summary>
 /// <param name="decoder">The decoder.</param>
 /// <param name="decompressSelective">The selective decompress value.</param>
-internal sealed class ColorReader3(IEntropyDecoder decoder, DecompressSelections decompressSelective = DecompressSelections.All) : IContextReader
+internal sealed class ColorReader4(IEntropyDecoder decoder, DecompressSelections decompressSelective = DecompressSelections.All) : IContextReader
 {
     private readonly Context[] contexts = [new(decoder), new(decoder), new(decoder), new(decoder)];
 
@@ -75,8 +75,9 @@ internal sealed class ColorReader3(IEntropyDecoder decoder, DecompressSelections
                 System.Buffers.Binary.BinaryPrimitives.WriteUInt16LittleEndian(byteArray[sizeof(ushort)..], processingContext.LastItem1);
                 System.Buffers.Binary.BinaryPrimitives.WriteUInt16LittleEndian(byteArray[(2 * sizeof(ushort))..], processingContext.LastItem2);
                 this.CreateAndInitModelsAndDecompressors(this.currentContext, byteArray);
-                processingContext = this.contexts[this.currentContext];
             }
+
+            processingContext = this.contexts[this.currentContext];
         }
 
         // decompress

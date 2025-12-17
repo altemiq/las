@@ -7,7 +7,7 @@ public class LasZipTests
     [MatrixDataSource]
     public async Task InvalidCompressor([Matrix(Compressor.PointWise, Compressor.PointWiseChunked)] Compressor compressor)
     {
-        _ = await Assert.That(() => _ = new LasZip(ExtendedGpsPointDataRecord.Id, 0, compressor, LasZip.GetValidVersion(ExtendedGpsPointDataRecord.Id))).Throws<ArgumentException>();
+        _ = await Assert.That(() => _ = new LasZip(ExtendedGpsPointDataRecord.Id, 0, compressor, LasZip.GetValidVersion(ExtendedGpsPointDataRecord.Id, HeaderBlock.DefaultVersion))).Throws<ArgumentException>();
     }
 
     [Test]
@@ -24,7 +24,7 @@ public class LasZipTests
     [Arguments(ExtendedGpsPointDataRecord.Id, LasItemType.Byte14)]
     public async Task AddExtraBytes(byte pointDataFormatId, LasItemType lasItemType)
     {
-        var version = LasZip.GetValidVersion(pointDataFormatId);
+        var version = LasZip.GetValidVersion(pointDataFormatId, HeaderBlock.DefaultVersion);
         LasZip lasZip = new(pointDataFormatId, 2, Compressor.None, version);
         _ = await Assert.That(lasZip.Items).Contains(new LasItem { Type = lasItemType, Version = version, Size = 2 });
     }

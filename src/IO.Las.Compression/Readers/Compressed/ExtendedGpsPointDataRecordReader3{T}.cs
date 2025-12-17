@@ -1,5 +1,5 @@
 ﻿// -----------------------------------------------------------------------
-// <copyright file="ExtendedGpsPointDataRecordReader{T}.cs" company="Altemiq">
+// <copyright file="ExtendedGpsPointDataRecordReader3{T}.cs" company="Altemiq">
 // Copyright (c) Altemiq. All rights reserved.
 // </copyright>
 // -----------------------------------------------------------------------
@@ -10,7 +10,7 @@ namespace Altemiq.IO.Las.Readers.Compressed;
 /// The compressed <see cref="Readers.IPointDataRecordReader"/> for <see cref="IExtendedPointDataRecord"/> instances.
 /// </summary>
 /// <typeparam name="T">The type of extended point data record.</typeparam>
-internal abstract class ExtendedGpsPointDataRecordReader<T> : IPointDataRecordReader, IContext
+internal abstract class ExtendedGpsPointDataRecordReader3<T> : IPointDataRecordReader, IContext
     where T : IExtendedPointDataRecord
 {
     private const int Multiple = 500;
@@ -41,13 +41,13 @@ internal abstract class ExtendedGpsPointDataRecordReader<T> : IPointDataRecordRe
     private uint currentContext;
 
     /// <summary>
-    /// Initializes a new instance of the <see cref="ExtendedGpsPointDataRecordReader{T}"/> class.
+    /// Initializes a new instance of the <see cref="ExtendedGpsPointDataRecordReader3{T}"/> class.
     /// </summary>
     /// <param name="decoder">The decoder.</param>
     /// <param name="pointDataLength">The point data length.</param>
     /// <param name="basePointDataLength">The base point data length.</param>
     /// <param name="decompressSelective">The selective compress value.</param>
-    protected ExtendedGpsPointDataRecordReader(IEntropyDecoder decoder, int pointDataLength, int basePointDataLength, DecompressSelections decompressSelective = DecompressSelections.All)
+    protected ExtendedGpsPointDataRecordReader3(IEntropyDecoder decoder, int pointDataLength, int basePointDataLength, DecompressSelections decompressSelective = DecompressSelections.All)
     {
         this.decoder = decoder;
 
@@ -123,14 +123,14 @@ internal abstract class ExtendedGpsPointDataRecordReader<T> : IPointDataRecordRe
 
         // how many bytes do we need to read
         var byteCount = this.valueChannelReturnsXY.ByteCount
-            + this.valueZ.GetByteCountIfRequested()
-            + this.valueClassification.GetByteCountIfRequested()
-            + this.valueFlags.GetByteCountIfRequested()
-            + this.valueIntensity.GetByteCountIfRequested()
-            + this.valueScanAngle.GetByteCountIfRequested()
-            + this.valueUserData.GetByteCountIfRequested()
-            + this.valuePointSource.GetByteCountIfRequested()
-            + this.valueGpsTime.GetByteCountIfRequested();
+                        + this.valueZ.GetByteCountIfRequested()
+                        + this.valueClassification.GetByteCountIfRequested()
+                        + this.valueFlags.GetByteCountIfRequested()
+                        + this.valueIntensity.GetByteCountIfRequested()
+                        + this.valueScanAngle.GetByteCountIfRequested()
+                        + this.valueUserData.GetByteCountIfRequested()
+                        + this.valuePointSource.GetByteCountIfRequested()
+                        + this.valueGpsTime.GetByteCountIfRequested();
 
         // make sure the buffer is sufficiently large
         if (byteCount > this.bytes.Length)
@@ -384,11 +384,11 @@ internal abstract class ExtendedGpsPointDataRecordReader<T> : IPointDataRecordRe
         {
             var flagValue = lastPoint[Constants.ExtendedPointDataRecord.ClassificationFlagsFieldOffset];
             var lastFlags = ((FieldAccessors.ExtendedPointDataRecord.GetSynthetic(flagValue) ? 1 : 0) << 0)
-                | ((FieldAccessors.ExtendedPointDataRecord.GetKeyPoint(flagValue) ? 1 : 0) << 1)
-                | ((FieldAccessors.ExtendedPointDataRecord.GetWithheld(flagValue) ? 1 : 0) << 2)
-                | ((FieldAccessors.ExtendedPointDataRecord.GetOverlap(flagValue) ? 1 : 0) << 3)
-                | ((FieldAccessors.ExtendedPointDataRecord.GetScanDirectionFlag(flagValue) ? 1 : 0) << 4)
-                | ((FieldAccessors.ExtendedPointDataRecord.GetEdgeOfFlightLine(flagValue) ? 1 : 0) << 5);
+                            | ((FieldAccessors.ExtendedPointDataRecord.GetKeyPoint(flagValue) ? 1 : 0) << 1)
+                            | ((FieldAccessors.ExtendedPointDataRecord.GetWithheld(flagValue) ? 1 : 0) << 2)
+                            | ((FieldAccessors.ExtendedPointDataRecord.GetOverlap(flagValue) ? 1 : 0) << 3)
+                            | ((FieldAccessors.ExtendedPointDataRecord.GetScanDirectionFlag(flagValue) ? 1 : 0) << 4)
+                            | ((FieldAccessors.ExtendedPointDataRecord.GetEdgeOfFlightLine(flagValue) ? 1 : 0) << 5);
             var model = processingContext.FlagsModels[lastFlags];
             if (model is null)
             {
@@ -655,59 +655,59 @@ internal abstract class ExtendedGpsPointDataRecordReader<T> : IPointDataRecordRe
                         break;
 
                     case < MultipleCodeFull:
+                    {
+                        int gpsTimeDiff;
+                        switch (multi)
                         {
-                            int gpsTimeDiff;
-                            switch (multi)
-                            {
-                                case 0:
-                                    gpsTimeDiff = processingContext.GpsTimeIntegerDecompressor.Decompress(0, 7);
+                            case 0:
+                                gpsTimeDiff = processingContext.GpsTimeIntegerDecompressor.Decompress(0, 7);
+                                processingContext.MultiExtremeCounter[processingContext.Last]++;
+                                if (processingContext.MultiExtremeCounter[processingContext.Last] > 3)
+                                {
+                                    processingContext.LastGpsTimeDiff[processingContext.Last] = gpsTimeDiff;
+                                    processingContext.MultiExtremeCounter[processingContext.Last] = default;
+                                }
+
+                                break;
+
+                            case < Multiple:
+                                gpsTimeDiff = processingContext.GpsTimeIntegerDecompressor.Decompress(multi * processingContext.LastGpsTimeDiff[processingContext.Last], multi < 10 ? 2U : 3U);
+                                break;
+                            case Multiple:
+                                gpsTimeDiff = processingContext.GpsTimeIntegerDecompressor.Decompress(Multiple * processingContext.LastGpsTimeDiff[processingContext.Last], 4);
+                                processingContext.MultiExtremeCounter[processingContext.Last]++;
+                                if (processingContext.MultiExtremeCounter[processingContext.Last] > 3)
+                                {
+                                    processingContext.LastGpsTimeDiff[processingContext.Last] = gpsTimeDiff;
+                                    processingContext.MultiExtremeCounter[processingContext.Last] = default;
+                                }
+
+                                break;
+
+                            default:
+                                multi = Multiple - multi;
+                                if (multi > MultipleMinus)
+                                {
+                                    gpsTimeDiff = processingContext.GpsTimeIntegerDecompressor.Decompress(multi * processingContext.LastGpsTimeDiff[processingContext.Last], 5);
+                                }
+                                else
+                                {
+                                    gpsTimeDiff = processingContext.GpsTimeIntegerDecompressor.Decompress(MultipleMinus * processingContext.LastGpsTimeDiff[processingContext.Last], 6);
                                     processingContext.MultiExtremeCounter[processingContext.Last]++;
                                     if (processingContext.MultiExtremeCounter[processingContext.Last] > 3)
                                     {
                                         processingContext.LastGpsTimeDiff[processingContext.Last] = gpsTimeDiff;
                                         processingContext.MultiExtremeCounter[processingContext.Last] = default;
                                     }
+                                }
 
-                                    break;
-
-                                case < Multiple:
-                                    gpsTimeDiff = processingContext.GpsTimeIntegerDecompressor.Decompress(multi * processingContext.LastGpsTimeDiff[processingContext.Last], multi < 10 ? 2U : 3U);
-                                    break;
-                                case Multiple:
-                                    gpsTimeDiff = processingContext.GpsTimeIntegerDecompressor.Decompress(Multiple * processingContext.LastGpsTimeDiff[processingContext.Last], 4);
-                                    processingContext.MultiExtremeCounter[processingContext.Last]++;
-                                    if (processingContext.MultiExtremeCounter[processingContext.Last] > 3)
-                                    {
-                                        processingContext.LastGpsTimeDiff[processingContext.Last] = gpsTimeDiff;
-                                        processingContext.MultiExtremeCounter[processingContext.Last] = default;
-                                    }
-
-                                    break;
-
-                                default:
-                                    multi = Multiple - multi;
-                                    if (multi > MultipleMinus)
-                                    {
-                                        gpsTimeDiff = processingContext.GpsTimeIntegerDecompressor.Decompress(multi * processingContext.LastGpsTimeDiff[processingContext.Last], 5);
-                                    }
-                                    else
-                                    {
-                                        gpsTimeDiff = processingContext.GpsTimeIntegerDecompressor.Decompress(MultipleMinus * processingContext.LastGpsTimeDiff[processingContext.Last], 6);
-                                        processingContext.MultiExtremeCounter[processingContext.Last]++;
-                                        if (processingContext.MultiExtremeCounter[processingContext.Last] > 3)
-                                        {
-                                            processingContext.LastGpsTimeDiff[processingContext.Last] = gpsTimeDiff;
-                                            processingContext.MultiExtremeCounter[processingContext.Last] = default;
-                                        }
-                                    }
-
-                                    break;
-                            }
-
-                            var value = BitConverter.UInt64BitsToInt64Bits(processingContext.LastGpsTime[processingContext.Last]) + gpsTimeDiff;
-                            processingContext.LastGpsTime[processingContext.Last] = BitConverter.Int64BitsToUInt64Bits(value);
-                            break;
+                                break;
                         }
+
+                        var value = BitConverter.UInt64BitsToInt64Bits(processingContext.LastGpsTime[processingContext.Last]) + gpsTimeDiff;
+                        processingContext.LastGpsTime[processingContext.Last] = BitConverter.Int64BitsToUInt64Bits(value);
+                        break;
+                    }
 
                     case MultipleCodeFull:
                         processingContext.Next = (processingContext.Next + 1) & 3;

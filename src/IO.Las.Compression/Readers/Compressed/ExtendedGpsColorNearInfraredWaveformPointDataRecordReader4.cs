@@ -1,5 +1,5 @@
 ﻿// -----------------------------------------------------------------------
-// <copyright file="ExtendedGpsColorNearInfraredWaveformPointDataRecordReader.cs" company="Altemiq">
+// <copyright file="ExtendedGpsColorNearInfraredWaveformPointDataRecordReader4.cs" company="Altemiq">
 // Copyright (c) Altemiq. All rights reserved.
 // </copyright>
 // -----------------------------------------------------------------------
@@ -12,16 +12,16 @@ namespace Altemiq.IO.Las.Readers.Compressed;
 /// <param name="decoder">The decoder.</param>
 /// <param name="extraBytes">The extra bytes.</param>
 /// <param name="decompressSelective">The selected items to decompress.</param>
-internal sealed class ExtendedGpsColorNearInfraredWaveformPointDataRecordReader(IEntropyDecoder decoder, int extraBytes, DecompressSelections decompressSelective = DecompressSelections.All) : ExtendedGpsPointDataRecordReader<ExtendedGpsColorNearInfraredWaveformPointDataRecord>(decoder, ExtendedGpsColorNearInfraredWaveformPointDataRecord.Size + extraBytes, ExtendedGpsColorNearInfraredWaveformPointDataRecord.Size, decompressSelective), IDisposable
+internal sealed class ExtendedGpsColorNearInfraredWaveformPointDataRecordReader4(IEntropyDecoder decoder, int extraBytes, DecompressSelections decompressSelective = DecompressSelections.All) : ExtendedGpsPointDataRecordReader4<ExtendedGpsColorNearInfraredWaveformPointDataRecord>(decoder, ExtendedGpsColorNearInfraredWaveformPointDataRecord.Size + extraBytes, ExtendedGpsColorNearInfraredWaveformPointDataRecord.Size, decompressSelective), IDisposable
 {
-    private readonly ColorNearInfraredReader3 colorNearInfraredReader = new(decoder, decompressSelective);
+    private readonly ColorNearInfraredReader4 colorNearInfraredReader = new(decoder, decompressSelective);
 
-    private readonly WavePacketReader3 waveformReader = new(decoder, decompressSelective);
+    private readonly WavePacketReader4 waveformReader = new(decoder, decompressSelective);
 
     private readonly IContextReader byteReader = extraBytes switch
     {
         0 => NullContextReader.Instance,
-        _ => new ByteReader3(decoder, (uint)extraBytes, decompressSelective),
+        _ => new ByteReader4(decoder, (uint)extraBytes, decompressSelective),
     };
 
     private bool disposed;

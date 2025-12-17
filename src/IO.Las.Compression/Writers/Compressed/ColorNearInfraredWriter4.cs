@@ -1,5 +1,5 @@
 ﻿// -----------------------------------------------------------------------
-// <copyright file="ColorNearInfraredWriter3.cs" company="Altemiq">
+// <copyright file="ColorNearInfraredWriter4.cs" company="Altemiq">
 // Copyright (c) Altemiq. All rights reserved.
 // </copyright>
 // -----------------------------------------------------------------------
@@ -7,9 +7,9 @@
 namespace Altemiq.IO.Las.Writers.Compressed;
 
 /// <summary>
-/// The compressed writer for <see cref="Color"/> with near-infrared values, version 3.
+/// The compressed writer for <see cref="Color"/> with near-infrared values, version 4.
 /// </summary>
-internal sealed class ColorNearInfraredWriter3 : IContextWriter
+internal sealed class ColorNearInfraredWriter4 : IContextWriter
 {
     private readonly IEntropyEncoder encoder;
 
@@ -22,10 +22,10 @@ internal sealed class ColorNearInfraredWriter3 : IContextWriter
     private uint currentContext;
 
     /// <summary>
-    /// Initializes a new instance of the <see cref="ColorNearInfraredWriter3"/> class.
+    /// Initializes a new instance of the <see cref="ColorNearInfraredWriter4"/> class.
     /// </summary>
     /// <param name="encoder">The encoder.</param>
-    public ColorNearInfraredWriter3(IEntropyEncoder encoder)
+    public ColorNearInfraredWriter4(IEntropyEncoder encoder)
     {
         this.encoder = encoder;
         this.valueRgb = new();
@@ -99,9 +99,10 @@ internal sealed class ColorNearInfraredWriter3 : IContextWriter
                 System.Buffers.Binary.BinaryPrimitives.WriteUInt32LittleEndian(bytes[(sizeof(ushort) + sizeof(ushort))..], lastItem[2]);
                 System.Buffers.Binary.BinaryPrimitives.WriteUInt32LittleEndian(bytes[(sizeof(ushort) + sizeof(ushort) + sizeof(ushort))..], lastItem[3]);
                 this.CreateAndInitModelsAndCompressors(this.currentContext, bytes);
-                processingContext = this.contexts[this.currentContext];
-                lastItem = processingContext.LastItem;
             }
+
+            processingContext = this.contexts[this.currentContext];
+            lastItem = processingContext.LastItem;
         }
 
         // compress

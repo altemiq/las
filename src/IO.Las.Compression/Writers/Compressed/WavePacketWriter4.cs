@@ -1,5 +1,5 @@
 ﻿// -----------------------------------------------------------------------
-// <copyright file="WavePacketWriter3.cs" company="Altemiq">
+// <copyright file="WavePacketWriter4.cs" company="Altemiq">
 // Copyright (c) Altemiq. All rights reserved.
 // </copyright>
 // -----------------------------------------------------------------------
@@ -7,9 +7,9 @@
 namespace Altemiq.IO.Las.Writers.Compressed;
 
 /// <summary>
-/// The compressed writer for <see cref="Color"/> values, version 3.
+/// The compressed writer for <see cref="Color"/> values, version 4.
 /// </summary>
-internal sealed class WavePacketWriter3 : IContextWriter
+internal sealed class WavePacketWriter4 : IContextWriter
 {
     private readonly IEntropyEncoder encoder;
 
@@ -20,10 +20,10 @@ internal sealed class WavePacketWriter3 : IContextWriter
     private uint currentContext;
 
     /// <summary>
-    /// Initializes a new instance of the <see cref="WavePacketWriter3"/> class.
+    /// Initializes a new instance of the <see cref="WavePacketWriter4"/> class.
     /// </summary>
     /// <param name="encoder">The encoder.</param>
-    public WavePacketWriter3(IEntropyEncoder encoder)
+    public WavePacketWriter4(IEntropyEncoder encoder)
     {
         this.encoder = encoder;
         this.valueWavePacket = new();
@@ -87,9 +87,10 @@ internal sealed class WavePacketWriter3 : IContextWriter
             if (this.contexts[this.currentContext].Unused)
             {
                 this.CreateAndInitModelsAndCompressors(this.currentContext, lastItem);
-                processingContext = this.contexts[this.currentContext];
-                lastItem = processingContext.LastItem;
             }
+
+            processingContext = this.contexts[this.currentContext];
+            lastItem = processingContext.LastItem;
         }
 
         // compare arrays

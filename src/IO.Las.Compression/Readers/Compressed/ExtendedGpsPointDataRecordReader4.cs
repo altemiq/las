@@ -1,5 +1,5 @@
 ﻿// -----------------------------------------------------------------------
-// <copyright file="ExtendedGpsPointDataRecordReader.cs" company="Altemiq">
+// <copyright file="ExtendedGpsPointDataRecordReader4.cs" company="Altemiq">
 // Copyright (c) Altemiq. All rights reserved.
 // </copyright>
 // -----------------------------------------------------------------------
@@ -12,12 +12,12 @@ namespace Altemiq.IO.Las.Readers.Compressed;
 /// <param name="decoder">The decoder.</param>
 /// <param name="extraBytes">The number of extra bytes.</param>
 /// <param name="decompressSelective">The selective decompress value.</param>
-internal sealed class ExtendedGpsPointDataRecordReader(IEntropyDecoder decoder, int extraBytes, DecompressSelections decompressSelective = DecompressSelections.All) : ExtendedGpsPointDataRecordReader<ExtendedGpsPointDataRecord>(decoder, ExtendedGpsPointDataRecord.Size + extraBytes, ExtendedGpsPointDataRecord.Size, decompressSelective), IDisposable
+internal sealed class ExtendedGpsPointDataRecordReader4(IEntropyDecoder decoder, int extraBytes, DecompressSelections decompressSelective = DecompressSelections.All) : ExtendedGpsPointDataRecordReader4<ExtendedGpsPointDataRecord>(decoder, ExtendedGpsPointDataRecord.Size + extraBytes, ExtendedGpsPointDataRecord.Size, decompressSelective), IDisposable
 {
     private readonly IContextReader byteReader = extraBytes switch
     {
         0 => NullContextReader.Instance,
-        _ => new ByteReader3(decoder, (uint)extraBytes, decompressSelective),
+        _ => new ByteReader4(decoder, (uint)extraBytes, decompressSelective),
     };
 
     private bool disposed;

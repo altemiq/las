@@ -1,5 +1,5 @@
 ﻿// -----------------------------------------------------------------------
-// <copyright file="ExtendedGpsWaveformPointDataRecordReader.cs" company="Altemiq">
+// <copyright file="ExtendedGpsColorNearInfraredPointDataRecordReader4.cs" company="Altemiq">
 // Copyright (c) Altemiq. All rights reserved.
 // </copyright>
 // -----------------------------------------------------------------------
@@ -7,31 +7,31 @@
 namespace Altemiq.IO.Las.Readers.Compressed;
 
 /// <summary>
-/// The compressed <see cref="Readers.IPointDataRecordReader"/> for <see cref="ExtendedGpsWaveformPointDataRecord"/> instances.
+/// The compressed <see cref="Readers.IPointDataRecordReader"/> for <see cref="ExtendedGpsColorNearInfraredPointDataRecord"/> instances.
 /// </summary>
 /// <param name="decoder">The decoder.</param>
 /// <param name="extraBytes">The extra bytes.</param>
 /// <param name="decompressSelective">The selected items to decompress.</param>
-internal sealed class ExtendedGpsWaveformPointDataRecordReader(IEntropyDecoder decoder, int extraBytes, DecompressSelections decompressSelective = DecompressSelections.All) : ExtendedGpsPointDataRecordReader<ExtendedGpsWaveformPointDataRecord>(decoder, ExtendedGpsWaveformPointDataRecord.Size + extraBytes, ExtendedGpsWaveformPointDataRecord.Size, decompressSelective), IDisposable
+internal sealed class ExtendedGpsColorNearInfraredPointDataRecordReader4(IEntropyDecoder decoder, int extraBytes, DecompressSelections decompressSelective = DecompressSelections.All) : ExtendedGpsPointDataRecordReader4<ExtendedGpsColorNearInfraredPointDataRecord>(decoder, ExtendedGpsColorNearInfraredPointDataRecord.Size + extraBytes, ExtendedGpsColorNearInfraredPointDataRecord.Size, decompressSelective), IDisposable
 {
-    private readonly WavePacketReader3 waveformReader = new(decoder, decompressSelective);
+    private readonly ColorNearInfraredReader4 colorNearInfraredReader = new(decoder, decompressSelective);
 
     private readonly IContextReader byteReader = extraBytes switch
     {
         0 => NullContextReader.Instance,
-        _ => new ByteReader3(decoder, (uint)extraBytes, decompressSelective),
+        _ => new ByteReader4(decoder, (uint)extraBytes, decompressSelective),
     };
 
     private bool disposed;
 
     /// <inheritdoc/>
     public override bool Initialize(ReadOnlySpan<byte> item, ref uint context) => base.Initialize(item, ref context)
-        && this.waveformReader.Initialize(item[ExtendedGpsPointDataRecord.Size..], ref context)
-        && this.byteReader.Initialize(item[ExtendedGpsWaveformPointDataRecord.Size..], ref context);
+        && this.colorNearInfraredReader.Initialize(item[ExtendedGpsPointDataRecord.Size..], ref context)
+        && this.byteReader.Initialize(item[ExtendedGpsColorNearInfraredPointDataRecord.Size..], ref context);
 
     /// <inheritdoc/>
     public override bool ChunkSizes() => base.ChunkSizes()
-        && this.waveformReader.ChunkSizes()
+        && this.colorNearInfraredReader.ChunkSizes()
         && this.byteReader.ChunkSizes();
 
     /// <inheritdoc/>
@@ -51,7 +51,7 @@ internal sealed class ExtendedGpsWaveformPointDataRecordReader(IEntropyDecoder d
     }
 
     /// <inheritdoc/>
-    protected override ExtendedGpsWaveformPointDataRecord Read(ReadOnlySpan<byte> source) => ExtendedGpsWaveformPointDataRecord.Create(source);
+    protected override ExtendedGpsColorNearInfraredPointDataRecord Read(ReadOnlySpan<byte> source) => ExtendedGpsColorNearInfraredPointDataRecord.Create(source);
 
     /// <inheritdoc/>
     protected override byte[] ProcessData()
@@ -59,8 +59,8 @@ internal sealed class ExtendedGpsWaveformPointDataRecordReader(IEntropyDecoder d
         var context = default(uint);
         var data = this.ProcessData(ref context);
         Span<byte> span = data;
-        this.waveformReader.Read(span[ExtendedGpsPointDataRecord.Size..], context);
-        this.byteReader.Read(span[ExtendedGpsWaveformPointDataRecord.Size..], context);
+        this.colorNearInfraredReader.Read(span[ExtendedGpsPointDataRecord.Size..], context);
+        this.byteReader.Read(span[ExtendedGpsColorNearInfraredPointDataRecord.Size..], context);
         return data;
     }
 
@@ -70,8 +70,8 @@ internal sealed class ExtendedGpsWaveformPointDataRecordReader(IEntropyDecoder d
         var context = default(uint);
         var data = await this.ProcessDataAsync(ref context, cancellationToken).ConfigureAwait(false);
         var span = data.Span;
-        this.waveformReader.Read(span[ExtendedGpsPointDataRecord.Size..], context);
-        this.byteReader.Read(span[ExtendedGpsWaveformPointDataRecord.Size..], context);
+        this.colorNearInfraredReader.Read(span[ExtendedGpsPointDataRecord.Size..], context);
+        this.byteReader.Read(span[ExtendedGpsColorNearInfraredPointDataRecord.Size..], context);
         return data;
     }
 }
