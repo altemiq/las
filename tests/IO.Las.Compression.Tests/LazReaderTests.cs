@@ -26,7 +26,7 @@ public class LazReaderTests
         using var stream = typeof(LazReaderTests).Assembly.GetManifestResourceStream(typeof(LazReaderTests), file)
             ?? throw new InvalidOperationException("Failed to get stream");
         using LazReader reader = new(stream);
-        _ = await Assert.That(reader.VariableLengthRecords).HasCount().EqualTo(vlrCount);
+        _ = await Assert.That(reader.VariableLengthRecords).Count().IsEqualTo(vlrCount);
 
         var count = 10;
         while (--count > 0)
@@ -78,7 +78,7 @@ public class LazReaderTests
             ?? throw new InvalidOperationException("Failed to get stream");
         using LazReader reader = new(stream);
         await CheckHeader(reader.Header, new(1, 4));
-        _ = await Assert.That(reader.VariableLengthRecords).HasCount().EqualTo(3);
+        _ = await Assert.That(reader.VariableLengthRecords).Count().IsEqualTo(3);
         var extraBytesTag = reader.VariableLengthRecords.OfType<ExtraBytes>().Single();
 
         var min = double.MaxValue;
@@ -151,7 +151,7 @@ public class LazReaderTests
         using var stream = typeof(LazReaderTests).Assembly.GetManifestResourceStream(typeof(LazReaderTests), file)
             ?? throw new InvalidOperationException("Failed to get stream");
         using LazReader reader = new(stream);
-        _ = await Assert.That(reader.VariableLengthRecords).HasCount().EqualTo(vlrCount);
+        _ = await Assert.That(reader.VariableLengthRecords).Count().IsEqualTo(vlrCount);
 
         await TestPointAsync(reader, expectedType, hasExtraBytes);
         await TestPointAsync(reader, expectedType, hasExtraBytes);
@@ -178,7 +178,7 @@ public class LazReaderTests
             ?? throw new InvalidOperationException("Failed to get stream");
         using LazReader reader = new(stream);
         await CheckHeader(reader.Header, new(1, 4));
-        _ = await Assert.That(reader.VariableLengthRecords).HasCount().EqualTo(3);
+        _ = await Assert.That(reader.VariableLengthRecords).Count().IsEqualTo(3);
         var extraBytes = reader.VariableLengthRecords.OfType<ExtraBytes>().Single();
 
         var min = double.MaxValue;

@@ -84,7 +84,7 @@ public class ExtendedVariableLengthRecordTests
 #else
         _ = await Assert.That(reader.Header.LegacyNumberOfPointRecords).IsEqualTo(2U);
 #endif
-        _ = await Assert.That(reader.ExtendedVariableLengthRecords).HasCount().EqualTo(1)
+        _ = await Assert.That(reader.ExtendedVariableLengthRecords).Count().IsEqualTo(1)
             .And.Member(x => x.First(), x => x.IsEqualTo(evlr, ExtendedVariableLengthRecordComparer.Instance));
     }
 

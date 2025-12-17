@@ -30,7 +30,7 @@ public class ProjectGuidTests
 #else
         _ = await Assert.That(await stream.ReadAsync(bytes, 0, length)).IsEqualTo(length);
 #endif
-        _ = await Assert.That(bytes).HasCount().EqualTo(16);
+        _ = await Assert.That(bytes).Count().IsEqualTo(16);
 
         _ = await Assert.That(new Guid(bytes)).IsEqualTo(Guid.Parse(id));
         System.Buffers.ArrayPool<byte>.Shared.Return(bytes);

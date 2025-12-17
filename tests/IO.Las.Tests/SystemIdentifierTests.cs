@@ -66,7 +66,7 @@ public class SystemIdentifierTests
     public async Task TwoSensors()
     {
         List<SystemIdentifier> identifiers = [.. SystemIdentifier.ParseMultiple("AR15J ALTM1")];
-        _ = await Assert.That(identifiers).HasCount().EqualTo(2)
+        _ = await Assert.That(identifiers).Count().IsEqualTo(2)
             .And.IsEquivalentTo([
                 new(Platforms.CrewedFixedWing, Models.Riegl.VQ1560ii),
                 new SystemIdentifier(Platforms.CrewedFixedWing, Models.Leica.TerrainMapper)
@@ -77,7 +77,7 @@ public class SystemIdentifierTests
     public async Task TwoSensorsDifferentPlatforms()
     {
         List<SystemIdentifier> identifiers = [.. SystemIdentifier.ParseMultiple("RRX2H ARX2H")];
-        _ = await Assert.That(identifiers).HasCount().EqualTo(2)
+        _ = await Assert.That(identifiers).Count().IsEqualTo(2)
             .And.IsEquivalentTo([
                 new(Platforms.CrewedHelicopterRotary, Models.Riegl.Vux240),
                 new SystemIdentifier(Platforms.CrewedFixedWing, Models.Riegl.Vux240)

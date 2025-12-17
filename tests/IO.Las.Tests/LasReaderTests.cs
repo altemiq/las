@@ -57,7 +57,7 @@ public class LasReaderTests
                                     ?? throw new InvalidOperationException("Failed to get stream");
         using LasReader reader = new(stream);
         await CheckHeader(reader.Header, new(1, 4));
-        _ = await Assert.That(reader.VariableLengthRecords).HasCount().EqualTo(2);
+        _ = await Assert.That(reader.VariableLengthRecords).Count().IsEqualTo(2);
 
         var min = double.MaxValue;
         var max = double.MinValue;
@@ -164,7 +164,7 @@ public class LasReaderTests
                                     ?? throw new InvalidOperationException("Failed to get stream");
         using LasReader reader = new(stream);
         await CheckHeader(reader.Header, new(1, 4));
-        _ = await Assert.That(reader.VariableLengthRecords).HasCount().EqualTo(2);
+        _ = await Assert.That(reader.VariableLengthRecords).Count().IsEqualTo(2);
 
         var extraBytes = reader.VariableLengthRecords.OfType<ExtraBytes>().Single();
 
