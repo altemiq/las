@@ -192,7 +192,7 @@ jobs:
           --os ${{ matrix.os }}
           --arch ${{ matrix.arch }} 
           -property:PublishDir=${{ github.workspace }}/publish/${{ matrix.os }}-${{ matrix.arch }} 
-          -property:Version=${{ needs.get-version.outputs.semver }}
+          -property:Version=${{ needs.get-version.outputs.prefix }}
 
       - uses: actions/upload-artifact@v6
         with:
