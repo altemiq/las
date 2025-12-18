@@ -452,6 +452,7 @@ internal class DefaultLasReaderFormatter(IFormatBuilder builder) : ILasReaderFor
             GeoAsciiParamsTag geoAsciiParamsTag => GetGeoAsciiParamsTag(geoAsciiParamsTag),
             GeoDoubleParamsTag geoDoubleParamsTag => GetGeoDoubleParamsTag(geoDoubleParamsTag),
             GeoKeyDirectoryTag geoKeyEntries => GetGeoKeyDirectoryTag(geoKeyEntries, reader.VariableLengthRecords.OfType<GeoDoubleParamsTag>().SingleOrDefault(), reader.VariableLengthRecords.OfType<GeoAsciiParamsTag>().SingleOrDefault()),
+            CompressedTag compressedTag => GetCompressedTag(compressedTag),
 #if LAS1_3_OR_GREATER
             WaveformPacketDescriptor waveformPacketDescriptor => GetWaveformPacketDescriptor(waveformPacketDescriptor),
 #endif
@@ -570,6 +571,20 @@ internal class DefaultLasReaderFormatter(IFormatBuilder builder) : ILasReaderFor
                 {
                     _ = GeoProjectionConverter.TryGetGeoTiffInfo(key, geoDoubleValue, geoAsciiValue, out _, out var value);
                     return value;
+                }
+            }
+        }
+
+        static IEnumerable<(object? Header, object? Value)> GetCompressedTag(CompressedTag record)
+        {
+            yield return (default, LazyFormattable.Create($"LASzip compression (version {record.Version.Major}.{record.Version.Minor}r{record.Version.Revision} c{(ushort)record.Compressor} {record.ChunkSize}): {string.Join(' ', GetItemValues(record))}"));
+
+            static IEnumerable<object> GetItemValues(IEnumerable<LasItem> items)
+            {
+                foreach (var item in items)
+                {
+                    yield return item.Name;
+                    yield return item.Version;
                 }
             }
         }
