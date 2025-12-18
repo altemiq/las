@@ -16,7 +16,7 @@ public static class GeoProjectionConverter
     /// </summary>
     /// <param name="geoKeyEntry">The geo-key entry.</param>
     /// <param name="geoDoubleParams">The double parameters.</param>
-    /// <param name="geoAsciiParams">The ASCII paramters.</param>
+    /// <param name="geoAsciiParams">The ASCII parameters.</param>
     /// <param name="key">The output key.</param>
     /// <param name="value">The output value.</param>
     /// <returns><see langword="true"/> if the GeoTIFF info was found; otherwise <see langword="false"/>.</returns>

@@ -293,7 +293,7 @@ internal class DefaultLasReaderFormatter(IFormatBuilder builder) : ILasReaderFor
                 }
 
                 builder.Append(" ");
-                builder.AppendCaption("{0,-15}", value)
+                builder.AppendCaption("{0,15}", value)
                     .Append("  ");
                 builder
                     .AppendValue(GetClassificationName(i))
@@ -349,7 +349,7 @@ internal class DefaultLasReaderFormatter(IFormatBuilder builder) : ILasReaderFor
                 }
 
                 builder.Append(" ");
-                builder.AppendCaption("{0,-15}", value)
+                builder.AppendCaption("{0,15}", value)
                     .Append("  ");
                 builder
                     .AppendValue("extended classification")
