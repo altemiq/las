@@ -28,10 +28,10 @@ internal static partial class RootCommandExtensions
             var command = new Command("laz", "Converts a LA(S/Z) file to a new LAZ file.")
             {
                 Arguments.Input,
-                Options.Output,
+                Options.To.Output,
             };
 
-            command.SetAction(static parseResult => To.Laz.Processor.Process(parseResult.GetServices(), parseResult.GetRequiredValue(Arguments.Input), parseResult.GetRequiredValue(Options.Output)));
+            command.SetAction(static parseResult => To.Laz.Processor.Process(parseResult.GetServices(), parseResult.GetRequiredValue(Arguments.Input), parseResult.GetRequiredValue(Options.To.Output)));
 
             return command;
         }

@@ -29,12 +29,12 @@ internal static partial class RootCommandExtensions
             var command = new Command("sorted", Tool.Properties.v1_4.Resources.Command_ToSortedDescription)
             {
                 Arguments.Inputs,
-                Options.Output,
+                Options.To.Output,
                 Options.Indexing.Threshold,
                 Options.Indexing.Append,
             };
 
-            command.SetAction(parseResult => To.Sorted.Processor.Process(parseResult.GetServices(), parseResult.InvocationConfiguration.Output, parseResult.GetRequiredValue(Arguments.Inputs), parseResult.GetValue(Options.Output), parseResult.GetValue(Options.Indexing.Append)));
+            command.SetAction(parseResult => To.Sorted.Processor.Process(parseResult.GetServices(), parseResult.InvocationConfiguration.Output, parseResult.GetRequiredValue(Arguments.Inputs), parseResult.GetValue(Options.To.Output), parseResult.GetValue(Options.Indexing.Append)));
 
             return command;
         }

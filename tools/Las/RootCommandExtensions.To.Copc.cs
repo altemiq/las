@@ -33,7 +33,7 @@ internal static partial class RootCommandExtensions
             var command = new Command("copc", Tool.Properties.v1_4.Resources.Command_ToCopcDescription)
             {
                 Arguments.Input,
-                Options.Output,
+                Options.To.Output,
                 maxDepthOption,
                 maxPointsPerOctantOption,
                 gridSpacingOption,
@@ -42,7 +42,7 @@ internal static partial class RootCommandExtensions
             command.SetAction(parseResult => Processor.Process(
                 parseResult.GetServices(),
                 parseResult.GetRequiredValue(Arguments.Input),
-                parseResult.GetRequiredValue(Options.Output),
+                parseResult.GetRequiredValue(Options.To.Output),
                 parseResult.GetValue(maxDepthOption),
                 parseResult.GetValue(maxPointsPerOctantOption),
                 parseResult.GetValue(gridSpacingOption)));

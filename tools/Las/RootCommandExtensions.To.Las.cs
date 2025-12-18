@@ -28,10 +28,10 @@ internal static partial class RootCommandExtensions
             var command = new Command("las", Tool.Properties.Resources.Command_ToLasDescription)
             {
                 Arguments.Input,
-                Options.Output,
+                Options.To.Output,
             };
 
-            command.SetAction(static parseResult => To.Las.Processor.Process(parseResult.GetServices(), parseResult.GetRequiredValue(Arguments.Input), parseResult.GetRequiredValue(Options.Output)));
+            command.SetAction(static parseResult => To.Las.Processor.Process(parseResult.GetServices(), parseResult.GetRequiredValue(Arguments.Input), parseResult.GetRequiredValue(Options.To.Output)));
 
             return command;
         }
