@@ -55,7 +55,7 @@ internal sealed class LasZip
         {
             items.Add(new()
             {
-                Type = requestedVersion > 3 ? LasItemType.Byte14 : LasItemType.Byte,
+                Type = requestedVersion >= 3 ? LasItemType.Byte14 : LasItemType.Byte,
                 Size = extraByteCount,
                 Version = requestedVersion,
             });
