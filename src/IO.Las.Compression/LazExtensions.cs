@@ -39,7 +39,6 @@ public static class LazExtensions
         /// Copies the contents the current reader to the specified writer.
         /// </summary>
         /// <param name="writer">The writer.</param>
-        /// <param name="vlrPredicate">The <see cref="VariableLengthRecord"/> predicate.</param>
         public void CopyTo(ILasWriter writer) =>
             reader.CopyTo(writer, static vlr => vlr.IsForCompression());
 
@@ -47,7 +46,6 @@ public static class LazExtensions
         /// Copies the contents the current reader to the specified writer asynchronously.
         /// </summary>
         /// <param name="writer">The writer.</param>
-        /// <param name="vlrPredicate">The <see cref="VariableLengthRecord"/> predicate.</param>
         /// <param name="cancellationToken">The token for cancelling the task.</param>
         /// <returns>The asynchronous task for copying the contents to <paramref name="writer"/>.</returns>
         public Task CopyToAsync(ILasWriter writer, CancellationToken cancellationToken = default) =>

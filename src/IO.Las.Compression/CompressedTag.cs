@@ -125,10 +125,21 @@ public sealed record CompressedTag : VariableLengthRecord, IReadOnlyList<LasItem
     /// <summary>
     /// Initializes a new instance of the <see cref="CompressedTag"/> class.
     /// </summary>
+    /// <param name="header">The header block.</param>
+    /// <param name="compressor">The compressor.</param>
+    public CompressedTag(in HeaderBlock header, Compressor compressor)
+        : this(new LasZip(header.PointDataFormatId, compressor, LasZip.GetValidVersion(header)))
+    {
+    }
+
+    /// <summary>
+    /// Initializes a new instance of the <see cref="CompressedTag"/> class.
+    /// </summary>
     /// <param name="pointDataFormatId">The point data format ID.</param>
     /// <param name="compressor">The compressor.</param>
-    public CompressedTag(byte pointDataFormatId, Compressor compressor)
-        : this(new LasZip(pointDataFormatId, compressor, LasZip.GetValidVersion(pointDataFormatId)))
+    /// <param name="version">The LAS version.</param>
+    public CompressedTag(byte pointDataFormatId, Compressor compressor, Version version)
+        : this(new LasZip(pointDataFormatId, compressor, LasZip.GetValidVersion(pointDataFormatId, version)))
     {
     }
 #endif

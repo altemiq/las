@@ -36,9 +36,9 @@ internal abstract class ExtendedGpsPointDataRecordWriter4<T> : Writers.PointData
     private uint currentContext;
 
     /// <summary>
-    /// Initializes a new instance of the <see cref="ExtendedGpsPointDataRecordWriter4"/> class.
+    /// Initializes a new instance of the <see cref="ExtendedGpsPointDataRecordWriter4{T}"/> class.
     /// </summary>
-    /// <param name="encoder">The Encoder.</param>
+    /// <param name="encoder">The encoder.</param>
     protected ExtendedGpsPointDataRecordWriter4(IEntropyEncoder encoder)
     {
         this.encoder = encoder;
