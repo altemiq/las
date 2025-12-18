@@ -180,7 +180,7 @@ public readonly struct HeaderBlock : IEquatable<HeaderBlock>
 #if LAS1_2_OR_GREATER
         this.GlobalEncoding = globalEncoding;
 #endif
-        ArgumentOutOfRangeException.ThrowIfEqual(version, new Version(1, 0));
+        ArgumentOutOfRangeException.ThrowIfLessThan(version, new Version(1, 1));
         ArgumentOutOfRangeException.ThrowIfGreaterThan(version, new Version(1, MaxMinorVersion));
 
         this.Version = version;
