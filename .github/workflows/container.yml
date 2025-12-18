@@ -17,7 +17,7 @@ jobs:
     
     steps:
       - uses: docker/setup-buildx-action@v3
-      
+
       - uses: docker/build-push-action@v6
         id: build
         with:
@@ -26,13 +26,13 @@ jobs:
           tags: ghcr.io/${{ github.repository_owner }}/lastools:ubuntu-latest
           file: ContainerFile.ubuntu
           load: true
-        
+
       - name: Run local/get-version@v1
         id: version
         run: |
           version=$((docker run --rm ${{ steps.build.outputs.imageid }} lasinfo64 -version) 2> >(grep -o '[^ ]\+$'))
           echo "lastools=$version" >> $GITHUB_OUTPUT
-          
+
       - name: Run local/tag-lastools-version@v1
         run: |
           docker tag ${{ steps.build.outputs.imageid }} ghcr.io/${{ github.repository_owner }}/lastools:ubuntu-${{ steps.version.outputs.lastools }}
@@ -41,8 +41,8 @@ jobs:
         with:
           registry: ghcr.io
           username: ${{ github.actor }}
-          password: ${{ secrets.GITHUB_TOKEN }} 
-      
+          password: ${{ secrets.GITHUB_TOKEN }}
+
       - name: Run local/push-containers@v1
         run: |
           docker push ghcr.io/${{ github.repository_owner }}/lastools --all-tags
@@ -50,7 +50,7 @@ jobs:
     outputs:
       sha: ${{ steps.build.outputs.imageid }}
       version: ${{ steps.version.outputs.lastools }}
-    
+  
   windows:
     runs-on: windows-2022
     
@@ -58,13 +58,13 @@ jobs:
       packages: write
     
     steps:
-      - uses: actions/checkout@v5
-        
+      - uses: actions/checkout@v6
+
       - name: Run local/docker-build
         working-directory: container
         run: |
           docker build -f ContainerFile.windows -t ghcr.io/${{ github.repository_owner }}/lastools:windows-latest .
-          
+
       - name: Run local/get-image-id@v1
         id: build
         shell: pwsh
@@ -97,11 +97,11 @@ jobs:
     outputs:
       sha: ${{ steps.build.outputs.imageid }}
       version: ${{ steps.version.outputs.lastools }}
-      
+  
   manifest:
     runs-on: ubuntu-latest
 
-    needs: 
+    needs:
       - linux
       - windows
     
@@ -114,14 +114,14 @@ jobs:
           registry: ghcr.io
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
-          
+
       - name: Run local/latest-manifest@v1
         run: |
           docker manifest create ghcr.io/${{ github.repository_owner }}/lastools:latest  ghcr.io/${{ github.repository_owner }}/lastools:ubuntu-${{ needs.linux.outputs.version }} ghcr.io/${{ github.repository_owner }}/lastools:windows-${{ needs.windows.outputs.version }}
           docker manifest push ghcr.io/${{ github.repository_owner }}/lastools:latest
-          
+
       - name: Run local/version-manifest@v1
-        if: ${{ needs.linux.outputs.version }} == ${{ needs.windows.outputs.version }} 
+        if: ${{ needs.linux.outputs.version }} == ${{ needs.windows.outputs.version }}
         run: |
           docker manifest create ghcr.io/${{ github.repository_owner }}/lastools:${{ needs.linux.outputs.version }} ghcr.io/${{ github.repository_owner }}/lastools:ubuntu-${{ needs.linux.outputs.version }} ghcr.io/${{ github.repository_owner }}/lastools:windows-${{ needs.windows.outputs.version }}
           docker manifest push ghcr.io/${{ github.repository_owner }}/lastools:${{ needs.linux.outputs.version }}
