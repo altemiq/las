@@ -72,6 +72,7 @@ jobs:
     runs-on: ubuntu-latest
 
     outputs:
+      semver: ${{ steps.versions.outputs.semver }}
       version: ${{ steps.versions.outputs.version }}
       prefix: ${{ steps.versions.outputs.prefix }}
       suffix: ${{ steps.versions.outputs.suffix }}
@@ -98,13 +99,14 @@ jobs:
             suffix=beta;
           fi
           
-          properties=$(echo "$(dotnet msbuild -getProperty:Version,VersionPrefix,VersionSuffix /p:VersionSuffix=$suffix.${{ github.run_number }})"  | tr -d '\n')
+          properties=$(echo "$(dotnet msbuild -getProperty:Version,VersionPrefix,VersionSuffix /p:VersionSuffix=$suffix)"  | tr -d '\n')
           
           echo "properties=$properties" >> $GITHUB_OUTPUT
 
       - name: Run local/get-version@v1
         id: versions
         run: |
+          echo "semver=${{ fromJSON(steps.msbuild.outputs.properties).Properties.Version }}.${{ github.run_number }}" >> $GITHUB_OUTPUT
           echo "version=${{ fromJSON(steps.msbuild.outputs.properties).Properties.Version }}" >> $GITHUB_OUTPUT
           echo "prefix=${{ fromJSON(steps.msbuild.outputs.properties).Properties.VersionPrefix }}" >> $GITHUB_OUTPUT
           echo "suffix=${{ fromJSON(steps.msbuild.outputs.properties).Properties.VersionSuffix }}" >> $GITHUB_OUTPUT
@@ -130,11 +132,19 @@ jobs:
 
       - name: Run local/dotnet-restore@v1
         run: dotnet restore
+        
+      - name: run local/dotnet-build@v1
+        run: >
+          dotnet build generators/IO.Las.CodeGeneration
+          --no-restore
+          --configuration Release
 
       - name: Run local/dotnet-pack@v1
-        run: |
-          dotnet build generators/IO.Las.CodeGeneration --no-restore --configuration Release
-          dotnet pack --output ${{ github.workspace }}/nupkg --version ${{ needs.get-version.outputs.version }}
+        run: >
+          dotnet pack
+          --output ${{ github.workspace }}/nupkg
+          --version ${{ needs.get-version.outputs.prefix }}
+          /p:PackageVersion=${{ needs.get-version.outputs.semver }}
 
       - uses: actions/upload-artifact@v6
         with:
@@ -168,12 +178,21 @@ jobs:
         env:
           NUGET_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
+      - name: run local/dotnet-build@v1
+        run: >
+          dotnet build generators/IO.Las.CodeGeneration
+          --configuration Release
+
       - name: Run local/dotnet-publish@v1
         env:
           DOTNET_CLI_ENABLE_PUBLISH_RELEASE_FOR_SOLUTIONS: true
-        run: |
-          dotnet build generators/IO.Las.CodeGeneration --configuration Release
-          dotnet publish tools/Las --configuration Release --os ${{ matrix.os }} --arch ${{ matrix.arch }} -property:PublishDir=${{ github.workspace }}/publish/${{ matrix.os }}-${{ matrix.arch }} -property:Version=${{ needs.get-version.outputs.version }}
+        run: >
+          dotnet publish tools/Las
+          --configuration Release
+          --os ${{ matrix.os }}
+          --arch ${{ matrix.arch }} 
+          -property:PublishDir=${{ github.workspace }}/publish/${{ matrix.os }}-${{ matrix.arch }} 
+          -property:Version=${{ needs.get-version.outputs.semver }}
 
       - uses: actions/upload-artifact@v6
         with:
@@ -203,8 +222,18 @@ jobs:
         env:
           NUGET_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
+      - name: run local/dotnet-build@v1
+        run: >
+          dotnet build generators/IO.Las.CodeGeneration
+          --configuration Release
+
       - name: Run local/dotnet-publish@v1
-        run: dotnet publish tools/Las /t:PublishContainer /p:ContainerArchiveOutputPath=${{ github.workspace }}/container /p:ContainerImageTag=${{ needs.get-version.outputs.version }}
+        run: >
+          dotnet publish tools/Las
+          /t:PublishContainer
+          /p:ContainerArchiveOutputPath=${{ github.workspace }}/container
+          /p:ContainerImageTag=${{ needs.get-version.outputs.semver }}
+          /p:Version=${{ needs.get-version.outputs.prefix }}
 
       - uses: actions/upload-artifact@v6
         with:
@@ -236,7 +265,11 @@ jobs:
       - name: Run local/dotnet-nuget-push@v1
         id: push-nuget
         working-directory: ${{ github.workspace }}/nupkg
-        run: dotnet nuget push *.nupkg --source https://nuget.pkg.github.com/${{ github.repository_owner }}/index.json --api-key ${{ secrets.GITHUB_TOKEN }} --skip-duplicate
+        run: >
+          dotnet nuget push *.nupkg
+          --source https://nuget.pkg.github.com/${{ github.repository_owner }}/index.json
+          --api-key ${{ secrets.GITHUB_TOKEN }}
+          --skip-duplicate
 
       - uses: actions/download-artifact@v7
         with:
@@ -251,8 +284,9 @@ jobs:
         run: |
           # login to ghcr.io
           echo ${{ secrets.GITHUB_TOKEN }} | oras login ghcr.io -u ${{ github.actor }} --password-stdin
-          oras cp --from-oci-layout las.tar.gz:${{ needs.get-version.outputs.version }} ghcr.io/${{ github.repository_owner }}/io/las:${{ needs.get-version.outputs.version }}
-          oras cp --from-oci-layout las.tar.gz:${{ needs.get-version.outputs.version }} ghcr.io/${{ github.repository_owner }}/io/las:${{ needs.get-version.outputs.suffix }}
+          oras cp --from-oci-layout las.tar.gz:${{ needs.get-version.outputs.semver }} ghcr.io/${{ github.repository_owner }}/io/las:${{ needs.get-version.outputs.semver }}
+          oras cp --from-oci-layout las.tar.gz:${{ needs.get-version.outputs.semver }} ghcr.io/${{ github.repository_owner }}/io/las:${{ needs.get-version.outputs.version }}
+          oras cp --from-oci-layout las.tar.gz:${{ needs.get-version.outputs.semver }} ghcr.io/${{ github.repository_owner }}/io/las:${{ needs.get-version.outputs.suffix }}
 
       - uses: actions/download-artifact@v7
         with:
