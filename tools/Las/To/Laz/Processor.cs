@@ -21,6 +21,6 @@ internal static class Processor
     {
         using var reader = LazReader.Create(File.OpenRead(input, serviceProvider));
         using var writer = new LazWriter(output.OpenWrite());
-        Las.Processor.Las(reader, writer);
+        Cloud.CloudExtensions.CopyTo(reader, writer);
     }
 }

@@ -4,7 +4,7 @@
 // </copyright>
 // -----------------------------------------------------------------------
 
-namespace Altemiq.IO.Las.Internals;
+namespace Altemiq.IO.Las.Cloud.Internals;
 
 /// <summary>
 /// Initializes a new instance of the <see cref="OccupancyGrid"/> class.

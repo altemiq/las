@@ -82,14 +82,14 @@ public class LasWriter(Stream stream, bool leaveOpen = false) : ILasWriter, IDis
 #endif
 
     /// <summary>
+    /// Gets the base stream.
+    /// </summary>
+    public Stream BaseStream { get; } = stream;
+
+    /// <summary>
     /// Gets the RAW writer.
     /// </summary>
     protected Writers.IPointDataRecordWriter RawWriter { get; } = new Writers.Raw.PointDataRecordWriter();
-
-    /// <summary>
-    /// Gets the base stream.
-    /// </summary>
-    protected Stream BaseStream { get; } = stream;
 
     /// <inheritdoc/>
     public virtual void Write(in HeaderBlock header, params IEnumerable<VariableLengthRecord> records)

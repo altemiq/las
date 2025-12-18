@@ -61,6 +61,57 @@ public static partial class ExtensionMethods
 #endif
     }
 
+#if !NETSTANDARD2_1_OR_GREATER && !NETCOREAPP2_1_OR_GREATER
+    /// <summary>
+    /// The <see cref="Guid"/> extensions.
+    /// </summary>
+    extension(Guid guid)
+    {
+        /// <summary>
+        /// Tries to write the current GUID instance into a span of bytes.
+        /// </summary>
+        /// <param name="destination">When this method returns, the GUID as a span of bytes.</param>
+        /// <returns><see langword="true"/> if the GUID is successfully written to the specified span; <see langword="false"/> otherwise.</returns>
+        internal bool TryWriteBytes(Span<byte> destination)
+        {
+            var byteArray = guid.ToByteArray();
+            if (byteArray.Length > destination.Length)
+            {
+                return false;
+            }
+
+            byteArray.CopyTo(destination);
+            return true;
+        }
+    }
+
+    /// <summary>
+    /// The dictionary extensions.
+    /// </summary>
+    extension<TKey, TValue>(Dictionary<TKey, TValue> dictionary)
+    {
+        /// <summary>
+        /// Attempts to add the specified key and value to the dictionary.
+        /// </summary>
+        /// <param name="key">The key of the element to add.</param>
+        /// <param name="value">The value of the element to add. It can be <see langword="null"/>.</param>
+        /// <returns><see langword="true"/> if the key/value pair was added to the dictionary successfully; otherwise, <see langword="false"/>.</returns>
+        internal bool TryAdd(TKey key, TValue value)
+        {
+            try
+            {
+                dictionary.Add(key, value);
+            }
+            catch
+            {
+                return false;
+            }
+
+            return true;
+        }
+    }
+#endif
+
     /// <summary>
     /// Gets the point data record length.
     /// </summary>

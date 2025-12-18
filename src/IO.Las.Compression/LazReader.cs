@@ -101,14 +101,14 @@ public sealed class LazReader : LasReader, ILazReader
     /// </summary>
     /// <param name="index">The chunk index.</param>
     /// <returns><see langword="true"/> if the move was successful; otherwise <see langword="false"/>.</returns>
-    internal bool MoveToChunk(int index) => index >= 0 && this.pointReader is ChunkedReader chunkedReader && chunkedReader.MoveToChunk(this.BaseStream, this.GetCurrentIndex(), index);
+    bool ILazReader.MoveToChunk(int index) => this.MoveToChunkImpl(index);
 
     /// <summary>
     /// Moves to the specified chunk start.
     /// </summary>
     /// <param name="chunkStart">The chunk start.</param>
     /// <returns><see langword="true"/> if the move was successful; otherwise <see langword="false"/>.</returns>
-    internal bool MoveToChunk(long chunkStart) => this.MoveToChunk(this.GetChunkIndex(chunkStart));
+    bool ILazReader.MoveToChunk(long chunkStart) => this.MoveToChunkImpl(this.GetChunkIndex(chunkStart));
 
     /// <summary>
     /// Moves to the specified chunk.
@@ -116,7 +116,7 @@ public sealed class LazReader : LasReader, ILazReader
     /// <param name="index">The chunk index.</param>
     /// <param name="cancellationToken">The cancellation token.</param>
     /// <returns><see langword="true"/> if the move was successful; otherwise <see langword="false"/>.</returns>
-    internal async ValueTask<bool> MoveToChunkAsync(int index, CancellationToken cancellationToken = default) => index >= 0 && this.pointReader is ChunkedReader chunkedReader && await chunkedReader.MoveToChunkAsync(this.BaseStream, this.GetCurrentIndex(), index, cancellationToken).ConfigureAwait(false);
+    ValueTask<bool> ILazReader.MoveToChunkAsync(int index, CancellationToken cancellationToken) => this.MoveToChunkImplAsync(index, cancellationToken);
 
     /// <summary>
     /// Moves to the specified chunk start.
@@ -124,7 +124,7 @@ public sealed class LazReader : LasReader, ILazReader
     /// <param name="chunkStart">The chunk start.</param>
     /// <param name="cancellationToken">The cancellation token.</param>
     /// <returns><see langword="true"/> if the move was successful; otherwise <see langword="false"/>.</returns>
-    internal ValueTask<bool> MoveToChunkAsync(long chunkStart, CancellationToken cancellationToken = default) => this.MoveToChunkAsync(this.GetChunkIndex(chunkStart), cancellationToken);
+    ValueTask<bool> ILazReader.MoveToChunkAsync(long chunkStart, CancellationToken cancellationToken) => this.MoveToChunkImplAsync(this.GetChunkIndex(chunkStart), cancellationToken);
 
     /// <summary>
     /// Gets the chunk index.
@@ -143,6 +143,10 @@ public sealed class LazReader : LasReader, ILazReader
         not null when Directory.Exists(path) => LazMultipleFileStream.OpenRead(path),
         _ => throw new NotSupportedException(),
     };
+
+    private bool MoveToChunkImpl(int index) => index >= 0 && this.pointReader is ChunkedReader chunkedReader && chunkedReader.MoveToChunk(this.BaseStream, this.GetCurrentIndex(), index);
+
+    private async ValueTask<bool> MoveToChunkImplAsync(int index, CancellationToken cancellationToken) => index >= 0 && this.pointReader is ChunkedReader chunkedReader && await chunkedReader.MoveToChunkAsync(this.BaseStream, this.GetCurrentIndex(), index, cancellationToken).ConfigureAwait(false);
 
     private IPointReader CreatePointReader()
     {

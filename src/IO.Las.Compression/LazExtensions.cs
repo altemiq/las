@@ -6,11 +6,55 @@
 
 namespace Altemiq.IO.Las;
 
+#pragma warning disable S2325, SA1101
+
 /// <summary>
 /// LAZ extensions.
 /// </summary>
 public static class LazExtensions
 {
+    /// <summary>
+    /// The <see cref="ILasReader"/> extensions.
+    /// </summary>
+    extension(ILasReader reader)
+    {
+#if LAS1_4_OR_GREATER
+        /// <summary>
+        /// Copies the contents the current reader to the specified writer.
+        /// </summary>
+        /// <param name="writer">The writer.</param>
+        public void CopyTo(ILasWriter writer) =>
+            reader.CopyTo(writer, static vlr => vlr.IsForCompression(), static evlr => evlr.IsForCompression());
+
+        /// <summary>
+        /// Copies the contents the current reader to the specified writer asynchronously.
+        /// </summary>
+        /// <param name="writer">The writer.</param>
+        /// <param name="cancellationToken">The token for cancelling the task.</param>
+        /// <returns>The asynchronous task for copying the contents to <paramref name="writer"/>.</returns>
+        public Task CopyToAsync(ILasWriter writer, CancellationToken cancellationToken = default) =>
+            reader.CopyToAsync(writer, static vlr => vlr.IsForCompression(), static evlr => evlr.IsForCompression(), cancellationToken);
+#else
+        /// <summary>
+        /// Copies the contents the current reader to the specified writer.
+        /// </summary>
+        /// <param name="writer">The writer.</param>
+        /// <param name="vlrPredicate">The <see cref="VariableLengthRecord"/> predicate.</param>
+        public void CopyTo(ILasWriter writer) =>
+            reader.CopyTo(writer, static vlr => vlr.IsForCompression());
+
+        /// <summary>
+        /// Copies the contents the current reader to the specified writer asynchronously.
+        /// </summary>
+        /// <param name="writer">The writer.</param>
+        /// <param name="vlrPredicate">The <see cref="VariableLengthRecord"/> predicate.</param>
+        /// <param name="cancellationToken">The token for cancelling the task.</param>
+        /// <returns>The asynchronous task for copying the contents to <paramref name="writer"/>.</returns>
+        public Task CopyToAsync(ILasWriter writer, CancellationToken cancellationToken = default) =>
+            reader.CopyToAsync(writer, static vlr => vlr.IsForCompression(), cancellationToken);
+#endif
+    }
+
     /// <summary>
     /// Gets a value indicating whether this <see cref="HeaderBlock"/> is compressed.
     /// </summary>
