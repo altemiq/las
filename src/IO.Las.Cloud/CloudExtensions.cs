@@ -23,7 +23,7 @@ public static class CloudExtensions
         /// </summary>
         /// <param name="writer">The writer.</param>
         public void CopyTo(ILasWriter writer) =>
-            reader.CopyTo(writer, static vlr => vlr.IsForCompression() || vlr.IsForCloudOptimization(), static evlr => evlr.IsForCompression() || evlr.IsForCloudOptimization());
+            reader.CopyTo(writer, static vlr => !vlr.IsForCompression() && !vlr.IsForCloudOptimization(), static evlr => !evlr.IsForCompression() && !evlr.IsForCloudOptimization());
 
         /// <summary>
         /// Copies the contents the current reader to the specified writer asynchronously.
@@ -32,6 +32,6 @@ public static class CloudExtensions
         /// <param name="cancellationToken">The token for cancelling the task.</param>
         /// <returns>The asynchronous task for copying the contents to <paramref name="writer"/>.</returns>
         public Task CopyToAsync(ILasWriter writer, CancellationToken cancellationToken = default) =>
-            reader.CopyToAsync(writer, static vlr => vlr.IsForCompression() || vlr.IsForCloudOptimization(), static evlr => evlr.IsForCompression() || evlr.IsForCloudOptimization(), cancellationToken);
+            reader.CopyToAsync(writer, static vlr => !vlr.IsForCompression() && !vlr.IsForCloudOptimization(), static evlr => !evlr.IsForCompression() && !evlr.IsForCloudOptimization(), cancellationToken);
     }
 }

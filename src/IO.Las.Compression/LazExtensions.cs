@@ -24,7 +24,7 @@ public static class LazExtensions
         /// </summary>
         /// <param name="writer">The writer.</param>
         public void CopyTo(ILasWriter writer) =>
-            reader.CopyTo(writer, static vlr => vlr.IsForCompression(), static evlr => evlr.IsForCompression());
+            reader.CopyTo(writer, static vlr => !vlr.IsForCompression(), static evlr => !evlr.IsForCompression());
 
         /// <summary>
         /// Copies the contents the current reader to the specified writer asynchronously.
@@ -33,14 +33,14 @@ public static class LazExtensions
         /// <param name="cancellationToken">The token for cancelling the task.</param>
         /// <returns>The asynchronous task for copying the contents to <paramref name="writer"/>.</returns>
         public Task CopyToAsync(ILasWriter writer, CancellationToken cancellationToken = default) =>
-            reader.CopyToAsync(writer, static vlr => vlr.IsForCompression(), static evlr => evlr.IsForCompression(), cancellationToken);
+            reader.CopyToAsync(writer, static vlr => !vlr.IsForCompression(), static evlr => !evlr.IsForCompression(), cancellationToken);
 #else
         /// <summary>
         /// Copies the contents the current reader to the specified writer.
         /// </summary>
         /// <param name="writer">The writer.</param>
         public void CopyTo(ILasWriter writer) =>
-            reader.CopyTo(writer, static vlr => vlr.IsForCompression());
+            reader.CopyTo(writer, static vlr => !vlr.IsForCompression());
 
         /// <summary>
         /// Copies the contents the current reader to the specified writer asynchronously.
@@ -49,7 +49,7 @@ public static class LazExtensions
         /// <param name="cancellationToken">The token for cancelling the task.</param>
         /// <returns>The asynchronous task for copying the contents to <paramref name="writer"/>.</returns>
         public Task CopyToAsync(ILasWriter writer, CancellationToken cancellationToken = default) =>
-            reader.CopyToAsync(writer, static vlr => vlr.IsForCompression(), cancellationToken);
+            reader.CopyToAsync(writer, static vlr => !vlr.IsForCompression(), cancellationToken);
 #endif
     }
 
