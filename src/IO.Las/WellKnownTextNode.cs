@@ -171,6 +171,19 @@ public readonly struct WellKnownTextNode
 
         return new(id, list);
     }
+#else
+    /// <summary>
+    /// Parses a <see cref="WellKnownTextNode"/> from the string.
+    /// </summary>
+    /// <param name="value">The string.</param>
+    /// <returns>The well known text node.</returns>
+    public static WellKnownTextNode Parse(string value)
+    {
+        var byteCount = System.Text.Encoding.UTF8.GetByteCount(value);
+        Span<byte> buffer = stackalloc byte[byteCount];
+        System.Text.Encoding.UTF8.GetBytes(value, buffer);
+        return Parse(buffer);
+    }
 #endif
 
     /// <inheritdoc />
@@ -212,8 +225,20 @@ public readonly struct WellKnownTextNode
         bytesWritten++;
         d = destination[bytesWritten..];
 
+        var first = true;
+
         foreach (var value in this.Values)
         {
+            if (!first)
+            {
+                // add the comma
+                destination[bytesWritten] = SeparatorByte;
+                bytesWritten++;
+                d = destination[bytesWritten..];
+            }
+
+            first = false;
+
             bytesWritten += value.CopyTo(d);
             d = destination[bytesWritten..];
         }
@@ -221,6 +246,37 @@ public readonly struct WellKnownTextNode
         d[0] = EndByte;
 
         return bytesWritten + 1;
+    }
+
+    /// <summary>
+    /// Gets the byte count.
+    /// </summary>
+    /// <returns>The byte count.</returns>
+    public int GetByteCount()
+    {
+        var byteCount = System.Text.Encoding.ASCII.GetByteCount(this.Id);
+
+        // start byte
+        byteCount++;
+
+        var first = true;
+        foreach (var value in this.Values)
+        {
+            if (!first)
+            {
+                // separator
+                byteCount++;
+            }
+
+            first = false;
+
+            byteCount += value.GetByteCount();
+        }
+
+        // end byte
+        byteCount++;
+
+        return byteCount;
     }
 
     [System.Runtime.InteropServices.StructLayout(System.Runtime.InteropServices.LayoutKind.Auto)]

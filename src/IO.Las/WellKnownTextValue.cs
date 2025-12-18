@@ -107,4 +107,27 @@ public readonly struct WellKnownTextValue
             return bytesWritten;
         }
     }
+
+    /// <summary>
+    /// Gets the byte count.
+    /// </summary>
+    /// <returns>The byte count.</returns>
+    public int GetByteCount()
+    {
+        return this.value switch
+        {
+            string s => System.Text.Encoding.UTF8.GetByteCount(s) + 2,
+            double d => GetDoubleByteCount(d),
+            WellKnownTextLiteral literal => System.Text.Encoding.UTF8.GetByteCount(literal.ToString()),
+            WellKnownTextNode node => node.GetByteCount(),
+            _ => default,
+        };
+
+        static int GetDoubleByteCount(double d)
+        {
+            Span<byte> buffer = stackalloc byte[20];
+            System.Buffers.Text.Utf8Formatter.TryFormat(d, buffer, out var bytesWritten, System.Buffers.StandardFormat.Parse("G13"));
+            return bytesWritten;
+        }
+    }
 }

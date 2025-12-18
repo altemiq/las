@@ -21,24 +21,9 @@ public sealed record OgcCoordinateSystemWkt : VariableLengthRecord
     /// </summary>
     /// <param name="wkt">The well-known text.</param>
     public OgcCoordinateSystemWkt(string wkt)
-        : base(
-            new VariableLengthRecordHeader
-            {
-                UserId = VariableLengthRecordHeader.ProjectionUserId,
-                RecordId = 2112,
-                RecordLengthAfterHeader = (ushort)(System.Text.Encoding.UTF8.GetByteCount(wkt) + 1),
-                Description = "OGC COORDINATE SYSTEM WKT",
-            })
-#if NETSTANDARD2_1_OR_GREATER || NETCOREAPP2_1_OR_GREATER
-        => this.Wkt = WellKnownTextNode.Parse(wkt);
-#else
+        : this(WellKnownTextNode.Parse(wkt))
     {
-        var byteCount = System.Text.Encoding.UTF8.GetByteCount(wkt);
-        Span<byte> buffer = stackalloc byte[byteCount];
-        System.Text.Encoding.UTF8.GetBytes(wkt, buffer);
-        this.Wkt = WellKnownTextNode.Parse(buffer);
     }
-#endif
 
     /// <summary>
     /// Initializes a new instance of the <see cref="OgcCoordinateSystemWkt"/> class.
@@ -46,7 +31,21 @@ public sealed record OgcCoordinateSystemWkt : VariableLengthRecord
     /// <param name="header">The header.</param>
     /// <param name="data">The data.</param>
     internal OgcCoordinateSystemWkt(VariableLengthRecordHeader header, ReadOnlySpan<byte> data)
-        : base(header) => this.Wkt = WellKnownTextNode.Parse(data);
+        : this(header, WellKnownTextNode.Parse(data))
+    {
+    }
+
+    private OgcCoordinateSystemWkt(WellKnownTextNode wkt)
+        : base(new VariableLengthRecordHeader
+        {
+            UserId = VariableLengthRecordHeader.ProjectionUserId,
+            RecordId = TagRecordId,
+            RecordLengthAfterHeader = (ushort)(wkt.GetByteCount() + 1),
+            Description = "OGC COORDINATE SYSTEM WKT",
+        }) => this.Wkt = wkt;
+
+    private OgcCoordinateSystemWkt(VariableLengthRecordHeader header, WellKnownTextNode wkt)
+        : base(header with { RecordLengthAfterHeader = (ushort)(wkt.GetByteCount() + 1) }) => this.Wkt = wkt;
 
     /// <summary>
     /// Gets the well-known text.
