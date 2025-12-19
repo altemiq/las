@@ -6,8 +6,6 @@
 
 namespace Altemiq.IO.Las.Geodesy;
 
-using System.Collections.Concurrent;
-
 /// <summary>
 /// The PROJ context.
 /// </summary>
@@ -25,7 +23,7 @@ public sealed partial class ProjContext :
 
     private const string DeprecatedField = "deprecated";
 
-    private static readonly ConcurrentDictionary<(int Code, WellKnownTextVersion Version), WellKnownTextNode> UnitNodes = new();
+    private static readonly System.Collections.Concurrent.ConcurrentDictionary<VersionedUnitOfMeasure, WellKnownTextNode> UnitNodes = new();
 
     private readonly Microsoft.Data.Sqlite.SqliteConnection connection;
 
@@ -194,11 +192,13 @@ public sealed partial class ProjContext :
             for (var i = 0; i < parameters.Count; i++)
             {
                 var parameter = parameters[i];
-                if (string.Equals(parameter.ParameterName, parameterName, StringComparison.Ordinal))
+                if (!string.Equals(parameter.ParameterName, parameterName, StringComparison.Ordinal))
                 {
-                    parameter.Value = value;
-                    return parameter;
+                    continue;
                 }
+
+                parameter.Value = value;
+                return parameter;
             }
 
             return parameters.AddWithValue(parameterName, value);
@@ -217,18 +217,14 @@ public sealed partial class ProjContext :
 
     private static WellKnownTextNode GetUnitNode(Microsoft.Data.Sqlite.SqliteCommand command, string auth, int uom, WellKnownTextVersion version) =>
         UnitNodes.GetOrAdd(
-            (uom, version),
+            new(uom, version),
             static (key, a) =>
             {
-#pragma warning disable SA1142, PreferExplicitlyProvidedTupleComponentName
-                var code = key.Item1;
-                var version = key.Item2;
-#pragma warning restore SA1142, PreferExplicitlyProvidedTupleComponentName
                 a.Command.CommandText = "SELECT type, name, conv_factor, auth_name, code FROM unit_of_measure WHERE deprecated = 0";
-                AddAuthClause(a.Command, a.Auth, code, limit: 1);
+                AddAuthClause(a.Command, a.Auth, key.Code, limit: 1);
                 using var reader = a.Command.ExecuteReader();
                 return reader.Read()
-                    ? GetUnitNode(reader.GetString(0), reader.GetString(1), reader.GetDouble(2), reader.GetString(3), reader.GetInt32(4), version)
+                    ? GetUnitNode(reader.GetString(0), reader.GetString(1), reader.GetDouble(2), reader.GetString(3), reader.GetInt32(4), key.Version)
                     : default;
             },
             (Command: command, Auth: auth));
@@ -253,4 +249,7 @@ public sealed partial class ProjContext :
 
         return string.Empty;
     }
+
+    [System.Runtime.InteropServices.StructLayout(System.Runtime.InteropServices.LayoutKind.Auto)]
+    private readonly record struct VersionedUnitOfMeasure(int Code, WellKnownTextVersion Version);
 }

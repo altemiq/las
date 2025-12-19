@@ -8,7 +8,6 @@
   <ItemGroup>
     <PackageVersion Include="Altemiq.CommandLine.DependencyInjection" Version="2.0.0" />
     <PackageVersion Include="Altemiq.CommandLine.Spectre" Version="2.0.0" />
-    <PackageVersion Include="Altemiq.CommandLine" Version="2.0.0" />
     <PackageVersion Include="AWSSDK.S3" Version="4.0.15.1" />
     <PackageVersion Include="Humanizer" Version="3.0.1" />
     <PackageVersion Include="Microsoft.Extensions.Http" Version="10.0.1" />
@@ -23,7 +22,7 @@
   </ItemGroup>
   
   <ItemGroup Label="Coding Standards">
-    <GlobalPackageReference Include="Altemiq.DotNet.CodingStandard" Version="1.0.147" />
+    <GlobalPackageReference Include="Altemiq.DotNet.CodingStandard" Version="1.0.150" />
   </ItemGroup>
 
 </Project>

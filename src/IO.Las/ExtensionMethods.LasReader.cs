@@ -97,7 +97,7 @@ public static partial class ExtensionMethods
                 writer.Write(extendedVariableLengthRecord);
             }
         }
-    #else
+#else
         /// <summary>
         /// Copies the contents the current reader to the specified writer.
         /// </summary>

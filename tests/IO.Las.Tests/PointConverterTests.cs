@@ -7,24 +7,24 @@ public class PointConverterTests
         readonly
 #endif
         PointDataRecord PointDataRecord = new()
-    {
-        X = Values.X,
-        Y = Values.Y,
-        Z = Values.Z,
-        Intensity = Values.Intensity,
-        ReturnNumber = Values.ReturnNumber,
-        NumberOfReturns = Values.NumberOfReturns,
-        Synthetic = Values.Synthetic,
-        KeyPoint = Values.KeyPoint,
-        Withheld = Values.Withheld,
-        ScanAngleRank = Values.ScanAngleRank,
-        ScanDirectionFlag = Values.ScanDirectionFlag,
-        EdgeOfFlightLine = Values.EdgeOfFlightLine,
-        Classification = Values.Classification,
-        UserData = Values.UserData,
-        PointSourceId = Values.PointSourceId,
-    };
-    
+        {
+            X = Values.X,
+            Y = Values.Y,
+            Z = Values.Z,
+            Intensity = Values.Intensity,
+            ReturnNumber = Values.ReturnNumber,
+            NumberOfReturns = Values.NumberOfReturns,
+            Synthetic = Values.Synthetic,
+            KeyPoint = Values.KeyPoint,
+            Withheld = Values.Withheld,
+            ScanAngleRank = Values.ScanAngleRank,
+            ScanDirectionFlag = Values.ScanDirectionFlag,
+            EdgeOfFlightLine = Values.EdgeOfFlightLine,
+            Classification = Values.Classification,
+            UserData = Values.UserData,
+            PointSourceId = Values.PointSourceId,
+        };
+
     private static
 #if !NETFRAMEWORK
         readonly
@@ -48,7 +48,7 @@ public class PointConverterTests
             PointSourceId = Values.PointSourceId,
             GpsTime = Values.GpsTime,
         };
-    
+
     private static
 #if !NETFRAMEWORK
         readonly
@@ -72,7 +72,7 @@ public class PointConverterTests
             PointSourceId = Values.PointSourceId,
             Color = Values.Color,
         };
-    
+
     private static
 #if !NETFRAMEWORK
         readonly
@@ -97,7 +97,7 @@ public class PointConverterTests
             GpsTime = Values.GpsTime,
             Color = Values.Color,
         };
-    
+
     private static
 #if !NETFRAMEWORK
         readonly
@@ -128,7 +128,7 @@ public class PointConverterTests
             ParametricDy = Values.ParametricDy,
             ParametricDz = Values.ParametricDz,
         };
-    
+
     private static
 #if !NETFRAMEWORK
         readonly
@@ -160,7 +160,7 @@ public class PointConverterTests
             ParametricDy = Values.ParametricDy,
             ParametricDz = Values.ParametricDz,
         };
-    
+
     private static
 #if !NETFRAMEWORK
         readonly
@@ -186,7 +186,7 @@ public class PointConverterTests
             PointSourceId = Values.PointSourceId,
             GpsTime = Values.GpsTime,
         };
-    
+
     private static
 #if !NETFRAMEWORK
         readonly
@@ -213,7 +213,7 @@ public class PointConverterTests
             GpsTime = Values.GpsTime,
             Color = Values.Color,
         };
-    
+
     private static
 #if !NETFRAMEWORK
         readonly
@@ -241,7 +241,7 @@ public class PointConverterTests
             Color = Values.Color,
             NearInfrared = Values.NearInfrared,
         };
-    
+
     private static
 #if !NETFRAMEWORK
         readonly
@@ -274,7 +274,7 @@ public class PointConverterTests
             ParametricDy = Values.ParametricDy,
             ParametricDz = Values.ParametricDz,
         };
-    
+
     private static
 #if !NETFRAMEWORK
         readonly
@@ -309,14 +309,14 @@ public class PointConverterTests
             ParametricDy = Values.ParametricDy,
             ParametricDz = Values.ParametricDz,
         };
-    
+
     [Test]
     [MethodDataSource(nameof(ToExtendedData))]
     public async Task ToExtended(IBasePointDataRecord point, IExtendedPointDataRecord extendedPoint)
     {
         await Assert.That(PointConverter.ToExtended(point)).IsEqualTo(extendedPoint);
     }
-    
+
     [Test]
     [MethodDataSource(nameof(ToSimpleData))]
     public async Task ToSimple(IBasePointDataRecord point, IPointDataRecord simplePoint)
@@ -333,7 +333,7 @@ public class PointConverterTests
         yield return () => (GpsWaveformPointDataRecord, ExtendedGpsWaveformPointDataRecord);
         yield return () => (GpsColorWaveformPointDataRecord, ExtendedGpsColorNearInfraredWaveformPointDataRecord with { NearInfrared = default });
     }
-    
+
     public static IEnumerable<Func<(IBasePointDataRecord point, IPointDataRecord simplePoint)>> ToSimpleData()
     {
         yield return () => (ExtendedGpsPointDataRecord, GpsPointDataRecord);
@@ -342,7 +342,7 @@ public class PointConverterTests
         yield return () => (ExtendedGpsWaveformPointDataRecord, GpsWaveformPointDataRecord);
         yield return () => (ExtendedGpsColorNearInfraredWaveformPointDataRecord, GpsColorWaveformPointDataRecord);
     }
-    
+
     private static class Values
     {
         public const int X = 5977566;

@@ -156,7 +156,7 @@ public class WellKnownTextNodeTests
         var node = WellKnownTextNode.Parse(wkt);
         var byteCount = node.GetByteCount();
         var bytesWritten = node.CopyTo(bytes);
-        
+
         await Assert.That(byteCount).IsEqualTo(bytesWritten);
     }
 }
