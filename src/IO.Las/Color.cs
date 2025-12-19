@@ -80,11 +80,26 @@ public readonly partial struct Color : IEquatable<Color>
     /// <returns>The color.</returns>
     public static Color FromRgb(int red, int green, int blue)
     {
-        CheckUInt16(red);
-        CheckUInt16(green);
-        CheckUInt16(blue);
+        return new() { R = CheckUInt16(red), G = CheckUInt16(green), B = CheckUInt16(blue) };
 
-        return new() { R = (ushort)red, G = (ushort)green, B = (ushort)blue };
+        static ushort CheckUInt16(int value, [System.Runtime.CompilerServices.CallerArgumentExpression(nameof(value))] string? name = default)
+        {
+            if (unchecked((uint)value) > ushort.MaxValue)
+            {
+                ThrowOutOfByteRange(value, name);
+            }
+
+            return (ushort)value;
+
+#if NET8_0_OR_GREATER
+            [System.Diagnostics.CodeAnalysis.SuppressMessage("Performance", "CA1863:Use 'CompositeFormat'", Justification = "This is a formatted string for an exception.")]
+#endif
+            [System.Diagnostics.CodeAnalysis.DoesNotReturn]
+            static void ThrowOutOfByteRange(int v, string? n)
+            {
+                throw new ArgumentException(string.Format(Properties.Resources.Culture, Properties.Resources.InvalidEx2BoundArgument, n, v, ushort.MinValue, ushort.MaxValue), n);
+            }
+        }
     }
 
     /// <summary>
@@ -210,22 +225,5 @@ public readonly partial struct Color : IEquatable<Color>
             var blue when blue < min => (blue, max),
             _ => (min, max),
         };
-    }
-
-    private static void CheckUInt16(int value, [System.Runtime.CompilerServices.CallerArgumentExpression(nameof(value))] string? name = default)
-    {
-        if (unchecked((uint)value) > ushort.MaxValue)
-        {
-            ThrowOutOfByteRange(value, name);
-        }
-
-#if NET8_0_OR_GREATER
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Performance", "CA1863:Use 'CompositeFormat'", Justification = "This is a formatted string for an exception.")]
-#endif
-        [System.Diagnostics.CodeAnalysis.DoesNotReturn]
-        static void ThrowOutOfByteRange(int v, string? n)
-        {
-            throw new ArgumentException(string.Format(Properties.Resources.Culture, Properties.Resources.InvalidEx2BoundArgument, n, v, ushort.MinValue, ushort.MaxValue), n);
-        }
     }
 }
