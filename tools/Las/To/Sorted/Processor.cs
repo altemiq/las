@@ -71,15 +71,12 @@ internal static class Processor
             ? ToolConstants.SystemIdentifier
             : reader.Header.SystemIdentifier + " \"" + ToolConstants.SystemIdentifier + "\"";
 
-        var extendedPointDataFormatId = GetExtendedPointDataFormatId(reader.Header.PointDataFormatId);
-        var pointDataFormatIdUpgradeRequired = reader.Header.PointDataFormatId != extendedPointDataFormatId;
-
         // set to version 1.4 and point 6+ to get layered chunks
         var builder = new HeaderBlockBuilder(reader.Header)
         {
             Version = new(1, 4),
             GlobalEncoding = GlobalEncoding.StandardGpsTime | GlobalEncoding.Wkt,
-            PointDataFormatId = extendedPointDataFormatId,
+            PointDataFormatId = GetExtendedPointDataFormatId(reader.Header.PointDataFormatId),
             GeneratingSoftware = ToolConstants.GeneratingSoftware,
             SystemIdentifier = systemIdentifier,
         };
@@ -104,13 +101,7 @@ internal static class Processor
                 var x = quantizer.GetX(point.X);
                 var y = quantizer.GetY(point.Y);
                 var cellIndex = GetCellIndex(cells, x, y);
-
-                if (pointDataFormatIdUpgradeRequired)
-                {
-                    point = PointConverter.ToExtended((IPointDataRecord)point);
-                }
-
-                writer.Write(point, record.ExtraBytes, cellIndex);
+                writer.Write(PointConverter.ToExtended(point), record.ExtraBytes, cellIndex);
             }
 
             var chunkCounts = writer.GetChunkCounts().ToArray();
@@ -195,7 +186,7 @@ internal static class Processor
             };
         }
 
-        static List<VariableLengthRecord> GetVariableLengthRecords(in HeaderBlock header, IReadOnlyList<VariableLengthRecord> records)
+        static ICollection<VariableLengthRecord> GetVariableLengthRecords(in HeaderBlock header, IReadOnlyList<VariableLengthRecord> records)
         {
             var values = records.Select(static x => x).ToList();
             var geoTiffTags = new List<VariableLengthRecord>();
@@ -211,7 +202,7 @@ internal static class Processor
                 }
 
                 // remove unwanted tags
-                if (value.IsForCloudOptimization())
+                if (value.IsForCompression() || value.IsForCloudOptimization())
                 {
                     _ = values.Remove(value);
                     continue;
@@ -239,7 +230,7 @@ internal static class Processor
             return values;
         }
 
-        static List<(ExtendedVariableLengthRecord Record, bool Special)> GetExtendedVariableLengthRecords(IReadOnlyList<ExtendedVariableLengthRecord> records)
+        static ICollection<(ExtendedVariableLengthRecord Record, bool Special)> GetExtendedVariableLengthRecords(IReadOnlyList<ExtendedVariableLengthRecord> records)
         {
             return [.. records.Where(static value => !value.IsForCompression() && !value.IsForCloudOptimization()).Select(r => (r, false))];
         }
