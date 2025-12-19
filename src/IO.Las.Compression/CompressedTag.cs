@@ -155,7 +155,7 @@ public sealed record CompressedTag : VariableLengthRecord, IReadOnlyList<LasItem
         this.Compressor = (Compressor)System.Buffers.Binary.BinaryPrimitives.ReadUInt16LittleEndian(data[..CoderOffset]);
         this.Coder = (Coder)System.Buffers.Binary.BinaryPrimitives.ReadUInt16LittleEndian(data[CoderOffset..VersionMajorOffset]);
         this.Version = new(data[VersionMajorOffset], data[VersionMinorOffset], 0, System.Buffers.Binary.BinaryPrimitives.ReadUInt16LittleEndian(data[VersionRevisionOffset..OptionsOffset]));
-        this.Options = System.Buffers.Binary.BinaryPrimitives.ReadUInt32LittleEndian(data[OptionsOffset..ChunkSizeOffset]);
+        this.Options = (LazOptions)System.Buffers.Binary.BinaryPrimitives.ReadUInt32LittleEndian(data[OptionsOffset..ChunkSizeOffset]);
 #if LAS1_4_OR_GREATER
         this.ChunkSize = (int)System.Buffers.Binary.BinaryPrimitives.ReadUInt32LittleEndian(data[ChunkSizeOffset..NumOfSpecialEvlrsOffset]);
         this.NumOfSpecialEvlrs = System.Buffers.Binary.BinaryPrimitives.ReadInt64LittleEndian(data[NumOfSpecialEvlrsOffset..OffsetToSpecialEvlrsOffset]);
@@ -228,7 +228,7 @@ public sealed record CompressedTag : VariableLengthRecord, IReadOnlyList<LasItem
     /// <summary>
     /// Gets the options.
     /// </summary>
-    public uint Options { get; init; }
+    public LazOptions Options { get; init; }
 
     /// <summary>
     /// Gets the size of the chunk.
@@ -282,7 +282,7 @@ public sealed record CompressedTag : VariableLengthRecord, IReadOnlyList<LasItem
         d[VersionMajorOffset] = (byte)this.Version.Major;
         d[VersionMinorOffset] = (byte)this.Version.Minor;
         System.Buffers.Binary.BinaryPrimitives.WriteUInt16LittleEndian(d[VersionRevisionOffset..OptionsOffset], (ushort)this.Version.Revision);
-        System.Buffers.Binary.BinaryPrimitives.WriteUInt32LittleEndian(d[OptionsOffset..ChunkSizeOffset], this.Options);
+        System.Buffers.Binary.BinaryPrimitives.WriteUInt32LittleEndian(d[OptionsOffset..ChunkSizeOffset], (uint)this.Options);
 #if LAS1_4_OR_GREATER
         System.Buffers.Binary.BinaryPrimitives.WriteUInt32LittleEndian(d[ChunkSizeOffset..NumOfSpecialEvlrsOffset], (uint)this.ChunkSize);
         System.Buffers.Binary.BinaryPrimitives.WriteInt64LittleEndian(d[NumOfSpecialEvlrsOffset..OffsetToSpecialEvlrsOffset], this.NumOfSpecialEvlrs);

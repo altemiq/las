@@ -225,7 +225,7 @@ internal static class Processor
                 values.AddRange(Geodesy.GeodesyExtensions.ToWkt(geoTiffTags));
             }
 
-            values.Add(new CompressedTag(header, extraBytesCount, Compressor.LayeredChunked) { ChunkSize = -1, Options = default, NumOfSpecialEvlrs = -1, });
+            values.Add(new CompressedTag(header, extraBytesCount, Compressor.LayeredChunked) { ChunkSize = CompressedTag.VariableChunkSize, NumOfSpecialEvlrs = -1, });
 
             return values;
         }

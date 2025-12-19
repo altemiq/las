@@ -113,7 +113,7 @@ internal sealed class LasZip
     /// <summary>
     /// Gets the options.
     /// </summary>
-    public uint Options { get; private set; }
+    public LazOptions Options { get; private set; }
 
     /// <summary>
     /// Gets the chunk size.
