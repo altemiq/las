@@ -18,16 +18,9 @@ internal sealed class LazyFormattable : IFormattable
     /// <summary>
     /// Creates a lazy formattable around the <see cref="FormattableString"/>.
     /// </summary>
-    /// <param name="formattableString">The formattable string.</param>
+    /// <param name="handler">The interpolated string handler.</param>
     /// <returns>The lazy formattable.</returns>
-    public static IFormattable Create(FormattableString formattableString) => new LazyFormattable(formattableString.ToString);
-
-    /// <summary>
-    /// Creates a lazy formattable around the format and arguments.
-    /// </summary>
-    /// <inheritdoc cref="string.Format(string, object[])"/>
-    /// <returns>The lazy formattable.</returns>
-    public static IFormattable Create(string format, params object[] args) => new LazyFormattable(formatProvider => string.Format(formatProvider, format, args));
+    public static IFormattable Create(LazyInterpolatedStringHandler handler) => new LazyFormattable(handler.ToString);
 
     /// <summary>
     /// Creates a lazy formattable around the value.
@@ -35,15 +28,6 @@ internal sealed class LazyFormattable : IFormattable
     /// <param name="value">The value.</param>
     /// <returns>The lazy formattable.</returns>
     public static IFormattable Create(string value) => new LazyFormattable(_ => value);
-
-    /// <summary>
-    /// Creates a lazy formattable around the enumerable.
-    /// </summary>
-    /// <typeparam name="T">The type of the values.</typeparam>
-    /// <param name="values">The values.</param>
-    /// <param name="format">The format to apply to each element.</param>
-    /// <returns>The lazy formattable.</returns>
-    public static IFormattable Create<T>(IEnumerable<T> values, Func<IFormatProvider?, T, string> format) => new LazyFormattable(formatProvider => string.Join(' ', values.Select(value => format(formatProvider, value))));
 
     /// <summary>
     /// Creates a lazy formattable around the function.
@@ -63,4 +47,6 @@ internal sealed class LazyFormattable : IFormattable
 
     /// <inheritdoc/>
     string IFormattable.ToString(string? format, IFormatProvider? formatProvider) => this.function(formatProvider);
+
+    private static LazyFormattable Create<T>(IEnumerable<T> values, Func<IFormatProvider?, T, string> format) => new(formatProvider => string.Join(' ', values.Select(value => format(formatProvider, value))));
 }

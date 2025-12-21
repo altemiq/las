@@ -164,8 +164,10 @@ internal sealed class LasZip
     public static ushort GetValidVersion(byte pointDataFormatId, Version version) =>
         (pointDataFormatId, version) switch
         {
-            (>= 6, { Major: 1, Minor: >= 5 }) => 4,
-            (>= 6, _) => 3,
+#pragma warning disable SA1008
+            ( >= 6, { Major: 1, Minor: >= 5 }) => 4,
+            ( >= 6, _) => 3,
+#pragma warning restore SA1008
             _ => 2,
         };
 

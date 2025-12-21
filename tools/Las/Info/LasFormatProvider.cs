@@ -23,6 +23,7 @@ internal sealed class LasFormatProvider(IFormatProvider? baseFormatProvider, ILa
     {
         GeoKeyEntry { TiffTagLocation: GeoDoubleParamsTag.TagRecordId } keyEntry => reader.GetDoubleValue(keyEntry).ToString(format, formatProvider),
         GeoKeyEntry { TiffTagLocation: GeoAsciiParamsTag.TagRecordId } keyEntry => reader.GetAsciiValue(keyEntry),
+        DateTime dateTime => string.Format(formatProvider, format is null ? "{0}/{1}" : format + "/{1}", dateTime.DayOfYear, dateTime.Year),
         IFormattable formattable => formattable.ToString(format, formatProvider),
         IConvertible convertible => convertible.ToString(formatProvider),
         not null when arg.ToString() is { } argString => argString,

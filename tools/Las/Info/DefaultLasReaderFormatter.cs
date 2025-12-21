@@ -18,18 +18,28 @@ internal class DefaultLasReaderFormatter(IFormatBuilder builder) : ILasReaderFor
         builder.AppendMajorHeader("reporting all LAS header entries:").AppendLine();
         foreach (var (header, value) in GetInformation(reader))
         {
-            if (header is null)
+            switch (header, value)
             {
-                // just data
-                builder.AppendFormat("    {0}", value);
-            }
-            else if (value is string stringValue)
-            {
-                builder.AppendHeader($"{header,-27}").AppendFormat(format: " '{0}'", stringValue);
-            }
-            else
-            {
-                builder.AppendHeader($"{header,-27}").AppendFormat(" {0}", value);
+                case (null, _):
+                    // just data
+                    builder
+                        .Append("  ")
+                        .AppendFormat("{0}", value);
+                    break;
+                case (_, string stringValue):
+                    builder
+                        .Append("  ")
+                        .AppendHeader($"{header,-27}")
+                        .Append(" ")
+                        .AppendFormat(format: "'{0}'", stringValue);
+                    break;
+                default:
+                    builder
+                        .Append("  ")
+                        .AppendHeader($"{header,-27}")
+                        .Append(" ")
+                        .AppendFormat("{0}", value);
+                    break;
             }
 
             builder.AppendLine();
@@ -46,38 +56,34 @@ internal class DefaultLasReaderFormatter(IFormatBuilder builder) : ILasReaderFor
             builder.AppendMajorHeader("variable length header record {0} of {1}:", i + 1, reader.VariableLengthRecords.Count).AppendLine();
             foreach (var (header, value) in GetInformation(reader, reader.VariableLengthRecords[i]))
             {
-                switch (header)
+                switch (header, value)
                 {
-                    case null:
+                    case (null, _):
                         // just data
-                        builder.AppendFormat(
-                            "    {0}",
-                            value);
+                        builder
+                            .Append("    ")
+                            .AppendFormat("{0}", value);
                         break;
-                    case string { Length: 0 }:
+                    case (string { Length: 0 }, _):
                         // just information
-                        builder.AppendFormat(
-                            "  {0}",
-                            value);
+                        builder
+                            .Append("  ")
+                            .AppendFormat("{0}", value);
+                        break;
+                    case (_, string stringValue):
+                        builder
+                            .Append("  ")
+                            .AppendHeader($"{header,-20}")
+                            .Append(" ")
+                            .AppendFormat(format: "'{0}'", stringValue);
                         break;
                     default:
-                        {
-                            builder.AppendHeader($"  {header,-20}");
-                            if (value is string stringValue)
-                            {
-                                builder.AppendFormat(
-                                    format: " '{0}'",
-                                    stringValue);
-                            }
-                            else
-                            {
-                                builder.AppendFormat(
-                                    " {0}",
-                                    value);
-                            }
-
-                            break;
-                        }
+                        builder
+                            .Append("  ")
+                            .AppendHeader($"{header,-20}")
+                            .Append(" ")
+                            .AppendFormat("{0}", value);
+                        break;
                 }
 
                 builder.AppendLine();
@@ -96,22 +102,34 @@ internal class DefaultLasReaderFormatter(IFormatBuilder builder) : ILasReaderFor
             builder.AppendMajorHeader("extended variable length header record {0} of {1}:", i + 1, reader.ExtendedVariableLengthRecords.Count).AppendLine();
             foreach (var (header, value) in GetInformation(reader.ExtendedVariableLengthRecords[i]))
             {
-                if (header is null)
+                switch (header, value)
                 {
-                    // just data
-                    builder.AppendFormat("    {0}", value);
-                }
-                else if (value is string stringValue)
-                {
-                    builder
-                        .Append($"  {header,-20}")
-                        .AppendFormat(format: " '{0}'", stringValue);
-                }
-                else
-                {
-                    builder
-                        .Append($"  {header,-20}")
-                        .AppendFormat(" {0}", value);
+                    case (null, _):
+                        // just data
+                        builder
+                            .Append("    ")
+                            .AppendFormat("{0}", value);
+                        break;
+                    case (string { Length: 0 }, _):
+                        // just information
+                        builder
+                            .Append("  ")
+                            .AppendFormat("{0}", value);
+                        break;
+                    case (_, string stringValue):
+                        builder
+                            .Append("  ")
+                            .AppendHeader($"{header,-20}")
+                            .Append(" ")
+                            .AppendFormat(format: "'{0}'", stringValue);
+                        break;
+                    default:
+                        builder
+                            .Append("  ")
+                            .AppendHeader($"{header,-20}")
+                            .Append(" ")
+                            .AppendFormat("{0}", value);
+                        break;
                 }
 
                 builder.AppendLine();
@@ -129,27 +147,28 @@ internal class DefaultLasReaderFormatter(IFormatBuilder builder) : ILasReaderFor
 
         var statistics = statisticsFunc(reader);
 
-        _ = builder.AppendHeader("  X").AppendFormat("{0,20}{1,11}", statistics.X.Minimum, statistics.X.Maximum).AppendLine()
-            .AppendHeader("  Y").AppendFormat("{0,20}{1,11}", statistics.Y.Minimum, statistics.Y.Maximum).AppendLine()
-            .AppendHeader("  Z").AppendFormat("{0,20}{1,11}", statistics.Z.Minimum, statistics.Z.Maximum).AppendLine()
-            .AppendHeader("  intensity").AppendFormat("{0,12}{1,11}", statistics.Intensity.Minimum, statistics.Intensity.Maximum).AppendLine()
-            .AppendHeader("  return_number").AppendFormat("{0,8}{1,11}", statistics.ReturnNumber.Minimum, statistics.ReturnNumber.Maximum).AppendLine()
-            .AppendHeader("  number_of_returns").AppendFormat("{0,4}{1,11}", statistics.NumberOfReturns.Minimum, statistics.NumberOfReturns.Maximum).AppendLine()
-            .AppendHeader("  edge_of_flight_line").AppendFormat("{0,2}{1,11}", 0, statistics.EdgeOfFlightLine ? 1 : 0).AppendLine()
-            .AppendHeader("  scan_direction_flag").AppendFormat("{0,2}{1,11}", 0, statistics.ScanDirectionFlag ? 1 : 0).AppendLine()
-            .AppendHeader("  classification").AppendFormat("{0,7}{1,11}", statistics.Classification.Minimum, statistics.Classification.Maximum).AppendLine();
+        _ = builder
+            .Append("  ").AppendHeader("X          ").AppendFormat("{0,10} {1,10}", statistics.X.Minimum, statistics.X.Maximum).AppendLine()
+            .Append("  ").AppendHeader("Y          ").AppendFormat("{0,10} {1,10}", statistics.Y.Minimum, statistics.Y.Maximum).AppendLine()
+            .Append("  ").AppendHeader("Z          ").AppendFormat("{0,10} {1,10}", statistics.Z.Minimum, statistics.Z.Maximum).AppendLine()
+            .Append("  ").AppendHeader("intensity  ").AppendFormat("{0,10} {1,10}", statistics.Intensity.Minimum, statistics.Intensity.Maximum).AppendLine()
+            .Append("  ").AppendHeader("return_number       ").AppendFormat("{0} {1,10}", statistics.ReturnNumber.Minimum, statistics.ReturnNumber.Maximum).AppendLine()
+            .Append("  ").AppendHeader("number_of_returns   ").AppendFormat("{0} {1,10}", statistics.NumberOfReturns.Minimum, statistics.NumberOfReturns.Maximum).AppendLine()
+            .Append("  ").AppendHeader("edge_of_flight_line ").AppendFormat("{0} {1,10}", 0, statistics.EdgeOfFlightLine ? 1 : 0).AppendLine()
+            .Append("  ").AppendHeader("scan_direction_flag ").AppendFormat("{0} {1,10}", 0, statistics.ScanDirectionFlag ? 1 : 0).AppendLine()
+            .Append("  ").AppendHeader("classification  ").AppendFormat("{0,5} {1,10}", statistics.Classification.Minimum, statistics.Classification.Maximum).AppendLine();
         if (statistics.ScanAngleRank is { } scanAngleRank)
         {
-            _ = builder.AppendHeader("  scan_angle_rank").AppendFormat("{0,6}{1,11}", scanAngleRank.Minimum, scanAngleRank.Maximum).AppendLine();
+            _ = builder.Append("  ").AppendHeader("scan_angle ").AppendFormat("{0,10} {1,10}", scanAngleRank.Minimum, scanAngleRank.Maximum).AppendLine();
         }
 
         _ = builder
-            .AppendHeader("  user_data").AppendFormat("{0,12}{1,11}", statistics.UserData.Minimum, statistics.UserData.Maximum).AppendLine()
-            .AppendHeader("  point_source_ID").AppendFormat("{0,6}{1,11}", statistics.PointSourceId.Minimum, statistics.PointSourceId.Maximum).AppendLine();
+            .Append("  ").AppendHeader("user_data       ").AppendFormat("{0,5} {1,10}", statistics.UserData.Minimum, statistics.UserData.Maximum).AppendLine()
+            .Append("  ").AppendHeader("point_source_ID ").AppendFormat("{0,5} {1,10}", statistics.PointSourceId.Minimum, statistics.PointSourceId.Maximum).AppendLine();
 
         if (statistics.Gps is { } gps)
         {
-            builder.AppendHeader("  gps_time").AppendFormat(" {0:0.000000} {1:0.000000}", gps.Minimum, gps.Maximum).AppendLine();
+            builder.Append("  ").AppendHeader("gps_time ").AppendFormat("{0:0.000000} {1:0.000000}", gps.Minimum, gps.Maximum).AppendLine();
 #if LAS1_2_OR_GREATER
             if (!reader.Header.GlobalEncoding.HasFlag(GlobalEncoding.StandardGpsTime) && (gps.Minimum < 0.0 || gps.Maximum > 604800.0))
             {
@@ -162,47 +181,79 @@ internal class DefaultLasReaderFormatter(IFormatBuilder builder) : ILasReaderFor
         if (statistics.WavePacketDescriptorIndex is not null)
         {
             builder
-                .AppendHeader("  Wavepacket ")
-                .AppendMinorHeader("Index    ")
+                .Append("  ")
+                .AppendHeader("Wavepacket")
+                .Append(" ")
+                .AppendMinorHeader("Index")
+                .Append("    ")
                 .AppendFormat("{0} {1}", statistics.WavePacketDescriptorIndex.Minimum, statistics.WavePacketDescriptorIndex.Maximum).AppendLine();
         }
 
         if (statistics.ByteOffsetToWaveformData is not null)
         {
-            builder.AppendMinorHeader("             Offset   ").AppendFormat("{0} {1}", statistics.ByteOffsetToWaveformData.Minimum, statistics.ByteOffsetToWaveformData.Maximum).AppendLine();
+            builder
+                .Append("             ")
+                .AppendMinorHeader("Offset")
+                .Append(" ")
+                .AppendFormat("{0} {1}", statistics.ByteOffsetToWaveformData.Minimum, statistics.ByteOffsetToWaveformData.Maximum).AppendLine();
         }
 
         if (statistics.WaveformPacketSizeInBytes is not null)
         {
-            builder.AppendMinorHeader("             Size     ").AppendFormat("{0} {1}", statistics.WaveformPacketSizeInBytes.Minimum, statistics.WaveformPacketSizeInBytes.Maximum).AppendLine();
+            builder
+                .Append("             ")
+                .AppendMinorHeader("Size")
+                .Append(" ")
+                .AppendFormat("{0} {1}", statistics.WaveformPacketSizeInBytes.Minimum, statistics.WaveformPacketSizeInBytes.Maximum).AppendLine();
         }
 
         if (statistics.ReturnPointWaveformLocation is not null)
         {
-            builder.AppendMinorHeader("             Location ").AppendFormat("{0} {1}", statistics.ReturnPointWaveformLocation.Minimum, statistics.ReturnPointWaveformLocation.Maximum).AppendLine();
+            builder
+                .Append("             ")
+                .AppendMinorHeader("Location")
+                .Append(" ")
+                .AppendFormat("{0} {1}", statistics.ReturnPointWaveformLocation.Minimum, statistics.ReturnPointWaveformLocation.Maximum).AppendLine();
         }
 
         if (statistics.ParametricDx is not null)
         {
-            builder.AppendMinorHeader("             Xt       ").AppendFormat("{0} {1}", statistics.ParametricDx.Minimum, statistics.ParametricDx.Maximum).AppendLine();
+            builder
+                .Append("             ")
+                .AppendMinorHeader("Xt")
+                .Append("       ")
+                .AppendFormat("{0} {1}", statistics.ParametricDx.Minimum, statistics.ParametricDx.Maximum).AppendLine();
         }
 
         if (statistics.ParametricDy is not null)
         {
-            builder.AppendMinorHeader("             Yt       ").AppendFormat("{0} {1}", statistics.ParametricDy.Minimum, statistics.ParametricDy.Maximum).AppendLine();
+            builder
+                .Append("             ")
+                .AppendMinorHeader("Yt")
+                .Append("       ")
+                .AppendFormat("{0} {1}", statistics.ParametricDy.Minimum, statistics.ParametricDy.Maximum).AppendLine();
         }
 
         if (statistics.ParametricDz is not null)
         {
-            builder.AppendMinorHeader("             Zt       ").AppendFormat("{0} {1}", statistics.ParametricDz.Minimum, statistics.ParametricDz.Maximum).AppendLine();
+            builder
+                .Append("             ")
+                .AppendMinorHeader("Zt")
+                .Append("       ")
+                .AppendFormat("{0} {1}", statistics.ParametricDz.Minimum, statistics.ParametricDz.Maximum).AppendLine();
         }
 #endif
 
 #if LAS1_4_OR_GREATER
         if (statistics.ScanAngle is not null)
         {
-            builder.AppendHeader("  extended_classification").AppendFormat("{0,10}{1,7}", statistics.Classification.Minimum, statistics.Classification.Maximum).AppendLine();
-            builder.AppendHeader("  extended_scan_angle").AppendFormat("{0,14}{1,7}", statistics.ScanAngle.Minimum, statistics.ScanAngle.Maximum).AppendLine();
+            builder.Append("  ").AppendHeader("extended_classification   ").AppendFormat("{0,7}{1,7}", statistics.Classification.Minimum, statistics.Classification.Maximum).AppendLine();
+            builder.Append("  ").AppendHeader("extended_scan_angle       ").AppendFormat("{0,7:0.000}{1,7:0.000}", statistics.ScanAngle.Minimum * 180D / 30000D, statistics.ScanAngle.Maximum * 180D / 30000D).AppendLine();
+        }
+
+        if (statistics.ScannerChannel is not null)
+        {
+            builder.Append("  ").AppendHeader("extended_scanner_channel  ").AppendFormat("{0,7}{1,7}", statistics.ScannerChannel.Minimum, statistics.ScannerChannel.Maximum).AppendLine();
         }
 
         if (reader.VariableLengthRecords.OfType<ExtraBytes>().FirstOrDefault() is { } extraBytesRecord)
@@ -210,7 +261,7 @@ internal class DefaultLasReaderFormatter(IFormatBuilder builder) : ILasReaderFor
             var index = default(int);
             foreach (var extraByte in statistics.ExtraBytes)
             {
-                builder.AppendHeader("  attribute{0}", index).AppendFormat("{0,11:0.###}{1,11:0.###}  ('{2}')", extraByte.Minimum, extraByte.Maximum, extraBytesRecord[index].Name).AppendLine();
+                builder.Append("  ").AppendHeader("attribute{0}", index).AppendFormat("{0,11:0.###}{1,11:0.###}  ('{2}')", extraByte.Minimum, extraByte.Maximum, extraBytesRecord[index].Name).AppendLine();
                 index++;
             }
         }
@@ -348,13 +399,12 @@ internal class DefaultLasReaderFormatter(IFormatBuilder builder) : ILasReaderFor
                     continue;
                 }
 
-                builder.Append(" ");
-                builder.AppendCaption("{0,15}", value)
-                    .Append("  ");
                 builder
+                    .Append(" ")
+                    .AppendCaption("{0,15}", value)
+                    .Append("  ")
                     .AppendValue("extended classification")
-                    .Append(" (");
-                builder
+                    .Append(" (")
                     .AppendCount("{0}", i)
                     .AppendLine(")");
             }
@@ -372,20 +422,20 @@ internal class DefaultLasReaderFormatter(IFormatBuilder builder) : ILasReaderFor
         yield return ("global_encoding:", (ushort)header.GlobalEncoding);
 #endif
         yield return ("project ID GUID data 1-4:", header.ProjectId);
-        yield return ("version major.minor:", FormatVersion(header.Version));
+        yield return ("version major.minor:", LazyFormattable.Create(header.Version.ToString(2)));
         yield return ("system identifier:", header.SystemIdentifier);
         yield return ("generating software:", header.GeneratingSoftware);
-        yield return ("file creation day/year:", FormatDate(header.FileCreation));
+        yield return ("file creation day/year:", header.FileCreation.GetValueOrDefault());
         yield return ("offset to point data:", GetOffsetToPointData(reader));
         yield return ("number var. length records:", reader.VariableLengthRecords.Count);
         yield return ("point data format:", header.PointDataFormatId);
         yield return ("point data record length:", GetPointDataLength(reader));
 #if LAS1_4_OR_GREATER
         yield return ("number of point records:", header.LegacyNumberOfPointRecords);
-        yield return ("number of points by return:", FormatArray(header.LegacyNumberOfPointsByReturn));
+        yield return ("number of points by return:", LazyFormattable.Create(header.LegacyNumberOfPointsByReturn));
 #else
         yield return ("number of point records:", header.NumberOfPointRecords);
-        yield return ("number of points by return:", FormatArray(header.NumberOfPointsByReturn));
+        yield return ("number of points by return:", LazyFormattable.Create(header.NumberOfPointsByReturn));
 #endif
         yield return ("scale factor x y z:", FormatPoint(header.ScaleFactor));
         yield return ("offset x y z:", FormatPoint(header.Offset));
@@ -396,26 +446,9 @@ internal class DefaultLasReaderFormatter(IFormatBuilder builder) : ILasReaderFor
         {
             yield return ("number of extended_variable length records:", reader.ExtendedVariableLengthRecords.Count);
             yield return ("extended number of point records:", header.RawNumberOfPointRecords);
-            yield return ("extended number of points by return:", FormatArray(header.RawNumberOfPointsByReturn));
+            yield return ("extended number of points by return:", LazyFormattable.Create(header.RawNumberOfPointsByReturn));
         }
 #endif
-
-        static IFormattable FormatVersion(Version version)
-        {
-            return LazyFormattable.Create(version.ToString(2));
-        }
-
-        static IFormattable FormatArray<T>(IEnumerable<T> statistics)
-            where T : IConvertible
-        {
-            return LazyFormattable.Create(statistics);
-        }
-
-        static IFormattable FormatDate(DateTime? dateTime)
-        {
-            var (dayOfYear, year) = dateTime.HasValue ? (dateTime.Value.DayOfYear, dateTime.Value.Year) : default;
-            return LazyFormattable.Create((FormattableString)$"{dayOfYear}/{year}");
-        }
 
         static IFormattable FormatPoint(Vector3D point, Vector3D? scaleFactor = default)
         {
@@ -423,13 +456,22 @@ internal class DefaultLasReaderFormatter(IFormatBuilder builder) : ILasReaderFor
             var y = point.Y;
             var z = point.Z;
 
-            if (scaleFactor is not { } vector)
-            {
-                return LazyFormattable.Create((FormattableString)$"{x} {y} {z}");
-            }
+            return scaleFactor is { } vector
+                ? LazyFormattable.Create(Create(x, y, z, vector))
+                : LazyFormattable.Create($"{x} {y} {z}");
 
-            var format = string.Concat("{0", Format(vector.X), "} {1", Format(vector.Y), "} {2", Format(vector.Z), "}");
-            return LazyFormattable.Create(format, x, y, z);
+            static LazyInterpolatedStringHandler Create(double x, double y, double z, Vector3D scaleFactor)
+            {
+                var handler = new LazyInterpolatedStringHandler(2, 3);
+
+                handler.AppendFormatted(x, GetFormat(scaleFactor.X));
+                handler.AppendLiteral(" ");
+                handler.AppendFormatted(y, GetFormat(scaleFactor.Y));
+                handler.AppendLiteral(" ");
+                handler.AppendFormatted(z, GetFormat(scaleFactor.Z));
+
+                return handler;
+            }
         }
 
         [System.Runtime.CompilerServices.UnsafeAccessor(System.Runtime.CompilerServices.UnsafeAccessorKind.Field, Name = "offsetToPointData")]
@@ -533,39 +575,33 @@ internal class DefaultLasReaderFormatter(IFormatBuilder builder) : ILasReaderFor
 
         static IEnumerable<(object? Header, object? Value)> GetGeoAsciiParamsTag(GeoAsciiParamsTag record)
         {
-            yield return (default, LazyFormattable.Create("GeoAsciiParamsTag (number of characters {0})", record.Header.RecordLengthAfterHeader));
-            var stringBuilder = new System.Text.StringBuilder();
-            foreach (var item in record)
+            yield return (default, LazyFormattable.Create($"GeoAsciiParamsTag (number of characters {record.Header.RecordLengthAfterHeader})"));
+            yield return (default, LazyFormattable.Create(_ =>
             {
-                stringBuilder.Append(item).Append('|');
-            }
+                var stringBuilder = new System.Text.StringBuilder();
+                foreach (var item in record)
+                {
+                    stringBuilder.Append(item).Append('|');
+                }
 
-            yield return (default, LazyFormattable.Create("  " + stringBuilder));
+                return "  " + stringBuilder;
+            }));
         }
 
         static IEnumerable<(object? Header, object? Value)> GetGeoDoubleParamsTag(GeoDoubleParamsTag record)
         {
-            yield return (default, LazyFormattable.Create("GeoDoubleParamsTag  (number of doubles {0})", record.Count));
-            yield return (default, LazyFormattable.Create(GetEnumerable()));
-
-            IEnumerable<double> GetEnumerable()
-            {
-                var count = record.Count;
-                for (var i = 0; i < count; i++)
-                {
-                    yield return record[i];
-                }
-            }
+            yield return (default, LazyFormattable.Create($"GeoDoubleParamsTag  (number of doubles {record.Count})"));
+            yield return (default, LazyFormattable.Create(record));
         }
 
         static IEnumerable<(object? Header, object? Value)> GetGeoKeyDirectoryTag(GeoKeyDirectoryTag record, GeoDoubleParamsTag? geoDoubleValue, GeoAsciiParamsTag? geoAsciiValue)
         {
             var version = record.Version;
-            yield return (default, LazyFormattable.Create("GeoKeyDirectoryTag version {0} number of keys {1}", version, record.Count));
+            yield return (default, LazyFormattable.Create($"GeoKeyDirectoryTag version {version} number of keys {record.Count}"));
 
             foreach (var key in record)
             {
-                yield return (default, LazyFormattable.Create("  key {0} tiff_tag_location {1} count {2} value_offset {3} - {4}: {5}", (ushort)key.KeyId, key.TiffTagLocation, key.Count, key.ValueOffset, key.KeyId, GetValueCore(key, geoDoubleValue, geoAsciiValue)));
+                yield return (default, LazyFormattable.Create($"  key {(ushort)key.KeyId} tiff_tag_location {key.TiffTagLocation} count {key.Count} value_offset {key.ValueOffset} - {key.KeyId}: {GetValueCore(key, geoDoubleValue, geoAsciiValue)}"));
 
                 static string GetValueCore(GeoKeyEntry key, GeoDoubleParamsTag? geoDoubleValue, GeoAsciiParamsTag? geoAsciiValue)
                 {
@@ -577,16 +613,7 @@ internal class DefaultLasReaderFormatter(IFormatBuilder builder) : ILasReaderFor
 
         static IEnumerable<(object? Header, object? Value)> GetCompressedTag(CompressedTag record)
         {
-            yield return (default, LazyFormattable.Create($"LASzip compression (version {record.Version.Major}.{record.Version.Minor}r{record.Version.Revision} c{(ushort)record.Compressor} {record.ChunkSize}): {string.Join(' ', GetItemValues(record))}"));
-
-            static IEnumerable<object> GetItemValues(IEnumerable<LasItem> items)
-            {
-                foreach (var item in items)
-                {
-                    yield return item.Name;
-                    yield return item.Version;
-                }
-            }
+            yield return (default, LazyFormattable.Create($"LASzip compression (version {record.Version.ToString(2)}r{record.Version.Revision} c{(ushort)record.Compressor} {record.ChunkSize}): {string.Join(' ', record.SelectMany<LasItem, object>(item => [item.Name, item.Version]))}"));
         }
 
 #if LAS1_4_OR_GREATER
@@ -606,22 +633,32 @@ internal class DefaultLasReaderFormatter(IFormatBuilder builder) : ILasReaderFor
 #if LAS1_3_OR_GREATER
         static IEnumerable<(object? Header, object? Value)> GetWaveformPacketDescriptor(WaveformPacketDescriptor record)
         {
-            yield return (string.Empty,
-                string.Create(
-                    System.Globalization.CultureInfo.InvariantCulture,
-                    $"index {record.Header.RecordId - WaveformPacketDescriptor.MinTagRecordId + 1} bits/sample {record.BitsPerSample} compression {record.WaveformCompressionType} samples {record.NumberOfSamples} temporal {record.TemporalSampleSpacing} gain {record.DigitizerGain}, offset {record.DigitizerOffset}"));
+            yield return (string.Empty, LazyFormattable.Create($"index {record.Header.RecordId - WaveformPacketDescriptor.MinTagRecordId + 1} bits/sample {record.BitsPerSample} compression {record.WaveformCompressionType} samples {record.NumberOfSamples} temporal {record.TemporalSampleSpacing} gain {record.DigitizerGain}, offset {record.DigitizerOffset}"));
         }
 #endif
 
 #if LAS1_4_OR_GREATER
         static IEnumerable<(object? Header, object? Value)> GetCopcInfo(HeaderBlock header, Cloud.CopcInfo record)
         {
-            var centerFormat = string.Concat("center x y z: {0", Format(header.ScaleFactor.X), "} {1", Format(header.ScaleFactor.Y), "} {2", Format(header.ScaleFactor.Z), "}");
-            yield return (default, string.Format(System.Globalization.CultureInfo.InvariantCulture, centerFormat, record.CentreX, record.CentreY, record.CentreZ));
-            yield return (default, string.Create(System.Globalization.CultureInfo.InvariantCulture, $"root node halfsize: {record.HalfSize:0.000}"));
-            yield return (default, string.Create(System.Globalization.CultureInfo.InvariantCulture, $"root node point spacing: {record.Spacing:0.000}"));
-            yield return (default, string.Create(System.Globalization.CultureInfo.InvariantCulture, $"gpstime min/max: {record.GpsTimeMinimum:0.00}/{record.GpsTimeMaximum:0.00}"));
-            yield return (default, string.Create(System.Globalization.CultureInfo.InvariantCulture, $"root hierarchy offset/size: {record.RootHierOffset}/{record.RootHierSize}"));
+            yield return (default, LazyFormattable.Create(Create(record.CentreX, record.CentreY, record.CentreZ, header.ScaleFactor)));
+            yield return (default, LazyFormattable.Create($"root node halfsize: {record.HalfSize:0.000}"));
+            yield return (default, LazyFormattable.Create($"root node point spacing: {record.Spacing:0.000}"));
+            yield return (default, LazyFormattable.Create($"gpstime min/max: {record.GpsTimeMinimum:0.00}/{record.GpsTimeMaximum:0.00}"));
+            yield return (default, LazyFormattable.Create($"root hierarchy offset/size: {record.RootHierOffset}/{record.RootHierSize}"));
+
+            static LazyInterpolatedStringHandler Create(double x, double y, double z, Vector3D scaleFactor)
+            {
+                var handler = new LazyInterpolatedStringHandler(2, 3);
+
+                handler.AppendLiteral("center x y z: ");
+                handler.AppendFormatted(x, GetFormat(scaleFactor.X));
+                handler.AppendLiteral(" ");
+                handler.AppendFormatted(y, GetFormat(scaleFactor.Y));
+                handler.AppendLiteral(" ");
+                handler.AppendFormatted(z, GetFormat(scaleFactor.Z));
+
+                return handler;
+            }
         }
 #endif
 
@@ -639,10 +676,7 @@ internal class DefaultLasReaderFormatter(IFormatBuilder builder) : ILasReaderFor
                     (float)(max.Y - maximumY))
                 : default;
 
-            yield return (string.Empty,
-                string.Create(
-                    System.Globalization.CultureInfo.InvariantCulture,
-                    $"LAStiling (idx {record.LevelIndex}, lvl {record.Level}, sub {record.ImplicitLevels}, bbox {record.MinX} {record.MinY} {record.MaxX} {record.MaxY}{(record.Buffer ? ", buffer" : string.Empty)}{(record.Reversible ? ", reversible" : string.Empty)}) (size {maximumX - minimumX} x {maximumY - minimumY}, buffer {buffer})"));
+            yield return (string.Empty, LazyFormattable.Create($"LAStiling (idx {record.LevelIndex}, lvl {record.Level}, sub {record.ImplicitLevels}, bbox {record.MinX} {record.MinY} {record.MaxX} {record.MaxY}{(record.Buffer ? ", buffer" : string.Empty)}{(record.Reversible ? ", reversible" : string.Empty)}) (size {maximumX - minimumX} x {maximumY - minimumY}, buffer {buffer})"));
         }
     }
 
@@ -675,7 +709,7 @@ internal class DefaultLasReaderFormatter(IFormatBuilder builder) : ILasReaderFor
             }
 
             var maxOctreeLevel = root.Max(static e => e.Key.Level) + 1;
-            yield return (default, string.Create(System.Globalization.CultureInfo.InvariantCulture, $"Octree with {maxOctreeLevel} levels"));
+            yield return (default, LazyFormattable.Create($"Octree with {maxOctreeLevel} levels"));
 
             var pointCount = new uint[maxOctreeLevel];
             var voxelCount = new uint[maxOctreeLevel];
@@ -691,23 +725,23 @@ internal class DefaultLasReaderFormatter(IFormatBuilder builder) : ILasReaderFor
             {
                 if (pointCount[i] is not 0)
                 {
-                    yield return (default, string.Create(System.Globalization.CultureInfo.InvariantCulture, $"Level {i}: {pointCount[i]} points in {voxelCount[i]} voxels"));
+                    yield return (default, LazyFormattable.Create($"Level {i} : {pointCount[i]} points in {voxelCount[i]} voxels"));
                 }
             }
         }
     }
 #endif
 
-    private static string Format(double precision) => precision switch
+    private static string? GetFormat(double precision) => precision switch
     {
-        0.1 or 0.5 => ":0.0",
-        0.01 or 0.25 => ":0.00",
-        0.001 or 0.002 or 0.005 or 0.025 or 0.125 => ":0.000",
-        0.0001 or 0.0002 or 0.0005 or 0.0025 => ":0.0000",
-        0.00001 or 0.00002 or 0.00005 or 0.00025 => ":0.00000",
-        0.000001 => ":0.000000",
-        0.0000001 => ":0.0000000",
-        0.00000001 => ":0.00000000",
-        _ => string.Empty,
+        0.1 or 0.5 => "0.0",
+        0.01 or 0.25 => "0.00",
+        0.001 or 0.002 or 0.005 or 0.025 or 0.125 => "0.000",
+        0.0001 or 0.0002 or 0.0005 or 0.0025 => "0.0000",
+        0.00001 or 0.00002 or 0.00005 or 0.00025 => "0.00000",
+        0.000001 => "0.000000",
+        0.0000001 => "0.0000000",
+        0.00000001 => "0.00000000",
+        _ => default,
     };
 }

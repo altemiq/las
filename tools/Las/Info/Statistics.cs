@@ -24,6 +24,7 @@ internal sealed record Statistics(
     IMinMax<ushort> PointSourceId,
 #if LAS1_4_OR_GREATER
     IMinMax<short>? ScanAngle,
+    IMinMax<byte>? ScannerChannel,
 #endif
     IMinMax<double>? Gps,
 #if LAS1_3_OR_GREATER

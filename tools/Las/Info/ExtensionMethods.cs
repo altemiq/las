@@ -80,6 +80,7 @@ internal static class ExtensionMethods
         var pointSourceId = MinMax.Create<ushort>();
 #if LAS1_4_OR_GREATER
         IMinMax<short>? scanAngle = default;
+        IMinMax<byte>? scannerChannel = default;
 #endif
         IMinMax<double>? gps = default;
 #if LAS1_3_OR_GREATER
@@ -173,6 +174,9 @@ internal static class ExtensionMethods
                         classification.Update(classificationValue);
                         scanAngle.Update(extendedPointDataRecord.ScanAngle);
 
+                        scannerChannel ??= MinMax.Create<byte>();
+                        scanAngle.Update(extendedPointDataRecord.ScannerChannel);
+
                         histogram[classificationValue]++;
                         break;
                     }
@@ -244,6 +248,7 @@ internal static class ExtensionMethods
             pointSourceId,
 #if LAS1_4_OR_GREATER
             scanAngle,
+            scannerChannel,
 #endif
             gps,
 #if LAS1_3_OR_GREATER
