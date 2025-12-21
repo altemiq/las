@@ -29,6 +29,7 @@
     <!-- Remove extended point data records for versions below 1.4 -->
     <Compile Remove="**\*Extended*Point*.cs" />
     <Compile Remove="**\ExtendedVariableLengthRecord*.cs" />
+    <Compile Remove="**\PointConverterTests.cs" />
   </ItemGroup>
 
 </Project>

@@ -26,10 +26,6 @@
     <IsPublishable>false</IsPublishable>
   </PropertyGroup>
 
-  <ItemGroup Condition=" '$(SupportLas14)' != 'true' ">
-    <Compile Remove="@(Compile)" />
-  </ItemGroup>
-
   <ItemGroup>
     <PackageReference Include="Meziantou.Polyfill">
       <PrivateAssets>all</PrivateAssets>
@@ -48,5 +44,17 @@
   <ItemGroup>
     <None Include="README.md" Pack="true" PackagePath="\"/>
   </ItemGroup>
+  
+  <Target Name="_SetNoBuild"
+          BeforeTargets="_SetBuildInnerTarget"
+          Condition=" '$(SupportLas14)' != 'true' ">
+    <PropertyGroup>
+      <InnerTargets>NoBuild</InnerTargets>
+    </PropertyGroup>
+  </Target>
+  
+  <Target Name="NoBuild">
+    <Message Importance="high" Text="Skipping build for $(MSBuildProjectName) due to LAS 1.4 not being supported." />    
+  </Target>
 
 </Project>

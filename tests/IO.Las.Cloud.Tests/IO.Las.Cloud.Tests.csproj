@@ -3,23 +3,26 @@
   <PropertyGroup>
     <TargetFrameworks>net10.0;net9.0;net8.0</TargetFrameworks>
     <TargetFrameworks Condition=" '$(NetCoreOnly)' != 'true' ">$(TargetFrameworks);net472</TargetFrameworks>
-    <IsTestProject Condition=" '$(SupportLas14)' != 'true' ">false</IsTestProject>
   </PropertyGroup>
 
-  <ItemGroup Condition=" '$(SupportLas14)' != 'true' ">
-    <Compile Remove="@(Compile)" />
-  </ItemGroup>
-
-  <ItemGroup Condition=" '@(Compile)' == '' ">
-    <Compile Include="..\Program.cs" />
-  </ItemGroup>
-
-  <ItemGroup Condition=" '$(IsTestProject)' != 'false' ">
+  <ItemGroup Condition=" '$(SupportLas14)' == 'true' ">
     <PackageReference Include="TUnit" />
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\..\src\IO.Las.Cloud\IO.Las.Cloud.csproj" Condition=" '$(SupportLas14)' == 'true' " />
+    <ProjectReference Include="..\..\src\IO.Las.Cloud\IO.Las.Cloud.csproj" />
   </ItemGroup>
 
+  <Target Name="_SetNoBuild"
+          BeforeTargets="_SetBuildInnerTarget"
+          Condition=" '$(SupportLas14)' != 'true' ">
+    <PropertyGroup>
+      <InnerTargets>NoBuild</InnerTargets>
+    </PropertyGroup>
+  </Target>
+
+  <Target Name="NoBuild">
+    <Message Importance="high" Text="Skipping build for $(MSBuildProjectName) due to LAS 1.4 not being supported." />
+  </Target>
+  
 </Project>

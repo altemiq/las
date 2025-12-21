@@ -59,7 +59,7 @@
   </ItemGroup>
 
   <ItemGroup Condition=" !$([MSBuild]::IsTargetFrameworkCompatible('$(TargetFramework)', 'netcoreapp1.0')) AND $([MSBuild]::IsTargetFrameworkCompatible('$(TargetFramework)', 'netstandard2.1')) ">
-    <PackageReference Include="System.Runtime.CompilerServices.Unsafe" VersionOverride="4.5.0" />
+    <PackageReference Include="System.Runtime.CompilerServices.Unsafe" VersionOverride="4.5.3" />
   </ItemGroup>
 
   <ItemGroup Condition=" !$([MSBuild]::IsTargetFrameworkCompatible('$(TargetFramework)', 'net7.0')) ">
@@ -83,7 +83,7 @@
     <!-- Remove global encoding -->
     <Compile Remove="**\GlobalEncoding.cs" />
 
-    <!-- Remove v1.3 specific resources -->
+    <!-- Remove v1.2 specific resources -->
     <EmbeddedResource Remove="Properties\v1.2\*.resx" />
     <None Remove="Properties\v1.2\*.xml" />
   </ItemGroup>

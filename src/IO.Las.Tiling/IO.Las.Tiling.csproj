@@ -5,20 +5,13 @@
     <RootNamespace>$(RootNamespace.Replace('.Tiling', ''))</RootNamespace>
     <MeziantouPolyfill_IncludedPolyfills>
       $(MeziantouPolyfill_IncludedPolyfills)|
-      T:System.Index|
-      T:System.Range|
       T:System.Diagnostics.CodeAnalysis.DoesNotReturnAttribute|
       T:System.Diagnostics.CodeAnalysis.NotNullWhenAttribute|
+      T:System.Index|
+      T:System.Range|
       T:System.Runtime.CompilerServices.IsExternalInit|
     </MeziantouPolyfill_IncludedPolyfills>
   </PropertyGroup>
-
-  <ItemGroup>
-    <PackageReference Include="Meziantou.Polyfill">
-      <PrivateAssets>all</PrivateAssets>
-      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
-    </PackageReference>
-  </ItemGroup>
 
   <PropertyGroup Label="Packaging">
     <_Tag>Tiling</_Tag>
@@ -28,6 +21,13 @@
     <PackageTags>$(PackageTags);$(_Tag)</PackageTags>
     <PackageLicenseExpression>LGPL-2.1-only</PackageLicenseExpression>
   </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Meziantou.Polyfill">
+      <PrivateAssets>all</PrivateAssets>
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+    </PackageReference>
+  </ItemGroup>
 
   <ItemGroup>
     <ProjectReference Include="..\IO.Las\IO.Las.csproj" />

@@ -9,7 +9,7 @@
 
   <ItemGroup>
     <PackageVersion Include="Polyfill" Version="8.9.1" />
-    <PackageVersion Include="TUnit" Version="1.5.60" />
+    <PackageVersion Include="TUnit" Version="1.6.5" />
   </ItemGroup>
 
   <ItemGroup Label="SQLite">
