@@ -2,7 +2,7 @@
   <Import Project="$([MSBuild]::GetPathOfFileAbove('$(MSBuildThisFileName.Replace('Build', 'Versions'))$(MSBuildThisFileExtension)', '$(MSBuildThisFileDirectory)'))" />
 
   <PropertyGroup>
-    <MinorVersion>1</MinorVersion>
+    <MinorVersion>0</MinorVersion>
     <VersionPrefix Condition="'$(VersionPrefix)' == ''">$(MaximumLasVersion).$(MinorVersion)</VersionPrefix>
 
     <NeutralLanguage>en</NeutralLanguage>
