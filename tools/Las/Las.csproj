@@ -4,12 +4,20 @@
     <OutputType>Exe</OutputType>
     <TargetFramework>$(DefaultTargetFramework)</TargetFramework>
     
-    <!-- packaging -->
-    <EnableSdkContainerSupport>true</EnableSdkContainerSupport>
-    <ContainerDescription>Container for the `las` executable</ContainerDescription>
-
     <!-- turn off buggy analyzer -->
     <NoWarn>$(NoWarn);S1117</NoWarn>
+  </PropertyGroup>
+  
+  <PropertyGroup Label="Publishing">
+    <PublishAot>true</PublishAot>
+    <PublishDocumentationFile>false</PublishDocumentationFile>
+    <PublishReferencesDocumentationFiles>false</PublishReferencesDocumentationFiles>    
+  </PropertyGroup>
+  
+  <PropertyGroup Label="Packaging">
+    <ContainerImageFormat>OCI</ContainerImageFormat>
+    <EnableSdkContainerSupport>true</EnableSdkContainerSupport>
+    <ContainerDescription>Container for the `las` executable</ContainerDescription>    
   </PropertyGroup>
 
   <ItemGroup Condition=" '$(SupportLas14)' != 'true' ">
