@@ -6,8 +6,6 @@
 
 namespace Altemiq.IO.Las;
 
-using Microsoft.Extensions.DependencyInjection;
-
 /// <summary>
 /// The <see cref="File"/> extension methods.
 /// </summary>
@@ -20,7 +18,7 @@ internal static class FileExtensions
         /// </summary>
         /// <param name="uri">The uri to check.</param>
         /// <returns><see langword="true"/> if <paramref name="uri"/> exists; otherwise <see langword="false"/>.</returns>
-        public static bool Exists(Uri uri) => Exists(uri, static () => new());
+        public static bool Exists(Uri uri) => File.Exists(uri, Amazon.S3.AmazonS3Client.Create(), HttpClient.Create());
 
         /// <summary>
         /// Determines whether the specified uri exists.
@@ -28,19 +26,20 @@ internal static class FileExtensions
         /// <param name="uri">The uri to check.</param>
         /// <param name="serviceProvider">The service provider.</param>
         /// <returns><see langword="true"/> if <paramref name="uri"/> exists; otherwise <see langword="false"/>.</returns>
-        public static bool Exists(Uri uri, IServiceProvider? serviceProvider) => Exists(uri, File.CreateHttpClient(serviceProvider));
+        public static bool Exists(Uri uri, IServiceProvider? serviceProvider) => File.Exists(uri, Amazon.S3.AmazonS3Client.Create(serviceProvider), HttpClient.Create(serviceProvider));
 
         /// <summary>
         /// Determines whether the specified uri exists.
         /// </summary>
         /// <param name="uri">The uri to check.</param>
-        /// <param name="httpClientFactory">The <see cref="System.Net.Http"/> client factory.</param>
+        /// <param name="lazyS3Client">The <see cref="Amazon.S3"/> client.</param>
+        /// <param name="lazyHttpClient">The <see cref="System.Net.Http"/> client.</param>
         /// <returns><see langword="true"/> if <paramref name="uri"/> exists; otherwise <see langword="false"/>.</returns>
-        public static bool Exists(Uri uri, Func<HttpClient> httpClientFactory) => uri switch
+        public static bool Exists(Uri uri, Lazy<Amazon.S3.IAmazonS3> lazyS3Client, Lazy<HttpClient> lazyHttpClient) => uri switch
         {
             { Scheme: "file" } => File.Exists(uri.LocalPath),
-            _ when S3.S3UriUtility.IsS3(uri) => S3.S3Las.Exists(uri),
-            { Scheme: "http" or "https" } => Http.HttpLas.Exists(uri, httpClientFactory),
+            _ when S3.S3UriUtility.IsS3(uri) => S3.S3Las.Exists(uri, lazyS3Client),
+            { Scheme: "http" or "https" } => Http.HttpLas.Exists(uri, lazyHttpClient),
             _ => false,
         };
 
@@ -50,7 +49,7 @@ internal static class FileExtensions
         /// <param name="uri">The uri.</param>
         /// <returns>The stream from URI.</returns>
         /// <exception cref="InvalidOperationException">The uri scheme is not supported.</exception>
-        public static Stream OpenRead(Uri uri) => OpenRead(uri, static () => new());
+        public static Stream OpenRead(Uri uri) => File.OpenRead(uri, Amazon.S3.AmazonS3Client.Create(), HttpClient.Create());
 
         /// <summary>
         /// Opens an existing URI for reading.
@@ -59,21 +58,22 @@ internal static class FileExtensions
         /// <param name="serviceProvider">The service provider.</param>
         /// <returns>The stream from URI.</returns>
         /// <exception cref="InvalidOperationException">The uri scheme is not supported.</exception>
-        public static Stream OpenRead(Uri uri, IServiceProvider? serviceProvider) => OpenRead(uri, File.CreateHttpClient(serviceProvider));
+        public static Stream OpenRead(Uri uri, IServiceProvider? serviceProvider) => File.OpenRead(uri, Amazon.S3.AmazonS3Client.Create(serviceProvider), HttpClient.Create(serviceProvider));
 
         /// <summary>
         /// Opens an existing URI for reading.
         /// </summary>
         /// <param name="uri">The uri.</param>
-        /// <param name="httpClientFactory">The <see cref="System.Net.Http"/> client factory.</param>
+        /// <param name="lazyS3Client">The <see cref="Amazon.S3"/> client.</param>
+        /// <param name="lazyHttpClient">The <see cref="System.Net.Http"/> client.</param>
         /// <returns>The stream from URI.</returns>
         /// <exception cref="InvalidOperationException">The uri scheme is not supported.</exception>
-        public static Stream OpenRead(Uri uri, Func<HttpClient> httpClientFactory)
+        public static Stream OpenRead(Uri uri, Lazy<Amazon.S3.IAmazonS3> lazyS3Client, Lazy<HttpClient> lazyHttpClient)
             => uri switch
             {
                 { Scheme: "file" } => new FileStream(uri.LocalPath, FileMode.Open, FileAccess.Read, FileShare.Read, ushort.MaxValue),
-                _ when S3.S3UriUtility.IsS3(uri) => S3.S3Las.OpenRead(uri),
-                { Scheme: "http" or "https" } => Http.HttpLas.OpenRead(uri, httpClientFactory),
+                _ when S3.S3UriUtility.IsS3(uri) => S3.S3Las.OpenRead(uri, lazyS3Client),
+                { Scheme: "http" or "https" } => Http.HttpLas.OpenRead(uri, lazyHttpClient),
                 _ => throw new NotSupportedException(),
             };
 
@@ -83,7 +83,7 @@ internal static class FileExtensions
         /// <param name="uri">The uri.</param>
         /// <returns>The stream from URI.</returns>
         /// <exception cref="InvalidOperationException">The uri scheme is not supported.</exception>
-        public static Stream OpenWrite(Uri uri) => OpenWrite(uri, File.CreateHttpClient);
+        public static Stream OpenWrite(Uri uri) => File.OpenWrite(uri, Amazon.S3.AmazonS3Client.Create(), HttpClient.Create());
 
         /// <summary>
         /// Opens an existing URI for writing.
@@ -92,18 +92,19 @@ internal static class FileExtensions
         /// <param name="serviceProvider">The service provider.</param>
         /// <returns>The stream from URI.</returns>
         /// <exception cref="InvalidOperationException">The uri scheme is not supported.</exception>
-        public static Stream OpenWrite(Uri uri, IServiceProvider? serviceProvider) => OpenWrite(uri, File.CreateHttpClient(serviceProvider));
+        public static Stream OpenWrite(Uri uri, IServiceProvider? serviceProvider) => File.OpenWrite(uri, Amazon.S3.AmazonS3Client.Create(serviceProvider), HttpClient.Create(serviceProvider));
 
         /// <summary>
         /// Opens an existing URI for writing.
         /// </summary>
         /// <param name="uri">The uri.</param>
-        /// <param name="httpClientFactory">The <see cref="System.Net.Http"/> client factory.</param>
+        /// <param name="lazyS3Client">The <see cref="Amazon.S3"/> client.</param>
+        /// <param name="lazyHttpClient">The <see cref="System.Net.Http"/> client.</param>
         /// <returns>The stream from URI.</returns>
         /// <exception cref="InvalidOperationException">The uri scheme is not supported.</exception>
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Roslynator", "RCS1163:Unused parameter.", Justification = "This will be used in the future.")]
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Style", "IDE0060:Remove unused parameter", Justification = "This will be used in the future.")]
-        public static Stream OpenWrite(Uri uri, Func<HttpClient> httpClientFactory)
+        public static Stream OpenWrite(Uri uri, Lazy<Amazon.S3.IAmazonS3> lazyS3Client, Lazy<HttpClient> lazyHttpClient)
         {
             return uri switch
             {
@@ -122,34 +123,35 @@ internal static class FileExtensions
         /// Opens an existing URI for reading.
         /// </summary>
         /// <param name="uri">The uri.</param>
-        /// <param name="mode">A <see cref="FileMode"/> value that specifies whether an uri is created if one does not exist, and determines whether the contents of existing uris are retained or overwritten.</param>
+        /// <param name="mode">A <see cref="FileMode"/> value that specifies whether a uri is created if one does not exist, and determines whether the contents of existing uris are retained or overwritten.</param>
         /// <returns>The stream from URI.</returns>
         /// <exception cref="InvalidOperationException">The uri scheme is not supported.</exception>
-        public static Stream Open(Uri uri, FileMode mode) => Open(uri, mode, static () => new());
+        public static Stream Open(Uri uri, FileMode mode) => File.Open(uri, mode, Amazon.S3.AmazonS3Client.Create(),  HttpClient.Create());
 
         /// <summary>
         /// Opens an existing URI for reading.
         /// </summary>
         /// <param name="uri">The uri.</param>
-        /// <param name="mode">A <see cref="FileMode"/> value that specifies whether an uri is created if one does not exist, and determines whether the contents of existing uris are retained or overwritten.</param>
+        /// <param name="mode">A <see cref="FileMode"/> value that specifies whether a uri is created if one does not exist, and determines whether the contents of existing uris are retained or overwritten.</param>
         /// <param name="serviceProvider">The service provider.</param>
         /// <returns>The stream from URI.</returns>
         /// <exception cref="InvalidOperationException">The uri scheme is not supported.</exception>
-        public static Stream Open(Uri uri, FileMode mode, IServiceProvider? serviceProvider) => Open(uri, mode, File.CreateHttpClient(serviceProvider));
+        public static Stream Open(Uri uri, FileMode mode, IServiceProvider? serviceProvider) => File.Open(uri, mode, Amazon.S3.AmazonS3Client.Create(serviceProvider), HttpClient.Create(serviceProvider));
 
         /// <summary>
         /// Opens an existing URI for reading.
         /// </summary>
         /// <param name="uri">The uri.</param>
-        /// <param name="mode">A <see cref="FileMode"/> value that specifies whether an uri is created if one does not exist, and determines whether the contents of existing uris are retained or overwritten.</param>
-        /// <param name="httpClientFactory">The <see cref="System.Net.Http"/> client factory.</param>
+        /// <param name="mode">A <see cref="FileMode"/> value that specifies whether a uri is created if one does not exist, and determines whether the contents of existing uris are retained or overwritten.</param>
+        /// <param name="lazyAmazonS3">The <see cref="Amazon.S3"/> client.</param>
+        /// <param name="lazyHttpClient">The <see cref="System.Net.Http"/> client.</param>
         /// <returns>The stream from URI.</returns>
         /// <exception cref="InvalidOperationException">The uri scheme is not supported.</exception>
-        public static Stream Open(Uri uri, FileMode mode, Func<HttpClient> httpClientFactory) => (uri, mode) switch
+        public static Stream Open(Uri uri, FileMode mode, Lazy<Amazon.S3.IAmazonS3> lazyAmazonS3, Lazy<HttpClient> lazyHttpClient) => (uri, mode) switch
         {
             ({ Scheme: "file" }, _) => File.Open(uri.LocalPath, mode),
-            (_, FileMode.Open) when S3.S3UriUtility.IsS3(uri) => S3.S3Las.OpenRead(uri),
-            ({ Scheme: "http" or "https" }, FileMode.Open) => Http.HttpLas.OpenRead(uri, httpClientFactory),
+            (_, FileMode.Open) when S3.S3UriUtility.IsS3(uri) => S3.S3Las.OpenRead(uri, lazyAmazonS3),
+            ({ Scheme: "http" or "https" }, FileMode.Open) => Http.HttpLas.OpenRead(uri, lazyHttpClient),
             _ => throw new NotSupportedException(),
         };
 
@@ -165,17 +167,5 @@ internal static class FileExtensions
                 Directory.CreateDirectory(directoryName);
             }
         }
-
-        private static Func<HttpClient> CreateHttpClient(IServiceProvider? serviceProvider)
-        {
-            if (serviceProvider is not null)
-            {
-                return serviceProvider.GetRequiredService<HttpClient>;
-            }
-
-            return File.CreateHttpClient;
-        }
-
-        private static HttpClient CreateHttpClient() => new();
     }
 }

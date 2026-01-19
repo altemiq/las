@@ -58,14 +58,14 @@ public static class LazExtensions
     /// </summary>
     /// <param name="header">The header.</param>
     /// <returns><see langword="true"/> if <paramref name="header"/> indicates that the file is compressed; otherwise <see langword="false"/>.</returns>
-    public static bool IsCompressed(this in HeaderBlock header) => IsCompressed(header.PointDataFormat);
+    public static bool IsCompressed(this in HeaderBlock header) => header.PointDataFormat.IsCompressed();
 
     /// <summary>
     /// Gets a value indicating whether this <see cref="HeaderBlockBuilder"/> is compressed.
     /// </summary>
     /// <param name="builder">The header.</param>
     /// <returns><see langword="true"/> if <paramref name="builder"/> indicates that the file is compressed; otherwise <see langword="false"/>.</returns>
-    public static bool IsCompressed(this HeaderBlockBuilder builder) => IsCompressed(builder.PointDataFormat);
+    public static bool IsCompressed(this HeaderBlockBuilder builder) => builder.PointDataFormat.IsCompressed();
 
     /// <summary>
     /// Gets a value indicating whether this <see cref="byte"/> represents a compressed point data format.

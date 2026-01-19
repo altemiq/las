@@ -6,8 +6,6 @@
 
 namespace Altemiq.IO.Las;
 
-using Microsoft.Extensions.DependencyInjection;
-
 /// <summary>
 /// The <see cref="Path"/> extension methods.
 /// </summary>
@@ -20,7 +18,7 @@ internal static class PathExtensions
         /// </summary>
         /// <param name="uri">The uri to check.</param>
         /// <returns><see langword="true"/> if <paramref name="uri"/> exists; otherwise <see langword="false"/>.</returns>
-        public static bool Exists(Uri uri) => Exists(uri, static () => new());
+        public static bool Exists(Uri uri) => Path.Exists(uri, Amazon.S3.AmazonS3Client.Create(), HttpClient.Create());
 
         /// <summary>
         /// Determines whether the specified uri exists.
@@ -28,19 +26,20 @@ internal static class PathExtensions
         /// <param name="uri">The uri to check.</param>
         /// <param name="serviceProvider">The service provider.</param>
         /// <returns><see langword="true"/> if <paramref name="uri"/> exists; otherwise <see langword="false"/>.</returns>
-        public static bool Exists(Uri uri, IServiceProvider? serviceProvider) => Exists(uri, CreateHttpClient(serviceProvider));
+        public static bool Exists(Uri uri, IServiceProvider? serviceProvider) => Path.Exists(uri, Amazon.S3.AmazonS3Client.Create(serviceProvider), HttpClient.Create(serviceProvider));
 
         /// <summary>
         /// Determines whether the specified uri exists.
         /// </summary>
         /// <param name="uri">The uri to check.</param>
-        /// <param name="httpClientFactory">The <see cref="System.Net.Http"/> client factory.</param>
+        /// <param name="lazyAmazonS3">The <see cref="Amazon.S3"/> client.</param>
+        /// <param name="lazyHttpClient">The <see cref="System.Net.Http"/> client.</param>
         /// <returns><see langword="true"/> if <paramref name="uri"/> exists; otherwise <see langword="false"/>.</returns>
-        public static bool Exists(Uri uri, Func<HttpClient> httpClientFactory) => uri switch
+        public static bool Exists(Uri uri, Lazy<Amazon.S3.IAmazonS3> lazyAmazonS3, Lazy<HttpClient> lazyHttpClient) => uri switch
         {
             { Scheme: "file" } => Path.Exists(uri.LocalPath),
-            _ when S3.S3UriUtility.IsS3(uri) => S3.S3Las.Exists(uri),
-            { Scheme: "http" or "https" } => Http.HttpLas.Exists(uri, httpClientFactory),
+            _ when S3.S3UriUtility.IsS3(uri) => S3.S3Las.Exists(uri, lazyAmazonS3),
+            { Scheme: "http" or "https" } => Http.HttpLas.Exists(uri, lazyHttpClient),
             _ => false,
         };
 
@@ -58,19 +57,5 @@ internal static class PathExtensions
             builder.Path = Path.ChangeExtension(builder.Path, extension);
             return builder.Uri;
         }
-
-#pragma warning disable IDE0051, S1144
-        private static Func<HttpClient> CreateHttpClient(IServiceProvider? serviceProvider)
-        {
-            if (serviceProvider is not null)
-            {
-                return serviceProvider.GetRequiredService<HttpClient>;
-            }
-
-            return CreateHttpClient;
-        }
-
-        private static HttpClient CreateHttpClient() => new();
-#pragma warning restore IDE0051, S1144
     }
 }

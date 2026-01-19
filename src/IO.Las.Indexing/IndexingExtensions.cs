@@ -47,7 +47,8 @@ public static class IndexingExtensions
     {
         var header = reader.Header;
         var quantizer = new PointDataRecordQuantizer(header);
-        return GetPointDataRecordIndexes(index, box)
+        return index
+            .GetPointDataRecordIndexes(box)
             .Select(idx => reader.ReadPointDataRecord(idx).PointDataRecord!)
             .Where(point =>
             {

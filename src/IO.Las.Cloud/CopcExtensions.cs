@@ -51,8 +51,7 @@ public static class CopcExtensions
             bool sort = true)
         {
             using var writer = new LazWriter(output);
-            CopyToCloudOptimized(
-                reader,
+            reader.CopyToCloudOptimized(
                 writer,
                 maximumDepth,
                 minimumPointsPerOctant,

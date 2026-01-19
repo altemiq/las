@@ -46,6 +46,7 @@
   <ItemGroup>
     <PackageReference Include="Altemiq.CommandLine.DependencyInjection" />
     <PackageReference Include="Altemiq.CommandLine.Spectre" />
+    <PackageReference Include="AWSSDK.Extensions.NETCore.Setup" />
     <PackageReference Include="Humanizer" />
     <PackageReference Include="Microsoft.Data.Sqlite" />
     <PackageReference Include="Microsoft.Extensions.Http" />
