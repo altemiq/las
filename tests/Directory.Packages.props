@@ -9,11 +9,15 @@
 
   <ItemGroup>
     <PackageVersion Include="Polyfill" Version="8.9.1" />
-    <PackageVersion Include="TUnit" Version="1.6.5" />
+    <PackageVersion Include="TUnit" Version="1.12.3" />
+  </ItemGroup>
+  
+  <ItemGroup Label="AWS">
+    <PackageVersion Include="AWSSDK.S3" Version="4.0.14" />
   </ItemGroup>
 
   <ItemGroup Label="SQLite">
-    <PackageVersion Include="Microsoft.Data.Sqlite" Version="10.0.1" />
+    <PackageVersion Include="Microsoft.Data.Sqlite" Version="10.0.2" />
     <PackageVersion Include="SQLitePCLRaw.bundle_e_sqlite3" Version="3.0.2" />
     <PackageVersion Include="SQLitePCLRaw.core" Version="3.0.2" />
   </ItemGroup>

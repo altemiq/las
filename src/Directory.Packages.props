@@ -11,11 +11,11 @@
   </ItemGroup>
   
   <ItemGroup>
-    <PackageVersion Include="Meziantou.Polyfill" Version="1.0.71" />
+    <PackageVersion Include="Meziantou.Polyfill" Version="1.0.99" />
   </ItemGroup>
 
   <ItemGroup Label="Coding Standards">
-    <GlobalPackageReference Include="Altemiq.DotNet.CodingStandard" Version="1.0.151" />
+    <GlobalPackageReference Include="Altemiq.DotNet.CodingStandard" Version="1.0.169" />
   </ItemGroup>
 
 </Project>

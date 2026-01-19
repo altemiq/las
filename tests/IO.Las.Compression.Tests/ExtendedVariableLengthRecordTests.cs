@@ -85,7 +85,7 @@ public class ExtendedVariableLengthRecordTests
         _ = await Assert.That(reader.Header.LegacyNumberOfPointRecords).IsEqualTo(2U);
 #endif
         _ = await Assert.That(reader.ExtendedVariableLengthRecords).Count().IsEqualTo(1)
-            .And.Member(x => x.First(), x => x.IsEqualTo(evlr, ExtendedVariableLengthRecordComparer.Instance));
+            .And.Member(x => x[0], x => x.IsEqualTo(evlr, ExtendedVariableLengthRecordComparer.Instance));
     }
 
     internal sealed class ForwardOnlyMemoryStream : MemoryStream

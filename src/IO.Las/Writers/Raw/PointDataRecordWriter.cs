@@ -7,7 +7,7 @@
 namespace Altemiq.IO.Las.Writers.Raw;
 
 /// <summary>
-/// The <see cref="PointDataRecordWriter{T}"/> for <see cref="IBasePointDataRecord"/> instances.
+/// The <see cref="IPointDataRecordWriter"/> for <see cref="IBasePointDataRecord"/> instances.
 /// </summary>
 internal sealed class PointDataRecordWriter : IPointDataRecordWriter
 {
