@@ -29,6 +29,9 @@ public class LasWriterTests
         ];
 
         MemoryStream memoryStream = new();
+#if NETSTANDARD2_1_OR_GREATER || NETCOREAPP3_0_OR_GREATER
+        await
+#endif
         using (LasWriter lasWriter = new(memoryStream, true))
         {
             lasWriter.Write(builder.HeaderBlock, geoKeyDirectoryTag);
@@ -36,6 +39,9 @@ public class LasWriterTests
 
         memoryStream.Position = 0;
         HeaderBlock outputHeader;
+#if NETSTANDARD2_1_OR_GREATER || NETCOREAPP3_0_OR_GREATER
+        await
+#endif
         using (LasReader lasReader = new(memoryStream))
         {
             outputHeader = lasReader.Header;
@@ -83,6 +89,9 @@ public class LasWriterTests
         MemoryStream memoryStream = new();
         const double ExtraValue = 123.34;
         Span<byte> span = stackalloc byte[sizeof(short)];
+#if NETSTANDARD2_1_OR_GREATER || NETCOREAPP3_0_OR_GREATER
+        await
+#endif
         using (LasWriter lasWriter = new(memoryStream, true))
         {
             lasWriter.Write(builder.HeaderBlock, geoKeyDirectoryTag, extraBytes);
@@ -110,6 +119,9 @@ public class LasWriterTests
         HeaderBlock outputHeader;
         IBasePointDataRecord outputPoint;
         byte[] extra;
+#if NETSTANDARD2_1_OR_GREATER || NETCOREAPP3_0_OR_GREATER
+        await
+#endif
         using (LasReader lasReader = new(memoryStream))
         {
             outputHeader = lasReader.Header;
@@ -166,6 +178,9 @@ public class LasWriterTests
         MemoryStream memoryStream = new();
         const double ExtraValue = 123.34;
         var span = new byte[sizeof(short)];
+#if NETSTANDARD2_1_OR_GREATER || NETCOREAPP3_0_OR_GREATER
+        await
+#endif
         using (LasWriter lasWriter = new(memoryStream, true))
         {
             lasWriter.Write(builder.HeaderBlock, geoKeyDirectoryTag, extraBytes);
@@ -192,6 +207,9 @@ public class LasWriterTests
         memoryStream.Position = 0;
         HeaderBlock outputHeader;
         LasPointMemory outputPoint;
+#if NETSTANDARD2_1_OR_GREATER || NETCOREAPP3_0_OR_GREATER
+        await
+#endif
         using (LasReader lasReader = new(memoryStream))
         {
             outputHeader = lasReader.Header;
@@ -258,6 +276,9 @@ public class LasWriterTests
         Span<byte> span = stackalloc byte[sizeof(ushort)];
 #endif
 
+#if NETSTANDARD2_1_OR_GREATER || NETCOREAPP3_0_OR_GREATER
+        await
+#endif
         using (LasWriter lasWriter = new(stream, true))
         {
 #if LAS1_4_OR_GREATER
@@ -337,6 +358,9 @@ public class LasWriterTests
         HeaderBlock outputHeader;
         IBasePointDataRecord outputPoint;
         byte[] bytes;
+#if NETSTANDARD2_1_OR_GREATER || NETCOREAPP3_0_OR_GREATER
+        await
+#endif
         using (LasReader lasReader = new(stream))
         {
             outputHeader = lasReader.Header;
@@ -380,6 +404,9 @@ public class LasWriterTests
         using Stream memoryStream = exploded
             ? new LasMultipleMemoryStream()
             : new MemoryStream();
+#if NETSTANDARD2_1_OR_GREATER || NETCOREAPP3_0_OR_GREATER
+        await
+#endif
         using (LasWriter writer = new(memoryStream, leaveOpen: true))
         {
             HeaderBlockBuilder headerBuilder = new();
@@ -388,6 +415,9 @@ public class LasWriterTests
         }
 
         memoryStream.Position = 0;
+#if NETSTANDARD2_1_OR_GREATER || NETCOREAPP3_0_OR_GREATER
+        await
+#endif
         using LasReader reader = new(memoryStream);
         _ = await Assert.That(reader.ExtendedVariableLengthRecords).HasSingleItem()
             .And.Member(static x => x.Single(), x => x.IsEquivalentTo(record));

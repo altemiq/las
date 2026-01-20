@@ -11,7 +11,12 @@ namespace Altemiq.IO.Las;
 /// </summary>
 /// <param name="stream">The stream.</param>
 /// <param name="leaveOpen"><see langword="true"/> to leave the stream open after the <see cref="LasWriter"/> object is disposed; otherwise <see langword="false"/>.</param>
-public class LasWriter(Stream stream, bool leaveOpen = false) : ILasWriter, IDisposable
+public class LasWriter(Stream stream, bool leaveOpen = false) :
+    ILasWriter,
+#if NETSTANDARD2_1_OR_GREATER || NETCOREAPP3_0_OR_GREATER
+    IAsyncDisposable,
+#endif
+    IDisposable
 {
 #if LAS1_4_OR_GREATER
     /// <summary>
@@ -177,6 +182,16 @@ public class LasWriter(Stream stream, bool leaveOpen = false) : ILasWriter, IDis
         this.Dispose(disposing: true);
         GC.SuppressFinalize(this);
     }
+
+#if NETSTANDARD2_1_OR_GREATER || NETCOREAPP3_0_OR_GREATER
+    /// <inheritdoc />
+    public async ValueTask DisposeAsync()
+    {
+        // Do not change this code. Put cleanup code in 'DisposeAsyncCore()' method
+        await this.DisposeAsyncCore().ConfigureAwait(false);
+        GC.SuppressFinalize(this);
+    }
+#endif
 
 #if NETSTANDARD2_0_OR_GREATER || NETFRAMEWORK || NET
     /// <inheritdoc cref="Stream.Close" />
@@ -460,6 +475,27 @@ public class LasWriter(Stream stream, bool leaveOpen = false) : ILasWriter, IDis
 
         this.disposedValue = true;
     }
+
+#if NETSTANDARD2_1_OR_GREATER || NETCOREAPP3_0_OR_GREATER
+    /// <summary>
+    /// Asynchronously releases the unmanaged resources used by the <see cref="LasWriter"/> class.
+    /// </summary>
+    /// <returns>The asynchronous task.</returns>
+    protected async virtual ValueTask DisposeAsyncCore()
+    {
+        if (this.disposedValue)
+        {
+            return;
+        }
+
+        if (!leaveOpen)
+        {
+            await this.BaseStream.DisposeAsync().ConfigureAwait(false);
+        }
+
+        this.disposedValue = true;
+    }
+#endif
 
     private static Stream CreateStream(string path) => path switch
     {

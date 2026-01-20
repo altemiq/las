@@ -3,6 +3,60 @@ namespace Altemiq.IO.Las;
 public class LasReaderTests
 {
     [Test]
+    public async Task ReadEnumerable()
+    {
+#if NETSTANDARD2_1_OR_GREATER || NETCOREAPP3_0_OR_GREATER
+        await
+#endif
+        using var stream = typeof(LasReaderTests).Assembly.GetManifestResourceStream(typeof(LasReaderTests), "fusa.las")
+                               ?? throw new InvalidOperationException("Failed to get stream");
+#if NETSTANDARD2_1_OR_GREATER || NETCOREAPP3_0_OR_GREATER
+        await
+#endif
+        using LasReader reader = new(stream);
+
+        IBasePointDataRecord pointDataRecord = default;
+        byte[] data = default;
+
+        foreach (var point in reader)
+        {
+            pointDataRecord = point.PointDataRecord;
+            data = point.ExtraBytes.ToArray();
+
+            break;
+        }
+
+        await Assert.That(pointDataRecord).IsTypeOf<GpsPointDataRecord>().And.Member(p => p.X, x => x.IsNotDefault());
+        await Assert.That(data).IsEmpty();
+    }
+    
+    [Test]
+    public async Task ReadAsyncEnumerable()
+    {
+#if NETSTANDARD2_1_OR_GREATER || NETCOREAPP3_0_OR_GREATER
+        await
+#endif
+        using var stream = typeof(LasReaderTests).Assembly.GetManifestResourceStream(typeof(LasReaderTests), "fusa.las")
+                               ?? throw new InvalidOperationException("Failed to get stream");
+#if NETSTANDARD2_1_OR_GREATER || NETCOREAPP3_0_OR_GREATER
+        await
+#endif
+        using LasReader reader = new(stream);
+
+        await foreach (var point in reader)
+        {
+            var pointDataRecord = point.PointDataRecord;
+            var data = point.ExtraBytes.ToArray();
+            
+            await Assert.That(pointDataRecord).IsTypeOf<GpsPointDataRecord>().And.Member(p => p.X, x => x.IsNotDefault());
+            await Assert.That(data).IsEmpty();
+
+            break;
+        }
+
+    }
+    
+    [Test]
     public async Task ReadLas()
     {
 #if NETSTANDARD2_1_OR_GREATER || NETCOREAPP3_0_OR_GREATER
@@ -10,6 +64,9 @@ public class LasReaderTests
 #endif
         using var stream = typeof(LasReaderTests).Assembly.GetManifestResourceStream(typeof(LasReaderTests), "fusa.las")
                               ?? throw new InvalidOperationException("Failed to get stream");
+#if NETSTANDARD2_1_OR_GREATER || NETCOREAPP3_0_OR_GREATER
+        await
+#endif
         using LasReader reader = new(stream);
         await CheckHeader(reader.Header, new(1, 1));
         _ = await Assert.That(reader.VariableLengthRecords.Count).IsEqualTo(1);
@@ -34,6 +91,9 @@ public class LasReaderTests
 
         await Assert.That(await stream.ReadAsync(bytes)).IsEqualTo(bytes.Length);
 
+#if NETSTANDARD2_1_OR_GREATER || NETCOREAPP3_0_OR_GREATER
+        await
+#endif
         using LasReader reader = new(stream, System.Text.Encoding.UTF8.GetString(bytes));
         await CheckHeader(reader.Header, new(1, 1));
         _ = await Assert.That(reader.VariableLengthRecords).HasSingleItem();
@@ -55,6 +115,9 @@ public class LasReaderTests
 #endif
         using var stream = typeof(LasReaderTests).Assembly.GetManifestResourceStream(typeof(LasReaderTests), "fusa_height.las")
                                     ?? throw new InvalidOperationException("Failed to get stream");
+#if NETSTANDARD2_1_OR_GREATER || NETCOREAPP3_0_OR_GREATER
+        await
+#endif
         using LasReader reader = new(stream);
         await CheckHeader(reader.Header, new(1, 4));
         _ = await Assert.That(reader.VariableLengthRecords).Count().IsEqualTo(2);
@@ -94,6 +157,9 @@ public class LasReaderTests
 #endif
         using var stream = typeof(LasReaderTests).Assembly.GetManifestResourceStream(typeof(LasReaderTests), "fusa.las")
                                     ?? throw new InvalidOperationException("Failed to get stream");
+#if NETSTANDARD2_1_OR_GREATER || NETCOREAPP3_0_OR_GREATER
+        await
+#endif
         using LasReader reader = new(stream);
         await CheckHeader(reader.Header, new(1, 1));
 
@@ -124,6 +190,9 @@ public class LasReaderTests
 #endif
         using var stream = typeof(LasReaderTests).Assembly.GetManifestResourceStream(typeof(LasReaderTests), "fusa.las")
                                     ?? throw new InvalidOperationException("Failed to get stream");
+#if NETSTANDARD2_1_OR_GREATER || NETCOREAPP3_0_OR_GREATER
+        await
+#endif
         using LasReader reader = new(stream);
         await CheckHeader(reader.Header, new(1, 1));
         _ = await Assert.That(reader.VariableLengthRecords).HasSingleItem();
@@ -143,6 +212,9 @@ public class LasReaderTests
                                     ?? throw new InvalidOperationException("Failed to get stream");
         var bytes = new byte[4];
         await Assert.That(stream.ReadAsync(bytes, 0, bytes.Length)).IsEqualTo(bytes.Length);
+#if NETSTANDARD2_1_OR_GREATER || NETCOREAPP3_0_OR_GREATER
+        await
+#endif
         using LasReader reader = new(stream, System.Text.Encoding.UTF8.GetString(bytes));
         await CheckHeader(reader.Header, new(1, 1));
         _ = await Assert.That(reader.VariableLengthRecords).HasSingleItem();
@@ -162,6 +234,9 @@ public class LasReaderTests
 #endif
         using var stream = typeof(LasReaderTests).Assembly.GetManifestResourceStream(typeof(LasReaderTests), "fusa_height.las")
                                     ?? throw new InvalidOperationException("Failed to get stream");
+#if NETSTANDARD2_1_OR_GREATER || NETCOREAPP3_0_OR_GREATER
+        await
+#endif
         using LasReader reader = new(stream);
         await CheckHeader(reader.Header, new(1, 4));
         _ = await Assert.That(reader.VariableLengthRecords).Count().IsEqualTo(2);
@@ -195,8 +270,14 @@ public class LasReaderTests
     [Test]
     public async Task ReadByPointIndexAsync()
     {
+#if NETSTANDARD2_1_OR_GREATER || NETCOREAPP3_0_OR_GREATER
+        await
+#endif
         using var stream = typeof(LasReaderTests).Assembly.GetManifestResourceStream(typeof(LasReaderTests), "fusa.las")
-                              ?? throw new InvalidOperationException("Failed to get stream");
+                               ?? throw new InvalidOperationException("Failed to get stream");
+#if NETSTANDARD2_1_OR_GREATER || NETCOREAPP3_0_OR_GREATER
+        await
+#endif
         using LasReader reader = new(stream);
         await CheckHeader(reader.Header, new(1, 1));
 

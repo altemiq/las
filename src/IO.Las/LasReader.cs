@@ -9,7 +9,12 @@ namespace Altemiq.IO.Las;
 /// <summary>
 /// The LAS reader.
 /// </summary>
-public class LasReader : ILasReader, IDisposable
+public class LasReader :
+    ILasReader,
+#if NETSTANDARD2_1_OR_GREATER || NETCOREAPP3_0_OR_GREATER
+    IAsyncDisposable,
+#endif
+    IDisposable
 {
     private readonly bool leaveOpen;
 
@@ -29,7 +34,7 @@ public class LasReader : ILasReader, IDisposable
 
 #if LAS1_4_OR_GREATER
 #pragma warning disable S4487
-    private readonly long offsetToEntendedVariableLengthRecords;
+    private readonly long offsetToExtendedVariableLengthRecords;
 #pragma warning restore S4487
 #endif
 
@@ -59,7 +64,7 @@ public class LasReader : ILasReader, IDisposable
                 out this.rawReader,
                 out this.offsetToPointData,
                 out this.offsetToVariableLengthRecords,
-                out this.offsetToEntendedVariableLengthRecords,
+                out this.offsetToExtendedVariableLengthRecords,
                 out this.pointDataLength,
                 out this.endOfPointDataRecords);
 #else
@@ -96,7 +101,7 @@ public class LasReader : ILasReader, IDisposable
                 out this.rawReader,
                 out this.offsetToPointData,
                 out this.offsetToVariableLengthRecords,
-                out this.offsetToEntendedVariableLengthRecords,
+                out this.offsetToExtendedVariableLengthRecords,
                 out this.pointDataLength,
                 out this.endOfPointDataRecords);
 #else
@@ -144,7 +149,7 @@ public class LasReader : ILasReader, IDisposable
                 out this.rawReader,
                 out this.offsetToPointData,
                 out this.offsetToVariableLengthRecords,
-                out this.offsetToEntendedVariableLengthRecords,
+                out this.offsetToExtendedVariableLengthRecords,
                 out this.pointDataLength,
                 out this.endOfPointDataRecords);
 #else
@@ -254,6 +259,16 @@ public class LasReader : ILasReader, IDisposable
         GC.SuppressFinalize(this);
     }
 
+#if NETSTANDARD2_1_OR_GREATER || NETCOREAPP3_0_OR_GREATER
+    /// <inheritdoc />
+    public async ValueTask DisposeAsync()
+    {
+        // Do not change this code. Put cleanup code in 'DisposeAsyncCore()' method
+        await this.DisposeAsyncCore().ConfigureAwait(false);
+        GC.SuppressFinalize(this);
+    }
+#endif
+
 #if NETSTANDARD2_0_OR_GREATER || NETCOREAPP2_0_OR_GREATER || NET20_OR_GREATER
     /// <inheritdoc cref="Stream.Close" />
     public virtual void Close() => this.BaseStream.Close();
@@ -275,6 +290,22 @@ public class LasReader : ILasReader, IDisposable
     }
 
     /// <summary>
+    /// Resets the reading.
+    /// </summary>
+    /// <returns>Whether reading was reset.</returns>
+    internal bool ResetReading()
+    {
+        if (!this.BaseStream.CanSeek)
+        {
+            return false;
+        }
+
+        this.currentPointIndex = 0;
+        this.BaseStream.Seek(this.offsetToPointData,  SeekOrigin.Begin);
+        return true;
+    }
+
+    /// <summary>
     /// Releases the unmanaged resources used by the <see cref="LasReader"/> class and optionally releases the managed resources.
     /// </summary>
     /// <param name="disposing"><see langword="true" /> to release both managed and unmanaged resources; <see langword="false" /> to release only unmanaged resources.</param>
@@ -292,6 +323,27 @@ public class LasReader : ILasReader, IDisposable
 
         this.disposedValue = true;
     }
+
+#if NETSTANDARD2_1_OR_GREATER || NETCOREAPP3_0_OR_GREATER
+    /// <summary>
+    /// Asynchronously releases the unmanaged resources used by the <see cref="LasWriter"/> class.
+    /// </summary>
+    /// <returns>The asynchronous task.</returns>
+    protected async virtual ValueTask DisposeAsyncCore()
+    {
+        if (this.disposedValue)
+        {
+            return;
+        }
+
+        if (!this.leaveOpen)
+        {
+            await this.BaseStream.DisposeAsync().ConfigureAwait(false);
+        }
+
+        this.disposedValue = true;
+    }
+#endif
 
     /// <summary>
     /// Checks the end of point data.
