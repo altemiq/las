@@ -38,7 +38,79 @@ public class ColorSourceGenerator : BaseSourceGenerator
 
     private static CompilationUnitSyntax CreateKnownColors(BaseNamespaceDeclarationSyntax @namespace)
     {
-        return CreateStruct(@namespace, nameof(System.Drawing.Color), GetColors());
+        return CreateStruct(@namespace, nameof(System.Drawing.Color),  Concat(GetConstructor(), GetColors()));
+
+        static IEnumerable<ConstructorDeclarationSyntax> GetConstructor()
+        {
+            const string Value = "value";
+
+            yield return ConstructorDeclaration(
+                    Identifier(nameof(System.Drawing.Color)))
+                .WithModifiers(
+                    TokenList(
+                        Token(SyntaxKind.PrivateKeyword)))
+                .WithParameterList(
+                    ParameterList(
+                        SingletonSeparatedList(
+                            Parameter(
+                                    Identifier(Value))
+                                .WithType(
+                                    PredefinedType(
+                                        Token(SyntaxKind.LongKeyword))))))
+                .WithBody(
+                    Block(
+                        ExpressionStatement(
+                            AssignmentExpression(
+                                SyntaxKind.SimpleAssignmentExpression,
+                                MemberAccessExpression(
+                                    SyntaxKind.SimpleMemberAccessExpression,
+                                    ThisExpression(),
+                                    IdentifierName(nameof(System.Drawing.Color.R))),
+                                CheckedExpression(
+                                    SyntaxKind.UncheckedExpression,
+                                    CastExpression(
+                                        PredefinedType(
+                                            Token(SyntaxKind.UShortKeyword)),
+                                        ParenthesizedExpression(
+                                            BinaryExpression(
+                                                SyntaxKind.RightShiftExpression,
+                                                IdentifierName(Value),
+                                                IdentifierName("RGBRedShift"))))))),
+                        ExpressionStatement(
+                            AssignmentExpression(
+                                SyntaxKind.SimpleAssignmentExpression,
+                                MemberAccessExpression(
+                                    SyntaxKind.SimpleMemberAccessExpression,
+                                    ThisExpression(),
+                                    IdentifierName(nameof(System.Drawing.Color.G))),
+                                CheckedExpression(
+                                    SyntaxKind.UncheckedExpression,
+                                    CastExpression(
+                                        PredefinedType(
+                                            Token(SyntaxKind.UShortKeyword)),
+                                        ParenthesizedExpression(
+                                            BinaryExpression(
+                                                SyntaxKind.RightShiftExpression,
+                                                IdentifierName(Value),
+                                                IdentifierName("RGBGreenShift"))))))),
+                        ExpressionStatement(
+                            AssignmentExpression(
+                                SyntaxKind.SimpleAssignmentExpression,
+                                MemberAccessExpression(
+                                    SyntaxKind.SimpleMemberAccessExpression,
+                                    ThisExpression(),
+                                    IdentifierName(nameof(System.Drawing.Color.B))),
+                                CheckedExpression(
+                                    SyntaxKind.UncheckedExpression,
+                                    CastExpression(
+                                        PredefinedType(
+                                            Token(SyntaxKind.UShortKeyword)),
+                                        ParenthesizedExpression(
+                                            BinaryExpression(
+                                                SyntaxKind.RightShiftExpression,
+                                                IdentifierName(Value),
+                                                IdentifierName("RGBBlueShift")))))))));
+        }
 
         static IEnumerable<PropertyDeclarationSyntax> GetColors()
         {
@@ -208,6 +280,23 @@ public class ColorSourceGenerator : BaseSourceGenerator
                                 TokenList(
                                     Token(SyntaxKind.PartialKeyword)))
                             .WithMembers(List(members))))));
+        }
+
+        static IEnumerable<MemberDeclarationSyntax> Concat(params ReadOnlySpan<IEnumerable<MemberDeclarationSyntax>> values)
+        {
+            if (values.Length is 0)
+            {
+                return [];
+            }
+
+            var enumerable = values[0];
+
+            for (var i = 1; i < values.Length; i++)
+            {
+                enumerable = enumerable.Concat(values[i]);
+            }
+
+            return enumerable;
         }
     }
 }

@@ -22,13 +22,6 @@ public readonly partial struct Color : IEquatable<Color>
     private const int RGBGreenShift = 16;
     private const int RGBBlueShift = 0;
 
-    private Color(long value)
-    {
-        this.R = unchecked((ushort)(value >> RGBRedShift));
-        this.G = unchecked((ushort)(value >> RGBGreenShift));
-        this.B = unchecked((ushort)(value >> RGBBlueShift));
-    }
-
     /// <summary>
     /// Gets the red component value of this <see cref="Color" /> structure.
     /// </summary>
