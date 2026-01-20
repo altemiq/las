@@ -22,10 +22,10 @@ public sealed class VariableLengthRecordProcessor
     /// </summary>
     public static readonly VariableLengthRecordProcessor Instance = new();
 
-    private readonly Dictionary<(string? UserId, ushort RecordId), CreateVariableLengthRecord> processors = [];
+    private readonly System.Collections.Concurrent.ConcurrentDictionary<Key, CreateVariableLengthRecord> processors = [];
 
 #if LAS1_3_OR_GREATER
-    private readonly Dictionary<(string? UserId, ushort RecordId), CreateExtendedVariableLengthRecord> extendedProcessors = [];
+    private readonly System.Collections.Concurrent.ConcurrentDictionary<Key, CreateExtendedVariableLengthRecord> extendedProcessors = [];
 #endif
 
     private VariableLengthRecordProcessor()
@@ -76,7 +76,19 @@ public sealed class VariableLengthRecordProcessor
     /// </summary>
     /// <param name="recordId">The record ID.</param>
     /// <param name="processor">The processor.</param>
-    public void Register(ushort recordId, CreateVariableLengthRecord processor) => this.processors.Add((default, recordId), processor);
+    public void Register(ushort recordId, CreateVariableLengthRecord processor) =>
+#if NETSTANDARD2_1_OR_GREATER || NET472_OR_GREATER || NETCOREAPP2_0_OR_GREATER
+        this.processors.AddOrUpdate(
+            new(recordId),
+            static (_, processor) => processor,
+            static (_, _, processor) => processor,
+            processor);
+#else
+        this.processors.AddOrUpdate(
+            new(recordId),
+            _ => processor,
+            (_, _) => processor);
+#endif
 
     /// <summary>
     /// Registers the processor.
@@ -84,7 +96,19 @@ public sealed class VariableLengthRecordProcessor
     /// <param name="userId">The user ID.</param>
     /// <param name="recordId">The record ID.</param>
     /// <param name="processor">The processor.</param>
-    public void Register(string userId, ushort recordId, CreateVariableLengthRecord processor) => this.processors.Add((userId, recordId), processor);
+    public void Register(string userId, ushort recordId, CreateVariableLengthRecord processor) =>
+#if NETSTANDARD2_1_OR_GREATER || NET472_OR_GREATER || NETCOREAPP2_0_OR_GREATER
+        this.processors.AddOrUpdate(
+            new(userId, recordId),
+            static (_, processor) => processor,
+            static (_, _, processor) => processor,
+            processor);
+#else
+        this.processors.AddOrUpdate(
+            new(userId, recordId),
+            _ => processor,
+            (_, _) => processor);
+#endif
 
 #if LAS1_3_OR_GREATER
     /// <summary>
@@ -92,7 +116,19 @@ public sealed class VariableLengthRecordProcessor
     /// </summary>
     /// <param name="recordId">The record ID.</param>
     /// <param name="processor">The processor.</param>
-    public void Register(ushort recordId, CreateExtendedVariableLengthRecord processor) => this.extendedProcessors.Add((default, recordId), processor);
+    public void Register(ushort recordId, CreateExtendedVariableLengthRecord processor) =>
+#if NETSTANDARD2_1_OR_GREATER || NET472_OR_GREATER || NETCOREAPP2_0_OR_GREATER
+        this.extendedProcessors.AddOrUpdate(
+            new(recordId),
+            static (_, processor) => processor,
+            static (_, _, processor) => processor,
+            processor);
+#else
+        this.extendedProcessors.AddOrUpdate(
+            new(recordId),
+            _ => processor,
+            (_, _) => processor);
+#endif
 
     /// <summary>
     /// Registers the processor.
@@ -100,7 +136,19 @@ public sealed class VariableLengthRecordProcessor
     /// <param name="userId">The user ID.</param>
     /// <param name="recordId">The record ID.</param>
     /// <param name="processor">The processor.</param>
-    public void Register(string userId, ushort recordId, CreateExtendedVariableLengthRecord processor) => this.extendedProcessors.Add((userId, recordId), processor);
+    public void Register(string userId, ushort recordId, CreateExtendedVariableLengthRecord processor) =>
+#if NETSTANDARD2_1_OR_GREATER || NET472_OR_GREATER || NETCOREAPP2_0_OR_GREATER
+        this.extendedProcessors.AddOrUpdate(
+            new(userId, recordId),
+            static (_, processor) => processor,
+            static (_, _, processor) => processor,
+            processor);
+#else
+        this.extendedProcessors.AddOrUpdate(
+            new(userId, recordId),
+            _ => processor,
+            (_, _) => processor);
+#endif
 #endif
 
     /// <summary>
@@ -109,7 +157,7 @@ public sealed class VariableLengthRecordProcessor
     /// <param name="recordId">The record ID.</param>
     /// <param name="processor">The processor.</param>
     /// <returns><see langword="true" /> when the processor is successfully added to the dictionary; <see langword="false" /> when the dictionary already contains the processor, in which case nothing gets added.</returns>
-    public bool TryRegister(ushort recordId, CreateVariableLengthRecord processor) => this.processors.TryAdd((default, recordId), processor);
+    public bool TryRegister(ushort recordId, CreateVariableLengthRecord processor) => this.processors.TryAdd(new(recordId), processor);
 
     /// <summary>
     /// Tries to register the processor.
@@ -118,7 +166,7 @@ public sealed class VariableLengthRecordProcessor
     /// <param name="recordId">The record ID.</param>
     /// <param name="processor">The processor.</param>
     /// <returns><see langword="true" /> when the processor is successfully added to the dictionary; <see langword="false" /> when the dictionary already contains the processor, in which case nothing gets added.</returns>
-    public bool TryRegister(string userId, ushort recordId, CreateVariableLengthRecord processor) => this.processors.TryAdd((userId, recordId), processor);
+    public bool TryRegister(string userId, ushort recordId, CreateVariableLengthRecord processor) => this.processors.TryAdd(new(userId, recordId), processor);
 
 #if LAS1_3_OR_GREATER
     /// <summary>
@@ -127,7 +175,7 @@ public sealed class VariableLengthRecordProcessor
     /// <param name="recordId">The record ID.</param>
     /// <param name="processor">The processor.</param>
     /// <returns><see langword="true" /> when the processor is successfully added to the dictionary; <see langword="false" /> when the dictionary already contains the processor, in which case nothing gets added.</returns>
-    public bool TryRegister(ushort recordId, CreateExtendedVariableLengthRecord processor) => this.extendedProcessors.TryAdd((default, recordId), processor);
+    public bool TryRegister(ushort recordId, CreateExtendedVariableLengthRecord processor) => this.extendedProcessors.TryAdd(new(recordId), processor);
 
     /// <summary>
     /// Tries to register the processor.
@@ -136,7 +184,7 @@ public sealed class VariableLengthRecordProcessor
     /// <param name="recordId">The record ID.</param>
     /// <param name="processor">The processor.</param>
     /// <returns><see langword="true" /> when the processor is successfully added to the dictionary; <see langword="false" /> when the dictionary already contains the processor, in which case nothing gets added.</returns>
-    public bool TryRegister(string userId, ushort recordId, CreateExtendedVariableLengthRecord processor) => this.extendedProcessors.TryAdd((userId, recordId), processor);
+    public bool TryRegister(string userId, ushort recordId, CreateExtendedVariableLengthRecord processor) => this.extendedProcessors.TryAdd(new(userId, recordId), processor);
 #endif
 
     /// <summary>
@@ -163,19 +211,34 @@ public sealed class VariableLengthRecordProcessor
         : new UnknownExtendedVariableLengthRecord(header, data.ToArray());
 #endif
 
-    private static T? GetProcessor<T>(IDictionary<(string? UserId, ushort RecordId), T> dictionary, string userId, ushort recordId)
+    private static T? GetProcessor<T>(System.Collections.Concurrent.ConcurrentDictionary<Key, T> dictionary, string userId, ushort recordId) =>
+#if NETSTANDARD2_1_OR_GREATER || NETCOREAPP2_0_OR_GREATER
+        dictionary.GetValueOrDefault(new(userId, recordId));
+#else
+        dictionary.TryGetValue(new(userId, recordId),  out var value) ? value : default;
+#endif
+
+    private readonly struct Key(string? userId, ushort recordId) : IEquatable<Key>, IEqualityComparer<Key>
     {
-        return dictionary.FirstOrDefault(IsValid).Value;
-
-        bool IsValid(KeyValuePair<(string? UserId, ushort RecordId), T> kvp)
+        public Key(ushort recordId)
+            : this(default, recordId)
         {
-            return IsValidCore(kvp.Key, userId, recordId);
-
-            static bool IsValidCore((string? UserId, ushort RecordId) key, string userId, ushort recordId)
-            {
-                return (key.UserId is null || string.Equals(key.UserId, userId, StringComparison.Ordinal))
-                    && key.RecordId == recordId;
-            }
         }
+
+        private string? UserId { get; } = userId;
+
+        private ushort RecordId { get; } = recordId;
+
+        public override bool Equals(object? obj) => obj is Key key && this.Equals(key);
+
+        public bool Equals(Key other) => (this.UserId is null || string.Equals(this.UserId, other.UserId, StringComparison.Ordinal))
+                                         && this.RecordId == other.RecordId;
+
+        public bool Equals(Key x, Key y) => (x.UserId is null || string.Equals(x.UserId, y.UserId, StringComparison.Ordinal))
+                                            && x.RecordId == y.RecordId;
+
+        public override int GetHashCode() => this.GetHashCode(this);
+
+        public int GetHashCode(Key obj) => obj.RecordId.GetHashCode();
     }
 }

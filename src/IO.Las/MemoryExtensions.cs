@@ -27,6 +27,10 @@ internal static class MemoryExtensions
         /// <summary>
         /// Marshals data from a managed object of a specified type to a block of memory.
         /// </summary>
+        /// <typeparam name="T">The type of the managed object.</typeparam>
+        /// <param name="structure">A managed object that holds the data to be marshaled. The object must be a structure or an instance of a formatted class.</param>
+        /// <param name="span">The span of memory.</param>
+        /// <param name="fDeleteOld"><see langword="true"/> to call the <see cref="System.Runtime.InteropServices.Marshal.DestroyStructure{T}"/> method on the <paramref name="span"/> parameter before this method copies the data. The block must contain valid data. Note that passing false when the memory block already contains data can lead to a memory leak.</param>
         public static void StructureToSpan<T>([System.Diagnostics.CodeAnalysis.DisallowNull] T structure, Span<byte> span, bool fDeleteOld = false) =>
             System.Runtime.InteropServices.Marshal.StructureToPtr(structure, span.GetIntPtr(), fDeleteOld);
     }
