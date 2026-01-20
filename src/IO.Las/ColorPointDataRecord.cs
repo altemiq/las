@@ -280,7 +280,11 @@ public readonly record struct ColorPointDataRecord :
         switch (BitConverter.IsLittleEndian)
         {
             case true:
+#if NET8_0_OR_GREATER
+                System.Runtime.InteropServices.MemoryMarshal.Write(destination, in System.Runtime.CompilerServices.Unsafe.AsRef(in this));
+#else
                 System.Runtime.InteropServices.MemoryMarshal.Write(destination, ref System.Runtime.CompilerServices.Unsafe.AsRef(this));
+#endif
                 return Size;
             default:
                 return this.WriteLittleEndian(destination);

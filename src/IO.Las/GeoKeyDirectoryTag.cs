@@ -121,7 +121,11 @@ public sealed record GeoKeyDirectoryTag : VariableLengthRecord, IReadOnlyList<Ge
         {
             if (BitConverter.IsLittleEndian)
             {
+#if NET8_0_OR_GREATER
+                System.Runtime.InteropServices.MemoryMarshal.Write(d, in System.Runtime.CompilerServices.Unsafe.AsRef(in value));
+#else
                 System.Runtime.InteropServices.MemoryMarshal.Write(d, ref System.Runtime.CompilerServices.Unsafe.AsRef(value));
+#endif
             }
             else
             {

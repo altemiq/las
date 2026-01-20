@@ -12,7 +12,7 @@ using System.Runtime.CompilerServices;
 /// Represents a vector with three double-precision floating-point values.
 /// </summary>
 [System.Runtime.InteropServices.StructLayout(System.Runtime.InteropServices.LayoutKind.Auto)]
-public readonly struct Vector3D : IFormattable, IEquatable<Vector3D>
+public readonly partial struct Vector3D : IFormattable, IEquatable<Vector3D>
 {
     /// <summary>
     /// The X component of the vector.
@@ -277,7 +277,7 @@ public readonly struct Vector3D : IFormattable, IEquatable<Vector3D>
     /// <param name="right">The second vector to add.</param>
     /// <returns>The summed vector.</returns>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static Vector3D Add(Vector3D left, Vector3D right) => new(left.X + right.X, left.Y + right.Y, left.Z + right.Z);
+    public static partial Vector3D Add(Vector3D left, Vector3D right);
 
     /// <summary>
     /// Subtracts the second vector from the first.
@@ -286,7 +286,7 @@ public readonly struct Vector3D : IFormattable, IEquatable<Vector3D>
     /// <param name="right">The second vector.</param>
     /// <returns>The difference vector.</returns>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static Vector3D Subtract(Vector3D left, Vector3D right) => new(left.X - right.X, left.Y - right.Y, left.Z - right.Z);
+    public static partial Vector3D Subtract(Vector3D left, Vector3D right);
 
     /// <summary>
     /// Multiplies two vectors together.
@@ -295,7 +295,7 @@ public readonly struct Vector3D : IFormattable, IEquatable<Vector3D>
     /// <param name="right">The second vector.</param>
     /// <returns>The product vector.</returns>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static Vector3D Multiply(Vector3D left, Vector3D right) => new(left.X * right.X, left.Y * right.Y, left.Z * right.Z);
+    public static partial Vector3D Multiply(Vector3D left, Vector3D right);
 
     /// <summary>
     /// Multiplies a vector by a specified scalar.
@@ -304,7 +304,7 @@ public readonly struct Vector3D : IFormattable, IEquatable<Vector3D>
     /// <param name="right">The scalar value.</param>
     /// <returns>The scaled vector.</returns>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static Vector3D Multiply(Vector3D left, double right) => Multiply(left, new Vector3D(right));
+    public static partial Vector3D Multiply(Vector3D left, double right);
 
     /// <summary>
     /// Multiplies a scalar value by a specified vector.
@@ -313,7 +313,7 @@ public readonly struct Vector3D : IFormattable, IEquatable<Vector3D>
     /// <param name="right">The vector.</param>
     /// <returns>The scaled vector.</returns>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static Vector3D Multiply(double left, Vector3D right) => Multiply(new Vector3D(left), right);
+    public static partial Vector3D Multiply(double left, Vector3D right);
 
     /// <summary>
     /// Divides the first vector by the second.
@@ -322,7 +322,7 @@ public readonly struct Vector3D : IFormattable, IEquatable<Vector3D>
     /// <param name="right">The second vector.</param>
     /// <returns>The vector resulting from the division.</returns>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static Vector3D Divide(Vector3D left, Vector3D right) => new(left.X / right.X, left.Y / right.Y, left.Z / right.Z);
+    public static partial Vector3D Divide(Vector3D left, Vector3D right);
 
     /// <summary>
     /// Divides the specified vector by a specified scalar value.
@@ -331,7 +331,7 @@ public readonly struct Vector3D : IFormattable, IEquatable<Vector3D>
     /// <param name="divisor">The scalar value.</param>
     /// <returns>The vector that results from the division.</returns>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static Vector3D Divide(Vector3D left, double divisor) => Divide(left, new Vector3D(divisor));
+    public static partial Vector3D Divide(Vector3D left, double divisor);
 
     /// <summary>
     /// Negates a specified vector.
@@ -339,7 +339,7 @@ public readonly struct Vector3D : IFormattable, IEquatable<Vector3D>
     /// <param name="value">The vector to negate.</param>
     /// <returns>The negated vector.</returns>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static Vector3D Negate(Vector3D value) => Subtract(Zero, value);
+    public static partial Vector3D Negate(Vector3D value);
 
     /// <summary>
     /// Returns the dot product of two vectors.
@@ -348,7 +348,7 @@ public readonly struct Vector3D : IFormattable, IEquatable<Vector3D>
     /// <param name="vector2">The second vector.</param>
     /// <returns>The dot product.</returns>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static double Dot(Vector3D vector1, Vector3D vector2) => (vector1.X * vector2.X) + (vector1.Y * vector2.Y) + (vector1.Z * vector2.Z);
+    public static partial double Dot(Vector3D vector1, Vector3D vector2);
 
     /// <summary>
     /// Returns a vector whose elements are the minimum of each of the pairs of elements in two specified vectors.
@@ -356,10 +356,7 @@ public readonly struct Vector3D : IFormattable, IEquatable<Vector3D>
     /// <param name="value1">The first vector.</param>
     /// <param name="value2">The second vector.</param>
     /// <returns>The minimized vector.</returns>
-    public static Vector3D Min(Vector3D value1, Vector3D value2) => new(
-        Math.Min(value1.X, value2.X),
-        Math.Min(value1.Y, value2.Y),
-        Math.Min(value1.Z, value2.Z));
+    public static partial Vector3D Min(Vector3D value1, Vector3D value2);
 
     /// <summary>
     /// Returns a vector whose elements are the maximum of each of the pairs of elements in two specified vectors.
@@ -368,10 +365,7 @@ public readonly struct Vector3D : IFormattable, IEquatable<Vector3D>
     /// <param name="value2">The second vector.</param>
     /// <returns>The maximized vector.</returns>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static Vector3D Max(Vector3D value1, Vector3D value2) => new(
-        Math.Max(value1.X, value2.X),
-        Math.Max(value1.Y, value2.Y),
-        Math.Max(value1.Z, value2.Z));
+    public static partial Vector3D Max(Vector3D value1, Vector3D value2);
 
     /// <summary>
     /// Returns a vector whose elements are the absolute values of each of the specified vector's elements.
@@ -379,10 +373,7 @@ public readonly struct Vector3D : IFormattable, IEquatable<Vector3D>
     /// <param name="value">A vector.</param>
     /// <returns>The absolute value vector.</returns>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static Vector3D Abs(Vector3D value) => new(
-        Math.Abs(value.X),
-        Math.Abs(value.Y),
-        Math.Abs(value.Z));
+    public static partial Vector3D Abs(Vector3D value);
 
     /// <summary>
     /// Returns a vector whose elements are the square root of each of a specified vector's elements.
@@ -390,10 +381,7 @@ public readonly struct Vector3D : IFormattable, IEquatable<Vector3D>
     /// <param name="value">A vector.</param>
     /// <returns>The square root vector.</returns>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static Vector3D SquareRoot(Vector3D value) => new(
-        Math.Sqrt(value.X),
-        Math.Sqrt(value.Y),
-        Math.Sqrt(value.Z));
+    public static partial Vector3D SquareRoot(Vector3D value);
 
     /// <inheritdoc/>
     public override int GetHashCode() => HashCode.Combine(this.X, this.Y, this.Z);
@@ -457,7 +445,16 @@ public readonly struct Vector3D : IFormattable, IEquatable<Vector3D>
     /// <exception cref="ArgumentException">The number of elements in the current instance is greater than in the array.</exception>
     /// <exception cref="RankException"><paramref name="array"/> is multidimensional.</exception>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public void CopyTo(double[] array) => this.CopyTo(array, 0);
+    public void CopyTo(double[] array)
+    {
+        // We explicitly don't check for `null` because historically this has thrown `NullReferenceException` for perf reasons
+        if (array.Length < 3)
+        {
+            throw new ArgumentException(Properties.Resources.ElementsInSourceIsGreaterThanDestination, nameof(array));
+        }
+
+        Unsafe.WriteUnaligned(ref Unsafe.As<double, byte>(ref array[0]), this);
+    }
 
     /// <summary>Copies the elements of the vector to a specified array starting at a specified index position.</summary>
     /// <param name="array">The destination array.</param>
@@ -471,7 +468,7 @@ public readonly struct Vector3D : IFormattable, IEquatable<Vector3D>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public void CopyTo(double[] array, int index)
     {
-        ArgumentNullException.ThrowIfNull(array);
+        // We explicitly don't check for `null` because historically this has thrown `NullReferenceException` for perf reasons
         ArgumentOutOfRangeException.ThrowIfLessThan(index, 0);
         ArgumentOutOfRangeException.ThrowIfGreaterThanOrEqual(index, array.Length);
         if (array.Length - index < 3)
@@ -479,8 +476,22 @@ public readonly struct Vector3D : IFormattable, IEquatable<Vector3D>
             throw new ArgumentException(Properties.Resources.ElementsInSourceIsGreaterThanDestination, nameof(index));
         }
 
-        array[index] = this.X;
-        array[index + 1] = this.Y;
-        array[index + 2] = this.Z;
+        Unsafe.WriteUnaligned(ref Unsafe.As<double, byte>(ref array[index]), this);
+    }
+
+    /// <summary>
+    /// Copies the vector to the given <see cref="Span{T}" />. The length of the destination span must be at least 3.
+    /// </summary>
+    /// <param name="destination">The destination span which the values are copied into.</param>
+    /// <exception cref="ArgumentException">If number of elements in source vector is greater than those available in destination span.</exception>
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public void CopyTo(Span<double> destination)
+    {
+        if (destination.Length < 3)
+        {
+            throw new ArgumentException(Properties.Resources.ElementsInSourceIsGreaterThanDestination, nameof(destination));
+        }
+
+        Unsafe.WriteUnaligned(ref Unsafe.As<double, byte>(ref System.Runtime.InteropServices.MemoryMarshal.GetReference(destination)), this);
     }
 }
