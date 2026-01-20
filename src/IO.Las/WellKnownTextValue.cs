@@ -84,14 +84,14 @@ public readonly struct WellKnownTextValue
     {
         return this.value switch
         {
-            string s => WriteString(s, destination),
-            double d => WriteDouble(d, destination),
+            string s => WriteString(destination, s),
+            double d => WriteDouble(destination, d),
             WellKnownTextLiteral literal => System.Text.Encoding.UTF8.GetBytes(literal.ToString(), destination),
             WellKnownTextNode node => node.CopyTo(destination),
             _ => default,
         };
 
-        static int WriteString(string s, Span<byte> buffer)
+        static int WriteString(Span<byte> buffer, string s)
         {
             var bytesWritten = 0;
             buffer[bytesWritten] = (byte)'\"';
@@ -101,7 +101,7 @@ public readonly struct WellKnownTextValue
             return bytesWritten + 1;
         }
 
-        static int WriteDouble(double d, Span<byte> buffer)
+        static int WriteDouble(Span<byte> buffer, double d)
         {
             System.Buffers.Text.Utf8Formatter.TryFormat(d, buffer, out var bytesWritten, System.Buffers.StandardFormat.Parse("G13"));
             return bytesWritten;
@@ -118,7 +118,7 @@ public readonly struct WellKnownTextValue
         {
             string s => System.Text.Encoding.UTF8.GetByteCount(s) + 2,
             double d => GetDoubleByteCount(d),
-            WellKnownTextLiteral literal => System.Text.Encoding.UTF8.GetByteCount(literal.ToString()),
+            WellKnownTextLiteral literal => literal.GetByteCount(),
             WellKnownTextNode node => node.GetByteCount(),
             _ => default,
         };

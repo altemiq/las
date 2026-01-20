@@ -109,6 +109,9 @@ public abstract class ChunkedStream(long length) : Stream, ICacheStream, IAsyncC
 
     /// <inheritdoc/>
     [System.Diagnostics.CodeAnalysis.DoesNotReturn]
+#if NET8_0_OR_GREATER
+    [System.Diagnostics.CodeAnalysis.SuppressMessage("Performance", "CA1863:Use \'CompositeFormat\'", Justification = "This is for an exception")]
+#endif
     public sealed override void SetLength(long value) => throw new NotSupportedException(string.Format(Properties.Resources.Culture, Properties.Resources.CannotSetOn, "length", "chunked stream"));
 
     /// <inheritdoc/>

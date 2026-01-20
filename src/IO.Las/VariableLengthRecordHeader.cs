@@ -97,20 +97,13 @@ public readonly record struct VariableLengthRecordHeader
     public ushort RecordLengthAfterHeader { get => this.recordLengthAfterHeader; init => this.recordLengthAfterHeader = value; }
 
     /// <summary>
-    /// Reads an instance of <see cref="VariableLengthRecordHeader"/> from the source.
+    /// Creates an instance of <see cref="VariableLengthRecordHeader"/> from the source.
     /// </summary>
     /// <param name="source">The source.</param>
     /// <returns>The instance of <see cref="VariableLengthRecordHeader"/>.</returns>
-    public static VariableLengthRecordHeader Read(ReadOnlySpan<byte> source)
-    {
-        return BitConverter.IsLittleEndian ? System.Runtime.InteropServices.Marshal.PtrToStructure<VariableLengthRecordHeader>(GetIntPtrFromReadOnlySpan(source)) : new(source);
-
-        static unsafe IntPtr GetIntPtrFromReadOnlySpan<T>(ReadOnlySpan<T> span)
-        {
-            // Cast the reference to an IntPtr
-            return (IntPtr)System.Runtime.CompilerServices.Unsafe.AsPointer(ref System.Runtime.InteropServices.MemoryMarshal.GetReference(span));
-        }
-    }
+    public static VariableLengthRecordHeader Create(ReadOnlySpan<byte> source) => BitConverter.IsLittleEndian
+        ? System.Runtime.InteropServices.Marshal.SpanToStructure<VariableLengthRecordHeader>(source)
+        : new(source);
 
     /// <summary>
     /// Copies the contents of this instance into a destination <see cref="Span{T}"/>.
@@ -120,17 +113,12 @@ public readonly record struct VariableLengthRecordHeader
     {
         if (BitConverter.IsLittleEndian)
         {
-            System.Runtime.InteropServices.Marshal.StructureToPtr(this, GetIntPtrFromSpan(destination), fDeleteOld: false);
-            return;
-
-            static unsafe IntPtr GetIntPtrFromSpan<T>(Span<T> span)
-            {
-                // Cast the reference to an IntPtr
-                return (IntPtr)System.Runtime.CompilerServices.Unsafe.AsPointer(ref System.Runtime.InteropServices.MemoryMarshal.GetReference(span));
-            }
+            System.Runtime.InteropServices.Marshal.StructureToSpan(this, destination);
         }
-
-        this.WriteLittleEndian(destination);
+        else
+        {
+            this.WriteLittleEndian(destination);
+        }
     }
 
     /// <summary>
@@ -140,25 +128,9 @@ public readonly record struct VariableLengthRecordHeader
     public void WriteLittleEndian(Span<byte> destination)
     {
         System.Buffers.Binary.BinaryPrimitives.WriteUInt16LittleEndian(destination[..Constants.VariableLengthRecord.UserIdFieldOffset], this.reserved);
-        WriteString(destination[Constants.VariableLengthRecord.UserIdFieldOffset..Constants.VariableLengthRecord.RecordIdFieldOffset], this.userId);
+        System.Text.Encoding.UTF8.GetNullTerminatedBytes(this.userId, destination[Constants.VariableLengthRecord.UserIdFieldOffset..Constants.VariableLengthRecord.RecordIdFieldOffset]);
         System.Buffers.Binary.BinaryPrimitives.WriteUInt16LittleEndian(destination[Constants.VariableLengthRecord.RecordIdFieldOffset..Constants.VariableLengthRecord.RecordLengthAfterHeaderFieldOffset], this.recordId);
         System.Buffers.Binary.BinaryPrimitives.WriteUInt16LittleEndian(destination[Constants.VariableLengthRecord.RecordLengthAfterHeaderFieldOffset..Constants.VariableLengthRecord.DescriptionFieldOffset], this.recordLengthAfterHeader);
-        WriteString(destination[Constants.VariableLengthRecord.DescriptionFieldOffset..Size], this.description);
-
-        static void WriteString(Span<byte> destination, string input)
-        {
-            var length = Math.Min(destination.Length, input.Length);
-            int current;
-            for (current = 0; current < length; current++)
-            {
-                destination[current] = (byte)input[current];
-            }
-
-            while (current < destination.Length)
-            {
-                destination[current] = 0;
-                current++;
-            }
-        }
+        System.Text.Encoding.UTF8.GetNullTerminatedBytes(this.description, destination[Constants.VariableLengthRecord.DescriptionFieldOffset..Size]);
     }
 }

@@ -85,18 +85,12 @@ public sealed record ClassificationLookup : VariableLengthRecord, IReadOnlyList<
         {
             if (BitConverter.IsLittleEndian)
             {
-                System.Runtime.InteropServices.Marshal.StructureToPtr(value, GetIntPtrFromSpan(d), fDeleteOld: false);
-
-                static unsafe IntPtr GetIntPtrFromSpan<T>(Span<T> span)
-                {
-                    // Cast the reference to an IntPtr
-                    return (IntPtr)System.Runtime.CompilerServices.Unsafe.AsPointer(ref System.Runtime.InteropServices.MemoryMarshal.GetReference(span));
-                }
+                System.Runtime.InteropServices.Marshal.StructureToSpan(value, d);
             }
             else
             {
                 d[0] = value.ClassNumber;
-                _ = System.Text.Encoding.UTF8.GetBytes(value.Description, d[1..]);
+                System.Text.Encoding.UTF8.GetNullTerminatedBytes(value.Description, d[1..16]);
             }
 
             bytesWritten += ValueSize;
@@ -118,7 +112,7 @@ public sealed record ClassificationLookup : VariableLengthRecord, IReadOnlyList<
             var index = i * 16;
             var s = source[index..];
             var entry = BitConverter.IsLittleEndian
-                ? Read(s)
+                ? System.Runtime.InteropServices.Marshal.SpanToStructure<ClassificationLookupItem>(s)
                 : new()
                 {
                     ClassNumber = s[0],
@@ -129,16 +123,5 @@ public sealed record ClassificationLookup : VariableLengthRecord, IReadOnlyList<
         }
 
         return builder.ToReadOnlyCollection();
-
-        static ClassificationLookupItem Read(ReadOnlySpan<byte> source)
-        {
-            return System.Runtime.InteropServices.Marshal.PtrToStructure<ClassificationLookupItem>(GetIntPtrFromSpan(source));
-
-            static unsafe IntPtr GetIntPtrFromSpan<T>(ReadOnlySpan<T> span)
-            {
-                // Cast the reference to an IntPtr
-                return (IntPtr)System.Runtime.CompilerServices.Unsafe.AsPointer(ref System.Runtime.InteropServices.MemoryMarshal.GetReference(span));
-            }
-        }
     }
 }

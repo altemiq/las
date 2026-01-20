@@ -43,7 +43,7 @@ public class CopcHierarchyTests
 
         _ = hierarchy.CopyTo(data);
 
-        var recordHeader = ExtendedVariableLengthRecordHeader.Read(data);
+        var recordHeader = ExtendedVariableLengthRecordHeader.Create(data);
         var recordData = data[ExtendedVariableLengthRecordHeader.Size..];
         hierarchy = new(recordHeader, info, default, recordData);
 

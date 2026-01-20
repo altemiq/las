@@ -72,6 +72,14 @@ public class ExtendedGpsColorPointTests
         _ = await Assert.That(destination).IsEquivalentTo(Bytes);
     }
 
+    [Test]
+    public async Task CopyTo()
+    {
+        var destination = new byte[Bytes.Length];
+        Point.CopyTo(destination);
+        await Assert.That(destination).IsEquivalentTo(Bytes);
+    }
+
     private static async Task CheckPoint(ExtendedGpsColorPointDataRecord record)
     {
         _ = await Assert.That(record)

@@ -24,8 +24,16 @@ public static partial class ExtensionMethods
         /// </summary>
         /// <param name="bytes">A read-only byte span to decode to a Unicode string.</param>
         /// <returns>A string that contains the decoded bytes from the provided read-only span.</returns>
-        public string GetNullTerminatedString(ReadOnlySpan<byte> bytes)
+        public
+#if NET6_0_OR_GREATER
+            unsafe
+#endif
+            string GetNullTerminatedString(ReadOnlySpan<byte> bytes)
         {
+#if NET6_0_OR_GREATER
+            var ptr = (byte*)System.Runtime.CompilerServices.Unsafe.AsPointer(ref System.Runtime.InteropServices.MemoryMarshal.GetReference(bytes));
+            return encoding.GetString(System.Runtime.InteropServices.MemoryMarshal.CreateReadOnlySpanFromNullTerminated(ptr));
+#else
             var endIndex = bytes.IndexOf((byte)0);
             if (endIndex is -1)
             {
@@ -33,6 +41,18 @@ public static partial class ExtensionMethods
             }
 
             return encoding.GetString(bytes[..endIndex]);
+#endif
+        }
+
+        /// <summary>
+        /// Encodes into a span of bytes a set of characters from the specified read-only span.
+        /// </summary>
+        /// <param name="chars">The span containing the set of characters to encode.</param>
+        /// <param name="bytes">The byte span to hold the encoded bytes.</param>
+        public void GetNullTerminatedBytes(ReadOnlySpan<char> chars, Span<byte> bytes)
+        {
+            var length = System.Text.Encoding.UTF8.GetBytes(chars[..Math.Min(bytes.Length, chars.Length)], bytes);
+            bytes[length..].Clear();
         }
 
 #if !NETSTANDARD2_1_OR_GREATER && !NETCOREAPP2_1_OR_GREATER
@@ -54,8 +74,8 @@ public static partial class ExtensionMethods
         /// <returns>The number of bytes produced by encoding the specified character span.</returns>
         public unsafe int GetByteCount(ReadOnlySpan<byte> chars)
         {
-            var charsPtr = (char*)System.Runtime.CompilerServices.Unsafe.AsPointer(ref System.Runtime.InteropServices.MemoryMarshal.GetReference(chars));
-            return encoding.GetByteCount(charsPtr, chars.Length);
+            var ptr = (char*)System.Runtime.CompilerServices.Unsafe.AsPointer(ref System.Runtime.InteropServices.MemoryMarshal.GetReference(chars));
+            return encoding.GetByteCount(ptr, chars.Length);
         }
 
         /// <summary>

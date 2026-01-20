@@ -576,5 +576,8 @@ public static partial class ExtensionMethods
     }
 
     [System.Diagnostics.CodeAnalysis.DoesNotReturn]
+#if NET8_0_OR_GREATER
+    [System.Diagnostics.CodeAnalysis.SuppressMessage("Performance", "CA1863:Use \'CompositeFormat\'", Justification = "This is for an exception")]
+#endif
     private static T ThrowIsNotAValue<T>(string expected, string paramName) => throw new ArgumentException(string.Format(Properties.Resources.Culture, Properties.Resources.IsNotAValue, nameof(GeoKeyEntry), expected), paramName);
 }

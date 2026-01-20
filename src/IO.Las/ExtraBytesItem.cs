@@ -484,67 +484,41 @@ public readonly record struct ExtraBytesItem
     public ValueTask<object?> GetValueAsync(ReadOnlyMemory<byte> source) => new(this.GetValue(source.Span));
 
     /// <summary>
-    /// Reads an instance of <see cref="ExtraBytesItem"/> from the source.
+    /// Creates an instance of <see cref="ExtraBytesItem"/> from the source.
     /// </summary>
     /// <param name="source">The source.</param>
     /// <returns>The instance of <see cref="ExtraBytesItem"/>.</returns>
-    internal static ExtraBytesItem Read(ReadOnlySpan<byte> source)
-    {
-        return BitConverter.IsLittleEndian ? Marshal.PtrToStructure<ExtraBytesItem>(GetIntPtrFromSpan(source)) : new(source);
-
-        static unsafe IntPtr GetIntPtrFromSpan<T>(ReadOnlySpan<T> span)
-        {
-            // Cast the reference to an IntPtr
-            return (IntPtr)System.Runtime.CompilerServices.Unsafe.AsPointer(ref MemoryMarshal.GetReference(span));
-        }
-    }
+    internal static ExtraBytesItem Create(ReadOnlySpan<byte> source) => BitConverter.IsLittleEndian
+        ? Marshal.SpanToStructure<ExtraBytesItem>(source)
+        : new(source);
 
     /// <summary>
     /// Writes this instance to the destination.
     /// </summary>
     /// <param name="destination">The destination.</param>
-    internal void Write(Span<byte> destination)
+    internal void CopyTo(Span<byte> destination)
     {
         if (BitConverter.IsLittleEndian)
         {
-            Marshal.StructureToPtr(this, GetIntPtrFromSpan(destination), fDeleteOld: false);
-
-            static unsafe IntPtr GetIntPtrFromSpan<T>(Span<T> span)
-            {
-                // Cast the reference to an IntPtr
-                return (IntPtr)System.Runtime.CompilerServices.Unsafe.AsPointer(ref MemoryMarshal.GetReference(span));
-            }
+            Marshal.StructureToSpan(this, destination);
         }
         else
         {
             destination[2] = (byte)this.dataType;
             destination[3] = (byte)this.options;
-            WriteString(this.name, destination[4..36]);
+            System.Text.Encoding.UTF8.GetNullTerminatedBytes(this.name, destination[4..36]);
             this.noData.CopyTo(destination[40..48]);
             this.min.CopyTo(destination[64..72]);
             this.max.CopyTo(destination[88..96]);
             System.Buffers.Binary.BinaryPrimitives.WriteDoubleLittleEndian(destination[112..120], this.scale);
             System.Buffers.Binary.BinaryPrimitives.WriteDoubleLittleEndian(destination[136..142], this.offset);
-            WriteString(this.description, destination[160..192]);
-        }
-
-        static void WriteString(string value, Span<byte> destination)
-        {
-            var chars = value.AsSpan();
-            if (chars.Length > destination.Length)
-            {
-                chars = chars[..destination.Length];
-            }
-
-            var written = System.Text.Encoding.UTF8.GetBytes(chars, destination);
-
-            if (written < destination.Length)
-            {
-                destination[written..].Clear();
-            }
+            System.Text.Encoding.UTF8.GetNullTerminatedBytes(this.description, destination[160..192]);
         }
     }
 
+#if NET8_0_OR_GREATER
+    [System.Diagnostics.CodeAnalysis.SuppressMessage("Performance", "CA1863:Use \'CompositeFormat\'", Justification = "This is for an exception")]
+#endif
     private static object GetDataAsFull(byte[] data, ExtraBytesDataType dataType) => dataType switch
     {
         ExtraBytesDataType.UnsignedChar or ExtraBytesDataType.UnsignedShort or ExtraBytesDataType.UnsignedLong or ExtraBytesDataType.UnsignedLongLong => System.Buffers.Binary.BinaryPrimitives.ReadUInt64LittleEndian(data),

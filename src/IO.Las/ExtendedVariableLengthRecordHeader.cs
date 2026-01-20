@@ -136,20 +136,13 @@ public readonly record struct ExtendedVariableLengthRecordHeader
     }
 
     /// <summary>
-    /// Reads an instance of <see cref="ExtendedVariableLengthRecordHeader"/> from the source.
+    /// Creates an instance of <see cref="ExtendedVariableLengthRecordHeader"/> from the source.
     /// </summary>
     /// <param name="source">The source.</param>
     /// <returns>The instance of <see cref="ExtendedVariableLengthRecordHeader"/>.</returns>
-    public static ExtendedVariableLengthRecordHeader Read(ReadOnlySpan<byte> source)
-    {
-        return BitConverter.IsLittleEndian ? System.Runtime.InteropServices.Marshal.PtrToStructure<ExtendedVariableLengthRecordHeader>(GetIntPtrFromSpan(source)) : new(source);
-
-        static unsafe IntPtr GetIntPtrFromSpan<T>(ReadOnlySpan<T> span)
-        {
-            // Cast the reference to an IntPtr
-            return (IntPtr)System.Runtime.CompilerServices.Unsafe.AsPointer(ref System.Runtime.InteropServices.MemoryMarshal.GetReference(span));
-        }
-    }
+    public static ExtendedVariableLengthRecordHeader Create(ReadOnlySpan<byte> source) => BitConverter.IsLittleEndian
+        ? System.Runtime.InteropServices.Marshal.SpanToStructure<ExtendedVariableLengthRecordHeader>(source)
+        : new(source);
 
     /// <summary>
     /// Writes this instance to the destination.
@@ -159,17 +152,12 @@ public readonly record struct ExtendedVariableLengthRecordHeader
     {
         if (BitConverter.IsLittleEndian)
         {
-            System.Runtime.InteropServices.Marshal.StructureToPtr(this, GetIntPtrFromSpan(destination), fDeleteOld: false);
-            return;
-
-            static unsafe IntPtr GetIntPtrFromSpan<T>(Span<T> span)
-            {
-                // Cast the reference to an IntPtr
-                return (IntPtr)System.Runtime.CompilerServices.Unsafe.AsPointer(ref System.Runtime.InteropServices.MemoryMarshal.GetReference(span));
-            }
+            System.Runtime.InteropServices.Marshal.StructureToSpan(this, destination);
         }
-
-        this.WriteLittleEndian(destination);
+        else
+        {
+            this.WriteLittleEndian(destination);
+        }
     }
 
     /// <summary>
@@ -179,25 +167,9 @@ public readonly record struct ExtendedVariableLengthRecordHeader
     public void WriteLittleEndian(Span<byte> destination)
     {
         System.Buffers.Binary.BinaryPrimitives.WriteUInt16LittleEndian(destination[..Constants.ExtendedVariableLengthRecord.UserIdFieldOffset], this.reserved);
-        WriteString(destination[Constants.ExtendedVariableLengthRecord.UserIdFieldOffset..Constants.ExtendedVariableLengthRecord.RecordIdFieldOffset], this.userId);
+        System.Text.Encoding.UTF8.GetNullTerminatedBytes(this.userId, destination[Constants.ExtendedVariableLengthRecord.UserIdFieldOffset..Constants.ExtendedVariableLengthRecord.RecordIdFieldOffset]);
         System.Buffers.Binary.BinaryPrimitives.WriteUInt16LittleEndian(destination[Constants.ExtendedVariableLengthRecord.RecordIdFieldOffset..Constants.ExtendedVariableLengthRecord.RecordLengthAfterHeaderFieldOffset], this.recordId);
         System.Buffers.Binary.BinaryPrimitives.WriteUInt64LittleEndian(destination[Constants.ExtendedVariableLengthRecord.RecordLengthAfterHeaderFieldOffset..Constants.ExtendedVariableLengthRecord.DescriptionFieldOffset], this.recordLengthAfterHeader);
-        WriteString(destination[Constants.ExtendedVariableLengthRecord.DescriptionFieldOffset..Size], this.description);
-
-        static void WriteString(Span<byte> destination, string input)
-        {
-            var length = Math.Min(destination.Length, input.Length);
-            int current;
-            for (current = 0; current < length; current++)
-            {
-                destination[current] = (byte)input[current];
-            }
-
-            while (current < destination.Length)
-            {
-                destination[current] = 0;
-                current++;
-            }
-        }
+        System.Text.Encoding.UTF8.GetNullTerminatedBytes(this.description, destination[Constants.ExtendedVariableLengthRecord.DescriptionFieldOffset..Size]);
     }
 }

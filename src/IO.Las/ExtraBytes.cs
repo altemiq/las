@@ -77,7 +77,7 @@ public sealed record ExtraBytes : VariableLengthRecord, IExtraBytes
 
         foreach (var item in this.items)
         {
-            item.Write(d);
+            item.CopyTo(d);
             bytesWritten += 192;
             d = destination[bytesWritten..];
         }
@@ -171,7 +171,7 @@ public sealed record ExtraBytes : VariableLengthRecord, IExtraBytes
         for (var i = 0; i < count; i++)
         {
             var index = i * 192;
-            builder.Add(ExtraBytesItem.Read(source[index..]));
+            builder.Add(ExtraBytesItem.Create(source[index..]));
         }
 
         return builder.ToReadOnlyCollection();

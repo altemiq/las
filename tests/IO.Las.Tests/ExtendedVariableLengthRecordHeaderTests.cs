@@ -57,4 +57,12 @@ public class ExtendedVariableLengthRecordHeaderTests
         Array.Copy(Bytes, destination, 2);
         _ = await Assert.That(destination).IsEquivalentTo(Bytes);
     }
+
+    [Test]
+    public async Task CopyTo()
+    {
+        var destination = new byte[Bytes.Length];
+        Header.CopyTo(destination);
+        await Assert.That(destination).IsEquivalentTo(Bytes);
+    }
 }

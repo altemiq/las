@@ -24,4 +24,10 @@ public readonly struct WellKnownTextLiteral(string value)
 
     /// <inheritdoc/>
     public override string ToString() => value;
+
+    /// <summary>
+    /// Gets the byte count.
+    /// </summary>
+    /// <returns>The byte count.</returns>
+    public int GetByteCount() => System.Text.Encoding.UTF8.GetByteCount(value);
 }

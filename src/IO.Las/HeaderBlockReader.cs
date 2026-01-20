@@ -198,7 +198,7 @@ public class HeaderBlockReader(Stream stream)
         Span<byte> byteArray = stackalloc byte[54];
         _ = stream.Read(byteArray);
 
-        var header = VariableLengthRecordHeader.Read(byteArray);
+        var header = VariableLengthRecordHeader.Create(byteArray);
 
         byteArray = stackalloc byte[header.RecordLengthAfterHeader];
         _ = stream.Read(byteArray);
@@ -218,7 +218,7 @@ public class HeaderBlockReader(Stream stream)
         var position = stream.Position;
         var byteArray = new byte[60];
         _ = stream.Read(byteArray, 0, byteArray.Length);
-        var header = ExtendedVariableLengthRecordHeader.Read(byteArray);
+        var header = ExtendedVariableLengthRecordHeader.Create(byteArray);
 
         byteArray = new byte[header.RecordLengthAfterHeader];
         _ = stream.Read(byteArray, 0, byteArray.Length);
@@ -239,6 +239,9 @@ public class HeaderBlockReader(Stream stream)
     }
 #endif
 
+#if NET8_0_OR_GREATER
+    [System.Diagnostics.CodeAnalysis.SuppressMessage("Performance", "CA1863:Use \'CompositeFormat\'", Justification = "This is for an exception")]
+#endif
     private HeaderBlock GetHeaderBlockImpl(string fileSignature)
     {
         if (fileSignature is not "LASF")

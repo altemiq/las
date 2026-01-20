@@ -11,8 +11,6 @@ public class GpsPointTests
         0xC5, 0x0A, 0x00, 0x00, 0x9F, 0xFA, 0xFF, 0xFF, 0xC3, 0xE5, 0xFF, 0xFF, 0xAE, 0x01, 0x09, 0x01, 0xE3, 0x00, 0x00, 0x00, 0x00, 0x68, 0x90, 0xA2, 0x64, 0x0B, 0x1E, 0x41,
     ];
 
-
-
     private static
 #if !NETFRAMEWORK
         readonly
@@ -69,6 +67,14 @@ public class GpsPointTests
         var destination = new byte[Bytes.Length];
         _ = Point.WriteLittleEndian(destination);
         _ = await Assert.That(destination).IsEquivalentTo(Bytes);
+    }
+
+    [Test]
+    public async Task CopyTo()
+    {
+        var destination = new byte[Bytes.Length];
+        Point.CopyTo(destination);
+        await Assert.That(destination).IsEquivalentTo(Bytes);
     }
 
     private static async Task CheckPoint(GpsPointDataRecord record)

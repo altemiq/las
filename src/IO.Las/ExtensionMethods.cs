@@ -173,6 +173,9 @@ public static partial class ExtensionMethods
         return builder.ToReadOnlyCollection();
     }
 
+#if NET8_0_OR_GREATER
+    [System.Diagnostics.CodeAnalysis.SuppressMessage("Performance", "CA1863:Use \'CompositeFormat\'", Justification = "This is for an exception")]
+#endif
     private static void MoveToPosition(Stream stream, long currentPosition, long position)
     {
         if (stream.CanSeek)
