@@ -38,7 +38,7 @@ public class ColorSourceGenerator : BaseSourceGenerator
 
     private static CompilationUnitSyntax CreateKnownColors(BaseNamespaceDeclarationSyntax @namespace)
     {
-        return CreateStruct(@namespace, nameof(System.Drawing.Color),  Concat(GetConstructor(), GetColors()));
+        return CreateStruct(@namespace, nameof(System.Drawing.Color), Concat(GetConstructor(), GetColors()));
 
         static IEnumerable<ConstructorDeclarationSyntax> GetConstructor()
         {

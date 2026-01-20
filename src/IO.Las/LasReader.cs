@@ -301,7 +301,7 @@ public class LasReader :
         }
 
         this.currentPointIndex = 0;
-        this.BaseStream.Seek(this.offsetToPointData,  SeekOrigin.Begin);
+        this.BaseStream.Seek(this.offsetToPointData, SeekOrigin.Begin);
         return true;
     }
 

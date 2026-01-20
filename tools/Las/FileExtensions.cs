@@ -126,7 +126,7 @@ internal static class FileExtensions
         /// <param name="mode">A <see cref="FileMode"/> value that specifies whether a uri is created if one does not exist, and determines whether the contents of existing uris are retained or overwritten.</param>
         /// <returns>The stream from URI.</returns>
         /// <exception cref="InvalidOperationException">The uri scheme is not supported.</exception>
-        public static Stream Open(Uri uri, FileMode mode) => File.Open(uri, mode, Amazon.S3.AmazonS3Client.Create(),  HttpClient.Create());
+        public static Stream Open(Uri uri, FileMode mode) => File.Open(uri, mode, Amazon.S3.AmazonS3Client.Create(), HttpClient.Create());
 
         /// <summary>
         /// Opens an existing URI for reading.

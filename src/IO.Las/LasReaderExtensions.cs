@@ -43,7 +43,7 @@ public static class LasReaderExtensions
         }
 
         /// <inheritdoc cref="System.Collections.IEnumerator.Reset()" />
-        public void Reset() => reader.ResetReading();
+        public readonly void Reset() => reader.ResetReading();
     }
 
     /// <summary>

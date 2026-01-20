@@ -29,7 +29,7 @@ public class LasReaderTests
         await Assert.That(pointDataRecord).IsTypeOf<GpsPointDataRecord>().And.Member(p => p.X, x => x.IsNotDefault());
         await Assert.That(data).IsEmpty();
     }
-    
+
     [Test]
     public async Task ReadAsyncEnumerable()
     {
@@ -47,7 +47,7 @@ public class LasReaderTests
         {
             var pointDataRecord = point.PointDataRecord;
             var data = point.ExtraBytes.ToArray();
-            
+
             await Assert.That(pointDataRecord).IsTypeOf<GpsPointDataRecord>().And.Member(p => p.X, x => x.IsNotDefault());
             await Assert.That(data).IsEmpty();
 
@@ -55,7 +55,7 @@ public class LasReaderTests
         }
 
     }
-    
+
     [Test]
     public async Task ReadLas()
     {
