@@ -298,9 +298,10 @@ public readonly struct HeaderBlock : IEquatable<HeaderBlock>
     /// <para>The point data format ID corresponds to the point data record format type.</para>
     /// <list type="bullet">
     /// <item>LAS 1.0 defines types 0 and 1</item>
-    /// <item>LAS 1.2 defines types 2 and 3</item>
-    /// <item>LAS 1.3 defines types 4 and 5</item>
-    /// <item>LAS 1.4 defines types 6, 7, 8, 9, and 10</item>
+    /// <item>LAS 1.2 defines types 0 through 3</item>
+    /// <item>LAS 1.3 defines types 0 through 5</item>
+    /// <item>LAS 1.4 defines types 0 through 10</item>
+    /// <item>LAS 1.5 defines types 6 through 10</item>
     /// </list>
     /// </remarks>
     public byte PointDataFormatId => (byte)(this.PointDataFormat & 0x3f);
