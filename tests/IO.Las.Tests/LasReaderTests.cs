@@ -128,7 +128,7 @@ public class LasReaderTests
 
         while (reader.ReadPointDataRecord() is { PointDataRecord: not null } point)
         {
-            if (extraBytes[0].GetValue(point.ExtraBytes) is not double value)
+            if (extraBytes[0].GetValue(point.ExtraBytes) is not { Value: double value })
             {
                 continue;
             }
@@ -250,7 +250,7 @@ public class LasReaderTests
         {
             _ = await Assert.That(point.PointDataRecord).IsAssignableTo<IGpsPointDataRecord>();
 
-            var value = await Assert.That(await extraBytes.GetValueAsync(0, point.ExtraBytes)).IsTypeOf<double>();
+            var value = await Assert.That(await extraBytes.GetValueAsync(0, point.ExtraBytes)).ValueIsTypeOf<double>();
             if (value < min)
             {
                 min = value;

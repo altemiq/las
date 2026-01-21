@@ -291,13 +291,13 @@ internal static class ExtensionMethods
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Critical Code Smell", "S3218:Inner class members should not shadow outer class \"static\" or type members", Justification = "Checked")]
         public override string ToString() => nameof(NullExtraBytes);
 
-        public object? GetValue(int index, ReadOnlySpan<byte> source) => default;
+        public ExtraBytesValue GetValue(int index, ReadOnlySpan<byte> source) => default;
 
-        public IReadOnlyList<object?> GetValues(ReadOnlySpan<byte> source) => [];
+        public IReadOnlyList<ExtraBytesValue> GetValues(ReadOnlySpan<byte> source) => [];
 
-        public ValueTask<object?> GetValueAsync(int index, ReadOnlyMemory<byte> source) => new(default(object));
+        public ValueTask<ExtraBytesValue> GetValueAsync(int index, ReadOnlyMemory<byte> source) => default;
 
-        public ValueTask<IReadOnlyList<object?>> GetValuesAsync(ReadOnlyMemory<byte> source) => new([]);
+        public ValueTask<IReadOnlyList<ExtraBytesValue>> GetValuesAsync(ReadOnlyMemory<byte> source) => new([]);
     }
 #endif
 }

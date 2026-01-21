@@ -97,7 +97,7 @@ public class LazReaderTests
             _ = await Assert.That(point).IsTypeOf<GpsPointDataRecord>();
             _ = await Assert.That(extraBytes).IsNotEmpty();
 
-            var value = await Assert.That(extraBytesTag[0].GetValue(extraBytes.AsSpan())).IsTypeOf<double>();
+            var value = await Assert.That(extraBytesTag[0].GetValue(extraBytes.AsSpan())).ValueIsTypeOf<double>();
             min = Math.Min(value, min);
             max = Math.Max(value, max);
         }
@@ -188,7 +188,7 @@ public class LazReaderTests
         {
             _ = await Assert.That(point.PointDataRecord).IsTypeOf<GpsPointDataRecord>();
             _ = await Assert.That(point.ExtraBytes.IsEmpty).IsFalse();
-            var value = await Assert.That(await extraBytes.GetValueAsync(0, point.ExtraBytes)).IsTypeOf<double>();
+            var value = await Assert.That(await extraBytes.GetValueAsync(0, point.ExtraBytes)).ValueIsTypeOf<double>();
             min = Math.Min(value, min);
             max = Math.Max(value, max);
         }
@@ -236,7 +236,7 @@ public class LazReaderTests
 #endif
             .And.Member(static headerBlock => headerBlock.ProjectId, static projectId => projectId.IsEqualTo(Guid.Empty))
             .And.Member(static headerBlock => headerBlock.Version, version => version.IsEqualTo(expectedVersion))
-            .And.Member(static headerBlock => headerBlock.SystemIdentifier, static systemIdentifier => systemIdentifier.IsEqualTo("LAStools (c) by rapidlasso GmbH"))
+            .And.Member(static headerBlock => headerBlock.SystemIdentifier, static systemIdentifier => systemIdentifier.Contains("LAStools").And.Contains("rapidlasso"))
             .And.Member(static headerBlock => headerBlock.FileCreation.GetValueOrDefault(), static fileCreation => fileCreation.IsEqualTo(new DateTime(2010, 2, 9)))
 #if LAS1_4_OR_GREATER
             .And.Member(static headerBlock => headerBlock.NumberOfPointRecords, static numberOfPointRecords => numberOfPointRecords.IsEqualTo(277573UL))

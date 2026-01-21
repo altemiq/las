@@ -23,21 +23,21 @@ public static partial class ExtensionMethods
         /// <param name="value">The value.</param>
         /// <returns>The number of bytes written.</returns>
         /// <exception cref="ArgumentOutOfRangeException">The type of <paramref name="value"/> is invalid.</exception>
-        public int Write(Span<byte> destination, object value)
+        public int Write(Span<byte> destination, ExtraBytesValue value)
         {
-            return item.DescaleAndRemoveOffset(value) switch
+            return item.RemoveOffsetAndDescale(value) switch
             {
-                byte v => WriteByte(destination, v),
-                sbyte v => WriteSByte(destination, v),
-                short v => WriteInt16(destination, v),
-                ushort v => WriteUInt16(destination, v),
-                int v => WriteInt32(destination, v),
-                uint v => WriteUInt32(destination, v),
-                long v => WriteInt64(destination, v),
-                ulong v => WriteUInt64(destination, v),
-                float v => WriteSingle(destination, v),
-                double v => WriteDouble(destination, v),
-                byte[] v => WriteBytes(destination, v),
+                { Value: byte v } => WriteByte(destination, v),
+                { Value: sbyte v } => WriteSByte(destination, v),
+                { Value: short v } => WriteInt16(destination, v),
+                { Value: ushort v } => WriteUInt16(destination, v),
+                { Value: int v } => WriteInt32(destination, v),
+                { Value: uint v } => WriteUInt32(destination, v),
+                { Value: long v } => WriteInt64(destination, v),
+                { Value: ulong v } => WriteUInt64(destination, v),
+                { Value: float v } => WriteSingle(destination, v),
+                { Value: double v } => WriteDouble(destination, v),
+                { Value: byte[] v } => WriteBytes(destination, v),
                 _ => throw new ArgumentOutOfRangeException(nameof(value)),
             };
 
@@ -124,36 +124,46 @@ public static partial class ExtensionMethods
         /// </summary>
         /// <param name="value">The value to scale and offset.</param>
         /// <returns>The scaled, and offset value.</returns>
-        public object ScaleAndApplyOffset(object value) => (item, value) switch
+        public ExtraBytesValue ScaleAndApplyOffset(ExtraBytesValue value) => (item, value.Value) switch
         {
-            ({ HasScale: false, HasOffset: false }, var v) => v,
+            (_, byte[] v) => v,
+            ({ HasScale: false, HasOffset: false }, byte v) => v,
             ({ HasScale: true, HasOffset: true }, byte v) => ScaleAndApplyOffset(item, v),
             ({ HasScale: true, HasOffset: false }, byte v) => Scale(item, v),
             ({ HasScale: false, HasOffset: true }, byte v) => ApplyOffset(item, v),
+            ({ HasScale: false, HasOffset: false }, sbyte v) => v,
             ({ HasScale: true, HasOffset: true }, sbyte v) => ScaleAndApplyOffset(item, v),
             ({ HasScale: true, HasOffset: false }, sbyte v) => Scale(item, v),
             ({ HasScale: false, HasOffset: true }, sbyte v) => ApplyOffset(item, v),
+            ({ HasScale: false, HasOffset: false }, ushort v) => v,
             ({ HasScale: true, HasOffset: true }, ushort v) => ScaleAndApplyOffset(item, v),
             ({ HasScale: true, HasOffset: false }, ushort v) => Scale(item, v),
             ({ HasScale: false, HasOffset: true }, ushort v) => ApplyOffset(item, v),
+            ({ HasScale: false, HasOffset: false }, short v) => v,
             ({ HasScale: true, HasOffset: true }, short v) => ScaleAndApplyOffset(item, v),
             ({ HasScale: true, HasOffset: false }, short v) => Scale(item, v),
             ({ HasScale: false, HasOffset: true }, short v) => ApplyOffset(item, v),
+            ({ HasScale: false, HasOffset: false }, uint v) => v,
             ({ HasScale: true, HasOffset: true }, uint v) => ScaleAndApplyOffset(item, v),
             ({ HasScale: true, HasOffset: false }, uint v) => Scale(item, v),
             ({ HasScale: false, HasOffset: true }, uint v) => ApplyOffset(item, v),
+            ({ HasScale: false, HasOffset: false }, int v) => v,
             ({ HasScale: true, HasOffset: true }, int v) => ScaleAndApplyOffset(item, v),
             ({ HasScale: true, HasOffset: false }, int v) => Scale(item, v),
             ({ HasScale: false, HasOffset: true }, int v) => ApplyOffset(item, v),
+            ({ HasScale: false, HasOffset: false }, ulong v) => v,
             ({ HasScale: true, HasOffset: true }, ulong v) => ScaleAndApplyOffset(item, v),
             ({ HasScale: true, HasOffset: false }, ulong v) => Scale(item, v),
             ({ HasScale: false, HasOffset: true }, ulong v) => ApplyOffset(item, v),
+            ({ HasScale: false, HasOffset: false }, long v) => v,
             ({ HasScale: true, HasOffset: true }, long v) => ScaleAndApplyOffset(item, v),
             ({ HasScale: true, HasOffset: false }, long v) => Scale(item, v),
             ({ HasScale: false, HasOffset: true }, long v) => ApplyOffset(item, v),
+            ({ HasScale: false, HasOffset: false }, float v) => v,
             ({ HasScale: true, HasOffset: true }, float v) => ScaleAndApplyOffset(item, v),
             ({ HasScale: true, HasOffset: false }, float v) => Scale(item, v),
             ({ HasScale: false, HasOffset: true }, float v) => ApplyOffset(item, v),
+            ({ HasScale: false, HasOffset: false }, double v) => v,
             ({ HasScale: true, HasOffset: true }, double v) => ScaleAndApplyOffset(item, v),
             ({ HasScale: true, HasOffset: false }, double v) => Scale(item, v),
             ({ HasScale: false, HasOffset: true }, double v) => ApplyOffset(item, v),
@@ -165,9 +175,9 @@ public static partial class ExtensionMethods
         /// </summary>
         /// <param name="value">The value to descale and offset.</param>
         /// <returns>The descaled, and offset value.</returns>
-        public object DescaleAndRemoveOffset(object value)
+        public ExtraBytesValue RemoveOffsetAndDescale(ExtraBytesValue value)
         {
-            var returnValue = (item, value) switch
+            var returnValue = (item, value.Value) switch
             {
                 ({ HasOffset: false, HasScale: false }, var v) => v,
                 ({ HasOffset: true, HasScale: true }, byte v) => RemoveOffsetAndDescale(item, v),
@@ -203,7 +213,7 @@ public static partial class ExtensionMethods
                 _ => value,
             };
 
-            return Convert.ChangeType(returnValue, item.DataType.ToType(), System.Globalization.CultureInfo.InvariantCulture);
+            return new(Convert.ChangeType(returnValue, item.DataType.ToType(), System.Globalization.CultureInfo.InvariantCulture));
         }
     }
 
@@ -215,7 +225,7 @@ public static partial class ExtensionMethods
     /// <param name="values">The values.</param>
     /// <returns>The number of bytes written.</returns>
     /// <exception cref="ArgumentOutOfRangeException">The number of values does not match the extra byte items.</exception>
-    public static int Write(this ExtraBytes extraBytes, Span<byte> destination, params IReadOnlyList<object> values)
+    public static int Write(this ExtraBytes extraBytes, Span<byte> destination, params IReadOnlyList<ExtraBytesValue> values)
     {
         // get the value
         if (extraBytes.Count != values.Count)

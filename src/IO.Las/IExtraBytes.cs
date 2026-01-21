@@ -18,14 +18,14 @@ public interface IExtraBytes : IReadOnlyList<ExtraBytesItem>
     /// <param name="index">The index.</param>
     /// <param name="source">The source.</param>
     /// <returns>The value.</returns>
-    object? GetValue(int index, ReadOnlySpan<byte> source);
+    ExtraBytesValue GetValue(int index, ReadOnlySpan<byte> source);
 
     /// <summary>
     /// Gets the values.
     /// </summary>
     /// <param name="source">The source.</param>
     /// <returns>The value.</returns>
-    IReadOnlyList<object?> GetValues(ReadOnlySpan<byte> source);
+    IReadOnlyList<ExtraBytesValue> GetValues(ReadOnlySpan<byte> source);
 
     /// <summary>
     /// Gets the value for the specified index asynchronously.
@@ -33,12 +33,12 @@ public interface IExtraBytes : IReadOnlyList<ExtraBytesItem>
     /// <param name="index">The index.</param>
     /// <param name="source">The source.</param>
     /// <returns>The value.</returns>
-    ValueTask<object?> GetValueAsync(int index, ReadOnlyMemory<byte> source);
+    ValueTask<ExtraBytesValue> GetValueAsync(int index, ReadOnlyMemory<byte> source);
 
     /// <summary>
     /// Gets the values asynchronously.
     /// </summary>
     /// <param name="source">The source.</param>
     /// <returns>The value.</returns>
-    ValueTask<IReadOnlyList<object?>> GetValuesAsync(ReadOnlyMemory<byte> source);
+    ValueTask<IReadOnlyList<ExtraBytesValue>> GetValuesAsync(ReadOnlyMemory<byte> source);
 }

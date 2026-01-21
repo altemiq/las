@@ -91,16 +91,16 @@ public sealed record ExtraBytes : VariableLengthRecord, IExtraBytes
     /// <param name="index">The index.</param>
     /// <param name="source">The source.</param>
     /// <returns>The value.</returns>
-    public object? GetValue(int index, ReadOnlySpan<byte> source) => this.items[index].GetValue(source[this.indexes[index]..]);
+    public ExtraBytesValue GetValue(int index, ReadOnlySpan<byte> source) => this.items[index].GetValue(source[this.indexes[index]..]);
 
     /// <summary>
     /// Gets the data.
     /// </summary>
     /// <param name="source">The source.</param>
     /// <returns>The value.</returns>
-    public IReadOnlyList<object?> GetValues(ReadOnlySpan<byte> source)
+    public IReadOnlyList<ExtraBytesValue> GetValues(ReadOnlySpan<byte> source)
     {
-        var values = new object?[this.items.Count];
+        var values = new ExtraBytesValue[this.items.Count];
         for (var i = 0; i < this.items.Count; i++)
         {
             values[i] = this.items[i].GetValue(source[this.indexes[i]..]);
@@ -115,16 +115,16 @@ public sealed record ExtraBytes : VariableLengthRecord, IExtraBytes
     /// <param name="index">The index.</param>
     /// <param name="source">The source.</param>
     /// <returns>The value.</returns>
-    public ValueTask<object?> GetValueAsync(int index, ReadOnlyMemory<byte> source) => this.items[index].GetValueAsync(source[this.indexes[index]..]);
+    public ValueTask<ExtraBytesValue> GetValueAsync(int index, ReadOnlyMemory<byte> source) => this.items[index].GetValueAsync(source[this.indexes[index]..]);
 
     /// <summary>
     /// Gets the data.
     /// </summary>
     /// <param name="source">The source.</param>
     /// <returns>The value.</returns>
-    public async ValueTask<IReadOnlyList<object?>> GetValuesAsync(ReadOnlyMemory<byte> source)
+    public async ValueTask<IReadOnlyList<ExtraBytesValue>> GetValuesAsync(ReadOnlyMemory<byte> source)
     {
-        var values = new object?[this.items.Count];
+        var values = new ExtraBytesValue[this.items.Count];
         for (var i = 0; i < this.items.Count; i++)
         {
             values[i] = await this.items[i].GetValueAsync(source[this.indexes[i]..]).ConfigureAwait(false);

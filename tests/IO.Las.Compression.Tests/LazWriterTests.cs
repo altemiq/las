@@ -109,7 +109,7 @@ public class LazWriterTests
             .And.IsTypeOf<IPointDataRecord>()
             .And.Member(p => p.Classification, classification => classification.IsEqualTo(Classification.LowVegetation));
 
-        _ = await Assert.That(extraBytes.GetValue(0, bytes)).IsTypeOf<double>().And.IsEqualTo(ExtraValue);
+        _ = await Assert.That(extraBytes.GetValue(0, bytes)).ValueIsTypeOf<double>().And.IsEqualTo(ExtraValue);
     }
 
 
@@ -211,7 +211,7 @@ public class LazWriterTests
             .And.IsTypeOf<IPointDataRecord>()
             .And.Member(p => p.Classification, classification => classification.IsEqualTo(Classification.LowVegetation));
 
-        _ = await Assert.That(extraBytes.GetValue(0, bytes.Span)).IsTypeOf<double>().And.IsEqualTo(ExtraValue);
+        _ = await Assert.That(extraBytes.GetValue(0, bytes.Span)).ValueIsTypeOf<double>().And.IsEqualTo(ExtraValue);
     }
 #endif
 
@@ -382,7 +382,7 @@ public class LazWriterTests
             .And.Member(p => p.Classification, classification => classification.IsEqualTo(Classification.LowVegetation));
 
 #if LAS1_4_OR_GREATER
-        _ = await Assert.That(extraBytes.GetValue(0, bytes)).IsTypeOf<double>().And.IsEqualTo(ExtraValue);
+        _ = await Assert.That(extraBytes.GetValue(0, bytes)).ValueIsTypeOf<double>().And.IsEqualTo(ExtraValue);
 #endif
     }
 

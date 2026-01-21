@@ -14,11 +14,23 @@
   </ItemGroup>
   
   <ItemGroup>
+    <EmbeddedResource Include="..\..\data\laz\fusa.laz" />
     <EmbeddedResource Include="*.laz" />
   </ItemGroup>
 
-  <ItemGroup Condition=" '$(SupportLas14)' != 'true' ">
-    <Compile Remove="**\ExtendedVariableLengthRecord*.cs" />
-  </ItemGroup>
+  <Choose>
+    <When Condition=" '$(SupportLas14)' == 'true' ">
+      <ItemGroup>
+        <Compile Include="..\IO.Las.Tests\ExtraBytesItemExtensions.cs" />
+      </ItemGroup>
+    </When>
+    <Otherwise>
+      <ItemGroup>
+        <!-- remove new VLRs -->
+        <Compile Remove="**\ExtendedVariableLengthRecord*.cs" />
+        <Compile Remove="**\*ExtraBytes*.cs" />
+      </ItemGroup>
+    </Otherwise>
+  </Choose>
 
 </Project>

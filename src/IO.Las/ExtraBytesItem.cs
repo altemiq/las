@@ -164,7 +164,7 @@ public readonly record struct ExtraBytesItem
     /// <summary>
     /// Gets the no-data value.
     /// </summary>
-    public object NoData
+    public ExtraBytesValue NoData
     {
         get => this.GetDataAsFull(this.noData);
         init
@@ -177,7 +177,7 @@ public readonly record struct ExtraBytesItem
     /// <summary>
     /// Gets the minimum value.
     /// </summary>
-    public object Min
+    public ExtraBytesValue Min
     {
         get => this.GetDataAsFull(this.min);
         init
@@ -190,7 +190,7 @@ public readonly record struct ExtraBytesItem
     /// <summary>
     /// Gets the maximum value.
     /// </summary>
-    public object Max
+    public ExtraBytesValue Max
     {
         get => this.GetDataAsFull(this.max);
         init
@@ -225,73 +225,63 @@ public readonly record struct ExtraBytesItem
     /// </summary>
     /// <param name="source">The source.</param>
     /// <returns>The value.</returns>
-    public object? GetValue(ReadOnlyMemory<byte> source) => this.GetValue(source.Span);
+    public ExtraBytesValue GetValue(ReadOnlyMemory<byte> source) => this.GetValue(source.Span);
 
     /// <summary>
     /// Gets the data.
     /// </summary>
     /// <param name="source">The source.</param>
     /// <returns>The value.</returns>
-    public object? GetValue(ReadOnlySpan<byte> source)
+    public ExtraBytesValue GetValue(ReadOnlySpan<byte> source)
     {
-        return ScaleAndOffset(this, GetItemValue(this, source));
+        return GetItemValue(this, source);
 
-        static object? GetItemValue(ExtraBytesItem item, ReadOnlySpan<byte> source)
+        static ExtraBytesValue GetItemValue(ExtraBytesItem item, ReadOnlySpan<byte> source)
         {
-            return item.DataType switch
+            return (item.HasScale, item.HasOffset, item.DataType) switch
             {
-                ExtraBytesDataType.Undocumented => source[..(int)item.options].ToArray(),
-                ExtraBytesDataType.UnsignedChar => source[0],
-                ExtraBytesDataType.Char => (sbyte)source[0],
-                ExtraBytesDataType.UnsignedShort => System.Buffers.Binary.BinaryPrimitives.ReadUInt16LittleEndian(source),
-                ExtraBytesDataType.Short => System.Buffers.Binary.BinaryPrimitives.ReadInt16LittleEndian(source),
-                ExtraBytesDataType.UnsignedLong => System.Buffers.Binary.BinaryPrimitives.ReadUInt32LittleEndian(source),
-                ExtraBytesDataType.Long => System.Buffers.Binary.BinaryPrimitives.ReadInt32LittleEndian(source),
-                ExtraBytesDataType.UnsignedLongLong => System.Buffers.Binary.BinaryPrimitives.ReadUInt64LittleEndian(source),
-                ExtraBytesDataType.LongLong => System.Buffers.Binary.BinaryPrimitives.ReadInt64LittleEndian(source),
-                ExtraBytesDataType.Float => System.Buffers.Binary.BinaryPrimitives.ReadSingleLittleEndian(source),
-                ExtraBytesDataType.Double => System.Buffers.Binary.BinaryPrimitives.ReadDoubleLittleEndian(source),
-                _ => default,
-            };
-        }
-
-        static object? ScaleAndOffset(ExtraBytesItem item, object? value)
-        {
-            return (item.HasScale, item.HasOffset, value) switch
-            {
-                (_, _, null) => default,
-                (false, false, var v) => v,
-                (true, true, byte v) => ScaleAndOffsetByte(item, v),
-                (true, false, byte v) => ScaleByte(item, v),
-                (false, true, byte v) => OffsetByte(item, v),
-                (true, true, sbyte v) => ScaleAndOffsetSByte(item, v),
-                (true, false, sbyte v) => ScaleSByte(item, v),
-                (false, true, sbyte v) => OffsetSByte(item, v),
-                (true, true, ushort v) => ScaleAndOffsetUInt16(item, v),
-                (true, false, ushort v) => ScaleUInt16(item, v),
-                (false, true, ushort v) => OffsetUInt16(item, v),
-                (true, true, short v) => ScaleAndOffsetInt16(item, v),
-                (true, false, short v) => ScaleInt16(item, v),
-                (false, true, short v) => OffsetInt16(item, v),
-                (true, true, uint v) => ScaleAndOffsetUInt32(item, v),
-                (true, false, uint v) => ScaleUInt32(item, v),
-                (false, true, uint v) => OffsetUInt32(item, v),
-                (true, true, int v) => ScaleAndOffsetInt32(item, v),
-                (true, false, int v) => ScaleInt32(item, v),
-                (false, true, int v) => OffsetInt32(item, v),
-                (true, true, ulong v) => ScaleAndOffsetUInt64(item, v),
-                (true, false, ulong v) => ScaleUInt64(item, v),
-                (false, true, ulong v) => OffsetUInt64(item, v),
-                (true, true, long v) => ScaleAndOffsetInt64(item, v),
-                (true, false, long v) => ScaleInt64(item, v),
-                (false, true, long v) => OffsetInt64(item, v),
-                (true, true, float v) => ScaleAndOffsetSingle(item, v),
-                (true, false, float v) => ScaleSingle(item, v),
-                (false, true, float v) => OffsetSingle(item, v),
-                (true, true, double v) => ScaleAndOffsetDouble(item, v),
-                (true, false, double v) => ScaleDouble(item, v),
-                (false, true, double v) => OffsetDouble(item, v),
-                _ => value,
+                (_, _, ExtraBytesDataType.Undocumented) => source[..(int)item.options].ToArray(),
+                (false, false, ExtraBytesDataType.UnsignedChar) => source[0],
+                (true, true, ExtraBytesDataType.UnsignedChar) => ScaleAndOffsetByte(item, source[0]),
+                (true, false, ExtraBytesDataType.UnsignedChar) => ScaleByte(item, source[0]),
+                (false, true, ExtraBytesDataType.UnsignedChar) => OffsetByte(item, source[0]),
+                (false, false, ExtraBytesDataType.Char) => (sbyte)source[0],
+                (true, true, ExtraBytesDataType.Char) => ScaleAndOffsetSByte(item, (sbyte)source[0]),
+                (true, false, ExtraBytesDataType.Char) => ScaleSByte(item, (sbyte)source[0]),
+                (false, true, ExtraBytesDataType.Char) => OffsetSByte(item, (sbyte)source[0]),
+                (false, false, ExtraBytesDataType.UnsignedShort) => System.Buffers.Binary.BinaryPrimitives.ReadUInt16LittleEndian(source),
+                (true, true, ExtraBytesDataType.UnsignedShort) => ScaleAndOffsetUInt16(item, System.Buffers.Binary.BinaryPrimitives.ReadUInt16LittleEndian(source)),
+                (true, false, ExtraBytesDataType.UnsignedShort) => ScaleUInt16(item, System.Buffers.Binary.BinaryPrimitives.ReadUInt16LittleEndian(source)),
+                (false, true, ExtraBytesDataType.UnsignedShort) => OffsetUInt16(item, System.Buffers.Binary.BinaryPrimitives.ReadUInt16LittleEndian(source)),
+                (false, false, ExtraBytesDataType.Short) => System.Buffers.Binary.BinaryPrimitives.ReadInt16LittleEndian(source),
+                (true, true, ExtraBytesDataType.Short) => ScaleAndOffsetInt16(item, System.Buffers.Binary.BinaryPrimitives.ReadInt16LittleEndian(source)),
+                (true, false, ExtraBytesDataType.Short) => ScaleInt16(item, System.Buffers.Binary.BinaryPrimitives.ReadInt16LittleEndian(source)),
+                (false, true, ExtraBytesDataType.Short) => OffsetInt16(item, System.Buffers.Binary.BinaryPrimitives.ReadInt16LittleEndian(source)),
+                (false, false, ExtraBytesDataType.UnsignedLong) => System.Buffers.Binary.BinaryPrimitives.ReadUInt32LittleEndian(source),
+                (true, true, ExtraBytesDataType.UnsignedLong) => ScaleAndOffsetUInt32(item, System.Buffers.Binary.BinaryPrimitives.ReadUInt32LittleEndian(source)),
+                (true, false, ExtraBytesDataType.UnsignedLong) => ScaleUInt32(item, System.Buffers.Binary.BinaryPrimitives.ReadUInt32LittleEndian(source)),
+                (false, true, ExtraBytesDataType.UnsignedLong) => OffsetUInt32(item, System.Buffers.Binary.BinaryPrimitives.ReadUInt32LittleEndian(source)),
+                (false, false, ExtraBytesDataType.Long) => System.Buffers.Binary.BinaryPrimitives.ReadInt32LittleEndian(source),
+                (true, true, ExtraBytesDataType.Long) => ScaleAndOffsetInt32(item, System.Buffers.Binary.BinaryPrimitives.ReadInt32LittleEndian(source)),
+                (true, false, ExtraBytesDataType.Long) => ScaleInt32(item, System.Buffers.Binary.BinaryPrimitives.ReadInt32LittleEndian(source)),
+                (false, true, ExtraBytesDataType.Long) => OffsetInt32(item, System.Buffers.Binary.BinaryPrimitives.ReadInt32LittleEndian(source)),
+                (false, false, ExtraBytesDataType.UnsignedLongLong) => System.Buffers.Binary.BinaryPrimitives.ReadUInt64LittleEndian(source),
+                (true, true, ExtraBytesDataType.UnsignedLongLong) => ScaleAndOffsetUInt64(item, System.Buffers.Binary.BinaryPrimitives.ReadUInt64LittleEndian(source)),
+                (true, false, ExtraBytesDataType.UnsignedLongLong) => ScaleUInt64(item, System.Buffers.Binary.BinaryPrimitives.ReadUInt64LittleEndian(source)),
+                (false, true, ExtraBytesDataType.UnsignedLongLong) => OffsetUInt64(item, System.Buffers.Binary.BinaryPrimitives.ReadUInt64LittleEndian(source)),
+                (false, false, ExtraBytesDataType.LongLong) => System.Buffers.Binary.BinaryPrimitives.ReadInt64LittleEndian(source),
+                (true, true, ExtraBytesDataType.LongLong) => ScaleAndOffsetInt64(item, System.Buffers.Binary.BinaryPrimitives.ReadInt64LittleEndian(source)),
+                (true, false, ExtraBytesDataType.LongLong) => ScaleInt64(item, System.Buffers.Binary.BinaryPrimitives.ReadInt64LittleEndian(source)),
+                (false, true, ExtraBytesDataType.LongLong) => OffsetInt64(item, System.Buffers.Binary.BinaryPrimitives.ReadInt64LittleEndian(source)),
+                (false, false, ExtraBytesDataType.Float) => System.Buffers.Binary.BinaryPrimitives.ReadSingleLittleEndian(source),
+                (true, true, ExtraBytesDataType.Float) => ScaleAndOffsetSingle(item, System.Buffers.Binary.BinaryPrimitives.ReadSingleLittleEndian(source)),
+                (true, false, ExtraBytesDataType.Float) => ScaleSingle(item, System.Buffers.Binary.BinaryPrimitives.ReadSingleLittleEndian(source)),
+                (false, true, ExtraBytesDataType.Float) => OffsetSingle(item, System.Buffers.Binary.BinaryPrimitives.ReadSingleLittleEndian(source)),
+                (false, false, ExtraBytesDataType.Double) => System.Buffers.Binary.BinaryPrimitives.ReadDoubleLittleEndian(source),
+                (true, true, ExtraBytesDataType.Double) => ScaleAndOffsetDouble(item, System.Buffers.Binary.BinaryPrimitives.ReadDoubleLittleEndian(source)),
+                (true, false, ExtraBytesDataType.Double) => ScaleDouble(item, System.Buffers.Binary.BinaryPrimitives.ReadDoubleLittleEndian(source)),
+                (false, true, ExtraBytesDataType.Double) => OffsetDouble(item, System.Buffers.Binary.BinaryPrimitives.ReadDoubleLittleEndian(source)),
+                _ => throw new InvalidCastException(),
             };
 
             [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
@@ -481,7 +471,7 @@ public readonly record struct ExtraBytesItem
     /// </summary>
     /// <param name="source">The source.</param>
     /// <returns>The value.</returns>
-    public ValueTask<object?> GetValueAsync(ReadOnlyMemory<byte> source) => new(this.GetValue(source.Span));
+    public ValueTask<ExtraBytesValue> GetValueAsync(ReadOnlyMemory<byte> source) => new(this.GetValue(source.Span));
 
     /// <summary>
     /// Creates an instance of <see cref="ExtraBytesItem"/> from the source.
@@ -519,7 +509,7 @@ public readonly record struct ExtraBytesItem
 #if NET8_0_OR_GREATER
     [System.Diagnostics.CodeAnalysis.SuppressMessage("Performance", "CA1863:Use \'CompositeFormat\'", Justification = "This is for an exception")]
 #endif
-    private static object GetDataAsFull(byte[] data, ExtraBytesDataType dataType) => dataType switch
+    private static ExtraBytesValue GetDataAsFull(byte[] data, ExtraBytesDataType dataType) => dataType switch
     {
         ExtraBytesDataType.UnsignedChar or ExtraBytesDataType.UnsignedShort or ExtraBytesDataType.UnsignedLong or ExtraBytesDataType.UnsignedLongLong => System.Buffers.Binary.BinaryPrimitives.ReadUInt64LittleEndian(data),
         ExtraBytesDataType.Char or ExtraBytesDataType.Short or ExtraBytesDataType.Long or ExtraBytesDataType.LongLong => System.Buffers.Binary.BinaryPrimitives.ReadInt64LittleEndian(data),
@@ -528,15 +518,15 @@ public readonly record struct ExtraBytesItem
         _ => throw new ArgumentOutOfRangeException(nameof(dataType), dataType, string.Format(Properties.Resources.Culture, Properties.Resources.CannotSetOn, "data-type", dataType)),
     };
 
-    private static void SetDataAsFull(byte[] data, object? value, ExtraBytesDataType dataType)
+    private static void SetDataAsFull(byte[] data, ExtraBytesValue value, ExtraBytesDataType dataType)
     {
-        if (value is null)
+        if (value.Value is null)
         {
             Array.Clear(data, 0, data.Length);
             return;
         }
 
-        switch (value, dataType)
+        switch (value.Value, dataType)
         {
             case (byte @byte, ExtraBytesDataType.UnsignedChar):
                 WriteUInt64(@byte);
@@ -590,7 +580,7 @@ public readonly record struct ExtraBytesItem
         }
     }
 
-    private object GetDataAsFull(byte[] data) => GetDataAsFull(data, this.dataType);
+    private ExtraBytesValue GetDataAsFull(byte[] data) => GetDataAsFull(data, this.dataType);
 
-    private void SetDataAsFull(byte[] data, object? value) => SetDataAsFull(data, value, this.dataType);
+    private void SetDataAsFull(byte[] data, ExtraBytesValue value) => SetDataAsFull(data, value, this.dataType);
 }
