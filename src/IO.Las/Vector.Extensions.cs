@@ -46,6 +46,13 @@ public static class Vector
         public Vector256<double> AsVector256() => value.AsVector256Unsafe().WithElement(3, 0);
 
         /// <summary>
+        /// Reinterprets a <see langword="Numerics.Vector3D" /> as a new <see cref="Vector256{Double}" /> with the new elements zeroed.
+        /// </summary>
+        /// <param name="v">The value of the final element.</param>
+        /// <returns>The input reinterpreted as a new <see langword="Vector256{Double}" /> with the new elements zeroed.</returns>
+        public Vector256<double> AsVector256(double v) => value.AsVector256Unsafe().WithElement(3, v);
+
+        /// <summary>
         /// Reinterprets a <see langword="Numerics.Vector3D" /> as a new <see cref="Vector256{Double}" />, leaving the new elements undefined.
         /// </summary>
         /// <returns>The input reinterpreted as a new <see langword="Vector256{Double}" />.</returns>

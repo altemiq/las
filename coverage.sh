@@ -19,16 +19,16 @@ reportDir=$coverageDir/report
 # Delete previous test run results (there's a bunch of subfolders named with guids)
 if [ -d $resultsDir ]; then
   echo "Removing $resultsDir" 
-  # rm -rf $resultsDir
+  rm -rf $resultsDir
 fi
 
 # Run the tests
-dotnet test -- --results-directory $resultsDir --coverage --coverage-output-format cobertura
+dotnet test --solution $baseDir --results-directory $resultsDir --coverage --coverage-output-format cobertura
 
 # Delete previous test run reports - note if you're getting wrong results do a Solution Clean and Rebuild to remove stale DLLs in the bin folder
 if [ -d $reportDir ]; then
   echo "Removing $reportDir"
-  # rm -rf $reportDir
+  rm -rf $reportDir
 fi
 
 # Generate the Code Coverage HTML Report

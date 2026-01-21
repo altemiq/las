@@ -6,7 +6,7 @@ public class PointDataRecordQuantizerTests
         new(0.01, 0.01, 0.01),
         new(123, 456, 789),
         0);
-    
+
     [Test]
     [MethodDataSource(nameof(GetToDoubleXY))]
     public async Task ConvertToDoubleXY(int inputX, int inputY, double expectedX, double expectedY)
@@ -15,7 +15,7 @@ public class PointDataRecordQuantizerTests
             .Member(p => p.X, x => x.IsEqualTo(expectedX)).And
             .Member(p => p.Y, y => y.IsEqualTo(expectedY));
     }
-    
+
     [Test]
     [MethodDataSource(nameof(GetToIntXY))]
     public async Task ConvertToIntXY(double inputX, double inputY, int expectedX, int expectedY)
@@ -24,7 +24,7 @@ public class PointDataRecordQuantizerTests
             .Member(p => p.X, x => x.IsEqualTo(expectedX)).And
             .Member(p => p.Y, y => y.IsEqualTo(expectedY));
     }
-    
+
     [Test]
     public async Task ConvertToDoubleXYZ()
     {
@@ -39,7 +39,7 @@ public class PointDataRecordQuantizerTests
         yield return () => (321, 123, 126.21, 457.23);
         yield return () => (-321, 123, 119.79, 457.23);
     }
-    
+
     public IEnumerable<Func<(double, double, int, int)>> GetToIntXY()
     {
         yield return () => (126.21, 457.23, 321, 123);

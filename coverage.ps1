@@ -20,7 +20,7 @@ if (Test-Path -path $resultsDir) {
 }
 
 # Run the tests
-dotnet test -- --results-directory $resultsDir --coverage --coverage-output-format cobertura
+dotnet test --solution $baseDir --results-directory $resultsDir --coverage --coverage-output-format cobertura
 
 # Delete previous test run reports - note if you're getting wrong results do a Solution Clean and Rebuild to remove stale DLLs in the bin folder
 if (Test-Path -path $reportDir) { 
@@ -33,7 +33,7 @@ if (!(Test-Path -path $historyDir)) {
 }
 
 # Generate the Code Coverage HTML Report
-reportgenerator -reports:"$resultsDir/**/coverage.cobertura.xml" -targetdir:$reportDir -reporttypes:Html -historydir:$historyDir
+reportgenerator -reports:"$resultsDir/*.cobertura.xml" -targetdir:$reportDir -reporttypes:Html -historydir:$historyDir
 
 # Open the Code Coverage HTML Report (if running on a WorkStation)
 $osInfo = Get-CimInstance -ClassName Win32_OperatingSystem
