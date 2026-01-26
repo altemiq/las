@@ -144,8 +144,8 @@ public class LasReaderTests
             }
         }
 
-        _ = await Assert.That(min).IsBetween(-1.76 - 0.001, -1.76 + 0.001);
-        _ = await Assert.That(max).IsBetween(19.72 - 0.001, 19.72 + 0.001);
+        _ = await Assert.That(min).IsEqualTo(-1.76).Within(0.001);
+        _ = await Assert.That(max).IsEqualTo(19.72).Within(0.001);
     }
 #endif
 
@@ -171,7 +171,7 @@ public class LasReaderTests
             .And.Member(p => p.Y, y => y.IsEqualTo(612234368))
             .And.Member(p => p.Z, z => z.IsEqualTo(6222))
             .And.IsTypeOf<IGpsPointDataRecord>()
-            .And.Member(p => quantizer.GetDateTime(p.GpsTime), gpsTime => gpsTime.IsBetween(fileCreation - TimeSpan.FromDays(7), fileCreation + TimeSpan.FromDays(7)));
+            .And.Member(p => quantizer.GetDateTime(p.GpsTime), gpsTime => gpsTime.IsEqualTo(fileCreation).Within(TimeSpan.FromDays(7)));
 
         await Assert.That(reader.ReadPointDataRecord(277500).PointDataRecord)
             .IsNotNull()
@@ -179,7 +179,7 @@ public class LasReaderTests
             .And.Member(p => p.Y, y => y.IsEqualTo(612225071))
             .And.Member(p => p.Z, z => z.IsEqualTo(4228))
             .And.IsTypeOf<IGpsPointDataRecord>()
-            .And.Member(p => quantizer.GetDateTime(p.GpsTime), gpsTime => gpsTime.IsBetween(fileCreation - TimeSpan.FromDays(7), fileCreation + TimeSpan.FromDays(7)));
+            .And.Member(p => quantizer.GetDateTime(p.GpsTime), gpsTime => gpsTime.IsEqualTo(fileCreation).Within(TimeSpan.FromDays(7)));
     }
 
     [Test]
@@ -262,8 +262,8 @@ public class LasReaderTests
             }
         }
 
-        _ = await Assert.That(min).IsBetween(-1.76 - 0.001, -1.76 + 0.001);
-        _ = await Assert.That(max).IsBetween(19.72 - 0.001, 19.72 + 0.001);
+        _ = await Assert.That(min).IsEqualTo(-1.76).Within(0.001);
+        _ = await Assert.That(max).IsEqualTo(19.72).Within(0.001);
     }
 #endif
 
@@ -290,7 +290,7 @@ public class LasReaderTests
             .And.Member(p => p.Y, y => y.IsEqualTo(612234368))
             .And.Member(p => p.Z, z => z.IsEqualTo(6222))
             .And.IsTypeOf<GpsPointDataRecord>()
-            .And.Member(p => quantizer.GetDateTime(p.GpsTime), gpsTime => gpsTime.IsBetween(fileCreation - TimeSpan.FromDays(7), fileCreation + TimeSpan.FromDays(7)));
+            .And.Member(p => quantizer.GetDateTime(p.GpsTime), gpsTime => gpsTime.IsEqualTo(fileCreation).Within(TimeSpan.FromDays(7)));
 
         point = await reader.ReadPointDataRecordAsync(277500);
         _ = await Assert.That(point.PointDataRecord)
@@ -298,7 +298,7 @@ public class LasReaderTests
             .And.Member(p => p.Y, y => y.IsEqualTo(612225071))
             .And.Member(p => p.Z, z => z.IsEqualTo(4228))
             .And.IsTypeOf<IGpsPointDataRecord>()
-            .And.Member(p => quantizer.GetDateTime(p.GpsTime), gpsTime => gpsTime.IsBetween(fileCreation - TimeSpan.FromDays(7), fileCreation + TimeSpan.FromDays(7)));
+            .And.Member(p => quantizer.GetDateTime(p.GpsTime), gpsTime => gpsTime.IsEqualTo(fileCreation).Within(TimeSpan.FromDays(7)));
     }
 
     private static async Task CheckHeader(HeaderBlock headerBlock, Version expectedVersion)

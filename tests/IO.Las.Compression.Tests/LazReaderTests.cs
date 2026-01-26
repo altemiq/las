@@ -102,8 +102,8 @@ public class LazReaderTests
             max = Math.Max(value, max);
         }
 
-        _ = await Assert.That(min).IsBetween(-1.76 - 0.001, -1.76 + 0.001);
-        _ = await Assert.That(max).IsBetween(19.72 - 0.001, 19.72 + 0.001);
+        _ = await Assert.That(min).IsEqualTo(-1.76).Within(0.001);
+        _ = await Assert.That(max).IsEqualTo(19.72).Within(0.001);
     }
 #endif
 
@@ -193,8 +193,8 @@ public class LazReaderTests
             max = Math.Max(value, max);
         }
 
-        _ = await Assert.That(min).IsBetween(-1.76 - 0.001, -1.76 + 0.001);
-        _ = await Assert.That(max).IsBetween(19.72 - 0.001, 19.72 + 0.001);
+        _ = await Assert.That(min).IsEqualTo(-1.76).Within(0.001);
+        _ = await Assert.That(max).IsEqualTo(19.72).Within(0.001);
     }
 #endif
 
