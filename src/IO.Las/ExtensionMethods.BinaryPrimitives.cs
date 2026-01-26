@@ -28,20 +28,7 @@ public static partial class ExtensionMethods
         /// </summary>
         /// <param name="source">The read-only span to read.</param>
         /// <returns>The little endian value.</returns>
-        public static float ReadSingleLittleEndian(ReadOnlySpan<byte> source)
-#if NETCOREAPP2_0_OR_GREATER || NETSTANDARD2_1_OR_GREATER
-            => BitConverter.Int32BitsToSingle(System.Buffers.Binary.BinaryPrimitives.ReadInt32LittleEndian(source));
-#else
-        {
-            return ToSingle(source);
-
-            static unsafe float ToSingle(ReadOnlySpan<byte> source)
-            {
-                var tmpBuffer = (uint)(source[0] | (source[1] << 8) | (source[2] << 16) | (source[3] << 24));
-                return *(float*)&tmpBuffer;
-            }
-        }
-#endif
+        public static float ReadSingleLittleEndian(ReadOnlySpan<byte> source) => BitConverter.Int32BitsToSingle(System.Buffers.Binary.BinaryPrimitives.ReadInt32LittleEndian(source));
 
         /// <summary>
         /// Writes a <see cref="double"/> into a span of bytes, as little endian.
@@ -59,21 +46,6 @@ public static partial class ExtensionMethods
         /// <param name="value">The value to write into the span of bytes.</param>
         /// <exception cref="ArgumentOutOfRangeException"><paramref name="destination"/> is too small to contain a <see cref="float"/>.</exception>
         /// <remarks>Writes exactly 4 bytes to the beginning of the span.</remarks>
-        public static void WriteSingleLittleEndian(Span<byte> destination, float value)
-#if NETCOREAPP2_0_OR_GREATER || NETSTANDARD2_1_OR_GREATER
-            => System.Buffers.Binary.BinaryPrimitives.WriteInt32LittleEndian(destination, BitConverter.SingleToInt32Bits(value));
-#else
-        {
-            CopyTo(value, destination);
-            static unsafe void CopyTo(float value, Span<byte> bytes)
-            {
-                var tmp = *(uint*)&value;
-                bytes[0] = (byte)tmp;
-                bytes[1] = (byte)(tmp >> 8);
-                bytes[2] = (byte)(tmp >> 16);
-                bytes[3] = (byte)(tmp >> 24);
-            }
-        }
-#endif
+        public static void WriteSingleLittleEndian(Span<byte> destination, float value) => System.Buffers.Binary.BinaryPrimitives.WriteInt32LittleEndian(destination, BitConverter.SingleToInt32Bits(value));
     }
 }

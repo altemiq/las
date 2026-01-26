@@ -25,7 +25,7 @@ public static partial class ExtensionMethods
         /// <param name="value">The number to convert.</param>
         /// <returns>A 64-bit unsigned integer whose value is equivalent to <paramref name="value"/>.</returns>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static unsafe ulong DoubleToUInt64Bits(double value) => *(ulong*)&value;
+        public static ulong DoubleToUInt64Bits(double value) => Unsafe.ReadUnaligned<ulong>(ref Unsafe.As<double, byte>(ref value));
 
         /// <summary>
         /// Converts the specified single-precision floating point number to a 32-bit unsigned integer.
@@ -33,7 +33,7 @@ public static partial class ExtensionMethods
         /// <param name="value">The number to convert.</param>
         /// <returns>A 32-bit unsigned integer whose value is equivalent to <paramref name="value"/>.</returns>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static unsafe uint SingleToUInt32Bits(float value) => *(uint*)&value;
+        public static uint SingleToUInt32Bits(float value) => Unsafe.ReadUnaligned<uint>(ref Unsafe.As<float, byte>(ref value));
 
         /// <summary>
         /// Converts the specified single-precision floating point number to a 32-bit signed integer.
@@ -41,7 +41,7 @@ public static partial class ExtensionMethods
         /// <param name="value">The number to convert.</param>
         /// <returns>A 32-bit signed integer whose value is equivalent to <paramref name="value"/>.</returns>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static unsafe int SingleToInt32Bits(float value) => *(int*)&value;
+        public static int SingleToInt32Bits(float value) => Unsafe.ReadUnaligned<int>(ref Unsafe.As<float, byte>(ref value));
 
         /// <summary>
         /// Converts the specified 64-bit unsigned integer to a double-precision floating point number.
@@ -49,7 +49,7 @@ public static partial class ExtensionMethods
         /// <param name="value">The number to convert.</param>
         /// <returns>A double-precision floating point number whose value is equivalent to <paramref name="value"/>.</returns>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static unsafe double UInt64BitsToDouble(ulong value) => *(double*)&value;
+        public static double UInt64BitsToDouble(ulong value) => Unsafe.ReadUnaligned<double>(ref Unsafe.As<ulong, byte>(ref value));
 
         /// <summary>
         /// Converts the specified 32-bit signed integer to a single-precision floating point number.
@@ -57,7 +57,7 @@ public static partial class ExtensionMethods
         /// <param name="value">The number to convert.</param>
         /// <returns>A single-precision floating point number whose value is equivalent to <paramref name="value"/>.</returns>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static unsafe float Int32BitsToSingle(int value) => *(float*)&value;
+        public static float Int32BitsToSingle(int value) => Unsafe.ReadUnaligned<float>(ref Unsafe.As<int, byte>(ref value));
 
         /// <summary>
         /// Converts the specified 32-bit unsigned integer to a single-precision floating point number.
@@ -65,7 +65,7 @@ public static partial class ExtensionMethods
         /// <param name="value">The number to convert.</param>
         /// <returns>A single-precision floating point number whose value is equivalent to <paramref name="value"/>.</returns>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static unsafe float UInt32BitsToSingle(uint value) => *(float*)&value;
+        public static float UInt32BitsToSingle(uint value) => Unsafe.ReadUnaligned<float>(ref Unsafe.As<uint, byte>(ref value));
 
         /// <summary>
         /// Converts the specified 64-bit signed integer to a 64-bit unsigned integer.
@@ -73,7 +73,7 @@ public static partial class ExtensionMethods
         /// <param name="value">The number to convert.</param>
         /// <returns>A 64-bit unsigned integer whose value is equivalent to <paramref name="value"/>.</returns>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static unsafe ulong Int64BitsToUInt64Bits(long value) => *(ulong*)&value;
+        public static ulong Int64BitsToUInt64Bits(long value) => Unsafe.ReadUnaligned<ulong>(ref Unsafe.As<long, byte>(ref value));
 
         /// <summary>
         /// Converts the specified 64-bit unsigned integer to a 64-bit signed integer.
@@ -81,7 +81,7 @@ public static partial class ExtensionMethods
         /// <param name="value">The number to convert.</param>
         /// <returns>A 64-bit signed integer whose value is equivalent to <paramref name="value"/>.</returns>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static unsafe long UInt64BitsToInt64Bits(ulong value) => *(long*)&value;
+        public static long UInt64BitsToInt64Bits(ulong value) => Unsafe.ReadUnaligned<long>(ref Unsafe.As<ulong, byte>(ref value));
     }
 #endif
 }
