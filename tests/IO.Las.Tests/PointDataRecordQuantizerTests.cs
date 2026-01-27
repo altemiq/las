@@ -2,7 +2,7 @@ namespace Altemiq.IO.Las;
 
 public class PointDataRecordQuantizerTests
 {
-    private readonly PointDataRecordQuantizer quantizer = new PointDataRecordQuantizer(
+    private readonly PointDataRecordQuantizer quantizer = new(
         new(0.01, 0.01, 0.01),
         new(123, 456, 789),
         0);

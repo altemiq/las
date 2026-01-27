@@ -5,7 +5,7 @@ public static class ExtraBytesValueExtensions
     public static ExtraBytesValueTypeOfAssertion<TExpected> ValueIsTypeOf<TExpected>(this TUnit.Assertions.Core.IAssertionSource<ExtraBytesValue> source)
     {
         source.Context.ExpressionBuilder.Append($".Value.IsTypeOf<{typeof(TExpected).Name}>()");
-        return new (source.Context);
+        return new(source.Context);
     }
 }
 
