@@ -6,6 +6,10 @@
 
 namespace Altemiq.IO.Las.Cloud;
 
+#if NET7_0_OR_GREATER
+using System.Runtime.Intrinsics;
+#endif
+
 /// <summary>
 /// <see cref="CopcHierarchy.VoxelKey"/> extensions.
 /// </summary>
@@ -55,15 +59,26 @@ public static class VoxelKeyExtensions
         /// <param name="max">The maximum.</param>
         /// <returns>The bounding box.</returns>
         public BoundingBox ToBoundingBox(in Vector3D min, in Vector3D max)
-        {
-            var size = Math.Max(Math.Max(max.X - min.X, max.Y - min.Y), max.Z - min.Z);
+         {
+#if NET7_0_OR_GREATER
+            var size =
+                Vector256.Divide(
+                    Vector256.Create(Math.Max(Math.Max(max.X - min.X, max.Y - min.Y), max.Z - min.Z)),
+                    Vector256.Create(Math.Pow(2, key.Level)));
+            var first = Vector256.Add(
+                Vector256.Multiply(Vector256.ConvertToDouble(Vector256.Create(key.X, key.Y, key.Z, default)), size),
+                min.AsVector256Unsafe());
+            return new(first.AsVector3D(), Vector256.Add(first, size).AsVector3D());
+#else
+            var size = Math.Max(Math.Max(max.X - min.X, max.Y - min.Y), max.Z - min.Z) / Math.Pow(2, key.Level);
             return BoundingBox.FromXYZWHD(
                 (size * key.X) + min.X,
                 (size * key.Y) + min.Y,
-                (size * key.Z) + min.Z,
+                (size * key.Z) + min.Z, 
                 size,
                 size,
                 size);
+#endif
         }
     }
 

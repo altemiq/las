@@ -43,7 +43,7 @@ public sealed class PointDataRecordQuantizer(Vector3D scaleFactor, Vector3D offs
     /// <param name="offset">The offset.</param>
     /// <returns>The converted point.</returns>
     [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
-    public static (double X, double Y, double Z) Get(IBasePointDataRecord point, Vector3D scaleFactor, Vector3D offset) => Get(point.X, point.Y, point.Z, scaleFactor, offset);
+    public static Vector3D Get(IBasePointDataRecord point, Vector3D scaleFactor, Vector3D offset) => Get(point.X, point.Y, point.Z, scaleFactor, offset);
 
     /// <summary>
     /// Converts the point.
@@ -55,20 +55,11 @@ public sealed class PointDataRecordQuantizer(Vector3D scaleFactor, Vector3D offs
     /// <param name="offset">The offset.</param>
     /// <returns>The converted point.</returns>
     [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
-    public static (double X, double Y, double Z) Get(int x, int y, int z, Vector3D scaleFactor, Vector3D offset)
+    public static Vector3D Get(int x, int y, int z, Vector3D scaleFactor, Vector3D offset)
 #if NET7_0_OR_GREATER
-    {
-        var result = Vector256.Add(
-            Vector256.Multiply(
-                Vector256.Create(
-                       Vector128.ConvertToDouble(Vector128.Create(x, y)),
-                       Vector128.ConvertToDouble(Vector128.Create(z, default(int)))),
-                scaleFactor.AsVector256()),
-            offset.AsVector256());
-        return (result[0], result[1], result[2]);
-    }
+        => (new Vector3D(x, y, z) * scaleFactor) + offset;
 #else
-        => ((x * scaleFactor.X) + offset.X, (y * scaleFactor.Y) + offset.Y, (z * scaleFactor.Z) + offset.Z);
+        => new((x * scaleFactor.X) + offset.X, (y * scaleFactor.Y) + offset.Y, (z * scaleFactor.Z) + offset.Z);
 #endif
 
     /// <summary>
@@ -102,7 +93,7 @@ public sealed class PointDataRecordQuantizer(Vector3D scaleFactor, Vector3D offs
     /// <param name="point">The point.</param>
     /// <returns>The converted point.</returns>
     [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
-    public (double X, double Y, double Z) Get(IBasePointDataRecord point) => this.Get(point.X, point.Y, point.Z);
+    public Vector3D Get(IBasePointDataRecord point) => this.Get(point.X, point.Y, point.Z);
 
     /// <summary>
     /// Converts the point.
@@ -111,7 +102,7 @@ public sealed class PointDataRecordQuantizer(Vector3D scaleFactor, Vector3D offs
     /// <param name="y">The y-coordinate.</param>
     /// <param name="z">The z-coordinate.</param>
     /// <returns>The converted point.</returns>
-    public (double X, double Y, double Z) Get(int x, int y, int z) => Get(x, y, z, scaleFactor, offset);
+    public Vector3D Get(int x, int y, int z) => Get(x, y, z, scaleFactor, offset);
 
     /// <summary>
     /// Converts the point.

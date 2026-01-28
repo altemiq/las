@@ -48,16 +48,30 @@ internal sealed class OccupancyGrid(PointDataRecordQuantizer quantizer, float gr
         if (this.gridSpacing < 0)
         {
             this.gridSpacing = -this.gridSpacing;
-            posX = (int)Math.Floor(quantizer.GetX(point.X) / this.gridSpacing);
-            posY = (int)Math.Floor(quantizer.GetY(point.Y) / this.gridSpacing);
+#if NET7_0_OR_GREATER
+            var position = System.Runtime.Intrinsics.Vector256.Floor((quantizer.Get(point) / this.gridSpacing).AsVector256());
+            posX = (int)position[0];
+            posY = (int)position[1];
+#else
+            var position = quantizer.Get(point) / this.gridSpacing;
+            posX = (int)Math.Floor(position.X);
+            posY = (int)Math.Floor(position.Y);
+#endif
             this.anker = posY;
             this.minX = this.maxX = posX;
             this.minY = this.maxY = posY;
         }
         else
         {
-            posX = (int)Math.Floor(quantizer.GetX(point.X) / this.gridSpacing);
-            posY = (int)Math.Floor(quantizer.GetY(point.Y) / this.gridSpacing);
+#if NET7_0_OR_GREATER
+            var position = System.Runtime.Intrinsics.Vector256.Floor((quantizer.Get(point) / this.gridSpacing).AsVector256());
+            posX = (int)position[0];
+            posY = (int)position[1];
+#else
+            var position = quantizer.Get(point) / this.gridSpacing;
+            posX = (int)Math.Floor(position.X);
+            posY = (int)Math.Floor(position.Y);
+#endif
             if (posX < this.minX)
             {
                 this.minX = posX;
@@ -77,104 +91,104 @@ internal sealed class OccupancyGrid(PointDataRecordQuantizer quantizer, float gr
             }
         }
 
-        return this.AddInternal(posX, posY);
-    }
+        return AddInternal(posX, posY);
 
-    private bool AddInternal(int posX, int posY)
-    {
-        posY -= this.anker;
-        var noXAnchor = false;
-#pragma warning disable IDE0007
-        ref int[] anchors = ref this.minusAnchors;
-        ref int[]?[] array = ref this.minusMinus;
-#pragma warning restore IDE0007
-        if (posY < 0)
+        bool AddInternal(int x, int y)
         {
-            posY = -posY - 1;
-            anchors = ref this.minusAnchors;
-            if (posY < this.minusPlus.Length && this.minusPlus[posY] is not null)
+            y -= this.anker;
+            var noXAnchor = false;
+#pragma warning disable IDE0007
+            ref int[] anchors = ref this.minusAnchors;
+            ref int[]?[] array = ref this.minusMinus;
+#pragma warning restore IDE0007
+            if (y < 0)
             {
-                posX -= this.minusAnchors[posY];
-                if (posX < 0)
+                y = -y - 1;
+                anchors = ref this.minusAnchors;
+                if (y < this.minusPlus.Length && this.minusPlus[y] is not null)
                 {
-                    posX = -posX - 1;
-                    array = ref this.minusMinus;
+                    x -= this.minusAnchors[y];
+                    if (x < 0)
+                    {
+                        x = -x - 1;
+                        array = ref this.minusMinus;
+                    }
+                    else
+                    {
+                        array = ref this.minusPlus;
+                    }
                 }
                 else
                 {
+                    noXAnchor = true;
                     array = ref this.minusPlus;
                 }
             }
             else
             {
-                noXAnchor = true;
-                array = ref this.minusPlus;
-            }
-        }
-        else
-        {
-            anchors = ref this.plusAnchors;
-            if (posY < this.plusPlus.Length && this.plusPlus[posY] is not null)
-            {
-                posX -= this.plusAnchors[posY];
-                if (posX < 0)
+                anchors = ref this.plusAnchors;
+                if (y < this.plusPlus.Length && this.plusPlus[y] is not null)
                 {
-                    posX = -posX - 1;
-                    array = ref this.plusMinus;
+                    x -= this.plusAnchors[y];
+                    if (x < 0)
+                    {
+                        x = -x - 1;
+                        array = ref this.plusMinus;
+                    }
+                    else
+                    {
+                        array = ref this.plusPlus;
+                    }
                 }
                 else
                 {
+                    noXAnchor = true;
                     array = ref this.plusPlus;
                 }
             }
-            else
-            {
-                noXAnchor = true;
-                array = ref this.plusPlus;
-            }
-        }
 
-        // maybe grow banded grid in y direction
-        if (posY >= array.Length)
-        {
-            var newSize = ((posY / 1024) + 1) * 1024;
-            if (array == this.minusPlus || array == this.plusPlus)
+            // maybe grow banded grid in y direction
+            if (y >= array.Length)
             {
-                Array.Resize(ref anchors, newSize);
+                var size = ((y / 1024) + 1) * 1024;
+                if (array == this.minusPlus || array == this.plusPlus)
+                {
+                    Array.Resize(ref anchors, size);
+                }
+
+                Array.Resize(ref array, size);
             }
 
-            Array.Resize(ref array, newSize);
-        }
+            // is this the first x anchor for this y pos?
+            if (noXAnchor)
+            {
+                anchors[y] = x;
+                x = 0;
+            }
 
-        // is this the first x anchor for this y pos?
-        if (noXAnchor)
-        {
-            anchors[posY] = posX;
-            posX = 0;
-        }
+            // maybe grow banded grid in x direction
+            var xPos = x / 32;
+            var arrayY = array[y];
+            if (arrayY is null)
+            {
+                arrayY = new int[((xPos / 256) + 1) * 256];
+                array[y] = arrayY;
+            }
+            else if (xPos >= arrayY.Length)
+            {
+                Array.Resize(ref arrayY, ((xPos / 256) + 1) * 256);
+            }
 
-        // maybe grow banded grid in x direction
-        var posXPos = posX / 32;
-        var arrayPosY = array[posY];
-        if (arrayPosY is null)
-        {
-            arrayPosY = new int[((posXPos / 256) + 1) * 256];
-            array[posY] = arrayPosY;
-        }
-        else if (posXPos >= arrayPosY.Length)
-        {
-            Array.Resize(ref arrayPosY, ((posXPos / 256) + 1) * 256);
-        }
+            var xBit = 1 << (x % 32);
+            var arrayX = arrayY[xPos];
+            if ((arrayX & xBit) is not 0)
+            {
+                return false;
+            }
 
-        var posXBit = 1 << (posX % 32);
-        var arrayPosXPos = arrayPosY[posXPos];
-        if ((arrayPosXPos & posXBit) is not 0)
-        {
-            return false;
+            arrayY[xPos] = arrayX | xBit;
+            this.NumOccupied++;
+            return true;
         }
-
-        arrayPosY[posXPos] = arrayPosXPos | posXBit;
-        this.NumOccupied++;
-        return true;
     }
 }

@@ -1050,12 +1050,7 @@ public static class CopcExtensions
 
         public void Sort()
         {
-            this.points.Sort(CompareBuffers);
-
-            static int CompareBuffers(LasPointMemory first, LasPointMemory second)
-            {
-                return ComparePointDataRecord(first.PointDataRecord, second.PointDataRecord);
-            }
+            this.points.Sort(static (first, second) => ComparePointDataRecord(first.PointDataRecord, second.PointDataRecord));
 
             static int ComparePointDataRecord(IBasePointDataRecord? first, IBasePointDataRecord? second)
             {

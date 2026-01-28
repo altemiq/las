@@ -34,7 +34,12 @@ public readonly struct BoundingBox : IEquatable<BoundingBox>
     {
     }
 
-    private BoundingBox(Vector3D lowerLeftFront, Vector3D upperRightBack) => (this.lowerLeftFront, this.upperRightBack) = (lowerLeftFront, upperRightBack);
+    /// <summary>
+    /// Initializes a new instance of the <see cref="BoundingBox"/> struct with the specified edge locations.
+    /// </summary>
+    /// <param name="lowerLeftFront">The coordinate of the lower-left-front corner of the bounding box.</param>
+    /// <param name="upperRightBack">The coordinate of the upper-right-back corner of the bounding box.</param>
+    public BoundingBox(Vector3D lowerLeftFront, Vector3D upperRightBack) => (this.lowerLeftFront, this.upperRightBack) = (lowerLeftFront, upperRightBack);
 
     /// <summary>
     /// Gets the x-coordinate of the lower-left corner of this <see cref="BoundingBox"/> structure.

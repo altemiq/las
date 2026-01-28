@@ -123,7 +123,7 @@ public readonly partial struct Vector3D : IFormattable, IEquatable<Vector3D>
     /// <param name="right">The second vector.</param>
     /// <returns>The product vector.</returns>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static Vector3D operator *(Vector3D left, Vector3D right) => Multiply(left, right.Y);
+    public static Vector3D operator *(Vector3D left, Vector3D right) => Multiply(left, right);
 
     /// <summary>
     /// Multiples the specified vector by the specified scalar value.

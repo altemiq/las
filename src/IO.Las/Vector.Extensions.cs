@@ -40,22 +40,22 @@ public static class Vector
     extension(Vector3D value)
     {
         /// <summary>
-        /// Reinterprets a <see langword="Numerics.Vector3D" /> as a new <see cref="Vector256{Double}" /> with the new elements zeroed.
+        /// Reinterprets a <see cref="Vector3D" /> as a new <see cref="Vector256{Double}" /> with the new elements zeroed.
         /// </summary>
-        /// <returns>The input reinterpreted as a new <see langword="Vector256{Double}" /> with the new elements zeroed.</returns>
+        /// <returns>The input reinterpreted as a new <see cref="Vector256{Double}" /> with the new elements zeroed.</returns>
         public Vector256<double> AsVector256() => value.AsVector256Unsafe().WithElement(3, 0);
 
         /// <summary>
-        /// Reinterprets a <see langword="Numerics.Vector3D" /> as a new <see cref="Vector256{Double}" /> with the new elements zeroed.
+        /// Reinterprets a <see cref="Vector3D" /> as a new <see cref="Vector256{Double}" /> with the new elements set to <paramref name="v"/>.
         /// </summary>
         /// <param name="v">The value of the final element.</param>
-        /// <returns>The input reinterpreted as a new <see langword="Vector256{Double}" /> with the new elements zeroed.</returns>
+        /// <returns>The input reinterpreted as a new <see cref="Vector256{Double}" /> with the new elements set to <paramref name="v"/>.</returns>
         public Vector256<double> AsVector256(double v) => value.AsVector256Unsafe().WithElement(3, v);
 
         /// <summary>
-        /// Reinterprets a <see langword="Numerics.Vector3D" /> as a new <see cref="Vector256{Double}" />, leaving the new elements undefined.
+        /// Reinterprets a <see cref="Vector3D" /> as a new <see cref="Vector256{Double}" />, leaving the new elements undefined.
         /// </summary>
-        /// <returns>The input reinterpreted as a new <see langword="Vector256{Double}" />.</returns>
+        /// <returns>The input reinterpreted as a new <see cref="Vector256{Double}" />.</returns>
         internal Vector256<double> AsVector256Unsafe()
         {
             // This relies on us stripping the "init" flag from the ".locals" declaration to let the upper bits be uninitialized.
