@@ -30,10 +30,7 @@ public sealed class HttpChunkedStream : ChunkedStream
         var request = new HttpRequestMessage
         {
             RequestUri = this.uri,
-            Headers =
-            {
-                Range = new(start, start + length - 1),
-            },
+            Headers = { Range = new(start, start + length - 1) },
         };
 
         return this.httpClient.SendAsync(request).Result is { IsSuccessStatusCode: true } response
@@ -47,10 +44,7 @@ public sealed class HttpChunkedStream : ChunkedStream
         var request = new HttpRequestMessage
         {
             RequestUri = this.uri,
-            Headers =
-            {
-                Range = new(start, start + length - 1),
-            },
+            Headers = { Range = new(start, start + length - 1) },
         };
 
         return await this.httpClient.SendAsync(request, cancellationToken).ConfigureAwait(false) is { IsSuccessStatusCode: true } response

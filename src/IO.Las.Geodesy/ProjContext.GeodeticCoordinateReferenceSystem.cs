@@ -93,6 +93,9 @@ public partial class ProjContext
                 case WellKnownTextVersion.Wkt2_2019:
                     values.Add(CreateAuthorityNode(auth, code, version));
                     break;
+                case WellKnownTextVersion.Wkt2_2015:
+                default:
+                    break;
             }
         }
 

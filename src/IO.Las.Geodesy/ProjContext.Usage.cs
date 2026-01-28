@@ -53,15 +53,19 @@ public partial class ProjContext
         var area = new WellKnownTextNode("AREA", reader.GetString(1));
         var bbox = new WellKnownTextNode("BBOX", reader.GetDouble(2), reader.GetDouble(3), reader.GetDouble(4), reader.GetDouble(5));
 
-        if (version is WellKnownTextVersion.Wkt2_2015)
+        switch (version)
         {
-            yield return scope;
-            yield return area;
-            yield return bbox;
-        }
-        else if (version is WellKnownTextVersion.Wkt2_2019)
-        {
-            yield return new("USAGE", scope, area, bbox);
+            case WellKnownTextVersion.Wkt2_2015:
+                yield return scope;
+                yield return area;
+                yield return bbox;
+                break;
+            case WellKnownTextVersion.Wkt2_2019:
+                yield return new("USAGE", scope, area, bbox);
+                break;
+            case WellKnownTextVersion.Wkt1:
+            default:
+                break;
         }
     }
 }

@@ -40,7 +40,7 @@ public static class HttpLas
     /// <param name="uri">The uri to check.</param>
     /// <param name="lazyClient">The <see cref="Http"/> client.</param>
     /// <returns><see langword="true"/> if <paramref name="uri"/> returns from a HEAD request successfully; otherwise <see langword="false"/>.</returns>
-    public static bool Exists(Uri uri, Lazy<HttpClient> lazyClient) => Exists(uri, lazyClient.Value);
+    public static bool Exists(Uri uri, Lazy<HttpClient> lazyClient) => ExistsAsync(uri, lazyClient.Value).Result;
 
     /// <summary>
     /// Determines whether the specified HTTP uri exists.
@@ -48,7 +48,7 @@ public static class HttpLas
     /// <param name="uri">The uri to check.</param>
     /// <param name="clientFactory">The <see cref="Http"/> client factory.</param>
     /// <returns><see langword="true"/> if <paramref name="uri"/> returns from a HEAD request successfully; otherwise <see langword="false"/>.</returns>
-    public static bool Exists(Uri uri, Func<HttpClient> clientFactory) => Exists(uri, clientFactory());
+    public static bool Exists(Uri uri, Func<HttpClient> clientFactory) => ExistsAsync(uri, clientFactory()).Result;
 
     /// <summary>
     /// Determines whether the specified HTTP uri exists.
@@ -116,9 +116,9 @@ public static class HttpLas
     /// Opens the <see cref="Las"/> <see cref="Http"/> <see cref="Uri"/> for reading using the <see cref="HttpClient"/>.
     /// </summary>
     /// <param name="uri">The <see cref="Http"/> <see cref="Uri"/> to the <see cref="Las"/> file.</param>
-    /// <param name="clientFactory">The <see cref="Http"/> client factory.</param>
+    /// <param name="lazyClient">The <see cref="Http"/> client factory.</param>
     /// <returns>The <see cref="Http"/> stream.</returns>
-    public static Stream OpenRead(Uri uri, Lazy<HttpClient> clientFactory) => OpenRead(uri, clientFactory.Value);
+    public static Stream OpenRead(Uri uri, Lazy<HttpClient> lazyClient) => OpenRead(uri, lazyClient.Value);
 
     /// <summary>
     /// Opens the <see cref="Las"/> <see cref="Http"/> <see cref="Uri"/> for reading using the <see cref="HttpClient"/>.

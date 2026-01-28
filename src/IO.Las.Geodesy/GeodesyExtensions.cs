@@ -23,23 +23,13 @@ public static class GeodesyExtensions
         const ushort UserDefinedValue = (ushort)short.MaxValue;
         ArgumentNullException.ThrowIfNull(records);
 
-        // get the geo key
-        if (records.OfType<GeoKeyDirectoryTag>().FirstOrDefault() is { } directory)
+        return records.OfType<GeoKeyDirectoryTag>().FirstOrDefault() switch
         {
-            if (directory.TryGetValue(GeoKey.ProjectedCRSGeoKey, out var projectedKey) && projectedKey is { ValueOffset: not UserDefinedValue and var projectedSrid })
-            {
-                // get the projected coordinate references system
-                return GetWellKnownTextFromSrid(projectedSrid);
-            }
-
-            if (directory.TryGetValue(GeoKey.GeodeticCRSGeoKey, out var geodeticKey) && geodeticKey is { ValueOffset: not UserDefinedValue and var geodeticSrid })
-            {
-                // get the geodetic coordinate references system
-                return GetWellKnownTextFromSrid(geodeticSrid);
-            }
-        }
-
-        return [];
+            // get the geo key
+            { } directory when directory.TryGetValue(GeoKey.ProjectedCRSGeoKey, out var projectedKey) && projectedKey is { ValueOffset: not UserDefinedValue and var projectedSrid } => GetWellKnownTextFromSrid(projectedSrid),
+            { } directory when directory.TryGetValue(GeoKey.GeodeticCRSGeoKey, out var geodeticKey) && geodeticKey is { ValueOffset: not UserDefinedValue and var geodeticSrid } => GetWellKnownTextFromSrid(geodeticSrid),
+            _ => [],
+        };
     }
 #endif
 
@@ -80,18 +70,11 @@ public static class GeodesyExtensions
     {
         using var context = new ProjContext();
         context.Open();
-        if (context.IsGeodeticCoordinateReferenceSystem(srid))
+        return context switch
         {
-            yield return new GeoKeyDirectoryTag(new GeoKeyEntry { KeyId = GeoKey.GeodeticCRSGeoKey, ValueOffset = srid, Count = 1 });
-            yield break;
-        }
-
-        if (context.IsProjectedCoordinateReferenceSystem(srid))
-        {
-            yield return new GeoKeyDirectoryTag(new GeoKeyEntry { KeyId = GeoKey.ProjectedCRSGeoKey, ValueOffset = srid, Count = 1 });
-            yield break;
-        }
-
-        throw new KeyNotFoundException();
+            _ when context.IsGeodeticCoordinateReferenceSystem(srid) => [new GeoKeyDirectoryTag(new GeoKeyEntry { KeyId = GeoKey.GeodeticCRSGeoKey, ValueOffset = srid, Count = 1 })],
+            _ when context.IsProjectedCoordinateReferenceSystem(srid) => [new GeoKeyDirectoryTag(new GeoKeyEntry { KeyId = GeoKey.ProjectedCRSGeoKey, ValueOffset = srid, Count = 1 })],
+            _ => throw new KeyNotFoundException(),
+        };
     }
 }

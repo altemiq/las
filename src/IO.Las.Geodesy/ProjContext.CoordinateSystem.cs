@@ -69,95 +69,103 @@ public partial class ProjContext
 
     private static IEnumerable<WellKnownTextNode> GetCoordinateSystem(Microsoft.Data.Sqlite.SqliteCommand command, string authority, int code, WellKnownTextVersion version)
     {
-        if (version is WellKnownTextVersion.Wkt1)
+        switch (version)
         {
-            command.CommandText = GetAxisCommandText;
-            AddAuthClause(command, authority, code, prefix: "coordinate_system_", orderBy: $"{AxisAlias}.coordinate_system_order");
-
-            using var reader = command.ExecuteReader();
-            if (!reader.Read())
+            case WellKnownTextVersion.Wkt1:
             {
-                throw new KeyNotFoundException();
-            }
+                command.CommandText = GetAxisCommandText;
+                AddAuthClause(command, authority, code, prefix: "coordinate_system_", orderBy: $"{AxisAlias}.coordinate_system_order");
 
-            var first = true;
-            do
-            {
-                // ensure we output the units for the axis first
-                if (first)
-                {
-                    yield return GetUnitNode(
-                        reader.GetString(7),
-                        reader.GetString(6),
-                        reader.GetDouble(8),
-                        reader.GetString(4),
-                        reader.GetInt32(5),
-                        version);
-                    first = false;
-                }
-
-                var orientation = reader.GetString(2);
-                var name = reader.GetString(1) switch
-                {
-                    "Lat" => "Latitude",
-                    "Lon" => "Longitude",
-                    _ => reader.GetString(0),
-                };
-
-                yield return new("AXIS", name, new WellKnownTextLiteral(orientation.ToUpperInvariant()));
-            }
-            while (reader.Read());
-        }
-        else if (version is WellKnownTextVersion.Wkt2_2015 or WellKnownTextVersion.Wkt2_2019)
-        {
-            command.CommandText = GetCoordinateSystemCommandText;
-            AddAuthClause(command, authority, code, limit: 1);
-
-            using (var reader = command.ExecuteReader())
-            {
+                using var reader = command.ExecuteReader();
                 if (!reader.Read())
                 {
                     throw new KeyNotFoundException();
                 }
 
-                yield return new("CS", new WellKnownTextLiteral(reader.GetString(0)), reader.GetInt32(1));
-            }
-
-            command.CommandText = GetAxisCommandText;
-            AddAuthClause(command, authority, code, prefix: "coordinate_system_", orderBy: $"{AxisAlias}.coordinate_system_order");
-            using (var reader = command.ExecuteReader())
-            {
-                if (!reader.Read())
-                {
-                    throw new KeyNotFoundException();
-                }
-
+                var first = true;
                 do
                 {
-                    var name = reader.GetString(0).ToLowerInvariant();
-                    var abbreviation = reader.GetString(1);
+                    // ensure we output the units for the axis first
+                    if (first)
+                    {
+                        yield return GetUnitNode(
+                            reader.GetString(7),
+                            reader.GetString(6),
+                            reader.GetDouble(8),
+                            reader.GetString(4),
+                            reader.GetInt32(5),
+                            version);
+                        first = false;
+                    }
+
                     var orientation = reader.GetString(2);
+                    var name = reader.GetString(1) switch
+                    {
+                        "Lat" => "Latitude",
+                        "Lon" => "Longitude",
+                        _ => reader.GetString(0),
+                    };
 
-                    var units = GetUnitNode(
-                        reader.GetString(7),
-                        reader.GetString(6),
-                        reader.GetDouble(8),
-                        reader.GetString(4),
-                        reader.GetInt32(5),
-                        version);
-
-                    var axisName = name.StartsWith(orientation, StringComparison.OrdinalIgnoreCase)
-                        ? $"({abbreviation})"
-                        : $"{name} ({abbreviation})";
-
-                    yield return new(
-                        "AXIS",
-                        axisName,
-                        new WellKnownTextLiteral(orientation),
-                        new WellKnownTextNode("ORDER", reader.GetInt32(3)),
-                        units);
+                    yield return new("AXIS", name, new WellKnownTextLiteral(orientation.ToUpperInvariant()));
                 }
                 while (reader.Read());
+
+                break;
+            }
+
+            case WellKnownTextVersion.Wkt2_2015 or WellKnownTextVersion.Wkt2_2019:
+            {
+                command.CommandText = GetCoordinateSystemCommandText;
+                AddAuthClause(command, authority, code, limit: 1);
+
+                using (var reader = command.ExecuteReader())
+                {
+                    if (!reader.Read())
+                    {
+                        throw new KeyNotFoundException();
+                    }
+
+                    yield return new("CS", new WellKnownTextLiteral(reader.GetString(0)), reader.GetInt32(1));
+                }
+
+                command.CommandText = GetAxisCommandText;
+                AddAuthClause(command, authority, code, prefix: "coordinate_system_", orderBy: $"{AxisAlias}.coordinate_system_order");
+                using (var reader = command.ExecuteReader())
+                {
+                    if (!reader.Read())
+                    {
+                        throw new KeyNotFoundException();
+                    }
+
+                    do
+                    {
+                        var name = reader.GetString(0).ToLowerInvariant();
+                        var abbreviation = reader.GetString(1);
+                        var orientation = reader.GetString(2);
+
+                        var units = GetUnitNode(
+                            reader.GetString(7),
+                            reader.GetString(6),
+                            reader.GetDouble(8),
+                            reader.GetString(4),
+                            reader.GetInt32(5),
+                            version);
+
+                        var axisName = name.StartsWith(orientation, StringComparison.OrdinalIgnoreCase)
+                            ? $"({abbreviation})"
+                            : $"{name} ({abbreviation})";
+
+                        yield return new(
+                            "AXIS",
+                            axisName,
+                            new WellKnownTextLiteral(orientation),
+                            new WellKnownTextNode("ORDER", reader.GetInt32(3)),
+                            units);
+                    }
+                    while (reader.Read());
+                }
+
+                break;
             }
         }
     }
