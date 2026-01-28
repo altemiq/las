@@ -13,9 +13,7 @@ public sealed class S3ChunkedStream : ChunkedStream
 {
     private readonly Amazon.S3.IAmazonS3 client;
 
-    private readonly string bucket;
-
-    private readonly string key;
+    private readonly Amazon.S3.Util.AmazonS3Uri uri;
 
     /// <summary>
     /// Initializes a new instance of the <see cref="S3ChunkedStream"/> class.
@@ -34,10 +32,8 @@ public sealed class S3ChunkedStream : ChunkedStream
     /// <param name="uri">The S3 URL.</param>
     /// <param name="length">The length of the resource.</param>
     internal S3ChunkedStream(Amazon.S3.IAmazonS3 client, Uri uri, long length)
-        : base(length)
+        : this(client, new Amazon.S3.Util.AmazonS3Uri(uri), length)
     {
-        this.client = client;
-        (this.bucket, this.key) = S3UriUtility.GetBucketNameAndKey(uri);
     }
 
     /// <summary>
@@ -59,7 +55,18 @@ public sealed class S3ChunkedStream : ChunkedStream
     /// <param name="key">The key to the resource.</param>
     /// <param name="length">The length of the resource.</param>
     internal S3ChunkedStream(Amazon.S3.IAmazonS3 client, string bucket, string key, long length)
-        : base(length) => (this.client, this.bucket, this.key) = (client, bucket, key);
+        : this(client, Create(bucket, key), length)
+    {
+    }
+
+    /// <summary>
+    /// Initializes a new instance of the <see cref="S3ChunkedStream"/> class.
+    /// </summary>
+    /// <param name="client">The S3 client.</param>
+    /// <param name="uri">The S3 URL.</param>
+    /// <param name="length">The length of the resource.</param>
+    internal S3ChunkedStream(Amazon.S3.IAmazonS3 client, Amazon.S3.Util.AmazonS3Uri uri, long length)
+        : base(length) => (this.client, this.uri) = (client, uri);
 
     /// <inheritdoc/>
     protected override Stream? GetStream(long start, int length)
@@ -72,8 +79,8 @@ public sealed class S3ChunkedStream : ChunkedStream
 
         var request = new Amazon.S3.Model.GetObjectRequest
         {
-            BucketName = this.bucket,
-            Key = this.key,
+            BucketName = this.uri.Bucket,
+            Key = this.uri.Key,
             ByteRange = new(start, end),
         };
 
@@ -107,8 +114,8 @@ public sealed class S3ChunkedStream : ChunkedStream
 
         var request = new Amazon.S3.Model.GetObjectRequest
         {
-            BucketName = this.bucket,
-            Key = this.key,
+            BucketName = this.uri.Bucket,
+            Key = this.uri.Key,
             ByteRange = new(start, end),
         };
 
@@ -128,5 +135,11 @@ public sealed class S3ChunkedStream : ChunkedStream
             stream.Position = 0;
             return stream;
         }
+    }
+
+    private static Amazon.S3.Util.AmazonS3Uri Create(string bucket, string key)
+    {
+        var uriBuilder = new UriBuilder("s3", bucket) { Path = key, };
+        return new(uriBuilder.Uri);
     }
 }

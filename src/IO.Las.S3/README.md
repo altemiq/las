@@ -14,7 +14,7 @@ Provides support for reading LAS/LAZ files through Amazon S3
   * Virtual Hosted-Style
   * Path-Style
 
-## How to Use
+## How to Use****
 
 <!-- A compelling example on how to use this package with code, as well as any specific guidelines for when to use the package -->
 
@@ -39,7 +39,6 @@ The main types provided by this library are:
 
 * `Altemiq.IO.Las.S3.S3Las`
 * `Altemiq.IO.Las.S3.S3ChunkedStream`
-* `Altemiq.IO.Las.S3.S3UriUtility`
 
 ## Additional Documentation
 

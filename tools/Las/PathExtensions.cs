@@ -38,7 +38,7 @@ internal static class PathExtensions
         public static bool Exists(Uri uri, Lazy<Amazon.S3.IAmazonS3> lazyAmazonS3, Lazy<HttpClient> lazyHttpClient) => uri switch
         {
             { Scheme: "file" } => Path.Exists(uri.LocalPath),
-            _ when S3.S3UriUtility.IsS3(uri) => S3.S3Las.Exists(uri, lazyAmazonS3),
+            _ when Amazon.S3.Util.AmazonS3Uri.IsAmazonS3Endpoint(uri) => S3.S3Las.Exists(uri, lazyAmazonS3),
             { Scheme: "http" or "https" } => Http.HttpLas.Exists(uri, lazyHttpClient),
             _ => false,
         };

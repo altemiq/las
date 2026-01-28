@@ -34,8 +34,8 @@ public static class S3Las
     /// <returns><see langword="true"/> if <paramref name="uri"/> returns from a request successfully; otherwise <see langword="false"/>.</returns>
     public static bool Exists(Uri uri, Amazon.S3.IAmazonS3 client)
     {
-        var (bucketName, key) = S3UriUtility.GetBucketNameAndKey(uri);
-        return Exists(bucketName, key, client);
+        var output = new Amazon.S3.Util.AmazonS3Uri(uri);
+        return Exists(output.Bucket, output.Key, client);
     }
 
     /// <summary>
@@ -87,8 +87,8 @@ public static class S3Las
     /// <returns><see langword="true"/> if <paramref name="uri"/> returns from a request successfully; otherwise <see langword="false"/>.</returns>
     public static Task<bool> ExistsAsync(Uri uri, Amazon.S3.IAmazonS3 client)
     {
-        var (bucketName, key) = S3UriUtility.GetBucketNameAndKey(uri);
-        return ExistsAsync(bucketName, key, client);
+        var output = new Amazon.S3.Util.AmazonS3Uri(uri);
+        return ExistsAsync(output.Bucket, output.Key, client);
     }
 
     /// <summary>
@@ -140,8 +140,8 @@ public static class S3Las
     /// <returns>The <see cref="S3"/> stream.</returns>
     public static Stream OpenRead(Uri uri, Amazon.S3.IAmazonS3 client)
     {
-        var (bucketName, key) = S3UriUtility.GetBucketNameAndKey(uri);
-        return new S3ChunkedStream(client, bucketName, key, GetContentLengthAsync(client, uri).GetAwaiter().GetResult());
+        var output = new Amazon.S3.Util.AmazonS3Uri(uri);
+        return new S3ChunkedStream(client, output, GetContentLengthAsync(client, output.Bucket, output.Key).GetAwaiter().GetResult());
     }
 
     /// <summary>
@@ -193,8 +193,8 @@ public static class S3Las
     /// <returns>The <see cref="S3"/> stream.</returns>
     public static async Task<Stream> OpenReadAsync(Uri uri, Amazon.S3.IAmazonS3 client)
     {
-        var (bucketName, key) = S3UriUtility.GetBucketNameAndKey(uri);
-        return new S3ChunkedStream(client, bucketName, key, await GetContentLengthAsync(client, uri).ConfigureAwait(false));
+        var output = new Amazon.S3.Util.AmazonS3Uri(uri);
+        return new S3ChunkedStream(client, output, await GetContentLengthAsync(client, output.Bucket, output.Key).ConfigureAwait(false));
     }
 
     /// <summary>
@@ -245,12 +245,6 @@ public static class S3Las
         {
             return false;
         }
-    }
-
-    private static Task<long> GetContentLengthAsync(Amazon.S3.IAmazonS3 client, Uri uri)
-    {
-        var (bucket, key) = S3UriUtility.GetBucketNameAndKey(uri);
-        return GetContentLengthAsync(client, bucket, key);
     }
 
     private static async Task<long> GetContentLengthAsync(Amazon.S3.IAmazonS3 client, string bucket, string key)

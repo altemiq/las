@@ -38,7 +38,7 @@ internal static class FileExtensions
         public static bool Exists(Uri uri, Lazy<Amazon.S3.IAmazonS3> lazyS3Client, Lazy<HttpClient> lazyHttpClient) => uri switch
         {
             { Scheme: "file" } => File.Exists(uri.LocalPath),
-            _ when S3.S3UriUtility.IsS3(uri) => S3.S3Las.Exists(uri, lazyS3Client),
+            _ when Amazon.S3.Util.AmazonS3Uri.IsAmazonS3Endpoint(uri) => S3.S3Las.Exists(uri, lazyS3Client),
             { Scheme: "http" or "https" } => Http.HttpLas.Exists(uri, lazyHttpClient),
             _ => false,
         };
@@ -72,7 +72,7 @@ internal static class FileExtensions
             => uri switch
             {
                 { Scheme: "file" } => new FileStream(uri.LocalPath, FileMode.Open, FileAccess.Read, FileShare.Read, ushort.MaxValue),
-                _ when S3.S3UriUtility.IsS3(uri) => S3.S3Las.OpenRead(uri, lazyS3Client),
+                _ when Amazon.S3.Util.AmazonS3Uri.IsAmazonS3Endpoint(uri) => S3.S3Las.OpenRead(uri, lazyS3Client),
                 { Scheme: "http" or "https" } => Http.HttpLas.OpenRead(uri, lazyHttpClient),
                 _ => throw new NotSupportedException(),
             };
@@ -150,7 +150,7 @@ internal static class FileExtensions
         public static Stream Open(Uri uri, FileMode mode, Lazy<Amazon.S3.IAmazonS3> lazyAmazonS3, Lazy<HttpClient> lazyHttpClient) => (uri, mode) switch
         {
             ({ Scheme: "file" }, _) => File.Open(uri.LocalPath, mode),
-            (_, FileMode.Open) when S3.S3UriUtility.IsS3(uri) => S3.S3Las.OpenRead(uri, lazyAmazonS3),
+            (_, FileMode.Open) when Amazon.S3.Util.AmazonS3Uri.IsAmazonS3Endpoint(uri) => S3.S3Las.OpenRead(uri, lazyAmazonS3),
             ({ Scheme: "http" or "https" }, FileMode.Open) => Http.HttpLas.OpenRead(uri, lazyHttpClient),
             _ => throw new NotSupportedException(),
         };
