@@ -9,7 +9,7 @@ namespace Altemiq.IO.Las;
 /// <summary>
 /// The well-known text node.
 /// </summary>
-public readonly struct WellKnownTextNode
+public readonly struct WellKnownTextNode : IEquatable<WellKnownTextNode>
 {
     private const char StartChar = '[';
 
@@ -49,6 +49,22 @@ public readonly struct WellKnownTextNode
     /// Gets the values.
     /// </summary>
     public IEnumerable<WellKnownTextValue> Values { get; }
+
+    /// <summary>
+    /// Implements the equals operator.
+    /// </summary>
+    /// <param name="left">The left hand side.</param>
+    /// <param name="right">The right hand side.</param>
+    /// <returns>The result of the operator.</returns>
+    public static bool operator ==(WellKnownTextNode left, WellKnownTextNode right) => left.Equals(right);
+
+    /// <summary>
+    /// Implements the not-equals operator.
+    /// </summary>
+    /// <param name="left">The left hand side.</param>
+    /// <param name="right">The right hand side.</param>
+    /// <returns>The result of the operator.</returns>
+    public static bool operator !=(WellKnownTextNode left, WellKnownTextNode right) => left.Equals(right);
 
     /// <summary>
     /// Parses a <see cref="WellKnownTextNode"/> from the span of bytes.
@@ -187,6 +203,25 @@ public readonly struct WellKnownTextNode
 #endif
 
     /// <inheritdoc />
+    public bool Equals(WellKnownTextNode other) => StringComparer.Ordinal.Equals(this.Id, other.Id) && this.Values.SequenceEqual(other.Values);
+
+    /// <inheritdoc />
+    public override bool Equals([System.Diagnostics.CodeAnalysis.NotNullWhen(true)] object? obj) => obj is WellKnownTextNode node && this.Equals(node);
+
+    /// <inheritdoc />
+    public override int GetHashCode()
+    {
+        HashCode hashCode = default;
+        hashCode.Add(this.Id, StringComparer.Ordinal);
+        foreach (var value in this.Values)
+        {
+            hashCode.Add(value);
+        }
+
+        return hashCode.ToHashCode();
+    }
+
+    /// <inheritdoc />
     public override string ToString()
     {
         var builder = new System.Text.StringBuilder();
@@ -289,16 +324,8 @@ public readonly struct WellKnownTextNode
         private int endCurrent = 0;
         private int startNext = 0;
 
-        /// <summary>
-        /// Gets the current element of the enumeration.
-        /// </summary>
-        /// <returns>Returns a <see cref="Range"/> instance that indicates the bounds of the current element withing the source span.</returns>
         public readonly Range Current => new(this.startCurrent, this.endCurrent);
 
-        /// <summary>
-        /// Advances the enumerator to the next element of the enumeration.
-        /// </summary>
-        /// <returns><see langword="true"/> if the enumerator was successfully advanced to the next element; <see langword="false"/> if the enumerator has passed the end of the enumeration.</returns>
         public bool MoveNext()
         {
             if (this.startNext > this.buffer.Length)

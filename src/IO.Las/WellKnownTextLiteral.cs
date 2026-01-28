@@ -10,8 +10,24 @@ namespace Altemiq.IO.Las;
 /// The <see cref="WellKnownTextNode"/> literal value.
 /// </summary>
 /// <param name="value">The literal value.</param>
-public readonly struct WellKnownTextLiteral(string value)
+public readonly struct WellKnownTextLiteral(string value) : IEquatable<WellKnownTextLiteral>, IEquatable<string>
 {
+    /// <summary>
+    /// Implements the equals operator.
+    /// </summary>
+    /// <param name="left">The left hand side.</param>
+    /// <param name="right">The right hand side.</param>
+    /// <returns>The result of the operator.</returns>
+    public static bool operator ==(WellKnownTextLiteral left, WellKnownTextLiteral right) => left.Equals(right);
+
+    /// <summary>
+    /// Implements the not-equals operator.
+    /// </summary>
+    /// <param name="left">The left hand side.</param>
+    /// <param name="right">The right hand side.</param>
+    /// <returns>The result of the operator.</returns>
+    public static bool operator !=(WellKnownTextLiteral left, WellKnownTextLiteral right) => left.Equals(right);
+
     /// <summary>
     /// Creates a <see cref="WellKnownTextLiteral"/> from the <see cref="Enum"/> value.
     /// </summary>
@@ -30,4 +46,21 @@ public readonly struct WellKnownTextLiteral(string value)
     /// </summary>
     /// <returns>The byte count.</returns>
     public int GetByteCount() => System.Text.Encoding.UTF8.GetByteCount(value);
+
+    /// <inheritdoc />
+    public bool Equals(WellKnownTextLiteral other) => other.Equals(value);
+
+    /// <inheritdoc />
+    public bool Equals(string? other) => StringComparer.Ordinal.Equals(value, other);
+
+    /// <inheritdoc />
+    public override bool Equals(object? obj) => obj switch
+    {
+        WellKnownTextLiteral other => this.Equals(other),
+        string other => this.Equals(other),
+        _ => false,
+    };
+
+    /// <inheritdoc />
+    public override int GetHashCode() => StringComparer.Ordinal.GetHashCode(value);
 }
