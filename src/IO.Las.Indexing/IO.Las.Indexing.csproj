@@ -1,9 +1,10 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFrameworks>net7.0;net5.0;netstandard2.1;netstandard2.0</TargetFrameworks>
+    <TargetFrameworks>net10.0;net7.0;net5.0;netstandard2.1;netstandard2.0</TargetFrameworks>
     <MeziantouPolyfill_IncludedPolyfills>
       $(MeziantouPolyfill_IncludedPolyfills)|
+      M:System.Collections.Generic.Dictionary`2.TryAdd(`0,`1)|
       M:System.IO.Stream.Read(System.Span{System.Byte})|
       M:System.IO.Stream.ReadAsync(System.Memory{System.Byte},System.Threading.CancellationToken)|
     </MeziantouPolyfill_IncludedPolyfills>
@@ -35,6 +36,10 @@
 
   <ItemGroup>
     <InternalsVisibleTo Include="las" />
+  </ItemGroup>
+
+  <ItemGroup Label="Tests" Condition=" '$(Configuration)' == 'Debug' ">
+    <InternalsVisibleTo Include="$(AssemblyName).Tests" />
   </ItemGroup>
 
   <ItemGroup>

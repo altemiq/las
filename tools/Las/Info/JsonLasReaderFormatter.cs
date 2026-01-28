@@ -293,11 +293,11 @@ internal sealed class JsonLasReaderFormatter(System.Text.Json.Utf8JsonWriter wri
                     writer.WriteBoolean("reversible", tiling.Reversible);
 
                     var quadTree = new Indexing.LasQuadTree(tiling.MinX, tiling.MaxX, tiling.MinY, tiling.MaxY, (int)tiling.Level, (int)tiling.LevelIndex, default);
-                    var (minimumX, minimumY, maximumX, maximumY) = quadTree.GetBounds(0, (int)tiling.LevelIndex);
+                    var (minimum, maximum) = quadTree.GetBounds(0, (int)tiling.LevelIndex);
 
                     writer.WriteStartObject("size");
-                    writer.WriteNumber("width", maximumX - minimumX);
-                    writer.WriteNumber("height", maximumY - minimumY);
+                    writer.WriteNumber("width", maximum.X - minimum.X);
+                    writer.WriteNumber("height", maximum.Y - minimum.Y);
                     writer.WriteEndObject();
 
                     var min = reader.Header.Min;
@@ -306,10 +306,10 @@ internal sealed class JsonLasReaderFormatter(System.Text.Json.Utf8JsonWriter wri
                         ? Math.Max(
                             Math.Max(
                                 Math.Max(
-                                    (float)(minimumX - min.X),
-                                    (float)(minimumY - min.Y)),
-                                (float)(max.X - maximumX)),
-                            (float)(max.Y - maximumY))
+                                    (float)(minimum.X - min.X),
+                                    (float)(minimum.Y - min.Y)),
+                                (float)(max.X - maximum.X)),
+                            (float)(max.Y - maximum.Y))
                         : default;
 
                     writer.WriteNumber("buffer_size", tilingBuffer);

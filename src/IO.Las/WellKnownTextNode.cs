@@ -283,9 +283,6 @@ public readonly struct WellKnownTextNode
     private ref struct SpanSplitEnumerator<T>(ReadOnlySpan<T> span, T start, T end, T separator)
         where T : IEquatable<T>
     {
-        private readonly T start = start;
-        private readonly T end = end;
-        private readonly T separator = separator;
         private readonly ReadOnlySpan<T> buffer = span;
 
         private int startCurrent = 0;
@@ -316,15 +313,15 @@ public readonly struct WellKnownTextNode
             var open = 0;
             for (var i = 1; i < slice.Length; i++)
             {
-                if (slice[i].Equals(this.start))
+                if (slice[i].Equals(start))
                 {
                     open++;
                 }
-                else if (slice[i].Equals(this.end))
+                else if (slice[i].Equals(end))
                 {
                     open--;
                 }
-                else if (slice[i].Equals(this.separator) && open is 0)
+                else if (slice[i].Equals(separator) && open is 0)
                 {
                     separatorIndex = i;
                 }

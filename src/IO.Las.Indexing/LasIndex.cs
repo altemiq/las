@@ -84,7 +84,8 @@ public class LasIndex : IEnumerable<LasIndexCell>
         var current = default(uint);
         while (reader.ReadPointDataRecord() is { PointDataRecord: { } record })
         {
-            _ = index.Add(quantizer.GetX(record.X), quantizer.GetY(record.Y), current++);
+            var (x, y, _) = quantizer.Get(record);
+            _ = index.Add((float)x, (float)y, current++);
         }
 
         index.Complete(minimumPoints, maximumIntervals);
@@ -198,7 +199,7 @@ public class LasIndex : IEnumerable<LasIndexCell>
     /// <param name="y">The y-coordinate.</param>
     /// <param name="index">The index.</param>
     /// <returns><see langword="true"/> if the point was added; otherwise <see langword="false"/>.</returns>
-    public bool Add(double x, double y, uint index)
+    public bool Add(float x, float y, uint index)
     {
         var cell = this.spatial.GetCellIndex(x, y);
         return this.interval.Add(index, cell);
@@ -347,14 +348,7 @@ public class LasIndex : IEnumerable<LasIndexCell>
     /// </summary>
     /// <param name="cell">The cell to get the index for.</param>
     /// <returns>The cell index.</returns>
-    public int IndexOf(LasIndexCell cell)
-    {
-        var width = cell.MaximumX - cell.MinimumX;
-        var height = cell.MaximumY - cell.MinimumY;
-        var x = cell.MinimumX + (width / 2);
-        var y = cell.MinimumY + (height / 2);
-        return this.GetCellIndex(x, y, width, height);
-    }
+    public int IndexOf(LasIndexCell cell) => this.spatial.GetCellIndex((cell.Minimum + cell.Maximum) * 0.5F, cell.Maximum - cell.Minimum);
 
     /// <summary>
     /// Gets the cell index.
@@ -364,7 +358,7 @@ public class LasIndex : IEnumerable<LasIndexCell>
     /// <param name="width">The cell width.</param>
     /// <param name="height">The cell height.</param>
     /// <returns>The cell index.</returns>
-    public int GetCellIndex(double x, double y, double width, double height) => this.spatial.GetCellIndex(x, y, width, height);
+    public int GetCellIndex(float x, float y, float width, float height) => this.spatial.GetCellIndex(new System.Numerics.Vector2(x, y), new(width, height));
 
     /// <summary>
     /// Gets all the ranges.
@@ -380,7 +374,7 @@ public class LasIndex : IEnumerable<LasIndexCell>
     /// <param name="maxX">The maximum x-coordinate.</param>
     /// <param name="maxY">The maximum y-coordinate.</param>
     /// <returns>The ranges.</returns>
-    public IEnumerable<Range> WithinRectangle(double minX, double minY, double maxX, double maxY) => GetRanges(this.GetCells(this.spatial.CellsWithinRectangle(minX, minY, maxX, maxY)));
+    public IEnumerable<Range> WithinRectangle(float minX, float minY, float maxX, float maxY) => GetRanges(this.GetCells(this.spatial.CellsWithinRectangle(minX, minY, maxX, maxY)));
 
     /// <summary>
     /// Gets the ranges within the specified tile.
@@ -474,9 +468,8 @@ public class LasIndex : IEnumerable<LasIndexCell>
             get
             {
                 var current = this.enumerator.Current;
-                var (minimumX, minimumY, maximumX, maximumY) = this.quadTree.GetBounds(current.Key);
-                var ranges = GetRanges(current.Value);
-                return new(minimumX, minimumY, maximumX, maximumY, ranges);
+                var (minimum, maximum) = this.quadTree.GetBounds(current.Key);
+                return new(minimum, maximum, GetRanges(current.Value));
             }
         }
 
@@ -497,13 +490,11 @@ public class LasIndex : IEnumerable<LasIndexCell>
 
     private readonly struct ReadOnlyLasIndex(LasIndexCell[] cells) : IReadOnlyList<LasIndexCell>
     {
-        private readonly LasIndexCell[] cells = cells;
+        public int Count => cells.Length;
 
-        public int Count => this.cells.Length;
+        public LasIndexCell this[int index] => cells[index];
 
-        public LasIndexCell this[int index] => this.cells[index];
-
-        public IEnumerator<LasIndexCell> GetEnumerator() => new ReadOnlyEnumerator(this.cells);
+        public IEnumerator<LasIndexCell> GetEnumerator() => new ReadOnlyEnumerator(cells);
 
         System.Collections.IEnumerator System.Collections.IEnumerable.GetEnumerator() => this.GetEnumerator();
 

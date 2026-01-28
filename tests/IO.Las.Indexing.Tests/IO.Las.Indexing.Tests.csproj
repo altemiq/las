@@ -10,7 +10,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <EmbeddedResource Include="*.lax" />
+    <EmbeddedResource Include="..\..\data\laz\*.lax" />
   </ItemGroup>
 
   <ItemGroup>

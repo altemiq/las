@@ -6,6 +6,10 @@
 
 namespace Altemiq.IO.Las;
 
+#if NET7_0_OR_GREATER
+using System.Runtime.Intrinsics;
+#endif
+
 /// <summary>
 /// The point converter.
 /// </summary>
@@ -54,7 +58,13 @@ public sealed class PointDataRecordQuantizer(Vector3D scaleFactor, Vector3D offs
     public static (double X, double Y, double Z) Get(int x, int y, int z, Vector3D scaleFactor, Vector3D offset)
 #if NET7_0_OR_GREATER
     {
-        var result = (System.Runtime.Intrinsics.Vector256.Create((double)x, y, z, default) * scaleFactor.AsVector256()) + offset.AsVector256();
+        var result = Vector256.Add(
+            Vector256.Multiply(
+                Vector256.Create(
+                       Vector128.ConvertToDouble(Vector128.Create(x, y)),
+                       Vector128.ConvertToDouble(Vector128.Create(z, default(int)))),
+                scaleFactor.AsVector256()),
+            offset.AsVector256());
         return (result[0], result[1], result[2]);
     }
 #else
@@ -73,7 +83,13 @@ public sealed class PointDataRecordQuantizer(Vector3D scaleFactor, Vector3D offs
     public static (double X, double Y) Get(int x, int y, Vector3D scaleFactor, Vector3D offset)
 #if NET7_0_OR_GREATER
     {
-        var result = (System.Runtime.Intrinsics.Vector256.Create(System.Runtime.Intrinsics.Vector128.Create((double)x, y), System.Runtime.Intrinsics.Vector128<double>.Zero) * scaleFactor.AsVector256()) + offset.AsVector256();
+        var result = Vector256.Add(
+            Vector256.Multiply(
+                Vector256.Create(
+                    Vector128.ConvertToDouble(Vector128.Create(x, y)),
+                    Vector128<double>.Zero),
+                scaleFactor.AsVector256()),
+            offset.AsVector256());
         return (result[0], result[1]);
     }
 #else
@@ -112,7 +128,26 @@ public sealed class PointDataRecordQuantizer(Vector3D scaleFactor, Vector3D offs
     /// <param name="y">The y-coordinate.</param>
     /// <param name="z">The z-coordinate.</param>
     /// <returns>The converted point.</returns>
-    public (int X, int Y, int Z) Get(double x, double y, double z) => (this.GetX(x), this.GetY(y), this.GetZ(z));
+    public (int X, int Y, int Z) Get(double x, double y, double z)
+#if NET7_0_OR_GREATER
+    {
+        var vector = Vector256.Divide(
+            Vector256.Subtract(
+                Vector256.Create(
+                    Vector128.Create(x, y),
+                    Vector128.Create(z)),
+                offset.AsVector256()),
+            scaleFactor.AsVector256());
+#if NET9_0_OR_GREATER
+        vector = Vector256.Round(vector, MidpointRounding.AwayFromZero);
+        return ((int)vector[0], (int)vector[1], (int)vector[2]);
+#else
+        return ((int)Math.Round(vector[0], MidpointRounding.AwayFromZero), (int)Math.Round(vector[1], MidpointRounding.AwayFromZero), (int)Math.Round(vector[2], MidpointRounding.AwayFromZero));
+#endif
+    }
+#else
+        => (this.GetX(x), this.GetY(y), this.GetZ(z));
+#endif
 
     /// <summary>
     /// Converts the point.
@@ -123,11 +158,15 @@ public sealed class PointDataRecordQuantizer(Vector3D scaleFactor, Vector3D offs
     public (int X, int Y) Get(double x, double y)
 #if NET7_0_OR_GREATER
     {
-        var vector = (System.Runtime.Intrinsics.Vector256.Create(
-            System.Runtime.Intrinsics.Vector128.Create(x, y),
-            System.Runtime.Intrinsics.Vector128<double>.Zero) - offset.AsVector256()) / scaleFactor.AsVector256();
+        var vector = Vector256.Divide(
+            Vector256.Subtract(
+                Vector256.Create(
+                    Vector128.Create(x, y),
+                    Vector128<double>.Zero),
+                offset.AsVector256()),
+            scaleFactor.AsVector256());
 #if NET9_0_OR_GREATER
-        vector = System.Runtime.Intrinsics.Vector256.Round(vector, MidpointRounding.AwayFromZero);
+        vector = Vector256.Round(vector, MidpointRounding.AwayFromZero);
         return ((int)vector[0], (int)vector[1]);
 #else
         return ((int)Math.Round(vector[0], MidpointRounding.AwayFromZero), (int)Math.Round(vector[1], MidpointRounding.AwayFromZero));
@@ -143,7 +182,7 @@ public sealed class PointDataRecordQuantizer(Vector3D scaleFactor, Vector3D offs
     /// <param name="x">The x-coordinate.</param>
     /// <returns>The converted x-coordinate.</returns>
     [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
-    public int GetX(double x) => ConvertSingle(x, offset.X, scaleFactor.X);
+    public int GetX(double x) => (int)Math.Round((x - offset.X) / scaleFactor.X, MidpointRounding.AwayFromZero);
 
     /// <summary>
     /// Converts the x-coordinate.
@@ -159,7 +198,7 @@ public sealed class PointDataRecordQuantizer(Vector3D scaleFactor, Vector3D offs
     /// <param name="y">The y-coordinate.</param>
     /// <returns>The converted y-coordinate.</returns>
     [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
-    public int GetY(double y) => ConvertSingle(y, offset.Y, scaleFactor.Y);
+    public int GetY(double y) => (int)Math.Round((y - offset.Y) / scaleFactor.Y, MidpointRounding.AwayFromZero);
 
     /// <summary>
     /// Converts the y-coordinate.
@@ -175,7 +214,7 @@ public sealed class PointDataRecordQuantizer(Vector3D scaleFactor, Vector3D offs
     /// <param name="z">The z-coordinate.</param>
     /// <returns>The converted z-coordinate.</returns>
     [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
-    public int GetZ(double z) => ConvertSingle(z, offset.Z, scaleFactor.Z);
+    public int GetZ(double z) => (int)Math.Round((z - offset.Z) / scaleFactor.Z, MidpointRounding.AwayFromZero);
 
     /// <summary>
     /// Converts the z-coordinate.
@@ -200,7 +239,4 @@ public sealed class PointDataRecordQuantizer(Vector3D scaleFactor, Vector3D offs
     /// <returns>The GPS time.</returns>
     [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
     public double GetGpsTime(DateTime dateTime) => GpsTime.DateTimeToGpsTime(dateTime, gpsOffset);
-
-    [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
-    private static int ConvertSingle(double value, double offset, double scaleFactor) => value >= offset ? (int)(((value - offset) / scaleFactor) + 0.5) : (int)(((value - offset) / scaleFactor) - 0.5);
 }

@@ -6,6 +6,8 @@
 
 namespace Altemiq.IO.Las.Indexing;
 
+using System.Numerics;
+
 /// <summary>
 /// The LAS quad tree.
 /// </summary>
@@ -18,10 +20,8 @@ public sealed class LasQuadTree : IEquatable<LasQuadTree>
 
     private readonly int sublevel;
     private readonly int sublevelIndex;
-    private readonly float minimumX;
-    private readonly float maximumX;
-    private readonly float minimumY;
-    private readonly float maximumY;
+    private readonly Vector2 minimum;
+    private readonly Vector2 maximum;
     private readonly int levels;
 
     private uint[]? adaptive;
@@ -39,27 +39,21 @@ public sealed class LasQuadTree : IEquatable<LasQuadTree>
     public LasQuadTree(double boundingBoxMinX, double boundingBoxMaxX, double boundingBoxMinY, double boundingBoxMaxY, float cellSize, float offsetX = default, float offsetY = default)
     {
         // enlarge bounding box to units of cells
-        this.minimumX = boundingBoxMinX >= offsetX
-            ? (cellSize * ((int)((boundingBoxMinX - offsetX) / cellSize))) + offsetX
-            : (cellSize * ((int)((boundingBoxMinX - offsetX) / cellSize) - 1)) + offsetX;
-        this.maximumX = boundingBoxMaxX >= offsetX
-            ? (cellSize * ((int)((boundingBoxMaxX - offsetX) / cellSize) + 1)) + offsetX
-            : (cellSize * ((int)((boundingBoxMaxX - offsetX) / cellSize))) + offsetX;
-        this.minimumY = boundingBoxMinY >= offsetY
-            ? (cellSize * ((int)((boundingBoxMinY - offsetY) / cellSize))) + offsetY
-            : (cellSize * ((int)((boundingBoxMinY - offsetY) / cellSize) - 1)) + offsetY;
-        this.maximumY = boundingBoxMaxY >= offsetY
-            ? (cellSize * ((int)((boundingBoxMaxY - offsetY) / cellSize) + 1)) + offsetY
-            : (cellSize * ((int)((boundingBoxMaxY - offsetY) / cellSize))) + offsetY;
+        this.minimum = new(
+            boundingBoxMinX >= offsetX ? (cellSize * ((int)((boundingBoxMinX - offsetX) / cellSize))) + offsetX : (cellSize * ((int)((boundingBoxMinX - offsetX) / cellSize) - 1)) + offsetX,
+            boundingBoxMinY >= offsetY ? (cellSize * ((int)((boundingBoxMinY - offsetY) / cellSize))) + offsetY : (cellSize * ((int)((boundingBoxMinY - offsetY) / cellSize) - 1)) + offsetY);
+        this.maximum = new(
+            boundingBoxMaxX >= offsetX ? (cellSize * ((int)((boundingBoxMaxX - offsetX) / cellSize) + 1)) + offsetX : (cellSize * ((int)((boundingBoxMaxX - offsetX) / cellSize))) + offsetX,
+            boundingBoxMaxY >= offsetY ? (cellSize * ((int)((boundingBoxMaxY - offsetY) / cellSize) + 1)) + offsetY : (cellSize * ((int)((boundingBoxMaxY - offsetY) / cellSize))) + offsetY);
 
         // how many cells minimally in each direction
-        var horizonalCells = UInt32Quantize((this.maximumX - this.minimumX) / cellSize);
+        var horizonalCells = UInt32Quantize((this.maximum.X - this.minimum.X) / cellSize);
         if (horizonalCells is 0)
         {
             throw new ArgumentOutOfRangeException(nameof(cellSize), cellSize, Properties.Resources.NoHorizontalCellsFound);
         }
 
-        var verticalCells = UInt32Quantize((this.maximumY - this.minimumY) / cellSize);
+        var verticalCells = UInt32Quantize((this.maximum.Y - this.minimum.Y) / cellSize);
         if (verticalCells is 0)
         {
             throw new ArgumentOutOfRangeException(nameof(cellSize), cellSize, Properties.Resources.NoVerticalCellsFound);
@@ -74,12 +68,16 @@ public sealed class LasQuadTree : IEquatable<LasQuadTree>
         }
 
         // enlarge bounding box to quad tree size
-        c = (uint)(1 << this.levels) - horizonalCells;
-        this.minimumX -= (c - (c / 2F)) * cellSize;
-        this.maximumX += c / 2F * cellSize;
-        c = (uint)(1 << this.levels) - verticalCells;
-        this.minimumY -= (c - (c / 2F)) * cellSize;
-        this.maximumY += c / 2F * cellSize;
+        var xc = (1U << this.levels) - horizonalCells;
+        var xc1 = xc / 2;
+        var xc2 = xc - xc1;
+
+        var yc = (1U << this.levels) - verticalCells;
+        var yc1 = yc / 2;
+        var yc2 = yc - yc1;
+
+        this.minimum -= new Vector2(xc2 * cellSize, yc2 * cellSize);
+        this.maximum += new Vector2(xc1 * cellSize, yc1 * cellSize);
 
         static uint UInt32Quantize(float n)
         {
@@ -98,14 +96,17 @@ public sealed class LasQuadTree : IEquatable<LasQuadTree>
     /// <param name="subLevelIndex">The sublevel index.</param>
     /// <param name="levels">The number of levels.</param>
     public LasQuadTree(float boundingBoxMinX, float boundingBoxMaxX, float boundingBoxMinY, float boundingBoxMaxY, int subLevel, int subLevelIndex, int levels)
+        : this(new(boundingBoxMinX, boundingBoxMinY), new(boundingBoxMaxX, boundingBoxMaxY), subLevel, subLevelIndex, levels)
     {
-        this.minimumX = boundingBoxMinX;
-        this.maximumX = boundingBoxMaxX;
-        this.minimumY = boundingBoxMinY;
-        this.maximumY = boundingBoxMaxY;
+    }
+
+    private LasQuadTree(Vector2 min, Vector2 max, int subLevel, int subLevelIndex, int levels)
+    {
+        this.minimum = min;
+        this.maximum = max;
 
         // get the cell bounding box
-        (this.minimumX, this.minimumY, this.maximumX, this.maximumY) = this.GetBounds(subLevel, subLevelIndex);
+        (this.minimum, this.maximum) = this.GetBounds(subLevel, subLevelIndex);
 
         this.levels = levels;
         this.sublevel = subLevel;
@@ -114,10 +115,8 @@ public sealed class LasQuadTree : IEquatable<LasQuadTree>
 
     private LasQuadTree(float minX, float maxX, float minY, float maxY, int levels)
     {
-        this.minimumX = minX;
-        this.maximumX = maxX;
-        this.minimumY = minY;
-        this.maximumY = maxY;
+        this.minimum = new(minX, minY);
+        this.maximum = new(maxX, maxY);
         this.levels = levels;
         this.sublevel = default;
         this.sublevelIndex = default;
@@ -201,7 +200,7 @@ public sealed class LasQuadTree : IEquatable<LasQuadTree>
     /// Clones this into an empty instance.
     /// </summary>
     /// <returns>The empty instance.</returns>
-    public LasQuadTree CloneEmpty() => new(this.minimumX, this.maximumX, this.minimumY, this.maximumY, this.sublevel, this.sublevelIndex, this.levels);
+    public LasQuadTree CloneEmpty() => new(this.minimum, this.maximum, this.sublevel, this.sublevelIndex, this.levels);
 
     /// <summary>
     /// Writes this instance to the specified stream.
@@ -228,10 +227,10 @@ public sealed class LasQuadTree : IEquatable<LasQuadTree>
         writer.Write((uint)this.levels);
         writer.Write(0U); // level index
         writer.Write(0U); // implicit_levels
-        writer.Write(this.minimumX);
-        writer.Write(this.maximumX);
-        writer.Write(this.minimumY);
-        writer.Write(this.maximumY);
+        writer.Write(this.minimum.X);
+        writer.Write(this.maximum.X);
+        writer.Write(this.minimum.Y);
+        writer.Write(this.maximum.Y);
     }
 
     /// <inheritdoc/>
@@ -243,10 +242,8 @@ public sealed class LasQuadTree : IEquatable<LasQuadTree>
             not null when ReferenceEquals(this, other) => true,
             not null => CheckSequence(other.adaptive, this.adaptive)
                         && other.levels == this.levels
-                        && other.maximumX.Equals(this.maximumX)
-                        && other.maximumY.Equals(this.maximumY)
-                        && other.minimumX.Equals(this.minimumX)
-                        && other.minimumY.Equals(this.minimumY)
+                        && other.maximum == this.maximum
+                        && other.minimum == this.minimum
                         && other.sublevel == this.sublevel
                         && other.sublevelIndex == this.sublevelIndex,
         };
@@ -267,10 +264,8 @@ public sealed class LasQuadTree : IEquatable<LasQuadTree>
     {
         var hashCode = default(HashCode);
         hashCode.Add(this.levels);
-        hashCode.Add(this.maximumX);
-        hashCode.Add(this.maximumY);
-        hashCode.Add(this.minimumX);
-        hashCode.Add(this.minimumY);
+        hashCode.Add(this.maximum);
+        hashCode.Add(this.minimum);
         hashCode.Add(this.sublevel);
         hashCode.Add(this.sublevelIndex);
         return hashCode.ToHashCode();
@@ -281,10 +276,10 @@ public sealed class LasQuadTree : IEquatable<LasQuadTree>
     $$"""
       {
         "Levels": {{this.levels}},
-        "MaxX": {{this.maximumX}},
-        "MaxY": {{this.maximumY}},
-        "MinX": {{this.minimumX}},
-        "MinY": {{this.minimumY}},
+        "MaxX": {{this.maximum.X}},
+        "MaxY": {{this.maximum.Y}},
+        "MinX": {{this.minimum.X}},
+        "MinY": {{this.minimum.Y}},
         "Sublevel": {{this.sublevel}},
         "SublevelIndex": {{this.sublevelIndex}}
       }
@@ -296,7 +291,7 @@ public sealed class LasQuadTree : IEquatable<LasQuadTree>
     /// <param name="x">The x-coordinate.</param>
     /// <param name="y">The y-coordinate.</param>
     /// <returns>The bounds of the cell that <paramref name="x"/> and <paramref name="y"/> are within.</returns>
-    internal (float MinimumX, float MinimumY, float MaximumX, float MaximumY) GetBounds(double x, double y) => this.GetBounds(x, y, this.levels);
+    internal (Vector2 Minimum, Vector2 Maximum) GetBounds(double x, double y) => this.GetBounds(x, y, this.levels);
 
     /// <summary>
     /// Gets the bounds of the cell that the coordinates are within at the required level.
@@ -305,39 +300,21 @@ public sealed class LasQuadTree : IEquatable<LasQuadTree>
     /// <param name="y">The y-coordinate.</param>
     /// <param name="level">The required level.</param>
     /// <returns>The bounds of the cell that <paramref name="x"/> and <paramref name="y"/> are within.</returns>
-    internal (float MinimumX, float MinimumY, float MaximumX, float MaximumY) GetBounds(double x, double y, int level)
+    internal (Vector2 Minimum, Vector2 Maximum) GetBounds(double x, double y, int level)
     {
-        var cellMinX = this.minimumX;
-        var cellMaxX = this.maximumX;
-        var cellMinY = this.minimumY;
-        var cellMaxY = this.maximumY;
+        var cellMin = this.minimum;
+        var cellMax = this.maximum;
 
         while (level > 0)
         {
-            var cellMidX = (cellMinX + cellMaxX) * 0.5F;
-            var cellMidY = (cellMinY + cellMaxY) * 0.5F;
-            if (x < cellMidX)
-            {
-                cellMaxX = cellMidX;
-            }
-            else
-            {
-                cellMinX = cellMidX;
-            }
-
-            if (y < cellMidY)
-            {
-                cellMaxY = cellMidY;
-            }
-            else
-            {
-                cellMinY = cellMidY;
-            }
+            var cellMid = (this.minimum + this.maximum) * 0.5F;
+            cellMin = Vector2.Min(cellMin, cellMid);
+            cellMax = Vector2.Max(cellMax, cellMid);
 
             level--;
         }
 
-        return (cellMinX, cellMinY, cellMaxX, cellMaxY);
+        return (cellMin, cellMax);
     }
 
     /// <summary>
@@ -345,7 +322,7 @@ public sealed class LasQuadTree : IEquatable<LasQuadTree>
     /// </summary>
     /// <param name="cellIndex">The cell index.</param>
     /// <returns>The bounds of the cell that <paramref name="cellIndex"/> represents.</returns>
-    internal (float MinimumX, float MinimumY, float MaximumX, float MaximumY) GetBounds(int cellIndex)
+    internal (Vector2 Minimum, Vector2 MaximumY) GetBounds(int cellIndex)
     {
         var level = GetLevel(cellIndex);
         return this.GetBounds(level, this.GetLevelIndex(cellIndex, level));
@@ -357,47 +334,44 @@ public sealed class LasQuadTree : IEquatable<LasQuadTree>
     /// <param name="level">The cell level.</param>
     /// <param name="levelIndex">The index of the cell within <paramref name="level"/>.</param>
     /// <returns>The bounds of the cell from the level and index.</returns>
-    internal (float MinimumX, float MinimumY, float MaximumX, float MaximumY) GetBounds(int level, int levelIndex)
+    internal (Vector2 Minimum, Vector2 MaximumY) GetBounds(int level, int levelIndex)
     {
-        var cellMinX = this.minimumX;
-        var cellMaxX = this.maximumX;
-        var cellMinY = this.minimumY;
-        var cellMaxY = this.maximumY;
+        var cellMin = this.minimum;
+        var cellMax = this.maximum;
 
         while (level is not 0)
         {
             var index = (levelIndex >> (2 * (level - 1))) & 3;
-            var cellMidX = (cellMinX + cellMaxX) * 0.5F;
-            var cellMidY = (cellMinY + cellMaxY) * 0.5F;
+            var cellMid = (cellMin + cellMax) * 0.5F;
             if ((index & 1) is not 0)
             {
-                cellMinX = cellMidX;
+                cellMin.X = cellMid.X;
             }
             else
             {
-                cellMaxX = cellMidX;
+                cellMax.X = cellMid.X;
             }
 
             if ((index & 2) is not 0)
             {
-                cellMinY = cellMidY;
+                cellMin.Y = cellMid.Y;
             }
             else
             {
-                cellMaxY = cellMidY;
+                cellMax.Y = cellMid.Y;
             }
 
             level--;
         }
 
-        return (cellMinX, cellMinY, cellMaxX, cellMaxY);
+        return (cellMin, cellMax);
     }
 
     /// <summary>
     /// Gets all the cells.
     /// </summary>
     /// <returns>The cell indexes.</returns>
-    internal IList<int> AllCells() => this.CellsWithinRectangle(this.minimumX, this.minimumY, this.maximumX, this.maximumY);
+    internal IList<int> AllCells() => this.CellsWithinRectangle(this.minimum, this.maximum, this.levels);
 
     /// <summary>
     /// Intersects the spatial quad-tree with the rectangle.
@@ -407,7 +381,7 @@ public sealed class LasQuadTree : IEquatable<LasQuadTree>
     /// <param name="maxX">The maximum x-coordinate.</param>
     /// <param name="maxY">The maximum y-coordinate.</param>
     /// <returns>The intersected cell indexes.</returns>
-    internal IList<int> CellsWithinRectangle(double minX, double minY, double maxX, double maxY) => this.CellsWithinRectangle(minX, minY, maxX, maxY, this.levels);
+    internal IList<int> CellsWithinRectangle(float minX, float minY, float maxX, float maxY) => this.CellsWithinRectangle(minX, minY, maxX, maxY, this.levels);
 
     /// <summary>
     /// Intersects the spatial quad-tree with the rectangle.
@@ -418,9 +392,18 @@ public sealed class LasQuadTree : IEquatable<LasQuadTree>
     /// <param name="maxY">The maximum y-coordinate.</param>
     /// <param name="level">The level.</param>
     /// <returns>The intersected cell indexes.</returns>
-    internal IList<int> CellsWithinRectangle(double minX, double minY, double maxX, double maxY, int level)
+    internal IList<int> CellsWithinRectangle(float minX, float minY, float maxX, float maxY, int level) => this.CellsWithinRectangle(new(minX, minY), new(maxX, maxY), level);
+
+    /// <summary>
+    /// Intersects the spatial quad-tree with the rectangle.
+    /// </summary>
+    /// <param name="min">The minimum coordinate.</param>
+    /// <param name="max">The maximum coordinate.</param>
+    /// <param name="level">The level.</param>
+    /// <returns>The intersected cell indexes.</returns>
+    internal IList<int> CellsWithinRectangle(Vector2 min, Vector2 max, int level)
     {
-        if (maxX <= this.minimumX || minX > this.maximumX || maxY <= this.minimumY || minY > this.maximumY)
+        if (VectorMath.LessThanOrEqualAny(max, this.minimum) || VectorMath.GreaterThanAny(min, this.maximum))
         {
             return [];
         }
@@ -428,16 +411,16 @@ public sealed class LasQuadTree : IEquatable<LasQuadTree>
         var cellsInRectangle = new List<int>();
         if (this.adaptive is not null)
         {
-            IntersectRectangleWithCellsAdaptive(cellsInRectangle, minX, minY, maxX, maxY, this.minimumX, this.minimumY, this.maximumX, this.maximumY, 0, 0);
+            IntersectRectangleWithCellsAdaptive(cellsInRectangle, min, max, this.minimum, this.maximum, 0, 0);
         }
         else
         {
-            IntersectRectangleWithCells(cellsInRectangle, LevelOffset[level], minX, minY, maxX, maxY, this.minimumX, this.minimumY, this.maximumX, this.maximumY, level, 0);
+            IntersectRectangleWithCells(cellsInRectangle, LevelOffset[level], min, max, this.minimum, this.maximum, level, 0);
         }
 
         return cellsInRectangle;
 
-        void IntersectRectangleWithCellsAdaptive(ICollection<int> cells, double rectangleMinX, double rectangleMinY, double rectangleMaxX, double rectangleMaxY, float cellMinX, float cellMinY, float cellMaxX, float cellMaxY, int currentLevel, int levelIndex)
+        void IntersectRectangleWithCellsAdaptive(ICollection<int> cells, Vector2 rectangleMin, Vector2 rectangleMax, Vector2 cellMin, Vector2 cellMax, int currentLevel, int levelIndex)
         {
             while (true)
             {
@@ -449,81 +432,75 @@ public sealed class LasQuadTree : IEquatable<LasQuadTree>
                     currentLevel++;
                     levelIndex <<= 2;
 
-                    var cellMidX = (cellMinX + cellMaxX) * 0.5F;
-                    var cellMidY = (cellMinY + cellMaxY) * 0.5F;
+                    var cellMid = (cellMin + cellMax) * 0.5F;
 
-                    if (rectangleMaxX <= cellMidX)
+                    if (rectangleMax.X <= cellMid.X)
                     {
-                        if (rectangleMaxY <= cellMidY)
+                        if (rectangleMax.Y <= cellMid.Y)
                         {
-                            cellMaxX = cellMidX;
-                            cellMaxY = cellMidY;
+                            cellMax = cellMid;
                             continue;
                         }
 
-                        if (rectangleMinY >= cellMidY)
+                        if (rectangleMin.Y >= cellMid.Y)
                         {
-                            cellMinY = cellMidY;
-                            cellMaxX = cellMidX;
+                            cellMin.Y = cellMid.Y;
+                            cellMax.X = cellMid.X;
                             levelIndex |= 2;
                             continue;
                         }
 
-                        IntersectRectangleWithCellsAdaptive(cells, rectangleMinX, rectangleMinY, rectangleMaxX, rectangleMaxY, cellMinX, cellMinY, cellMidX, cellMidY, currentLevel, levelIndex);
-                        cellMinY = cellMidY;
-                        cellMaxX = cellMidX;
+                        IntersectRectangleWithCellsAdaptive(cells, rectangleMin, rectangleMax, cellMin, cellMid, currentLevel, levelIndex);
+                        cellMin.Y = cellMid.Y;
+                        cellMax.X = cellMid.X;
                         levelIndex |= 2;
                         continue;
                     }
 
-                    if (rectangleMinX >= cellMidX)
+                    if (rectangleMin.X >= cellMid.X)
                     {
-                        if (rectangleMaxY <= cellMidY)
+                        if (rectangleMax.Y <= cellMid.Y)
                         {
-                            cellMinX = cellMidX;
-                            cellMaxY = cellMidY;
+                            cellMin.X = cellMid.X;
+                            cellMax.Y = cellMid.Y;
                             levelIndex |= 1;
                             continue;
                         }
 
-                        if (rectangleMinY >= cellMidY)
+                        if (rectangleMin.Y >= cellMid.Y)
                         {
-                            cellMinX = cellMidX;
-                            cellMinY = cellMidY;
+                            cellMin = cellMid;
                             levelIndex |= 3;
                             continue;
                         }
 
-                        IntersectRectangleWithCellsAdaptive(cells, rectangleMinX, rectangleMinY, rectangleMaxX, rectangleMaxY, cellMidX, cellMinY, cellMaxX, cellMidY, currentLevel, levelIndex | 1);
-                        cellMinX = cellMidX;
-                        cellMinY = cellMidY;
+                        IntersectRectangleWithCellsAdaptive(cells, rectangleMin, rectangleMax, new(cellMid.X, cellMin.Y), new(cellMax.X, cellMid.Y), currentLevel, levelIndex | 1);
+                        cellMin = cellMid;
                         levelIndex |= 3;
                         continue;
                     }
 
-                    if (rectangleMaxY <= cellMidY)
+                    if (rectangleMax.Y <= cellMid.Y)
                     {
-                        IntersectRectangleWithCellsAdaptive(cells, rectangleMinX, rectangleMinY, rectangleMaxX, rectangleMaxY, cellMinX, cellMinY, cellMidX, cellMidY, currentLevel, levelIndex);
-                        cellMinX = cellMidX;
-                        cellMaxY = cellMidY;
+                        IntersectRectangleWithCellsAdaptive(cells, rectangleMin, rectangleMax, cellMin, cellMid, currentLevel, levelIndex);
+                        cellMin.X = cellMid.X;
+                        cellMax.Y = cellMid.Y;
                         levelIndex |= 1;
                         continue;
                     }
 
-                    if (rectangleMinY >= cellMidY)
+                    if (rectangleMin.Y >= cellMid.Y)
                     {
-                        IntersectRectangleWithCellsAdaptive(cells, rectangleMinX, rectangleMinY, rectangleMaxX, rectangleMaxY, cellMinX, cellMidY, cellMidX, cellMaxY, currentLevel, levelIndex | 2);
-                        cellMinX = cellMidX;
-                        cellMinY = cellMidY;
+                        IntersectRectangleWithCellsAdaptive(cells, rectangleMin, rectangleMax, new(cellMin.X, cellMid.Y), new(cellMid.X, cellMax.Y), currentLevel, levelIndex | 2);
+                        cellMin = cellMid;
                         levelIndex |= 3;
                         continue;
                     }
 
-                    IntersectRectangleWithCellsAdaptive(cells, rectangleMinX, rectangleMinY, rectangleMaxX, rectangleMaxY, cellMinX, cellMinY, cellMidX, cellMidY, currentLevel, levelIndex);
-                    IntersectRectangleWithCellsAdaptive(cells, rectangleMinX, rectangleMinY, rectangleMaxX, rectangleMaxY, cellMidX, cellMinY, cellMaxX, cellMidY, currentLevel, levelIndex | 1);
-                    IntersectRectangleWithCellsAdaptive(cells, rectangleMinX, rectangleMinY, rectangleMaxX, rectangleMaxY, cellMinX, cellMidY, cellMidX, cellMaxY, currentLevel, levelIndex | 2);
-                    cellMinX = cellMidX;
-                    cellMinY = cellMidY;
+                    IntersectRectangleWithCellsAdaptive(cells, rectangleMin, rectangleMax, cellMin, cellMid, currentLevel, levelIndex);
+                    IntersectRectangleWithCellsAdaptive(cells, rectangleMin, rectangleMax, new(cellMid.X, cellMin.Y), new(cellMax.X, cellMid.Y), currentLevel, levelIndex | 1);
+                    IntersectRectangleWithCellsAdaptive(cells, rectangleMin, rectangleMax, new(cellMin.X, cellMid.Y), new(cellMid.X, cellMax.Y), currentLevel, levelIndex | 2);
+                    cellMin = cellMid;
                     levelIndex |= 3;
                     continue;
                 }
@@ -534,98 +511,86 @@ public sealed class LasQuadTree : IEquatable<LasQuadTree>
             }
         }
 
-        static void IntersectRectangleWithCells(ICollection<int> cells, int levelOffset, double rectangleMinX, double rectangleMinY, double rectangleMaxX, double rectangleMaxY, float cellMinX, float cellMinY, float cellMaxX, float cellMaxY, int currentLevel, int levelIndex)
+        static void IntersectRectangleWithCells(ICollection<int> cells, int levelOffset, Vector2 rectangleMin, Vector2 rectangleMax, Vector2 cellMin, Vector2 cellMax, int currentLevel, int levelIndex)
         {
-            while (true)
+            while (currentLevel is not 0)
             {
-                if (currentLevel is not 0)
+                currentLevel--;
+                levelIndex <<= 2;
+
+                var cellMid = (cellMin + cellMax) * 0.5F;
+
+                if (rectangleMax.X <= cellMid.X)
                 {
-                    currentLevel--;
-                    levelIndex <<= 2;
-
-                    var cellMidX = (cellMinX + cellMaxX) * 0.5F;
-                    var cellMidY = (cellMinY + cellMaxY) * 0.5F;
-
-                    if (rectangleMaxX <= cellMidX)
+                    if (rectangleMax.Y <= cellMid.Y)
                     {
-                        if (rectangleMaxY <= cellMidY)
-                        {
-                            cellMaxX = cellMidX;
-                            cellMaxY = cellMidY;
-                            continue;
-                        }
+                        cellMax = cellMid;
+                        continue;
+                    }
 
-                        if (rectangleMinY >= cellMidY)
-                        {
-                            cellMinY = cellMidY;
-                            cellMaxX = cellMidX;
-                            levelIndex |= 2;
-                            continue;
-                        }
-
-                        IntersectRectangleWithCells(cells, levelOffset, rectangleMinX, rectangleMinY, rectangleMaxX, rectangleMaxY, cellMinX, cellMinY, cellMidX, cellMidY, currentLevel, levelIndex);
-                        cellMinY = cellMidY;
-                        cellMaxX = cellMidX;
+                    if (rectangleMin.Y >= cellMid.Y)
+                    {
+                        cellMin.Y = cellMid.Y;
+                        cellMax.X = cellMid.X;
                         levelIndex |= 2;
                         continue;
                     }
 
-                    if (rectangleMinX >= cellMidX)
+                    IntersectRectangleWithCells(cells, levelOffset, rectangleMin, rectangleMax, cellMin, cellMid, currentLevel, levelIndex);
+                    cellMin.Y = cellMid.Y;
+                    cellMax.X = cellMid.X;
+                    levelIndex |= 2;
+                    continue;
+                }
+
+                if (rectangleMin.X >= cellMid.X)
+                {
+                    if (rectangleMax.Y <= cellMid.Y)
                     {
-                        if (rectangleMaxY <= cellMidY)
-                        {
-                            cellMinX = cellMidX;
-                            cellMaxY = cellMidY;
-                            levelIndex |= 1;
-                            continue;
-                        }
-
-                        if (rectangleMinY >= cellMidY)
-                        {
-                            cellMinX = cellMidX;
-                            cellMinY = cellMidY;
-                            levelIndex |= 3;
-                            continue;
-                        }
-
-                        IntersectRectangleWithCells(cells, levelOffset, rectangleMinX, rectangleMinY, rectangleMaxX, rectangleMaxY, cellMidX, cellMinY, cellMaxX, cellMidY, currentLevel, levelIndex | 1);
-                        cellMinX = cellMidX;
-                        cellMinY = cellMidY;
-                        levelIndex |= 3;
-                        continue;
-                    }
-
-                    if (rectangleMaxY <= cellMidY)
-                    {
-                        IntersectRectangleWithCells(cells, levelOffset, rectangleMinX, rectangleMinY, rectangleMaxX, rectangleMaxY, cellMinX, cellMinY, cellMidX, cellMidY, currentLevel, levelIndex);
-                        cellMinX = cellMidX;
-                        cellMaxY = cellMidY;
+                        cellMin.X = cellMid.X;
+                        cellMax.Y = cellMid.Y;
                         levelIndex |= 1;
                         continue;
                     }
 
-                    if (rectangleMinY >= cellMidY)
+                    if (rectangleMin.Y >= cellMid.Y)
                     {
-                        IntersectRectangleWithCells(cells, levelOffset, rectangleMinX, rectangleMinY, rectangleMaxX, rectangleMaxY, cellMinX, cellMidY, cellMidX, cellMaxY, currentLevel, levelIndex | 2);
-                        cellMinX = cellMidX;
-                        cellMinY = cellMidY;
+                        cellMin = cellMid;
                         levelIndex |= 3;
                         continue;
                     }
 
-                    IntersectRectangleWithCells(cells, levelOffset, rectangleMinX, rectangleMinY, rectangleMaxX, rectangleMaxY, cellMinX, cellMinY, cellMidX, cellMidY, currentLevel, levelIndex);
-                    IntersectRectangleWithCells(cells, levelOffset, rectangleMinX, rectangleMinY, rectangleMaxX, rectangleMaxY, cellMidX, cellMinY, cellMaxX, cellMidY, currentLevel, levelIndex | 1);
-                    IntersectRectangleWithCells(cells, levelOffset, rectangleMinX, rectangleMinY, rectangleMaxX, rectangleMaxY, cellMinX, cellMidY, cellMidX, cellMaxY, currentLevel, levelIndex | 2);
-                    cellMinX = cellMidX;
-                    cellMinY = cellMidY;
+                    IntersectRectangleWithCells(cells, levelOffset, rectangleMin, rectangleMax, new(cellMid.X, cellMin.Y), new(cellMax.X, cellMid.Y), currentLevel, levelIndex | 1);
+                    cellMin = cellMid;
                     levelIndex |= 3;
                     continue;
                 }
 
-                cells.Add(levelOffset + levelIndex);
+                if (rectangleMax.Y <= cellMid.Y)
+                {
+                    IntersectRectangleWithCells(cells, levelOffset, rectangleMin, rectangleMax, cellMin, cellMid, currentLevel, levelIndex);
+                    cellMin.X = cellMid.X;
+                    cellMax.Y = cellMid.Y;
+                    levelIndex |= 1;
+                    continue;
+                }
 
-                break;
+                if (rectangleMin.Y >= cellMid.Y)
+                {
+                    IntersectRectangleWithCells(cells, levelOffset, rectangleMin, rectangleMax, new(cellMin.X, cellMid.Y), new(cellMid.X, cellMax.Y), currentLevel, levelIndex | 2);
+                    cellMin = cellMid;
+                    levelIndex |= 3;
+                    continue;
+                }
+
+                IntersectRectangleWithCells(cells, levelOffset, rectangleMin, rectangleMax, cellMin, cellMid, currentLevel, levelIndex);
+                IntersectRectangleWithCells(cells, levelOffset, rectangleMin, rectangleMax, new(cellMid.X, cellMin.Y), new(cellMax.X, cellMid.Y), currentLevel, levelIndex | 1);
+                IntersectRectangleWithCells(cells, levelOffset, rectangleMin, rectangleMax, new(cellMin.X, cellMid.Y), new(cellMid.X, cellMax.Y), currentLevel, levelIndex | 2);
+                cellMin = cellMid;
+                levelIndex |= 3;
             }
+
+            cells.Add(levelOffset + levelIndex);
         }
     }
 
@@ -648,10 +613,20 @@ public sealed class LasQuadTree : IEquatable<LasQuadTree>
     /// <returns>The intersected cell indexes.</returns>
     internal IList<int> CellsWithinTile(float left, float bottom, float size, int level)
     {
-        var right = left + size;
-        var top = bottom + size;
+        var bottomLeft = new Vector2(left, bottom);
+        return this.CellsWithinTile(bottomLeft, bottomLeft + new Vector2(size), level);
+    }
 
-        if (right <= this.minimumX || left > this.maximumX || top <= this.minimumY || bottom > this.maximumY)
+    /// <summary>
+    /// Intersects the spatial quad-tree with the tile.
+    /// </summary>
+    /// <param name="bottomLeft">The lower-left coordinate.</param>
+    /// <param name="topRight">The upper-right coordinate.</param>
+    /// <param name="level">The level.</param>
+    /// <returns>The intersected cell indexes.</returns>
+    internal IList<int> CellsWithinTile(Vector2 bottomLeft, Vector2 topRight, int level)
+    {
+        if (VectorMath.LessThanOrEqualAny(topRight, this.minimum) || VectorMath.GreaterThanAny(bottomLeft, this.maximum))
         {
             return [];
         }
@@ -659,16 +634,16 @@ public sealed class LasQuadTree : IEquatable<LasQuadTree>
         var cellsWithinTile = new List<int>();
         if (this.adaptive is not null)
         {
-            IntersectTileWithCellsAdaptive(cellsWithinTile, left, bottom, right, top, this.minimumX, this.maximumX, this.minimumY, this.maximumY, 0, 0);
+            IntersectTileWithCellsAdaptive(cellsWithinTile, bottomLeft, topRight, this.minimum, this.maximum, 0, 0);
         }
         else
         {
-            IntersectTileWithCells(cellsWithinTile, LevelOffset[level], left, bottom, right, top, this.minimumX, this.maximumX, this.minimumY, this.maximumY, level, 0);
+            IntersectTileWithCells(cellsWithinTile, LevelOffset[level], bottomLeft, topRight, this.minimum, this.maximum, level, 0);
         }
 
         return cellsWithinTile;
 
-        void IntersectTileWithCellsAdaptive(ICollection<int> cells, float tileMinX, float tileMinY, float tileMaxX, float tileMaxY, float cellMinX, float cellMinY, float cellMaxX, float cellMaxY, int currentLevel, int levelIndex)
+        void IntersectTileWithCellsAdaptive(ICollection<int> cells, Vector2 tileMin, Vector2 tileMax, Vector2 cellMin, Vector2 cellMax, int currentLevel, int levelIndex)
         {
             while (true)
             {
@@ -680,81 +655,75 @@ public sealed class LasQuadTree : IEquatable<LasQuadTree>
                     currentLevel++;
                     levelIndex <<= 2;
 
-                    var cellMidX = (cellMinX + cellMaxX) * 0.5F;
-                    var cellMidY = (cellMinY + cellMaxY) * 0.5F;
+                    var cellMid = (cellMin + cellMax) * 0.5F;
 
-                    if (tileMaxX <= cellMidX)
+                    if (tileMax.X <= cellMid.X)
                     {
-                        if (tileMaxY <= cellMidY)
+                        if (tileMax.Y <= cellMid.Y)
                         {
-                            cellMaxX = cellMidX;
-                            cellMaxY = cellMidY;
+                            cellMax = cellMid;
                             continue;
                         }
 
-                        if (tileMinY >= cellMidY)
+                        if (tileMin.Y >= cellMid.Y)
                         {
-                            cellMinY = cellMidY;
-                            cellMaxX = cellMidX;
+                            cellMin.Y = cellMid.Y;
+                            cellMax.X = cellMid.X;
                             levelIndex |= 2;
                             continue;
                         }
 
-                        IntersectTileWithCellsAdaptive(cells, tileMinX, tileMinY, tileMaxX, tileMaxY, cellMinX, cellMinY, cellMidX, cellMidY, currentLevel, levelIndex);
-                        cellMinY = cellMidY;
-                        cellMaxX = cellMidX;
+                        IntersectTileWithCellsAdaptive(cells, tileMin, tileMax, cellMin, cellMid, currentLevel, levelIndex);
+                        cellMin.Y = cellMid.Y;
+                        cellMax.X = cellMid.X;
                         levelIndex |= 2;
                         continue;
                     }
 
-                    if (tileMinX >= cellMidX)
+                    if (tileMin.X >= cellMid.X)
                     {
-                        if (tileMaxY <= cellMidY)
+                        if (tileMax.Y <= cellMid.Y)
                         {
-                            cellMinX = cellMidX;
-                            cellMaxY = cellMidY;
+                            cellMin.X = cellMid.X;
+                            cellMax.Y = cellMid.Y;
                             levelIndex |= 1;
                             continue;
                         }
 
-                        if (tileMinY >= cellMidY)
+                        if (tileMin.Y >= cellMid.Y)
                         {
-                            cellMinX = cellMidX;
-                            cellMinY = cellMidY;
+                            cellMin = cellMid;
                             levelIndex |= 3;
                             continue;
                         }
 
-                        IntersectTileWithCellsAdaptive(cells, tileMinX, tileMinY, tileMaxX, tileMaxY, cellMidX, cellMinY, cellMaxX, cellMidY, currentLevel, levelIndex | 1);
-                        cellMinX = cellMidX;
-                        cellMinY = cellMidY;
+                        IntersectTileWithCellsAdaptive(cells, tileMin, tileMax, new(cellMid.X, cellMin.Y), new(cellMax.X, cellMid.Y), currentLevel, levelIndex | 1);
+                        cellMin = cellMid;
                         levelIndex |= 3;
                         continue;
                     }
 
-                    if (tileMaxY <= cellMidY)
+                    if (tileMax.Y <= cellMid.Y)
                     {
-                        IntersectTileWithCellsAdaptive(cells, tileMinX, tileMinY, tileMaxX, tileMaxY, cellMinX, cellMinY, cellMidX, cellMidY, currentLevel, levelIndex);
-                        cellMinX = cellMidX;
-                        cellMaxY = cellMidY;
+                        IntersectTileWithCellsAdaptive(cells, tileMin, tileMax, cellMin, cellMid, currentLevel, levelIndex);
+                        cellMin.X = cellMid.X;
+                        cellMax.Y = cellMid.Y;
                         levelIndex |= 1;
                         continue;
                     }
 
-                    if (tileMinY >= cellMidY)
+                    if (tileMin.Y >= cellMid.Y)
                     {
-                        IntersectTileWithCellsAdaptive(cells, tileMinX, tileMinY, tileMaxX, tileMaxY, cellMinX, cellMidY, cellMidX, cellMaxY, currentLevel, levelIndex | 2);
-                        cellMinX = cellMidX;
-                        cellMinY = cellMidY;
+                        IntersectTileWithCellsAdaptive(cells, tileMin, tileMax, new(cellMin.X, cellMid.Y), new(cellMid.X, cellMax.Y), currentLevel, levelIndex | 2);
+                        cellMin = cellMid;
                         levelIndex |= 3;
                         continue;
                     }
 
-                    IntersectTileWithCellsAdaptive(cells, tileMinX, tileMinY, tileMaxX, tileMaxY, cellMinX, cellMinY, cellMidX, cellMidY, currentLevel, levelIndex);
-                    IntersectTileWithCellsAdaptive(cells, tileMinX, tileMinY, tileMaxX, tileMaxY, cellMidX, cellMinY, cellMaxX, cellMidY, currentLevel, levelIndex | 1);
-                    IntersectTileWithCellsAdaptive(cells, tileMinX, tileMinY, tileMaxX, tileMaxY, cellMinX, cellMidY, cellMidX, cellMaxY, currentLevel, levelIndex | 2);
-                    cellMinX = cellMidX;
-                    cellMinY = cellMidY;
+                    IntersectTileWithCellsAdaptive(cells, tileMin, tileMax, cellMin, cellMid, currentLevel, levelIndex);
+                    IntersectTileWithCellsAdaptive(cells, tileMin, tileMax, new(cellMid.X, cellMin.Y), new(cellMax.X, cellMid.Y), currentLevel, levelIndex | 1);
+                    IntersectTileWithCellsAdaptive(cells, tileMin, tileMax, new(cellMin.X, cellMid.Y), new(cellMid.X, cellMax.Y), currentLevel, levelIndex | 2);
+                    cellMin = cellMid;
                     levelIndex |= 3;
                     continue;
                 }
@@ -765,98 +734,86 @@ public sealed class LasQuadTree : IEquatable<LasQuadTree>
             }
         }
 
-        static void IntersectTileWithCells(IList<int> cells, int levelOffset, float tileMinX, float tileMinY, float tileMaxX, float tileMaxY, float cellMinX, float cellMinY, float cellMaxX, float cellMaxY, int currentLevel, int levelIndex)
+        static void IntersectTileWithCells(ICollection<int> cells, int levelOffset, Vector2 tileMin, Vector2 tileMax, Vector2 cellMin, Vector2 cellMax, int currentLevel, int levelIndex)
         {
-            while (true)
+            while (currentLevel is not 0)
             {
-                if (currentLevel is not 0)
+                currentLevel--;
+                levelIndex <<= 2;
+
+                var cellMid = (cellMin + cellMax) * 0.5F;
+
+                if (tileMax.X <= cellMid.X)
                 {
-                    currentLevel--;
-                    levelIndex <<= 2;
-
-                    var cellMidX = (cellMinX + cellMaxX) * 0.5F;
-                    var cellMidY = (cellMinY + cellMaxY) * 0.5F;
-
-                    if (tileMaxX <= cellMidX)
+                    if (tileMax.Y <= cellMid.Y)
                     {
-                        if (tileMaxY <= cellMidY)
-                        {
-                            cellMaxX = cellMidX;
-                            cellMaxY = cellMidY;
-                            continue;
-                        }
+                        cellMax = cellMid;
+                        continue;
+                    }
 
-                        if (tileMinY >= cellMidY)
-                        {
-                            cellMinY = cellMidY;
-                            cellMaxX = cellMidX;
-                            levelIndex |= 2;
-                            continue;
-                        }
-
-                        IntersectTileWithCells(cells, levelOffset, tileMinX, tileMinY, tileMaxX, tileMaxY, cellMinX, cellMinY, cellMidX, cellMidY, currentLevel, levelIndex);
-                        cellMinY = cellMidY;
-                        cellMaxX = cellMidX;
+                    if (tileMin.Y >= cellMid.Y)
+                    {
+                        cellMin.Y = cellMid.Y;
+                        cellMax.X = cellMid.X;
                         levelIndex |= 2;
                         continue;
                     }
 
-                    if (tileMinX >= cellMidX)
+                    IntersectTileWithCells(cells, levelOffset, tileMin, tileMax, cellMin, cellMid, currentLevel, levelIndex);
+                    cellMin.Y = cellMid.Y;
+                    cellMax.X = cellMid.X;
+                    levelIndex |= 2;
+                    continue;
+                }
+
+                if (tileMin.X >= cellMid.X)
+                {
+                    if (tileMax.Y <= cellMid.Y)
                     {
-                        if (tileMaxY <= cellMidY)
-                        {
-                            cellMinX = cellMidX;
-                            cellMaxY = cellMidY;
-                            levelIndex |= 1;
-                            continue;
-                        }
-
-                        if (tileMinY >= cellMidY)
-                        {
-                            cellMinX = cellMidX;
-                            cellMinY = cellMidY;
-                            levelIndex |= 3;
-                            continue;
-                        }
-
-                        IntersectTileWithCells(cells, levelOffset, tileMinX, tileMinY, tileMaxX, tileMaxY, cellMidX, cellMinY, cellMaxX, cellMidY, currentLevel, levelIndex | 1);
-                        cellMinX = cellMidX;
-                        cellMinY = cellMidY;
-                        levelIndex |= 3;
-                        continue;
-                    }
-
-                    if (tileMaxY <= cellMidY)
-                    {
-                        IntersectTileWithCells(cells, levelOffset, tileMinX, tileMinY, tileMaxX, tileMaxY, cellMinX, cellMinY, cellMidX, cellMidY, currentLevel, levelIndex);
-                        cellMinX = cellMidX;
-                        cellMaxY = cellMidY;
+                        cellMin.X = cellMid.X;
+                        cellMax.Y = cellMid.Y;
                         levelIndex |= 1;
                         continue;
                     }
 
-                    if (tileMinY >= cellMidY)
+                    if (tileMin.Y >= cellMid.Y)
                     {
-                        IntersectTileWithCells(cells, levelOffset, tileMinX, tileMinY, tileMaxX, tileMaxY, cellMinX, cellMidY, cellMidX, cellMaxY, currentLevel, levelIndex | 2);
-                        cellMinX = cellMidX;
-                        cellMinY = cellMidY;
+                        cellMin = cellMid;
                         levelIndex |= 3;
                         continue;
                     }
 
-                    IntersectTileWithCells(cells, levelOffset, tileMinX, tileMinY, tileMaxX, tileMaxY, cellMinX, cellMinY, cellMidX, cellMidY, currentLevel, levelIndex);
-                    IntersectTileWithCells(cells, levelOffset, tileMinX, tileMinY, tileMaxX, tileMaxY, cellMidX, cellMinY, cellMaxX, cellMidY, currentLevel, levelIndex | 1);
-                    IntersectTileWithCells(cells, levelOffset, tileMinX, tileMinY, tileMaxX, tileMaxY, cellMinX, cellMidY, cellMidX, cellMaxY, currentLevel, levelIndex | 2);
-                    cellMinX = cellMidX;
-                    cellMinY = cellMidY;
+                    IntersectTileWithCells(cells, levelOffset, tileMin, tileMax, new(cellMid.X, cellMin.Y), new(cellMax.X, cellMid.Y), currentLevel, levelIndex | 1);
+                    cellMin = cellMid;
                     levelIndex |= 3;
                     continue;
                 }
 
-                cells.Add(levelOffset + levelIndex);
+                if (tileMax.Y <= cellMid.Y)
+                {
+                    IntersectTileWithCells(cells, levelOffset, tileMin, tileMax, cellMin, cellMid, currentLevel, levelIndex);
+                    cellMin.X = cellMid.X;
+                    cellMax.Y = cellMid.Y;
+                    levelIndex |= 1;
+                    continue;
+                }
 
-                break;
+                if (tileMin.Y >= cellMid.Y)
+                {
+                    IntersectTileWithCells(cells, levelOffset, tileMin, tileMax, new(cellMin.X, cellMid.Y), new(cellMid.X, cellMax.Y), currentLevel, levelIndex | 2);
+                    cellMin = cellMid;
+                    levelIndex |= 3;
+                    continue;
+                }
+
+                IntersectTileWithCells(cells, levelOffset, tileMin, tileMax, cellMin, cellMid, currentLevel, levelIndex);
+                IntersectTileWithCells(cells, levelOffset, tileMin, tileMax, new(cellMid.X, cellMin.Y), new(cellMax.X, cellMid.Y), currentLevel, levelIndex | 1);
+                IntersectTileWithCells(cells, levelOffset, tileMin, tileMax, new(cellMin.X, cellMid.Y), new(cellMid.X, cellMax.Y), currentLevel, levelIndex | 2);
+                cellMin = cellMid;
+                levelIndex |= 3;
             }
+
+            cells.Add(levelOffset + levelIndex);
         }
     }
 
@@ -866,7 +823,7 @@ public sealed class LasQuadTree : IEquatable<LasQuadTree>
     /// <param name="x">The x-coordinate.</param>
     /// <param name="y">The y-coordinate.</param>
     /// <returns>The cell index.</returns>
-    internal int GetCellIndex(double x, double y) => this.GetCellIndex(x, y, this.levels);
+    internal int GetCellIndex(float x, float y) => this.GetCellIndex(x, y, this.levels);
 
     /// <summary>
     /// Gets the cell index for the specified x, y coordinates.
@@ -876,21 +833,27 @@ public sealed class LasQuadTree : IEquatable<LasQuadTree>
     /// <param name="width">The width of the cell.</param>
     /// <param name="height">The height of the cell.</param>
     /// <returns>The cell index.</returns>
-    internal int GetCellIndex(double x, double y, double width, double height)
-    {
-        return this.GetCellIndex(x, y, GetLevelCore(width, height));
+    internal int GetCellIndex(float x, float y, float width, float height) => this.GetCellIndex(new Vector2(x, y), new(width, height));
 
-        int GetLevelCore(double requiredWidth, double requiredHeight)
+    /// <summary>
+    /// Gets the cell index for the specified x, y coordinates.
+    /// </summary>
+    /// <param name="center">The center coordinate.</param>
+    /// <param name="size">The size of the cell.</param>
+    /// <returns>The cell index.</returns>
+    internal int GetCellIndex(Vector2 center, Vector2 size)
+    {
+        return this.GetCellIndex(center.X, center.Y, GetLevelCore(size));
+
+        int GetLevelCore(Vector2 required)
         {
-            double currentWidth = this.maximumX - this.minimumY;
-            double currentHeight = this.maximumY - this.minimumY;
+            var current = this.maximum - this.minimum;
 
             var level = 0;
-            while (requiredWidth < currentWidth && requiredHeight < currentHeight)
+            while (VectorMath.LessThanAll(required, current))
             {
                 level++;
-                currentHeight /= 2;
-                currentWidth /= 2;
+                current *= 0.5F;
             }
 
             return level;
@@ -997,7 +960,7 @@ public sealed class LasQuadTree : IEquatable<LasQuadTree>
         return level;
     }
 
-    private int GetCellIndex(double x, double y, int level) => this.sublevel is not 0
+    private int GetCellIndex(float x, float y, int level) => this.sublevel is not 0
         ? LevelOffset[this.sublevel + level] + (this.sublevelIndex << (level * 2)) + this.GetLevelIndex(x, y, level)
         : LevelOffset[level] + this.GetLevelIndex(x, y, level);
 
@@ -1009,12 +972,10 @@ public sealed class LasQuadTree : IEquatable<LasQuadTree>
         ? cellIndex - (this.sublevelIndex << (level * 2)) - LevelOffset[this.sublevel + level]
         : cellIndex - LevelOffset[level];
 
-    private int GetLevelIndex(double x, double y, int level)
+    private int GetLevelIndex(float x, float y, int level)
     {
-        double cellMinX = this.minimumX;
-        double cellMaxX = this.maximumX;
-        double cellMinY = this.minimumY;
-        double cellMaxY = this.maximumY;
+        var cellMin = this.minimum;
+        var cellMax = this.maximum;
 
         var levelIndex = default(int);
 
@@ -1022,26 +983,25 @@ public sealed class LasQuadTree : IEquatable<LasQuadTree>
         {
             levelIndex <<= 2;
 
-            var cellMidX = (cellMinX + cellMaxX) / 2;
-            var cellMidY = (cellMinY + cellMaxY) / 2;
+            var cellMid = (cellMin + cellMax) * 0.5F;
 
-            if (x < cellMidX)
+            if (x < cellMid.X)
             {
-                cellMaxX = cellMidX;
+                cellMax.X = cellMid.X;
             }
             else
             {
-                cellMinX = cellMidX;
+                cellMin.X = cellMid.X;
                 levelIndex |= 1;
             }
 
-            if (y < cellMidY)
+            if (y < cellMid.Y)
             {
-                cellMaxY = cellMidY;
+                cellMax.Y = cellMid.Y;
             }
             else
             {
-                cellMinY = cellMidY;
+                cellMin.Y = cellMid.Y;
                 levelIndex |= 2;
             }
 

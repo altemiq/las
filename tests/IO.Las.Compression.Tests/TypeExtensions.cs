@@ -15,8 +15,6 @@ public class TypeOfAssertion<TValue>(
     AssertionContext<TValue> context,
     Type expectedType) : Assertion<TValue>(context)
 {
-    private readonly Type expectedType = expectedType;
-
     protected override Task<AssertionResult> CheckAsync(EvaluationMetadata<TValue> metadata)
     {
         var value = metadata.Value;
@@ -42,10 +40,10 @@ public class TypeOfAssertion<TValue>(
 
         var actualType = objectToCheck.GetType();
 
-        return Task.FromResult(this.expectedType.IsAssignableFrom(actualType)
+        return Task.FromResult(expectedType.IsAssignableFrom(actualType)
             ? AssertionResult.Passed
-            : AssertionResult.Failed($"type {actualType.Name} is not assignable to {this.expectedType.Name}"));
+            : AssertionResult.Failed($"type {actualType.Name} is not assignable to {expectedType.Name}"));
     }
 
-    protected override string GetExpectation() => $"to be of type {this.expectedType.Name}";
+    protected override string GetExpectation() => $"to be of type {expectedType.Name}";
 }

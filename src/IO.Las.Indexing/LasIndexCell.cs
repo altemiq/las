@@ -14,32 +14,20 @@ public readonly record struct LasIndexCell
     /// <summary>
     /// Initializes a new instance of the <see cref="LasIndexCell"/> struct.
     /// </summary>
-    /// <param name="minimumX">The minimum x-coordinate.</param>
-    /// <param name="minimumY">The maximum x-coordinate.</param>
-    /// <param name="maximumX">The minimum y-coordinate.</param>
-    /// <param name="maximumY">The maximum y-coordinate.</param>
+    /// <param name="minimum">The minimum coordinate.</param>
+    /// <param name="maximum">The maximum coordinate.</param>
     /// <param name="ranges">The ranges.</param>
-    internal LasIndexCell(double minimumX, double minimumY, double maximumX, double maximumY, IEnumerable<Range> ranges) => (this.MinimumX, this.MinimumY, this.MaximumX, this.MaximumY, this.Intervals) = (minimumX, minimumY, maximumX, maximumY, ranges);
+    internal LasIndexCell(System.Numerics.Vector2 minimum, System.Numerics.Vector2 maximum, IEnumerable<Range> ranges) => (this.Minimum, this.Maximum, this.Intervals) = (minimum, maximum, ranges);
 
     /// <summary>
-    /// Gets the minimum x-coordinate.
+    /// Gets the minimum coordinate.
     /// </summary>
-    public double MinimumX { get; }
+    public System.Numerics.Vector2 Minimum { get; }
 
     /// <summary>
-    /// Gets the maximum x-coordinate.
+    /// Gets the maximum coordinate.
     /// </summary>
-    public double MaximumX { get; }
-
-    /// <summary>
-    /// Gets the minimum y-coordinate.
-    /// </summary>
-    public double MinimumY { get; }
-
-    /// <summary>
-    /// Gets the maximum x-coordinate.
-    /// </summary>
-    public double MaximumY { get; }
+    public System.Numerics.Vector2 Maximum { get; }
 
     /// <summary>
     /// Gets the intervals.
@@ -52,32 +40,36 @@ public readonly record struct LasIndexCell
     /// <param name="x">The x-coordinate.</param>
     /// <param name="y">The y-coordinate.</param>
     /// <returns><see langword="true"/> if the <paramref name="x"/>,<paramref name="y"/> is within this cell; otherwise <see langword="false"/>.</returns>
-    public bool Contains(double x, double y) => this.ContainsX(x) && this.ContainsY(y);
+    public bool Contains(double x, double y)
+    {
+        var value = new System.Numerics.Vector2((float)x, (float)y);
+        return VectorMath.LessThanOrEqualAll(this.Minimum, value) && VectorMath.LessThanAll(value, this.Maximum);
+    }
 
     /// <summary>
     /// Determines whether the specified index is in this cell.
     /// </summary>
     /// <param name="index">The point index.</param>
     /// <returns><see langword="true"/> if the <paramref name="index"/> is within this cell; otherwise <see langword="false"/>.</returns>
-    public bool Contains(uint index) => this.Intervals.Any(range => range.Start.Value >= index && range.End.Value < index);
+    public bool Contains(uint index) => this.Intervals.Any(range => index >= range.Start.Value && index < range.End.Value);
 
     /// <summary>
     /// Determines whether the specified x-coordinate is in this cell.
     /// </summary>
     /// <param name="x">The x-coordinate.</param>
     /// <returns><see langword="true"/> if the <paramref name="x"/> is within this cell; otherwise <see langword="false"/>.</returns>
-    public bool ContainsX(double x) => this.MinimumX <= x && x < this.MaximumX;
+    public bool ContainsX(double x) => this.Minimum.X <= x && x < this.Maximum.X;
 
     /// <summary>
     /// Determines whether the specified y-coordinate is in this cell.
     /// </summary>
     /// <param name="y">The y-coordinate.</param>
     /// <returns><see langword="true"/> if the <paramref name="y"/> is within this cell; otherwise <see langword="false"/>.</returns>
-    public bool ContainsY(double y) => this.MinimumY <= y && y < this.MaximumY;
+    public bool ContainsY(double y) => this.Minimum.X <= y && y < this.Maximum.X;
 
     /// <inheritdoc/>
-    public override int GetHashCode() => HashCode.Combine(this.MinimumX, this.MaximumX, this.MinimumY, this.MaximumY);
+    public override int GetHashCode() => HashCode.Combine(this.Minimum, this.Maximum);
 
     /// <inheritdoc/>
-    public override string ToString() => $"[ X: ({this.MinimumX} -> {this.MaximumX}), Y: ({this.MinimumY} -> {this.MaximumY}) ]";
+    public override string ToString() => $"[ X: ({this.Minimum.X} -> {this.Maximum.X}), Y: ({this.Minimum.Y} -> {this.Maximum.Y}) ]";
 }

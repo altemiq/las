@@ -665,18 +665,18 @@ internal class DefaultLasReaderFormatter(IFormatBuilder builder) : ILasReaderFor
         static IEnumerable<(object? Header, object? Value)> GetTiling(Vector3D min, Vector3D max, Tiling record)
         {
             var quadTree = new Indexing.LasQuadTree(record.MinX, record.MaxX, record.MinY, record.MaxY, (int)record.Level, (int)record.LevelIndex, default);
-            var (minimumX, minimumY, maximumX, maximumY) = quadTree.GetBounds(0, (int)record.LevelIndex);
+            var (minimum, maximum) = quadTree.GetBounds(0, (int)record.LevelIndex);
             var buffer = record.Buffer
                 ? Math.Max(
                     Math.Max(
                         Math.Max(
-                            (float)(minimumX - min.X),
-                            (float)(minimumY - min.Y)),
-                        (float)(max.X - maximumX)),
-                    (float)(max.Y - maximumY))
+                            (float)(minimum.X - min.X),
+                            (float)(minimum.Y - min.Y)),
+                        (float)(max.X - maximum.X)),
+                    (float)(max.Y - maximum.Y))
                 : default;
 
-            yield return (string.Empty, LazyFormattable.Create($"LAStiling (idx {record.LevelIndex}, lvl {record.Level}, sub {record.ImplicitLevels}, bbox {record.MinX} {record.MinY} {record.MaxX} {record.MaxY}{(record.Buffer ? ", buffer" : string.Empty)}{(record.Reversible ? ", reversible" : string.Empty)}) (size {maximumX - minimumX} x {maximumY - minimumY}, buffer {buffer})"));
+            yield return (string.Empty, LazyFormattable.Create($"LAStiling (idx {record.LevelIndex}, lvl {record.Level}, sub {record.ImplicitLevels}, bbox {record.MinX} {record.MinY} {record.MaxX} {record.MaxY}{(record.Buffer ? ", buffer" : string.Empty)}{(record.Reversible ? ", reversible" : string.Empty)}) (size {maximum.X - minimum.X} x {maximum.Y - minimum.Y}, buffer {buffer})"));
         }
     }
 

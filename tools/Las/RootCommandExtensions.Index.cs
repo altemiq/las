@@ -91,7 +91,7 @@ internal static partial class RootCommandExtensions
 
                         static void PrintTree(TextWriter output, Indexing.LasIndexCell cell)
                         {
-                            output.Write(string.Format(System.Globalization.CultureInfo.InvariantCulture, "({0},{1})-({2},{3})", cell.MinimumX, cell.MinimumY, cell.MaximumX, cell.MaximumY));
+                            output.Write(string.Format(System.Globalization.CultureInfo.InvariantCulture, "({0},{1})-({2},{3})", cell.Minimum.X, cell.Minimum.Y, cell.Maximum.X, cell.Maximum.Y));
                             output.Write(": ");
                             output.WriteLine(string.Join(',', cell.Intervals));
                         }
@@ -157,8 +157,8 @@ internal static partial class RootCommandExtensions
                             createdIndex = Indexing.LasIndex.Create(reader);
                         }
 
-                        using var createdEnumerator = createdIndex.OrderBy(x => x.MinimumX).ThenBy(x => x.MinimumY).GetEnumerator();
-                        using var readEnumerator = readIndex.OrderBy(x => x.MinimumX).ThenBy(x => x.MinimumY).GetEnumerator();
+                        using var createdEnumerator = createdIndex.OrderBy(x => x.Minimum.X).ThenBy(x => x.Minimum.Y).GetEnumerator();
+                        using var readEnumerator = readIndex.OrderBy(x => x.Minimum.X).ThenBy(x => x.Minimum.Y).GetEnumerator();
 
                         while (true)
                         {

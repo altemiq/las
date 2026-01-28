@@ -34,6 +34,15 @@ public class PointDataRecordQuantizerTests
         await Assert.That(z).IsEqualTo(793.56);
     }
 
+    [Test]
+    public async Task ConvertToIntXYZ()
+    {
+        var (x, y, z) = this.quantizer.Get(126.21, 457.23, 793.56);
+        await Assert.That(x).IsEqualTo(321);
+        await Assert.That(y).IsEqualTo(123);
+        await Assert.That(z).IsEqualTo(456);
+    }
+
     public IEnumerable<Func<(int, int, double, double)>> GetToDoubleXY()
     {
         yield return () => (321, 123, 126.21, 457.23);
