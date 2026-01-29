@@ -253,18 +253,18 @@ public class HeaderBlockBuilder
     /// <param name="point">The point.</param>
     public void Add(IBasePointDataRecord point)
     {
-        var (x, y, z) = PointDataRecordQuantizer.Get(point, this.ScaleFactor, this.Offset);
+        var vector = PointDataRecordQuantizer.Get(point, this.ScaleFactor, this.Offset);
 #if LAS1_5_OR_GREATER
         if (point is IGpsPointDataRecord gpsPointDataRecord)
         {
-            this.Add(x, y, z, gpsPointDataRecord.GpsTime, point.ReturnNumber);
+            this.Add(vector, gpsPointDataRecord.GpsTime, point.ReturnNumber);
         }
         else
         {
-            this.Add(x, y, z, point.ReturnNumber);
+            this.Add(vector, point.ReturnNumber);
         }
 #else
-        this.Add(x, y, z, point.ReturnNumber);
+        this.Add(vector, point.ReturnNumber);
 #endif
     }
 
@@ -287,11 +287,11 @@ public class HeaderBlockBuilder
     /// Adds a point to the header block.
     /// </summary>
     /// <param name="point">The point.</param>
-    public void Add(IGpsPointDataRecord point)
-    {
-        var (x, y, z) = PointDataRecordQuantizer.Get(point, this.ScaleFactor, this.Offset);
-        this.Add(x, y, z, point.GpsTime, point.ReturnNumber);
-    }
+    public void Add(IGpsPointDataRecord point) =>
+        this.Add(
+            PointDataRecordQuantizer.Get(point, this.ScaleFactor, this.Offset),
+            point.GpsTime,
+            point.ReturnNumber);
 #endif
 
     /// <summary>
@@ -409,6 +409,23 @@ public class HeaderBlockBuilder
 
     private Vector3D Truncate(double x, double y, double z)
     {
+#if NET7_0_OR_GREATER
+        var scaleVector = this.ScaleFactor.AsVector256();
+        var divided = System.Runtime.Intrinsics.Vector256.Divide(
+            System.Runtime.Intrinsics.Vector256.Create(x, y, z, default),
+            scaleVector);
+        var truncated =
+#if NET9_0_OR_GREATER
+            System.Runtime.Intrinsics.Vector256.Truncate(divided);
+#else
+            System.Runtime.Intrinsics.Vector256.Create(
+                Math.Truncate(divided[0]),
+                Math.Truncate(divided[1]),
+                Math.Truncate(divided[2]),
+                default);
+#endif
+        return System.Runtime.Intrinsics.Vector256.Multiply(truncated, scaleVector).AsVector3D();
+#else
         return new(TruncateToScale(x, this.ScaleFactor.X), TruncateToScale(y, this.ScaleFactor.Y), TruncateToScale(z, this.ScaleFactor.Y));
 
         [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
@@ -416,6 +433,7 @@ public class HeaderBlockBuilder
         {
             return Math.Truncate(value / scale) * scale;
         }
+#endif
     }
 
 #if LAS1_5_OR_GREATER

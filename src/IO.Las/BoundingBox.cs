@@ -170,6 +170,14 @@ public readonly struct BoundingBox : IEquatable<BoundingBox>
     public static BoundingBox Inflate(in BoundingBox envelope, double x, double y, double z) => envelope.Inflate(x, y, z);
 
     /// <summary>
+    /// Creates and returns an inflated copy of the specified <see cref="BoundingBox"/> structure. The copy is inflated by the specified amount. The original <see cref="BoundingBox"/> structure remains unmodified.
+    /// </summary>
+    /// <param name="envelope">The <see cref="BoundingBox"/> with which to start. This bounding box is not modified.</param>
+    /// <param name="amount">The amount to inflate this <see cref="BoundingBox"/> by.</param>
+    /// <returns>The inflated <see cref="BoundingBox"/>.</returns>
+    public static BoundingBox Inflate(in BoundingBox envelope, Vector3D amount) => envelope.Inflate(amount);
+
+    /// <summary>
     /// Returns a third <see cref="BoundingBox"/> structure that represents the intersection of two other <see cref="BoundingBox"/> structures. If there is no intersection, an empty <see cref="BoundingBox"/> is returned.
     /// </summary>
     /// <param name="a">The first bounding box to intersect.</param>
@@ -229,15 +237,27 @@ public readonly struct BoundingBox : IEquatable<BoundingBox>
     /// <returns>This method returns <see langword="true"/> if the point defined by <paramref name="x"/>, <paramref name="y"/>, and <paramref name="z"/> is contained within this <see cref="BoundingBox"/> structure; otherwise, <see langword="false"/>.</returns>
     public bool Contains(double x, double y, double z)
 #if NET7_0_OR_GREATER
-    {
-        var vector = System.Runtime.Intrinsics.Vector256.Create(x, y, z, default);
-        return System.Runtime.Intrinsics.Vector256.LessThanOrEqualAll(this.lowerLeftFront.AsVector256(), vector)
-            && System.Runtime.Intrinsics.Vector256.GreaterThanOrEqualAll(this.upperRightBack.AsVector256(), vector);
-    }
+        => this.Contains(new Vector3D(x, y, z));
 #else
         => (this.Height > 0 ? this.Bottom <= y && y < this.Top : this.Bottom >= y && y > this.Top)
            && (this.Width > 0 ? this.Left <= x && x < this.Right : this.Left >= x && x > this.Right)
            && (this.Depth > 0 ? this.Front <= z && z < this.Back : this.Front >= z && z > this.Back);
+#endif
+
+    /// <summary>
+    /// Determines if the specified point is contained within this <see cref="BoundingBox"/> structure.
+    /// </summary>
+    /// <param name="value">The coordinate of the point to test.</param>
+    /// <returns>This method returns <see langword="true"/> if the point defined by <paramref name="value"/> is contained within this <see cref="BoundingBox"/> structure; otherwise, <see langword="false"/>.</returns>
+    public bool Contains(Vector3D value)
+#if NET7_0_OR_GREATER
+    {
+        var vector = value.AsVector256();
+        return System.Runtime.Intrinsics.Vector256.LessThanOrEqualAll(this.lowerLeftFront.AsVector256(), vector)
+            && System.Runtime.Intrinsics.Vector256.GreaterThanOrEqualAll(this.upperRightBack.AsVector256(), vector);
+    }
+#else
+        => this.Contains(value.X, value.Y, value.Z);
 #endif
 
     /// <summary>
@@ -262,11 +282,14 @@ public readonly struct BoundingBox : IEquatable<BoundingBox>
     /// <param name="height">The amount to inflate this <see cref="BoundingBox"/> vertically.</param>
     /// <param name="depth">The amount to inflate this <see cref="BoundingBox"/> in depth.</param>
     /// <returns>The inflated bounding box.</returns>
-    public BoundingBox Inflate(double width, double height, double depth)
-    {
-        var amount = new Vector3D(width, height, depth);
-        return new(this.lowerLeftFront - amount, this.upperRightBack + amount);
-    }
+    public BoundingBox Inflate(double width, double height, double depth) => this.Inflate(new(width, height, depth));
+
+    /// <summary>
+    /// Inflates this <see cref="BoundingBox"/> by the specified amount.
+    /// </summary>
+    /// <param name="amount">The amount to inflate this <see cref="BoundingBox"/> by.</param>
+    /// <returns>The inflated bounding box.</returns>
+    public BoundingBox Inflate(Vector3D amount) => new(this.lowerLeftFront - amount, this.upperRightBack + amount);
 
     /// <summary>
     /// Returns a <see cref="BoundingBox"/> with the intersection of this instance and the specified <see cref="BoundingBox"/>.
@@ -282,12 +305,9 @@ public readonly struct BoundingBox : IEquatable<BoundingBox>
     /// <returns>This method returns <see langword="true"/> if there is any intersection, otherwise <see langword="false"/>.</returns>
     public bool IntersectsWith(BoundingBox rect)
 #if NET7_0_OR_GREATER
-    {
-        var min = System.Runtime.Intrinsics.Vector256.Max(this.lowerLeftFront.AsVector256(), rect.lowerLeftFront.AsVector256());
-        var max = System.Runtime.Intrinsics.Vector256.Min(this.upperRightBack.AsVector256(double.MaxValue), rect.upperRightBack.AsVector256(double.MaxValue));
-
-        return System.Runtime.Intrinsics.Vector256.GreaterThanOrEqualAll(max, min);
-    }
+        => System.Runtime.Intrinsics.Vector256.GreaterThanOrEqualAll(
+            System.Runtime.Intrinsics.Vector256.Min(this.upperRightBack.AsVector256(double.MaxValue), rect.upperRightBack.AsVector256(double.MaxValue)),
+            System.Runtime.Intrinsics.Vector256.Max(this.lowerLeftFront.AsVector256(), rect.lowerLeftFront.AsVector256()));
 #else
         => (rect.Left < this.Right)
            && (this.Left < rect.Right)

@@ -52,16 +52,11 @@ public static class IndexingExtensions
         /// <returns>The point data records within <paramref name="box"/>.</returns>
         public IEnumerable<IBasePointDataRecord> ReadPointDataRecords(Indexing.LasIndex index, BoundingBox box)
         {
-            var header = reader.Header;
-            var quantizer = new PointDataRecordQuantizer(header);
+            var quantizer = new PointDataRecordQuantizer(reader.Header);
             return index
                 .GetPointDataRecordIndexes(box)
                 .Select(idx => reader.ReadPointDataRecord(idx).PointDataRecord!)
-                .Where(point =>
-                {
-                    var (x, y, z) = quantizer.Get(point);
-                    return box.Contains(x, y, z);
-                });
+                .Where(point => box.Contains(quantizer.Get(point)));
         }
     }
 

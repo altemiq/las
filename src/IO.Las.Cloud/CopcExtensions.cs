@@ -286,8 +286,7 @@ public static class CopcExtensions
                     // points that are not in the current region of interest.
                     if (unordered)
                     {
-                        var (x, y, z) = quantizer.Get(point);
-                        skip = octree.GetKey(x, y, z, 1) != currentUnorderedKey;
+                        skip = octree.GetKey(quantizer.Get(point), 1) != currentUnorderedKey;
                         if (endOfStream && unorderedKeyId < (unorderedKeys.Length - 1))
                         {
                             numPointsRead = 0;
@@ -320,8 +319,8 @@ public static class CopcExtensions
                         {
                             var lasPoint = item;
                             point = lasPoint.PointDataRecord!;
-                            var (x, y, z) = quantizer.Get(point);
-                            finalizer.Remove(x, y, z);
+                            var vector = quantizer.Get(point);
+                            finalizer.Remove(vector);
 
                             // Search a place to insert the point
                             var level = 0;
@@ -331,10 +330,10 @@ public static class CopcExtensions
                             bool accepted;
                             do
                             {
-                                var key = octree.GetKey(x, y, z, level);
+                                var key = octree.GetKey(vector, level);
                                 cell = level == maxDepth
                                     ? -1 // Do not build an occupancy grid for last level. Point must be inserted anyway.
-                                    : octree.GetCell(x, y, z, key);
+                                    : octree.GetCell(vector, key);
 
                                 if (!registry.TryGetValue(key, out octant))
                                 {
@@ -589,11 +588,7 @@ public static class CopcExtensions
 
                     // If the node only crosses the box then get subset of points within box
                     return box.IntersectsWith(keyBox)
-                        ? lazReader.ReadPointDataRecords(entry).Where(point =>
-                        {
-                            var (x, y, z) = quantizer.Get(point.PointDataRecord!);
-                            return box.Contains(x, y, z);
-                        })
+                        ? lazReader.ReadPointDataRecords(entry).Where(point => box.Contains(quantizer.Get(point.PointDataRecord!)))
                         : [];
                 });
         }
@@ -788,15 +783,9 @@ public static class CopcExtensions
 
     private sealed class Finalizer
     {
-        private readonly double minimumX;
-        private readonly double minimumY;
-        private readonly double minimumZ;
-        private readonly double maximumX;
-        private readonly double maximumY;
-        private readonly double maximumZ;
-        private readonly double resolutionX;
-        private readonly double resolutionY;
-        private readonly double resolutionZ;
+        private readonly Vector3D minimum;
+        private readonly Vector3D maximum;
+        private readonly Vector3D resolution;
         private readonly int columnCount;
         private readonly int rowCount;
         private readonly int layerCount;
@@ -805,22 +794,21 @@ public static class CopcExtensions
 
         public Finalizer(in HeaderBlock header, PointDataRecordQuantizer converter, int division)
         {
-            this.minimumX = header.Min.X;
-            this.maximumX = header.Max.X;
-            this.minimumY = header.Min.Y;
-            this.maximumY = header.Max.Y;
-            this.minimumZ = header.Min.Z;
-            this.maximumZ = header.Max.Z;
+            this.minimum = header.Min;
+            this.maximum = header.Max;
 
-            var gridSpacing = Math.Max(Math.Max(this.maximumX - this.minimumX, this.maximumY - this.minimumY), this.maximumZ - this.minimumZ) / division;
+            var difference = this.maximum - this.minimum;
 
-            this.columnCount = (int)Math.Ceiling((this.maximumX - this.minimumX) / gridSpacing);
-            this.rowCount = (int)Math.Ceiling((this.maximumY - this.minimumY) / gridSpacing);
-            this.layerCount = (int)Math.Ceiling((this.maximumZ - this.minimumZ) / gridSpacing);
+            var gridSpacing = Math.Max(Math.Max(difference.X, difference.Y), difference.Z) / division;
 
-            this.resolutionX = (this.maximumX - this.minimumX) / this.columnCount;
-            this.resolutionY = (this.maximumY - this.minimumY) / this.rowCount;
-            this.resolutionZ = (this.maximumZ - this.minimumZ) / this.layerCount;
+            this.columnCount = (int)Math.Ceiling((difference.X) / gridSpacing);
+            this.rowCount = (int)Math.Ceiling((difference.Y) / gridSpacing);
+            this.layerCount = (int)Math.Ceiling((difference.Z) / gridSpacing);
+
+            this.resolution = new(
+                (difference.X) / this.columnCount,
+                (difference.Y) / this.rowCount,
+                (difference.Z) / this.layerCount);
 
             this.grid = new uint[this.columnCount * this.rowCount * this.layerCount];
 
@@ -829,16 +817,12 @@ public static class CopcExtensions
 
         public bool AreAnyFinalized { get; private set; }
 
-        public void Add(IBasePointDataRecord point)
-        {
-            var (x, y, z) = this.converter.Get(point);
-            this.Add(x, y, z);
-        }
+        public void Add(IBasePointDataRecord point) => this.Add(this.converter.Get(point));
 
-        public void Remove(double x, double y, double z)
+        public void Remove(Vector3D vector)
         {
             this.AreAnyFinalized = false;
-            var cell = this.CellFromXyz(x, y, z);
+            var cell = this.GetCell(vector);
             var gridValue = this.grid[cell];
             if (gridValue is 0)
             {
@@ -852,12 +836,12 @@ public static class CopcExtensions
 
         public bool IsFinalized(double minX, double minY, double minZ, double maxX, double maxY, double maxZ)
         {
-            var startX = Math.Max((int)Math.Floor((minX - this.minimumX) / this.resolutionX), 0);
-            var startY = Math.Max((int)Math.Floor((this.maximumY - maxY) / this.resolutionY), 0);
-            var startZ = Math.Max((int)Math.Floor((minZ - this.minimumZ) / this.resolutionZ), 0);
-            var endX = Math.Min((int)Math.Ceiling((maxX - this.minimumX) / this.resolutionX), this.columnCount - 1);
-            var endY = Math.Min((int)Math.Ceiling((this.maximumY - minY) / this.resolutionY), this.rowCount - 1);
-            var endZ = Math.Min((int)Math.Ceiling((maxZ - this.minimumZ) / this.resolutionZ), this.layerCount - 1);
+            var startX = Math.Max((int)Math.Floor((minX - this.minimum.X) / this.resolution.X), 0);
+            var startY = Math.Max((int)Math.Floor((this.maximum.Y - maxY) / this.resolution.Y), 0);
+            var startZ = Math.Max((int)Math.Floor((minZ - this.minimum.Z) / this.resolution.Z), 0);
+            var endX = Math.Min((int)Math.Ceiling((maxX - this.minimum.X) / this.resolution.X), this.columnCount - 1);
+            var endY = Math.Min((int)Math.Ceiling((this.maximum.Y - minY) / this.resolution.Y), this.rowCount - 1);
+            var endZ = Math.Min((int)Math.Ceiling((maxZ - this.minimum.Z) / this.resolution.Z), this.layerCount - 1);
 
             for (var column = startX; column <= endX; column++)
             {
@@ -877,35 +861,39 @@ public static class CopcExtensions
             return true;
         }
 
-        private void Add(double x, double y, double z) => this.grid[this.CellFromXyz(x, y, z)]++;
+        private void Add(Vector3D vector) => this.grid[this.GetCell(vector)]++;
 
-        private int CellFromXyz(double x, double y, double z)
+        private int GetCell(Vector3D vector)
         {
-            int colum = default;
-            if (x > this.minimumX)
+            var x = vector.X;
+            var y = vector.Y;
+            var z = vector.Z;
+
+            var column = 0;
+            if (x > this.minimum.X)
             {
-                colum = x < this.maximumX
-                    ? (int)Math.Floor((x - this.minimumX) / this.resolutionX)
+                column = x < this.maximum.X
+                    ? (int)Math.Floor((x - this.minimum.X) / this.resolution.X)
                     : this.columnCount - 1;
             }
 
-            int row = default;
-            if (y > this.minimumY)
+            var row = 0;
+            if (y > this.minimum.Y)
             {
-                row = y < this.maximumY
-                    ? (int)Math.Floor((this.maximumY - y) / this.resolutionY)
+                row = y < this.maximum.Y
+                    ? (int)Math.Floor((this.maximum.Y - y) / this.resolution.Y)
                     : this.rowCount - 1;
             }
 
-            int layer = default;
-            if (z > this.minimumZ)
+            var layer = 0;
+            if (z > this.minimum.Z)
             {
-                layer = z < this.maximumZ
-                    ? (int)Math.Floor((z - this.minimumZ) / this.resolutionZ)
+                layer = z < this.maximum.Z
+                    ? (int)Math.Floor((z - this.minimum.Z) / this.resolution.Z)
                     : this.layerCount - 1;
             }
 
-            return (layer * this.rowCount * this.columnCount) + (row * this.columnCount) + colum;
+            return (layer * this.rowCount * this.columnCount) + (row * this.columnCount) + column;
         }
     }
 
@@ -980,16 +968,16 @@ public static class CopcExtensions
             return computedMaxDepth;
         }
 
-        public EptKey GetKey(double x, double y, double z, int depth)
+        public EptKey GetKey(Vector3D vector, int depth)
         {
             var gridSize = (int)Math.Pow(2, depth);
             var gridResolution = this.Size / gridSize;
 
             return new(
                 depth,
-                GetKeyValue(x - this.MinX),
-                GetKeyValue(y - this.MinY),
-                GetKeyValue(z - this.MinZ));
+                GetKeyValue(vector.X - this.MinX),
+                GetKeyValue(vector.Y - this.MinY),
+                GetKeyValue(vector.Z - this.MinZ));
 
             [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
             int GetKeyValue(double value)
@@ -998,15 +986,15 @@ public static class CopcExtensions
             }
         }
 
-        public int GetCell(double x, double y, double z, EptKey key)
+        public int GetCell(Vector3D vector, EptKey key)
         {
             var halfSize = this.HalfSize;
             var resolution = this.Size / (1 << key.Depth);
 
             var gridResolution = resolution / this.GridSize;
-            var cellX = GetCellValue(x - (resolution * key.X) - (this.CentreX - halfSize));
-            var cellY = GetCellValue(y - (resolution * key.Y) - (this.CentreY - halfSize));
-            var cellZ = GetCellValue(z - (resolution * key.Z) - (this.CentreZ - halfSize));
+            var cellX = GetCellValue(vector.X - (resolution * key.X) - (this.CentreX - halfSize));
+            var cellY = GetCellValue(vector.Y - (resolution * key.Y) - (this.CentreY - halfSize));
+            var cellZ = GetCellValue(vector.Z - (resolution * key.Z) - (this.CentreZ - halfSize));
 
             return (cellZ * this.GridSize * this.GridSize) + (cellY * this.GridSize) + cellX;
 

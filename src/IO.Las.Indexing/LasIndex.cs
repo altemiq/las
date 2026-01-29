@@ -84,8 +84,8 @@ public class LasIndex : IEnumerable<LasIndexCell>
         var current = default(uint);
         while (reader.ReadPointDataRecord() is { PointDataRecord: { } record })
         {
-            var (x, y, _) = quantizer.Get(record);
-            _ = index.Add((float)x, (float)y, current++);
+            var vector = quantizer.Get(record);
+            _ = index.Add((float)vector.X, (float)vector.Y, current++);
         }
 
         index.Complete(minimumPoints, maximumIntervals);

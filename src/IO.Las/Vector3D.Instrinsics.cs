@@ -106,18 +106,48 @@ public partial struct Vector3D
 #if NET7_0_OR_GREATER
         => Vector256.Min(value1.AsVector256(), value2.AsVector256()).AsVector3D();
 #else
-        => Avx.IsSupported
-            ? Avx.Min(value1.AsVector256(), value2.AsVector256()).AsVector3D()
-            : new(Math.Min(value1.X, value2.X), Math.Min(value1.Y, value2.Y), Math.Min(value1.Z, value2.Z));
+    {
+        if (Avx.IsSupported)
+        {
+            return Avx.Min(value1.AsVector256(), value2.AsVector256()).AsVector3D();
+        }
+
+        if (!Sse2.IsSupported)
+        {
+            return new(Math.Min(value1.X, value2.X), Math.Min(value1.Y, value2.Y), Math.Min(value1.Z, value2.Z));
+        }
+
+        var value1Vector = value1.AsVector256();
+        var value2Vector = value2.AsVector256();
+        return Vector256.Create(
+            Sse2.Min(value1Vector.GetLower(), value2Vector.GetLower()),
+            Sse2.Min(value1Vector.GetUpper(), value2Vector.GetUpper()))
+            .AsVector3D();
+    }
 #endif
 
     public static partial Vector3D Max(Vector3D value1, Vector3D value2)
 #if NET7_0_OR_GREATER
         => Vector256.Max(value1.AsVector256(), value2.AsVector256()).AsVector3D();
 #else
-        => Avx.IsSupported
-            ? Avx.Max(value1.AsVector256(), value2.AsVector256()).AsVector3D()
-            : new(Math.Max(value1.X, value2.X), Math.Max(value1.Y, value2.Y), Math.Max(value1.Z, value2.Z));
+    {
+        if (Avx.IsSupported)
+        {
+            return Avx.Max(value1.AsVector256(), value2.AsVector256()).AsVector3D();
+        }
+
+        if (!Sse2.IsSupported)
+        {
+            return new(Math.Max(value1.X, value2.X), Math.Max(value1.Y, value2.Y), Math.Max(value1.Z, value2.Z));
+        }
+
+        var value1Vector = value1.AsVector256();
+        var value2Vector = value2.AsVector256();
+        return Vector256.Create(
+            Sse2.Max(value1Vector.GetLower(), value2Vector.GetLower()),
+            Sse2.Max(value1Vector.GetUpper(), value2Vector.GetUpper()))
+            .AsVector3D();
+    }
 #endif
 
     public static partial Vector3D Abs(Vector3D value)

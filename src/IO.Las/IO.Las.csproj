@@ -74,7 +74,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Compile Update="PointConverter.*.cs;HeaderBlockBuilder.*.cs;ExtensionMethods.*.cs;Vector3D.*.cs">
+    <Compile Update="PointConverter.*.cs;HeaderBlockBuilder.*.cs;ExtensionMethods.*.cs;Vector*D.*.cs">
       <DependentUpon>$([System.Text.RegularExpressions.Regex]::Replace('%(Filename)%(Extension)', '\.[^.]+\%(Extension)$', '%(Extension)'))</DependentUpon>
     </Compile>
   </ItemGroup>

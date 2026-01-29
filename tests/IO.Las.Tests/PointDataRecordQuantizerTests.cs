@@ -11,9 +11,7 @@ public class PointDataRecordQuantizerTests
     [MethodDataSource(nameof(GetToDoubleXY))]
     public async Task ConvertToDoubleXY(int inputX, int inputY, double expectedX, double expectedY)
     {
-        await Assert.That(this.quantizer.Get(inputX, inputY))
-            .Member(p => p.X, x => x.IsEqualTo(expectedX)).And
-            .Member(p => p.Y, y => y.IsEqualTo(expectedY));
+        await Assert.That(this.quantizer.Get(inputX, inputY)).IsEqualTo(new Vector2D(expectedX, expectedY));
     }
 
     [Test]
@@ -28,19 +26,16 @@ public class PointDataRecordQuantizerTests
     [Test]
     public async Task ConvertToDoubleXYZ()
     {
-        var (x, y, z) = this.quantizer.Get(321, 123, 456);
-        await Assert.That(x).IsEqualTo(126.21);
-        await Assert.That(y).IsEqualTo(457.23);
-        await Assert.That(z).IsEqualTo(793.56);
+        await Assert.That(this.quantizer.Get(321, 123, 456)).IsEqualTo(new Vector3D(126.21, 457.23, 793.56));
     }
 
     [Test]
     public async Task ConvertToIntXYZ()
     {
-        var (x, y, z) = this.quantizer.Get(126.21, 457.23, 793.56);
-        await Assert.That(x).IsEqualTo(321);
-        await Assert.That(y).IsEqualTo(123);
-        await Assert.That(z).IsEqualTo(456);
+        await Assert.That(this.quantizer.Get(126.21, 457.23, 793.56))
+            .Member(static p => p.X , static x =>x.IsEqualTo(321)).And
+            .Member(static p => p.Y , static y => y.IsEqualTo(123)).And
+            .Member(static p => p.Z , static z => z.IsEqualTo(456));
     }
 
     public IEnumerable<Func<(int, int, double, double)>> GetToDoubleXY()
