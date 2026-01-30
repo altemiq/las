@@ -51,5 +51,15 @@ public partial struct Vector3D
         Math.Sqrt(value.X),
         Math.Sqrt(value.Y),
         Math.Sqrt(value.Z));
+
+    public static partial Vector3D Round(Vector3D vector, MidpointRounding mode) => new(
+        Math.Round(vector.X, mode),
+        Math.Round(vector.Y, mode),
+        Math.Round(vector.Z, mode));
+
+    public static partial Vector3D Cross(Vector3D value1, Vector3D vector2) => new(
+        (value1.Y * vector2.Z) - (value1.Z * vector2.Y),
+        (value1.Z * vector2.X) - (value1.X * vector2.Z),
+        (value1.X * vector2.Y) - (value1.Y * vector2.X));
 }
 #endif

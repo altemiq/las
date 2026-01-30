@@ -6,10 +6,6 @@
 
 namespace Altemiq.IO.Las;
 
-#if NET7_0_OR_GREATER
-using System.Runtime.Intrinsics;
-#endif
-
 /// <summary>
 /// The point converter.
 /// </summary>
@@ -55,12 +51,7 @@ public sealed class PointDataRecordQuantizer(Vector3D scaleFactor, Vector3D offs
     /// <param name="offset">The offset.</param>
     /// <returns>The converted point.</returns>
     [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
-    public static Vector3D Get(int x, int y, int z, Vector3D scaleFactor, Vector3D offset)
-#if NET7_0_OR_GREATER
-        => (new Vector3D(x, y, z) * scaleFactor) + offset;
-#else
-        => new((x * scaleFactor.X) + offset.X, (y * scaleFactor.Y) + offset.Y, (z * scaleFactor.Z) + offset.Z);
-#endif
+    public static Vector3D Get(int x, int y, int z, Vector3D scaleFactor, Vector3D offset) => (new Vector3D(x, y, z) * scaleFactor) + offset;
 
     /// <summary>
     /// Converts the point.
@@ -71,12 +62,7 @@ public sealed class PointDataRecordQuantizer(Vector3D scaleFactor, Vector3D offs
     /// <param name="offset">The offset.</param>
     /// <returns>The converted point.</returns>
     [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
-    public static Vector2D Get(int x, int y, Vector3D scaleFactor, Vector3D offset)
-#if NET7_0_OR_GREATER
-        => (new Vector2D(x, y) * scaleFactor.AsVector2D()) + offset.AsVector2D();
-#else
-        => new((x * scaleFactor.X) + offset.X, (y * scaleFactor.Y) + offset.Y);
-#endif
+    public static Vector2D Get(int x, int y, Vector3D scaleFactor, Vector3D offset) => (new Vector2D(x, y) * scaleFactor.AsVector2D()) + offset.AsVector2D();
 
     /// <summary>
     /// Converts the point.
@@ -118,19 +104,10 @@ public sealed class PointDataRecordQuantizer(Vector3D scaleFactor, Vector3D offs
     /// <param name="vector">The coordinate.</param>
     /// <returns>The converted point.</returns>
     public (int X, int Y, int Z) Get(Vector3D vector)
-#if NET7_0_OR_GREATER
     {
-        vector = (vector - offset) / scaleFactor;
-#if NET9_0_OR_GREATER
-        var rounded = Vector256.Round(vector.AsVector256(), MidpointRounding.AwayFromZero);
-        return ((int)rounded[0], (int)rounded[1], (int)rounded[2]);
-#else
-        return ((int)Math.Round(vector.X, MidpointRounding.AwayFromZero), (int)Math.Round(vector.Y, MidpointRounding.AwayFromZero), (int)Math.Round(vector.Z, MidpointRounding.AwayFromZero));
-#endif
+        var rounded = Vector3D.Round((vector - offset) / scaleFactor, MidpointRounding.AwayFromZero);
+        return ((int)rounded.X, (int)rounded.Y, (int)rounded.Z);
     }
-#else
-        => (this.GetX(vector.X), this.GetY(vector.Y), this.GetZ(vector.Z));
-#endif
 
     /// <summary>
     /// Converts the point.
@@ -146,19 +123,10 @@ public sealed class PointDataRecordQuantizer(Vector3D scaleFactor, Vector3D offs
     /// <param name="vector">The coordinate.</param>
     /// <returns>The converted point.</returns>
     public (int X, int Y) Get(Vector2D vector)
-#if NET7_0_OR_GREATER
     {
-        vector = (vector - offset.AsVector2D()) / scaleFactor.AsVector2D();
-#if NET9_0_OR_GREATER
-        var rounded = Vector128.Round(vector.AsVector128(), MidpointRounding.AwayFromZero);
-        return ((int)rounded[0], (int)rounded[1]);
-#else
-        return ((int)Math.Round(vector.X, MidpointRounding.AwayFromZero), (int)Math.Round(vector.Y, MidpointRounding.AwayFromZero));
-#endif
+        var rounded = Vector2D.Round((vector - offset.AsVector2D()) / scaleFactor.AsVector2D(), MidpointRounding.AwayFromZero);
+        return ((int)rounded.X, (int)rounded.Y);
     }
-#else
-        => (this.GetX(vector.X), this.GetY(vector.Y));
-#endif
 
     /// <summary>
     /// Converts the x-coordinate.

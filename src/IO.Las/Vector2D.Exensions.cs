@@ -4,13 +4,14 @@
 // </copyright>
 // -----------------------------------------------------------------------
 
-#if NETCOREAPP3_0_OR_GREATER
 namespace Altemiq.IO.Las;
 
 #pragma warning disable CA1708, RCS1263, SA1101, S2325
 
+#if NETCOREAPP3_0_OR_GREATER
 using System.Runtime.CompilerServices;
 using System.Runtime.Intrinsics;
+#endif
 
 /// <summary>
 /// <see cref="Vector2D"/> extensions.
@@ -25,8 +26,14 @@ public static partial class Vector
         /// Reinterprets a <see cref="Vector2D" /> as a new <see cref="Vector3D" />.
         /// </summary>
         /// <returns>The input reinterpreted as a new <see cref="Vector3D" />.</returns>
-        public Vector3D AsVector3D() => value.AsVector256().AsVector3D();
+        public Vector3D AsVector3D() =>
+#if NETCOREAPP3_0_OR_GREATER
+            value.AsVector256().AsVector3D();
+#else
+            new(value.X, value.Y, default);
+#endif
 
+#if NETCOREAPP3_0_OR_GREATER
         /// <summary>
         /// Reinterprets a <see cref="Vector3D" /> as a new <see cref="Vector128" /> with the new elements zeroed.
         /// </summary>
@@ -69,6 +76,6 @@ public static partial class Vector
             Unsafe.WriteUnaligned(ref Unsafe.As<Vector256<double>, byte>(ref result), value);
             return result;
         }
+#endif
     }
 }
-#endif

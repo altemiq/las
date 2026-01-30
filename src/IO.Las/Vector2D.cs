@@ -145,11 +145,7 @@ public readonly partial struct Vector2D : IFormattable, IEquatable<Vector2D>
     /// <param name="right">The scalar value.</param>
     /// <returns>The result of the division.</returns>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static Vector2D operator /(Vector2D left, double right)
-    {
-        var num = 1D / right;
-        return new(left.X * num, left.Y * num);
-    }
+    public static Vector2D operator /(Vector2D left, double right) => Divide(left, right);
 
     /// <summary>
     /// Negates the specified vector.
@@ -184,11 +180,7 @@ public readonly partial struct Vector2D : IFormattable, IEquatable<Vector2D>
     /// <param name="value2">The second point.</param>
     /// <returns>The distance.</returns>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static double Distance(Vector2D value1, Vector2D value2)
-    {
-        var distanceSquared = DistanceSquared(value1, value2);
-        return Math.Sqrt(distanceSquared);
-    }
+    public static double Distance(Vector2D value1, Vector2D value2) => Math.Sqrt(DistanceSquared(value1, value2));
 
     /// <summary>
     /// Returns the Euclidean distance squared between two specified points.
@@ -209,7 +201,7 @@ public readonly partial struct Vector2D : IFormattable, IEquatable<Vector2D>
     /// <param name="value">The vector to normalize.</param>
     /// <returns>The normalized vector.</returns>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static Vector2D Normalize(Vector2D value) => value / value.Length();
+    public static Vector2D Normalize(Vector2D value) => Divide(value, value.Length());
 
     /// <summary>
     /// Computes the cross product of two vectors.
@@ -365,6 +357,15 @@ public readonly partial struct Vector2D : IFormattable, IEquatable<Vector2D>
     /// <returns>The square root vector.</returns>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static partial Vector2D SquareRoot(Vector2D value);
+
+    /// <summary>
+    /// Rounds each element in a vector to the nearest integer using the specified rounding mode.
+    /// </summary>
+    /// <param name="vector">The vector to round.</param>
+    /// <param name="mode">The mode under which vector should be rounded.</param>
+    /// <returns>The result of rounding each element to the nearest integer using <paramref name="mode"/>.</returns>
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public static partial Vector2D Round(Vector2D vector, MidpointRounding mode);
 
     /// <inheritdoc/>
     public override int GetHashCode() => HashCode.Combine(this.X, this.Y);

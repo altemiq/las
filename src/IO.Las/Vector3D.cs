@@ -159,11 +159,7 @@ public readonly partial struct Vector3D : IFormattable, IEquatable<Vector3D>
     /// <param name="right">The scalar value.</param>
     /// <returns>The result of the division.</returns>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static Vector3D operator /(Vector3D left, double right)
-    {
-        var num = 1D / right;
-        return new(left.X * num, left.Y * num, left.Z * num);
-    }
+    public static Vector3D operator /(Vector3D left, double right) => Divide(left, right);
 
     /// <summary>
     /// Negates the specified vector.
@@ -198,11 +194,7 @@ public readonly partial struct Vector3D : IFormattable, IEquatable<Vector3D>
     /// <param name="value2">The second point.</param>
     /// <returns>The distance.</returns>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static double Distance(Vector3D value1, Vector3D value2)
-    {
-        var distanceSquared = DistanceSquared(value1, value2);
-        return Math.Sqrt(distanceSquared);
-    }
+    public static double Distance(Vector3D value1, Vector3D value2) => Math.Sqrt(DistanceSquared(value1, value2));
 
     /// <summary>
     /// Returns the Euclidean distance squared between two specified points.
@@ -223,7 +215,7 @@ public readonly partial struct Vector3D : IFormattable, IEquatable<Vector3D>
     /// <param name="value">The vector to normalize.</param>
     /// <returns>The normalized vector.</returns>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static Vector3D Normalize(Vector3D value) => value / value.Length();
+    public static Vector3D Normalize(Vector3D value) => Divide(value, value.Length());
 
     /// <summary>
     /// Computes the cross product of two vectors.
@@ -232,10 +224,7 @@ public readonly partial struct Vector3D : IFormattable, IEquatable<Vector3D>
     /// <param name="vector2">The second vector.</param>
     /// <returns>The cross product.</returns>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static Vector3D Cross(Vector3D value1, Vector3D vector2) => new(
-        (value1.Y * vector2.Z) - (value1.Z * vector2.Y),
-        (value1.Z * vector2.X) - (value1.X * vector2.Z),
-        (value1.X * vector2.Y) - (value1.Y * vector2.X));
+    public static partial Vector3D Cross(Vector3D value1, Vector3D vector2);
 
     /// <summary>
     /// Returns the reflection of a vector off a surface that has the specified normal.
@@ -382,6 +371,15 @@ public readonly partial struct Vector3D : IFormattable, IEquatable<Vector3D>
     /// <returns>The square root vector.</returns>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static partial Vector3D SquareRoot(Vector3D value);
+
+    /// <summary>
+    /// Rounds each element in a vector to the nearest integer using the specified rounding mode.
+    /// </summary>
+    /// <param name="vector">The vector to round.</param>
+    /// <param name="mode">The mode under which vector should be rounded.</param>
+    /// <returns>The result of rounding each element to the nearest integer using <paramref name="mode"/>.</returns>
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public static partial Vector3D Round(Vector3D vector, MidpointRounding mode);
 
     /// <inheritdoc/>
     public override int GetHashCode() => HashCode.Combine(this.X, this.Y, this.Z);

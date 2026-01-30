@@ -48,6 +48,10 @@ public partial struct Vector2D
         Math.Sqrt(value.X),
         Math.Sqrt(value.Y));
 
+    public static partial Vector2D Round(Vector2D vector, MidpointRounding mode) => new(
+        Math.Round(vector.X, mode),
+        Math.Round(vector.Y, mode));
+
     public static partial double Cross(Vector2D value1, Vector2D vector2) => (value1.X * vector2.Y) - (value1.Y * vector2.X);
 }
 #endif

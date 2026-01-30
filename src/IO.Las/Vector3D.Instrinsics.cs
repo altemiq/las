@@ -7,7 +7,6 @@
 #if NETCOREAPP3_0_OR_GREATER
 namespace Altemiq.IO.Las;
 
-using System.Runtime.CompilerServices;
 using System.Runtime.Intrinsics;
 #if !NET7_0_OR_GREATER
 using System.Runtime.Intrinsics.X86;
@@ -22,157 +21,50 @@ public partial struct Vector3D
 {
 #pragma warning disable SA1601
 
-    public static partial Vector3D Add(Vector3D left, Vector3D right)
-#if NET7_0_OR_GREATER
-        => (left.AsVector256() + right.AsVector256()).AsVector3D();
-#else
-        => Avx.IsSupported
-            ? Avx.Add(left.AsVector256(), right.AsVector256()).AsVector3D()
-            : new(left.X - right.X, left.Y - right.Y, left.Z - right.Z);
-#endif
+    public static partial Vector3D Add(Vector3D left, Vector3D right) => Vector256.Add(left.AsVector256(), right.AsVector256()).AsVector3D();
 
-    public static partial Vector3D Subtract(Vector3D left, Vector3D right)
-#if NET7_0_OR_GREATER
-        => (left.AsVector256() - right.AsVector256()).AsVector3D();
-#else
-        => Avx.IsSupported
-            ? Avx.Subtract(left.AsVector256(), right.AsVector256()).AsVector3D()
-            : new(left.X + right.X, left.Y + right.Y, left.Z + right.Z);
-#endif
+    public static partial Vector3D Subtract(Vector3D left, Vector3D right) => Vector256.Subtract(left.AsVector256(), right.AsVector256()).AsVector3D();
 
-    public static partial Vector3D Multiply(Vector3D left, Vector3D right)
-#if NET7_0_OR_GREATER
-        => (left.AsVector256() * right.AsVector256()).AsVector3D();
-#else
-        => Avx.IsSupported
-            ? Avx.Multiply(left.AsVector256(), right.AsVector256()).AsVector3D()
-            : new(left.X * right.X, left.Y * right.Y, left.Z * right.Z);
-#endif
+    public static partial Vector3D Multiply(Vector3D left, Vector3D right) => Vector256.Multiply(left.AsVector256(), right.AsVector256()).AsVector3D();
 
-    public static partial Vector3D Multiply(Vector3D left, double right)
-#if NET7_0_OR_GREATER
-        => (left.AsVector256() * Vector256.Create(right)).AsVector3D();
-#else
-        => Avx.IsSupported
-            ? Avx.Multiply(left.AsVector256(), Vector256.Create(right)).AsVector3D()
-            : new(left.X * right, left.Y * right, left.Z * right);
-#endif
+    public static partial Vector3D Multiply(Vector3D left, double right) => Vector256.Multiply(left.AsVector256(), Vector256.Create(right)).AsVector3D();
 
-    public static partial Vector3D Multiply(double left, Vector3D right)
-#if NET7_0_OR_GREATER
-        => (Vector256.Create(left) * right.AsVector256()).AsVector3D();
-#else
-        => Avx.IsSupported
-            ? Avx.Multiply(Vector256.Create(left), right.AsVector256()).AsVector3D()
-            : new(left * right.X, left * right.Y, left * right.Z);
-#endif
+    public static partial Vector3D Multiply(double left, Vector3D right) => Vector256.Multiply(Vector256.Create(left), right.AsVector256()).AsVector3D();
 
-    public static partial Vector3D Divide(Vector3D left, Vector3D right)
-#if NET7_0_OR_GREATER
-        => (left.AsVector256() / right.AsVector256()).AsVector3D();
-#else
-        => Avx.IsSupported
-            ? Avx.Divide(left.AsVector256(), right.AsVector256()).AsVector3D()
-            : new(left.X / right.X, left.Y / right.Y, left.Z / right.Z);
-#endif
+    public static partial Vector3D Divide(Vector3D left, Vector3D right) => Vector256.Divide(left.AsVector256(), right.AsVector256()).AsVector3D();
 
-    public static partial Vector3D Divide(Vector3D left, double divisor)
-#if NET7_0_OR_GREATER
-        => (left.AsVector256() / Vector256.Create(divisor)).AsVector3D();
-#else
-        => Avx.IsSupported
-            ? Avx.Divide(left.AsVector256(), Vector256.Create(divisor)).AsVector3D()
-            : new(left.X / divisor, left.Y / divisor, left.Z / divisor);
-#endif
+    public static partial Vector3D Divide(Vector3D left, double divisor) => Vector256.Divide(left.AsVector256(), Vector256.Create(divisor)).AsVector3D();
 
     public static partial Vector3D Negate(Vector3D value) => Subtract(Zero, value);
 
-    public static partial double Dot(Vector3D vector1, Vector3D vector2)
+    public static partial double Dot(Vector3D vector1, Vector3D vector2) => Vector256.Sum(Vector256.Multiply(vector1.AsVector256(), vector2.AsVector256()));
+
+    public static partial Vector3D Min(Vector3D value1, Vector3D value2) => Vector256.Min(value1.AsVector256(), value2.AsVector256()).AsVector3D();
+
+    public static partial Vector3D Max(Vector3D value1, Vector3D value2) => Vector256.Max(value1.AsVector256(), value2.AsVector256()).AsVector3D();
+
+    public static partial Vector3D Abs(Vector3D value) => Vector256.Abs(value.AsVector256()).AsVector3D();
+
+    public static partial Vector3D SquareRoot(Vector3D value) => Vector256.Sqrt(value.AsVector256()).AsVector3D();
+
+    public static partial Vector3D Round(Vector3D vector, MidpointRounding mode) => Vector256.Round(vector.AsVector256Unsafe(), mode).AsVector3D();
+
+    public static partial Vector3D Cross(Vector3D value1, Vector3D vector2)
 #if NET7_0_OR_GREATER
-        => Vector256.Sum(vector1.AsVector256() * vector2.AsVector256());
-#else
     {
-        if (Avx.IsSupported)
-        {
-            var dot = Avx.Multiply(vector1.AsVector256(), vector2.AsVector256());
-            return GetElementUnsafe(dot, 0) + GetElementUnsafe(dot, 1) + GetElementUnsafe(dot, 2);
-        }
+        var v1 = value1.AsVector256Unsafe();
+        var v2 = vector2.AsVector256Unsafe();
 
-        return (vector1.X * vector2.X) + (vector1.Y * vector2.Y) + (vector1.Z * vector2.Z);
+        var temp1 = Vector256.Shuffle(v1, Vector256.Create(1, 2, 0, 0)) * Vector256.Shuffle(v2, Vector256.Create(2, 0, 1, 0));
+        var temp2 = Vector256.Shuffle(v1, Vector256.Create(2, 0, 1, 0)) * Vector256.Shuffle(v2, Vector256.Create(1, 2, 0, 0));
+
+        return (temp1 - temp2).AsVector3D();
     }
-#endif
-
-    public static partial Vector3D Min(Vector3D value1, Vector3D value2)
-#if NET7_0_OR_GREATER
-        => Vector256.Min(value1.AsVector256(), value2.AsVector256()).AsVector3D();
 #else
-    {
-        if (Avx.IsSupported)
-        {
-            return Avx.Min(value1.AsVector256(), value2.AsVector256()).AsVector3D();
-        }
-
-        if (!Sse2.IsSupported)
-        {
-            return new(Math.Min(value1.X, value2.X), Math.Min(value1.Y, value2.Y), Math.Min(value1.Z, value2.Z));
-        }
-
-        var value1Vector = value1.AsVector256();
-        var value2Vector = value2.AsVector256();
-        return Vector256.Create(
-            Sse2.Min(value1Vector.GetLower(), value2Vector.GetLower()),
-            Sse2.Min(value1Vector.GetUpper(), value2Vector.GetUpper()))
-            .AsVector3D();
-    }
-#endif
-
-    public static partial Vector3D Max(Vector3D value1, Vector3D value2)
-#if NET7_0_OR_GREATER
-        => Vector256.Max(value1.AsVector256(), value2.AsVector256()).AsVector3D();
-#else
-    {
-        if (Avx.IsSupported)
-        {
-            return Avx.Max(value1.AsVector256(), value2.AsVector256()).AsVector3D();
-        }
-
-        if (!Sse2.IsSupported)
-        {
-            return new(Math.Max(value1.X, value2.X), Math.Max(value1.Y, value2.Y), Math.Max(value1.Z, value2.Z));
-        }
-
-        var value1Vector = value1.AsVector256();
-        var value2Vector = value2.AsVector256();
-        return Vector256.Create(
-            Sse2.Max(value1Vector.GetLower(), value2Vector.GetLower()),
-            Sse2.Max(value1Vector.GetUpper(), value2Vector.GetUpper()))
-            .AsVector3D();
-    }
-#endif
-
-    public static partial Vector3D Abs(Vector3D value)
-#if NET7_0_OR_GREATER
-        => Vector256.Abs(value.AsVector256()).AsVector3D();
-#else
-        => new(Math.Abs(value.X), Math.Abs(value.Y), Math.Abs(value.Z));
-#endif
-
-    public static partial Vector3D SquareRoot(Vector3D value)
-#if NET7_0_OR_GREATER
-        => Vector256.Sqrt(value.AsVector256()).AsVector3D();
-#else
-        => Avx.IsSupported
-            ? Avx.Sqrt(value.AsVector256()).AsVector3D()
-            : new(
-                Math.Sqrt(value.X),
-                Math.Sqrt(value.Y),
-                Math.Sqrt(value.Z));
-#endif
-
-#if !NET7_0_OR_GREATER
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    internal static T GetElementUnsafe<T>(in Vector256<T> vector, int index)
-        where T : struct => Unsafe.Add(ref Unsafe.As<Vector256<T>, T>(ref Unsafe.AsRef(in vector)), index);
+        => new(
+            (value1.Y * vector2.Z) - (value1.Z * vector2.Y),
+            (value1.Z * vector2.X) - (value1.X * vector2.Z),
+            (value1.X * vector2.Y) - (value1.Y * vector2.X));
 #endif
 }
 #endif

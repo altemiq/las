@@ -411,20 +411,13 @@ public class HeaderBlockBuilder
     {
 #if NET7_0_OR_GREATER
         var scaleVector = this.ScaleFactor.AsVector256();
-        var divided = System.Runtime.Intrinsics.Vector256.Divide(
-            System.Runtime.Intrinsics.Vector256.Create(x, y, z, default),
-            scaleVector);
-        var truncated =
-#if NET9_0_OR_GREATER
-            System.Runtime.Intrinsics.Vector256.Truncate(divided);
-#else
-            System.Runtime.Intrinsics.Vector256.Create(
-                Math.Truncate(divided[0]),
-                Math.Truncate(divided[1]),
-                Math.Truncate(divided[2]),
-                default);
-#endif
-        return System.Runtime.Intrinsics.Vector256.Multiply(truncated, scaleVector).AsVector3D();
+        return System.Runtime.Intrinsics.Vector256.Multiply(
+            System.Runtime.Intrinsics.Vector256.Truncate(
+                System.Runtime.Intrinsics.Vector256.Divide(
+                    System.Runtime.Intrinsics.Vector256.Create(x, y, z, default),
+                    scaleVector)),
+            scaleVector)
+            .AsVector3D();
 #else
         return new(TruncateToScale(x, this.ScaleFactor.X), TruncateToScale(y, this.ScaleFactor.Y), TruncateToScale(z, this.ScaleFactor.Y));
 
