@@ -27,4 +27,10 @@ internal interface IMinMax<T>
     /// </summary>
     /// <param name="value">The value.</param>
     void Update(T value);
+
+    /// <summary>
+    /// Gets a value indicating whether this instance is the default value.
+    /// </summary>
+    /// <returns><see langword="true"/> if this instance is the default value; otherwise <see langword="false"/>.</returns>
+    public bool IsDefault();
 }

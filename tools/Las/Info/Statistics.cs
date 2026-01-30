@@ -6,16 +6,13 @@
 
 namespace Altemiq.IO.Las.Info;
 
+using System.Runtime.Intrinsics;
+
 /// <summary>
 /// The statistics.
 /// </summary>
 internal sealed record Statistics(
-    IMinMax<int> X,
-    IMinMax<int> Y,
-    IMinMax<int> Z,
-    IMinMax<int> Intensity,
-    IMinMax<int> ReturnNumber,
-    IMinMax<int> NumberOfReturns,
+    IMinMax<Vector256<int>> IntValues,
     bool EdgeOfFlightLine,
     bool ScanDirectionFlag,
     IMinMax<byte> Classification,

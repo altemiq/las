@@ -6,6 +6,8 @@
 
 namespace Altemiq.IO.Las.Info;
 
+using System.Runtime.Intrinsics;
+
 /// <summary>
 /// Extension methods.
 /// </summary>
@@ -66,12 +68,7 @@ internal static class ExtensionMethods
 
     private static Statistics GetStatistics(LasReader reader, BoundingBox? box = default)
     {
-        var x = MinMax.Create<int>();
-        var y = MinMax.Create<int>();
-        var z = MinMax.Create<int>();
-        var intensity = MinMax.Create<int>();
-        var returnNumber = MinMax.Create<int>();
-        var numberOfReturns = MinMax.Create<int>();
+        var values = MinMax.Create<Vector256<int>>();
         var edgeOfFlightLine = false;
         var scanDirectionFlag = false;
         var classification = MinMax.Create<byte>();
@@ -128,16 +125,11 @@ internal static class ExtensionMethods
                 continue;
             }
 
-            x.Update(record.X);
-            y.Update(record.Y);
-            z.Update(record.Z);
-            intensity.Update(record.Intensity);
             var returnNumberValue = record.ReturnNumber;
-            returnNumber.Update(returnNumberValue);
             numberOfPointsByReturn[returnNumberValue]++;
             var numberOfReturnsValue = record.NumberOfReturns;
-            numberOfReturns.Update(numberOfReturnsValue);
             numberOfReturnsArray[numberOfReturnsValue]++;
+            values.Update(Vector256.Create(record.X, record.Y, record.Z, record.Intensity, returnNumberValue, numberOfReturnsValue, default, default));
             if (returnNumberValue.IsFirst())
             {
                 firstReturns++;
@@ -230,12 +222,7 @@ internal static class ExtensionMethods
         }
 
         return new(
-            x,
-            y,
-            z,
-            intensity,
-            returnNumber,
-            numberOfReturns,
+            values,
             edgeOfFlightLine,
             scanDirectionFlag,
             classification,

@@ -435,12 +435,13 @@ internal sealed class JsonLasReaderFormatter(System.Text.Json.Utf8JsonWriter wri
         writer.WriteStartObject("min_max_las_point_report");
 
         var statistics = statisticsFunc(reader);
-        WriteMinMax(writer, "x", statistics.X);
-        WriteMinMax(writer, "y", statistics.Y);
-        WriteMinMax(writer, "z", statistics.Z);
-        WriteMinMax(writer, "intensity", statistics.Intensity);
-        WriteMinMax(writer, "return_number", statistics.ReturnNumber);
-        WriteMinMax(writer, "number_of_returns", statistics.NumberOfReturns);
+        var values = statistics.IntValues;
+        WriteVectorMinMax(writer, "x", values, 0);
+        WriteVectorMinMax(writer, "y", values, 1);
+        WriteVectorMinMax(writer, "z", values, 2);
+        WriteVectorMinMax(writer, "intensity", values, 3);
+        WriteVectorMinMax(writer, "return_number", values, 4);
+        WriteVectorMinMax(writer, "number_of_returns", values, 5);
         WriteBoolean(writer, "edge_of_flight_line", statistics.EdgeOfFlightLine);
         WriteBoolean(writer, "scan_direction_flag", statistics.ScanDirectionFlag);
         WriteMinMax(writer, "classification", statistics.Classification);
@@ -452,8 +453,8 @@ internal sealed class JsonLasReaderFormatter(System.Text.Json.Utf8JsonWriter wri
 #if LAS1_4_OR_GREATER
         if (statistics.ScanAngle is not null)
         {
-            WriteMinMax(writer, "extended_return_number", statistics.ReturnNumber);
-            WriteMinMax(writer, "extended_number_of_returns", statistics.NumberOfReturns);
+            WriteVectorMinMax(writer, "extended_return_number", values, 4);
+            WriteVectorMinMax(writer, "extended_number_of_returns", values, 5);
             WriteMinMax(writer, "extended_classification", statistics.Classification);
             WriteMinMax(writer, "extended_scan_angle", statistics.ScanAngle);
         }
@@ -461,6 +462,20 @@ internal sealed class JsonLasReaderFormatter(System.Text.Json.Utf8JsonWriter wri
 
         writer.WriteEndObject();
         return this;
+
+        static void WriteVectorMinMax<T>(System.Text.Json.Utf8JsonWriter writer, string name, IMinMax<System.Runtime.Intrinsics.Vector256<T>>? minMax, int index, Func<T, T>? transformer = default)
+            where T : System.Numerics.INumber<T>
+        {
+            if (minMax is null)
+            {
+                return;
+            }
+
+            var min = transformer is null ? minMax.Minimum[index] : transformer(minMax.Minimum[index]);
+            var max = transformer is null ? minMax.Maximum[index] : transformer(minMax.Maximum[index]);
+
+            WriteMinMaxValues(writer, name, min, max);
+        }
 
         static void WriteMinMax<T>(System.Text.Json.Utf8JsonWriter writer, string name, IMinMax<T>? minMax, Func<T, T>? transformer = default)
             where T : System.Numerics.INumber<T>

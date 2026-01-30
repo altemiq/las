@@ -146,14 +146,15 @@ internal class DefaultLasReaderFormatter(IFormatBuilder builder) : ILasReaderFor
         _ = builder.AppendMajorHeader("reporting minimum and maximum for all LAS point record entries ...").AppendLine();
 
         var statistics = statisticsFunc(reader);
+        var values = statistics.IntValues;
 
         _ = builder
-            .Append("  ").AppendHeader("X          ").AppendFormat("{0,10} {1,10}", statistics.X.Minimum, statistics.X.Maximum).AppendLine()
-            .Append("  ").AppendHeader("Y          ").AppendFormat("{0,10} {1,10}", statistics.Y.Minimum, statistics.Y.Maximum).AppendLine()
-            .Append("  ").AppendHeader("Z          ").AppendFormat("{0,10} {1,10}", statistics.Z.Minimum, statistics.Z.Maximum).AppendLine()
-            .Append("  ").AppendHeader("intensity  ").AppendFormat("{0,10} {1,10}", statistics.Intensity.Minimum, statistics.Intensity.Maximum).AppendLine()
-            .Append("  ").AppendHeader("return_number       ").AppendFormat("{0} {1,10}", statistics.ReturnNumber.Minimum, statistics.ReturnNumber.Maximum).AppendLine()
-            .Append("  ").AppendHeader("number_of_returns   ").AppendFormat("{0} {1,10}", statistics.NumberOfReturns.Minimum, statistics.NumberOfReturns.Maximum).AppendLine()
+            .Append("  ").AppendHeader("X          ").AppendFormat("{0,10} {1,10}", values.Minimum[0], values.Maximum[0]).AppendLine()
+            .Append("  ").AppendHeader("Y          ").AppendFormat("{0,10} {1,10}", values.Minimum[1], values.Maximum[1]).AppendLine()
+            .Append("  ").AppendHeader("Z          ").AppendFormat("{0,10} {1,10}", values.Minimum[2], values.Maximum[2]).AppendLine()
+            .Append("  ").AppendHeader("intensity  ").AppendFormat("{0,10} {1,10}", values.Minimum[3], values.Maximum[3]).AppendLine()
+            .Append("  ").AppendHeader("return_number       ").AppendFormat("{0} {1,10}", values.Minimum[4], values.Maximum[4]).AppendLine()
+            .Append("  ").AppendHeader("number_of_returns   ").AppendFormat("{0} {1,10}", values.Minimum[5], values.Maximum[5]).AppendLine()
             .Append("  ").AppendHeader("edge_of_flight_line ").AppendFormat("{0} {1,10}", 0, statistics.EdgeOfFlightLine ? 1 : 0).AppendLine()
             .Append("  ").AppendHeader("scan_direction_flag ").AppendFormat("{0} {1,10}", 0, statistics.ScanDirectionFlag ? 1 : 0).AppendLine()
             .Append("  ").AppendHeader("classification  ").AppendFormat("{0,5} {1,10}", statistics.Classification.Minimum, statistics.Classification.Maximum).AppendLine();
