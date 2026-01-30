@@ -801,14 +801,14 @@ public static class CopcExtensions
 
             var gridSpacing = Math.Max(Math.Max(difference.X, difference.Y), difference.Z) / division;
 
-            this.columnCount = (int)Math.Ceiling((difference.X) / gridSpacing);
-            this.rowCount = (int)Math.Ceiling((difference.Y) / gridSpacing);
-            this.layerCount = (int)Math.Ceiling((difference.Z) / gridSpacing);
+            this.columnCount = (int)Math.Ceiling(difference.X / gridSpacing);
+            this.rowCount = (int)Math.Ceiling(difference.Y / gridSpacing);
+            this.layerCount = (int)Math.Ceiling(difference.Z / gridSpacing);
 
             this.resolution = new(
-                (difference.X) / this.columnCount,
-                (difference.Y) / this.rowCount,
-                (difference.Z) / this.layerCount);
+                difference.X / this.columnCount,
+                difference.Y / this.rowCount,
+                difference.Z / this.layerCount);
 
             this.grid = new uint[this.columnCount * this.rowCount * this.layerCount];
 

@@ -14,7 +14,7 @@ public class LasIndexCellTests
         var cell = new LasIndexCell(new(0, 0), new(100, 100), []);
         await Assert.That(cell.Contains(x, y)).IsTrue();
     }
-    
+
     [Test]
     [Arguments(-1, -1)]
     [Arguments(-1, 25)]
@@ -42,7 +42,7 @@ public class LasIndexCellTests
         var cell = new LasIndexCell(new(0, 0), new(100, 100), [new(10, 100), new(200, 300)]);
         await Assert.That(cell.Contains(index)).IsTrue();
     }
-    
+
     [Test]
     [Arguments(5U)]
     [Arguments(100U)]

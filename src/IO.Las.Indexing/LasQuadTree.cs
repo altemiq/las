@@ -47,23 +47,22 @@ public sealed class LasQuadTree : IEquatable<LasQuadTree>
             boundingBoxMaxY >= offsetY ? (cellSize * ((int)((boundingBoxMaxY - offsetY) / cellSize) + 1)) + offsetY : (cellSize * ((int)((boundingBoxMaxY - offsetY) / cellSize))) + offsetY);
 
         // how many cells minimally in each direction
-        var horizonalCells = UInt32Quantize((this.maximum.X - this.minimum.X) / cellSize);
+        var (horizonalCells, verticalCells) = UInt32Quantize((this.maximum - this.minimum) / cellSize);
         if (horizonalCells is 0)
         {
             throw new ArgumentOutOfRangeException(nameof(cellSize), cellSize, Properties.Resources.NoHorizontalCellsFound);
         }
 
-        var verticalCells = UInt32Quantize((this.maximum.Y - this.minimum.Y) / cellSize);
         if (verticalCells is 0)
         {
             throw new ArgumentOutOfRangeException(nameof(cellSize), cellSize, Properties.Resources.NoVerticalCellsFound);
         }
 
         // how many quad tree levels to get to that many cells
-        var c = (horizonalCells > verticalCells) ? horizonalCells - 1 : verticalCells - 1;
-        while (c is not 0)
+        var cells = Math.Max(horizonalCells, verticalCells) - 1;
+        while (cells is not 0)
         {
-            c >>= 1;
+            cells >>= 1;
             this.levels++;
         }
 
@@ -79,9 +78,12 @@ public sealed class LasQuadTree : IEquatable<LasQuadTree>
         this.minimum -= new Vector2(xc2 * cellSize, yc2 * cellSize);
         this.maximum += new Vector2(xc1 * cellSize, yc1 * cellSize);
 
-        static uint UInt32Quantize(float n)
+        static (uint X, uint Y) UInt32Quantize(Vector2 n)
         {
-            return (n >= 0) ? (uint)(n + 0.5) : 0;
+            var rounded = Vector2.Round(
+                Vector2.Clamp(n, Vector2.Zero, new(float.MaxValue)),
+                MidpointRounding.AwayFromZero);
+            return ((uint)rounded.X, (uint)rounded.Y);
         }
     }
 
@@ -288,28 +290,41 @@ public sealed class LasQuadTree : IEquatable<LasQuadTree>
     /// <summary>
     /// Gets the bounds of the cell that the coordinates are within.
     /// </summary>
-    /// <param name="x">The x-coordinate.</param>
-    /// <param name="y">The y-coordinate.</param>
-    /// <returns>The bounds of the cell that <paramref name="x"/> and <paramref name="y"/> are within.</returns>
-    internal (Vector2 Minimum, Vector2 Maximum) GetBounds(double x, double y) => this.GetBounds(x, y, this.levels);
+    /// <param name="vector">The coordinate.</param>
+    /// <returns>The bounds of the cell that <paramref name="vector"/> is within.</returns>
+    internal (Vector2 Minimum, Vector2 Maximum) GetBounds(Vector2D vector) => this.GetBounds(vector, this.levels);
 
     /// <summary>
     /// Gets the bounds of the cell that the coordinates are within at the required level.
     /// </summary>
-    /// <param name="x">The x-coordinate.</param>
-    /// <param name="y">The y-coordinate.</param>
+    /// <param name="vector">The coordinate.</param>
     /// <param name="level">The required level.</param>
-    /// <returns>The bounds of the cell that <paramref name="x"/> and <paramref name="y"/> are within.</returns>
-    internal (Vector2 Minimum, Vector2 Maximum) GetBounds(double x, double y, int level)
+    /// <returns>The bounds of the cell that <paramref name="vector"/> is within.</returns>
+    internal (Vector2 Minimum, Vector2 Maximum) GetBounds(Vector2D vector, int level)
     {
         var cellMin = this.minimum;
         var cellMax = this.maximum;
 
         while (level > 0)
         {
-            var cellMid = (this.minimum + this.maximum) * 0.5F;
-            cellMin = Vector2.Min(cellMin, cellMid);
-            cellMax = Vector2.Max(cellMax, cellMid);
+            var cellMid = (cellMin + cellMax) * 0.5F;
+            if (vector.X < cellMid.X)
+            {
+                cellMax.X = cellMid.X;
+            }
+            else
+            {
+                cellMin.X = cellMid.X;
+            }
+
+            if (vector.Y < cellMid.Y)
+            {
+                cellMax.Y = cellMid.Y;
+            }
+            else
+            {
+                cellMin.Y = cellMid.Y;
+            }
 
             level--;
         }

@@ -33,9 +33,9 @@ public class PointDataRecordQuantizerTests
     public async Task ConvertToIntXYZ()
     {
         await Assert.That(this.quantizer.Get(126.21, 457.23, 793.56))
-            .Member(static p => p.X , static x =>x.IsEqualTo(321)).And
-            .Member(static p => p.Y , static y => y.IsEqualTo(123)).And
-            .Member(static p => p.Z , static z => z.IsEqualTo(456));
+            .Member(static p => p.X, static x => x.IsEqualTo(321)).And
+            .Member(static p => p.Y, static y => y.IsEqualTo(123)).And
+            .Member(static p => p.Z, static z => z.IsEqualTo(456));
     }
 
     public IEnumerable<Func<(int, int, double, double)>> GetToDoubleXY()

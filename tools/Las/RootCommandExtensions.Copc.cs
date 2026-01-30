@@ -6,6 +6,8 @@
 
 namespace Altemiq.IO.Las;
 
+using MinMax = (Vector3D Min, Vector3D Max, double MinGps, double MaxGps);
+
 /// <content>
 /// The <c>copc</c> extensions.
 /// </content>
@@ -177,7 +179,7 @@ internal static partial class RootCommandExtensions
 
                     VerifyRanges(error, reader.Header, info, ranges);
 
-                    static (IDictionary<int, ulong> Totals, IDictionary<int, ulong> Counts, (double MinX, double MaxX, double MinY, double MaxY, double MinZ, double MaxZ, double MinGps, double MaxGps) Ranges) TraverseTree(
+                    static (IDictionary<int, ulong> Totals, IDictionary<int, ulong> Counts, MinMax Ranges) TraverseTree(
                         TextWriter output,
                         TextWriter error,
                         LazReader reader,
@@ -193,7 +195,7 @@ internal static partial class RootCommandExtensions
                         var counts = new Dictionary<int, ulong>();
 
                         VerifyPage(error, page, positiveEntries);
-                        var ranges = (double.MaxValue, double.MinValue, double.MaxValue, double.MinValue, double.MaxValue, double.MinValue, double.MaxValue, double.MinValue);
+                        MinMax ranges = (new(double.MaxValue), new(double.MinValue), double.MaxValue, double.MinValue);
                         var entries = ProcessPage(reader, page, totals, counts, out var temp).ToList();
                         ranges = Combine(ranges, temp);
                         while (entries.Count > 0)
@@ -239,17 +241,13 @@ internal static partial class RootCommandExtensions
 
                         return (totals, counts, ranges);
 
-                        static (double MinX, double MaxX, double MinY, double MaxY, double MinZ, double MaxZ, double MinGps, double MaxGps) Combine(
-                            (double MinX, double MaxX, double MinY, double MaxY, double MinZ, double MaxZ, double MinGps, double MaxGps) first,
-                            (double MinX, double MaxX, double MinY, double MaxY, double MinZ, double MaxZ, double MinGps, double MaxGps) second)
+                        static MinMax Combine(
+                            MinMax first,
+                            MinMax second)
                         {
                             return (
-                                Math.Min(first.MinX, second.MinX),
-                                Math.Max(first.MaxX, second.MaxX),
-                                Math.Min(first.MinY, second.MinY),
-                                Math.Max(first.MaxY, second.MaxY),
-                                Math.Min(first.MinZ, second.MinZ),
-                                Math.Max(first.MaxZ, second.MaxZ),
+                                Vector3D.Min(first.Min, second.Min),
+                                Vector3D.Max(first.Max, second.Max),
                                 Math.Min(first.MinGps, second.MinGps),
                                 Math.Max(first.MaxGps, second.MaxGps));
                         }
@@ -289,15 +287,11 @@ internal static partial class RootCommandExtensions
                             Cloud.CopcHierarchy.Page page,
                             IDictionary<int, ulong> totals,
                             IDictionary<int, ulong> counts,
-                            out (double MinX, double MaxX, double MinY, double MaxY, double MinZ, double MaxZ, double MinGps, double MaxGps) ranges)
+                            out MinMax ranges)
                         {
                             var children = new List<Cloud.CopcHierarchy.Entry>();
-                            var pageMinX = double.MaxValue;
-                            var pageMaxX = double.MinValue;
-                            var pageMinY = double.MaxValue;
-                            var pageMaxY = double.MinValue;
-                            var pageMinZ = double.MaxValue;
-                            var pageMaxZ = double.MinValue;
+                            var pageMin = new Vector3D(double.MaxValue);
+                            var pageMax = new Vector3D(double.MinValue);
                             var pageMinGps = double.MaxValue;
                             var pageMaxGps = double.MinValue;
 
@@ -327,54 +321,50 @@ internal static partial class RootCommandExtensions
                                         counts.Add(entry.Key.Level, 1);
                                     }
 
-                                    var (dataMinX, dataMaxX, dataMinY, dataMaxY, dataMinZ, dataMaxZ, dataMinGps, dataMaxGps) = ReadData(reader, entry);
+                                    var (dataMin, dataMax, dataMinGps, dataMaxGps) = ReadData(reader, entry);
 
-                                    pageMinX = Math.Min(dataMinX, pageMinX);
-                                    pageMaxX = Math.Max(dataMaxX, pageMaxX);
-                                    pageMinY = Math.Min(dataMinY, pageMinY);
-                                    pageMaxY = Math.Max(dataMaxY, pageMaxY);
-                                    pageMinZ = Math.Min(dataMinZ, pageMinZ);
-                                    pageMaxZ = Math.Max(dataMaxZ, pageMaxZ);
+                                    pageMin = Vector3D.Min(dataMin, pageMin);
+                                    pageMax = Vector3D.Max(dataMax, pageMax);
                                     pageMinGps = Math.Min(dataMinGps, pageMinGps);
                                     pageMaxGps = Math.Max(dataMaxGps, pageMaxGps);
                                 }
                             }
 
-                            ranges = (pageMinX, pageMaxX, pageMinY, pageMaxY, pageMinZ, pageMaxZ, pageMinGps, pageMaxGps);
+                            ranges = (pageMin, pageMax, pageMinGps, pageMaxGps);
                             return children;
                         }
                     }
 
-                    static void VerifyRanges(TextWriter error, in HeaderBlock headerBlock, Cloud.CopcInfo copcVlr, (double MinX, double MaxX, double MinY, double MaxY, double MinZ, double MaxZ, double MinGps, double MaxGps) ranges)
+                    static void VerifyRanges(TextWriter error, in HeaderBlock headerBlock, Cloud.CopcInfo copcVlr, MinMax ranges)
                     {
-                        if (!CloseEnough(ranges.MinX, headerBlock.Min.X, .0000001))
+                        if (!CloseEnough(ranges.Min.X, headerBlock.Min.X, .0000001))
                         {
-                            error.WriteLine("Minimum X value of {0} doesn't match header minimum of {1}.", ranges.MinX, headerBlock.Min.X);
+                            error.WriteLine("Minimum X value of {0} doesn't match header minimum of {1}.", ranges.Min.X, headerBlock.Min.X);
                         }
 
-                        if (!CloseEnough(ranges.MaxX, headerBlock.Max.X, .0000001))
+                        if (!CloseEnough(ranges.Max.X, headerBlock.Max.X, .0000001))
                         {
-                            error.WriteLine("Maximum X value of {0} doesn't match header maximum of {1}", ranges.MaxX, headerBlock.Max.X);
+                            error.WriteLine("Maximum X value of {0} doesn't match header maximum of {1}", ranges.Max.X, headerBlock.Max.X);
                         }
 
-                        if (!CloseEnough(ranges.MinY, headerBlock.Min.Y, .0000001))
+                        if (!CloseEnough(ranges.Min.Y, headerBlock.Min.Y, .0000001))
                         {
-                            error.WriteLine("Minimum X value of {0} doesn't match header minimum of {1}.", ranges.MinY, headerBlock.Min.Y);
+                            error.WriteLine("Minimum X value of {0} doesn't match header minimum of {1}.", ranges.Min.Y, headerBlock.Min.Y);
                         }
 
-                        if (!CloseEnough(ranges.MaxY, headerBlock.Max.Y, .0000001))
+                        if (!CloseEnough(ranges.Max.Y, headerBlock.Max.Y, .0000001))
                         {
-                            error.WriteLine("Maximum X value of {0} doesn't match header maximum of {1}", ranges.MaxY, headerBlock.Max.Y);
+                            error.WriteLine("Maximum X value of {0} doesn't match header maximum of {1}", ranges.Max.Y, headerBlock.Max.Y);
                         }
 
-                        if (!CloseEnough(ranges.MinZ, headerBlock.Min.Z, .0000001))
+                        if (!CloseEnough(ranges.Min.Z, headerBlock.Min.Z, .0000001))
                         {
-                            error.WriteLine("Minimum X value of {0} doesn't match header minimum of {1}.", ranges.MinZ, headerBlock.Min.Z);
+                            error.WriteLine("Minimum X value of {0} doesn't match header minimum of {1}.", ranges.Min.Z, headerBlock.Min.Z);
                         }
 
-                        if (!CloseEnough(ranges.MaxZ, headerBlock.Max.Z, .0000001))
+                        if (!CloseEnough(ranges.Max.Z, headerBlock.Max.Z, .0000001))
                         {
-                            error.WriteLine("Maximum X value of {0} doesn't match header maximum of {1}", ranges.MaxZ, headerBlock.Max.Z);
+                            error.WriteLine("Maximum X value of {0} doesn't match header maximum of {1}", ranges.Max.Z, headerBlock.Max.Z);
                         }
 
                         if (!CloseEnough(ranges.MinGps, copcVlr.GpsTimeMinimum, .0000001))
@@ -393,16 +383,12 @@ internal static partial class RootCommandExtensions
                         }
                     }
 
-                    static (double MinX, double MaxX, double MinY, double MaxY, double MinZ, double MaxZ, double MinGps, double MaxGps) ReadData(LazReader reader, in Cloud.CopcHierarchy.Entry entry)
+                    static MinMax ReadData(LazReader reader, in Cloud.CopcHierarchy.Entry entry)
                     {
                         reader.MoveToEntry(entry);
                         var count = entry.PointCount;
-                        var minX = double.MaxValue;
-                        var maxX = double.MinValue;
-                        var minY = double.MaxValue;
-                        var maxY = double.MinValue;
-                        var minZ = double.MaxValue;
-                        var maxZ = double.MinValue;
+                        var min = new Vector3D(double.MaxValue);
+                        var max = new Vector3D(double.MinValue);
                         var minGps = double.MaxValue;
                         var maxGps = double.MinValue;
                         var header = reader.Header;
@@ -412,15 +398,11 @@ internal static partial class RootCommandExtensions
                         {
                             if (reader.ReadPointDataRecord() is { PointDataRecord: IExtendedPointDataRecord point })
                             {
-                                var (x, y, z) = quantizer.Get(point);
+                                var vector = quantizer.Get(point);
                                 var gps = point.GpsTime;
 
-                                minX = Math.Min(x, minX);
-                                maxX = Math.Max(x, maxX);
-                                minY = Math.Min(y, minY);
-                                maxY = Math.Max(y, maxY);
-                                minZ = Math.Min(z, minZ);
-                                maxZ = Math.Max(z, maxZ);
+                                min = Vector3D.Min(min, vector);
+                                max = Vector3D.Max(max, vector);
                                 minGps = Math.Min(gps, minGps);
                                 maxGps = Math.Max(gps, maxGps);
                             }
@@ -428,7 +410,7 @@ internal static partial class RootCommandExtensions
                             count--;
                         }
 
-                        return (minX, maxX, minY, maxY, minZ, maxZ, minGps, maxGps);
+                        return (min, max, minGps, maxGps);
                     }
                 });
 

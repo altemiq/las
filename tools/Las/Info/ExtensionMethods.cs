@@ -114,11 +114,7 @@ internal static class ExtensionMethods
         {
             var quantizer = new PointDataRecordQuantizer(reader.Header);
             var boundingBox = box.Value;
-            filter = point =>
-            {
-                var (px, py, pz) = quantizer.Get(point);
-                return boundingBox.Contains(px, py, pz);
-            };
+            filter = point => boundingBox.Contains(quantizer.Get(point));
         }
 
 #if LAS1_4_OR_GREATER
@@ -273,6 +269,7 @@ internal static class ExtensionMethods
     }
 
 #if LAS1_4_OR_GREATER
+    [System.Diagnostics.CodeAnalysis.DynamicallyAccessedMembers(System.Diagnostics.CodeAnalysis.DynamicallyAccessedMemberTypes.All)]
     private readonly struct NullExtraBytes : IExtraBytes
     {
         int IReadOnlyCollection<ExtraBytesItem>.Count => 0;

@@ -165,95 +165,95 @@ public partial class ProjContext
         switch (version)
         {
             case WellKnownTextVersion.Wkt1:
-            {
-                using var reader = command.ExecuteReader();
-                if (!reader.Read())
                 {
-                    throw new KeyNotFoundException();
-                }
-
-                var projectionName = reader.GetString(3) switch
-                {
-                    "Transverse Mercator" or "Transverse Mercator (3D)" => "Transverse_Mercator",
-                    "Transverse Mercator (South Orientated)" => "Transverse_Mercator_South_Orientated",
-                    "Albers Equal Area" => "Albers_Conic_Equal_Area",
-                    "Lambert Conic Conformal (1SP)" => "Lambert_Conformal_Conic_1SP",
-                    "Lambert Conic Conformal (2SP)" => "Lambert_Conformal_Conic_2SP",
-                    "Lambert Conic Conformal (2SP Belgium)" => "Lambert_Conformal_Conic_2SP_Belgium",
-                    "Modified Azimuthal Equidistant" => "Azimuthal_Equidistant",
-                    "Lambert Cylindrical Equal Area" or "Lambert Cylindrical Equal Area (Spherical)" => "Cylindrical_Equal_Area",
-                    "Cassini-Soldner" => "Cassini_Soldner",
-                    "Equidistant Cylindrical" or "Equidistant Cylindrical (Spherical)" => "Equirectangular",
-                    "Hotine Oblique Mercator (variant A)" => "Hotine_Oblique_Mercator",
-                    "Hotine Oblique Mercator (variant B)" => "Hotine_Oblique_Mercator_Azimuth_Center",
-                    "Krovak (North Orientated)" => "Krovak",
-                    "Lambert Azimuthal Equal Area (Spherical)" => "Lambert_Azimuthal_Equal_Area",
-                    "Mercator (variant A)" => "Mercator_1SP",
-                    "Mercator (variant B)" => "Mercator_2SP",
-                    "Local Orthographic" => "Local Orthographic",
-                    "American Polyconic" => "Polyconic",
-                    "Polar Stereographic (variant A)" or "Polar Stereographic (variant B)" => "Polar_Stereographic",
-                    var name => name.Replace(' ', '_'),
-                };
-
-                yield return new("PROJECTION", projectionName);
-
-                foreach (var parameter in GetParameters(reader))
-                {
-                    var parameterName = parameter switch
-                    {
-                        { Code: 8801 or 8821 or 8832 } => "latitude_of_origin",
-                        { Code: 8802 or 8822 } => "central_meridian",
-                        { Code: 8805 or 8815 or 8819 } => "scale_factor",
-                        { Code: 8806 or 8826 or 8816 } => "false_easting",
-                        { Code: 8807 or 8827 or 8817 } => "false_northing",
-                        { Code: 8823 } => "standard_parallel_1",
-                        { Code: 8824 } => "standard_parallel_2",
-                        { Code: 8811 } => "latitude_of_center",
-                        { Code: 8812 } => "longitude_of_center",
-                        { Code: 1036 or 8813 } => "azimuth",
-                        { Code: 8814 } => "rectified_grid_angle",
-                        { Code: 8818 } => "pseudo_standard_parallel_1",
-                        { Code: 8833 } => "longitude_of_center",
-                        { Name: var n } => n.ToLowerInvariant().Replace(' ', '_'),
-                    };
-
-                    yield return new("PARAMETER", parameterName, parameter.Value);
-                }
-
-                break;
-            }
-
-            case WellKnownTextVersion.Wkt2_2015 or WellKnownTextVersion.Wkt2_2019:
-            {
-                IList<WellKnownTextValue> values = [];
-                IEnumerable<Parameter> parameters;
-                using (var reader = command.ExecuteReader())
-                {
+                    using var reader = command.ExecuteReader();
                     if (!reader.Read())
                     {
                         throw new KeyNotFoundException();
                     }
 
-                    values.Add(reader.GetString(0));
+                    var projectionName = reader.GetString(3) switch
+                    {
+                        "Transverse Mercator" or "Transverse Mercator (3D)" => "Transverse_Mercator",
+                        "Transverse Mercator (South Orientated)" => "Transverse_Mercator_South_Orientated",
+                        "Albers Equal Area" => "Albers_Conic_Equal_Area",
+                        "Lambert Conic Conformal (1SP)" => "Lambert_Conformal_Conic_1SP",
+                        "Lambert Conic Conformal (2SP)" => "Lambert_Conformal_Conic_2SP",
+                        "Lambert Conic Conformal (2SP Belgium)" => "Lambert_Conformal_Conic_2SP_Belgium",
+                        "Modified Azimuthal Equidistant" => "Azimuthal_Equidistant",
+                        "Lambert Cylindrical Equal Area" or "Lambert Cylindrical Equal Area (Spherical)" => "Cylindrical_Equal_Area",
+                        "Cassini-Soldner" => "Cassini_Soldner",
+                        "Equidistant Cylindrical" or "Equidistant Cylindrical (Spherical)" => "Equirectangular",
+                        "Hotine Oblique Mercator (variant A)" => "Hotine_Oblique_Mercator",
+                        "Hotine Oblique Mercator (variant B)" => "Hotine_Oblique_Mercator_Azimuth_Center",
+                        "Krovak (North Orientated)" => "Krovak",
+                        "Lambert Azimuthal Equal Area (Spherical)" => "Lambert_Azimuthal_Equal_Area",
+                        "Mercator (variant A)" => "Mercator_1SP",
+                        "Mercator (variant B)" => "Mercator_2SP",
+                        "Local Orthographic" => "Local Orthographic",
+                        "American Polyconic" => "Polyconic",
+                        "Polar Stereographic (variant A)" or "Polar Stereographic (variant B)" => "Polar_Stereographic",
+                        var name => name.Replace(' ', '_'),
+                    };
 
-                    // get the method
-                    values.Add(new WellKnownTextNode(
-                        "METHOD",
-                        reader.GetString(3),
-                        CreateAuthorityNode(reader.GetString(1), reader.GetInt32(2), version)));
+                    yield return new("PROJECTION", projectionName);
 
-                    parameters = GetParameters(reader);
+                    foreach (var parameter in GetParameters(reader))
+                    {
+                        var parameterName = parameter switch
+                        {
+                            { Code: 8801 or 8821 or 8832 } => "latitude_of_origin",
+                            { Code: 8802 or 8822 } => "central_meridian",
+                            { Code: 8805 or 8815 or 8819 } => "scale_factor",
+                            { Code: 8806 or 8826 or 8816 } => "false_easting",
+                            { Code: 8807 or 8827 or 8817 } => "false_northing",
+                            { Code: 8823 } => "standard_parallel_1",
+                            { Code: 8824 } => "standard_parallel_2",
+                            { Code: 8811 } => "latitude_of_center",
+                            { Code: 8812 } => "longitude_of_center",
+                            { Code: 1036 or 8813 } => "azimuth",
+                            { Code: 8814 } => "rectified_grid_angle",
+                            { Code: 8818 } => "pseudo_standard_parallel_1",
+                            { Code: 8833 } => "longitude_of_center",
+                            { Name: var n } => n.ToLowerInvariant().Replace(' ', '_'),
+                        };
+
+                        yield return new("PARAMETER", parameterName, parameter.Value);
+                    }
+
+                    break;
                 }
 
-                foreach (var parameter in parameters)
+            case WellKnownTextVersion.Wkt2_2015 or WellKnownTextVersion.Wkt2_2019:
                 {
-                    values.Add(parameter.GetNode(command, version));
-                }
+                    IList<WellKnownTextValue> values = [];
+                    IEnumerable<Parameter> parameters;
+                    using (var reader = command.ExecuteReader())
+                    {
+                        if (!reader.Read())
+                        {
+                            throw new KeyNotFoundException();
+                        }
 
-                yield return new("CONVERSION", values);
-                break;
-            }
+                        values.Add(reader.GetString(0));
+
+                        // get the method
+                        values.Add(new WellKnownTextNode(
+                            "METHOD",
+                            reader.GetString(3),
+                            CreateAuthorityNode(reader.GetString(1), reader.GetInt32(2), version)));
+
+                        parameters = GetParameters(reader);
+                    }
+
+                    foreach (var parameter in parameters)
+                    {
+                        values.Add(parameter.GetNode(command, version));
+                    }
+
+                    yield return new("CONVERSION", values);
+                    break;
+                }
         }
 
         static IEnumerable<Parameter> GetParameters(Microsoft.Data.Sqlite.SqliteDataReader reader)

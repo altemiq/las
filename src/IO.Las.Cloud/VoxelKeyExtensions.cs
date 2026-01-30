@@ -59,7 +59,7 @@ public static class VoxelKeyExtensions
         /// <param name="max">The maximum.</param>
         /// <returns>The bounding box.</returns>
         public BoundingBox ToBoundingBox(in Vector3D min, in Vector3D max)
-         {
+        {
 #if NET7_0_OR_GREATER
             var size =
                 Vector256.Divide(
@@ -74,7 +74,7 @@ public static class VoxelKeyExtensions
             return BoundingBox.FromXYZWHD(
                 (size * key.X) + min.X,
                 (size * key.Y) + min.Y,
-                (size * key.Z) + min.Z, 
+                (size * key.Z) + min.Z,
                 size,
                 size,
                 size);
