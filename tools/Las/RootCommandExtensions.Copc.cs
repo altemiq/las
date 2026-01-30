@@ -4,9 +4,11 @@
 // </copyright>
 // -----------------------------------------------------------------------
 
-namespace Altemiq.IO.Las;
+#pragma warning disable SA1200
+using MinMax = (Altemiq.IO.Las.Vector3D Min, Altemiq.IO.Las.Vector3D Max, System.Double MinGps, System.Double MaxGps);
+#pragma warning restore SA1200
 
-using MinMax = (Vector3D Min, Vector3D Max, double MinGps, double MaxGps);
+namespace Altemiq.IO.Las;
 
 /// <content>
 /// The <c>copc</c> extensions.
@@ -120,9 +122,9 @@ internal static partial class RootCommandExtensions
 
                     var header = reader.Header;
 
-                    if (header.Version.Major is not 1 || header.Version.Minor is not 4)
+                    if (header.Version.Major is not 1 || header.Version.Minor < 4)
                     {
-                        error.WriteLine("Invalid COPC file. Found version {0} instead of 1.4", header.Version);
+                        error.WriteLine("Invalid COPC file. Found version {0} instead of 1.4+", header.Version);
                     }
 
                     if (GetOffsetToVariableLengthRecords(reader) is var headerSize and not HeaderBlock.Size14)
@@ -154,7 +156,7 @@ internal static partial class RootCommandExtensions
                     _ = info.CopyTo(bytes);
                     for (var i = 0; i < 11; ++i)
                     {
-                        if (bytes[160 - 11 + i] is var v and not 0)
+                        if (bytes[160 - 11 + i] is not 0 and var v)
                         {
                             error.WriteLine("Invalid COPC VLR. COPC field reserved[{0}] is {1}, not 0.", i, v);
                         }
@@ -196,8 +198,8 @@ internal static partial class RootCommandExtensions
 
                         VerifyPage(error, page, positiveEntries);
                         MinMax ranges = (new(double.MaxValue), new(double.MinValue), double.MaxValue, double.MinValue);
-                        var entries = ProcessPage(reader, page, totals, counts, out var temp).ToList();
-                        ranges = Combine(ranges, temp);
+                        var entries = ProcessPage(reader, page, totals, counts, out var pageRanges).ToList();
+                        ranges = Combine(ranges, pageRanges);
                         while (entries.Count > 0)
                         {
                             var e = entries[0];
@@ -210,8 +212,8 @@ internal static partial class RootCommandExtensions
                             }
 
                             VerifyPage(error, page, positiveEntries);
-                            entries.AddRange(ProcessPage(reader, page, totals, counts, out temp));
-                            ranges = Combine(ranges, temp);
+                            entries.AddRange(ProcessPage(reader, page, totals, counts, out pageRanges));
+                            ranges = Combine(ranges, pageRanges);
                         }
 
                         if (!dumpChunks)
@@ -256,29 +258,11 @@ internal static partial class RootCommandExtensions
                         {
                             foreach (var key in page.Select(static e => e.Key))
                             {
-                                var parent = Cloud.VoxelKeyExtensions.Parent(key);
-                                if (parent.Level < 0)
-                                {
-                                    continue;
-                                }
-
-                                if (!KeyExists(parent, all))
+                                if (Cloud.VoxelKeyExtensions.Parent(key) is { Level: >= 0 } parent
+                                    && all.All(e => e.Key != parent))
                                 {
                                     error.WriteLine("Hierarchy entry {0} has no parent in existing hierarchy.", key);
                                 }
-                            }
-
-                            static bool KeyExists(in Cloud.CopcHierarchy.VoxelKey k, IEnumerable<Cloud.CopcHierarchy.Entry> all)
-                            {
-                                foreach (var e in all)
-                                {
-                                    if (e.Key == k)
-                                    {
-                                        return true;
-                                    }
-                                }
-
-                                return false;
                             }
                         }
 
