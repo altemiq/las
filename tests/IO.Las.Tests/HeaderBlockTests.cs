@@ -224,6 +224,24 @@ public class HeaderBlockTests
         yield return () => GpsPointDataRecord.Id;
     }
 #endif
+    
+    
+#if LAS1_5_OR_GREATER
+    [Test]
+    [Arguments(1000, true)]
+    [Arguments(0, false)]
+    public async Task SetTimeOffset(ushort timeOffset, bool expected)
+    {
+        var builder = new HeaderBlockBuilder
+        {
+            TimeOffset = timeOffset,
+        };
+
+        await Assert.That(builder.HeaderBlock)
+            .Member(static header => header.TimeOffset, offset => offset.IsEqualTo(timeOffset)).And
+            .Member(static header => header.GlobalEncoding.HasFlag(GlobalEncoding.TimeOffsetFlag), hasFlag => hasFlag.IsEqualTo(expected));
+    }
+#endif
 
     public static IEnumerable<Func<(Type, byte)>> GetPointTypes()
     {

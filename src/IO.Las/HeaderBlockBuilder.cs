@@ -169,7 +169,24 @@ public class HeaderBlockBuilder
     /// <summary>
     /// Gets or sets the time offset.
     /// </summary>
-    public ushort TimeOffset { get; set; }
+    public ushort TimeOffset
+    {
+        get;
+        set
+        {
+            if (field != value)
+            {
+                if ((field = value) is 0)
+                {
+                    this.GlobalEncoding &= ~GlobalEncoding.TimeOffsetFlag;
+                }
+                else
+                {
+                    this.GlobalEncoding |= GlobalEncoding.TimeOffsetFlag;
+                }
+            }
+        }
+    }
 #endif
 
     /// <summary>
