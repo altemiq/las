@@ -35,19 +35,11 @@ internal static class MemoryExtensions
             System.Runtime.InteropServices.Marshal.StructureToPtr(structure, span.GetIntPtr(), fDeleteOld);
     }
 
-    /// <content>
-    /// <see cref="Span{T}"/> extensions.
-    /// </content>
-    /// <param name="span">The span to operate on.</param>
     extension<T>(Span<T> span)
     {
         private unsafe IntPtr GetIntPtr() => (IntPtr)System.Runtime.CompilerServices.Unsafe.AsPointer(ref System.Runtime.InteropServices.MemoryMarshal.GetReference(span));
     }
 
-    /// <content>
-    /// <see cref="ReadOnlySpan{T}"/> extensions.
-    /// </content>
-    /// <param name="span">The span to operate on.</param>
     extension<T>(ReadOnlySpan<T> span)
     {
         private unsafe IntPtr GetIntPtr() => (IntPtr)System.Runtime.CompilerServices.Unsafe.AsPointer(ref System.Runtime.InteropServices.MemoryMarshal.GetReference(span));

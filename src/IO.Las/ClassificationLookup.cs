@@ -17,11 +17,9 @@ public sealed record ClassificationLookup : VariableLengthRecord, IReadOnlyList<
     /// </summary>
     public const ushort TagRecordId = default;
 
-    private const int ValueSize = 16;
-
     private const int ValueCount = 256;
 
-    private const int TotalSize = ValueCount * ValueSize;
+    private const int TotalSize = ValueCount * ClassificationLookupItem.Size;
 
     private readonly IReadOnlyList<ClassificationLookupItem> values;
 
@@ -90,10 +88,10 @@ public sealed record ClassificationLookup : VariableLengthRecord, IReadOnlyList<
             else
             {
                 d[0] = value.ClassNumber;
-                System.Text.Encoding.UTF8.GetNullTerminatedBytes(value.Description, d[1..16]);
+                System.Text.Encoding.UTF8.GetNullTerminatedBytes(value.Description, d[1..ClassificationLookupItem.Size]);
             }
 
-            bytesWritten += ValueSize;
+            bytesWritten += ClassificationLookupItem.Size;
             d = destination[bytesWritten..];
         }
 

@@ -26,6 +26,6 @@ public class ClassificationLookupTests
         _ = lookup.CopyTo(bytes);
 
         _ = await Assert.That(bytes[VariableLengthRecordHeader.Size]).IsEqualTo((byte)112);
-        _ = await Assert.That(bytes[VariableLengthRecordHeader.Size + 16]).IsEqualTo((byte)113);
+        _ = await Assert.That(bytes[VariableLengthRecordHeader.Size + ClassificationLookupItem.Size]).IsEqualTo((byte)113);
     }
 }

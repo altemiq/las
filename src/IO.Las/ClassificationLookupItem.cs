@@ -9,9 +9,14 @@ namespace Altemiq.IO.Las;
 /// <summary>
 /// The classification lookup item.
 /// </summary>
-[System.Runtime.InteropServices.StructLayout(System.Runtime.InteropServices.LayoutKind.Sequential, Pack = 1, Size = 16)]
+[System.Runtime.InteropServices.StructLayout(System.Runtime.InteropServices.LayoutKind.Sequential, Pack = 1, Size = Size)]
 public readonly record struct ClassificationLookupItem
 {
+    /// <summary>
+    /// The size of a classification lookup item.
+    /// </summary>
+    public const ushort Size = 16;
+
     /// <summary>
     /// Gets the class number.
     /// </summary>
@@ -20,6 +25,6 @@ public readonly record struct ClassificationLookupItem
     /// <summary>
     /// Gets the description.
     /// </summary>
-    [field: System.Runtime.InteropServices.MarshalAs(System.Runtime.InteropServices.UnmanagedType.ByValTStr, SizeConst = 15)]
+    [field: System.Runtime.InteropServices.MarshalAs(System.Runtime.InteropServices.UnmanagedType.ByValTStr, SizeConst = Size - sizeof(byte))]
     public string Description { get; init; }
 }
