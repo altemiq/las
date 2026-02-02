@@ -662,7 +662,7 @@ internal abstract class ChunkedReader : IPointReader
         // fail if the version is wrong
         if (stream.ReadUInt32LittleEndian() is not 0)
         {
-            throw new InvalidOperationException(Compression.Properties.Resources.IncorrectVersion);
+            throw new System.Diagnostics.UnreachableException(Compression.Properties.Resources.IncorrectVersion);
         }
 
         numberChunks = stream.ReadUInt32LittleEndian();

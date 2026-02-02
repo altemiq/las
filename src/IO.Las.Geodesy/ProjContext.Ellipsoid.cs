@@ -61,7 +61,7 @@ public partial class ProjContext
                 values.Add(GetUnitNode(command, authName, authCode, WellKnownTextVersion.Wkt2_2015));
                 break;
             default:
-                throw new InvalidOperationException();
+                throw new System.Diagnostics.UnreachableException();
         }
 
         return new(nodeName, values);

@@ -533,7 +533,7 @@ public class LasReader :
 #if LAS1_5_OR_GREATER
             { Version: { Major: 1, Minor: 5 } } => throw new InvalidOperationException(Properties.v1_5.Resources.OnlyDataPointsAreAllowed),
 #endif
-            _ => throw new InvalidCastException(),
+            _ => throw new System.Diagnostics.UnreachableException(),
         };
 
 #if LAS1_4_OR_GREATER

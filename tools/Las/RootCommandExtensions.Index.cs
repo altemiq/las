@@ -81,7 +81,7 @@ internal static partial class RootCommandExtensions
                         var lax = Path.ChangeExtension(input, ".lax");
                         var index = Path.Exists(lax)
                             ? CreateFromLax(lax, services)
-                            : throw new InvalidOperationException();
+                            : throw new FileNotFoundException(null, lax);
 #endif
 
                         foreach (var item in index)
@@ -141,7 +141,11 @@ internal static partial class RootCommandExtensions
                                 ".las" or ".laz" => CreateFromReader(input, services),
 #endif
                                 ".lax" => CreateFromLax(input, services),
-                                _ => throw new InvalidOperationException(),
+#if LAS1_4_OR_GREATER
+                                _ => throw new InvalidOperationException("Extension must be 'las', 'laz', or 'lax'"),
+#else
+                                _ => throw new InvalidOperationException("Extension must be 'lax'"),
+#endif
                             };
                         }
 

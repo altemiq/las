@@ -30,7 +30,7 @@ internal static class IndexingExtensions
     public static Indexing.LasIndex ReadIndex(this LasReader reader) =>
         TryReadIndex(reader, out var index)
             ? index
-            : throw new InvalidOperationException();
+            : throw new InvalidDataException();
 
     [System.Diagnostics.CodeAnalysis.SuppressMessage("Major Bug", "S1751:Loops with at most one iteration should be refactored", Justification = "Checked")]
     private static bool TryReadIndex(LasReader reader, [System.Diagnostics.CodeAnalysis.NotNullWhen(true)] out Indexing.LasIndex? index)

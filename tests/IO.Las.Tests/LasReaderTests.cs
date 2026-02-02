@@ -9,7 +9,7 @@ public class LasReaderTests
         await
 #endif
         using var stream = typeof(LasReaderTests).Assembly.GetManifestResourceStream(typeof(LasReaderTests), "fusa.las")
-                               ?? throw new InvalidOperationException("Failed to get stream");
+                               ?? throw new System.Diagnostics.UnreachableException("Failed to get stream");
 #if NETSTANDARD2_1_OR_GREATER || NETCOREAPP3_0_OR_GREATER
         await
 #endif
@@ -37,7 +37,7 @@ public class LasReaderTests
         await
 #endif
         using var stream = typeof(LasReaderTests).Assembly.GetManifestResourceStream(typeof(LasReaderTests), "fusa.las")
-                               ?? throw new InvalidOperationException("Failed to get stream");
+                               ?? throw new System.Diagnostics.UnreachableException("Failed to get stream");
 #if NETSTANDARD2_1_OR_GREATER || NETCOREAPP3_0_OR_GREATER
         await
 #endif
@@ -63,7 +63,7 @@ public class LasReaderTests
         await
 #endif
         using var stream = typeof(LasReaderTests).Assembly.GetManifestResourceStream(typeof(LasReaderTests), "fusa.las")
-                              ?? throw new InvalidOperationException("Failed to get stream");
+                              ?? throw new System.Diagnostics.UnreachableException("Failed to get stream");
 #if NETSTANDARD2_1_OR_GREATER || NETCOREAPP3_0_OR_GREATER
         await
 #endif
@@ -86,7 +86,7 @@ public class LasReaderTests
         await
 #endif
         using var stream = typeof(LasReaderTests).Assembly.GetManifestResourceStream(typeof(LasReaderTests), "fusa.las")
-                              ?? throw new InvalidOperationException("Failed to get stream");
+                              ?? throw new System.Diagnostics.UnreachableException("Failed to get stream");
         var bytes = new byte[4];
 
         await Assert.That(await stream.ReadAsync(bytes)).IsEqualTo(bytes.Length);
@@ -114,7 +114,7 @@ public class LasReaderTests
         await
 #endif
         using var stream = typeof(LasReaderTests).Assembly.GetManifestResourceStream(typeof(LasReaderTests), "fusa_height.las")
-                                    ?? throw new InvalidOperationException("Failed to get stream");
+                                    ?? throw new System.Diagnostics.UnreachableException("Failed to get stream");
 #if NETSTANDARD2_1_OR_GREATER || NETCOREAPP3_0_OR_GREATER
         await
 #endif
@@ -156,7 +156,7 @@ public class LasReaderTests
         await
 #endif
         using var stream = typeof(LasReaderTests).Assembly.GetManifestResourceStream(typeof(LasReaderTests), "fusa.las")
-                                    ?? throw new InvalidOperationException("Failed to get stream");
+                                    ?? throw new System.Diagnostics.UnreachableException("Failed to get stream");
 #if NETSTANDARD2_1_OR_GREATER || NETCOREAPP3_0_OR_GREATER
         await
 #endif
@@ -189,7 +189,7 @@ public class LasReaderTests
         await
 #endif
         using var stream = typeof(LasReaderTests).Assembly.GetManifestResourceStream(typeof(LasReaderTests), "fusa.las")
-                                    ?? throw new InvalidOperationException("Failed to get stream");
+                                    ?? throw new System.Diagnostics.UnreachableException("Failed to get stream");
 #if NETSTANDARD2_1_OR_GREATER || NETCOREAPP3_0_OR_GREATER
         await
 #endif
@@ -209,7 +209,7 @@ public class LasReaderTests
         await
 #endif
         using var stream = typeof(LasReaderTests).Assembly.GetManifestResourceStream(typeof(LasReaderTests), "fusa.las")
-                                    ?? throw new InvalidOperationException("Failed to get stream");
+                                    ?? throw new System.Diagnostics.UnreachableException("Failed to get stream");
         var bytes = new byte[4];
         await Assert.That(stream.ReadAsync(bytes, 0, bytes.Length)).IsEqualTo(bytes.Length);
 #if NETSTANDARD2_1_OR_GREATER || NETCOREAPP3_0_OR_GREATER
@@ -233,7 +233,7 @@ public class LasReaderTests
         await
 #endif
         using var stream = typeof(LasReaderTests).Assembly.GetManifestResourceStream(typeof(LasReaderTests), "fusa_height.las")
-                                    ?? throw new InvalidOperationException("Failed to get stream");
+                                    ?? throw new System.Diagnostics.UnreachableException("Failed to get stream");
 #if NETSTANDARD2_1_OR_GREATER || NETCOREAPP3_0_OR_GREATER
         await
 #endif
@@ -274,7 +274,7 @@ public class LasReaderTests
         await
 #endif
         using var stream = typeof(LasReaderTests).Assembly.GetManifestResourceStream(typeof(LasReaderTests), "fusa.las")
-                               ?? throw new InvalidOperationException("Failed to get stream");
+                               ?? throw new System.Diagnostics.UnreachableException("Failed to get stream");
 #if NETSTANDARD2_1_OR_GREATER || NETCOREAPP3_0_OR_GREATER
         await
 #endif

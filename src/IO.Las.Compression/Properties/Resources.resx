@@ -145,4 +145,8 @@
     <value>Previous chunk was corrupt</value>
     <comment>Error message for chunk corruption.@Invariant</comment>
   </data>
+  <data name="InvalidChunkName" xml:space="preserve">
+    <value>Invalid chunk name</value>
+    <comment>Error message for an invalid chunk name.@Invariant</comment>
+  </data>
 </root>

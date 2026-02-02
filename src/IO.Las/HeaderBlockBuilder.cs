@@ -230,7 +230,7 @@ public class HeaderBlockBuilder
 #else
         System.Reflection.IntrospectionExtensions.GetTypeInfo(typeof(T)).GetDeclaredField(nameof(PointDataRecord.Id))?.GetValue(null) is byte pointTypeId
             ? new(pointTypeId)
-            : throw new InvalidOperationException();
+            : throw new System.Diagnostics.UnreachableException();
 #endif
 
     /// <summary>
@@ -395,7 +395,7 @@ public class HeaderBlockBuilder
         { Major: 1, Minor: >= 5 } => 6, // ExtendedGpsPointDataRecord.Id,
 #endif
         { Major: 1 } => PointDataRecord.Id,
-        _ => throw new InvalidOperationException(),
+        _ => throw new System.Diagnostics.UnreachableException(),
     };
 
 #if LAS1_5_OR_GREATER

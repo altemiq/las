@@ -23,7 +23,7 @@ internal static class FileManager
     /// <returns>The path to <c>proj.db</c>.</returns>
     public static string FindProjDb() => FindResource("proj.db");
 
-    private static string FindResource(string name) => GetResourcePaths(name).FirstOrDefault(File.Exists) ?? throw new FileNotFoundException($"Cannot find {name}");
+    private static string FindResource(string name) => GetResourcePaths(name).FirstOrDefault(File.Exists) ?? throw new FileNotFoundException($"Cannot find {name}", name);
 
     private static IEnumerable<string> GetResourcePaths(string name)
     {

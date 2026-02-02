@@ -159,7 +159,7 @@ public sealed class LazReader : LasReader, ILazReader
             { Compressor: Compressor.LayeredChunked, ChunkSize: LasZip.VariableChunkSize } zip => new VariableLayeredChunkedReader(this.RawReader, this.Header, zip, this.PointDataLength),
             { Compressor: Compressor.LayeredChunked } zip => new FixedLayeredChunkedReader(this.RawReader, this.Header, zip, this.PointDataLength),
 #endif
-            _ => throw new InvalidOperationException(),
+            _ => throw new System.Diagnostics.UnreachableException(),
         };
 
         static LasZip? GetLasZip(IReadOnlyList<VariableLengthRecord> variableLengthRecords)

@@ -24,6 +24,7 @@
       T:System.Diagnostics.CodeAnalysis.NotNullWhenAttribute|
       T:System.Diagnostics.CodeAnalysis.MaybeNullWhenAttribute|
       T:System.Diagnostics.CodeAnalysis.StringSyntaxAttribute|
+      T:System.Diagnostics.UnreachableException|
       T:System.HashCode|
       T:System.Index|
       T:System.Range|

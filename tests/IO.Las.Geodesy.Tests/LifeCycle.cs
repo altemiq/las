@@ -8,7 +8,7 @@ public static class LifeCycle
     public static void Setup(AssemblyHookContext context)
     {
         using var manifestStream = context.Assembly.GetManifestResourceStream(typeof(ProjContextTests), "proj.db")
-                                   ?? throw new InvalidOperationException();
+                                   ?? throw new System.Diagnostics.UnreachableException();
 
         TestLocation = Path.GetTempFileName();
         context.OutputWriter.WriteLine($"Writing temp proj.db to {TestLocation}");

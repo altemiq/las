@@ -22,7 +22,7 @@ public class ProjectGuidTests
         await
 #endif
         using var stream = typeof(ProjectGuidTests).Assembly.GetManifestResourceStream(typeof(ProjectGuidTests), resource)
-                              ?? throw new InvalidOperationException("Failed to get stream");
+                           ?? throw new System.Diagnostics.UnreachableException("Failed to get stream");
         var length = (int)stream.Length;
         var bytes = System.Buffers.ArrayPool<byte>.Shared.Rent(length);
 #if NET
@@ -46,7 +46,7 @@ public class ProjectGuidTests
         await
 #endif
         using var stream = typeof(ProjectGuidTests).Assembly.GetManifestResourceStream(typeof(ProjectGuidTests), resource)
-                              ?? throw new InvalidOperationException("Failed to get stream");
+                           ?? throw new System.Diagnostics.UnreachableException("Failed to get stream");
         HeaderBlockReader headerReader = new(stream);
         var headerBlock = headerReader.GetHeaderBlock();
         _ = await Assert.That(headerBlock.ProjectId).IsEqualTo(Guid.Parse(id));

@@ -151,7 +151,7 @@ public static partial class ExtensionMethods
 #if LAS1_5_OR_GREATER
         { Version: { Major: 1, Minor: 5 } } => throw new InvalidOperationException(Properties.v1_5.Resources.OnlyDataPointsAreAllowed),
 #endif
-        _ => throw new InvalidCastException(),
+        _ => throw new System.Diagnostics.UnreachableException(),
     };
 
     /// <summary>

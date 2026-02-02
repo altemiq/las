@@ -99,12 +99,12 @@ public static class CopcExtensions
 
             if (reader.Header.Version.Minor < 4)
             {
-                throw new InvalidOperationException("Source must be LAS1.4 or greater");
+                throw new InvalidDataException("Source must be LAS1.4 or greater");
             }
 
             if ((reader.Header.GlobalEncoding & GlobalEncoding.Wkt) is GlobalEncoding.None)
             {
-                throw new InvalidOperationException("Source must have WKT specified");
+                throw new InvalidDataException("Source must have WKT specified");
             }
 
             // remove any compression tags
@@ -826,7 +826,7 @@ public static class CopcExtensions
             var gridValue = this.grid[cell];
             if (gridValue is 0)
             {
-                throw new InvalidOperationException("internal error in the finalizer. Please report");
+                throw new System.Diagnostics.UnreachableException("internal error in the finalizer. Please report");
             }
 
             gridValue--;

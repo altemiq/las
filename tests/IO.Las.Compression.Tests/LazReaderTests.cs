@@ -24,7 +24,7 @@ public class LazReaderTests
         await
 #endif
         using var stream = typeof(LazReaderTests).Assembly.GetManifestResourceStream(typeof(LazReaderTests), file)
-            ?? throw new InvalidOperationException("Failed to get stream");
+                           ?? throw new System.Diagnostics.UnreachableException("Failed to get stream");
         using LazReader reader = new(stream);
         _ = await Assert.That(reader.VariableLengthRecords).Count().IsEqualTo(vlrCount);
 
@@ -58,7 +58,7 @@ public class LazReaderTests
         await
 #endif
         using var stream = typeof(LazReaderTests).Assembly.GetManifestResourceStream(typeof(LazReaderTests), resource)
-            ?? throw new InvalidOperationException("Failed to get stream");
+                           ?? throw new System.Diagnostics.UnreachableException("Failed to get stream");
 
         var reader = LazReader.Create(stream);
         _ = await Assert.That(reader)
@@ -75,7 +75,7 @@ public class LazReaderTests
         await
 #endif
         using var stream = typeof(LazReaderTests).Assembly.GetManifestResourceStream(typeof(LazReaderTests), "fusa_height.laz")
-            ?? throw new InvalidOperationException("Failed to get stream");
+                           ?? throw new System.Diagnostics.UnreachableException("Failed to get stream");
         using LazReader reader = new(stream);
         await CheckHeader(reader.Header, new(1, 4));
         _ = await Assert.That(reader.VariableLengthRecords).Count().IsEqualTo(3);
@@ -118,7 +118,7 @@ public class LazReaderTests
         await
 #endif
         using var stream = typeof(LazReaderTests).Assembly.GetManifestResourceStream(typeof(LazReaderTests), resource)
-            ?? throw new InvalidOperationException("Failed to get stream");
+                           ?? throw new System.Diagnostics.UnreachableException("Failed to get stream");
         using LazReader reader = new(stream);
         await CheckHeader(reader.Header, new(major, minor));
 
@@ -149,7 +149,7 @@ public class LazReaderTests
         await
 #endif
         using var stream = typeof(LazReaderTests).Assembly.GetManifestResourceStream(typeof(LazReaderTests), file)
-            ?? throw new InvalidOperationException("Failed to get stream");
+                           ?? throw new System.Diagnostics.UnreachableException("Failed to get stream");
         using LazReader reader = new(stream);
         _ = await Assert.That(reader.VariableLengthRecords).Count().IsEqualTo(vlrCount);
 
@@ -175,7 +175,7 @@ public class LazReaderTests
         await
 #endif
         using var stream = typeof(LazReaderTests).Assembly.GetManifestResourceStream(typeof(LazReaderTests), "fusa_height.laz")
-            ?? throw new InvalidOperationException("Failed to get stream");
+                           ?? throw new System.Diagnostics.UnreachableException("Failed to get stream");
         using LazReader reader = new(stream);
         await CheckHeader(reader.Header, new(1, 4));
         _ = await Assert.That(reader.VariableLengthRecords).Count().IsEqualTo(3);
@@ -209,7 +209,7 @@ public class LazReaderTests
         await
 #endif
         using var stream = typeof(LazReaderTests).Assembly.GetManifestResourceStream(typeof(LazReaderTests), resource)
-            ?? throw new InvalidOperationException("Failed to get stream");
+                           ?? throw new System.Diagnostics.UnreachableException("Failed to get stream");
         using LazReader reader = new(stream);
         await CheckHeader(reader.Header, new(major, minor));
 

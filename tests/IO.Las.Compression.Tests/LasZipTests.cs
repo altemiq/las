@@ -32,13 +32,13 @@ public class LasZipTests
     [Test]
     public async Task InvalidCompressorValue()
     {
-        _ = await Assert.That(() => new LasZip(PointDataRecord.Id, 0, (Compressor)ushort.MaxValue).Validate(PointDataRecord.Size)).Throws<InvalidOperationException>();
+        _ = await Assert.That(() => new LasZip(PointDataRecord.Id, 0, (Compressor)ushort.MaxValue).Validate(PointDataRecord.Size)).Throws<InvalidDataException>();
     }
 #else
     [Test]
     public async Task InvalidCompressorValue()
     {
-        _ = await Assert.That(() => new LasZip(PointDataRecord.Id, (Compressor)ushort.MaxValue).Validate(PointDataRecord.Size)).Throws<InvalidOperationException>();
+        _ = await Assert.That(() => new LasZip(PointDataRecord.Id, (Compressor)ushort.MaxValue).Validate(PointDataRecord.Size)).Throws<InvalidDataException>();
     }
 #endif
 }

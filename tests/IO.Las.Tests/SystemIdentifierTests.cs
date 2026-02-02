@@ -92,7 +92,7 @@ public class SystemIdentifierTests
         await
 #endif
         using var stream = typeof(SystemIdentifierTests).Assembly.GetManifestResourceStream(typeof(SystemIdentifierTests), "systemid_examples.1sensor.las")
-                                    ?? throw new InvalidOperationException("Failed to get stream");
+                           ?? throw new System.Diagnostics.UnreachableException("Failed to get stream");
         HeaderBlockReader header = new(stream);
 
         var headerBlock = header.GetHeaderBlock();
@@ -110,7 +110,7 @@ public class SystemIdentifierTests
         await
 #endif
         using var stream = typeof(SystemIdentifierTests).Assembly.GetManifestResourceStream(typeof(SystemIdentifierTests), "systemid_examples.1sensor_generic.las")
-                                    ?? throw new InvalidOperationException("Failed to get stream");
+                           ?? throw new System.Diagnostics.UnreachableException("Failed to get stream");
         HeaderBlockReader header = new(stream);
 
         var headerBlock = header.GetHeaderBlock();
@@ -129,7 +129,7 @@ public class SystemIdentifierTests
         await
 #endif
         using var stream = typeof(SystemIdentifierTests).Assembly.GetManifestResourceStream(typeof(SystemIdentifierTests), "systemid_examples.5sensor.las")
-                                    ?? throw new InvalidOperationException("Failed to get stream");
+                           ?? throw new System.Diagnostics.UnreachableException("Failed to get stream");
         HeaderBlockReader header = new(stream);
 
         var headerBlock = header.GetHeaderBlock();

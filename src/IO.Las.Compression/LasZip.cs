@@ -175,19 +175,19 @@ internal sealed class LasZip
     /// Checks this instance.
     /// </summary>
     /// <param name="pointSize">The point size.</param>
-    /// <exception cref="InvalidOperationException">The compressor is invalid.</exception>
-    /// <exception cref="InvalidOperationException">The coder is invalid.</exception>
-    /// <exception cref="InvalidOperationException">The point size is invalid.</exception>
+    /// <exception cref="InvalidDataException">The compressor is invalid.</exception>
+    /// <exception cref="InvalidDataException">The coder is invalid.</exception>
+    /// <exception cref="InvalidDataException">The point size is invalid.</exception>
     public void Validate(ushort pointSize)
     {
         if (!Enum.IsDefined(this.Compressor))
         {
-            throw new InvalidOperationException($"Invalid {nameof(Las.Compressor)} value: {this.Compressor}");
+            throw new InvalidDataException($"Invalid {nameof(Las.Compressor)} value: {this.Compressor}");
         }
 
         if (!Enum.IsDefined(this.Coder))
         {
-            throw new InvalidOperationException($"Invalid {nameof(Las.Coder)} value: {this.Coder}");
+            throw new InvalidDataException($"Invalid {nameof(Las.Coder)} value: {this.Coder}");
         }
 
         ValidateItems(this.Items, pointSize);
@@ -203,7 +203,7 @@ internal sealed class LasZip
 
             if (pointSize is not 0 && (pointSize != size))
             {
-                throw new InvalidOperationException($"point has size of {pointSize} but items only add up to {size} bytes");
+                throw new InvalidDataException($"point has size of {pointSize} but items only add up to {size} bytes");
             }
 
             static void ValidateItem(LasItem item)
@@ -211,52 +211,52 @@ internal sealed class LasZip
                 switch (item)
                 {
                     case { Type: LasItemType.Point10, Size: not PointDataRecord.Size }:
-                        throw new InvalidOperationException($"{item.Name} has size != {PointDataRecord.Size}");
+                        throw new InvalidDataException($"{item.Name} has size != {PointDataRecord.Size}");
                 }
 
                 switch (item)
                 {
-                    case { Type: LasItemType.Point10, Size: not PointDataRecord.Size }: throw new InvalidOperationException($"{item.Name} has size != {PointDataRecord.Size}");
-                    case { Type: LasItemType.Point10, Version: < 2 }: throw new InvalidOperationException($"{item.Name} has version < 2");
-                    case { Type: LasItemType.Point10, Version: > 2 }: throw new InvalidOperationException($"{item.Name} has version > 2");
+                    case { Type: LasItemType.Point10, Size: not PointDataRecord.Size }: throw new InvalidDataException($"{item.Name} has size != {PointDataRecord.Size}");
+                    case { Type: LasItemType.Point10, Version: < 2 }: throw new InvalidDataException($"{item.Name} has version < 2");
+                    case { Type: LasItemType.Point10, Version: > 2 }: throw new InvalidDataException($"{item.Name} has version > 2");
                     case { Type: LasItemType.Point10 }: break;
-                    case { Type: LasItemType.GpsTime11, Size: not GpsItemSize }: throw new InvalidOperationException($"{item.Name} has size != {GpsItemSize}");
-                    case { Type: LasItemType.GpsTime11, Version: < 2 }: throw new InvalidOperationException($"{item.Name} has version < 2");
-                    case { Type: LasItemType.GpsTime11, Version: > 2 }: throw new InvalidOperationException($"{item.Name} has version > 2");
+                    case { Type: LasItemType.GpsTime11, Size: not GpsItemSize }: throw new InvalidDataException($"{item.Name} has size != {GpsItemSize}");
+                    case { Type: LasItemType.GpsTime11, Version: < 2 }: throw new InvalidDataException($"{item.Name} has version < 2");
+                    case { Type: LasItemType.GpsTime11, Version: > 2 }: throw new InvalidDataException($"{item.Name} has version > 2");
                     case { Type: LasItemType.GpsTime11 }: break;
 #if LAS1_2_OR_GREATER
-                    case { Type: LasItemType.Rgb12, Size: not ColorItemSize }: throw new InvalidOperationException($"{item.Name} has size != {ColorItemSize}");
-                    case { Type: LasItemType.Rgb12, Version: < 2 }: throw new InvalidOperationException($"{item.Name} has version < 2");
-                    case { Type: LasItemType.Rgb12, Version: > 2 }: throw new InvalidOperationException($"{item.Name} has version > 2");
+                    case { Type: LasItemType.Rgb12, Size: not ColorItemSize }: throw new InvalidDataException($"{item.Name} has size != {ColorItemSize}");
+                    case { Type: LasItemType.Rgb12, Version: < 2 }: throw new InvalidDataException($"{item.Name} has version < 2");
+                    case { Type: LasItemType.Rgb12, Version: > 2 }: throw new InvalidDataException($"{item.Name} has version > 2");
                     case { Type: LasItemType.Rgb12 }: break;
 #endif
-                    case { Type: LasItemType.Byte, Size: < sizeof(byte) }: throw new InvalidOperationException($"{item.Name} has size < {sizeof(byte)}");
-                    case { Type: LasItemType.Byte, Version: < 2 }: throw new InvalidOperationException($"{item.Name} has version < 2");
-                    case { Type: LasItemType.Byte, Version: > 2 }: throw new InvalidOperationException($"{item.Name} has version > 2");
+                    case { Type: LasItemType.Byte, Size: < sizeof(byte) }: throw new InvalidDataException($"{item.Name} has size < {sizeof(byte)}");
+                    case { Type: LasItemType.Byte, Version: < 2 }: throw new InvalidDataException($"{item.Name} has version < 2");
+                    case { Type: LasItemType.Byte, Version: > 2 }: throw new InvalidDataException($"{item.Name} has version > 2");
                     case { Type: LasItemType.Byte }: break;
 #if LAS1_3_OR_GREATER
-                    case { Type: LasItemType.WavePacket13, Size: not WavePacketItemSize }: throw new InvalidOperationException($"{item.Name} has size != {WavePacketItemSize}");
-                    case { Type: LasItemType.WavePacket13, Version: > 1 }: throw new InvalidOperationException($"{item.Name} has version > 1");
+                    case { Type: LasItemType.WavePacket13, Size: not WavePacketItemSize }: throw new InvalidDataException($"{item.Name} has size != {WavePacketItemSize}");
+                    case { Type: LasItemType.WavePacket13, Version: > 1 }: throw new InvalidDataException($"{item.Name} has version > 1");
                     case { Type: LasItemType.WavePacket13 }: break;
 #endif
 #if LAS1_4_OR_GREATER
-                    case { Type: LasItemType.Point14, Size: not ExtendedGpsPointDataRecord.Size }: throw new InvalidOperationException($"{item.Name} has size != {ExtendedGpsPointDataRecord.Size}");
-                    case { Type: LasItemType.Point14, Version: not 0 and not 2 and not 3 and not 4 }: throw new InvalidOperationException($"{item.Name} has version != 0 and != 2 and != 3 and != 4");
+                    case { Type: LasItemType.Point14, Size: not ExtendedGpsPointDataRecord.Size }: throw new InvalidDataException($"{item.Name} has size != {ExtendedGpsPointDataRecord.Size}");
+                    case { Type: LasItemType.Point14, Version: not 0 and not 2 and not 3 and not 4 }: throw new InvalidDataException($"{item.Name} has version != 0 and != 2 and != 3 and != 4");
                     case { Type: LasItemType.Point14 }: break;
-                    case { Type: LasItemType.Rgb14, Size: not ColorItemSize }: throw new InvalidOperationException($"{item.Name} has size != {ColorItemSize}");
-                    case { Type: LasItemType.Rgb14, Version: not 0 and not 2 and not 3 and not 4 }: throw new InvalidOperationException($"{item.Name} has version != 0 and != 2 and != 3 and != 4");
+                    case { Type: LasItemType.Rgb14, Size: not ColorItemSize }: throw new InvalidDataException($"{item.Name} has size != {ColorItemSize}");
+                    case { Type: LasItemType.Rgb14, Version: not 0 and not 2 and not 3 and not 4 }: throw new InvalidDataException($"{item.Name} has version != 0 and != 2 and != 3 and != 4");
                     case { Type: LasItemType.Rgb14 }: break;
-                    case { Type: LasItemType.RgbNir14, Size: not ColorNearInfraredItemSize }: throw new InvalidOperationException($"{item.Name} has size != {ColorNearInfraredItemSize}");
-                    case { Type: LasItemType.RgbNir14, Version: not 0 and not 2 and not 3 and not 4 }: throw new InvalidOperationException($"{item.Name} has version != 0 and != 2 and != 3 and != 4");
+                    case { Type: LasItemType.RgbNir14, Size: not ColorNearInfraredItemSize }: throw new InvalidDataException($"{item.Name} has size != {ColorNearInfraredItemSize}");
+                    case { Type: LasItemType.RgbNir14, Version: not 0 and not 2 and not 3 and not 4 }: throw new InvalidDataException($"{item.Name} has version != 0 and != 2 and != 3 and != 4");
                     case { Type: LasItemType.RgbNir14 }: break;
-                    case { Type: LasItemType.Byte14, Size: < sizeof(byte) }: throw new InvalidOperationException($"{item.Name} has size < {sizeof(byte)}");
-                    case { Type: LasItemType.Byte14, Version: not 0 and not 2 and not 3 and not 4 }: throw new InvalidOperationException($"{item.Name} has version != 0 and != 2 and != 3 and != 4");
+                    case { Type: LasItemType.Byte14, Size: < sizeof(byte) }: throw new InvalidDataException($"{item.Name} has size < {sizeof(byte)}");
+                    case { Type: LasItemType.Byte14, Version: not 0 and not 2 and not 3 and not 4 }: throw new InvalidDataException($"{item.Name} has version != 0 and != 2 and != 3 and != 4");
                     case { Type: LasItemType.Byte14 }: break;
-                    case { Type: LasItemType.WavePacket14, Size: not WavePacketItemSize }: throw new InvalidOperationException($"{item.Name}  has size != {WavePacketItemSize}");
-                    case { Type: LasItemType.WavePacket14, Version: not 0 and not 3 and not 4 }: throw new InvalidOperationException($"{item.Name}  has version != 0 and != 3 and != 4");
+                    case { Type: LasItemType.WavePacket14, Size: not WavePacketItemSize }: throw new InvalidDataException($"{item.Name}  has size != {WavePacketItemSize}");
+                    case { Type: LasItemType.WavePacket14, Version: not 0 and not 3 and not 4 }: throw new InvalidDataException($"{item.Name}  has version != 0 and != 3 and != 4");
                     case { Type: LasItemType.WavePacket14 }: break;
 #endif
-                    default: throw new InvalidOperationException($"item unknown ({item.Type},{item.Size},{item.Version}");
+                    default: throw new InvalidDataException($"item unknown ({item.Type},{item.Size},{item.Version}");
                 }
             }
         }

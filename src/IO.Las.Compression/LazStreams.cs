@@ -56,7 +56,7 @@ internal static class LazStreams
     public static int ParseChunkNumber(string s) => s.Split('_') switch
     {
         [Chunk, var v] => int.Parse(v, System.Globalization.CultureInfo.InvariantCulture),
-        _ => throw new InvalidOperationException(),
+        _ => throw new ArgumentException(Compression.Properties.Resources.InvalidChunkName, paramName: nameof(s)),
     };
 
     /// <summary>

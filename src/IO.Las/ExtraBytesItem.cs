@@ -281,7 +281,7 @@ public readonly record struct ExtraBytesItem
                 (true, true, ExtraBytesDataType.Double) => ScaleAndOffsetDouble(item, System.Buffers.Binary.BinaryPrimitives.ReadDoubleLittleEndian(source)),
                 (true, false, ExtraBytesDataType.Double) => ScaleDouble(item, System.Buffers.Binary.BinaryPrimitives.ReadDoubleLittleEndian(source)),
                 (false, true, ExtraBytesDataType.Double) => OffsetDouble(item, System.Buffers.Binary.BinaryPrimitives.ReadDoubleLittleEndian(source)),
-                _ => throw new InvalidCastException(),
+                _ => throw new System.Diagnostics.UnreachableException(),
             };
 
             [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]

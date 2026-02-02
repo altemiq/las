@@ -176,7 +176,7 @@ public sealed class LazWriter : LasWriter
             foreach (var point in points.Take(count))
             {
                 this.Write(
-                    point.PointDataRecord ?? throw new InvalidOperationException(),
+                    point.PointDataRecord ?? throw new System.Diagnostics.UnreachableException(),
                     point.ExtraBytes.Span);
             }
         }
@@ -184,7 +184,7 @@ public sealed class LazWriter : LasWriter
         foreach (var point in points.Take(count))
         {
             this.Write(
-                point.PointDataRecord ?? throw new InvalidOperationException(),
+                point.PointDataRecord ?? throw new System.Diagnostics.UnreachableException(),
                 point.ExtraBytes.Span);
         }
 #endif
@@ -207,7 +207,7 @@ public sealed class LazWriter : LasWriter
             foreach (var point in points)
             {
                 this.Write(
-                    point.PointDataRecord ?? throw new InvalidOperationException(),
+                    point.PointDataRecord ?? throw new System.Diagnostics.UnreachableException(),
                     point.ExtraBytes.Span);
             }
         }
@@ -215,7 +215,7 @@ public sealed class LazWriter : LasWriter
         foreach (var point in points)
         {
             this.Write(
-                point.PointDataRecord ?? throw new InvalidOperationException(),
+                point.PointDataRecord ?? throw new System.Diagnostics.UnreachableException(),
                 point.ExtraBytes.Span);
         }
 #endif
@@ -302,7 +302,7 @@ public sealed class LazWriter : LasWriter
             foreach (var point in points.Take(count))
             {
                 await this.WriteAsync(
-                    point.PointDataRecord ?? throw new InvalidOperationException(),
+                    point.PointDataRecord ?? throw new System.Diagnostics.UnreachableException(),
                     point.ExtraBytes,
                     cancellationToken).ConfigureAwait(false);
             }
@@ -311,7 +311,7 @@ public sealed class LazWriter : LasWriter
         foreach (var point in points.Take(count))
         {
             await this.WriteAsync(
-                point.PointDataRecord ?? throw new InvalidOperationException(),
+                point.PointDataRecord ?? throw new System.Diagnostics.UnreachableException(),
                 point.ExtraBytes,
                 cancellationToken).ConfigureAwait(false);
         }
@@ -337,7 +337,7 @@ public sealed class LazWriter : LasWriter
             foreach (var point in points)
             {
                 await this.WriteAsync(
-                    point.PointDataRecord ?? throw new InvalidOperationException(),
+                    point.PointDataRecord ?? throw new System.Diagnostics.UnreachableException(),
                     point.ExtraBytes,
                     cancellationToken).ConfigureAwait(false);
             }
@@ -346,7 +346,7 @@ public sealed class LazWriter : LasWriter
         foreach (var point in points)
         {
             await this.WriteAsync(
-                point.PointDataRecord ?? throw new InvalidOperationException(),
+                point.PointDataRecord ?? throw new System.Diagnostics.UnreachableException(),
                 point.ExtraBytes,
                 cancellationToken).ConfigureAwait(false);
         }
@@ -376,7 +376,7 @@ public sealed class LazWriter : LasWriter
             await foreach (var point in points.WithCancellation(cancellationToken).ConfigureAwait(false))
             {
                 await this.WriteAsync(
-                    point.PointDataRecord ?? throw new InvalidOperationException(),
+                    point.PointDataRecord ?? throw new System.Diagnostics.UnreachableException(),
                     point.ExtraBytes,
                     cancellationToken).ConfigureAwait(false);
 
@@ -392,7 +392,7 @@ public sealed class LazWriter : LasWriter
         await foreach (var point in points.WithCancellation(cancellationToken).ConfigureAwait(false))
         {
             await this.WriteAsync(
-                point.PointDataRecord ?? throw new InvalidOperationException(),
+                point.PointDataRecord ?? throw new System.Diagnostics.UnreachableException(),
                 point.ExtraBytes,
                 cancellationToken).ConfigureAwait(false);
 
@@ -494,7 +494,7 @@ public sealed class LazWriter : LasWriter
             { Compressor: Compressor.PointWiseChunked } => new PointWiseChunkedWriter(rawWriter, pointDataRecordLength, header.PointDataFormatId, zip),
             { Compressor: Compressor.LayeredChunked, ChunkSize: LasZip.VariableChunkSize } => new VariableLayeredChunkedWriter(rawWriter, pointDataRecordLength, header.PointDataFormatId, zip),
             { Compressor: Compressor.LayeredChunked } => new FixedLayeredChunkedWriter(rawWriter, pointDataRecordLength, header.PointDataFormatId, zip),
-            _ => throw new InvalidOperationException(),
+            _ => throw new System.Diagnostics.UnreachableException(),
         });
 
         static CompressedTag? GetCompressedTagAndRemoveDuplicates(ICollection<VariableLengthRecord> records)
@@ -546,7 +546,7 @@ public sealed class LazWriter : LasWriter
             { Compressor: Compressor.None } => new RawWriter(rawWriter, pointDataRecordLength),
             { Compressor: Compressor.PointWise } => new PointWiseWriter(rawWriter, pointDataRecordLength, header.PointDataFormatId, zip),
             { Compressor: Compressor.PointWiseChunked } => new PointWiseChunkedWriter(rawWriter, pointDataRecordLength, header.PointDataFormatId, zip),
-            _ => throw new InvalidOperationException(),
+            _ => throw new System.Diagnostics.UnreachableException(),
         };
 
         static CompressedTag? GetCompressedTagAndRemoveDuplicates(ICollection<VariableLengthRecord> records)
