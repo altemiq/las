@@ -88,6 +88,7 @@ public readonly partial struct Color : IEquatable<Color>
             [System.Diagnostics.CodeAnalysis.SuppressMessage("Performance", "CA1863:Use 'CompositeFormat'", Justification = "This is a formatted string for an exception.")]
 #endif
             [System.Diagnostics.CodeAnalysis.DoesNotReturn]
+            [System.Diagnostics.CodeAnalysis.SuppressMessage("Usage", "MA0183:string.Format should use a format string with placeholders", Justification = "False positive")]
             static void ThrowOutOfByteRange(int v, string? n)
             {
                 throw new ArgumentException(string.Format(Properties.Resources.Culture, Properties.Resources.InvalidEx2BoundArgument, n, v, ushort.MinValue, ushort.MaxValue), n);

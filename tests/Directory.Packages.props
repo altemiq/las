@@ -9,7 +9,7 @@
 
   <ItemGroup>
     <PackageVersion Include="Polyfill" Version="8.9.1" />
-    <PackageVersion Include="TUnit" Version="1.12.93" />
+    <PackageVersion Include="TUnit" Version="1.12.111" />
   </ItemGroup>
   
   <ItemGroup Label="AWS">

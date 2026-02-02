@@ -91,7 +91,7 @@ internal static partial class RootCommandExtensions
 
                         static void PrintTree(TextWriter output, Indexing.LasIndexCell cell)
                         {
-                            output.Write(string.Format(System.Globalization.CultureInfo.InvariantCulture, "({0},{1})-({2},{3})", cell.Minimum.X, cell.Minimum.Y, cell.Maximum.X, cell.Maximum.Y));
+                            output.Write(string.Create(System.Globalization.CultureInfo.InvariantCulture, $"({cell.Minimum.X},{cell.Minimum.Y})-({cell.Maximum.X},{cell.Maximum.Y})"));
                             output.Write(": ");
                             output.WriteLine(string.Join(',', cell.Intervals));
                         }

@@ -601,7 +601,7 @@ public static class GeoProjectionConverter
 
             static string FormatPcs(string name, int zone, bool south = false, string utm = "UTM")
             {
-                return string.Format(System.Globalization.CultureInfo.InvariantCulture, "{0} / {1} {2}{3}", name, utm, zone, south ? 'S' : 'N');
+                return string.Create(System.Globalization.CultureInfo.InvariantCulture, $"{name} / {utm} {zone}{(south ? 'S' : 'N')}");
             }
         }
 
