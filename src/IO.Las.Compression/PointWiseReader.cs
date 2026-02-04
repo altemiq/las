@@ -52,7 +52,7 @@ internal class PointWiseReader : RawReader
 #endif
 #if LAS1_3_OR_GREATER
             GpsWaveformPointDataRecord.Id => new Readers.Compressed.GpsWaveformPointDataRecordReader(this.Decoder, extraBytes),
-            GpsColorWaveformPointDataRecord.Id => new Readers.Compressed.GpsColorPointDataRecordReader(this.Decoder, extraBytes),
+            GpsColorWaveformPointDataRecord.Id => new Readers.Compressed.GpsColorWaveformPointDataRecordReader(this.Decoder, extraBytes),
 #endif
 #if LAS1_5_OR_GREATER
             ExtendedGpsPointDataRecord.Id when requiredVersion is 4 => new Readers.Compressed.ExtendedGpsPointDataRecordReader4(this.Decoder, extraBytes),
