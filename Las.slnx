@@ -1,0 +1,72 @@
+<Solution>
+  <Folder Name="/docs/">
+    <File Path="docs/asprs_las_format_v10_2003.pdf" />
+    <File Path="docs/asprs_las_format_v11_2005.pdf" />
+    <File Path="docs/asprs_las_format_v12_2008.pdf" />
+    <File Path="docs/asprs_las_format_v13_r11_2010.pdf" />
+    <File Path="docs/asprs_las_format_v14_r16_2025.pdf" />
+    <File Path="docs/asprs_las_format_v15_r00_2025.pdf" />
+    <File Path="docs/copc-specification-1.0.pdf" />
+    <File Path="docs/LAZ_Specification_1.4_R0.pdf" />
+  </Folder>
+  <Folder Name="/generators/">
+    <File Path="generators/Directory.Build.props" />
+    <File Path="generators/Directory.Build.targets" />
+    <File Path="generators/Directory.Packages.props" />
+    <Project Path="generators/IO.Las.CodeGeneration/IO.Las.CodeGeneration.csproj" />
+  </Folder>
+  <Folder Name="/Solution Items/">
+    <File Path="Directory.Versions.props" />
+    <File Path="nuget.config" />
+  </Folder>
+  <Folder Name="/src/">
+    <File Path="src/Directory.Build.props" />
+    <File Path="src/Directory.Build.targets" />
+    <File Path="src/Directory.Packages.props" />
+    <Project Path="src/IO.Las.Arrow/IO.Las.Arrow.csproj" />
+    <Project Path="src/IO.Las.Cloud/IO.Las.Cloud.csproj" />
+    <Project Path="src/IO.Las.Compression/IO.Las.Compression.csproj" />
+    <Project Path="src/IO.Las.DataFrame/IO.Las.DataFrame.csproj" />
+    <Project Path="src/IO.Las.Geodesy/IO.Las.Geodesy.csproj" />
+    <Project Path="src/IO.Las.Http/IO.Las.Http.csproj" />
+    <Project Path="src/IO.Las.Indexing/IO.Las.Indexing.csproj" />
+    <Project Path="src/IO.Las.S3/IO.Las.S3.csproj" />
+    <Project Path="src/IO.Las.Tiling/IO.Las.Tiling.csproj" />
+    <Project Path="src/IO.Las/IO.Las.csproj" />
+  </Folder>
+  <Folder Name="/tests/">
+    <File Path="tests/Directory.Build.props" />
+    <File Path="tests/Directory.Build.targets" />
+    <File Path="tests/Directory.Packages.props" />
+    <Project Path="tests/IO.Las.Arrow.Tests/IO.Las.Arrow.Tests.csproj">
+      <Build Solution="Release|*" Project="false" />
+    </Project>
+    <Project Path="tests/IO.Las.Cloud.Tests/IO.Las.Cloud.Tests.csproj">
+      <Build Solution="Release|*" Project="false" />
+    </Project>
+    <Project Path="tests/IO.Las.Compression.Tests/IO.Las.Compression.Tests.csproj">
+      <Build Solution="Release|*" Project="false" />
+    </Project>
+    <Project Path="tests/IO.Las.DataFrame.Tests/IO.Las.DataFrame.Tests.csproj">
+      <Build Solution="Release|*" Project="false" />
+    </Project>
+    <Project Path="tests/IO.Las.Geodesy.Tests/IO.Las.Geodesy.Tests.csproj">
+      <Build Solution="Release|*" Project="false" />
+    </Project>
+    <Project Path="tests/IO.Las.Indexing.Tests/IO.Las.Indexing.Tests.csproj">
+      <Build Solution="Release|*" Project="false" />
+    </Project>
+    <Project Path="tests/IO.Las.S3.Tests/IO.Las.S3.Tests.csproj">
+      <Build Solution="Release|*" Project="false" />
+    </Project>
+    <Project Path="tests/IO.Las.Tests/IO.Las.Tests.csproj">
+      <Build Solution="Release|*" Project="false" />
+    </Project>
+  </Folder>
+  <Folder Name="/tools/">
+    <File Path="tools/Directory.Build.props" />
+    <File Path="tools/Directory.Build.targets" />
+    <File Path="tools/Directory.Packages.props" />
+    <Project Path="tools/Las/Las.csproj" />
+  </Folder>
+</Solution>
