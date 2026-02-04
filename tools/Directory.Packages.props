@@ -9,7 +9,7 @@
     <PackageVersion Include="Altemiq.CommandLine.DependencyInjection" Version="2.0.0" />
     <PackageVersion Include="Altemiq.CommandLine.Spectre" Version="2.0.0" />
     <PackageVersion Include="AWSSDK.Extensions.NETCore.Setup" Version="4.0.3.22" />
-    <PackageVersion Include="AWSSDK.S3" Version="4.0.18.1" />
+    <PackageVersion Include="AWSSDK.S3" Version="4.0.18.2" />
     <PackageVersion Include="Humanizer" Version="3.0.1" />
     <PackageVersion Include="Microsoft.Extensions.Http" Version="10.0.2" />
     <PackageVersion Include="Spectre.Console" Version="0.53.0" />
