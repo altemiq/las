@@ -35,23 +35,27 @@ public sealed class ArrowLasReader : ILasReader, IDisposable
                 return default;
             }
 
+            HeaderBlockBuilder builder;
             if (!this.schema.HasMetadata)
             {
-                var inferredSchemaBuilder = new HeaderBlockBuilder(InferPointDataRecordId(this.schema));
-                return inferredSchemaBuilder.HeaderBlock;
+                builder = new(InferPointDataRecordId(this.schema));
             }
-
-            var pointDataFormatId = byte.Parse(this.schema.Metadata[Constants.Metadata.PointDataFormatId], System.Globalization.CultureInfo.InvariantCulture);
-            var builder = new HeaderBlockBuilder(pointDataFormatId)
+            else
             {
-                Version = Version.Parse(this.schema.Metadata[Constants.Metadata.Version]),
-                GlobalEncoding = Enum.Parse<GlobalEncoding>(this.schema.Metadata[Constants.Metadata.GlobalEncoding]),
-                Offset = ParseVector3D(this.schema.Metadata[Constants.Metadata.Offset], System.Globalization.CultureInfo.InvariantCulture),
-                ScaleFactor = ParseVector3D(this.schema.Metadata[Constants.Metadata.ScaleFactor], System.Globalization.CultureInfo.InvariantCulture),
-#if LAS1_5_OR_GREATER
-                TimeOffset = ushort.Parse(this.schema.Metadata[Constants.Metadata.TimeOffset], System.Globalization.CultureInfo.InvariantCulture),
+                var pointDataFormatId = byte.Parse(this.schema.Metadata[Constants.Metadata.PointDataFormatId], System.Globalization.CultureInfo.InvariantCulture);
+                builder = new(pointDataFormatId)
+                {
+                    Version = Version.Parse(this.schema.Metadata[Constants.Metadata.Version]),
+#if LAS1_2_OR_GREATER
+                    GlobalEncoding = Enum.Parse<GlobalEncoding>(this.schema.Metadata[Constants.Metadata.GlobalEncoding]),
 #endif
-            };
+                    Offset = ParseVector3D(this.schema.Metadata[Constants.Metadata.Offset], System.Globalization.CultureInfo.InvariantCulture),
+                    ScaleFactor = ParseVector3D(this.schema.Metadata[Constants.Metadata.ScaleFactor], System.Globalization.CultureInfo.InvariantCulture),
+#if LAS1_5_OR_GREATER
+                    TimeOffset = ushort.Parse(this.schema.Metadata[Constants.Metadata.TimeOffset], System.Globalization.CultureInfo.InvariantCulture),
+#endif
+                };
+            }
 
             return builder.HeaderBlock;
         });
@@ -63,8 +67,10 @@ public sealed class ArrowLasReader : ILasReader, IDisposable
     /// <inheritdoc/>
     public IReadOnlyList<VariableLengthRecord> VariableLengthRecords { get; } = [];
 
+#if LAS1_4_OR_GREATER
     /// <inheritdoc/>
     public IReadOnlyList<ExtendedVariableLengthRecord> ExtendedVariableLengthRecords { get; } = [];
+#endif
 
     /// <inheritdoc/>
     public LasPointSpan ReadPointDataRecord()
@@ -520,28 +526,95 @@ public sealed class ArrowLasReader : ILasReader, IDisposable
 
     private static byte InferPointDataRecordId(Schema schema)
     {
-        var isLegacy = schema.FieldsList.Any(static field => field.Name is Constants.Columns.Legacy.ScanAngleRank);
-        var isExtended = schema.FieldsList.Any(static field => field.Name is Constants.Columns.Extended.ScannerChannel);
-        var hasGps = schema.FieldsList.Any(static field => field.Name is Constants.Columns.Gps.GpsTime);
-        var hasColor = schema.FieldsList.Any(static field => field.Name is Constants.Columns.Color.Red);
-        var hasNir = schema.FieldsList.Any(static field => field.Name is Constants.Columns.Nir.NearInfrared);
-        var hasWaveform = schema.FieldsList.Any(static field => field.Name is Constants.Columns.Waveform.WavePacketDescriptorIndex);
-
-        return (isLegacy, isExtended, hasGps, hasColor, hasNir, hasWaveform) switch
+        if (IsLegacy(schema))
         {
-            (true, false, false, false, false, false) => PointDataRecord.Id,
-            (true, false, true, false, false, false) => GpsPointDataRecord.Id,
-            (true, false, false, true, false, false) => ColorPointDataRecord.Id,
-            (true, false, true, true, false, false) => GpsColorPointDataRecord.Id,
-            (true, false, true, false, false, true) => GpsWaveformPointDataRecord.Id,
-            (true, false, true, true, false, true) => GpsColorWaveformPointDataRecord.Id,
-            (false, true, true, false, false, false) => ExtendedGpsPointDataRecord.Id,
-            (false, true, true, true, false, false) => ExtendedGpsColorPointDataRecord.Id,
-            (false, true, true, true, true, false) => ExtendedGpsColorNearInfraredPointDataRecord.Id,
-            (false, true, true, false, false, true) => ExtendedGpsWaveformPointDataRecord.Id,
-            (false, true, true, true, true, true) => ExtendedGpsColorNearInfraredWaveformPointDataRecord.Id,
-            _ => throw new System.Diagnostics.UnreachableException(),
-        };
+            if (!HasGps(schema))
+            {
+                // No GPS
+#if LAS1_2_OR_GREATER
+                return HasColor(schema) ? ColorPointDataRecord.Id : PointDataRecord.Id;
+#else
+                return PointDataRecord.Id;
+#endif
+            }
+
+            // Have GPS
+#if LAS1_2_OR_GREATER
+            if (!HasColor(schema))
+            {
+                return GpsPointDataRecord.Id;
+            }
+
+            // Have Color
+#if LAS1_3_OR_GREATER
+            return HasWaveform(schema)
+                ? GpsColorWaveformPointDataRecord.Id
+                : GpsColorPointDataRecord.Id;
+#endif
+#else
+            return GpsPointDataRecord.Id;
+#endif
+        }
+
+#if LAS1_4_OR_GREATER
+        if (!IsExtended(schema))
+        {
+            throw new System.Diagnostics.UnreachableException();
+        }
+
+        if (!HasColor(schema))
+        {
+            return HasWaveform(schema)
+                ? ExtendedGpsWaveformPointDataRecord.Id
+                : ExtendedGpsPointDataRecord.Id;
+        }
+
+        if (!HasNir(schema))
+        {
+            return ExtendedGpsColorPointDataRecord.Id;
+        }
+
+        return HasWaveform(schema)
+            ? ExtendedGpsColorNearInfraredWaveformPointDataRecord.Id
+            : ExtendedGpsColorNearInfraredPointDataRecord.Id;
+
+#endif
+
+        static bool IsLegacy(Schema schema)
+        {
+            return schema.FieldsList.Any(static field => field.Name is Constants.Columns.Legacy.ScanAngleRank);
+        }
+
+        static bool HasGps(Schema schema)
+        {
+            return schema.FieldsList.Any(static field => field.Name is Constants.Columns.Gps.GpsTime);
+        }
+
+#if LAS1_2_OR_GREATER
+        static bool HasColor(Schema schema)
+        {
+            return schema.FieldsList.Any(static field => field.Name is Constants.Columns.Color.Red);
+        }
+#endif
+
+#if LAS1_3_OR_GREATER
+        static bool HasWaveform(Schema schema)
+        {
+            return schema.FieldsList.Any(static field => field.Name is Constants.Columns.Waveform.WavePacketDescriptorIndex);
+        }
+#endif
+
+#if LAS1_4_OR_GREATER
+        static bool IsExtended(Schema schema3)
+        {
+            return schema3.FieldsList.Any(static field => field.Name is Constants.Columns.Extended.ScannerChannel);
+        }
+
+        static bool HasNir(Schema schema4)
+        {
+            return schema4.FieldsList.Any(static field => field.Name is Constants.Columns.Nir.NearInfrared);
+        }
+#endif
     }
 
     [System.Diagnostics.CodeAnalysis.MemberNotNullWhen(true, nameof(schema))]

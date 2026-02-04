@@ -37,7 +37,7 @@ internal static class SchemaExtensions
 
             return schemaBuilder.Build();
 
-            Apache.Arrow.Types.IArrowType MapDataType(Apache.Arrow.Types.IArrowType arrowType)
+            static Apache.Arrow.Types.IArrowType MapDataType(Apache.Arrow.Types.IArrowType arrowType)
             {
                 return arrowType switch
                 {

@@ -224,8 +224,7 @@ public class HeaderBlockTests
         yield return () => GpsPointDataRecord.Id;
     }
 #endif
-    
-    
+
 #if LAS1_5_OR_GREATER
     [Test]
     [Arguments(1000, true)]

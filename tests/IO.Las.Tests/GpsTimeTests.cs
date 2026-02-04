@@ -13,7 +13,7 @@ public class GpsTimeTests
         var header = builder.HeaderBlock;
         await Assert.That(GpsTime.GetOffset(header)).IsDefault();
     }
-    
+
 #if LAS1_5_OR_GREATER
     [Test]
     [Arguments(1995, 500000000)]

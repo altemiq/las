@@ -10,7 +10,7 @@ public class LasReaderExtensionTests
         var reader = new Data.MockLasReader();
 
         var schema = reader.GetArrowSchema();
-        
+
         // ensure we have some byte, and ushort fields
         await Assert.That(schema.FieldsList)
             .Contains(p => p.DataType.TypeId is ArrowTypeId.UInt8).And
@@ -26,6 +26,6 @@ public class LasReaderExtensionTests
 
         await Assert.That(batches).Count().IsEqualTo(1);
     }
-    
-    
+
+
 }

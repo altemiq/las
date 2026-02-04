@@ -18,9 +18,11 @@ internal static class LasToArrowStream
     /// <param name="schema">The schema.</param>
     /// <param name="batchSize">The batch size.</param>
     /// <returns>The <see cref="RecordBatch"/> instances.</returns>
+    [System.Diagnostics.CodeAnalysis.SuppressMessage("Major Code Smell", "S1854:Unused assignments should be removed", Justification = "This _could_ be used.")]
+    [System.Diagnostics.CodeAnalysis.SuppressMessage("ReSharper", "RedundantAssignment", Justification = "This _could_ be used.")]
     internal static IEnumerable<RecordBatch> ToArrowBatches(ILasReader reader, Schema schema, int batchSize = 50_000)
     {
-        IReadOnlyList<ColumnBuffer> buffers = [..schema.FieldsList.Select(f => ColumnBuffer.Create(f.DataType.TypeId, capacity: batchSize))];
+        IReadOnlyList<ColumnBuffer> buffers = [.. schema.FieldsList.Select(f => ColumnBuffer.Create(f.DataType.TypeId, capacity: batchSize))];
 
         var rowCount = 0;
         var hasYielded = false;
@@ -43,37 +45,44 @@ internal static class LasToArrowStream
             buffers[index++].Add(basePointDataRecord.UserData);
             buffers[index++].Add(basePointDataRecord.PointSourceId);
 
-            switch (basePointDataRecord)
+            if (basePointDataRecord is IPointDataRecord pointDataRecord)
             {
-                case IPointDataRecord pointDataRecord:
-                    buffers[index++].Add((byte)pointDataRecord.Classification);
-                    buffers[index++].Add(pointDataRecord.ScanAngleRank);
-                    break;
-                case IExtendedPointDataRecord extendedPointDataRecord:
-                    buffers[index++].Add(extendedPointDataRecord.Overlap);
-                    buffers[index++].Add(extendedPointDataRecord.ScannerChannel);
-                    buffers[index++].Add((byte)extendedPointDataRecord.Classification);
-                    buffers[index++].Add(extendedPointDataRecord.ScanAngle);
-                    break;
+                buffers[index++].Add((byte)pointDataRecord.Classification);
+                buffers[index++].Add(pointDataRecord.ScanAngleRank);
             }
+
+#if LAS1_4_OR_GREATER
+            if (basePointDataRecord is IExtendedPointDataRecord extendedPointDataRecord)
+            {
+                buffers[index++].Add(extendedPointDataRecord.Overlap);
+                buffers[index++].Add(extendedPointDataRecord.ScannerChannel);
+                buffers[index++].Add((byte)extendedPointDataRecord.Classification);
+                buffers[index++].Add(extendedPointDataRecord.ScanAngle);
+            }
+#endif
 
             if (basePointDataRecord is IGpsPointDataRecord gpsPointDataRecord)
             {
                 buffers[index++].Add(gpsPointDataRecord.GpsTime);
             }
 
+#if LAS1_2_OR_GREATER
             if (basePointDataRecord is IColorPointDataRecord colorPointDataRecord)
             {
                 buffers[index++].Add(colorPointDataRecord.Color.R);
                 buffers[index++].Add(colorPointDataRecord.Color.G);
                 buffers[index++].Add(colorPointDataRecord.Color.B);
             }
+#endif
 
+#if LAS1_4_OR_GREATER
             if (basePointDataRecord is INearInfraredPointDataRecord nearInfraredPointDataRecord)
             {
                 buffers[index++].Add(nearInfraredPointDataRecord.NearInfrared);
             }
+#endif
 
+#if LAS1_3_OR_GREATER
             if (basePointDataRecord is IWaveformPointDataRecord waveformPointDataRecord)
             {
                 buffers[index++].Add(waveformPointDataRecord.WavePacketDescriptorIndex);
@@ -84,6 +93,7 @@ internal static class LasToArrowStream
                 buffers[index++].Add(waveformPointDataRecord.ParametricDy);
                 buffers[index].Add(waveformPointDataRecord.ParametricDz);
             }
+#endif
 
             rowCount++;
 
@@ -164,13 +174,21 @@ internal static class LasToArrowStream
             .Field(new Field(Constants.Columns.PointSourceId, UInt16Type.Default, nullable: false));
 
         var pointDataFormatId = reader.Header.PointDataFormatId;
+#if LAS1_3_OR_GREATER
         if (pointDataFormatId <= GpsColorWaveformPointDataRecord.Id)
         {
             builder
                 .Field(new Field(Constants.Columns.Legacy.Classification, UInt8Type.Default, nullable: false))
                 .Field(new Field(Constants.Columns.Legacy.ScanAngleRank, Int8Type.Default, nullable: false));
         }
-        else
+#else
+        builder
+            .Field(new Field(Constants.Columns.Legacy.Classification, UInt8Type.Default, nullable: false))
+            .Field(new Field(Constants.Columns.Legacy.ScanAngleRank, Int8Type.Default, nullable: false));
+#endif
+
+#if LAS1_4_OR_GREATER
+        if (pointDataFormatId > GpsColorWaveformPointDataRecord.Id)
         {
             builder
                 .Field(new Field(Constants.Columns.Extended.Overlap, BooleanType.Default, nullable: false))
@@ -178,37 +196,56 @@ internal static class LasToArrowStream
                 .Field(new Field(Constants.Columns.Extended.Classification, UInt8Type.Default, nullable: false))
                 .Field(new Field(Constants.Columns.Extended.ScanAngle, Int16Type.Default, nullable: false));
         }
+#endif
 
         // GPS point data formats
         if (pointDataFormatId
-            is GpsPointDataRecord.Id
-            or GpsColorPointDataRecord.Id
+#if !LAS1_2_OR_GREATER
+            is GpsPointDataRecord.Id)
+#endif
+#if LAS1_2_OR_GREATER
+            is GpsColorPointDataRecord.Id
+#endif
+#if LAS1_3_OR_GREATER
             or GpsWaveformPointDataRecord.Id
             or GpsColorWaveformPointDataRecord.Id
+#endif
+#if LAS1_4_OR_GREATER
             or ExtendedGpsPointDataRecord.Id
             or ExtendedGpsColorPointDataRecord.Id
             or ExtendedGpsColorNearInfraredPointDataRecord.Id
             or ExtendedGpsWaveformPointDataRecord.Id
-            or ExtendedGpsColorNearInfraredWaveformPointDataRecord.Id)
+            or ExtendedGpsColorNearInfraredWaveformPointDataRecord.Id
+#endif
+#if LAS1_2_OR_GREATER
+            or GpsPointDataRecord.Id)
+#endif
         {
             builder.Field(new Field(Constants.Columns.Gps.GpsTime, DoubleType.Default, nullable: false));
         }
 
+#if LAS1_2_OR_GREATER
         // Color point data formats
         if (pointDataFormatId
-            is ColorPointDataRecord.Id
-            or GpsColorPointDataRecord.Id
+            is GpsColorPointDataRecord.Id
+#if LAS1_3_OR_GREATER
             or GpsColorWaveformPointDataRecord.Id
+#endif
+#if LAS1_4_OR_GREATER
             or ExtendedGpsColorPointDataRecord.Id
             or ExtendedGpsColorNearInfraredPointDataRecord.Id
-            or ExtendedGpsColorNearInfraredWaveformPointDataRecord.Id)
+            or ExtendedGpsColorNearInfraredWaveformPointDataRecord.Id
+#endif
+            or ColorPointDataRecord.Id)
         {
             builder
                 .Field(new Field(Constants.Columns.Color.Red, UInt16Type.Default, nullable: false))
                 .Field(new Field(Constants.Columns.Color.Green, UInt16Type.Default, nullable: false))
                 .Field(new Field(Constants.Columns.Color.Blue, UInt16Type.Default, nullable: false));
         }
+#endif
 
+#if LAS1_4_OR_GREATER
         // NIR point data formats
         if (pointDataFormatId
             is ExtendedGpsColorNearInfraredPointDataRecord.Id
@@ -216,12 +253,16 @@ internal static class LasToArrowStream
         {
             builder.Field(new Field(Constants.Columns.Nir.NearInfrared, UInt16Type.Default, nullable: false));
         }
+#endif
 
+#if LAS1_3_OR_GREATER
         if (pointDataFormatId
             is GpsWaveformPointDataRecord.Id
-            or GpsColorWaveformPointDataRecord.Id
+#if LAS1_4_OR_GREATER
             or ExtendedGpsWaveformPointDataRecord.Id
-            or ExtendedGpsColorNearInfraredWaveformPointDataRecord.Id)
+            or ExtendedGpsColorNearInfraredWaveformPointDataRecord.Id
+#endif
+            or GpsColorWaveformPointDataRecord.Id)
         {
             builder
                 .Field(new Field(Constants.Columns.Waveform.WavePacketDescriptorIndex, UInt8Type.Default, nullable: false))
@@ -232,9 +273,12 @@ internal static class LasToArrowStream
                 .Field(new Field(Constants.Columns.Waveform.ParametricDy, FloatType.Default, nullable: false))
                 .Field(new Field(Constants.Columns.Waveform.ParametricDz, FloatType.Default, nullable: false));
         }
+#endif
 
         builder.Metadata(Constants.Metadata.PointDataFormatId, pointDataFormatId.ToString(System.Globalization.CultureInfo.InvariantCulture));
+#if LAS1_2_OR_GREATER
         builder.Metadata(Constants.Metadata.GlobalEncoding, reader.Header.GlobalEncoding.ToString());
+#endif
         builder.Metadata(Constants.Metadata.Version, reader.Header.Version.ToString());
         builder.Metadata(Constants.Metadata.Offset, reader.Header.Offset.ToString(format: null, System.Globalization.CultureInfo.InvariantCulture));
         builder.Metadata(Constants.Metadata.ScaleFactor, reader.Header.ScaleFactor.ToString(format: null, System.Globalization.CultureInfo.InvariantCulture));

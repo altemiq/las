@@ -98,32 +98,6 @@ public static class Constants
         }
 
         /// <summary>
-        /// The <see cref="IExtendedPointDataRecord"/> column names.
-        /// </summary>
-        public static class Extended
-        {
-            /// <summary>
-            /// The <see cref="IExtendedPointDataRecord.Overlap"/> column name.
-            /// </summary>
-            public const string Overlap = "overlap";
-
-            /// <summary>
-            /// The <see cref="IExtendedPointDataRecord.ScannerChannel"/> column name.
-            /// </summary>
-            public const string ScannerChannel = "scanner_channel";
-
-            /// <summary>
-            /// The <see cref="IExtendedPointDataRecord.Classification"/> column name.
-            /// </summary>
-            public const string Classification = "classification";
-
-            /// <summary>
-            /// The <see cref="IExtendedPointDataRecord.ScanAngle"/> column name.
-            /// </summary>
-            public const string ScanAngle = "scan_angle";
-        }
-
-        /// <summary>
         /// The <see cref="IGpsPointDataRecord"/> column names.
         /// </summary>
         public static class Gps
@@ -134,6 +108,7 @@ public static class Constants
             public const string GpsTime = "gps_time";
         }
 
+#if LAS1_2_OR_GREATER
         /// <summary>
         /// The <see cref="IColorPointDataRecord"/> column names.
         /// </summary>
@@ -154,18 +129,9 @@ public static class Constants
             /// </summary>
             public const string Blue = "blue";
         }
+#endif
 
-        /// <summary>
-        /// The <see cref="INearInfraredPointDataRecord"/> column names.
-        /// </summary>
-        public static class Nir
-        {
-            /// <summary>
-            /// The <see cref="INearInfraredPointDataRecord.NearInfrared"/> column name.
-            /// </summary>
-            public const string NearInfrared = "nir";
-        }
-
+#if LAS1_3_OR_GREATER
         /// <summary>
         /// The <see cref="IWaveformPointDataRecord"/> column names.
         /// </summary>
@@ -206,6 +172,46 @@ public static class Constants
             /// </summary>
             public const string ParametricDz = "parametric_d_z";
         }
+#endif
+
+#if LAS1_4_OR_GREATER
+        /// <summary>
+        /// The <see cref="IExtendedPointDataRecord"/> column names.
+        /// </summary>
+        public static class Extended
+        {
+            /// <summary>
+            /// The <see cref="IExtendedPointDataRecord.Overlap"/> column name.
+            /// </summary>
+            public const string Overlap = "overlap";
+
+            /// <summary>
+            /// The <see cref="IExtendedPointDataRecord.ScannerChannel"/> column name.
+            /// </summary>
+            public const string ScannerChannel = "scanner_channel";
+
+            /// <summary>
+            /// The <see cref="IExtendedPointDataRecord.Classification"/> column name.
+            /// </summary>
+            public const string Classification = "classification";
+
+            /// <summary>
+            /// The <see cref="IExtendedPointDataRecord.ScanAngle"/> column name.
+            /// </summary>
+            public const string ScanAngle = "scan_angle";
+        }
+
+        /// <summary>
+        /// The <see cref="INearInfraredPointDataRecord"/> column names.
+        /// </summary>
+        public static class Nir
+        {
+            /// <summary>
+            /// The <see cref="INearInfraredPointDataRecord.NearInfrared"/> column name.
+            /// </summary>
+            public const string NearInfrared = "nir";
+        }
+#endif
     }
 
     /// <summary>
@@ -218,10 +224,12 @@ public static class Constants
         /// </summary>
         public const string PointDataFormatId = "point_data_format_id";
 
+#if LAS1_2_OR_GREATER
         /// <summary>
         /// The <see cref="HeaderBlock.GlobalEncoding"/> metadata name.
         /// </summary>
         public const string GlobalEncoding = "global_encoding";
+#endif
 
         /// <summary>
         /// The <see cref="HeaderBlock.Version"/> metadata name.
