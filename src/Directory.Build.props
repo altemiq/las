@@ -20,9 +20,9 @@
 
     <GenerateDocumentationFile>true</GenerateDocumentationFile>
 
-    <IsTrimmable Condition="$([MSBuild]::IsTargetFrameworkCompatible('$(TargetFramework)', 'net6.0'))">true</IsTrimmable>
-    <IsAotCompatible Condition="$([MSBuild]::IsTargetFrameworkCompatible('$(TargetFramework)', 'net7.0'))">true</IsAotCompatible>
-    <VerifyReferenceAotCompatibility Condition=" '$(IsAotCompatible)' == 'true' ">true</VerifyReferenceAotCompatibility>
+    <IsTrimmable Condition=" '$(IsTrimmable)' == '' AND $([MSBuild]::IsTargetFrameworkCompatible('$(TargetFramework)', 'net6.0'))">true</IsTrimmable>
+    <IsAotCompatible Condition=" '$(IsAotCompatible)' == '' AND $([MSBuild]::IsTargetFrameworkCompatible('$(TargetFramework)', 'net7.0'))">true</IsAotCompatible>
+    <VerifyReferenceAotCompatibility Condition=" '$(VerifyReferenceAotCompatibility)' == '' AND '$(IsAotCompatible)' == 'true' ">true</VerifyReferenceAotCompatibility>
   </PropertyGroup>
   
   <PropertyGroup Label="Packaging">

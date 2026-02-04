@@ -1,0 +1,23 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFrameworks>net10.0;net9.0;net8.0</TargetFrameworks>
+    <RootNamespace>$(RootNamespace.Replace('.DataFrame', ''))</RootNamespace>
+    <VersionSuffix Condition=" '$(VersionSuffix)' == '' ">beta1</VersionSuffix>
+    <IsAotCompatible>false</IsAotCompatible>
+    <NoWarn Condition=" !$([MSBuild]::IsTargetFrameworkCompatible('$(TargetFramework)', 'net10.0')) ">$(NoWarn);AD0001</NoWarn>
+  </PropertyGroup>
+  
+  <ItemGroup>
+    <PackageReference Include="Polars.NET" VersionOverride="0.1.0-beta1" />
+  </ItemGroup>
+  
+  <ItemGroup>
+    <Using Include="Polars.CSharp" />
+  </ItemGroup>
+  
+  <ItemGroup>
+    <ProjectReference Include="..\IO.Las.Arrow\IO.Las.Arrow.csproj" />
+  </ItemGroup>
+
+</Project>
