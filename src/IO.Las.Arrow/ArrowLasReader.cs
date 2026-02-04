@@ -20,7 +20,7 @@ public sealed class ArrowLasReader : ILasReader, IDisposable
     private bool isClosed;
 
     /// <summary>
-    /// Initialises a new instance of the <see cref="ArrowLasReader"/> class.
+    /// Initializes a new instance of the <see cref="ArrowLasReader"/> class.
     /// </summary>
     /// <param name="stream">The record batches.</param>
     public ArrowLasReader(IEnumerable<RecordBatch> stream)
@@ -33,6 +33,12 @@ public sealed class ArrowLasReader : ILasReader, IDisposable
             if (!this.EnsureSchema())
             {
                 return default;
+            }
+
+            if (!this.schema.HasMetadata)
+            {
+                var inferredSchemaBuilder = new HeaderBlockBuilder(InferPointDataRecordId(this.schema));
+                return inferredSchemaBuilder.HeaderBlock;
             }
 
             var pointDataFormatId = byte.Parse(this.schema.Metadata[Constants.Metadata.PointDataFormatId], System.Globalization.CultureInfo.InvariantCulture);
@@ -84,6 +90,7 @@ public sealed class ArrowLasReader : ILasReader, IDisposable
         // Need next Batch
         if (this.MoveToNextBatch())
         {
+            this.currentRowIndex++;
             return new(ReadPointDataRecord(this.Header.PointDataFormatId, this.currentBatch, this.currentRowIndex), []);
         }
 
@@ -96,7 +103,7 @@ public sealed class ArrowLasReader : ILasReader, IDisposable
     /// <inheritdoc/>
     public LasPointSpan ReadPointDataRecord(ulong index)
     {
-        ArgumentOutOfRangeException.ThrowIfLessThan(index, this.currentBatchStartIndex + (ulong)this.currentRowIndex);
+        ArgumentOutOfRangeException.ThrowIfLessThan(index, this.currentBatchStartIndex);
 
         while (!IsInCurrentBatch(index))
         {
@@ -116,7 +123,7 @@ public sealed class ArrowLasReader : ILasReader, IDisposable
         [System.Diagnostics.CodeAnalysis.MemberNotNullWhen(true, nameof(currentBatch))]
         bool IsInCurrentBatch(ulong requiredIndex)
         {
-            return this.currentBatch is not null && (this.currentBatchStartIndex + (ulong)this.currentBatch.Length) < requiredIndex;
+            return this.currentBatch is { Length: var length } && requiredIndex < (this.currentBatchStartIndex + (ulong)length);
         }
     }
 
@@ -181,36 +188,36 @@ public sealed class ArrowLasReader : ILasReader, IDisposable
                 X = GetValue<int>(recordBatch.Column(Constants.Columns.X, StringComparer.Ordinal), index),
                 Y = GetValue<int>(recordBatch.Column(Constants.Columns.Y, StringComparer.Ordinal), index),
                 Z = GetValue<int>(recordBatch.Column(Constants.Columns.Z, StringComparer.Ordinal), index),
-                Intensity = (ushort)GetValue<uint>(recordBatch.Column(Constants.Columns.Intensity, StringComparer.Ordinal), index),
-                ReturnNumber = (byte)GetValue<uint>(recordBatch.Column(Constants.Columns.ReturnNumber, StringComparer.Ordinal), index),
-                NumberOfReturns = (byte)GetValue<uint>(recordBatch.Column(Constants.Columns.NumberOfReturns, StringComparer.Ordinal), index),
-                ScanDirectionFlag = GetValue<bool>(recordBatch.Column(Constants.Columns.ScanDirectionFlag, StringComparer.Ordinal), index),
-                EdgeOfFlightLine = GetValue<bool>(recordBatch.Column(Constants.Columns.EdgeOfFlightLine, StringComparer.Ordinal), index),
-                Synthetic = GetValue<bool>(recordBatch.Column(Constants.Columns.Synthetic, StringComparer.Ordinal), index),
-                KeyPoint = GetValue<bool>(recordBatch.Column(Constants.Columns.KeyPoint, StringComparer.Ordinal), index),
-                Withheld = GetValue<bool>(recordBatch.Column(Constants.Columns.Withheld, StringComparer.Ordinal), index),
-                UserData = (byte)GetValue<uint>(recordBatch.Column(Constants.Columns.UserData, StringComparer.Ordinal), index),
-                PointSourceId = (ushort)GetValue<uint>(recordBatch.Column(Constants.Columns.PointSourceId, StringComparer.Ordinal), index),
-                Classification = (Classification)GetValue<uint>(recordBatch.Column(Constants.Columns.Legacy.Classification, StringComparer.Ordinal), index),
-                ScanAngleRank = (sbyte)GetValue<int>(recordBatch.Column(Constants.Columns.Legacy.ScanAngleRank, StringComparer.Ordinal), index),
+                Intensity = GetValue<ushort>(recordBatch.Column(Constants.Columns.Intensity, StringComparer.Ordinal), index),
+                ReturnNumber = GetValue<byte>(recordBatch.Column(Constants.Columns.ReturnNumber, StringComparer.Ordinal), index),
+                NumberOfReturns = GetValue<byte>(recordBatch.Column(Constants.Columns.NumberOfReturns, StringComparer.Ordinal), index),
+                ScanDirectionFlag = GetBooleanValue(recordBatch.Column(Constants.Columns.ScanDirectionFlag, StringComparer.Ordinal), index),
+                EdgeOfFlightLine = GetBooleanValue(recordBatch.Column(Constants.Columns.EdgeOfFlightLine, StringComparer.Ordinal), index),
+                Synthetic = GetBooleanValue(recordBatch.Column(Constants.Columns.Synthetic, StringComparer.Ordinal), index),
+                KeyPoint = GetBooleanValue(recordBatch.Column(Constants.Columns.KeyPoint, StringComparer.Ordinal), index),
+                Withheld = GetBooleanValue(recordBatch.Column(Constants.Columns.Withheld, StringComparer.Ordinal), index),
+                UserData = GetValue<byte>(recordBatch.Column(Constants.Columns.UserData, StringComparer.Ordinal), index),
+                PointSourceId = GetValue<ushort>(recordBatch.Column(Constants.Columns.PointSourceId, StringComparer.Ordinal), index),
+                Classification = (Classification)GetValue<byte>(recordBatch.Column(Constants.Columns.Legacy.Classification, StringComparer.Ordinal), index),
+                ScanAngleRank = GetValue<sbyte>(recordBatch.Column(Constants.Columns.Legacy.ScanAngleRank, StringComparer.Ordinal), index),
             },
             GpsPointDataRecord.Id => new GpsPointDataRecord
             {
                 X = GetValue<int>(recordBatch.Column(Constants.Columns.X, StringComparer.Ordinal), index),
                 Y = GetValue<int>(recordBatch.Column(Constants.Columns.Y, StringComparer.Ordinal), index),
                 Z = GetValue<int>(recordBatch.Column(Constants.Columns.Z, StringComparer.Ordinal), index),
-                Intensity = (ushort)GetValue<uint>(recordBatch.Column(Constants.Columns.Intensity, StringComparer.Ordinal), index),
-                ReturnNumber = (byte)GetValue<uint>(recordBatch.Column(Constants.Columns.ReturnNumber, StringComparer.Ordinal), index),
-                NumberOfReturns = (byte)GetValue<uint>(recordBatch.Column(Constants.Columns.NumberOfReturns, StringComparer.Ordinal), index),
-                ScanDirectionFlag = GetValue<bool>(recordBatch.Column(Constants.Columns.ScanDirectionFlag, StringComparer.Ordinal), index),
-                EdgeOfFlightLine = GetValue<bool>(recordBatch.Column(Constants.Columns.EdgeOfFlightLine, StringComparer.Ordinal), index),
-                Synthetic = GetValue<bool>(recordBatch.Column(Constants.Columns.Synthetic, StringComparer.Ordinal), index),
-                KeyPoint = GetValue<bool>(recordBatch.Column(Constants.Columns.KeyPoint, StringComparer.Ordinal), index),
-                Withheld = GetValue<bool>(recordBatch.Column(Constants.Columns.Withheld, StringComparer.Ordinal), index),
-                UserData = (byte)GetValue<uint>(recordBatch.Column(Constants.Columns.UserData, StringComparer.Ordinal), index),
-                PointSourceId = (ushort)GetValue<uint>(recordBatch.Column(Constants.Columns.PointSourceId, StringComparer.Ordinal), index),
-                Classification = (Classification)GetValue<uint>(recordBatch.Column(Constants.Columns.Legacy.Classification, StringComparer.Ordinal), index),
-                ScanAngleRank = (sbyte)GetValue<int>(recordBatch.Column(Constants.Columns.Legacy.ScanAngleRank, StringComparer.Ordinal), index),
+                Intensity = GetValue<ushort>(recordBatch.Column(Constants.Columns.Intensity, StringComparer.Ordinal), index),
+                ReturnNumber = GetValue<byte>(recordBatch.Column(Constants.Columns.ReturnNumber, StringComparer.Ordinal), index),
+                NumberOfReturns = GetValue<byte>(recordBatch.Column(Constants.Columns.NumberOfReturns, StringComparer.Ordinal), index),
+                ScanDirectionFlag = GetBooleanValue(recordBatch.Column(Constants.Columns.ScanDirectionFlag, StringComparer.Ordinal), index),
+                EdgeOfFlightLine = GetBooleanValue(recordBatch.Column(Constants.Columns.EdgeOfFlightLine, StringComparer.Ordinal), index),
+                Synthetic = GetBooleanValue(recordBatch.Column(Constants.Columns.Synthetic, StringComparer.Ordinal), index),
+                KeyPoint = GetBooleanValue(recordBatch.Column(Constants.Columns.KeyPoint, StringComparer.Ordinal), index),
+                Withheld = GetBooleanValue(recordBatch.Column(Constants.Columns.Withheld, StringComparer.Ordinal), index),
+                UserData = GetValue<byte>(recordBatch.Column(Constants.Columns.UserData, StringComparer.Ordinal), index),
+                PointSourceId = GetValue<ushort>(recordBatch.Column(Constants.Columns.PointSourceId, StringComparer.Ordinal), index),
+                Classification = (Classification)GetValue<byte>(recordBatch.Column(Constants.Columns.Legacy.Classification, StringComparer.Ordinal), index),
+                ScanAngleRank = GetValue<sbyte>(recordBatch.Column(Constants.Columns.Legacy.ScanAngleRank, StringComparer.Ordinal), index),
                 GpsTime = GetValue<double>(recordBatch.Column(Constants.Columns.Gps.GpsTime, StringComparer.Ordinal), index),
             },
 #if LAS1_2_OR_GREATER
@@ -219,23 +226,23 @@ public sealed class ArrowLasReader : ILasReader, IDisposable
                 X = GetValue<int>(recordBatch.Column(Constants.Columns.X, StringComparer.Ordinal), index),
                 Y = GetValue<int>(recordBatch.Column(Constants.Columns.Y, StringComparer.Ordinal), index),
                 Z = GetValue<int>(recordBatch.Column(Constants.Columns.Z, StringComparer.Ordinal), index),
-                Intensity = (ushort)GetValue<uint>(recordBatch.Column(Constants.Columns.Intensity, StringComparer.Ordinal), index),
-                ReturnNumber = (byte)GetValue<uint>(recordBatch.Column(Constants.Columns.ReturnNumber, StringComparer.Ordinal), index),
-                NumberOfReturns = (byte)GetValue<uint>(recordBatch.Column(Constants.Columns.NumberOfReturns, StringComparer.Ordinal), index),
-                ScanDirectionFlag = GetValue<bool>(recordBatch.Column(Constants.Columns.ScanDirectionFlag, StringComparer.Ordinal), index),
-                EdgeOfFlightLine = GetValue<bool>(recordBatch.Column(Constants.Columns.EdgeOfFlightLine, StringComparer.Ordinal), index),
-                Synthetic = GetValue<bool>(recordBatch.Column(Constants.Columns.Synthetic, StringComparer.Ordinal), index),
-                KeyPoint = GetValue<bool>(recordBatch.Column(Constants.Columns.KeyPoint, StringComparer.Ordinal), index),
-                Withheld = GetValue<bool>(recordBatch.Column(Constants.Columns.Withheld, StringComparer.Ordinal), index),
-                UserData = (byte)GetValue<uint>(recordBatch.Column(Constants.Columns.UserData, StringComparer.Ordinal), index),
-                PointSourceId = (ushort)GetValue<uint>(recordBatch.Column(Constants.Columns.PointSourceId, StringComparer.Ordinal), index),
-                Classification = (Classification)GetValue<uint>(recordBatch.Column(Constants.Columns.Legacy.Classification, StringComparer.Ordinal), index),
-                ScanAngleRank = (sbyte)GetValue<int>(recordBatch.Column(Constants.Columns.Legacy.ScanAngleRank, StringComparer.Ordinal), index),
+                Intensity = GetValue<ushort>(recordBatch.Column(Constants.Columns.Intensity, StringComparer.Ordinal), index),
+                ReturnNumber = GetValue<byte>(recordBatch.Column(Constants.Columns.ReturnNumber, StringComparer.Ordinal), index),
+                NumberOfReturns = GetValue<byte>(recordBatch.Column(Constants.Columns.NumberOfReturns, StringComparer.Ordinal), index),
+                ScanDirectionFlag = GetBooleanValue(recordBatch.Column(Constants.Columns.ScanDirectionFlag, StringComparer.Ordinal), index),
+                EdgeOfFlightLine = GetBooleanValue(recordBatch.Column(Constants.Columns.EdgeOfFlightLine, StringComparer.Ordinal), index),
+                Synthetic = GetBooleanValue(recordBatch.Column(Constants.Columns.Synthetic, StringComparer.Ordinal), index),
+                KeyPoint = GetBooleanValue(recordBatch.Column(Constants.Columns.KeyPoint, StringComparer.Ordinal), index),
+                Withheld = GetBooleanValue(recordBatch.Column(Constants.Columns.Withheld, StringComparer.Ordinal), index),
+                UserData = GetValue<byte>(recordBatch.Column(Constants.Columns.UserData, StringComparer.Ordinal), index),
+                PointSourceId = GetValue<ushort>(recordBatch.Column(Constants.Columns.PointSourceId, StringComparer.Ordinal), index),
+                Classification = (Classification)GetValue<byte>(recordBatch.Column(Constants.Columns.Legacy.Classification, StringComparer.Ordinal), index),
+                ScanAngleRank = GetValue<sbyte>(recordBatch.Column(Constants.Columns.Legacy.ScanAngleRank, StringComparer.Ordinal), index),
                 Color = new()
                 {
-                    R = (ushort)GetValue<uint>(recordBatch.Column(Constants.Columns.Color.Red, StringComparer.Ordinal), index),
-                    G = (ushort)GetValue<uint>(recordBatch.Column(Constants.Columns.Color.Green, StringComparer.Ordinal), index),
-                    B = (ushort)GetValue<uint>(recordBatch.Column(Constants.Columns.Color.Blue, StringComparer.Ordinal), index),
+                    R = GetValue<ushort>(recordBatch.Column(Constants.Columns.Color.Red, StringComparer.Ordinal), index),
+                    G = GetValue<ushort>(recordBatch.Column(Constants.Columns.Color.Green, StringComparer.Ordinal), index),
+                    B = GetValue<ushort>(recordBatch.Column(Constants.Columns.Color.Blue, StringComparer.Ordinal), index),
                 },
             },
             GpsColorPointDataRecord.Id => new GpsColorPointDataRecord
@@ -243,24 +250,24 @@ public sealed class ArrowLasReader : ILasReader, IDisposable
                 X = GetValue<int>(recordBatch.Column(Constants.Columns.X, StringComparer.Ordinal), index),
                 Y = GetValue<int>(recordBatch.Column(Constants.Columns.Y, StringComparer.Ordinal), index),
                 Z = GetValue<int>(recordBatch.Column(Constants.Columns.Z, StringComparer.Ordinal), index),
-                Intensity = (ushort)GetValue<uint>(recordBatch.Column(Constants.Columns.Intensity, StringComparer.Ordinal), index),
-                ReturnNumber = (byte)GetValue<uint>(recordBatch.Column(Constants.Columns.ReturnNumber, StringComparer.Ordinal), index),
-                NumberOfReturns = (byte)GetValue<uint>(recordBatch.Column(Constants.Columns.NumberOfReturns, StringComparer.Ordinal), index),
-                ScanDirectionFlag = GetValue<bool>(recordBatch.Column(Constants.Columns.ScanDirectionFlag, StringComparer.Ordinal), index),
-                EdgeOfFlightLine = GetValue<bool>(recordBatch.Column(Constants.Columns.EdgeOfFlightLine, StringComparer.Ordinal), index),
-                Synthetic = GetValue<bool>(recordBatch.Column(Constants.Columns.Synthetic, StringComparer.Ordinal), index),
-                KeyPoint = GetValue<bool>(recordBatch.Column(Constants.Columns.KeyPoint, StringComparer.Ordinal), index),
-                Withheld = GetValue<bool>(recordBatch.Column(Constants.Columns.Withheld, StringComparer.Ordinal), index),
-                UserData = (byte)GetValue<uint>(recordBatch.Column(Constants.Columns.UserData, StringComparer.Ordinal), index),
-                PointSourceId = (ushort)GetValue<uint>(recordBatch.Column(Constants.Columns.PointSourceId, StringComparer.Ordinal), index),
-                Classification = (Classification)GetValue<uint>(recordBatch.Column(Constants.Columns.Legacy.Classification, StringComparer.Ordinal), index),
-                ScanAngleRank = (sbyte)GetValue<int>(recordBatch.Column(Constants.Columns.Legacy.ScanAngleRank, StringComparer.Ordinal), index),
+                Intensity = GetValue<ushort>(recordBatch.Column(Constants.Columns.Intensity, StringComparer.Ordinal), index),
+                ReturnNumber = GetValue<byte>(recordBatch.Column(Constants.Columns.ReturnNumber, StringComparer.Ordinal), index),
+                NumberOfReturns = GetValue<byte>(recordBatch.Column(Constants.Columns.NumberOfReturns, StringComparer.Ordinal), index),
+                ScanDirectionFlag = GetBooleanValue(recordBatch.Column(Constants.Columns.ScanDirectionFlag, StringComparer.Ordinal), index),
+                EdgeOfFlightLine = GetBooleanValue(recordBatch.Column(Constants.Columns.EdgeOfFlightLine, StringComparer.Ordinal), index),
+                Synthetic = GetBooleanValue(recordBatch.Column(Constants.Columns.Synthetic, StringComparer.Ordinal), index),
+                KeyPoint = GetBooleanValue(recordBatch.Column(Constants.Columns.KeyPoint, StringComparer.Ordinal), index),
+                Withheld = GetBooleanValue(recordBatch.Column(Constants.Columns.Withheld, StringComparer.Ordinal), index),
+                UserData = GetValue<byte>(recordBatch.Column(Constants.Columns.UserData, StringComparer.Ordinal), index),
+                PointSourceId = GetValue<ushort>(recordBatch.Column(Constants.Columns.PointSourceId, StringComparer.Ordinal), index),
+                Classification = (Classification)GetValue<byte>(recordBatch.Column(Constants.Columns.Legacy.Classification, StringComparer.Ordinal), index),
+                ScanAngleRank = GetValue<sbyte>(recordBatch.Column(Constants.Columns.Legacy.ScanAngleRank, StringComparer.Ordinal), index),
                 GpsTime = GetValue<double>(recordBatch.Column(Constants.Columns.Gps.GpsTime, StringComparer.Ordinal), index),
                 Color = new()
                 {
-                    R = (ushort)GetValue<uint>(recordBatch.Column(Constants.Columns.Color.Red, StringComparer.Ordinal), index),
-                    G = (ushort)GetValue<uint>(recordBatch.Column(Constants.Columns.Color.Green, StringComparer.Ordinal), index),
-                    B = (ushort)GetValue<uint>(recordBatch.Column(Constants.Columns.Color.Blue, StringComparer.Ordinal), index),
+                    R = GetValue<ushort>(recordBatch.Column(Constants.Columns.Color.Red, StringComparer.Ordinal), index),
+                    G = GetValue<ushort>(recordBatch.Column(Constants.Columns.Color.Green, StringComparer.Ordinal), index),
+                    B = GetValue<ushort>(recordBatch.Column(Constants.Columns.Color.Blue, StringComparer.Ordinal), index),
                 },
             },
 #endif
@@ -270,20 +277,20 @@ public sealed class ArrowLasReader : ILasReader, IDisposable
                 X = GetValue<int>(recordBatch.Column(Constants.Columns.X, StringComparer.Ordinal), index),
                 Y = GetValue<int>(recordBatch.Column(Constants.Columns.Y, StringComparer.Ordinal), index),
                 Z = GetValue<int>(recordBatch.Column(Constants.Columns.Z, StringComparer.Ordinal), index),
-                Intensity = (ushort)GetValue<uint>(recordBatch.Column(Constants.Columns.Intensity, StringComparer.Ordinal), index),
-                ReturnNumber = (byte)GetValue<uint>(recordBatch.Column(Constants.Columns.ReturnNumber, StringComparer.Ordinal), index),
-                NumberOfReturns = (byte)GetValue<uint>(recordBatch.Column(Constants.Columns.NumberOfReturns, StringComparer.Ordinal), index),
-                ScanDirectionFlag = GetValue<bool>(recordBatch.Column(Constants.Columns.ScanDirectionFlag, StringComparer.Ordinal), index),
-                EdgeOfFlightLine = GetValue<bool>(recordBatch.Column(Constants.Columns.EdgeOfFlightLine, StringComparer.Ordinal), index),
-                Synthetic = GetValue<bool>(recordBatch.Column(Constants.Columns.Synthetic, StringComparer.Ordinal), index),
-                KeyPoint = GetValue<bool>(recordBatch.Column(Constants.Columns.KeyPoint, StringComparer.Ordinal), index),
-                Withheld = GetValue<bool>(recordBatch.Column(Constants.Columns.Withheld, StringComparer.Ordinal), index),
-                UserData = (byte)GetValue<uint>(recordBatch.Column(Constants.Columns.UserData, StringComparer.Ordinal), index),
-                PointSourceId = (ushort)GetValue<uint>(recordBatch.Column(Constants.Columns.PointSourceId, StringComparer.Ordinal), index),
-                Classification = (Classification)GetValue<uint>(recordBatch.Column(Constants.Columns.Legacy.Classification, StringComparer.Ordinal), index),
-                ScanAngleRank = (sbyte)GetValue<int>(recordBatch.Column(Constants.Columns.Legacy.ScanAngleRank, StringComparer.Ordinal), index),
+                Intensity = GetValue<ushort>(recordBatch.Column(Constants.Columns.Intensity, StringComparer.Ordinal), index),
+                ReturnNumber = GetValue<byte>(recordBatch.Column(Constants.Columns.ReturnNumber, StringComparer.Ordinal), index),
+                NumberOfReturns = GetValue<byte>(recordBatch.Column(Constants.Columns.NumberOfReturns, StringComparer.Ordinal), index),
+                ScanDirectionFlag = GetBooleanValue(recordBatch.Column(Constants.Columns.ScanDirectionFlag, StringComparer.Ordinal), index),
+                EdgeOfFlightLine = GetBooleanValue(recordBatch.Column(Constants.Columns.EdgeOfFlightLine, StringComparer.Ordinal), index),
+                Synthetic = GetBooleanValue(recordBatch.Column(Constants.Columns.Synthetic, StringComparer.Ordinal), index),
+                KeyPoint = GetBooleanValue(recordBatch.Column(Constants.Columns.KeyPoint, StringComparer.Ordinal), index),
+                Withheld = GetBooleanValue(recordBatch.Column(Constants.Columns.Withheld, StringComparer.Ordinal), index),
+                UserData = GetValue<byte>(recordBatch.Column(Constants.Columns.UserData, StringComparer.Ordinal), index),
+                PointSourceId = GetValue<ushort>(recordBatch.Column(Constants.Columns.PointSourceId, StringComparer.Ordinal), index),
+                Classification = (Classification)GetValue<byte>(recordBatch.Column(Constants.Columns.Legacy.Classification, StringComparer.Ordinal), index),
+                ScanAngleRank = GetValue<sbyte>(recordBatch.Column(Constants.Columns.Legacy.ScanAngleRank, StringComparer.Ordinal), index),
                 GpsTime = GetValue<double>(recordBatch.Column(Constants.Columns.Gps.GpsTime, StringComparer.Ordinal), index),
-                WavePacketDescriptorIndex = (byte)GetValue<uint>(recordBatch.Column(Constants.Columns.Waveform.WavePacketDescriptorIndex, StringComparer.Ordinal), index),
+                WavePacketDescriptorIndex = GetValue<byte>(recordBatch.Column(Constants.Columns.Waveform.WavePacketDescriptorIndex, StringComparer.Ordinal), index),
                 ByteOffsetToWaveformData = GetValue<ulong>(recordBatch.Column(Constants.Columns.Waveform.ByteOffsetToWaveformData, StringComparer.Ordinal), index),
                 WaveformPacketSizeInBytes = GetValue<uint>(recordBatch.Column(Constants.Columns.Waveform.WaveformPacketSizeInBytes, StringComparer.Ordinal), index),
                 ReturnPointWaveformLocation = GetValue<float>(recordBatch.Column(Constants.Columns.Waveform.ReturnPointWaveformLocation, StringComparer.Ordinal), index),
@@ -296,26 +303,26 @@ public sealed class ArrowLasReader : ILasReader, IDisposable
                 X = GetValue<int>(recordBatch.Column(Constants.Columns.X, StringComparer.Ordinal), index),
                 Y = GetValue<int>(recordBatch.Column(Constants.Columns.Y, StringComparer.Ordinal), index),
                 Z = GetValue<int>(recordBatch.Column(Constants.Columns.Z, StringComparer.Ordinal), index),
-                Intensity = (ushort)GetValue<uint>(recordBatch.Column(Constants.Columns.Intensity, StringComparer.Ordinal), index),
-                ReturnNumber = (byte)GetValue<uint>(recordBatch.Column(Constants.Columns.ReturnNumber, StringComparer.Ordinal), index),
-                NumberOfReturns = (byte)GetValue<uint>(recordBatch.Column(Constants.Columns.NumberOfReturns, StringComparer.Ordinal), index),
-                ScanDirectionFlag = GetValue<bool>(recordBatch.Column(Constants.Columns.ScanDirectionFlag, StringComparer.Ordinal), index),
-                EdgeOfFlightLine = GetValue<bool>(recordBatch.Column(Constants.Columns.EdgeOfFlightLine, StringComparer.Ordinal), index),
-                Synthetic = GetValue<bool>(recordBatch.Column(Constants.Columns.Synthetic, StringComparer.Ordinal), index),
-                KeyPoint = GetValue<bool>(recordBatch.Column(Constants.Columns.KeyPoint, StringComparer.Ordinal), index),
-                Withheld = GetValue<bool>(recordBatch.Column(Constants.Columns.Withheld, StringComparer.Ordinal), index),
-                UserData = (byte)GetValue<uint>(recordBatch.Column(Constants.Columns.UserData, StringComparer.Ordinal), index),
-                PointSourceId = (ushort)GetValue<uint>(recordBatch.Column(Constants.Columns.PointSourceId, StringComparer.Ordinal), index),
-                Classification = (Classification)GetValue<uint>(recordBatch.Column(Constants.Columns.Legacy.Classification, StringComparer.Ordinal), index),
-                ScanAngleRank = (sbyte)GetValue<int>(recordBatch.Column(Constants.Columns.Legacy.ScanAngleRank, StringComparer.Ordinal), index),
+                Intensity = GetValue<ushort>(recordBatch.Column(Constants.Columns.Intensity, StringComparer.Ordinal), index),
+                ReturnNumber = GetValue<byte>(recordBatch.Column(Constants.Columns.ReturnNumber, StringComparer.Ordinal), index),
+                NumberOfReturns = GetValue<byte>(recordBatch.Column(Constants.Columns.NumberOfReturns, StringComparer.Ordinal), index),
+                ScanDirectionFlag = GetBooleanValue(recordBatch.Column(Constants.Columns.ScanDirectionFlag, StringComparer.Ordinal), index),
+                EdgeOfFlightLine = GetBooleanValue(recordBatch.Column(Constants.Columns.EdgeOfFlightLine, StringComparer.Ordinal), index),
+                Synthetic = GetBooleanValue(recordBatch.Column(Constants.Columns.Synthetic, StringComparer.Ordinal), index),
+                KeyPoint = GetBooleanValue(recordBatch.Column(Constants.Columns.KeyPoint, StringComparer.Ordinal), index),
+                Withheld = GetBooleanValue(recordBatch.Column(Constants.Columns.Withheld, StringComparer.Ordinal), index),
+                UserData = GetValue<byte>(recordBatch.Column(Constants.Columns.UserData, StringComparer.Ordinal), index),
+                PointSourceId = GetValue<ushort>(recordBatch.Column(Constants.Columns.PointSourceId, StringComparer.Ordinal), index),
+                Classification = (Classification)GetValue<byte>(recordBatch.Column(Constants.Columns.Legacy.Classification, StringComparer.Ordinal), index),
+                ScanAngleRank = GetValue<sbyte>(recordBatch.Column(Constants.Columns.Legacy.ScanAngleRank, StringComparer.Ordinal), index),
                 GpsTime = GetValue<double>(recordBatch.Column(Constants.Columns.Gps.GpsTime, StringComparer.Ordinal), index),
                 Color = new()
                 {
-                    R = (ushort)GetValue<uint>(recordBatch.Column(Constants.Columns.Color.Red, StringComparer.Ordinal), index),
-                    G = (ushort)GetValue<uint>(recordBatch.Column(Constants.Columns.Color.Green, StringComparer.Ordinal), index),
-                    B = (ushort)GetValue<uint>(recordBatch.Column(Constants.Columns.Color.Blue, StringComparer.Ordinal), index),
+                    R = GetValue<ushort>(recordBatch.Column(Constants.Columns.Color.Red, StringComparer.Ordinal), index),
+                    G = GetValue<ushort>(recordBatch.Column(Constants.Columns.Color.Green, StringComparer.Ordinal), index),
+                    B = GetValue<ushort>(recordBatch.Column(Constants.Columns.Color.Blue, StringComparer.Ordinal), index),
                 },
-                WavePacketDescriptorIndex = (byte)GetValue<uint>(recordBatch.Column(Constants.Columns.Waveform.WavePacketDescriptorIndex, StringComparer.Ordinal), index),
+                WavePacketDescriptorIndex = GetValue<byte>(recordBatch.Column(Constants.Columns.Waveform.WavePacketDescriptorIndex, StringComparer.Ordinal), index),
                 ByteOffsetToWaveformData = GetValue<ulong>(recordBatch.Column(Constants.Columns.Waveform.ByteOffsetToWaveformData, StringComparer.Ordinal), index),
                 WaveformPacketSizeInBytes = GetValue<uint>(recordBatch.Column(Constants.Columns.Waveform.WaveformPacketSizeInBytes, StringComparer.Ordinal), index),
                 ReturnPointWaveformLocation = GetValue<float>(recordBatch.Column(Constants.Columns.Waveform.ReturnPointWaveformLocation, StringComparer.Ordinal), index),
@@ -330,20 +337,20 @@ public sealed class ArrowLasReader : ILasReader, IDisposable
                 X = GetValue<int>(recordBatch.Column(Constants.Columns.X, StringComparer.Ordinal), index),
                 Y = GetValue<int>(recordBatch.Column(Constants.Columns.Y, StringComparer.Ordinal), index),
                 Z = GetValue<int>(recordBatch.Column(Constants.Columns.Z, StringComparer.Ordinal), index),
-                Intensity = (ushort)GetValue<uint>(recordBatch.Column(Constants.Columns.Intensity, StringComparer.Ordinal), index),
-                ReturnNumber = (byte)GetValue<uint>(recordBatch.Column(Constants.Columns.ReturnNumber, StringComparer.Ordinal), index),
-                NumberOfReturns = (byte)GetValue<uint>(recordBatch.Column(Constants.Columns.NumberOfReturns, StringComparer.Ordinal), index),
-                ScanDirectionFlag = GetValue<bool>(recordBatch.Column(Constants.Columns.ScanDirectionFlag, StringComparer.Ordinal), index),
-                EdgeOfFlightLine = GetValue<bool>(recordBatch.Column(Constants.Columns.EdgeOfFlightLine, StringComparer.Ordinal), index),
-                Synthetic = GetValue<bool>(recordBatch.Column(Constants.Columns.Synthetic, StringComparer.Ordinal), index),
-                KeyPoint = GetValue<bool>(recordBatch.Column(Constants.Columns.KeyPoint, StringComparer.Ordinal), index),
-                Withheld = GetValue<bool>(recordBatch.Column(Constants.Columns.Withheld, StringComparer.Ordinal), index),
-                UserData = (byte)GetValue<uint>(recordBatch.Column(Constants.Columns.UserData, StringComparer.Ordinal), index),
-                PointSourceId = (ushort)GetValue<uint>(recordBatch.Column(Constants.Columns.PointSourceId, StringComparer.Ordinal), index),
-                Overlap = GetValue<bool>(recordBatch.Column(Constants.Columns.Extended.Overlap, StringComparer.Ordinal), index),
-                ScannerChannel = (byte)GetValue<uint>(recordBatch.Column(Constants.Columns.Extended.ScannerChannel, StringComparer.Ordinal), index),
-                Classification = (ExtendedClassification)GetValue<uint>(recordBatch.Column(Constants.Columns.Extended.Classification, StringComparer.Ordinal), index),
-                ScanAngle = (sbyte)GetValue<int>(recordBatch.Column(Constants.Columns.Extended.ScanAngle, StringComparer.Ordinal), index),
+                Intensity = GetValue<ushort>(recordBatch.Column(Constants.Columns.Intensity, StringComparer.Ordinal), index),
+                ReturnNumber = GetValue<byte>(recordBatch.Column(Constants.Columns.ReturnNumber, StringComparer.Ordinal), index),
+                NumberOfReturns = GetValue<byte>(recordBatch.Column(Constants.Columns.NumberOfReturns, StringComparer.Ordinal), index),
+                ScanDirectionFlag = GetBooleanValue(recordBatch.Column(Constants.Columns.ScanDirectionFlag, StringComparer.Ordinal), index),
+                EdgeOfFlightLine = GetBooleanValue(recordBatch.Column(Constants.Columns.EdgeOfFlightLine, StringComparer.Ordinal), index),
+                Synthetic = GetBooleanValue(recordBatch.Column(Constants.Columns.Synthetic, StringComparer.Ordinal), index),
+                KeyPoint = GetBooleanValue(recordBatch.Column(Constants.Columns.KeyPoint, StringComparer.Ordinal), index),
+                Withheld = GetBooleanValue(recordBatch.Column(Constants.Columns.Withheld, StringComparer.Ordinal), index),
+                UserData = GetValue<byte>(recordBatch.Column(Constants.Columns.UserData, StringComparer.Ordinal), index),
+                PointSourceId = GetValue<ushort>(recordBatch.Column(Constants.Columns.PointSourceId, StringComparer.Ordinal), index),
+                Overlap = GetBooleanValue(recordBatch.Column(Constants.Columns.Extended.Overlap, StringComparer.Ordinal), index),
+                ScannerChannel = GetValue<byte>(recordBatch.Column(Constants.Columns.Extended.ScannerChannel, StringComparer.Ordinal), index),
+                Classification = (ExtendedClassification)GetValue<byte>(recordBatch.Column(Constants.Columns.Extended.Classification, StringComparer.Ordinal), index),
+                ScanAngle = GetValue<sbyte>(recordBatch.Column(Constants.Columns.Extended.ScanAngle, StringComparer.Ordinal), index),
                 GpsTime = GetValue<double>(recordBatch.Column(Constants.Columns.Gps.GpsTime, StringComparer.Ordinal), index),
             },
             ExtendedGpsColorPointDataRecord.Id => new ExtendedGpsColorPointDataRecord
@@ -351,26 +358,26 @@ public sealed class ArrowLasReader : ILasReader, IDisposable
                 X = GetValue<int>(recordBatch.Column(Constants.Columns.X, StringComparer.Ordinal), index),
                 Y = GetValue<int>(recordBatch.Column(Constants.Columns.Y, StringComparer.Ordinal), index),
                 Z = GetValue<int>(recordBatch.Column(Constants.Columns.Z, StringComparer.Ordinal), index),
-                Intensity = (ushort)GetValue<uint>(recordBatch.Column(Constants.Columns.Intensity, StringComparer.Ordinal), index),
-                ReturnNumber = (byte)GetValue<uint>(recordBatch.Column(Constants.Columns.ReturnNumber, StringComparer.Ordinal), index),
-                NumberOfReturns = (byte)GetValue<uint>(recordBatch.Column(Constants.Columns.NumberOfReturns, StringComparer.Ordinal), index),
-                ScanDirectionFlag = GetValue<bool>(recordBatch.Column(Constants.Columns.ScanDirectionFlag, StringComparer.Ordinal), index),
-                EdgeOfFlightLine = GetValue<bool>(recordBatch.Column(Constants.Columns.EdgeOfFlightLine, StringComparer.Ordinal), index),
-                Synthetic = GetValue<bool>(recordBatch.Column(Constants.Columns.Synthetic, StringComparer.Ordinal), index),
-                KeyPoint = GetValue<bool>(recordBatch.Column(Constants.Columns.KeyPoint, StringComparer.Ordinal), index),
-                Withheld = GetValue<bool>(recordBatch.Column(Constants.Columns.Withheld, StringComparer.Ordinal), index),
-                UserData = (byte)GetValue<uint>(recordBatch.Column(Constants.Columns.UserData, StringComparer.Ordinal), index),
-                PointSourceId = (ushort)GetValue<uint>(recordBatch.Column(Constants.Columns.PointSourceId, StringComparer.Ordinal), index),
-                Overlap = GetValue<bool>(recordBatch.Column(Constants.Columns.Extended.Overlap, StringComparer.Ordinal), index),
-                ScannerChannel = (byte)GetValue<uint>(recordBatch.Column(Constants.Columns.Extended.ScannerChannel, StringComparer.Ordinal), index),
-                Classification = (ExtendedClassification)GetValue<uint>(recordBatch.Column(Constants.Columns.Extended.Classification, StringComparer.Ordinal), index),
-                ScanAngle = (sbyte)GetValue<int>(recordBatch.Column(Constants.Columns.Extended.ScanAngle, StringComparer.Ordinal), index),
+                Intensity = GetValue<ushort>(recordBatch.Column(Constants.Columns.Intensity, StringComparer.Ordinal), index),
+                ReturnNumber = GetValue<byte>(recordBatch.Column(Constants.Columns.ReturnNumber, StringComparer.Ordinal), index),
+                NumberOfReturns = GetValue<byte>(recordBatch.Column(Constants.Columns.NumberOfReturns, StringComparer.Ordinal), index),
+                ScanDirectionFlag = GetBooleanValue(recordBatch.Column(Constants.Columns.ScanDirectionFlag, StringComparer.Ordinal), index),
+                EdgeOfFlightLine = GetBooleanValue(recordBatch.Column(Constants.Columns.EdgeOfFlightLine, StringComparer.Ordinal), index),
+                Synthetic = GetBooleanValue(recordBatch.Column(Constants.Columns.Synthetic, StringComparer.Ordinal), index),
+                KeyPoint = GetBooleanValue(recordBatch.Column(Constants.Columns.KeyPoint, StringComparer.Ordinal), index),
+                Withheld = GetBooleanValue(recordBatch.Column(Constants.Columns.Withheld, StringComparer.Ordinal), index),
+                UserData = GetValue<byte>(recordBatch.Column(Constants.Columns.UserData, StringComparer.Ordinal), index),
+                PointSourceId = GetValue<ushort>(recordBatch.Column(Constants.Columns.PointSourceId, StringComparer.Ordinal), index),
+                Overlap = GetBooleanValue(recordBatch.Column(Constants.Columns.Extended.Overlap, StringComparer.Ordinal), index),
+                ScannerChannel = GetValue<byte>(recordBatch.Column(Constants.Columns.Extended.ScannerChannel, StringComparer.Ordinal), index),
+                Classification = (ExtendedClassification)GetValue<byte>(recordBatch.Column(Constants.Columns.Extended.Classification, StringComparer.Ordinal), index),
+                ScanAngle = GetValue<sbyte>(recordBatch.Column(Constants.Columns.Extended.ScanAngle, StringComparer.Ordinal), index),
                 GpsTime = GetValue<double>(recordBatch.Column(Constants.Columns.Gps.GpsTime, StringComparer.Ordinal), index),
                 Color = new()
                 {
-                    R = (ushort)GetValue<uint>(recordBatch.Column(Constants.Columns.Color.Red, StringComparer.Ordinal), index),
-                    G = (ushort)GetValue<uint>(recordBatch.Column(Constants.Columns.Color.Green, StringComparer.Ordinal), index),
-                    B = (ushort)GetValue<uint>(recordBatch.Column(Constants.Columns.Color.Blue, StringComparer.Ordinal), index),
+                    R = GetValue<ushort>(recordBatch.Column(Constants.Columns.Color.Red, StringComparer.Ordinal), index),
+                    G = GetValue<ushort>(recordBatch.Column(Constants.Columns.Color.Green, StringComparer.Ordinal), index),
+                    B = GetValue<ushort>(recordBatch.Column(Constants.Columns.Color.Blue, StringComparer.Ordinal), index),
                 },
             },
             ExtendedGpsColorNearInfraredPointDataRecord.Id => new ExtendedGpsColorNearInfraredPointDataRecord
@@ -378,50 +385,50 @@ public sealed class ArrowLasReader : ILasReader, IDisposable
                 X = GetValue<int>(recordBatch.Column(Constants.Columns.X, StringComparer.Ordinal), index),
                 Y = GetValue<int>(recordBatch.Column(Constants.Columns.Y, StringComparer.Ordinal), index),
                 Z = GetValue<int>(recordBatch.Column(Constants.Columns.Z, StringComparer.Ordinal), index),
-                Intensity = (ushort)GetValue<uint>(recordBatch.Column(Constants.Columns.Intensity, StringComparer.Ordinal), index),
-                ReturnNumber = (byte)GetValue<uint>(recordBatch.Column(Constants.Columns.ReturnNumber, StringComparer.Ordinal), index),
-                NumberOfReturns = (byte)GetValue<uint>(recordBatch.Column(Constants.Columns.NumberOfReturns, StringComparer.Ordinal), index),
-                ScanDirectionFlag = GetValue<bool>(recordBatch.Column(Constants.Columns.ScanDirectionFlag, StringComparer.Ordinal), index),
-                EdgeOfFlightLine = GetValue<bool>(recordBatch.Column(Constants.Columns.EdgeOfFlightLine, StringComparer.Ordinal), index),
-                Synthetic = GetValue<bool>(recordBatch.Column(Constants.Columns.Synthetic, StringComparer.Ordinal), index),
-                KeyPoint = GetValue<bool>(recordBatch.Column(Constants.Columns.KeyPoint, StringComparer.Ordinal), index),
-                Withheld = GetValue<bool>(recordBatch.Column(Constants.Columns.Withheld, StringComparer.Ordinal), index),
-                UserData = (byte)GetValue<uint>(recordBatch.Column(Constants.Columns.UserData, StringComparer.Ordinal), index),
-                PointSourceId = (ushort)GetValue<uint>(recordBatch.Column(Constants.Columns.PointSourceId, StringComparer.Ordinal), index),
-                Overlap = GetValue<bool>(recordBatch.Column(Constants.Columns.Extended.Overlap, StringComparer.Ordinal), index),
-                ScannerChannel = (byte)GetValue<uint>(recordBatch.Column(Constants.Columns.Extended.ScannerChannel, StringComparer.Ordinal), index),
-                Classification = (ExtendedClassification)GetValue<uint>(recordBatch.Column(Constants.Columns.Extended.Classification, StringComparer.Ordinal), index),
-                ScanAngle = (sbyte)GetValue<int>(recordBatch.Column(Constants.Columns.Extended.ScanAngle, StringComparer.Ordinal), index),
+                Intensity = GetValue<ushort>(recordBatch.Column(Constants.Columns.Intensity, StringComparer.Ordinal), index),
+                ReturnNumber = GetValue<byte>(recordBatch.Column(Constants.Columns.ReturnNumber, StringComparer.Ordinal), index),
+                NumberOfReturns = GetValue<byte>(recordBatch.Column(Constants.Columns.NumberOfReturns, StringComparer.Ordinal), index),
+                ScanDirectionFlag = GetBooleanValue(recordBatch.Column(Constants.Columns.ScanDirectionFlag, StringComparer.Ordinal), index),
+                EdgeOfFlightLine = GetBooleanValue(recordBatch.Column(Constants.Columns.EdgeOfFlightLine, StringComparer.Ordinal), index),
+                Synthetic = GetBooleanValue(recordBatch.Column(Constants.Columns.Synthetic, StringComparer.Ordinal), index),
+                KeyPoint = GetBooleanValue(recordBatch.Column(Constants.Columns.KeyPoint, StringComparer.Ordinal), index),
+                Withheld = GetBooleanValue(recordBatch.Column(Constants.Columns.Withheld, StringComparer.Ordinal), index),
+                UserData = GetValue<byte>(recordBatch.Column(Constants.Columns.UserData, StringComparer.Ordinal), index),
+                PointSourceId = GetValue<ushort>(recordBatch.Column(Constants.Columns.PointSourceId, StringComparer.Ordinal), index),
+                Overlap = GetBooleanValue(recordBatch.Column(Constants.Columns.Extended.Overlap, StringComparer.Ordinal), index),
+                ScannerChannel = GetValue<byte>(recordBatch.Column(Constants.Columns.Extended.ScannerChannel, StringComparer.Ordinal), index),
+                Classification = (ExtendedClassification)GetValue<byte>(recordBatch.Column(Constants.Columns.Extended.Classification, StringComparer.Ordinal), index),
+                ScanAngle = GetValue<sbyte>(recordBatch.Column(Constants.Columns.Extended.ScanAngle, StringComparer.Ordinal), index),
                 GpsTime = GetValue<double>(recordBatch.Column(Constants.Columns.Gps.GpsTime, StringComparer.Ordinal), index),
                 Color = new()
                 {
-                    R = (ushort)GetValue<uint>(recordBatch.Column(Constants.Columns.Color.Red, StringComparer.Ordinal), index),
-                    G = (ushort)GetValue<uint>(recordBatch.Column(Constants.Columns.Color.Green, StringComparer.Ordinal), index),
-                    B = (ushort)GetValue<uint>(recordBatch.Column(Constants.Columns.Color.Blue, StringComparer.Ordinal), index),
+                    R = GetValue<ushort>(recordBatch.Column(Constants.Columns.Color.Red, StringComparer.Ordinal), index),
+                    G = GetValue<ushort>(recordBatch.Column(Constants.Columns.Color.Green, StringComparer.Ordinal), index),
+                    B = GetValue<ushort>(recordBatch.Column(Constants.Columns.Color.Blue, StringComparer.Ordinal), index),
                 },
-                NearInfrared = (ushort)GetValue<uint>(recordBatch.Column(Constants.Columns.Nir.NearInfrared, StringComparer.Ordinal), index),
+                NearInfrared = GetValue<ushort>(recordBatch.Column(Constants.Columns.Nir.NearInfrared, StringComparer.Ordinal), index),
             },
             ExtendedGpsWaveformPointDataRecord.Id => new ExtendedGpsWaveformPointDataRecord
             {
                 X = GetValue<int>(recordBatch.Column(Constants.Columns.X, StringComparer.Ordinal), index),
                 Y = GetValue<int>(recordBatch.Column(Constants.Columns.Y, StringComparer.Ordinal), index),
                 Z = GetValue<int>(recordBatch.Column(Constants.Columns.Z, StringComparer.Ordinal), index),
-                Intensity = (ushort)GetValue<uint>(recordBatch.Column(Constants.Columns.Intensity, StringComparer.Ordinal), index),
-                ReturnNumber = (byte)GetValue<uint>(recordBatch.Column(Constants.Columns.ReturnNumber, StringComparer.Ordinal), index),
-                NumberOfReturns = (byte)GetValue<uint>(recordBatch.Column(Constants.Columns.NumberOfReturns, StringComparer.Ordinal), index),
-                ScanDirectionFlag = GetValue<bool>(recordBatch.Column(Constants.Columns.ScanDirectionFlag, StringComparer.Ordinal), index),
-                EdgeOfFlightLine = GetValue<bool>(recordBatch.Column(Constants.Columns.EdgeOfFlightLine, StringComparer.Ordinal), index),
-                Synthetic = GetValue<bool>(recordBatch.Column(Constants.Columns.Synthetic, StringComparer.Ordinal), index),
-                KeyPoint = GetValue<bool>(recordBatch.Column(Constants.Columns.KeyPoint, StringComparer.Ordinal), index),
-                Withheld = GetValue<bool>(recordBatch.Column(Constants.Columns.Withheld, StringComparer.Ordinal), index),
-                UserData = (byte)GetValue<uint>(recordBatch.Column(Constants.Columns.UserData, StringComparer.Ordinal), index),
-                PointSourceId = (ushort)GetValue<uint>(recordBatch.Column(Constants.Columns.PointSourceId, StringComparer.Ordinal), index),
-                Overlap = GetValue<bool>(recordBatch.Column(Constants.Columns.Extended.Overlap, StringComparer.Ordinal), index),
-                ScannerChannel = (byte)GetValue<uint>(recordBatch.Column(Constants.Columns.Extended.ScannerChannel, StringComparer.Ordinal), index),
-                Classification = (ExtendedClassification)GetValue<uint>(recordBatch.Column(Constants.Columns.Extended.Classification, StringComparer.Ordinal), index),
-                ScanAngle = (sbyte)GetValue<int>(recordBatch.Column(Constants.Columns.Extended.ScanAngle, StringComparer.Ordinal), index),
+                Intensity = GetValue<ushort>(recordBatch.Column(Constants.Columns.Intensity, StringComparer.Ordinal), index),
+                ReturnNumber = GetValue<byte>(recordBatch.Column(Constants.Columns.ReturnNumber, StringComparer.Ordinal), index),
+                NumberOfReturns = GetValue<byte>(recordBatch.Column(Constants.Columns.NumberOfReturns, StringComparer.Ordinal), index),
+                ScanDirectionFlag = GetBooleanValue(recordBatch.Column(Constants.Columns.ScanDirectionFlag, StringComparer.Ordinal), index),
+                EdgeOfFlightLine = GetBooleanValue(recordBatch.Column(Constants.Columns.EdgeOfFlightLine, StringComparer.Ordinal), index),
+                Synthetic = GetBooleanValue(recordBatch.Column(Constants.Columns.Synthetic, StringComparer.Ordinal), index),
+                KeyPoint = GetBooleanValue(recordBatch.Column(Constants.Columns.KeyPoint, StringComparer.Ordinal), index),
+                Withheld = GetBooleanValue(recordBatch.Column(Constants.Columns.Withheld, StringComparer.Ordinal), index),
+                UserData = GetValue<byte>(recordBatch.Column(Constants.Columns.UserData, StringComparer.Ordinal), index),
+                PointSourceId = GetValue<ushort>(recordBatch.Column(Constants.Columns.PointSourceId, StringComparer.Ordinal), index),
+                Overlap = GetBooleanValue(recordBatch.Column(Constants.Columns.Extended.Overlap, StringComparer.Ordinal), index),
+                ScannerChannel = GetValue<byte>(recordBatch.Column(Constants.Columns.Extended.ScannerChannel, StringComparer.Ordinal), index),
+                Classification = (ExtendedClassification)GetValue<byte>(recordBatch.Column(Constants.Columns.Extended.Classification, StringComparer.Ordinal), index),
+                ScanAngle = GetValue<sbyte>(recordBatch.Column(Constants.Columns.Extended.ScanAngle, StringComparer.Ordinal), index),
                 GpsTime = GetValue<double>(recordBatch.Column(Constants.Columns.Gps.GpsTime, StringComparer.Ordinal), index),
-                WavePacketDescriptorIndex = (byte)GetValue<uint>(recordBatch.Column(Constants.Columns.Waveform.WavePacketDescriptorIndex, StringComparer.Ordinal), index),
+                WavePacketDescriptorIndex = GetValue<byte>(recordBatch.Column(Constants.Columns.Waveform.WavePacketDescriptorIndex, StringComparer.Ordinal), index),
                 ByteOffsetToWaveformData = GetValue<ulong>(recordBatch.Column(Constants.Columns.Waveform.ByteOffsetToWaveformData, StringComparer.Ordinal), index),
                 WaveformPacketSizeInBytes = GetValue<uint>(recordBatch.Column(Constants.Columns.Waveform.WaveformPacketSizeInBytes, StringComparer.Ordinal), index),
                 ReturnPointWaveformLocation = GetValue<float>(recordBatch.Column(Constants.Columns.Waveform.ReturnPointWaveformLocation, StringComparer.Ordinal), index),
@@ -434,29 +441,29 @@ public sealed class ArrowLasReader : ILasReader, IDisposable
                 X = GetValue<int>(recordBatch.Column(Constants.Columns.X, StringComparer.Ordinal), index),
                 Y = GetValue<int>(recordBatch.Column(Constants.Columns.Y, StringComparer.Ordinal), index),
                 Z = GetValue<int>(recordBatch.Column(Constants.Columns.Z, StringComparer.Ordinal), index),
-                Intensity = (ushort)GetValue<uint>(recordBatch.Column(Constants.Columns.Intensity, StringComparer.Ordinal), index),
-                ReturnNumber = (byte)GetValue<uint>(recordBatch.Column(Constants.Columns.ReturnNumber, StringComparer.Ordinal), index),
-                NumberOfReturns = (byte)GetValue<uint>(recordBatch.Column(Constants.Columns.NumberOfReturns, StringComparer.Ordinal), index),
-                ScanDirectionFlag = GetValue<bool>(recordBatch.Column(Constants.Columns.ScanDirectionFlag, StringComparer.Ordinal), index),
-                EdgeOfFlightLine = GetValue<bool>(recordBatch.Column(Constants.Columns.EdgeOfFlightLine, StringComparer.Ordinal), index),
-                Synthetic = GetValue<bool>(recordBatch.Column(Constants.Columns.Synthetic, StringComparer.Ordinal), index),
-                KeyPoint = GetValue<bool>(recordBatch.Column(Constants.Columns.KeyPoint, StringComparer.Ordinal), index),
-                Withheld = GetValue<bool>(recordBatch.Column(Constants.Columns.Withheld, StringComparer.Ordinal), index),
-                UserData = (byte)GetValue<uint>(recordBatch.Column(Constants.Columns.UserData, StringComparer.Ordinal), index),
-                PointSourceId = (ushort)GetValue<uint>(recordBatch.Column(Constants.Columns.PointSourceId, StringComparer.Ordinal), index),
-                Overlap = GetValue<bool>(recordBatch.Column(Constants.Columns.Extended.Overlap, StringComparer.Ordinal), index),
-                ScannerChannel = (byte)GetValue<uint>(recordBatch.Column(Constants.Columns.Extended.ScannerChannel, StringComparer.Ordinal), index),
-                Classification = (ExtendedClassification)GetValue<uint>(recordBatch.Column(Constants.Columns.Extended.Classification, StringComparer.Ordinal), index),
-                ScanAngle = (sbyte)GetValue<int>(recordBatch.Column(Constants.Columns.Extended.ScanAngle, StringComparer.Ordinal), index),
+                Intensity = GetValue<ushort>(recordBatch.Column(Constants.Columns.Intensity, StringComparer.Ordinal), index),
+                ReturnNumber = GetValue<byte>(recordBatch.Column(Constants.Columns.ReturnNumber, StringComparer.Ordinal), index),
+                NumberOfReturns = GetValue<byte>(recordBatch.Column(Constants.Columns.NumberOfReturns, StringComparer.Ordinal), index),
+                ScanDirectionFlag = GetBooleanValue(recordBatch.Column(Constants.Columns.ScanDirectionFlag, StringComparer.Ordinal), index),
+                EdgeOfFlightLine = GetBooleanValue(recordBatch.Column(Constants.Columns.EdgeOfFlightLine, StringComparer.Ordinal), index),
+                Synthetic = GetBooleanValue(recordBatch.Column(Constants.Columns.Synthetic, StringComparer.Ordinal), index),
+                KeyPoint = GetBooleanValue(recordBatch.Column(Constants.Columns.KeyPoint, StringComparer.Ordinal), index),
+                Withheld = GetBooleanValue(recordBatch.Column(Constants.Columns.Withheld, StringComparer.Ordinal), index),
+                UserData = GetValue<byte>(recordBatch.Column(Constants.Columns.UserData, StringComparer.Ordinal), index),
+                PointSourceId = GetValue<ushort>(recordBatch.Column(Constants.Columns.PointSourceId, StringComparer.Ordinal), index),
+                Overlap = GetBooleanValue(recordBatch.Column(Constants.Columns.Extended.Overlap, StringComparer.Ordinal), index),
+                ScannerChannel = GetValue<byte>(recordBatch.Column(Constants.Columns.Extended.ScannerChannel, StringComparer.Ordinal), index),
+                Classification = (ExtendedClassification)GetValue<byte>(recordBatch.Column(Constants.Columns.Extended.Classification, StringComparer.Ordinal), index),
+                ScanAngle = GetValue<sbyte>(recordBatch.Column(Constants.Columns.Extended.ScanAngle, StringComparer.Ordinal), index),
                 GpsTime = GetValue<double>(recordBatch.Column(Constants.Columns.Gps.GpsTime, StringComparer.Ordinal), index),
                 Color = new()
                 {
-                    R = (ushort)GetValue<uint>(recordBatch.Column(Constants.Columns.Color.Red, StringComparer.Ordinal), index),
-                    G = (ushort)GetValue<uint>(recordBatch.Column(Constants.Columns.Color.Green, StringComparer.Ordinal), index),
-                    B = (ushort)GetValue<uint>(recordBatch.Column(Constants.Columns.Color.Blue, StringComparer.Ordinal), index),
+                    R = GetValue<ushort>(recordBatch.Column(Constants.Columns.Color.Red, StringComparer.Ordinal), index),
+                    G = GetValue<ushort>(recordBatch.Column(Constants.Columns.Color.Green, StringComparer.Ordinal), index),
+                    B = GetValue<ushort>(recordBatch.Column(Constants.Columns.Color.Blue, StringComparer.Ordinal), index),
                 },
-                NearInfrared = (ushort)GetValue<uint>(recordBatch.Column(Constants.Columns.Nir.NearInfrared, StringComparer.Ordinal), index),
-                WavePacketDescriptorIndex = (byte)GetValue<uint>(recordBatch.Column(Constants.Columns.Waveform.WavePacketDescriptorIndex, StringComparer.Ordinal), index),
+                NearInfrared = GetValue<ushort>(recordBatch.Column(Constants.Columns.Nir.NearInfrared, StringComparer.Ordinal), index),
+                WavePacketDescriptorIndex = GetValue<byte>(recordBatch.Column(Constants.Columns.Waveform.WavePacketDescriptorIndex, StringComparer.Ordinal), index),
                 ByteOffsetToWaveformData = GetValue<ulong>(recordBatch.Column(Constants.Columns.Waveform.ByteOffsetToWaveformData, StringComparer.Ordinal), index),
                 WaveformPacketSizeInBytes = GetValue<uint>(recordBatch.Column(Constants.Columns.Waveform.WaveformPacketSizeInBytes, StringComparer.Ordinal), index),
                 ReturnPointWaveformLocation = GetValue<float>(recordBatch.Column(Constants.Columns.Waveform.ReturnPointWaveformLocation, StringComparer.Ordinal), index),
@@ -468,21 +475,73 @@ public sealed class ArrowLasReader : ILasReader, IDisposable
             _ => throw new System.Diagnostics.UnreachableException(),
         };
 
+        static bool GetBooleanValue(IArrowArray arrowArray, int index)
+        {
+            return arrowArray switch
+            {
+                BooleanArray booleanArray when booleanArray.GetValue(index) is { } value => value,
+                BooleanArray => throw new KeyNotFoundException(),
+                _ when Convert.ChangeType(GetObjectValue(arrowArray, index), typeof(bool), System.Globalization.CultureInfo.InvariantCulture) is bool convertedValue => convertedValue,
+                _ => throw new InvalidCastException(),
+            };
+        }
+
         static T GetValue<T>(IArrowArray arrowArray, int index)
             where T : struct, IEquatable<T>
         {
-            if (arrowArray is not PrimitiveArray<T> primitiveArray)
+            return arrowArray switch
             {
-                throw new InvalidCastException();
-            }
-
-            if (primitiveArray.GetValue(index) is { } value)
-            {
-                return value;
-            }
-
-            throw new KeyNotFoundException();
+                PrimitiveArray<T> primitiveArray when primitiveArray.GetValue(index) is { } value => value,
+                PrimitiveArray<T> => throw new KeyNotFoundException(),
+                _ when Convert.ChangeType(GetObjectValue(arrowArray, index), typeof(T), System.Globalization.CultureInfo.InvariantCulture) is T convertedValue => convertedValue,
+                _ => throw new InvalidCastException(),
+            };
         }
+
+        static object? GetObjectValue(IArrowArray arrowArray, int index)
+        {
+            return arrowArray switch
+            {
+                BooleanArray values => values.GetValue(index),
+                UInt8Array values => values.GetValue(index),
+                Int8Array values => values.GetValue(index),
+                UInt16Array values => values.GetValue(index),
+                Int16Array values => values.GetValue(index),
+                UInt32Array values => values.GetValue(index),
+                Int32Array values => values.GetValue(index),
+                UInt64Array values => values.GetValue(index),
+                Int64Array values => values.GetValue(index),
+                FloatArray values => values.GetValue(index),
+                DoubleArray values => values.GetValue(index),
+                _ => null,
+            };
+        }
+    }
+
+    private static byte InferPointDataRecordId(Schema schema)
+    {
+        var isLegacy = schema.FieldsList.Any(static field => field.Name is Constants.Columns.Legacy.ScanAngleRank);
+        var isExtended = schema.FieldsList.Any(static field => field.Name is Constants.Columns.Extended.ScannerChannel);
+        var hasGps = schema.FieldsList.Any(static field => field.Name is Constants.Columns.Gps.GpsTime);
+        var hasColor = schema.FieldsList.Any(static field => field.Name is Constants.Columns.Color.Red);
+        var hasNir = schema.FieldsList.Any(static field => field.Name is Constants.Columns.Nir.NearInfrared);
+        var hasWaveform = schema.FieldsList.Any(static field => field.Name is Constants.Columns.Waveform.WavePacketDescriptorIndex);
+
+        return (isLegacy, isExtended, hasGps, hasColor, hasNir, hasWaveform) switch
+        {
+            (true, false, false, false, false, false) => PointDataRecord.Id,
+            (true, false, true, false, false, false) => GpsPointDataRecord.Id,
+            (true, false, false, true, false, false) => ColorPointDataRecord.Id,
+            (true, false, true, true, false, false) => GpsColorPointDataRecord.Id,
+            (true, false, true, false, false, true) => GpsWaveformPointDataRecord.Id,
+            (true, false, true, true, false, true) => GpsColorWaveformPointDataRecord.Id,
+            (false, true, true, false, false, false) => ExtendedGpsPointDataRecord.Id,
+            (false, true, true, true, false, false) => ExtendedGpsColorPointDataRecord.Id,
+            (false, true, true, true, true, false) => ExtendedGpsColorNearInfraredPointDataRecord.Id,
+            (false, true, true, false, false, true) => ExtendedGpsWaveformPointDataRecord.Id,
+            (false, true, true, true, true, true) => ExtendedGpsColorNearInfraredWaveformPointDataRecord.Id,
+            _ => throw new System.Diagnostics.UnreachableException(),
+        };
     }
 
     [System.Diagnostics.CodeAnalysis.MemberNotNullWhen(true, nameof(schema))]
@@ -517,6 +576,7 @@ public sealed class ArrowLasReader : ILasReader, IDisposable
             return false;
         }
 
+        var currentBatchLength = this.currentBatch?.Length ?? 0;
         this.currentBatch?.Dispose();
         this.currentBatch = this.batchEnumerator.Current;
         if (this.currentBatch is null)
@@ -525,8 +585,8 @@ public sealed class ArrowLasReader : ILasReader, IDisposable
         }
 
         this.schema = this.currentBatch.Schema;
-        this.currentBatchStartIndex += (ulong)this.currentRowIndex;
-        this.currentRowIndex = 0;
+        this.currentBatchStartIndex += (ulong)currentBatchLength;
+        this.currentRowIndex = -1;
 
         return this.currentBatch.Length is not 0;
     }

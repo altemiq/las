@@ -23,22 +23,11 @@ public static class DataFrameExtensions
         /// <returns>The data frame.</returns>
         public static DataFrame ReadLas(ILasReader reader, int batchSize = 50_000)
         {
-            var schema = reader.GetArrowSchema();
+            var schema = reader.GetArrowSchema().ToPolarsCompatibleSchema();
 
-            var batchEnumerable = reader.ToArrowBatches(schema, batchSize);
+            using var enumerator = reader.ToArrowBatches(schema, batchSize).GetEnumerator();
 
-            var enumerator = batchEnumerable.GetEnumerator();
-
-            try
-            {
-                var handle = Polars.NET.Core.Arrow.ArrowStreamInterop.ImportEager(enumerator, schema);
-                return NewDataFrame(handle);
-            }
-            catch
-            {
-                enumerator.Dispose();
-                throw;
-            }
+            return NewDataFrame(Polars.NET.Core.Arrow.ArrowStreamInterop.ImportEager(enumerator, schema));
         }
 
         /// <summary>

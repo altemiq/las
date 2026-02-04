@@ -22,11 +22,16 @@ public static class LasReaderExtensions
         /// <summary>
         /// From <see cref="ILasReader"/> infer <see cref="Apache.Arrow"/> <see cref="Apache.Arrow.Schema"/>.
         /// </summary>
-        public Apache.Arrow.Schema GetArrowSchema() => LasToArrowStream.GetArrowSchema(reader);
+        public Schema GetArrowSchema() => LasToArrowStream.GetArrowSchema(reader);
 
         /// <summary>
         /// Convert <see cref="ILasReader"/> to <see cref="Apache.Arrow"/> <see cref="Apache.Arrow.RecordBatch"/> Stream.
         /// </summary>
-        public IEnumerable<Apache.Arrow.RecordBatch> ToArrowBatches(Apache.Arrow.Schema schema, int batchSize = 50_000) => LasToArrowStream.ToArrowBatches(reader, schema, batchSize);
+        public IEnumerable<RecordBatch> ToArrowBatches(int batchSize = 50_000) => LasToArrowStream.ToArrowBatches(reader, LasToArrowStream.GetArrowSchema(reader), batchSize);
+
+        /// <summary>
+        /// Convert <see cref="ILasReader"/> to <see cref="Apache.Arrow"/> <see cref="Apache.Arrow.RecordBatch"/> Stream.
+        /// </summary>
+        public IEnumerable<RecordBatch> ToArrowBatches(Schema schema, int batchSize = 50_000) => LasToArrowStream.ToArrowBatches(reader, schema, batchSize);
     }
 }

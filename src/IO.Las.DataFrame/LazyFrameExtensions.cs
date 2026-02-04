@@ -23,7 +23,7 @@ public static class LazyFrameExtensions
         /// <returns>The lazy frame.</returns>
         public static LazyFrame ScanLas(ILasReader reader, int batchSize = 50_000)
         {
-            var schema = reader.GetArrowSchema();
+            var schema = reader.GetArrowSchema().ToPolarsCompatibleSchema();
 
             var batches = reader.ToArrowBatches(schema, batchSize);
 

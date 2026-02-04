@@ -20,4 +20,23 @@ public class LazyFrameTests
             .IsNotNull().And
             .Member(static m => ((Polars.CSharp.DataFrame)m).Height, static height => height.IsEqualTo(281));
     }
+
+    [Test]
+    public async Task WriteTo()
+    {
+        var stream = typeof(DataFrameTests).Assembly.GetManifestResourceStream(typeof(DataFrameTests), "fusa.las")
+                     ?? throw new System.Diagnostics.UnreachableException("Failed to get stream");
+        
+        await using LasReader reader = new(stream);
+        
+        var data = Polars.CSharp.LazyFrame.ScanLas(reader);
+
+        IBasePointDataRecord record = default;
+        data.SinkTo(arrowReader =>
+        {
+            record = arrowReader.ReadPointDataRecord().PointDataRecord;
+        });
+
+        await Assert.That(record).IsNotNull();
+    }
 }

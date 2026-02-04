@@ -32,28 +32,28 @@ internal static class LasToArrowStream
             buffers[index++].Add(basePointDataRecord.X);
             buffers[index++].Add(basePointDataRecord.Y);
             buffers[index++].Add(basePointDataRecord.Z);
-            buffers[index++].Add((uint)basePointDataRecord.Intensity);
-            buffers[index++].Add((uint)basePointDataRecord.ReturnNumber);
-            buffers[index++].Add((uint)basePointDataRecord.NumberOfReturns);
+            buffers[index++].Add(basePointDataRecord.Intensity);
+            buffers[index++].Add(basePointDataRecord.ReturnNumber);
+            buffers[index++].Add(basePointDataRecord.NumberOfReturns);
             buffers[index++].Add(basePointDataRecord.ScanDirectionFlag);
             buffers[index++].Add(basePointDataRecord.EdgeOfFlightLine);
             buffers[index++].Add(basePointDataRecord.Synthetic);
             buffers[index++].Add(basePointDataRecord.KeyPoint);
             buffers[index++].Add(basePointDataRecord.Withheld);
-            buffers[index++].Add((uint)basePointDataRecord.UserData);
-            buffers[index++].Add((uint)basePointDataRecord.PointSourceId);
+            buffers[index++].Add(basePointDataRecord.UserData);
+            buffers[index++].Add(basePointDataRecord.PointSourceId);
 
             switch (basePointDataRecord)
             {
                 case IPointDataRecord pointDataRecord:
-                    buffers[index++].Add((uint)pointDataRecord.Classification);
-                    buffers[index++].Add((int)pointDataRecord.ScanAngleRank);
+                    buffers[index++].Add((byte)pointDataRecord.Classification);
+                    buffers[index++].Add(pointDataRecord.ScanAngleRank);
                     break;
                 case IExtendedPointDataRecord extendedPointDataRecord:
                     buffers[index++].Add(extendedPointDataRecord.Overlap);
-                    buffers[index++].Add((uint)extendedPointDataRecord.ScannerChannel);
-                    buffers[index++].Add((uint)extendedPointDataRecord.Classification);
-                    buffers[index++].Add((int)extendedPointDataRecord.ScanAngle);
+                    buffers[index++].Add(extendedPointDataRecord.ScannerChannel);
+                    buffers[index++].Add((byte)extendedPointDataRecord.Classification);
+                    buffers[index++].Add(extendedPointDataRecord.ScanAngle);
                     break;
             }
 
@@ -64,19 +64,19 @@ internal static class LasToArrowStream
 
             if (basePointDataRecord is IColorPointDataRecord colorPointDataRecord)
             {
-                buffers[index++].Add((uint)colorPointDataRecord.Color.R);
-                buffers[index++].Add((uint)colorPointDataRecord.Color.G);
-                buffers[index++].Add((uint)colorPointDataRecord.Color.B);
+                buffers[index++].Add(colorPointDataRecord.Color.R);
+                buffers[index++].Add(colorPointDataRecord.Color.G);
+                buffers[index++].Add(colorPointDataRecord.Color.B);
             }
 
             if (basePointDataRecord is INearInfraredPointDataRecord nearInfraredPointDataRecord)
             {
-                buffers[index++].Add((uint)nearInfraredPointDataRecord.NearInfrared);
+                buffers[index++].Add(nearInfraredPointDataRecord.NearInfrared);
             }
 
             if (basePointDataRecord is IWaveformPointDataRecord waveformPointDataRecord)
             {
-                buffers[index++].Add((uint)waveformPointDataRecord.WavePacketDescriptorIndex);
+                buffers[index++].Add(waveformPointDataRecord.WavePacketDescriptorIndex);
                 buffers[index++].Add(waveformPointDataRecord.ByteOffsetToWaveformData);
                 buffers[index++].Add(waveformPointDataRecord.WaveformPacketSizeInBytes);
                 buffers[index++].Add(waveformPointDataRecord.ReturnPointWaveformLocation);
@@ -108,6 +108,35 @@ internal static class LasToArrowStream
         {
             yield return Flush(schema, buffers, 0);
         }
+
+        static RecordBatch Flush(Schema schema, IReadOnlyList<ColumnBuffer> buffers, int length)
+        {
+            return new(schema, GetArrays(schema, buffers, length), length);
+
+            static IEnumerable<IArrowArray> GetArrays(Schema schema, IReadOnlyList<ColumnBuffer> buffers, int length)
+            {
+                for (var i = 0; i < buffers.Count; i++)
+                {
+                    var buffer = buffers[i];
+
+                    if (buffer.Count != length)
+                    {
+                        throw new InvalidOperationException($"Column {i} ('{schema.GetFieldByIndex(i).Name}') has {buffer.Count} elements, but we are creating a batch of length {length}!");
+                    }
+
+                    var array = buffer.BuildArray();
+
+                    if (array.Length != length)
+                    {
+                        throw new InvalidOperationException($"Column {i} BuildArray() returned length {array.Length}, expected {length}. ArrowConverter might be adding extras?");
+                    }
+
+                    buffer.Clear();
+
+                    yield return array;
+                }
+            }
+        }
     }
 
     /// <summary>
@@ -123,31 +152,31 @@ internal static class LasToArrowStream
             .Field(new Field(Constants.Columns.X, Int32Type.Default, nullable: false))
             .Field(new Field(Constants.Columns.Y, Int32Type.Default, nullable: false))
             .Field(new Field(Constants.Columns.Z, Int32Type.Default, nullable: false))
-            .Field(new Field(Constants.Columns.Intensity, UInt32Type.Default, nullable: false)) // upscale from UInt16Type
-            .Field(new Field(Constants.Columns.ReturnNumber, UInt32Type.Default, nullable: false)) // upscale from UInt8Type
-            .Field(new Field(Constants.Columns.NumberOfReturns, UInt32Type.Default, nullable: false)) // upscale from UInt8Type
+            .Field(new Field(Constants.Columns.Intensity, UInt16Type.Default, nullable: false))
+            .Field(new Field(Constants.Columns.ReturnNumber, UInt8Type.Default, nullable: false))
+            .Field(new Field(Constants.Columns.NumberOfReturns, UInt8Type.Default, nullable: false))
             .Field(new Field(Constants.Columns.ScanDirectionFlag, BooleanType.Default, nullable: false))
             .Field(new Field(Constants.Columns.EdgeOfFlightLine, BooleanType.Default, nullable: false))
             .Field(new Field(Constants.Columns.Synthetic, BooleanType.Default, nullable: false))
             .Field(new Field(Constants.Columns.KeyPoint, BooleanType.Default, nullable: false))
             .Field(new Field(Constants.Columns.Withheld, BooleanType.Default, nullable: false))
-            .Field(new Field(Constants.Columns.UserData, UInt32Type.Default, nullable: false)) // upscale from UInt8Type
-            .Field(new Field(Constants.Columns.PointSourceId, UInt32Type.Default, nullable: false)); // upscale from UInt16Type
+            .Field(new Field(Constants.Columns.UserData, UInt8Type.Default, nullable: false))
+            .Field(new Field(Constants.Columns.PointSourceId, UInt16Type.Default, nullable: false));
 
         var pointDataFormatId = reader.Header.PointDataFormatId;
         if (pointDataFormatId <= GpsColorWaveformPointDataRecord.Id)
         {
             builder
-                .Field(new Field(Constants.Columns.Legacy.Classification, UInt32Type.Default, nullable: false)) // upscale from UInt8Type
-                .Field(new Field(Constants.Columns.Legacy.ScanAngleRank, Int32Type.Default, nullable: false)); // upscale from Int8Type
+                .Field(new Field(Constants.Columns.Legacy.Classification, UInt8Type.Default, nullable: false))
+                .Field(new Field(Constants.Columns.Legacy.ScanAngleRank, Int8Type.Default, nullable: false));
         }
         else
         {
             builder
                 .Field(new Field(Constants.Columns.Extended.Overlap, BooleanType.Default, nullable: false))
-                .Field(new Field(Constants.Columns.Extended.ScannerChannel, UInt32Type.Default, nullable: false)) // upscale from UInt8Type
-                .Field(new Field(Constants.Columns.Extended.Classification, UInt32Type.Default, nullable: false)) // upscale from UInt8Type
-                .Field(new Field(Constants.Columns.Extended.ScanAngle, Int32Type.Default, nullable: false)); // upscale from Int16Type
+                .Field(new Field(Constants.Columns.Extended.ScannerChannel, UInt8Type.Default, nullable: false))
+                .Field(new Field(Constants.Columns.Extended.Classification, UInt8Type.Default, nullable: false))
+                .Field(new Field(Constants.Columns.Extended.ScanAngle, Int16Type.Default, nullable: false));
         }
 
         // GPS point data formats
@@ -175,9 +204,9 @@ internal static class LasToArrowStream
             or ExtendedGpsColorNearInfraredWaveformPointDataRecord.Id)
         {
             builder
-                .Field(new Field(Constants.Columns.Color.Red, UInt32Type.Default, nullable: false)) // upscale from UInt16Type
-                .Field(new Field(Constants.Columns.Color.Green, UInt32Type.Default, nullable: false)) // upscale from UInt16Type
-                .Field(new Field(Constants.Columns.Color.Blue, UInt32Type.Default, nullable: false)); // upscale from UInt16Type
+                .Field(new Field(Constants.Columns.Color.Red, UInt16Type.Default, nullable: false))
+                .Field(new Field(Constants.Columns.Color.Green, UInt16Type.Default, nullable: false))
+                .Field(new Field(Constants.Columns.Color.Blue, UInt16Type.Default, nullable: false));
         }
 
         // NIR point data formats
@@ -185,7 +214,7 @@ internal static class LasToArrowStream
             is ExtendedGpsColorNearInfraredPointDataRecord.Id
             or ExtendedGpsColorNearInfraredWaveformPointDataRecord.Id)
         {
-            builder.Field(new Field(Constants.Columns.Nir.NearInfrared, UInt32Type.Default, nullable: false)); // upscale from UInt16Type
+            builder.Field(new Field(Constants.Columns.Nir.NearInfrared, UInt16Type.Default, nullable: false));
         }
 
         if (pointDataFormatId
@@ -195,7 +224,7 @@ internal static class LasToArrowStream
             or ExtendedGpsColorNearInfraredWaveformPointDataRecord.Id)
         {
             builder
-                .Field(new Field(Constants.Columns.Waveform.WavePacketDescriptorIndex, UInt32Type.Default, nullable: false)) // upscale from UInt16Type
+                .Field(new Field(Constants.Columns.Waveform.WavePacketDescriptorIndex, UInt8Type.Default, nullable: false))
                 .Field(new Field(Constants.Columns.Waveform.ByteOffsetToWaveformData, UInt64Type.Default, nullable: false))
                 .Field(new Field(Constants.Columns.Waveform.WaveformPacketSizeInBytes, UInt32Type.Default, nullable: false))
                 .Field(new Field(Constants.Columns.Waveform.ReturnPointWaveformLocation, FloatType.Default, nullable: false))
@@ -216,32 +245,6 @@ internal static class LasToArrowStream
         return builder.Build();
     }
 
-    private static RecordBatch Flush(Schema schema, IReadOnlyList<ColumnBuffer> buffers, int length)
-    {
-        var arrays = new List<IArrowArray>(buffers.Count);
-        for (var i = 0; i < buffers.Count; i++)
-        {
-            var buffer = buffers[i];
-
-            if (buffer.Count != length)
-            {
-                throw new InvalidOperationException($"Column {i} ('{schema.GetFieldByIndex(i).Name}') has {buffer.Count} elements, but we are creating a batch of length {length}!");
-            }
-
-            var array = buffer.BuildArray();
-
-            if (array.Length != length)
-            {
-                throw new InvalidOperationException($"Column {i} BuildArray() returned length {array.Length}, expected {length}. ArrowConverter might be adding extras?");
-            }
-
-            arrays.Add(array);
-            buffer.Clear();
-        }
-
-        return new(schema, arrays, length);
-    }
-
     private abstract class ColumnBuffer
     {
         public abstract int Count { get; }
@@ -250,9 +253,14 @@ internal static class LasToArrowStream
             typeId switch
             {
                 ArrowTypeId.Boolean => new BooleanColumnBuffer(capacity),
+                ArrowTypeId.UInt8 => new UInt8ColumnBuffer(capacity),
+                ArrowTypeId.Int8 => new Int8ColumnBuffer(capacity),
+                ArrowTypeId.UInt16 => new UInt16ColumnBuffer(capacity),
+                ArrowTypeId.Int16 => new Int16ColumnBuffer(capacity),
                 ArrowTypeId.UInt32 => new UInt32ColumnBuffer(capacity),
                 ArrowTypeId.Int32 => new Int32ColumnBuffer(capacity),
                 ArrowTypeId.UInt64 => new UInt64ColumnBuffer(capacity),
+                ArrowTypeId.Int64 => new Int64ColumnBuffer(capacity),
                 ArrowTypeId.Float => new SingleColumnBuffer(capacity),
                 ArrowTypeId.Double => new DoubleColumnBuffer(capacity),
                 _ => throw new NotSupportedException(),
@@ -285,7 +293,8 @@ internal static class LasToArrowStream
                 }
                 else
                 {
-                    throw new InvalidCastException();
+                    // try to cast it
+                    this.buffer.Add((T)Convert.ChangeType(value, typeof(T), System.Globalization.CultureInfo.InvariantCulture));
                 }
             }
 
@@ -321,6 +330,26 @@ internal static class LasToArrowStream
             protected override IArrowArrayBuilder<bool, BooleanArray, BooleanArray.Builder> GetArrayBuilder() => new BooleanArray.Builder();
         }
 
+        private sealed class UInt8ColumnBuffer(int capacity) : PrimitiveColumnBuffer<byte, UInt8Array, UInt8Array.Builder>(capacity)
+        {
+            protected override IArrowArrayBuilder<byte, UInt8Array, UInt8Array.Builder> GetArrayBuilder() => new UInt8Array.Builder();
+        }
+
+        private sealed class Int8ColumnBuffer(int capacity) : PrimitiveColumnBuffer<sbyte, Int8Array, Int8Array.Builder>(capacity)
+        {
+            protected override IArrowArrayBuilder<sbyte, Int8Array, Int8Array.Builder> GetArrayBuilder() => new Int8Array.Builder();
+        }
+
+        private sealed class UInt16ColumnBuffer(int capacity) : PrimitiveColumnBuffer<ushort, UInt16Array, UInt16Array.Builder>(capacity)
+        {
+            protected override IArrowArrayBuilder<ushort, UInt16Array, UInt16Array.Builder> GetArrayBuilder() => new UInt16Array.Builder();
+        }
+
+        private sealed class Int16ColumnBuffer(int capacity) : PrimitiveColumnBuffer<short, Int16Array, Int16Array.Builder>(capacity)
+        {
+            protected override IArrowArrayBuilder<short, Int16Array, Int16Array.Builder> GetArrayBuilder() => new Int16Array.Builder();
+        }
+
         private sealed class UInt32ColumnBuffer(int capacity) : PrimitiveColumnBuffer<uint, UInt32Array, UInt32Array.Builder>(capacity)
         {
             protected override IArrowArrayBuilder<uint, UInt32Array, UInt32Array.Builder> GetArrayBuilder() => new UInt32Array.Builder();
@@ -334,6 +363,11 @@ internal static class LasToArrowStream
         private sealed class UInt64ColumnBuffer(int capacity) : PrimitiveColumnBuffer<ulong, UInt64Array, UInt64Array.Builder>(capacity)
         {
             protected override IArrowArrayBuilder<ulong, UInt64Array, UInt64Array.Builder> GetArrayBuilder() => new UInt64Array.Builder();
+        }
+
+        private sealed class Int64ColumnBuffer(int capacity) : PrimitiveColumnBuffer<long, Int64Array, Int64Array.Builder>(capacity)
+        {
+            protected override IArrowArrayBuilder<long, Int64Array, Int64Array.Builder> GetArrayBuilder() => new Int64Array.Builder();
         }
 
         private sealed class SingleColumnBuffer(int capacity) : PrimitiveColumnBuffer<float, FloatArray, FloatArray.Builder>(capacity)
