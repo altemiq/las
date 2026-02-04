@@ -119,6 +119,7 @@ internal static class LasToArrowStream
             yield return Flush(schema, buffers, 0);
         }
 
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Performance", "CA1863:Use \'CompositeFormat\'", Justification = "This is for exceptions")]
         static RecordBatch Flush(Schema schema, IReadOnlyList<ColumnBuffer> buffers, int length)
         {
             return new(schema, GetArrays(schema, buffers, length), length);
@@ -131,14 +132,14 @@ internal static class LasToArrowStream
 
                     if (buffer.Count != length)
                     {
-                        throw new InvalidOperationException($"Column {i} ('{schema.GetFieldByIndex(i).Name}') has {buffer.Count} elements, but we are creating a batch of length {length}!");
+                        throw new InvalidOperationException(string.Format(Arrow.Properties.Resources.Culture, Arrow.Properties.Resources.IncorrectBufferLength, i, schema.GetFieldByIndex(i).Name, buffer.Count, length));
                     }
 
                     var array = buffer.BuildArray();
 
                     if (array.Length != length)
                     {
-                        throw new InvalidOperationException($"Column {i} BuildArray() returned length {array.Length}, expected {length}. ArrowConverter might be adding extras?");
+                        throw new InvalidOperationException(string.Format(Arrow.Properties.Resources.Culture, Arrow.Properties.Resources.IncorrectBullderBuildLength, i, array.Length, length));
                     }
 
                     buffer.Clear();
