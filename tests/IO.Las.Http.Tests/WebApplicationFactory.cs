@@ -5,15 +5,15 @@ public class WebApplicationFactory : TUnit.Core.Interfaces.IAsyncInitializer, IA
     private const int Port = 25812;
 
     private static readonly string Url = $"{Uri.UriSchemeHttp}://localhost:{Port}/";
-    
-    private readonly HttpClient client = new() { BaseAddress =  new(Url) };
-    
+
+    private readonly HttpClient client = new() { BaseAddress = new(Url) };
+
     private readonly HttpListener listener = new();
-    
+
     private readonly CancellationTokenSource cts = new();
-    
+
     private Task listenerTask;
-    
+
     public HttpClient CreateClient() => this.client;
 
     public Task InitializeAsync()
@@ -29,7 +29,7 @@ public class WebApplicationFactory : TUnit.Core.Interfaces.IAsyncInitializer, IA
                 try
                 {
                     var context = this.listener.GetContext();
-                    
+
                     // say that we accept ranges
                     context.Response.Headers.Add("Accept-Ranges", "bytes");
 
@@ -54,8 +54,8 @@ public class WebApplicationFactory : TUnit.Core.Interfaces.IAsyncInitializer, IA
                                     context.Response.OutputStream.Close();
                                     continue;
                                 }
-                                
-                                var byteRange =  manifestResourceStream.Length;
+
+                                var byteRange = manifestResourceStream.Length;
                                 if (context.Request.Headers.GetValues("Range") is { } rangeValues)
                                 {
                                     var range = rangeValues[0].Replace("bytes=", "").Split('-');
@@ -64,7 +64,7 @@ public class WebApplicationFactory : TUnit.Core.Interfaces.IAsyncInitializer, IA
                                     {
                                         endByte = manifestResourceStream.Length - 1;
                                     }
-                                    
+
                                     byteRange = endByte - startByte + 1;
                                     manifestResourceStream.Seek(startByte, SeekOrigin.Begin);
                                     context.Response.Headers.Add("Content-Range", $"bytes {startByte}-{byteRange - 1}/{byteRange}");
@@ -112,7 +112,7 @@ public class WebApplicationFactory : TUnit.Core.Interfaces.IAsyncInitializer, IA
                 };
             }
         });
-        
+
         return Task.CompletedTask;
     }
 

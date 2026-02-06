@@ -13,55 +13,58 @@ public class GlobalHooks
     public static ResourceNotificationService NotificationService => App.ResourceNotifications;
 
     [Before(TestSession)]
-    public static async Task SetUp()
+    public static async Task SetUp(CancellationToken cancellationToken)
     {
         // Arrange
-        var appHost = await DistributedApplicationTestingBuilder.CreateAsync<Projects.IO_Las_S3_AppHost>();
-        appHost.Services.ConfigureHttpClientDefaults(clientBuilder =>
+        var builder = await DistributedApplicationTestingBuilder.CreateAsync<Projects.IO_Las_S3_AppHost>(cancellationToken);
+        builder.Services.ConfigureHttpClientDefaults(clientBuilder =>
         {
             clientBuilder.AddStandardResilienceHandler();
         });
-        
-        appHost.Services.AddDefaultAWSOptions(static services =>
+
+        builder.Services.AddDefaultAWSOptions(static services =>
         {
-            var configuration = services.GetRequiredService<IConfiguration>();
-            var config = configuration.GetAWSOptions();
+            var options = services.GetRequiredService<IConfiguration>().GetAWSOptions();
             var model = services.GetRequiredService<DistributedApplicationModel>();
 
-            if (model.Resources.OfType<IAWSProfileConfig>().FirstOrDefault() is { } profileConfig)
+            // Set credentials
+            var profile = model.Resources.OfType<IAWSProfileConfig>().Single().Profiles.Single();
+            options.Credentials = new Amazon.Runtime.BasicAWSCredentials(
+                GetValue(profile.AccessKeyId.GetValueAsync(CancellationToken.None)),
+                GetValue(profile.SecretAccessKey.GetValueAsync(CancellationToken.None)));
+
+            // Set service URL and region
+            var localStackServer = model.Resources.OfType<LocalStackServerResource>().Single();
+            var endpoint = localStackServer.GetEndpoint(Uri.UriSchemeHttp, KnownNetworkIdentifiers.LocalhostNetwork);
+            options.DefaultClientConfig.ServiceURL = endpoint.Url;
+            options.DefaultClientConfig.AuthenticationRegion = localStackServer.Region;
+
+            options.DefaultClientConfig.ServiceSpecificSettings.TryAdd(nameof(Amazon.S3.AmazonS3Config.UseAccelerateEndpoint), bool.FalseString);
+            options.DefaultClientConfig.ServiceSpecificSettings.TryAdd(nameof(Amazon.S3.AmazonS3Config.ForcePathStyle), bool.TrueString);
+
+            return options;
+
+            static T GetValue<T>(ValueTask<T> task)
             {
-                var profile = profileConfig.Profiles.Single();
-
-                var accessKeyId = profile.AccessKeyId.GetValueAsync(CancellationToken.None).Result;
-                var secretAccessKey = profile.SecretAccessKey.GetValueAsync(CancellationToken.None).Result;
-
-                config.Credentials = new Amazon.Runtime.BasicAWSCredentials(
-                    accessKeyId,
-                    secretAccessKey);
+                return task.IsCompleted
+                    ? task.Result
+                    : task.AsTask().GetAwaiter().GetResult();
             }
-
-            if (model.Resources.OfType<LocalStackServerResource>().FirstOrDefault() is { } localStackServer)
-            {
-                var endpoint = localStackServer.GetEndpoint(Uri.UriSchemeHttp, KnownNetworkIdentifiers.LocalhostNetwork);
-                config.DefaultClientConfig.ServiceURL = endpoint.Url;
-                config.DefaultClientConfig.AuthenticationRegion = localStackServer.Region;
-            }
-            
-            config.DefaultClientConfig.ServiceSpecificSettings.TryAdd(nameof(Amazon.S3.AmazonS3Config.UseAccelerateEndpoint), bool.FalseString);
-            config.DefaultClientConfig.ServiceSpecificSettings.TryAdd(nameof(Amazon.S3.AmazonS3Config.ForcePathStyle), bool.TrueString);
-
-            return config;
         });
 
-        appHost.Services.AddAWSService<Amazon.S3.IAmazonS3>();
+        builder.Services.AddAWSService<Amazon.S3.IAmazonS3>();
 
-        App = await appHost.BuildAsync();
-        await App.StartAsync();
+        App = await builder.BuildAsync(cancellationToken);
+        await App.StartAsync(cancellationToken);
     }
 
     [After(TestSession)]
-    public static void CleanUp()
+    public static async Task CleanUp(CancellationToken cancellationToken)
     {
-        Console.WriteLine("...and after!");
+        if (App is { } app)
+        {
+            await app.StopAsync(cancellationToken);
+            await app.DisposeAsync();
+        }
     }
 }

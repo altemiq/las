@@ -4,7 +4,7 @@ public class LazReaderIntegrationTests
 {
     [ClassDataSource<WebApplicationFactory>(Shared = SharedType.PerTestSession)]
     public required WebApplicationFactory WebApplicationFactory { get; init; }
-    
+
     [Test]
     public async Task ReadLazAsync()
     {
@@ -30,7 +30,7 @@ public class LazReaderIntegrationTests
             .And.Member(p => p.Y, y => y.IsEqualTo(612225071))
             .And.Member(p => p.Z, z => z.IsEqualTo(4228));
     }
-    
+
     private static async Task CheckHeader(HeaderBlock headerBlock, Version expectedVersion)
     {
         _ = await Assert.That(headerBlock)

@@ -24,7 +24,7 @@ public class LasReaderIntegrationTests
             .Member(p => p.PointDataRecord, p => p.IsNotNull().And.Member(pt => pt.X, x => x.IsNotDefault()))
             .And.Member(p => p.ExtraBytes.IsEmpty, empty => empty.IsTrue());
     }
-    
+
     private static async Task CheckHeader(HeaderBlock headerBlock, Version expectedVersion)
     {
         _ = await Assert.That(headerBlock)
