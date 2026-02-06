@@ -2,7 +2,7 @@ namespace Altemiq.IO.Las.Http;
 
 public class WebApplicationFactory : TUnit.Core.Interfaces.IAsyncInitializer, IAsyncDisposable
 {
-    private const int Port = 25812;
+    private static readonly int Port = GetPort();
 
     private static readonly string Url = $"{Uri.UriSchemeHttp}://localhost:{Port}/";
 
@@ -135,5 +135,11 @@ public class WebApplicationFactory : TUnit.Core.Interfaces.IAsyncInitializer, IA
         }
 
         GC.SuppressFinalize(this);
+    }
+
+    private static int GetPort()
+    {
+        var random = new Random((int)DateTime.UtcNow.Ticks);
+        return random.Next(25000, 30000);
     }
 }
