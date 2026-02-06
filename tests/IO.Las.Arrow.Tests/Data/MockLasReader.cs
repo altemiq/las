@@ -48,7 +48,9 @@ internal sealed class MockLasReader : ILasReader
     {
         var builder = new HeaderBlockBuilder(GpsPointDataRecord.Id)
         {
+#if LAS1_4_OR_GREATER
             LegacyNumberOfPointRecords = 2,
+#endif
             NumberOfPointRecords = 2,
         };
         this.Header = builder.HeaderBlock;
@@ -56,7 +58,10 @@ internal sealed class MockLasReader : ILasReader
 
     public HeaderBlock Header { get; }
     public IReadOnlyList<VariableLengthRecord> VariableLengthRecords { get; } = [];
+    
+#if LAS1_4_OR_GREATER
     public IReadOnlyList<ExtendedVariableLengthRecord> ExtendedVariableLengthRecords { get; } = [];
+#endif
 
     public LasPointSpan ReadPointDataRecord()
     {

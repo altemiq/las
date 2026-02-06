@@ -81,7 +81,7 @@ internal static partial class RootCommandExtensions
                         var lax = Path.ChangeExtension(input, ".lax");
                         var index = Path.Exists(lax)
                             ? CreateFromLax(lax, services)
-                            : throw new FileNotFoundException(null, lax);
+                            : throw new FileNotFoundException(message: null, lax.ToString());
 #endif
 
                         foreach (var item in index)

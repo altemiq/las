@@ -25,9 +25,10 @@ public static class DataFrameExtensions
         {
             var schema = reader.GetArrowSchema().ToPolarsCompatibleSchema();
 
-            using var enumerator = reader.ToArrowBatches(schema, batchSize).GetEnumerator();
-
-            return NewDataFrame(Polars.NET.Core.Arrow.ArrowStreamInterop.ImportEager(enumerator, schema));
+            return NewDataFrame(
+                Polars.NET.Core.Arrow.ArrowStreamInterop.ImportEager(
+                    reader.ToArrowBatches(schema, batchSize),
+                    schema));
         }
 
         /// <summary>

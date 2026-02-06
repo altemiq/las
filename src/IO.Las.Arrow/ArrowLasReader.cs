@@ -577,7 +577,8 @@ public sealed class ArrowLasReader : ILasReader, IDisposable
         return HasWaveform(schema)
             ? ExtendedGpsColorNearInfraredWaveformPointDataRecord.Id
             : ExtendedGpsColorNearInfraredPointDataRecord.Id;
-
+#else
+        throw new System.Diagnostics.UnreachableException();
 #endif
 
         static bool IsLegacy(Schema schema)
