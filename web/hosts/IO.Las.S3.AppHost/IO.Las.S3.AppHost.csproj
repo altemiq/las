@@ -1,0 +1,17 @@
+<Project Sdk="Aspire.AppHost.Sdk/13.1.0">
+
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <TargetFrameworks>net10.0;net9.0;net8.0</TargetFrameworks>
+    <UserSecretsId>6467f0b0-1f4a-47cb-a251-feec08cbd622</UserSecretsId>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Altemiq.Aspire.Hosting.LocalStack" />
+  </ItemGroup>
+  
+  <ItemGroup>
+    <Using Include="Aspire.Hosting" />
+  </ItemGroup>
+
+</Project>

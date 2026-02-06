@@ -16,7 +16,12 @@
     <PackageVersion Include="Apache.Arrow" Version="22.1.0" />
   </ItemGroup>
   
+  <ItemGroup Label="Aspire">
+    <PackageVersion Include="Aspire.Hosting.Testing" Version="13.1.0" />
+  </ItemGroup>
+  
   <ItemGroup Label="AWS">
+    <PackageVersion Include="AWSSDK.Extensions.NETCore.Setup" Version="4.0.3.22" />
     <PackageVersion Include="AWSSDK.S3" Version="4.0.14" />
   </ItemGroup>
 

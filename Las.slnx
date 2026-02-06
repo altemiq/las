@@ -69,4 +69,12 @@
     <File Path="tools/Directory.Packages.props" />
     <Project Path="tools/Las/Las.csproj" />
   </Folder>
+  <Folder Name="/web/">
+    <File Path="web/Directory.Build.props" />
+    <File Path="web/Directory.Packages.props" />
+  </Folder>
+  <Folder Name="/web/hosts/">
+    <File Path="web/hosts/Directory.Packages.props" />
+    <Project Path="web/hosts/IO.Las.S3.AppHost/IO.Las.S3.AppHost.csproj" />
+  </Folder>
 </Solution>

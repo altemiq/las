@@ -1,6 +1,6 @@
-namespace Altemiq.IO.Las.S3;
+namespace Altemiq.IO.Las.S3.Data;
 
-public static class Data
+public static class S3UriData
 {
     public const string BucketName = "bucket-name-with-dashes-12345";
     public const string Path = "first-path/second-path/third-path/file.ext";
