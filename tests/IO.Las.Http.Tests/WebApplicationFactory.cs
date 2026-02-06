@@ -14,6 +14,8 @@ public class WebApplicationFactory : TUnit.Core.Interfaces.IAsyncInitializer, IA
 
     private Task listenerTask;
 
+    private bool disposed;
+
     public HttpClient CreateClient() => this.client;
 
     public Task InitializeAsync()
@@ -118,10 +120,20 @@ public class WebApplicationFactory : TUnit.Core.Interfaces.IAsyncInitializer, IA
 
     public async ValueTask DisposeAsync()
     {
+        if (this.disposed)
+        {
+            return;
+        }
+        
+        this.disposed = true;
         await this.cts.CancelAsync();
-        this.listener?.Stop();
-        await this.listenerTask.WaitAsync(CancellationToken.None);
-        this.listenerTask?.Dispose();
+        this.listener.Stop();
+        if (this.listenerTask is { } t)
+        {
+            await t.WaitAsync(CancellationToken.None);
+            t.Dispose();
+        }
+
         GC.SuppressFinalize(this);
     }
 }
