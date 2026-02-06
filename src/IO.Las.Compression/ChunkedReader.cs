@@ -95,11 +95,11 @@ internal abstract class ChunkedReader : IPointReader
             }
 
             // read the chunk here
-            if (stream is ICacheStream prepareStream)
+            if (stream is ICacheStream cacheStream)
             {
                 var chunkStart = this.chunkStartValues[this.currentChunk];
                 var chunkLength = this.chunkStartValues[this.currentChunk + 1] - chunkStart;
-                prepareStream.Cache(chunkStart, (int)chunkLength);
+                cacheStream.Cache(chunkStart, (int)chunkLength);
             }
 
             this.chunkCount = default;
@@ -321,14 +321,14 @@ internal abstract class ChunkedReader : IPointReader
         void Prepare()
         {
             // read the chunk here
-            if (stream is not ICacheStream prepareStream)
+            if (stream is not ICacheStream cacheStream)
             {
                 return;
             }
 
             var chunkStart = this.chunkStartValues[this.currentChunk];
             var chunkLength = this.chunkStartValues[this.currentChunk + 1] - chunkStart;
-            prepareStream.Cache(chunkStart, (int)chunkLength);
+            cacheStream.Cache(chunkStart, (int)chunkLength);
         }
     }
 
@@ -391,10 +391,10 @@ internal abstract class ChunkedReader : IPointReader
                     await asyncCacheStream.CacheAsync(asyncChunkStart, (int)asyncChunkLength, cancellationToken).ConfigureAwait(false);
                     break;
 
-                case ICacheStream prepareStream:
+                case ICacheStream cacheStream:
                     var chunkStart = this.chunkStartValues[this.currentChunk];
                     var chunkLength = this.chunkStartValues[this.currentChunk + 1] - chunkStart;
-                    prepareStream.Cache(chunkStart, (int)chunkLength);
+                    cacheStream.Cache(chunkStart, (int)chunkLength);
                     break;
             }
         }
@@ -572,10 +572,10 @@ internal abstract class ChunkedReader : IPointReader
                     throw new InvalidOperationException(Compression.Properties.Resources.FailedToSeek);
                 }
 
-                if (stream is ICacheStream prepareStream)
+                if (stream is ICacheStream cacheStream)
                 {
                     // prepare the chunk table
-                    prepareStream.Cache(chunkTableStartPosition, 2048);
+                    cacheStream.Cache(chunkTableStartPosition, 2048);
                 }
 
                 this.ReadChunkTable(

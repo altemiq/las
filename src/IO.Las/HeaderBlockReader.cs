@@ -67,9 +67,9 @@ public class HeaderBlockReader(Stream stream)
         _ = stream.SwitchStreamIfMultiple(LasStreams.Header);
 
         // do a cache on the stream
-        if (stream is ICacheStream prepareStream)
+        if (stream is ICacheStream cacheStream)
         {
-            prepareStream.Cache(0, 2024);
+            cacheStream.Cache(0, 2024);
         }
 
         // move this to the start if we can
@@ -97,9 +97,9 @@ public class HeaderBlockReader(Stream stream)
     {
         _ = stream.SwitchStreamIfMultiple(LasStreams.VariableLengthRecord);
 
-        if (stream is ICacheStream prepareStream)
+        if (stream is ICacheStream cacheStream)
         {
-            prepareStream.Cache(this.headerSize, (int)(this.OffsetToPointData - this.headerSize));
+            cacheStream.Cache(this.headerSize, (int)(this.OffsetToPointData - this.headerSize));
         }
 
         stream.MoveToPositionForwardsOnly(this.headerSize);
@@ -125,9 +125,9 @@ public class HeaderBlockReader(Stream stream)
     {
         _ = stream.SwitchStreamIfMultiple(LasStreams.ExtendedVariableLengthRecord);
 
-        if (stream is ICacheStream prepareStream)
+        if (stream is ICacheStream cacheStream)
         {
-            prepareStream.Cache(position);
+            cacheStream.Cache(position);
         }
 
         stream.MoveToPositionForwardsOnly(position);

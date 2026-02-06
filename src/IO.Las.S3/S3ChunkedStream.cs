@@ -15,13 +15,16 @@ public sealed class S3ChunkedStream : ChunkedStream
 
     private readonly Amazon.S3.Util.AmazonS3Uri uri;
 
+    private readonly int minimumCacheSize;
+
     /// <summary>
     /// Initializes a new instance of the <see cref="S3ChunkedStream"/> class.
     /// </summary>
     /// <param name="uri">The S3 URL.</param>
     /// <param name="length">The length of the resource.</param>
-    internal S3ChunkedStream(Uri uri, long length)
-        : this(new Amazon.S3.AmazonS3Client(), uri, length)
+    /// <param name="minimumCacheSize">The minimum cache size.</param>
+    internal S3ChunkedStream(Uri uri, long length, int minimumCacheSize = ushort.MaxValue)
+        : this(new Amazon.S3.AmazonS3Client(), uri, length, minimumCacheSize)
     {
     }
 
@@ -31,8 +34,9 @@ public sealed class S3ChunkedStream : ChunkedStream
     /// <param name="client">The S3 client.</param>
     /// <param name="uri">The S3 URL.</param>
     /// <param name="length">The length of the resource.</param>
-    internal S3ChunkedStream(Amazon.S3.IAmazonS3 client, Uri uri, long length)
-        : this(client, new Amazon.S3.Util.AmazonS3Uri(uri), length)
+    /// <param name="minimumCacheSize">The minimum cache size.</param>
+    internal S3ChunkedStream(Amazon.S3.IAmazonS3 client, Uri uri, long length, int minimumCacheSize = ushort.MaxValue)
+        : this(client, new Amazon.S3.Util.AmazonS3Uri(uri), length, minimumCacheSize)
     {
     }
 
@@ -42,8 +46,9 @@ public sealed class S3ChunkedStream : ChunkedStream
     /// <param name="bucket">The bucket name.</param>
     /// <param name="key">The key to the resource.</param>
     /// <param name="length">The length of the resource.</param>
-    internal S3ChunkedStream(string bucket, string key, long length)
-        : this(new Amazon.S3.AmazonS3Client(), bucket, key, length)
+    /// <param name="minimumCacheSize">The minimum cache size.</param>
+    internal S3ChunkedStream(string bucket, string key, long length, int minimumCacheSize = ushort.MaxValue)
+        : this(new Amazon.S3.AmazonS3Client(), bucket, key, length, minimumCacheSize)
     {
     }
 
@@ -54,8 +59,9 @@ public sealed class S3ChunkedStream : ChunkedStream
     /// <param name="bucket">The bucket name.</param>
     /// <param name="key">The key to the resource.</param>
     /// <param name="length">The length of the resource.</param>
-    internal S3ChunkedStream(Amazon.S3.IAmazonS3 client, string bucket, string key, long length)
-        : this(client, Create(bucket, key), length)
+    /// <param name="minimumCacheSize">The minimum cache size.</param>
+    internal S3ChunkedStream(Amazon.S3.IAmazonS3 client, string bucket, string key, long length, int minimumCacheSize = ushort.MaxValue)
+        : this(client, Create(bucket, key), length, minimumCacheSize)
     {
     }
 
@@ -65,13 +71,14 @@ public sealed class S3ChunkedStream : ChunkedStream
     /// <param name="client">The S3 client.</param>
     /// <param name="uri">The S3 URL.</param>
     /// <param name="length">The length of the resource.</param>
-    internal S3ChunkedStream(Amazon.S3.IAmazonS3 client, Amazon.S3.Util.AmazonS3Uri uri, long length)
-        : base(length) => (this.client, this.uri) = (client, uri);
+    /// <param name="minimumCacheSize">The minimum cache size.</param>
+    internal S3ChunkedStream(Amazon.S3.IAmazonS3 client, Amazon.S3.Util.AmazonS3Uri uri, long length, int minimumCacheSize = ushort.MaxValue)
+        : base(length) => (this.client, this.uri, this.minimumCacheSize) = (client, uri, minimumCacheSize);
 
     /// <inheritdoc/>
     protected override Stream? GetStream(long start, int length)
     {
-        var end = Math.Min(start + length - 1, this.Length - 1);
+        var end = Math.Min(start + Math.Max(length, this.minimumCacheSize) - 1, this.Length - 1);
         if (start >= end)
         {
             return default;

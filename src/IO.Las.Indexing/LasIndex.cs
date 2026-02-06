@@ -110,10 +110,10 @@ public class LasIndex : IEnumerable<LasIndexCell>
     /// <returns>The LAS index.</returns>
     public static LasIndex ReadFrom(Stream stream)
     {
-        if (stream is ICacheStream prepareStream)
+        if (stream is ICacheStream cacheStream)
         {
             // download the stream
-            prepareStream.Cache(0, (int)stream.Length);
+            cacheStream.Cache(0, (int)stream.Length);
         }
 
         var length = (int)(stream.Length - stream.Position);
