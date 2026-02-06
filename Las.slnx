@@ -53,6 +53,7 @@
     <Project Path="tests/IO.Las.Geodesy.Tests/IO.Las.Geodesy.Tests.csproj">
       <Build Solution="Release|*" Project="false" />
     </Project>
+    <Project Path="tests/IO.Las.Http.Tests/IO.Las.Http.Tests.csproj" />
     <Project Path="tests/IO.Las.Indexing.Tests/IO.Las.Indexing.Tests.csproj">
       <Build Solution="Release|*" Project="false" />
     </Project>

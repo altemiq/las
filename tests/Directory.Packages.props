@@ -9,7 +9,7 @@
 
   <ItemGroup>
     <PackageVersion Include="Polyfill" Version="8.9.1" />
-    <PackageVersion Include="TUnit" Version="1.12.125" />
+    <PackageVersion Include="TUnit" Version="1.12.144" />
   </ItemGroup>
   
   <ItemGroup Label="Apache">

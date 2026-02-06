@@ -24,6 +24,14 @@
     <NoWarn Condition=" !$([MSBuild]::IsTargetFrameworkCompatible('$(TargetFramework)', 'net10.0')) ">$(NoWarn);AD0001</NoWarn>
   </PropertyGroup>
 
+  <PropertyGroup Label="Packaging">
+    <_Tag>Apache;Arrow</_Tag>
+    <Product>$(Product.Replace('{Type}', '$(_Tag)'))</Product>
+    <Description>Provides support for reading LAS/LAZ to Apache Arrow formats</Description>
+    <PackageReadmeFile>README.md</PackageReadmeFile>
+    <PackageTags>$(PackageTags);$(_Tag)</PackageTags>
+  </PropertyGroup>
+
   <ItemGroup>
     <PackageReference Include="Apache.Arrow" VersionOverride="20.0.0" />
     <PackageReference Include="Meziantou.Polyfill">

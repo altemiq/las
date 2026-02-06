@@ -13,7 +13,7 @@ public sealed class HttpChunkedStream : ChunkedStream
 {
     private readonly HttpClient httpClient;
 
-    private readonly Uri uri;
+    private readonly Uri? uri;
 
     /// <summary>
     /// Initializes a new instance of the <see cref="HttpChunkedStream"/> class.
@@ -21,7 +21,7 @@ public sealed class HttpChunkedStream : ChunkedStream
     /// <param name="httpClient">The HTTP client.</param>
     /// <param name="uri">The URI.</param>
     /// <param name="length">The content length.</param>
-    internal HttpChunkedStream(HttpClient httpClient, Uri uri, long length)
+    internal HttpChunkedStream(HttpClient httpClient, Uri? uri, long length)
         : base(length) => (this.httpClient, this.uri) = (httpClient, uri);
 
     /// <inheritdoc/>
