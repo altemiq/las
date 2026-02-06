@@ -10,6 +10,14 @@
     <IsAotCompatible>false</IsAotCompatible>
     <SignAssembly>false</SignAssembly>
   </PropertyGroup>
+
+  <PropertyGroup Label="Packaging">
+    <_Tag>Polars DataFrame</_Tag>
+    <Product>$(Product.Replace('{Type}', '$(_Tag)'))</Product>
+    <Description>Provides support for reading LAS/LAZ to Polars data frames</Description>
+    <PackageReadmeFile>README.md</PackageReadmeFile>
+    <PackageTags>$(PackageTags);$(_Tag.Replace(' ',';'))</PackageTags>
+  </PropertyGroup>
   
   <ItemGroup>
     <PackageReference Include="Polars.NET" VersionOverride="0.2.0-beta1" />

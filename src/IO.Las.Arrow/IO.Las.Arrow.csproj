@@ -25,11 +25,11 @@
   </PropertyGroup>
 
   <PropertyGroup Label="Packaging">
-    <_Tag>Apache;Arrow</_Tag>
+    <_Tag>Apache Arrow</_Tag>
     <Product>$(Product.Replace('{Type}', '$(_Tag)'))</Product>
     <Description>Provides support for reading LAS/LAZ to Apache Arrow formats</Description>
     <PackageReadmeFile>README.md</PackageReadmeFile>
-    <PackageTags>$(PackageTags);$(_Tag)</PackageTags>
+    <PackageTags>$(PackageTags);$(_Tag.Replace(' ',';'))</PackageTags>
   </PropertyGroup>
 
   <ItemGroup>
