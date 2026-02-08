@@ -13,7 +13,6 @@
     <_Tag>HTTP</_Tag>
     <Product>$(Product.Replace('{Type}', '$(_Tag)'))</Product>
     <Description>Provides support for reading LAS/LAZ files through HTTP(S)</Description>
-    <PackageReadmeFile>README.md</PackageReadmeFile>
     <PackageTags>$(PackageTags);$(_Tag)</PackageTags>
   </PropertyGroup>
   
@@ -30,10 +29,6 @@
 
   <ItemGroup>
     <Using Include="System.Net.Http" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <None Include="README.md" Pack="true" PackagePath="\"/>
   </ItemGroup>
 
 </Project>

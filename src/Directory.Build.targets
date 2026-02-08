@@ -8,6 +8,16 @@
     <ResourceNamespace>$(Company).$(MSBuildProjectName)</ResourceNamespace>
   </PropertyGroup>
 
+  <Target Name="_SetPackageReadmeFile">
+    <ItemGroup>
+      <_ReadMeFiles Include="@(None)"
+                    Condition=" '%(Filename)%(Extension)' == 'README.md' " />
+    </ItemGroup>
+    <PropertyGroup>
+      <PackageReadmeFile Condition=" @(_ReadMeFiles) != '' ">README.md</PackageReadmeFile>
+    </PropertyGroup>
+  </Target>
+  
   <Target Name="_UpdateMeziantouPolyfill"
           BeforeTargets="GenerateMSBuildEditorConfigFileCore"
           DependsOnTargets="_UpdateMeziantouPolyfill_IncludedPolyfills;_UpdateMeziantouPolyfill_ExcludedPolyfills" />

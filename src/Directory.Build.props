@@ -63,7 +63,15 @@
   </PropertyGroup>
   
   <ItemGroup>
-    <None Include="$(MSBuildThisFileDirectory)icon.png" Pack="true" PackagePath="\"/>
+    <None Include="$(MSBuildThisFileDirectory)icon.png" Pack="true" PackagePath="\" />
   </ItemGroup>
+
+  <ItemGroup>
+    <None Include="$([MSBuild]::EnsureTrailingSlash('$(MSBuildProjectDirectory)'))README.md" Pack="true" PackagePath="\" />
+  </ItemGroup>
+
+  <PropertyGroup>
+    <GenerateNuspecDependsOn>$(GenerateNuspecDependsOn)_SetPackageReadmeFile;</GenerateNuspecDependsOn>
+  </PropertyGroup>
 
 </Project>

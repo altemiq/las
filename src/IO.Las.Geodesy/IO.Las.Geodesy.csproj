@@ -29,7 +29,6 @@
     <_Tag>Geodesy</_Tag>
     <Product>$(Product.Replace('{Type}', '$(_Tag)'))</Product>
     <Description>Provides support for coordinate systems for the OGC variable length records in Altemiq.IO.Las</Description>
-    <PackageReadmeFile>README.md</PackageReadmeFile>
     <PackageTags>$(PackageTags);$(_Tag);OGC;PROJ</PackageTags>
   </PropertyGroup>
 
@@ -49,13 +48,6 @@
 
   <ItemGroup>
     <ProjectReference Include="..\IO.Las\IO.Las.csproj" />
-  </ItemGroup>
-
-  <PropertyGroup>
-  </PropertyGroup>
-
-  <ItemGroup>
-    <None Include="README.md" Pack="true" PackagePath="\"/>
   </ItemGroup>
 
 </Project>

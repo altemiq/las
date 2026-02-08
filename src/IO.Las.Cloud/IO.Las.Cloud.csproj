@@ -17,7 +17,6 @@
     <_Tag>Cloud</_Tag>
     <Product>$(Product.Replace('{Type}', '$(_Tag)'))</Product>
     <Description>Provides support for Cloud-Optimized Point Clouds for Altemiq.IO.Las.Compression</Description>
-    <PackageReadmeFile>README.md</PackageReadmeFile>
     <PackageTags>$(PackageTags);$(_Tag);LAZ;COPC</PackageTags>
   </PropertyGroup>
 
@@ -39,10 +38,6 @@
 
   <ItemGroup Label="Tests" Condition=" '$(Configuration)' == 'Debug' ">
     <InternalsVisibleTo Include="$(AssemblyName).Tests" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <None Include="README.md" Pack="true" PackagePath="\"/>
   </ItemGroup>
   
   <Target Name="_SetNoBuild"

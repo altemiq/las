@@ -15,7 +15,6 @@
     <_Tag>Polars DataFrame</_Tag>
     <Product>$(Product.Replace('{Type}', '$(_Tag)'))</Product>
     <Description>Provides support for reading LAS/LAZ to Polars data frames</Description>
-    <PackageReadmeFile>README.md</PackageReadmeFile>
     <PackageTags>$(PackageTags);$(_Tag.Replace(' ',';'))</PackageTags>
   </PropertyGroup>
   

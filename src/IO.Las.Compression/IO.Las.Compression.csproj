@@ -31,7 +31,6 @@
     <_Tag>Compression</_Tag>
     <Product>$(Product.Replace('{Type}', '$(_Tag)'))</Product>
     <Description>Provides support for LAZ compression for Altemiq.IO.Las</Description>
-    <PackageReadmeFile>README.md</PackageReadmeFile>
     <PackageTags>$(PackageTags);$(_Tag);LAZ</PackageTags>
   </PropertyGroup>
 
@@ -91,10 +90,6 @@
   
   <ItemGroup>
     <Using Include="$(RootNamespace).Compression" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <None Include="README.md" Pack="true" PackagePath="\"/>
   </ItemGroup>
 
 </Project>

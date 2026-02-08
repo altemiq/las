@@ -13,7 +13,6 @@
     <_Tag>S3</_Tag>
     <Product>$(Product.Replace('{Type}', '$(_Tag)'))</Product>
     <Description>Provides support for reading LAS/LAZ files through Amazon S3</Description>
-    <PackageReadmeFile>README.md</PackageReadmeFile>
     <PackageTags>$(PackageTags);$(_Tag);Amazon;AWS</PackageTags>
   </PropertyGroup>
 
@@ -27,13 +26,6 @@
 
   <ItemGroup>
     <ProjectReference Include="..\IO.Las\IO.Las.csproj" />
-  </ItemGroup>
-
-  <PropertyGroup>
-  </PropertyGroup>
-
-  <ItemGroup>
-    <None Include="README.md" Pack="true" PackagePath="\"/>
   </ItemGroup>
 
 </Project>
