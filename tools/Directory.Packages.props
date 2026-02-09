@@ -8,12 +8,19 @@
   <ItemGroup>
     <PackageVersion Include="Altemiq.CommandLine.DependencyInjection" Version="2.0.0" />
     <PackageVersion Include="Altemiq.CommandLine.Spectre" Version="2.0.0" />
-    <PackageVersion Include="AWSSDK.Extensions.NETCore.Setup" Version="4.0.3.22" />
-    <PackageVersion Include="AWSSDK.S3" Version="4.0.18.3" />
     <PackageVersion Include="Humanizer" Version="3.0.1" />
     <PackageVersion Include="Microsoft.Extensions.Http" Version="10.0.2" />
     <PackageVersion Include="Spectre.Console" Version="0.53.0" />
     <PackageVersion Include="Spectre.Console.Analyzer" Version="1.0.0" />
+  </ItemGroup>
+
+  <ItemGroup Label="AWS">
+    <PackageVersion Include="AWSSDK.Extensions.NETCore.Setup" Version="4.0.3.22" />
+    <PackageVersion Include="AWSSDK.S3" Version="4.0.18.3" />
+  </ItemGroup>
+
+  <ItemGroup Label="Azure">
+    <PackageVersion Include="Microsoft.Extensions.Azure" Version="1.13.1" />
   </ItemGroup>
   
   <ItemGroup Label="SQLite">

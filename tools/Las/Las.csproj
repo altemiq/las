@@ -34,6 +34,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\..\src\IO.Las.Azure\IO.Las.Azure.csproj" />
     <ProjectReference Include="..\..\src\IO.Las.Cloud\IO.Las.Cloud.csproj" Condition=" '$(SupportLas14)' == 'true' " />
     <ProjectReference Include="..\..\src\IO.Las.Compression\IO.Las.Compression.csproj" />
     <ProjectReference Include="..\..\src\IO.Las.Geodesy\IO.Las.Geodesy.csproj" />
@@ -49,6 +50,7 @@
     <PackageReference Include="AWSSDK.Extensions.NETCore.Setup" />
     <PackageReference Include="Humanizer" />
     <PackageReference Include="Microsoft.Data.Sqlite" />
+    <PackageReference Include="Microsoft.Extensions.Azure" />
     <PackageReference Include="Microsoft.Extensions.Http" />
     <PackageReference Include="Spectre.Console.Analyzer" />
   </ItemGroup>

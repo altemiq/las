@@ -6,6 +6,8 @@
 
 namespace Altemiq.IO.Las;
 
+using Microsoft.Extensions.DependencyInjection;
+
 /// <summary>
 /// The <see cref="Path"/> extension methods.
 /// </summary>
@@ -17,31 +19,17 @@ internal static class PathExtensions
         /// Determines whether the specified uri exists.
         /// </summary>
         /// <param name="uri">The uri to check.</param>
-        /// <returns><see langword="true"/> if <paramref name="uri"/> exists; otherwise <see langword="false"/>.</returns>
-        public static bool Exists(Uri uri) => Path.Exists(uri, Amazon.S3.AmazonS3Client.Create(), HttpClient.Create());
-
-        /// <summary>
-        /// Determines whether the specified uri exists.
-        /// </summary>
-        /// <param name="uri">The uri to check.</param>
         /// <param name="serviceProvider">The service provider.</param>
         /// <returns><see langword="true"/> if <paramref name="uri"/> exists; otherwise <see langword="false"/>.</returns>
-        public static bool Exists(Uri uri, IServiceProvider? serviceProvider) => Path.Exists(uri, Amazon.S3.AmazonS3Client.Create(serviceProvider), HttpClient.Create(serviceProvider));
+        public static bool Exists(Uri uri, IServiceProvider? serviceProvider = default) => Path.Exists(uri, GetStreamProviders(serviceProvider));
 
         /// <summary>
         /// Determines whether the specified uri exists.
         /// </summary>
         /// <param name="uri">The uri to check.</param>
-        /// <param name="lazyAmazonS3">The <see cref="Amazon.S3"/> client.</param>
-        /// <param name="lazyHttpClient">The <see cref="System.Net.Http"/> client.</param>
+        /// <param name="providers">The stream providers.</param>
         /// <returns><see langword="true"/> if <paramref name="uri"/> exists; otherwise <see langword="false"/>.</returns>
-        public static bool Exists(Uri uri, Lazy<Amazon.S3.IAmazonS3> lazyAmazonS3, Lazy<HttpClient> lazyHttpClient) => uri switch
-        {
-            { Scheme: "file" } => Path.Exists(uri.LocalPath),
-            _ when Amazon.S3.Util.AmazonS3Uri.IsAmazonS3Endpoint(uri) => S3.S3Las.Exists(uri, lazyAmazonS3),
-            { Scheme: "http" or "https" } => Http.HttpLas.Exists(uri, lazyHttpClient),
-            _ => false,
-        };
+        public static bool Exists(Uri uri, IEnumerable<IStreamProvider> providers) => providers.Any(provider => provider.IsValid(uri) && provider.Exists(uri));
 
         /// <inheritdoc cref="Path.GetExtension(string)"/>
         public static string GetExtension(Uri uri)
@@ -58,4 +46,9 @@ internal static class PathExtensions
             return builder.Uri;
         }
     }
+
+    private static IEnumerable<IStreamProvider> GetStreamProviders(IServiceProvider? serviceProvider) =>
+        serviceProvider is not null
+            ? serviceProvider.GetServices<IStreamProvider>()
+            : [new Providers.FileStreamProvider()];
 }

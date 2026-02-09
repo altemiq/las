@@ -11,8 +11,10 @@ var rootCommand = new RootCommand()
     .AddAllTools()
     .UseServices((parseResult, services) =>
         services
-            .AddHttpClient()
-            .AddAWSService<Amazon.S3.IAmazonS3>()
+            .AddFile()
+            .AddAws()
+            .AddAzure()
+            .AddHttp()
             .AddSingleton(parseResult.CreateConsole(Options.Output)))
     .AddFiglet(Altemiq.IO.Las.Tool.Properties.Resources.Title, Spectre.Console.Color.DeepSkyBlue1);
 

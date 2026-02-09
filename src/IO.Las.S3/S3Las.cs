@@ -62,33 +62,36 @@ public static class S3Las
     /// <param name="key">The key to the resource.</param>
     /// <param name="client">The <see cref="S3"/> client.</param>
     /// <returns><see langword="true"/> if the resource at <paramref name="bucket"/> and <paramref name="key"/> returns from a request successfully; otherwise <see langword="false"/>.</returns>
-    public static bool Exists(string bucket, string key, Amazon.S3.IAmazonS3 client) => ExistsAsync(client, bucket, key).Result;
+    public static bool Exists(string bucket, string key, Amazon.S3.IAmazonS3 client) => ExistsAsync(client, bucket, key, CancellationToken.None).Result;
 
     /// <summary>
     /// Determines whether the specified <see cref="S3"/> <see cref="Uri"/> exists.
     /// </summary>
     /// <param name="uri">The uri to check.</param>
+    /// <param name="cancellationToken">The cancellation token to cancel operation.</param>
     /// <returns><see langword="true"/> if <paramref name="uri"/> returns from a request successfully; otherwise <see langword="false"/>.</returns>
-    public static Task<bool> ExistsAsync(Uri uri) => ExistsAsync(uri, new Amazon.S3.AmazonS3Client());
+    public static Task<bool> ExistsAsync(Uri uri, CancellationToken cancellationToken = default) => ExistsAsync(uri, new Amazon.S3.AmazonS3Client(), cancellationToken);
 
     /// <summary>
     /// Determines whether the specified <see cref="S3"/> <see cref="Uri"/> exists.
     /// </summary>
     /// <param name="uri">The uri to check.</param>
     /// <param name="lazyClient">The <see cref="S3"/> client.</param>
+    /// <param name="cancellationToken">The cancellation token to cancel operation.</param>
     /// <returns><see langword="true"/> if <paramref name="uri"/> returns from a request successfully; otherwise <see langword="false"/>.</returns>
-    public static Task<bool> ExistsAsync(Uri uri, Lazy<Amazon.S3.IAmazonS3> lazyClient) => ExistsAsync(uri, lazyClient.Value);
+    public static Task<bool> ExistsAsync(Uri uri, Lazy<Amazon.S3.IAmazonS3> lazyClient, CancellationToken cancellationToken = default) => ExistsAsync(uri, lazyClient.Value, cancellationToken);
 
     /// <summary>
     /// Determines whether the specified <see cref="S3"/> <see cref="Uri"/> exists using the <see cref="Amazon.S3.IAmazonS3"/>.
     /// </summary>
     /// <param name="uri">The uri to check.</param>
     /// <param name="client">The <see cref="S3"/> client.</param>
+    /// <param name="cancellationToken">The cancellation token to cancel operation.</param>
     /// <returns><see langword="true"/> if <paramref name="uri"/> returns from a request successfully; otherwise <see langword="false"/>.</returns>
-    public static Task<bool> ExistsAsync(Uri uri, Amazon.S3.IAmazonS3 client)
+    public static Task<bool> ExistsAsync(Uri uri, Amazon.S3.IAmazonS3 client, CancellationToken cancellationToken = default)
     {
         var output = new Amazon.S3.Util.AmazonS3Uri(uri);
-        return ExistsAsync(output.Bucket, output.Key, client);
+        return ExistsAsync(output.Bucket, output.Key, client, cancellationToken);
     }
 
     /// <summary>
@@ -96,8 +99,9 @@ public static class S3Las
     /// </summary>
     /// <param name="bucket">The bucket name.</param>
     /// <param name="key">The key to the resource.</param>
+    /// <param name="cancellationToken">The cancellation token to cancel operation.</param>
     /// <returns><see langword="true"/> if the resource at <paramref name="bucket"/> and <paramref name="key"/> returns from a request successfully; otherwise <see langword="false"/>.</returns>
-    public static Task<bool> ExistsAsync(string bucket, string key) => ExistsAsync(bucket, key, new Amazon.S3.AmazonS3Client());
+    public static Task<bool> ExistsAsync(string bucket, string key, CancellationToken cancellationToken = default) => ExistsAsync(bucket, key, new Amazon.S3.AmazonS3Client(), cancellationToken);
 
     /// <summary>
     /// Determines whether the specified <see cref="S3"/> bucket/key combination exists.
@@ -105,8 +109,9 @@ public static class S3Las
     /// <param name="bucket">The bucket name.</param>
     /// <param name="key">The key to the resource.</param>
     /// <param name="lazyClient">The <see cref="S3"/> client.</param>
+    /// <param name="cancellationToken">The cancellation token to cancel operation.</param>
     /// <returns><see langword="true"/> if the resource at <paramref name="bucket"/> and <paramref name="key"/> returns from a request successfully; otherwise <see langword="false"/>.</returns>
-    public static Task<bool> ExistsAsync(string bucket, string key, Lazy<Amazon.S3.IAmazonS3> lazyClient) => ExistsAsync(bucket, key, lazyClient.Value);
+    public static Task<bool> ExistsAsync(string bucket, string key, Lazy<Amazon.S3.IAmazonS3> lazyClient, CancellationToken cancellationToken = default) => ExistsAsync(bucket, key, lazyClient.Value, cancellationToken);
 
     /// <summary>
     /// Determines whether the specified <see cref="S3"/> bucket/key combination exists using the <see cref="Amazon.S3.IAmazonS3"/>.
@@ -114,8 +119,9 @@ public static class S3Las
     /// <param name="bucket">The bucket name.</param>
     /// <param name="key">The key to the resource.</param>
     /// <param name="client">The <see cref="S3"/> client.</param>
+    /// <param name="cancellationToken">The cancellation token to cancel operation.</param>
     /// <returns><see langword="true"/> if the resource at <paramref name="bucket"/> and <paramref name="key"/> returns from a request successfully; otherwise <see langword="false"/>.</returns>
-    public static Task<bool> ExistsAsync(string bucket, string key, Amazon.S3.IAmazonS3 client) => ExistsAsync(client, bucket, key);
+    public static Task<bool> ExistsAsync(string bucket, string key, Amazon.S3.IAmazonS3 client, CancellationToken cancellationToken = default) => ExistsAsync(client, bucket, key, cancellationToken);
 
     /// <summary>
     /// Opens the <see cref="Las"/> <see cref="S3"/> <see cref="Uri"/> for reading.
@@ -141,7 +147,7 @@ public static class S3Las
     public static Stream OpenRead(Uri uri, Amazon.S3.IAmazonS3 client)
     {
         var output = new Amazon.S3.Util.AmazonS3Uri(uri);
-        return new S3ChunkedStream(client, output, GetContentLengthAsync(client, output.Bucket, output.Key).GetAwaiter().GetResult());
+        return new S3ChunkedStream(client, output, GetContentLengthAsync(client, output.Bucket, output.Key, CancellationToken.None).GetAwaiter().GetResult());
     }
 
     /// <summary>
@@ -168,33 +174,36 @@ public static class S3Las
     /// <param name="key">The key to the resource.</param>
     /// <param name="client">The <see cref="S3"/> client.</param>
     /// <returns>The <see cref="S3"/> stream.</returns>
-    public static Stream OpenRead(string bucket, string key, Amazon.S3.IAmazonS3 client) => new S3ChunkedStream(client, bucket, key, GetContentLengthAsync(client, bucket, key).GetAwaiter().GetResult());
+    public static Stream OpenRead(string bucket, string key, Amazon.S3.IAmazonS3 client) => new S3ChunkedStream(client, bucket, key, GetContentLengthAsync(client, bucket, key, CancellationToken.None).GetAwaiter().GetResult());
 
     /// <summary>
     /// Opens the <see cref="Las"/> <see cref="S3"/> <see cref="Uri"/> for reading.
     /// </summary>
     /// <param name="uri">The <see cref="S3"/> <see cref="Uri"/> to the <see cref="Las"/> file.</param>
+    /// <param name="cancellationToken">The cancellation token to cancel operation.</param>
     /// <returns>The <see cref="S3"/> stream.</returns>
-    public static Task<Stream> OpenReadAsync(Uri uri) => OpenReadAsync(uri, new Amazon.S3.AmazonS3Client());
+    public static Task<Stream> OpenReadAsync(Uri uri, CancellationToken cancellationToken = default) => OpenReadAsync(uri, new Amazon.S3.AmazonS3Client(), cancellationToken);
 
     /// <summary>
     /// Opens the <see cref="Las"/> <see cref="S3"/> <see cref="Uri"/> for reading.
     /// </summary>
     /// <param name="uri">The <see cref="S3"/> <see cref="Uri"/> to the <see cref="Las"/> file.</param>
     /// <param name="lazyClient">The <see cref="S3"/> client.</param>
+    /// <param name="cancellationToken">The cancellation token to cancel operation.</param>
     /// <returns>The <see cref="S3"/> stream.</returns>
-    public static Task<Stream> OpenReadAsync(Uri uri, Lazy<Amazon.S3.IAmazonS3> lazyClient) => OpenReadAsync(uri, lazyClient.Value);
+    public static Task<Stream> OpenReadAsync(Uri uri, Lazy<Amazon.S3.IAmazonS3> lazyClient, CancellationToken cancellationToken = default) => OpenReadAsync(uri, lazyClient.Value, cancellationToken);
 
     /// <summary>
     /// Opens the <see cref="Las"/> <see cref="S3"/> <see cref="Uri"/> for reading using the <see cref="Amazon.S3.IAmazonS3"/> client.
     /// </summary>
     /// <param name="uri">The <see cref="S3"/> <see cref="Uri"/> to the <see cref="Las"/> file.</param>
     /// <param name="client">The <see cref="S3"/> client.</param>
+    /// <param name="cancellationToken">The cancellation token to cancel operation.</param>
     /// <returns>The <see cref="S3"/> stream.</returns>
-    public static async Task<Stream> OpenReadAsync(Uri uri, Amazon.S3.IAmazonS3 client)
+    public static async Task<Stream> OpenReadAsync(Uri uri, Amazon.S3.IAmazonS3 client, CancellationToken cancellationToken = default)
     {
         var output = new Amazon.S3.Util.AmazonS3Uri(uri);
-        return new S3ChunkedStream(client, output, await GetContentLengthAsync(client, output.Bucket, output.Key).ConfigureAwait(false));
+        return new S3ChunkedStream(client, output, await GetContentLengthAsync(client, output.Bucket, output.Key, cancellationToken).ConfigureAwait(false));
     }
 
     /// <summary>
@@ -202,8 +211,9 @@ public static class S3Las
     /// </summary>
     /// <param name="bucket">The bucket name.</param>
     /// <param name="key">The key to the resource.</param>
+    /// <param name="cancellationToken">The cancellation token to cancel operation.</param>
     /// <returns>The <see cref="S3"/> stream.</returns>
-    public static Task<Stream> OpenReadAsync(string bucket, string key) => OpenReadAsync(bucket, key, new Amazon.S3.AmazonS3Client());
+    public static Task<Stream> OpenReadAsync(string bucket, string key, CancellationToken cancellationToken = default) => OpenReadAsync(bucket, key, new Amazon.S3.AmazonS3Client(), cancellationToken);
 
     /// <summary>
     /// Opens the <see cref="Las"/> <see cref="S3"/> bucket/key combination for reading.
@@ -211,8 +221,9 @@ public static class S3Las
     /// <param name="bucket">The bucket name.</param>
     /// <param name="key">The key to the resource.</param>
     /// <param name="lazyClient">The <see cref="S3"/> client.</param>
+    /// <param name="cancellationToken">The cancellation token to cancel operation.</param>
     /// <returns>The <see cref="S3"/> stream.</returns>
-    public static Task<Stream> OpenReadAsync(string bucket, string key, Lazy<Amazon.S3.IAmazonS3> lazyClient) => OpenReadAsync(bucket, key, lazyClient.Value);
+    public static Task<Stream> OpenReadAsync(string bucket, string key, Lazy<Amazon.S3.IAmazonS3> lazyClient, CancellationToken cancellationToken = default) => OpenReadAsync(bucket, key, lazyClient.Value, cancellationToken);
 
     /// <summary>
     /// Opens the <see cref="Las"/> <see cref="S3"/> bucket/key combination for reading using the <see cref="Amazon.S3.IAmazonS3"/> client.
@@ -220,10 +231,11 @@ public static class S3Las
     /// <param name="bucket">The bucket name.</param>
     /// <param name="key">The key to the resource.</param>
     /// <param name="client">The <see cref="S3"/> client.</param>
+    /// <param name="cancellationToken">The cancellation token to cancel operation.</param>
     /// <returns>The <see cref="S3"/> stream.</returns>
-    public static async Task<Stream> OpenReadAsync(string bucket, string key, Amazon.S3.IAmazonS3 client) => new S3ChunkedStream(client, bucket, key, await GetContentLengthAsync(client, bucket, key).ConfigureAwait(false));
+    public static async Task<Stream> OpenReadAsync(string bucket, string key, Amazon.S3.IAmazonS3 client, CancellationToken cancellationToken = default) => new S3ChunkedStream(client, bucket, key, await GetContentLengthAsync(client, bucket, key, cancellationToken).ConfigureAwait(false));
 
-    private static async Task<bool> ExistsAsync(Amazon.S3.IAmazonS3 client, string bucket, string key)
+    private static async Task<bool> ExistsAsync(Amazon.S3.IAmazonS3 client, string bucket, string key, CancellationToken cancellationToken)
     {
         try
         {
@@ -233,7 +245,7 @@ public static class S3Las
                 Key = key,
             };
 
-            var response = await client.GetObjectMetadataAsync(request).ConfigureAwait(false);
+            var response = await client.GetObjectMetadataAsync(request, cancellationToken).ConfigureAwait(false);
             return IsSuccessStatusCode(response.HttpStatusCode);
 
             static bool IsSuccessStatusCode(System.Net.HttpStatusCode code)
@@ -247,7 +259,7 @@ public static class S3Las
         }
     }
 
-    private static async Task<long> GetContentLengthAsync(Amazon.S3.IAmazonS3 client, string bucket, string key)
+    private static async Task<long> GetContentLengthAsync(Amazon.S3.IAmazonS3 client, string bucket, string key, CancellationToken cancellationToken)
     {
         var request = new Amazon.S3.Model.GetObjectMetadataRequest
         {
@@ -255,7 +267,7 @@ public static class S3Las
             Key = key,
         };
 
-        var response = await client.GetObjectMetadataAsync(request).ConfigureAwait(false);
+        var response = await client.GetObjectMetadataAsync(request, cancellationToken).ConfigureAwait(false);
 
         return response.ContentLength;
     }
