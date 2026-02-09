@@ -1,11 +1,15 @@
-using Aspire.Hosting.Azure;
+// -----------------------------------------------------------------------
+// <copyright file="AppHost.cs" company="Altemiq">
+// Copyright (c) Altemiq. All rights reserved.
+// </copyright>
+// -----------------------------------------------------------------------
 
 var builder = DistributedApplication.CreateBuilder(args);
 
-var storage = builder.AddAzureStorage("azure")
-    .RunAsEmulator();
-
-_ = storage.AddBlobs("azure-blobs");
+_ = builder
+    .AddAzureStorage("azure")
+    .RunAsEmulator()
+    .AddBlobs("azure-blobs");
 
 await builder
     .Build()
