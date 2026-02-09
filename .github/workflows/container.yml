@@ -121,7 +121,7 @@ jobs:
           docker manifest push ghcr.io/${{ github.repository_owner }}/lastools:latest
 
       - name: Run local/version-manifest@v1
-        if: ${{ needs.linux.outputs.version }} == ${{ needs.windows.outputs.version }}
+        if: ${{ needs.linux.outputs.version == needs.windows.outputs.version }}
         run: |
           docker manifest create ghcr.io/${{ github.repository_owner }}/lastools:${{ needs.linux.outputs.version }} ghcr.io/${{ github.repository_owner }}/lastools:ubuntu-${{ needs.linux.outputs.version }} ghcr.io/${{ github.repository_owner }}/lastools:windows-${{ needs.windows.outputs.version }}
           docker manifest push ghcr.io/${{ github.repository_owner }}/lastools:${{ needs.linux.outputs.version }}
