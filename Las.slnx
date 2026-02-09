@@ -24,6 +24,7 @@
     <File Path="src/Directory.Build.targets" />
     <File Path="src/Directory.Packages.props" />
     <Project Path="src/IO.Las.Arrow/IO.Las.Arrow.csproj" />
+    <Project Path="src/IO.Las.Azure/IO.Las.Azure.csproj" />
     <Project Path="src/IO.Las.Cloud/IO.Las.Cloud.csproj" />
     <Project Path="src/IO.Las.Compression/IO.Las.Compression.csproj" />
     <Project Path="src/IO.Las.DataFrame/IO.Las.DataFrame.csproj" />
@@ -41,6 +42,7 @@
     <Project Path="tests/IO.Las.Arrow.Tests/IO.Las.Arrow.Tests.csproj">
       <Build Solution="Release|*" Project="false" />
     </Project>
+    <Project Path="tests/IO.Las.Azure.Tests/IO.Las.Azure.Tests.csproj" />
     <Project Path="tests/IO.Las.Cloud.Tests/IO.Las.Cloud.Tests.csproj">
       <Build Solution="Release|*" Project="false" />
     </Project>
@@ -76,6 +78,7 @@
   </Folder>
   <Folder Name="/web/hosts/">
     <File Path="web/hosts/Directory.Packages.props" />
-    <Project Path="web/hosts/IO.Las.S3.AppHost/IO.Las.S3.AppHost.csproj" />
+    <Project Path="web/hosts/IO.Las.AWS.AppHost/IO.Las.AWS.AppHost.csproj" />
+    <Project Path="web/hosts/IO.Las.Azure.AppHost/IO.Las.Azure.AppHost.csproj" />
   </Folder>
 </Solution>

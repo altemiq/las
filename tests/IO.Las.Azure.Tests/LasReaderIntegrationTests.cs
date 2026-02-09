@@ -1,33 +1,33 @@
-﻿namespace Altemiq.IO.Las.Http;
+namespace Altemiq.IO.Las.Azure;
 
 public class LasReaderIntegrationTests
 {
-    [ClassDataSource<WebApplicationFactory>(Shared = SharedType.PerTestSession)]
-    public required WebApplicationFactory WebApplicationFactory { get; init; }
+    [ClassDataSource<Data.BlobContainerClientDataClass>(Shared = SharedType.PerTestSession)]
+    public required Data.BlobContainerClientDataClass BlobContainerClientData { get; init; }
     
     [Test]
-    [Arguments("/las/fusa.las", true)]
-    [Arguments("/las/asuf.las", false)]
-    public async Task LasExists(string path, bool expected)
+    [Arguments("las/fusa.las", true)]
+    [Arguments("las/asuf.las", false)]
+    public async Task LasExists(string blobName, bool expected)
     {
-        await Assert.That(HttpLas.Exists(path, this.WebApplicationFactory.CreateClient())).IsEqualTo(expected);
+        await Assert.That(BlobLas.Exists(blobName, this.BlobContainerClientData.BlobContainerClient)).IsEqualTo(expected);
     }
 
     [Test]
-    [Arguments("/las/fusa.las", true)]
-    [Arguments("/las/asuf.las", false)]
-    public async Task LasExistsAsync(string path, bool expected)
+    [Arguments("las/fusa.las", true)]
+    [Arguments("las/asuf.las", false)]
+    public async Task LasExistsAsync(string blobName, bool expected)
     {
-        await Assert.That(async () => await HttpLas.ExistsAsync(path, this.WebApplicationFactory.CreateClient())).IsEqualTo(expected);
+        await Assert.That(async () => await BlobLas.ExistsAsync(blobName, this.BlobContainerClientData.BlobContainerClient)).IsEqualTo(expected);
     }
-
+    
     [Test]
     public async Task ReadLasAsync()
     {
 #if NETSTANDARD2_1_OR_GREATER || NETCOREAPP3_0_OR_GREATER
         await
 #endif
-            using var stream = await HttpLas.OpenReadAsync("/las/fusa.las", this.WebApplicationFactory.CreateClient());
+            using var stream = await BlobLas.OpenReadAsync("las/fusa.las", this.BlobContainerClientData.BlobContainerClient);
 #if NETSTANDARD2_1_OR_GREATER || NETCOREAPP3_0_OR_GREATER
         await
 #endif

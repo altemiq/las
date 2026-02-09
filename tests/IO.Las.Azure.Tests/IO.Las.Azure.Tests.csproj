@@ -6,8 +6,8 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="AWSSDK.Extensions.NETCore.Setup" />
     <PackageReference Include="Aspire.Hosting.Testing"/>
+    <PackageReference Include="Microsoft.Extensions.Azure" />
     <PackageReference Include="TUnit" />
   </ItemGroup>
 
@@ -19,15 +19,15 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\..\src\IO.Las.Azure\IO.Las.Azure.csproj" />
     <ProjectReference Include="..\..\src\IO.Las.Compression\IO.Las.Compression.csproj" />
-    <ProjectReference Include="..\..\src\IO.Las.S3\IO.Las.S3.csproj" />
-    <ProjectReference Include="..\..\web\hosts\IO.Las.AWS.AppHost\IO.Las.AWS.AppHost.csproj" />
+    <ProjectReference Include="..\..\web\hosts\IO.Las.Azure.AppHost\IO.Las.Azure.AppHost.csproj" />
   </ItemGroup>
-  
+
   <ItemGroup>
     <Using Include="Aspire.Hosting" />
   </ItemGroup>
-  
+
   <ItemGroup>
     <EmbeddedResource Include="..\..\data\*\fusa.*">
       <Link>Data\%(RecursiveDir)%(Filename)%(Extension)</Link>

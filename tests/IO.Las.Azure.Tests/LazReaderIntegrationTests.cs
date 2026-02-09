@@ -1,44 +1,50 @@
-﻿namespace Altemiq.IO.Las.Http;
+namespace Altemiq.IO.Las.Azure;
 
-public class LasReaderIntegrationTests
+public class LazReaderIntegrationTests
 {
-    [ClassDataSource<WebApplicationFactory>(Shared = SharedType.PerTestSession)]
-    public required WebApplicationFactory WebApplicationFactory { get; init; }
+    [ClassDataSource<Data.BlobContainerClientDataClass>(Shared = SharedType.PerTestSession)]
+    public required Data.BlobContainerClientDataClass BlobContainerClientData { get; init; }
     
     [Test]
-    [Arguments("/las/fusa.las", true)]
-    [Arguments("/las/asuf.las", false)]
-    public async Task LasExists(string path, bool expected)
+    [Arguments("laz/fusa.laz", true)]
+    [Arguments("laz/asuf.laz", false)]
+    public async Task LazExists(string blobName, bool expected)
     {
-        await Assert.That(HttpLas.Exists(path, this.WebApplicationFactory.CreateClient())).IsEqualTo(expected);
+        await Assert.That(BlobLas.Exists(blobName, this.BlobContainerClientData.BlobContainerClient)).IsEqualTo(expected);
     }
 
     [Test]
-    [Arguments("/las/fusa.las", true)]
-    [Arguments("/las/asuf.las", false)]
-    public async Task LasExistsAsync(string path, bool expected)
+    [Arguments("laz/fusa.laz", true)]
+    [Arguments("laz/asuf.laz", false)]
+    public async Task LazExistsAsync(string blobName, bool expected)
     {
-        await Assert.That(async () => await HttpLas.ExistsAsync(path, this.WebApplicationFactory.CreateClient())).IsEqualTo(expected);
+        await Assert.That(async () => await BlobLas.ExistsAsync(blobName, this.BlobContainerClientData.BlobContainerClient)).IsEqualTo(expected);
     }
-
+    
     [Test]
-    public async Task ReadLasAsync()
+    public async Task ReadLaz()
     {
 #if NETSTANDARD2_1_OR_GREATER || NETCOREAPP3_0_OR_GREATER
         await
 #endif
-            using var stream = await HttpLas.OpenReadAsync("/las/fusa.las", this.WebApplicationFactory.CreateClient());
+            using var stream = await BlobLas.OpenReadAsync("laz/fusa.laz", this.BlobContainerClientData.BlobContainerClient);
 #if NETSTANDARD2_1_OR_GREATER || NETCOREAPP3_0_OR_GREATER
         await
 #endif
-            using LasReader reader = new(stream);
+            using LazReader reader = new(stream);
 
         await CheckHeader(reader.Header, new(1, 1));
-        _ = await Assert.That(reader.VariableLengthRecords).HasSingleItem();
+        _ = await Assert.That(reader.VariableLengthRecords).Count().IsEqualTo(2);
 
-        _ = await Assert.That(await reader.ReadPointDataRecordAsync())
-            .Member(p => p.PointDataRecord, p => p.IsNotNull().And.Member(pt => pt.X, x => x.IsNotDefault()))
-            .And.Member(p => p.ExtraBytes.IsEmpty, empty => empty.IsTrue());
+        await Assert.That(reader.ReadPointDataRecord(10).PointDataRecord).IsNotNull()
+            .And.Member(p => p.X, x => x.IsEqualTo(27799961))
+            .And.Member(p => p.Y, y => y.IsEqualTo(612234368))
+            .And.Member(p => p.Z, z => z.IsEqualTo(6222));
+
+        await Assert.That(reader.ReadPointDataRecord(277500).PointDataRecord).IsNotNull()
+            .And.Member(p => p.X, x => x.IsEqualTo(27775097))
+            .And.Member(p => p.Y, y => y.IsEqualTo(612225071))
+            .And.Member(p => p.Z, z => z.IsEqualTo(4228));
     }
 
     private static async Task CheckHeader(HeaderBlock headerBlock, Version expectedVersion)
@@ -51,7 +57,7 @@ public class LasReaderIntegrationTests
 #endif
             .And.Member(static headerBlock => headerBlock.ProjectId, static projectId => projectId.IsEqualTo(Guid.Empty))
             .And.Member(static headerBlock => headerBlock.Version, version => version.IsEqualTo(expectedVersion))
-            .And.Member(static headerBlock => headerBlock.SystemIdentifier, static systemIdentifier => systemIdentifier.IsEqualTo("LAStools (c) by rapidlasso GmbH"))
+            .And.Member(static headerBlock => headerBlock.SystemIdentifier, static systemIdentifier => systemIdentifier.Contains("LAStools").And.Contains("rapidlasso"))
             .And.Member(static headerBlock => headerBlock.FileCreation.GetValueOrDefault(), static fileCreation => fileCreation.IsEqualTo(new DateTime(2010, 2, 9)))
 #if LAS1_4_OR_GREATER
             .And.Member(static headerBlock => headerBlock.NumberOfPointRecords, static numberOfPointRecords => numberOfPointRecords.IsEqualTo(277573UL))

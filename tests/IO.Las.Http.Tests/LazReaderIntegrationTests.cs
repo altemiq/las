@@ -4,6 +4,22 @@ public class LazReaderIntegrationTests
 {
     [ClassDataSource<WebApplicationFactory>(Shared = SharedType.PerTestSession)]
     public required WebApplicationFactory WebApplicationFactory { get; init; }
+    
+    [Test]
+    [Arguments("/laz/fusa.laz", true)]
+    [Arguments("/laz/asuf.laz", false)]
+    public async Task LazExists(string path, bool expected)
+    {
+        await Assert.That(HttpLas.Exists(path, this.WebApplicationFactory.CreateClient())).IsEqualTo(expected);
+    }
+
+    [Test]
+    [Arguments("/laz/fusa.laz", true)]
+    [Arguments("/laz/asuf.laz", false)]
+    public async Task LazExistsAsync(string path, bool expected)
+    {
+        await Assert.That(async () => await HttpLas.ExistsAsync(path, this.WebApplicationFactory.CreateClient())).IsEqualTo(expected);
+    }
 
     [Test]
     public async Task ReadLazAsync()

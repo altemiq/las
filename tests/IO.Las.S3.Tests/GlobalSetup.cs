@@ -16,7 +16,7 @@ public class GlobalHooks
     public static async Task SetUp(CancellationToken cancellationToken)
     {
         // Arrange
-        var builder = await DistributedApplicationTestingBuilder.CreateAsync<Projects.IO_Las_S3_AppHost>(cancellationToken);
+        var builder = await DistributedApplicationTestingBuilder.CreateAsync<Projects.IO_Las_AWS_AppHost>(cancellationToken);
         builder.Services.ConfigureHttpClientDefaults(clientBuilder =>
         {
             clientBuilder.AddStandardResilienceHandler();

@@ -1,0 +1,13 @@
+<Project Sdk="Aspire.AppHost.Sdk/13.1.0">
+
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <TargetFrameworks>net10.0;net9.0;net8.0</TargetFrameworks>
+    <UserSecretsId>b444d889-eaeb-4dca-a14d-5abe4dbbf38d</UserSecretsId>
+  </PropertyGroup>
+  
+  <ItemGroup>
+    <PackageReference Include="Aspire.Hosting.Azure.Storage" />
+  </ItemGroup>
+
+</Project>

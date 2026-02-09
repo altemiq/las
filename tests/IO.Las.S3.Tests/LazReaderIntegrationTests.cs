@@ -2,14 +2,32 @@ namespace Altemiq.IO.Las.S3;
 
 public class LazReaderIntegrationTests
 {
-    [ClassDataSource<Data.S3ClientDataClass>(Shared = SharedType.PerAssembly)]
+    [ClassDataSource<Data.S3ClientDataClass>(Shared = SharedType.PerTestSession)]
+    public required Data.S3ClientDataClass S3ClientData { get; init; }
+    
     [Test]
-    public async Task ReadLazAsync(Data.S3ClientDataClass s3ClientData)
+    [Arguments("lidar", "laz/fusa.laz", true)]
+    [Arguments("lidar", "laz/asuf.laz", false)]
+    public async Task LazExists(string bucketName, string blobName, bool expected)
+    {
+        await Assert.That(S3Las.Exists(bucketName, blobName, this.S3ClientData.S3Client)).IsEqualTo(expected);
+    }
+
+    [Test]
+    [Arguments("lidar", "laz/fusa.laz", true)]
+    [Arguments("lidar", "laz/asuf.laz", false)]
+    public async Task LazExistsAsync(string bucketName, string key, bool expected)
+    {
+        await Assert.That(async () => await S3Las.ExistsAsync(bucketName, key, this.S3ClientData.S3Client)).IsEqualTo(expected);
+    }
+    
+    [Test]
+    public async Task ReadLaz()
     {
 #if NETSTANDARD2_1_OR_GREATER || NETCOREAPP3_0_OR_GREATER
         await
 #endif
-            using var stream = await S3Las.OpenReadAsync("lidar", "laz/fusa.laz", s3ClientData.S3Client);
+            using var stream = await S3Las.OpenReadAsync("lidar", "laz/fusa.laz", this.S3ClientData.S3Client);
 #if NETSTANDARD2_1_OR_GREATER || NETCOREAPP3_0_OR_GREATER
         await
 #endif
