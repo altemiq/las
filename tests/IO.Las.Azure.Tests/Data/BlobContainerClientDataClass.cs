@@ -15,10 +15,10 @@ public class BlobContainerClientDataClass : IAsyncInitializer, IAsyncDisposable
         {
             await GlobalHooks.NotificationService.WaitForResourceAsync("azure-blobs", KnownResourceStates.Running).WaitAsync(TimeSpan.FromSeconds(30));
         }
-        
+
         // get the client
         var servicesClient = services.GetRequiredService<global::Azure.Storage.Blobs.BlobServiceClient>();
-            
+
         this.BlobContainerClient = servicesClient.GetBlobContainerClient(ContainerName);
         await this.BlobContainerClient.CreateIfNotExistsAsync();
 

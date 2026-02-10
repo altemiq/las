@@ -124,7 +124,7 @@ public class WebApplicationFactory : TUnit.Core.Interfaces.IAsyncInitializer, IA
         {
             return;
         }
-        
+
         this.disposed = true;
         await this.cts.CancelAsync();
         this.listener.Stop();

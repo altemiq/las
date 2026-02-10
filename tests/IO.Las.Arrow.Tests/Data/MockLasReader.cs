@@ -58,7 +58,7 @@ internal sealed class MockLasReader : ILasReader
 
     public HeaderBlock Header { get; }
     public IReadOnlyList<VariableLengthRecord> VariableLengthRecords { get; } = [];
-    
+
 #if LAS1_4_OR_GREATER
     public IReadOnlyList<ExtendedVariableLengthRecord> ExtendedVariableLengthRecords { get; } = [];
 #endif

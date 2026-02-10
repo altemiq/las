@@ -4,7 +4,7 @@ public class LasReaderIntegrationTests
 {
     [ClassDataSource<Data.BlobContainerClientDataClass>(Shared = SharedType.PerTestSession)]
     public required Data.BlobContainerClientDataClass BlobContainerClientData { get; init; }
-    
+
     [Test]
     [Arguments("las/fusa.las", true)]
     [Arguments("las/asuf.las", false)]
@@ -20,7 +20,7 @@ public class LasReaderIntegrationTests
     {
         await Assert.That(async () => await BlobLas.ExistsAsync(blobName, this.BlobContainerClientData.BlobContainerClient)).IsEqualTo(expected);
     }
-    
+
     [Test]
     public async Task ReadLasAsync()
     {

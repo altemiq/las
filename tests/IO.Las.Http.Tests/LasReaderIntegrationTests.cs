@@ -4,7 +4,7 @@ public class LasReaderIntegrationTests
 {
     [ClassDataSource<WebApplicationFactory>(Shared = SharedType.PerTestSession)]
     public required WebApplicationFactory WebApplicationFactory { get; init; }
-    
+
     [Test]
     [Arguments("/las/fusa.las", true)]
     [Arguments("/las/asuf.las", false)]

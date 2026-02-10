@@ -4,7 +4,7 @@ public class LazReaderIntegrationTests
 {
     [ClassDataSource<WebApplicationFactory>(Shared = SharedType.PerTestSession)]
     public required WebApplicationFactory WebApplicationFactory { get; init; }
-    
+
     [Test]
     [Arguments("/laz/fusa.laz", true)]
     [Arguments("/laz/asuf.laz", false)]

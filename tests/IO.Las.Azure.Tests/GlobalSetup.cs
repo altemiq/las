@@ -35,11 +35,11 @@ public class GlobalHooks
                 {
                     Thread.Sleep(100);
                 }
-                
+
                 return new(connectionString, options);
             });
         });
-        
+
         // get the blob storage
         if (builder.Resources.OfType<AzureBlobStorageResource>().SingleOrDefault() is { } blobStorage)
         {
@@ -48,10 +48,10 @@ public class GlobalHooks
         else if (builder.Resources.OfType<AzureBlobStorageContainerResource>().SingleOrDefault() is { } blobStorageContainer)
         {
             builder.Eventing.Subscribe<ResourceReadyEvent>(blobStorageContainer, AddConnectionString);
-        } 
+        }
 
         App = await builder.BuildAsync(cancellationToken);
-        
+
         await App.StartAsync(cancellationToken);
 
         async Task AddConnectionString(ResourceReadyEvent @event, CancellationToken token)

@@ -4,7 +4,7 @@ public class LazReaderIntegrationTests
 {
     [ClassDataSource<Data.BlobContainerClientDataClass>(Shared = SharedType.PerTestSession)]
     public required Data.BlobContainerClientDataClass BlobContainerClientData { get; init; }
-    
+
     [Test]
     [Arguments("laz/fusa.laz", true)]
     [Arguments("laz/asuf.laz", false)]
@@ -20,7 +20,7 @@ public class LazReaderIntegrationTests
     {
         await Assert.That(async () => await BlobLas.ExistsAsync(blobName, this.BlobContainerClientData.BlobContainerClient)).IsEqualTo(expected);
     }
-    
+
     [Test]
     public async Task ReadLaz()
     {

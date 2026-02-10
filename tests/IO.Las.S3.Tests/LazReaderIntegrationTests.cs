@@ -4,7 +4,7 @@ public class LazReaderIntegrationTests
 {
     [ClassDataSource<Data.S3ClientDataClass>(Shared = SharedType.PerTestSession)]
     public required Data.S3ClientDataClass S3ClientData { get; init; }
-    
+
     [Test]
     [Arguments("lidar", "laz/fusa.laz", true)]
     [Arguments("lidar", "laz/asuf.laz", false)]
@@ -20,7 +20,7 @@ public class LazReaderIntegrationTests
     {
         await Assert.That(async () => await S3Las.ExistsAsync(bucketName, key, this.S3ClientData.S3Client)).IsEqualTo(expected);
     }
-    
+
     [Test]
     public async Task ReadLaz()
     {
