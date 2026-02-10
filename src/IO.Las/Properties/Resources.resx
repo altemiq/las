@@ -54,4 +54,7 @@
   <data name="IsNotAValue" xml:space="preserve">
     <value>{0} is not a {1} value</value>
   </data>
+  <data name="FailedToReadRequiredBytesFromStream" xml:space="preserve">
+    <value>Failed to read any bytes from the stream.</value>
+  </data>
 </root>

@@ -71,7 +71,7 @@ internal class RawReader(Readers.IPointDataRecordReader reader, int pointDataLen
         if (current > target)
         {
             // move to the point start
-            stream.MoveToPositionAbsolute(this.PointStart);
+            await stream.MoveToPositionAbsoluteAsync(this.PointStart, cancellationToken).ConfigureAwait(false);
             delta = target;
         }
 

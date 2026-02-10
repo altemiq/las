@@ -152,7 +152,7 @@ internal static partial class RootCommandExtensions
                         error.WriteLine("Invalid COPC VLR header. Record ID is {0}, not 1.", info.Header.RecordId);
                     }
 
-                    var bytes = System.Buffers.ArrayPool<byte>.Shared.Rent(info.Size());
+                    var bytes = System.Buffers.ArrayPool<byte>.Shared.Rent(info.Size);
                     _ = info.CopyTo(bytes);
                     for (var i = 0; i < 11; ++i)
                     {

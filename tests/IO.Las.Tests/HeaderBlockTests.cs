@@ -195,6 +195,40 @@ public class HeaderBlockTests
     }
 
     [Test]
+    public async Task Read()
+    {
+#if NETSTANDARD2_1_OR_GREATER || NETCOREAPP3_0_OR_GREATER
+        await
+#endif
+            using var stream = typeof(LasReaderTests).Assembly.GetManifestResourceStream(typeof(LasReaderTests), "fusa.las")
+                               ?? throw new System.Diagnostics.UnreachableException("Failed to get stream");
+        var reader = new HeaderBlockReader(stream);
+        await Assert.That(() => reader.GetFileSignature()).IsEqualTo("LASF");
+        var headerBlock = await Assert.That(reader.GetHeaderBlock("LASF")).IsNotDefault();
+        await Assert.That(() => reader.GetVariableLengthRecord()).IsNotDefault();
+#if LAS1_4_OR_GREATER
+        await Assert.That(() => reader.GetExtendedVariableLengthRecord([])).Throws<InvalidDataException>();
+#endif
+    }
+
+    [Test]
+    public async Task ReadAsync()
+    {
+#if NETSTANDARD2_1_OR_GREATER || NETCOREAPP3_0_OR_GREATER
+        await
+#endif
+            using var stream = typeof(LasReaderTests).Assembly.GetManifestResourceStream(typeof(LasReaderTests), "fusa.las")
+                               ?? throw new System.Diagnostics.UnreachableException("Failed to get stream");
+        var reader = new HeaderBlockReader(stream);
+        await Assert.That(async () => await reader.GetFileSignatureAsync()).IsEqualTo("LASF");
+        var headerBlock = await Assert.That(reader.GetHeaderBlock("LASF")).IsNotDefault();
+        await Assert.That(async () => await reader.GetVariableLengthRecordAsync()).IsNotDefault();
+#if LAS1_4_OR_GREATER
+        await Assert.That(async () => await reader.GetExtendedVariableLengthRecordAsync([])).Throws<InvalidDataException>();
+#endif
+    }
+
+    [Test]
     [MethodDataSource(nameof(GetPointTypes))]
     public async Task CreateFromType(Type type, byte number)
     {

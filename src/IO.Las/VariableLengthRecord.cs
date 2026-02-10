@@ -13,17 +13,14 @@ namespace Altemiq.IO.Las;
 public abstract record VariableLengthRecord(VariableLengthRecordHeader Header)
 {
     /// <summary>
+    /// Gets the size of this instance.
+    /// </summary>
+    public ushort Size => (ushort)(VariableLengthRecordHeader.Size + (ushort)(sizeof(byte) * this.Header.RecordLengthAfterHeader));
+
+    /// <summary>
     /// Copies the contents of this instance into a destination <see cref="Span{T}"/>.
     /// </summary>
     /// <param name="destination">The destination <see cref="Span{T}"/> object.</param>
     /// <returns>The number of bytes written.</returns>
     public abstract int CopyTo(Span<byte> destination);
-
-    /// <summary>
-    /// Returns the sizes of this instance.
-    /// </summary>
-    /// <returns>The size.</returns>
-    public ushort Size() => Size(this.Header.RecordLengthAfterHeader);
-
-    private static ushort Size(ushort dataLength) => (ushort)(VariableLengthRecordHeader.Size + (ushort)(sizeof(byte) * dataLength));
 }

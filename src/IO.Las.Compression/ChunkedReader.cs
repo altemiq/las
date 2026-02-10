@@ -351,7 +351,7 @@ internal abstract class ChunkedReader : IPointReader
                 this.Reader.Decoder.Done();
                 this.currentChunk = this.tabledChunksValue - 1;
                 await PrepareAsync().ConfigureAwait(false);
-                stream.MoveToPositionAbsolute(this.chunkStartValues[this.currentChunk]);
+                await stream.MoveToPositionAbsoluteAsync(this.chunkStartValues[this.currentChunk], cancellationToken).ConfigureAwait(false);
                 _ = this.InitializeDecoder(stream);
                 this.chunkCount = default;
             }
@@ -363,7 +363,7 @@ internal abstract class ChunkedReader : IPointReader
             this.Reader.Decoder.Done();
             this.currentChunk = targetChunk;
             await PrepareAsync().ConfigureAwait(false);
-            stream.MoveToPositionAbsolute(this.chunkStartValues[this.currentChunk]);
+            await stream.MoveToPositionAbsoluteAsync(this.chunkStartValues[this.currentChunk], cancellationToken).ConfigureAwait(false);
             _ = this.InitializeDecoder(stream);
             this.chunkCount = default;
         }

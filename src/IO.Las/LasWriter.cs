@@ -115,7 +115,7 @@ public class LasWriter(Stream stream, bool leaveOpen = false) :
         _ = this.BaseStream.SwitchStreamIfMultiple(LasStreams.PointData);
 
         // offset to point data
-        var recordSize = recordsList.Aggregate(0u, static (current, record) => current + record.Size());
+        var recordSize = recordsList.Aggregate(0u, static (current, record) => current + record.Size);
         var pointDataRecordSize =
 #if LAS1_4_OR_GREATER
             this.WriteHeader(header, (uint)recordsList.Count, recordSize, extraByteCount);
@@ -133,15 +133,14 @@ public class LasWriter(Stream stream, bool leaveOpen = false) :
         var byteArray = System.Buffers.ArrayPool<byte>.Shared.Rent(0);
         foreach (var record in recordsList)
         {
-            var size = record.Size();
+            var size = record.Size;
             if (byteArray.Length < size)
             {
                 System.Buffers.ArrayPool<byte>.Shared.Return(byteArray);
                 byteArray = System.Buffers.ArrayPool<byte>.Shared.Rent(size);
             }
 
-            var written = record.CopyTo(byteArray);
-            this.BaseStream.Write(byteArray, 0, written);
+            this.BaseStream.Write(byteArray, 0, record.CopyTo(byteArray));
         }
 
         System.Buffers.ArrayPool<byte>.Shared.Return(byteArray);

@@ -70,41 +70,33 @@ public abstract class ChunkedStream(long length) : Stream, ICacheStream, IAsyncC
     /// <inheritdoc/>
     public sealed override long Seek(long offset, SeekOrigin origin)
     {
-        if (this.stream is not null)
+        if (this.stream is null)
         {
-            // see if this is in the current range
-            if (origin is SeekOrigin.Begin)
-            {
-                if (offset >= this.streamStart && offset <= (this.streamStart + this.streamLength))
-                {
-                    // set the position within the current stream
-                    var streamPosition = this.stream.Seek(offset - this.streamStart, SeekOrigin.Begin);
-                    return this.streamStart + streamPosition;
-                }
+            return -1;
+        }
 
+        switch (origin)
+        {
+            case SeekOrigin.Begin when offset >= this.streamStart && offset <= (this.streamStart + this.streamLength):
+                // set the position from the start of the current stream
+                return this.streamStart + this.stream.Seek(offset - this.streamStart, SeekOrigin.Begin);
+            case SeekOrigin.Begin:
                 this.DisposeStream();
                 this.streamStart = offset;
                 this.streamLength = -1;
                 return this.streamStart;
-            }
-
-            if (origin is SeekOrigin.Current)
-            {
-                if (this.stream.Position + offset >= 0 && this.stream.Position + offset <= this.streamLength)
-                {
-                    // set the position within the current stream
-                    var streamPosition = this.stream.Seek(offset - this.streamStart, SeekOrigin.Current);
-                    return this.streamStart + streamPosition;
-                }
-
+            case SeekOrigin.Current when this.stream.Position + offset >= 0 && this.stream.Position + offset <= this.streamLength:
+                // set the position within the current stream
+                return this.streamStart + this.stream.Seek(offset - this.streamStart, SeekOrigin.Current);
+            case SeekOrigin.Current:
                 this.DisposeStream();
                 this.streamStart += offset;
                 this.streamLength = -1;
                 return this.streamStart;
-            }
+            case SeekOrigin.End:
+            default:
+                return -1;
         }
-
-        return -1;
     }
 
     /// <inheritdoc/>

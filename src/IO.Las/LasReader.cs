@@ -232,7 +232,7 @@ public class LasReader :
         }
 
         _ = this.BaseStream.SwitchStreamIfMultiple(LasStreams.PointData);
-        this.MoveToPointData();
+        await this.MoveToPointDataAsync(cancellationToken).ConfigureAwait(false);
 
         // read the data
         _ = await this.BaseStream.ReadAsync(this.buffer, cancellationToken).ConfigureAwait(false);
@@ -246,7 +246,7 @@ public class LasReader :
     /// <inheritdoc/>
     public async ValueTask<LasPointMemory> ReadPointDataRecordAsync(ulong index, CancellationToken cancellationToken = default)
     {
-        this.MoveToPoint(index);
+        await this.MoveToPointAsync(index, cancellationToken).ConfigureAwait(false);
         var pointSpan = await this.ReadPointDataRecordAsync(cancellationToken).ConfigureAwait(false);
         return pointSpan.PointDataRecord is not null ? pointSpan : throw new KeyNotFoundException();
     }
@@ -375,6 +375,13 @@ public class LasReader :
     protected void MoveToPointData() => this.BaseStream.MoveToPositionForwardsOnly(this.offsetToPointData);
 
     /// <summary>
+    /// Move to the point data asynchronously.
+    /// </summary>
+    /// <param name="cancellationToken">The token to monitor for cancellation requests. The default value is <see cref="CancellationToken.None"/>.</param>
+    /// <returns>The asynchronous task.</returns>
+    protected ValueTask MoveToPointDataAsync(CancellationToken cancellationToken) => this.BaseStream.MoveToPositionForwardsOnlyAsync(this.offsetToPointData, cancellationToken);
+
+    /// <summary>
     /// Gets the current index.
     /// </summary>
     /// <returns>The current point index.</returns>
@@ -389,19 +396,10 @@ public class LasReader :
         ArgumentOutOfRangeException.ThrowIfGreaterThanOrEqual(pointIndex, this.numberOfPointRecords);
         if (!this.MoveToPoint(this.currentPointIndex, pointIndex))
         {
-            ThrowInvalidOperationException(pointIndex);
+            ThrowFailedToMoveToPointException(pointIndex);
         }
 
         this.currentPointIndex = pointIndex;
-
-#if NET8_0_OR_GREATER
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Performance", "CA1863:Use 'CompositeFormat'", Justification = "This is a formatted string for an exception.")]
-#endif
-        [System.Diagnostics.CodeAnalysis.DoesNotReturn]
-        static void ThrowInvalidOperationException(ulong pointIndex)
-        {
-            throw new InvalidOperationException(string.Format(Properties.Resources.Culture, Properties.Resources.FailedToMoveToPoint, pointIndex));
-        }
     }
 
     /// <summary>
@@ -416,6 +414,39 @@ public class LasReader :
         var pointPosition = (long)(this.offsetToPointData + (target * this.pointDataLength));
         _ = this.BaseStream.SwitchStreamIfMultiple(LasStreams.PointData);
         this.BaseStream.MoveToPositionAbsolute(pointPosition);
+        return this.BaseStream.Position == pointPosition;
+    }
+
+    /// <summary>
+    /// Move to the specified point asynchronously.
+    /// </summary>
+    /// <param name="pointIndex">The point index.</param>
+    /// <param name="cancellationToken">The token to monitor for cancellation requests. The default value is <see cref="CancellationToken.None"/>.</param>
+    /// <returns>The asynchronous task.</returns>
+    protected async Task MoveToPointAsync(ulong pointIndex, CancellationToken cancellationToken = default)
+    {
+        ArgumentOutOfRangeException.ThrowIfGreaterThanOrEqual(pointIndex, this.numberOfPointRecords);
+        if (!await this.MoveToPointAsync(this.currentPointIndex, pointIndex, cancellationToken).ConfigureAwait(false))
+        {
+            ThrowFailedToMoveToPointException(pointIndex);
+        }
+
+        this.currentPointIndex = pointIndex;
+    }
+
+    /// <summary>
+    /// Move to the specified point asynchronously.
+    /// </summary>
+    /// <param name="current">The current point index.</param>
+    /// <param name="target">The target point index.</param>
+    /// <param name="cancellationToken">The token to monitor for cancellation requests. The default value is <see cref="CancellationToken.None"/>.</param>
+    /// <returns><see langword="true"/> if the reader is now at <paramref name="target"/>; otherwise <see langword="false"/>.</returns>
+    protected virtual async Task<bool> MoveToPointAsync(ulong current, ulong target, CancellationToken cancellationToken = default)
+    {
+        // get the position of the point
+        var pointPosition = (long)(this.offsetToPointData + (target * this.pointDataLength));
+        _ = this.BaseStream.SwitchStreamIfMultiple(LasStreams.PointData);
+        await this.BaseStream.MoveToPositionAbsoluteAsync(pointPosition, cancellationToken).ConfigureAwait(false);
         return this.BaseStream.Position == pointPosition;
     }
 
@@ -549,4 +580,10 @@ public class LasReader :
         not null when Directory.Exists(path) => LasMultipleFileStream.OpenRead(path),
         _ => throw new NotSupportedException(),
     };
+
+#if NET8_0_OR_GREATER
+    [System.Diagnostics.CodeAnalysis.SuppressMessage("Performance", "CA1863:Use 'CompositeFormat'", Justification = "This is a formatted string for an exception.")]
+#endif
+    [System.Diagnostics.CodeAnalysis.DoesNotReturn]
+    private static void ThrowFailedToMoveToPointException(ulong pointIndex) => throw new InvalidOperationException(string.Format(Properties.Resources.Culture, Properties.Resources.FailedToMoveToPoint, pointIndex));
 }

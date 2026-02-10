@@ -172,7 +172,7 @@ internal class PointWiseReader : RawReader
         if (current > target)
         {
             this.Decoder.Done();
-            stream.MoveToPositionAbsolute(this.PointStart);
+            await stream.MoveToPositionAbsoluteAsync(this.PointStart, cancellationToken).ConfigureAwait(false);
             _ = this.InitializeDecoder();
             delta = target;
         }

@@ -31,6 +31,19 @@ public static partial class ExtensionMethods
         }
 
         /// <summary>
+        /// Moves to <paramref name="stream"/> to the specified <paramref name="position"/>.
+        /// </summary>
+        /// <param name="position">The position.</param>
+        /// <param name="cancellationToken">The token to monitor for cancellation requests. The default value is <see cref="CancellationToken.None"/>.</param>
+        internal ValueTask MoveToPositionForwardsOnlyAsync(long position, CancellationToken cancellationToken = default)
+        {
+            var streamPosition = stream.Position;
+            return streamPosition < position
+                ? new(MoveToPositionAsync(stream, streamPosition, position, cancellationToken))
+                : default;
+        }
+
+        /// <summary>
         /// Moves the <paramref name="stream"/> to the specified <paramref name="position"/>.
         /// </summary>
         /// <param name="position">The position.</param>
@@ -43,6 +56,19 @@ public static partial class ExtensionMethods
             }
 
             MoveToPosition(stream, streamPosition, position);
+        }
+
+        /// <summary>
+        /// Moves the <paramref name="stream"/> to the specified <paramref name="position"/>.
+        /// </summary>
+        /// <param name="position">The position.</param>
+        /// <param name="cancellationToken">The token to monitor for cancellation requests. The default value is <see cref="CancellationToken.None"/>.</param>
+        internal ValueTask MoveToPositionAbsoluteAsync(long position, CancellationToken cancellationToken = default)
+        {
+            var streamPosition = stream.Position;
+            return streamPosition != position
+                ? new(MoveToPositionAsync(stream, streamPosition, position, cancellationToken))
+                : default;
         }
 
 #if !NETSTANDARD2_1_OR_GREATER && !NETCOREAPP
@@ -178,6 +204,7 @@ public static partial class ExtensionMethods
 #endif
     private static void MoveToPosition(Stream stream, long currentPosition, long position)
     {
+        const int BufferSize = 1024;
         if (stream.CanSeek)
         {
             stream.Position = position;
@@ -189,12 +216,46 @@ public static partial class ExtensionMethods
                 throw new InvalidOperationException(string.Format(System.Globalization.CultureInfo.CurrentCulture, Properties.Resources.CannotMoveToPosition, currentPosition));
             }
 
+            var buffer = System.Buffers.ArrayPool<byte>.Shared.Rent(BufferSize);
             var delta = position - currentPosition;
             while (delta > 0)
             {
-                _ = stream.ReadByte();
-                delta--;
+                delta -= stream.Read(buffer, 0, (int)Math.Min(BufferSize, delta)) is not 0 and var read
+                    ? read
+                    : throw new InvalidOperationException(Properties.Resources.FailedToReadRequiredBytesFromStream);
             }
+
+            System.Buffers.ArrayPool<byte>.Shared.Return(buffer);
+        }
+    }
+
+#if NET8_0_OR_GREATER
+    [System.Diagnostics.CodeAnalysis.SuppressMessage("Performance", "CA1863:Use \'CompositeFormat\'", Justification = "This is for an exception")]
+#endif
+    private static async Task MoveToPositionAsync(Stream stream, long currentPosition, long position, CancellationToken cancellationToken = default)
+    {
+        const int BufferSize = 1024;
+        if (stream.CanSeek)
+        {
+            stream.Position = position;
+        }
+        else
+        {
+            if (position < currentPosition)
+            {
+                throw new InvalidOperationException(string.Format(System.Globalization.CultureInfo.CurrentCulture, Properties.Resources.CannotMoveToPosition, currentPosition));
+            }
+
+            var buffer = System.Buffers.ArrayPool<byte>.Shared.Rent(BufferSize);
+            var delta = position - currentPosition;
+            while (delta > 0)
+            {
+                delta -= await stream.ReadAsync(buffer.AsMemory(0, (int)Math.Min(BufferSize, delta)), cancellationToken).ConfigureAwait(false) is not 0 and var read
+                    ? read
+                    : throw new InvalidOperationException(Properties.Resources.FailedToReadRequiredBytesFromStream);
+            }
+
+            System.Buffers.ArrayPool<byte>.Shared.Return(buffer);
         }
     }
 }

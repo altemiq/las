@@ -420,7 +420,7 @@ public class LasWriterTests
 #endif
         using LasReader reader = new(memoryStream);
         _ = await Assert.That(reader.ExtendedVariableLengthRecords).HasSingleItem()
-            .And.Member(static x => x.Single(), x => x.IsEquivalentTo(record));
+            .And.Member(static x => x.Single(), x => x.IsEqualTo(record));
     }
 #endif
 }

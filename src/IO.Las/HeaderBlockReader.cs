@@ -46,19 +46,6 @@ public class HeaderBlockReader(Stream stream)
 #endif
 
     /// <summary>
-    /// Gets the header block.
-    /// </summary>
-    /// <returns>The <see cref="HeaderBlock"/>.</returns>
-    public HeaderBlock GetHeaderBlock() => this.GetHeaderBlock(this.GetFileSignature());
-
-    /// <summary>
-    /// Gets the header block.
-    /// </summary>
-    /// <param name="fileSignature">The file signature.</param>
-    /// <returns>The <see cref="HeaderBlock"/>.</returns>
-    public HeaderBlock GetHeaderBlock(string fileSignature) => this.GetHeaderBlockImpl(fileSignature);
-
-    /// <summary>
     /// Gets the file signature.
     /// </summary>
     /// <returns>The file signature.</returns>
@@ -85,9 +72,73 @@ public class HeaderBlockReader(Stream stream)
         // read this
         Span<byte> buffer = stackalloc byte[4];
         _ = stream.Read(buffer);
-        var stringValue = System.Text.Encoding.ASCII.GetString(buffer);
+        return System.Text.Encoding.ASCII.GetString(buffer);
+    }
+
+    /// <summary>
+    /// Gets the file signature asynchronously.
+    /// </summary>
+    /// <param name="cancellationToken">The token to monitor for cancellation requests. The default value is <see cref="CancellationToken.None"/>.</param>
+    /// <returns>The file signature.</returns>
+    public async Task<string> GetFileSignatureAsync(CancellationToken cancellationToken = default)
+    {
+        _ = stream.SwitchStreamIfMultiple(LasStreams.Header);
+
+        switch (stream)
+        {
+            case IAsyncCacheStream asyncCacheStream:
+                await asyncCacheStream.CacheAsync(0, 2024, cancellationToken).ConfigureAwait(false);
+                break;
+            case ICacheStream cacheStream:
+                cacheStream.Cache(0, 2024);
+                break;
+        }
+
+        // move this to the start if we can
+        if (stream.CanSeek)
+        {
+            stream.Position = 0;
+        }
+        else if (stream is { Position: not 0 })
+        {
+            // throw an error, as we need to read this from the start of the stream
+        }
+
+        // read this
+        var buffer = System.Buffers.ArrayPool<byte>.Shared.Rent(4);
+        _ = await stream.ReadAsync(buffer.AsMemory(0, 4), cancellationToken).ConfigureAwait(false);
+        var stringValue = System.Text.Encoding.ASCII.GetString(buffer.AsSpan(0, 4));
+        System.Buffers.ArrayPool<byte>.Shared.Return(buffer);
         return stringValue;
     }
+
+    /// <summary>
+    /// Gets the header block.
+    /// </summary>
+    /// <returns>The <see cref="HeaderBlock"/>.</returns>
+    public HeaderBlock GetHeaderBlock() => this.GetHeaderBlock(this.GetFileSignature());
+
+    /// <summary>
+    /// Gets the header block.
+    /// </summary>
+    /// <param name="fileSignature">The file signature.</param>
+    /// <returns>The <see cref="HeaderBlock"/>.</returns>
+    public HeaderBlock GetHeaderBlock(string fileSignature) => this.GetHeaderBlockImpl(fileSignature);
+
+    /// <summary>
+    /// Gets the header block.
+    /// </summary>
+    /// <param name="cancellationToken">The token to monitor for cancellation requests. The default value is <see cref="CancellationToken.None"/>.</param>
+    /// <returns>The <see cref="HeaderBlock"/>.</returns>
+    public async Task<HeaderBlock> GetHeaderBlockAsync(CancellationToken cancellationToken = default) => await this.GetHeaderBlockImplAsync(await this.GetFileSignatureAsync(cancellationToken).ConfigureAwait(false), cancellationToken).ConfigureAwait(false);
+
+    /// <summary>
+    /// Gets the header block.
+    /// </summary>
+    /// <param name="fileSignature">The file signature.</param>
+    /// <param name="cancellationToken">The token to monitor for cancellation requests. The default value is <see cref="CancellationToken.None"/>.</param>
+    /// <returns>The <see cref="HeaderBlock"/>.</returns>
+    public Task<HeaderBlock> GetHeaderBlockAsync(string fileSignature, CancellationToken cancellationToken = default) => this.GetHeaderBlockImplAsync(fileSignature, cancellationToken);
 
     /// <summary>
     /// Moves to the variable length records.
@@ -95,6 +146,8 @@ public class HeaderBlockReader(Stream stream)
     /// <returns><see langword="true"/> if the current position is at the start of the variable length records.</returns>
     public bool MoveToVariableLengthRecords()
     {
+        this.ThrowIfNotInitialized();
+
         _ = stream.SwitchStreamIfMultiple(LasStreams.VariableLengthRecord);
 
         if (stream is ICacheStream cacheStream)
@@ -107,13 +160,31 @@ public class HeaderBlockReader(Stream stream)
         return stream.Position == this.headerSize;
     }
 
-#if LAS1_4_OR_GREATER
     /// <summary>
-    /// Moves to the extended variable length records.
+    /// Moves to the variable length records.
     /// </summary>
-    /// <returns><see langword="true"/> if the current position is at the start of the extended variable length records.</returns>
-    public bool MoveToExtendedVariableLengthRecords() => this.MoveToExtendedVariableLengthRecords((long)this.startOfFirstExtendedVariableLengthRecord);
-#endif
+    /// <param name="cancellationToken">The token to monitor for cancellation requests. The default value is <see cref="CancellationToken.None"/>.</param>
+    /// <returns><see langword="true"/> if the current position is at the start of the variable length records.</returns>
+    public async Task<bool> MoveToVariableLengthRecordsAsync(CancellationToken cancellationToken = default)
+    {
+        this.ThrowIfNotInitialized();
+
+        _ = stream.SwitchStreamIfMultiple(LasStreams.VariableLengthRecord);
+
+        switch (stream)
+        {
+            case IAsyncCacheStream asyncCacheStream:
+                await asyncCacheStream.CacheAsync(this.headerSize, (int)(this.OffsetToPointData - this.headerSize), cancellationToken).ConfigureAwait(false);
+                break;
+            case ICacheStream cacheStream:
+                cacheStream.Cache(this.headerSize, (int)(this.OffsetToPointData - this.headerSize));
+                break;
+        }
+
+        await stream.MoveToPositionForwardsOnlyAsync(this.headerSize, cancellationToken).ConfigureAwait(false);
+
+        return stream.Position == this.headerSize;
+    }
 
 #if LAS1_3_OR_GREATER
     /// <summary>
@@ -123,6 +194,12 @@ public class HeaderBlockReader(Stream stream)
     /// <returns><see langword="true"/> if the current position is at the start of the extended variable length records.</returns>
     public bool MoveToExtendedVariableLengthRecords(long position)
     {
+        this.ThrowIfNotInitialized();
+        if (position < this.OffsetToPointData)
+        {
+            return false;
+        }
+
         _ = stream.SwitchStreamIfMultiple(LasStreams.ExtendedVariableLengthRecord);
 
         if (stream is ICacheStream cacheStream)
@@ -134,6 +211,54 @@ public class HeaderBlockReader(Stream stream)
 
         return stream.Position == position;
     }
+
+#if LAS1_4_OR_GREATER
+    /// <summary>
+    /// Moves to the extended variable length records.
+    /// </summary>
+    /// <returns><see langword="true"/> if the current position is at the start of the extended variable length records.</returns>
+    public bool MoveToExtendedVariableLengthRecords() => this.MoveToExtendedVariableLengthRecords((long)this.startOfFirstExtendedVariableLengthRecord);
+#endif
+
+    /// <summary>
+    /// Moves to the extended variable length records asynchronously.
+    /// </summary>
+    /// <param name="position">The start of the first extended variable length record.</param>
+    /// <param name="cancellationToken">The token to monitor for cancellation requests. The default value is <see cref="CancellationToken.None"/>.</param>
+    /// <returns><see langword="true"/> if the current position is at the start of the extended variable length records.</returns>
+    public async Task<bool> MoveToExtendedVariableLengthRecordsAsync(long position, CancellationToken cancellationToken = default)
+    {
+        this.ThrowIfNotInitialized();
+        if (position < this.OffsetToPointData)
+        {
+            return false;
+        }
+
+        _ = stream.SwitchStreamIfMultiple(LasStreams.ExtendedVariableLengthRecord);
+
+        switch (stream)
+        {
+            case IAsyncCacheStream asyncCacheStream:
+                await asyncCacheStream.CacheAsync(position, cancellationToken).ConfigureAwait(false);
+                break;
+            case ICacheStream cacheStream:
+                cacheStream.Cache(position);
+                break;
+        }
+
+        await stream.MoveToPositionForwardsOnlyAsync(position, cancellationToken).ConfigureAwait(false);
+
+        return stream.Position == position;
+    }
+
+#if LAS1_4_OR_GREATER
+    /// <summary>
+    /// Moves to the extended variable length records asynchronously.
+    /// </summary>
+    /// <param name="cancellationToken">The token to monitor for cancellation requests. The default value is <see cref="CancellationToken.None"/>.</param>
+    /// <returns><see langword="true"/> if the current position is at the start of the extended variable length records.</returns>
+    public Task<bool> MoveToExtendedVariableLengthRecordsAsync(CancellationToken cancellationToken = default) => this.MoveToExtendedVariableLengthRecordsAsync((long)this.startOfFirstExtendedVariableLengthRecord, cancellationToken);
+#endif
 #endif
 
     /// <summary>
@@ -142,8 +267,27 @@ public class HeaderBlockReader(Stream stream)
     /// <returns>The next <see cref="VariableLengthRecord"/>.</returns>
     public VariableLengthRecord GetVariableLengthRecord()
     {
-        _ = this.MoveToVariableLengthRecords();
-        return GetVariableLengthRecord(stream);
+        if (this.IsInVariableLengthRecords() || this.MoveToVariableLengthRecords())
+        {
+            return GetVariableLengthRecord(stream);
+        }
+
+        throw new InvalidDataException("Failed to move to variable length records");
+    }
+
+    /// <summary>
+    /// Gets the variable length record asynchronously.
+    /// </summary>
+    /// <param name="cancellationToken">The token to monitor for cancellation requests. The default value is <see cref="CancellationToken.None"/>.</param>
+    /// <returns>The next <see cref="VariableLengthRecord"/>.</returns>
+    public async Task<VariableLengthRecord> GetVariableLengthRecordAsync(CancellationToken cancellationToken = default)
+    {
+        if (this.IsInVariableLengthRecords() || await this.MoveToVariableLengthRecordsAsync(cancellationToken).ConfigureAwait(false))
+        {
+            return await GetVariableLengthRecordAsync(stream, cancellationToken).ConfigureAwait(false);
+        }
+
+        throw new InvalidDataException("Failed to move to variable length records");
     }
 
 #if LAS1_4_OR_GREATER
@@ -153,6 +297,15 @@ public class HeaderBlockReader(Stream stream)
     /// <param name="records">The variable length records.</param>
     /// <returns>The next <see cref="ExtendedVariableLengthRecord"/>.</returns>
     public ExtendedVariableLengthRecord GetExtendedVariableLengthRecord(IEnumerable<VariableLengthRecord> records) => this.GetExtendedVariableLengthRecord(records, (long)this.startOfFirstExtendedVariableLengthRecord);
+
+    /// <summary>
+    /// Gets the extended variable length record asynchronously.
+    /// </summary>
+    /// <param name="records">The variable length records.</param>
+    /// <param name="cancellationToken">The token to monitor for cancellation requests. The default value is <see cref="CancellationToken.None"/>.</param>
+    /// <returns>The next <see cref="ExtendedVariableLengthRecord"/>.</returns>
+    public Task<ExtendedVariableLengthRecord> GetExtendedVariableLengthRecordAsync(IEnumerable<VariableLengthRecord> records, CancellationToken cancellationToken = default) =>
+        this.GetExtendedVariableLengthRecordAsync(records, (long)this.startOfFirstExtendedVariableLengthRecord, cancellationToken);
 #endif
 
 #if LAS1_4_OR_GREATER
@@ -199,11 +352,45 @@ public class HeaderBlockReader(Stream stream)
         _ = stream.Read(byteArray);
 
         var header = VariableLengthRecordHeader.Create(byteArray);
-
-        byteArray = stackalloc byte[header.RecordLengthAfterHeader];
-        _ = stream.Read(byteArray);
+        if (header.RecordLengthAfterHeader is not 0 and var recordLengthAfterHeader)
+        {
+            byteArray = stackalloc byte[recordLengthAfterHeader];
+            _ = stream.Read(byteArray);
+        }
 
         return VariableLengthRecordProcessor.Instance.Process(header, byteArray);
+    }
+
+    /// <summary>
+    /// Gets the variable length record asynchronously.
+    /// </summary>
+    /// <param name="stream">The stream.</param>
+    /// <param name="cancellationToken">The token to monitor for cancellation requests. The default value is <see cref="CancellationToken.None"/>.</param>
+    /// <returns>The next <see cref="VariableLengthRecord"/>.</returns>
+    internal static async Task<VariableLengthRecord> GetVariableLengthRecordAsync(Stream stream, CancellationToken cancellationToken = default)
+    {
+        var byteArray = System.Buffers.ArrayPool<byte>.Shared.Rent(54);
+        _ = await stream.ReadAsync(byteArray.AsMemory(0, 54), cancellationToken).ConfigureAwait(false);
+
+        var header = VariableLengthRecordHeader.Create(byteArray);
+
+        var recordLengthAfterHeader = header.RecordLengthAfterHeader;
+        if (recordLengthAfterHeader is not 0)
+        {
+            if (recordLengthAfterHeader > byteArray.Length)
+            {
+                System.Buffers.ArrayPool<byte>.Shared.Return(byteArray);
+                byteArray = System.Buffers.ArrayPool<byte>.Shared.Rent(recordLengthAfterHeader);
+            }
+
+            _ = await stream.ReadAsync(byteArray.AsMemory(0, recordLengthAfterHeader), cancellationToken).ConfigureAwait(false);
+        }
+
+        var vlr = VariableLengthRecordProcessor.Instance.Process(header, byteArray.AsSpan(0, recordLengthAfterHeader));
+
+        System.Buffers.ArrayPool<byte>.Shared.Return(byteArray);
+
+        return vlr;
     }
 
 #if LAS1_3_OR_GREATER
@@ -216,14 +403,62 @@ public class HeaderBlockReader(Stream stream)
     internal static ExtendedVariableLengthRecord GetExtendedVariableLengthRecord(Stream stream, IEnumerable<VariableLengthRecord> records)
     {
         var position = stream.Position;
-        var byteArray = new byte[60];
-        _ = stream.Read(byteArray, 0, byteArray.Length);
+
+        var byteArray = System.Buffers.ArrayPool<byte>.Shared.Rent(60);
+        _ = stream.Read(byteArray.AsSpan(0, 60));
         var header = ExtendedVariableLengthRecordHeader.Create(byteArray);
 
-        byteArray = new byte[header.RecordLengthAfterHeader];
-        _ = stream.Read(byteArray, 0, byteArray.Length);
+        var recordLengthAfterHeader = (int)header.RecordLengthAfterHeader;
+        if (recordLengthAfterHeader is not 0)
+        {
+            if (recordLengthAfterHeader > byteArray.Length)
+            {
+                System.Buffers.ArrayPool<byte>.Shared.Return(byteArray);
+                byteArray = System.Buffers.ArrayPool<byte>.Shared.Rent(recordLengthAfterHeader);
+            }
 
-        return VariableLengthRecordProcessor.Instance.Process(header, records, position, byteArray);
+            _ = stream.Read(byteArray.AsSpan(0, recordLengthAfterHeader));
+        }
+
+        var vlr = VariableLengthRecordProcessor.Instance.Process(header, records, position, byteArray.AsSpan(0, recordLengthAfterHeader));
+
+        System.Buffers.ArrayPool<byte>.Shared.Return(byteArray);
+
+        return vlr;
+    }
+
+    /// <summary>
+    /// Gets the extended variable length record.
+    /// </summary>
+    /// <param name="stream">The stream.</param>
+    /// <param name="records">The variable length records.</param>
+    /// <param name="cancellationToken">The token to monitor for cancellation requests. The default value is <see cref="CancellationToken.None"/>.</param>
+    /// <returns>The next <see cref="ExtendedVariableLengthRecord"/>.</returns>
+    internal static async Task<ExtendedVariableLengthRecord> GetExtendedVariableLengthRecordAsync(Stream stream, IEnumerable<VariableLengthRecord> records, CancellationToken cancellationToken = default)
+    {
+        var position = stream.Position;
+
+        var byteArray = System.Buffers.ArrayPool<byte>.Shared.Rent(60);
+        _ = await stream.ReadAsync(byteArray.AsMemory(0, 60), cancellationToken).ConfigureAwait(false);
+        var header = ExtendedVariableLengthRecordHeader.Create(byteArray);
+
+        var recordLengthAfterHeader = (int)header.RecordLengthAfterHeader;
+        if (recordLengthAfterHeader is not 0)
+        {
+            if (recordLengthAfterHeader > byteArray.Length)
+            {
+                System.Buffers.ArrayPool<byte>.Shared.Return(byteArray);
+                byteArray = System.Buffers.ArrayPool<byte>.Shared.Rent(recordLengthAfterHeader);
+            }
+
+            _ = await stream.ReadAsync(byteArray.AsMemory(0, recordLengthAfterHeader), cancellationToken).ConfigureAwait(false);
+        }
+
+        var vlr = VariableLengthRecordProcessor.Instance.Process(header, records, position, byteArray.AsSpan(0, recordLengthAfterHeader));
+
+        System.Buffers.ArrayPool<byte>.Shared.Return(byteArray);
+
+        return vlr;
     }
 
     /// <summary>
@@ -234,26 +469,34 @@ public class HeaderBlockReader(Stream stream)
     /// <returns>The next <see cref="ExtendedVariableLengthRecord"/>.</returns>
     internal ExtendedVariableLengthRecord GetExtendedVariableLengthRecord(IEnumerable<VariableLengthRecord> records, long extendedVariableLengthRecordPosition)
     {
-        _ = this.MoveToExtendedVariableLengthRecords(extendedVariableLengthRecordPosition);
-        return GetExtendedVariableLengthRecord(stream, records);
+        if (stream.Position > extendedVariableLengthRecordPosition || this.MoveToExtendedVariableLengthRecords(extendedVariableLengthRecordPosition))
+        {
+            return GetExtendedVariableLengthRecord(stream, records);
+        }
+
+        throw new InvalidDataException("Failed to move to extended variable length records");
+    }
+
+    /// <summary>
+    /// Gets the extended variable length record.
+    /// </summary>
+    /// <param name="records">The variable length records.</param>
+    /// <param name="extendedVariableLengthRecordPosition">The start of the first extended variable length record.</param>
+    /// <param name="cancellationToken">The token to monitor for cancellation requests. The default value is <see cref="CancellationToken.None"/>.</param>
+    /// <returns>The next <see cref="ExtendedVariableLengthRecord"/>.</returns>
+    internal async Task<ExtendedVariableLengthRecord> GetExtendedVariableLengthRecordAsync(IEnumerable<VariableLengthRecord> records, long extendedVariableLengthRecordPosition, CancellationToken cancellationToken = default)
+    {
+        if (stream.Position > extendedVariableLengthRecordPosition || await this.MoveToExtendedVariableLengthRecordsAsync(extendedVariableLengthRecordPosition, cancellationToken).ConfigureAwait(false))
+        {
+            return await GetExtendedVariableLengthRecordAsync(stream, records, cancellationToken).ConfigureAwait(false);
+        }
+
+        throw new InvalidDataException("Failed to move to extended variable length records");
     }
 #endif
 
-#if NET8_0_OR_GREATER
-    [System.Diagnostics.CodeAnalysis.SuppressMessage("Performance", "CA1863:Use \'CompositeFormat\'", Justification = "This is for an exception")]
-#endif
-    private HeaderBlock GetHeaderBlockImpl(string fileSignature)
+    private static (HeaderBlockBuilder Builder, ushort HeaderSize) CreateHeaderBlockBuilder(ReadOnlySpan<byte> source)
     {
-        if (fileSignature is not "LASF")
-        {
-            throw new ArgumentException(string.Format(Properties.Resources.Culture, Properties.Resources.InvalidSignature, "LASF", fileSignature), nameof(fileSignature));
-        }
-
-        _ = stream.SwitchStreamIfMultiple(LasStreams.Header);
-        var byteArray = System.Buffers.ArrayPool<byte>.Shared.Rent(92);
-        _ = stream.Read(byteArray, 0, 92);
-        ReadOnlySpan<byte> source = byteArray;
-
         var builder = new HeaderBlockBuilder
         {
             FileSourceId = System.Buffers.Binary.BinaryPrimitives.ReadUInt16LittleEndian(source[..2]),
@@ -300,23 +543,16 @@ public class HeaderBlockReader(Stream stream)
             builder.FileCreation = fileCreation;
         }
 
-        this.headerSize = System.Buffers.Binary.BinaryPrimitives.ReadUInt16LittleEndian(source[90..92]);
+        return (builder, System.Buffers.Binary.BinaryPrimitives.ReadUInt16LittleEndian(source[90..92]));
+    }
 
-        // read the rest of the header
-        var bytesLeft = this.headerSize - 96;
-        if (byteArray.Length < bytesLeft)
-        {
-            System.Buffers.ArrayPool<byte>.Shared.Return(byteArray);
-            byteArray = System.Buffers.ArrayPool<byte>.Shared.Rent(bytesLeft);
-        }
-
-        _ = stream.Read(byteArray, 0, bytesLeft);
-        source = byteArray;
-
-        this.OffsetToPointData = System.Buffers.Binary.BinaryPrimitives.ReadUInt32LittleEndian(source[..4]);
-        this.VariableLengthRecordCount = System.Buffers.Binary.BinaryPrimitives.ReadUInt32LittleEndian(source[4..8]);
+    private static HeaderValues ReadRestOfHeader(HeaderBlockBuilder builder, ReadOnlySpan<byte> source, ushort headerSize)
+    {
+        var headerValues = new HeaderValues(
+            System.Buffers.Binary.BinaryPrimitives.ReadUInt32LittleEndian(source[..4]),
+            System.Buffers.Binary.BinaryPrimitives.ReadUInt32LittleEndian(source[4..8]),
+            System.Buffers.Binary.BinaryPrimitives.ReadUInt16LittleEndian(source[9..11]));
         builder.PointDataFormat = source[8];
-        this.PointDataLength = System.Buffers.Binary.BinaryPrimitives.ReadUInt16LittleEndian(source[9..11]);
 #if LAS1_4_OR_GREATER
         builder.LegacyNumberOfPointRecords = System.Buffers.Binary.BinaryPrimitives.ReadUInt32LittleEndian(source[11..15]);
 #else
@@ -351,20 +587,23 @@ public class HeaderBlockReader(Stream stream)
         builder.Min = new(minX, minY, minZ);
 
 #if LAS1_3_OR_GREATER
-        if (this.headerSize > HeaderBlock.Size10)
+        if (headerSize > HeaderBlock.Size10)
         {
-            this.startOfWaveformData = System.Buffers.Binary.BinaryPrimitives.ReadUInt64LittleEndian(source[131..139]);
+            headerValues = headerValues with { StartOfWaveformData = System.Buffers.Binary.BinaryPrimitives.ReadUInt64LittleEndian(source[131..139]) };
         }
 #endif
 
 #if LAS1_4_OR_GREATER
-        if (this.headerSize > HeaderBlock.Size13)
+        if (headerSize > HeaderBlock.Size13)
         {
-            this.startOfFirstExtendedVariableLengthRecord = System.Buffers.Binary.BinaryPrimitives.ReadUInt64LittleEndian(source[139..147]);
-            this.ExtendedVariableLengthRecordCount = System.Buffers.Binary.BinaryPrimitives.ReadUInt32LittleEndian(source[147..151]);
+            headerValues = headerValues with
+            {
+                StartOfFirstExtendedVariableLengthRecord = System.Buffers.Binary.BinaryPrimitives.ReadUInt64LittleEndian(source[139..147]),
+                ExtendedVariableLengthRecordCount = System.Buffers.Binary.BinaryPrimitives.ReadUInt32LittleEndian(source[147..151]),
+            };
         }
 
-        if (this.headerSize > HeaderBlock.Size13 + sizeof(ulong) + sizeof(uint))
+        if (headerSize > HeaderBlock.Size13 + sizeof(ulong) + sizeof(uint))
         {
             builder.NumberOfPointRecords = System.Buffers.Binary.BinaryPrimitives.ReadUInt64LittleEndian(source[151..159]);
             for (var i = 0; i < 15; i++)
@@ -385,7 +624,7 @@ public class HeaderBlockReader(Stream stream)
 #endif
 
 #if LAS1_5_OR_GREATER
-        if (this.headerSize > HeaderBlock.Size15)
+        if (headerSize > HeaderBlock.Size15)
         {
             builder.MaxGpsTime = System.Buffers.Binary.BinaryPrimitives.ReadDoubleLittleEndian(source[279..287]);
             builder.MinGpsTime = System.Buffers.Binary.BinaryPrimitives.ReadDoubleLittleEndian(source[287..295]);
@@ -393,8 +632,123 @@ public class HeaderBlockReader(Stream stream)
         }
 #endif
 
+        return headerValues;
+    }
+
+#if NET8_0_OR_GREATER
+    [System.Diagnostics.CodeAnalysis.SuppressMessage("Performance", "CA1863:Use \'CompositeFormat\'", Justification = "This is for an exception")]
+#endif
+    private HeaderBlock GetHeaderBlockImpl(string fileSignature)
+    {
+        if (fileSignature is not "LASF")
+        {
+            throw new ArgumentException(string.Format(Properties.Resources.Culture, Properties.Resources.InvalidSignature, "LASF", fileSignature), nameof(fileSignature));
+        }
+
+        _ = stream.SwitchStreamIfMultiple(LasStreams.Header);
+        var byteArray = System.Buffers.ArrayPool<byte>.Shared.Rent(92);
+        var bytesRead = stream.Read(byteArray, 0, 92);
+
+        (var builder, this.headerSize) = CreateHeaderBlockBuilder(byteArray.AsSpan(0, bytesRead));
+
+        // read the rest of the header
+        var bytesLeft = this.headerSize - 96;
+        if (byteArray.Length < bytesLeft)
+        {
+            System.Buffers.ArrayPool<byte>.Shared.Return(byteArray);
+            byteArray = System.Buffers.ArrayPool<byte>.Shared.Rent(bytesLeft);
+        }
+
+        bytesRead = stream.Read(byteArray, 0, bytesLeft);
+
+        var headerValues = ReadRestOfHeader(builder, byteArray.AsSpan(0, bytesRead), this.headerSize);
+
+        this.OffsetToPointData = headerValues.OffsetToPointData;
+        this.VariableLengthRecordCount = headerValues.VariableLengthRecordCount;
+        this.PointDataLength = headerValues.PointDataLength;
+
+#if LAS1_3_OR_GREATER
+        this.startOfWaveformData = headerValues.StartOfWaveformData;
+#endif
+
+#if LAS1_4_OR_GREATER
+        this.startOfFirstExtendedVariableLengthRecord = headerValues.StartOfFirstExtendedVariableLengthRecord;
+        this.ExtendedVariableLengthRecordCount = headerValues.ExtendedVariableLengthRecordCount;
+#endif
+
         System.Buffers.ArrayPool<byte>.Shared.Return(byteArray);
 
         return builder.HeaderBlock;
+    }
+
+#if NET8_0_OR_GREATER
+    [System.Diagnostics.CodeAnalysis.SuppressMessage("Performance", "CA1863:Use \'CompositeFormat\'", Justification = "This is for an exception")]
+#endif
+    private async Task<HeaderBlock> GetHeaderBlockImplAsync(string fileSignature, CancellationToken cancellationToken)
+    {
+        if (fileSignature is not "LASF")
+        {
+            throw new ArgumentException(string.Format(Properties.Resources.Culture, Properties.Resources.InvalidSignature, "LASF", fileSignature), nameof(fileSignature));
+        }
+
+        _ = stream.SwitchStreamIfMultiple(LasStreams.Header);
+        var byteArray = System.Buffers.ArrayPool<byte>.Shared.Rent(92);
+        var bytesRead = await stream.ReadAsync(byteArray.AsMemory(0, 92), cancellationToken).ConfigureAwait(false);
+
+        (var builder, this.headerSize) = CreateHeaderBlockBuilder(byteArray.AsSpan(0, bytesRead));
+
+        // read the rest of the header
+        var bytesLeft = this.headerSize - 96;
+        if (byteArray.Length < bytesLeft)
+        {
+            System.Buffers.ArrayPool<byte>.Shared.Return(byteArray);
+            byteArray = System.Buffers.ArrayPool<byte>.Shared.Rent(bytesLeft);
+        }
+
+        bytesRead = await stream.ReadAsync(byteArray.AsMemory(0, bytesLeft), cancellationToken).ConfigureAwait(false);
+
+        var headerValues = ReadRestOfHeader(builder, byteArray.AsSpan(0, bytesRead), this.headerSize);
+
+        this.OffsetToPointData = headerValues.OffsetToPointData;
+        this.VariableLengthRecordCount = headerValues.VariableLengthRecordCount;
+        this.PointDataLength = headerValues.PointDataLength;
+
+#if LAS1_3_OR_GREATER
+        this.startOfWaveformData = headerValues.StartOfWaveformData;
+#endif
+
+#if LAS1_4_OR_GREATER
+        this.startOfFirstExtendedVariableLengthRecord = headerValues.StartOfFirstExtendedVariableLengthRecord;
+        this.ExtendedVariableLengthRecordCount = headerValues.ExtendedVariableLengthRecordCount;
+#endif
+
+        System.Buffers.ArrayPool<byte>.Shared.Return(byteArray);
+
+        return builder.HeaderBlock;
+    }
+
+    private void ThrowIfNotInitialized()
+    {
+        if (this.headerSize is 0)
+        {
+            // need to call GetHeaderBlock first
+            throw new InvalidOperationException($"header size not initialized. {nameof(this.GetHeaderBlock)} or {nameof(this.GetHeaderBlockAsync)} must be called first");
+        }
+    }
+
+    private bool IsInVariableLengthRecords() => stream.Position >= this.headerSize && stream.Position < this.OffsetToPointData;
+
+    [System.Runtime.InteropServices.StructLayout(System.Runtime.InteropServices.LayoutKind.Auto)]
+    private readonly record struct HeaderValues(uint OffsetToPointData, uint VariableLengthRecordCount, ushort PointDataLength)
+    {
+#if LAS1_3_OR_GREATER
+        public ulong StartOfWaveformData { get; init; }
+#endif
+
+#if LAS1_4_OR_GREATER
+        public ulong StartOfFirstExtendedVariableLengthRecord { get; init; }
+
+        public uint ExtendedVariableLengthRecordCount { get; init; }
+#endif
     }
 }
