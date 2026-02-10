@@ -1,13 +1,18 @@
 <Project>
 
+  <ItemGroup Condition=" '$(IsTestProject)' == 'true' ">
+    <PackageReference Include="TUnit" />
+  </ItemGroup>
+
   <Choose>
     <When Condition=" '$([MSBuild]::GetTargetFrameworkIdentifier($(TargetFramework)))' == '.NETFramework' ">
       <PropertyGroup>
         <EnableTUnitPolyfills>false</EnableTUnitPolyfills>
+        <MeziantouPolyfill_IncludedPolyfills>$(MeziantouPolyfill_IncludedPolyfills)|T:System.Runtime.CompilerServices.ModuleInitializerAttribute</MeziantouPolyfill_IncludedPolyfills>
       </PropertyGroup>
 
       <ItemGroup>
-        <PackageReference Include="Polyfill">
+        <PackageReference Include="Meziantou.Polyfill">
           <PrivateAssets>all</PrivateAssets>
           <IncludeAssets>runtime; build; native; contentfiles; analyzers</IncludeAssets>
         </PackageReference>

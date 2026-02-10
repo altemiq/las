@@ -10,7 +10,7 @@ public class LasReaderIntegrationTests
     [Arguments("/las/asuf.las", false)]
     public async Task LasExists(string path, bool expected)
     {
-        await Assert.That(HttpLas.Exists(path, this.WebApplicationFactory.CreateClient())).IsEqualTo(expected);
+        await Assert.That(() => HttpLas.Exists(path, this.WebApplicationFactory.CreateClient())).IsEqualTo(expected);
     }
 
     [Test]

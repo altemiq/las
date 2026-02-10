@@ -3,21 +3,36 @@
   <PropertyGroup>
     <TargetFrameworks>net10.0;net9.0;net8.0</TargetFrameworks>
     <TargetFrameworks Condition=" '$(NetCoreOnly)' != 'true' ">$(TargetFrameworks);net472</TargetFrameworks>
+    <MeziantouPolyfill_IncludedPolyfills>
+      $(MeziantouPolyfill_IncludedPolyfills)|
+      M:System.IO.Stream.ReadAsync(System.Memory{System.Byte},System.Threading.CancellationToken)|
+      M:System.IO.Stream.WriteAsync(System.ReadOnlyMemory{System.Byte},System.Threading.CancellationToken)|
+      T:System.Diagnostics.CodeAnalysis.DoesNotReturnAttribute|
+      T:System.Diagnostics.CodeAnalysis.NotNullWhenAttribute|
+      T:System.Index|
+      T:System.Runtime.CompilerServices.CompilerFeatureRequiredAttribute|
+      T:System.Runtime.CompilerServices.IsExternalInit|
+      T:System.Runtime.CompilerServices.RequiredMemberAttribute|
+    </MeziantouPolyfill_IncludedPolyfills>
   </PropertyGroup>
-
-  <ItemGroup>
-    <PackageReference Include="TUnit" />
-  </ItemGroup>
 
   <ItemGroup>
     <EmbeddedResource Include="..\..\data\*\fusa.*">
       <Link>Data\%(RecursiveDir)%(Filename)%(Extension)</Link>
     </EmbeddedResource>
   </ItemGroup>
+  
+  <ItemGroup>
+    <PackageReference Include="Microsoft.AspNetCore.Server.Kestrel" />
+  </ItemGroup>
 
   <ItemGroup>
     <ProjectReference Include="..\..\src\IO.Las.Compression\IO.Las.Compression.csproj" />
     <ProjectReference Include="..\..\src\IO.Las.Http\IO.Las.Http.csproj" />
+  </ItemGroup>
+
+  <ItemGroup Condition=" $([MSBuild]::IsTargetFrameworkCompatible('$(TargetFramework)', 'net40')) ">
+    <Using Include="System.Net.Http" />
   </ItemGroup>
   
   <ItemGroup>

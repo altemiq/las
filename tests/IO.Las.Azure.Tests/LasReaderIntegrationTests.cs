@@ -10,7 +10,7 @@ public class LasReaderIntegrationTests
     [Arguments("las/asuf.las", false)]
     public async Task LasExists(string blobName, bool expected)
     {
-        await Assert.That(BlobLas.Exists(blobName, this.BlobContainerClientData.BlobContainerClient)).IsEqualTo(expected);
+        await Assert.That(() => BlobLas.Exists(blobName, this.BlobContainerClientData.BlobContainerClient)).IsEqualTo(expected);
     }
 
     [Test]

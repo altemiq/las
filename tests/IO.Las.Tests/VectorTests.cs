@@ -1,3 +1,4 @@
+#if NETCOREAPP3_0_OR_GREATER
 namespace Altemiq.IO.Las;
 
 using System.Runtime.Intrinsics;
@@ -13,3 +14,4 @@ public class VectorTests
                 Vector256.Create(123.0, 234.0, 345.0, 456.0));
     }
 }
+#endif

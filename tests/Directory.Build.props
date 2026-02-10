@@ -5,6 +5,8 @@
     <AssemblyName>$(Company).$(MSBuildProjectName)</AssemblyName>
     <RootNamespace>$(AssemblyName.Replace('.Tests', ''))</RootNamespace>
 
+    <IsTestProject>true</IsTestProject>
+
     <OutputType>Exe</OutputType>
 
     <LangVersion>latest</LangVersion>

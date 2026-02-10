@@ -10,7 +10,7 @@ public class LasReaderIntegrationTests
     [Arguments("lidar", "las/asuf.las", false)]
     public async Task LasExists(string bucketName, string blobName, bool expected)
     {
-        await Assert.That(S3Las.Exists(bucketName, blobName, this.S3ClientData.S3Client)).IsEqualTo(expected);
+        await Assert.That(() => S3Las.Exists(bucketName, blobName, this.S3ClientData.S3Client)).IsEqualTo(expected);
     }
 
     [Test]

@@ -10,7 +10,7 @@ public class LazReaderIntegrationTests
     [Arguments("/laz/asuf.laz", false)]
     public async Task LazExists(string path, bool expected)
     {
-        await Assert.That(HttpLas.Exists(path, this.WebApplicationFactory.CreateClient())).IsEqualTo(expected);
+        await Assert.That(() => HttpLas.Exists(path, this.WebApplicationFactory.CreateClient())).IsEqualTo(expected);
     }
 
     [Test]

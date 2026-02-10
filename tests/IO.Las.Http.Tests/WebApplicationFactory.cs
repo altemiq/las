@@ -1,18 +1,21 @@
 namespace Altemiq.IO.Las.Http;
 
+using Microsoft.AspNetCore.Http;
+using Microsoft.Extensions.Logging;
+
 public class WebApplicationFactory : TUnit.Core.Interfaces.IAsyncInitializer, IAsyncDisposable
 {
     private static readonly int Port = GetPort();
 
     private static readonly string Url = $"{Uri.UriSchemeHttp}://localhost:{Port}/";
+    
+    private static readonly ILoggerFactory LoggerFactory = new Microsoft.Extensions.Logging.Abstractions.NullLoggerFactory();
 
     private readonly HttpClient client = new() { BaseAddress = new(Url) };
 
-    private readonly HttpListener listener = new();
+    private readonly Microsoft.AspNetCore.Server.Kestrel.Core.KestrelServer server = new(GetKestrelServerOptions(), GetSocketTransportFactory(LoggerFactory), LoggerFactory);
 
     private readonly CancellationTokenSource cts = new();
-
-    private Task listenerTask;
 
     private bool disposed;
 
@@ -20,79 +23,120 @@ public class WebApplicationFactory : TUnit.Core.Interfaces.IAsyncInitializer, IA
 
     public Task InitializeAsync()
     {
-        this.listener.Prefixes.Add($"{Uri.UriSchemeHttp}://*:{Port}/");
-        this.listener.Start();
+        return this.server.StartAsync(new SimpleHttpApplication(), this.cts.Token);
+    }
 
-        this.listenerTask = Task.Run(() =>
+    public async ValueTask DisposeAsync()
+    {
+        if (this.disposed)
         {
-            var cancellationToken = this.cts.Token;
-            while (!cancellationToken.IsCancellationRequested)
+            return;
+        }
+
+        this.disposed = true;
+        await this.server.StopAsync(CancellationToken.None).ConfigureAwait(false);
+        
+#if NET8_0_OR_GREATER
+        await this.cts.CancelAsync();
+#else
+        this.cts.Cancel();
+#endif
+
+        GC.SuppressFinalize(this);
+    }
+
+    private static int GetPort()
+    {
+        var random = new Random((int)DateTime.UtcNow.Ticks);
+        return random.Next(25000, 30000);
+    }
+
+    private static Microsoft.Extensions.Options.OptionsWrapper<Microsoft.AspNetCore.Server.Kestrel.Core.KestrelServerOptions> GetKestrelServerOptions()
+    {
+        var kestrelServerOptions = new Microsoft.AspNetCore.Server.Kestrel.Core.KestrelServerOptions
+        {
+            Limits =
             {
-                try
+                MaxRequestBodySize = int.MaxValue,
+                MaxConcurrentConnections = 20,
+            },
+        };
+
+        kestrelServerOptions.ListenAnyIP(Port);
+
+        return new(kestrelServerOptions);
+    }
+
+    private static Microsoft.AspNetCore.Server.Kestrel.Transport.Sockets.SocketTransportFactory GetSocketTransportFactory(ILoggerFactory loggerFactory)
+    {
+        var transportOptions = new Microsoft.Extensions.Options.OptionsWrapper<Microsoft.AspNetCore.Server.Kestrel.Transport.Sockets.SocketTransportOptions>(new());
+        var applicationLifetime = new Microsoft.AspNetCore.Hosting.Internal.ApplicationLifetime(loggerFactory.CreateLogger<Microsoft.AspNetCore.Hosting.Internal.ApplicationLifetime>());
+        
+        return new(transportOptions, applicationLifetime, loggerFactory);
+    }
+
+    private class SimpleHttpApplication : Microsoft.AspNetCore.Hosting.Server.IHttpApplication<HttpContext>
+    {
+        public HttpContext CreateContext(Microsoft.AspNetCore.Http.Features.IFeatureCollection contextFeatures)
+        {
+            return new DefaultHttpContext(contextFeatures);
+        }
+
+        public async Task ProcessRequestAsync(HttpContext context)
+        {
+            context.Response.Headers.Append("Accept-Ranges", "bytes");
+
+            if (context.Request.Path is { HasValue: false })
+            {
+                context.Response.StatusCode = (int)HttpStatusCode.BadRequest;
+            }
+            else
+            {
+                var urlPath = context.Request.Path.Value!.TrimStart('/');
+
+                var manifestPath = $"{typeof(WebApplicationFactory).Namespace}.Data.{urlPath.Replace('/', '.')}";
+                if (typeof(WebApplicationFactory).Assembly.GetManifestResourceStream(manifestPath) is { } manifestResourceStream)
                 {
-                    var context = this.listener.GetContext();
-
-                    // say that we accept ranges
-                    context.Response.Headers.Add("Accept-Ranges", "bytes");
-
-                    if (context.Request.Url is not { } url)
+#if NETSTANDARD2_1_OR_GREATER || NETCOREAPP3_0_OR_GREATER
+                    await
+#endif
+                    using (manifestResourceStream)
                     {
-                        context.Response.StatusCode = (int)HttpStatusCode.BadRequest;
-                    }
-                    else
-                    {
-                        var urlPath = System.Web.HttpUtility.UrlDecode(url.AbsolutePath.TrimStart('/'));
 
-                        var manifestPath = $"{typeof(WebApplicationFactory).Namespace}.Data.{urlPath.Replace('/', '.')}";
-                        if (typeof(WebApplicationFactory).Assembly.GetManifestResourceStream(manifestPath) is { } manifestResourceStream)
+                        if (context.Request.Method == HttpMethod.Head.Method)
                         {
-                            using (manifestResourceStream)
+                            // just return the length
+                            context.Response.ContentLength = manifestResourceStream.Length;
+                            context.Response.ContentType = GetMimeType(urlPath);
+                            return;
+                        }
+
+                        var byteRange = manifestResourceStream.Length;
+                        if (context.Request.Headers.TryGetValue("Range", out var rangeValues)
+                            && rangeValues is [{} rangeValue, ..])
+                        {
+                            var range = rangeValue.Replace("bytes=", "").Split('-');
+                            var startByte = int.Parse(range[0]);
+                            if (string.IsNullOrEmpty(range[1].Trim()) || !long.TryParse(range[1], out var endByte))
                             {
-                                if (context.Request.HttpMethod == HttpMethod.Head.Method)
-                                {
-                                    // just return the length
-                                    context.Response.ContentLength64 = manifestResourceStream.Length;
-                                    context.Response.ContentType = GetMimeType(urlPath);
-                                    context.Response.OutputStream.Close();
-                                    continue;
-                                }
-
-                                var byteRange = manifestResourceStream.Length;
-                                if (context.Request.Headers.GetValues("Range") is { } rangeValues)
-                                {
-                                    var range = rangeValues[0].Replace("bytes=", "").Split('-');
-                                    var startByte = int.Parse(range[0]);
-                                    if (string.IsNullOrEmpty(range[1].Trim()) || !long.TryParse(range[1], out var endByte))
-                                    {
-                                        endByte = manifestResourceStream.Length - 1;
-                                    }
-
-                                    byteRange = endByte - startByte + 1;
-                                    manifestResourceStream.Seek(startByte, SeekOrigin.Begin);
-                                    context.Response.Headers.Add("Content-Range", $"bytes {startByte}-{byteRange - 1}/{byteRange}");
-                                }
-
-                                byte[] buffer = new byte[byteRange];
-                                var read = manifestResourceStream.Read(buffer, 0, buffer.Length);
-                                context.Response.ContentType = GetMimeType(urlPath);
-                                context.Response.ContentLength64 = read;
-                                context.Response.OutputStream.Write(buffer, 0, read);
+                                endByte = manifestResourceStream.Length - 1;
                             }
-                        }
-                        else
-                        {
-                            context.Response.StatusCode = (int)HttpStatusCode.NotFound;
-                        }
-                    }
 
-                    context.Response.OutputStream.Close();
-                }
-                catch (Exception)
-                {
-                    if (!cancellationToken.IsCancellationRequested)
-                    {
-                        throw;
+                            byteRange = endByte - startByte + 1;
+                            manifestResourceStream.Seek(startByte, SeekOrigin.Begin);
+                            context.Response.Headers.Append("Content-Range", $"bytes {startByte}-{byteRange - 1}/{byteRange}");
+                        }
+
+                        byte[] buffer = new byte[byteRange];
+                        var read = await manifestResourceStream.ReadAsync(buffer.AsMemory(0, buffer.Length));
+                        context.Response.ContentType = GetMimeType(urlPath);
+                        context.Response.ContentLength = read;
+                        await context.Response.Body.WriteAsync(buffer.AsMemory(0, read));
                     }
+                }
+                else
+                {
+                    context.Response.StatusCode = (int)HttpStatusCode.NotFound;
                 }
             }
 
@@ -113,33 +157,10 @@ public class WebApplicationFactory : TUnit.Core.Interfaces.IAsyncInitializer, IA
                     _ => "application/octet-stream",
                 };
             }
-        });
-
-        return Task.CompletedTask;
-    }
-
-    public async ValueTask DisposeAsync()
-    {
-        if (this.disposed)
-        {
-            return;
         }
 
-        this.disposed = true;
-        await this.cts.CancelAsync();
-        this.listener.Stop();
-        if (this.listenerTask is { } t)
+        public void DisposeContext(HttpContext context, Exception exception)
         {
-            await t.WaitAsync(CancellationToken.None);
-            t.Dispose();
         }
-
-        GC.SuppressFinalize(this);
-    }
-
-    private static int GetPort()
-    {
-        var random = new Random((int)DateTime.UtcNow.Ticks);
-        return random.Next(25000, 30000);
     }
 }

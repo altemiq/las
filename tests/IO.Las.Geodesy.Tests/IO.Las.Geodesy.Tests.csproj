@@ -3,11 +3,20 @@
   <PropertyGroup>
     <TargetFrameworks>net10.0;net9.0;net8.0</TargetFrameworks>
     <TargetFrameworks Condition=" '$(NetCoreOnly)' != 'true' ">$(TargetFrameworks);net472</TargetFrameworks>
+    <MeziantouPolyfill_IncludedPolyfills>
+      $(MeziantouPolyfill_IncludedPolyfills)|
+      T:System.Diagnostics.UnreachableException|
+    </MeziantouPolyfill_IncludedPolyfills>
+  </PropertyGroup>
+  
+  <!-- Set the platform if required -->
+  <PropertyGroup Condition=" $([MSBuild]::IsTargetFrameworkCompatible('$(TargetFramework)', 'net40')) ">
+    <_Platform>$([System.Runtime.InteropServices.RuntimeInformation]::ProcessArchitecture)</_Platform>
+    <Platform>$(_Platform.ToLower())</Platform>
   </PropertyGroup>
 
   <ItemGroup>
     <PackageReference Include="Microsoft.Data.Sqlite" />
-    <PackageReference Include="TUnit" />
   </ItemGroup>
 
   <ItemGroup>

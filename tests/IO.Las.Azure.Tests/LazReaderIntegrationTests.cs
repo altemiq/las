@@ -10,7 +10,7 @@ public class LazReaderIntegrationTests
     [Arguments("laz/asuf.laz", false)]
     public async Task LazExists(string blobName, bool expected)
     {
-        await Assert.That(BlobLas.Exists(blobName, this.BlobContainerClientData.BlobContainerClient)).IsEqualTo(expected);
+        await Assert.That(() => BlobLas.Exists(blobName, this.BlobContainerClientData.BlobContainerClient)).IsEqualTo(expected);
     }
 
     [Test]

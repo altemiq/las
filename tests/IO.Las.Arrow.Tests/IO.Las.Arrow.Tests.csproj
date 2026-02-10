@@ -5,10 +5,6 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="TUnit" />
-  </ItemGroup>
-
-  <ItemGroup>
     <ProjectReference Include="..\..\src\IO.Las.Arrow\IO.Las.Arrow.csproj" />
   </ItemGroup>
 
