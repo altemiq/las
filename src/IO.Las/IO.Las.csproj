@@ -147,10 +147,25 @@
   </ItemGroup>
 
   <Target Name="_DownloadStandardSystemIdentifiers" BeforeTargets="CoreCompile">
-    <DownloadFile SourceUrl="https://github.com/ASPRSorg/LAS/wiki/attachments/platforms.csv" DestinationFolder="$(IntermediateOutputPath)" SkipUnchangedFiles="true">
+    <ItemGroup Condition=" Exists('$(IntermediateOutputPath)\platforms.csv') ">
+      <AdditionalFiles Include="$(IntermediateOutputPath)\platforms.csv" />
+    </ItemGroup>
+    <DownloadFile SourceUrl="https://github.com/ASPRSorg/LAS/wiki/attachments/platforms.csv"
+                  Condition=" !Exists('$(IntermediateOutputPath)\platforms.csv') "
+                  DestinationFileName="platforms.csv"
+                  DestinationFolder="$(IntermediateOutputPath)"
+                  SkipUnchangedFiles="true">
       <Output TaskParameter="DownloadedFile" ItemName="AdditionalFiles"/>
     </DownloadFile>
-    <DownloadFile SourceUrl="https://github.com/ASPRSorg/LAS/wiki/attachments/models.csv" DestinationFolder="$(IntermediateOutputPath)" SkipUnchangedFiles="true">
+    
+    <ItemGroup Condition=" Exists('$(IntermediateOutputPath)\models.csv') ">
+      <AdditionalFiles Include="$(IntermediateOutputPath)\models.csv" />
+    </ItemGroup>
+    <DownloadFile SourceUrl="https://github.com/ASPRSorg/LAS/wiki/attachments/models.csv"
+                  Condition=" !Exists('$(IntermediateOutputPath)\models.csv') "
+                  DestinationFileName="models.csv"
+                  DestinationFolder="$(IntermediateOutputPath)"
+                  SkipUnchangedFiles="true">
       <Output TaskParameter="DownloadedFile" ItemName="AdditionalFiles"/>
     </DownloadFile>
   </Target>
