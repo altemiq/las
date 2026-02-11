@@ -8,7 +8,7 @@ public class WebApplicationFactory : TUnit.Core.Interfaces.IAsyncInitializer, IA
     private static readonly int Port = GetPort();
 
     private static readonly string Url = $"{Uri.UriSchemeHttp}://localhost:{Port}/";
-    
+
     private static readonly ILoggerFactory LoggerFactory = new Microsoft.Extensions.Logging.Abstractions.NullLoggerFactory();
 
     private readonly HttpClient client = new() { BaseAddress = new(Url) };
@@ -35,7 +35,7 @@ public class WebApplicationFactory : TUnit.Core.Interfaces.IAsyncInitializer, IA
 
         this.disposed = true;
         await this.server.StopAsync(CancellationToken.None).ConfigureAwait(false);
-        
+
 #if NET8_0_OR_GREATER
         await this.cts.CancelAsync();
 #else
@@ -71,7 +71,7 @@ public class WebApplicationFactory : TUnit.Core.Interfaces.IAsyncInitializer, IA
     {
         var transportOptions = new Microsoft.Extensions.Options.OptionsWrapper<Microsoft.AspNetCore.Server.Kestrel.Transport.Sockets.SocketTransportOptions>(new());
         var applicationLifetime = new Microsoft.AspNetCore.Hosting.Internal.ApplicationLifetime(loggerFactory.CreateLogger<Microsoft.AspNetCore.Hosting.Internal.ApplicationLifetime>());
-        
+
         return new(transportOptions, applicationLifetime, loggerFactory);
     }
 
@@ -113,7 +113,7 @@ public class WebApplicationFactory : TUnit.Core.Interfaces.IAsyncInitializer, IA
 
                         var byteRange = manifestResourceStream.Length;
                         if (context.Request.Headers.TryGetValue("Range", out var rangeValues)
-                            && rangeValues is [{} rangeValue, ..])
+                            && rangeValues is [{ } rangeValue, ..])
                         {
                             var range = rangeValue.Replace("bytes=", "").Split('-');
                             var startByte = int.Parse(range[0]);

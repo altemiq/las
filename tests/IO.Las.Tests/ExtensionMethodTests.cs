@@ -6,50 +6,50 @@ public class ExtensionMethodTests
     public async Task MoveToUnseekableForwardsOnly()
     {
         var stream = new UnseekableStream();
-        
+
         await Assert.That(() => stream.MoveToPositionForwardsOnly(500)).ThrowsNothing();
         await Assert.That(() => stream.MoveToPositionForwardsOnly(400)).ThrowsNothing();
         await Assert.That(stream.Position).IsEqualTo(500);
     }
-    
+
     [Test]
     public async Task MoveToUnseekableForwardsOnlyAsync()
     {
         var stream = new UnseekableStream();
-        
+
         await Assert.That(async () => await stream.MoveToPositionForwardsOnlyAsync(500)).ThrowsNothing();
         await Assert.That(async () => await stream.MoveToPositionForwardsOnlyAsync(400)).ThrowsNothing();
         await Assert.That(stream.Position).IsEqualTo(500);
     }
-    
+
     [Test]
     public async Task MoveToUnseekableAbsolute()
     {
         var stream = new UnseekableStream();
-        
+
         await Assert.That(() => stream.MoveToPositionAbsolute(500)).ThrowsNothing();
         await Assert.That(() => stream.MoveToPositionAbsolute(400)).Throws<InvalidOperationException>();
         await Assert.That(stream.Position).IsEqualTo(500);
     }
-    
+
     [Test]
     public async Task MoveToUnseekableAbsoluteAsync()
     {
         var stream = new UnseekableStream();
-        
+
         await Assert.That(async () => await stream.MoveToPositionAbsoluteAsync(500)).ThrowsNothing();
         await Assert.That(async () => await stream.MoveToPositionAbsoluteAsync(400)).Throws<InvalidOperationException>();
         await Assert.That(stream.Position).IsEqualTo(500);
     }
-    
-    
+
+
     private sealed class UnseekableStream(Stream stream) : Stream
     {
         public UnseekableStream()
             : this(CreateAndFillStream(1024))
         {
         }
-        
+
         public override void Flush() => stream.Flush();
 
         public override int Read(byte[] buffer, int offset, int count) => stream.Read(buffer, offset, count);
@@ -80,7 +80,7 @@ public class ExtensionMethodTests
             {
                 stream.Dispose();
             }
-            
+
             base.Dispose(disposing);
         }
 
