@@ -546,7 +546,11 @@ public class HeaderBlockReader(Stream stream)
         return (builder, System.Buffers.Binary.BinaryPrimitives.ReadUInt16LittleEndian(source[90..92]));
     }
 
+#if LAS1_3_OR_GREATER
     private static HeaderValues ReadRestOfHeader(HeaderBlockBuilder builder, ReadOnlySpan<byte> source, ushort headerSize)
+#else
+    private static HeaderValues ReadRestOfHeader(HeaderBlockBuilder builder, ReadOnlySpan<byte> source)
+#endif
     {
         var headerValues = new HeaderValues(
             System.Buffers.Binary.BinaryPrimitives.ReadUInt32LittleEndian(source[..4]),
@@ -661,7 +665,12 @@ public class HeaderBlockReader(Stream stream)
 
         bytesRead = stream.Read(byteArray, 0, bytesLeft);
 
-        var headerValues = ReadRestOfHeader(builder, byteArray.AsSpan(0, bytesRead), this.headerSize);
+        var headerValues =
+#if LAS1_3_OR_GREATER
+            ReadRestOfHeader(builder, byteArray.AsSpan(0, bytesRead), this.headerSize);
+#else
+            ReadRestOfHeader(builder, byteArray.AsSpan(0, bytesRead));
+#endif
 
         this.OffsetToPointData = headerValues.OffsetToPointData;
         this.VariableLengthRecordCount = headerValues.VariableLengthRecordCount;
@@ -707,7 +716,12 @@ public class HeaderBlockReader(Stream stream)
 
         bytesRead = await stream.ReadAsync(byteArray.AsMemory(0, bytesLeft), cancellationToken).ConfigureAwait(false);
 
-        var headerValues = ReadRestOfHeader(builder, byteArray.AsSpan(0, bytesRead), this.headerSize);
+        var headerValues =
+#if LAS1_3_OR_GREATER
+            ReadRestOfHeader(builder, byteArray.AsSpan(0, bytesRead), this.headerSize);
+#else
+            ReadRestOfHeader(builder, byteArray.AsSpan(0, bytesRead));
+#endif
 
         this.OffsetToPointData = headerValues.OffsetToPointData;
         this.VariableLengthRecordCount = headerValues.VariableLengthRecordCount;
