@@ -137,6 +137,10 @@ public sealed class LazReader : LasReader, ILazReader
     protected override bool MoveToPoint(ulong current, ulong target)
         => this.pointReader.MoveToPoint(this.BaseStream, current, target);
 
+    /// <inheritdoc/>
+    protected override ValueTask<bool> MoveToPointAsync(ulong current, ulong target, CancellationToken cancellationToken = default)
+        => this.pointReader.MoveToPointAsync(this.BaseStream, current, target, cancellationToken);
+
     private static Stream CreateStream(string path) => path switch
     {
         not null when File.Exists(path) => File.OpenRead(path),

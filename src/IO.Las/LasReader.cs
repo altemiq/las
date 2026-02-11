@@ -441,7 +441,7 @@ public class LasReader :
     /// <param name="target">The target point index.</param>
     /// <param name="cancellationToken">The token to monitor for cancellation requests. The default value is <see cref="CancellationToken.None"/>.</param>
     /// <returns><see langword="true"/> if the reader is now at <paramref name="target"/>; otherwise <see langword="false"/>.</returns>
-    protected virtual async Task<bool> MoveToPointAsync(ulong current, ulong target, CancellationToken cancellationToken = default)
+    protected virtual async ValueTask<bool> MoveToPointAsync(ulong current, ulong target, CancellationToken cancellationToken = default)
     {
         // get the position of the point
         var pointPosition = (long)(this.offsetToPointData + (target * this.pointDataLength));
