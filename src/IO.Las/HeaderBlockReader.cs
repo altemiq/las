@@ -467,15 +467,10 @@ public class HeaderBlockReader(Stream stream)
     /// <param name="records">The variable length records.</param>
     /// <param name="extendedVariableLengthRecordPosition">The start of the first extended variable length record.</param>
     /// <returns>The next <see cref="ExtendedVariableLengthRecord"/>.</returns>
-    internal ExtendedVariableLengthRecord GetExtendedVariableLengthRecord(IEnumerable<VariableLengthRecord> records, long extendedVariableLengthRecordPosition)
-    {
-        if (stream.Position > extendedVariableLengthRecordPosition || this.MoveToExtendedVariableLengthRecords(extendedVariableLengthRecordPosition))
-        {
-            return GetExtendedVariableLengthRecord(stream, records);
-        }
-
-        throw new InvalidDataException("Failed to move to extended variable length records");
-    }
+    internal ExtendedVariableLengthRecord GetExtendedVariableLengthRecord(IEnumerable<VariableLengthRecord> records, long extendedVariableLengthRecordPosition) =>
+        this.IsInExtendedVariableLengthRecords(extendedVariableLengthRecordPosition) || this.MoveToExtendedVariableLengthRecords(extendedVariableLengthRecordPosition)
+            ? GetExtendedVariableLengthRecord(stream, records)
+            : throw new InvalidDataException("Failed to move to extended variable length records");
 
     /// <summary>
     /// Gets the extended variable length record.
@@ -484,15 +479,10 @@ public class HeaderBlockReader(Stream stream)
     /// <param name="extendedVariableLengthRecordPosition">The start of the first extended variable length record.</param>
     /// <param name="cancellationToken">The token to monitor for cancellation requests. The default value is <see cref="CancellationToken.None"/>.</param>
     /// <returns>The next <see cref="ExtendedVariableLengthRecord"/>.</returns>
-    internal async Task<ExtendedVariableLengthRecord> GetExtendedVariableLengthRecordAsync(IEnumerable<VariableLengthRecord> records, long extendedVariableLengthRecordPosition, CancellationToken cancellationToken = default)
-    {
-        if (stream.Position > extendedVariableLengthRecordPosition || await this.MoveToExtendedVariableLengthRecordsAsync(extendedVariableLengthRecordPosition, cancellationToken).ConfigureAwait(false))
-        {
-            return await GetExtendedVariableLengthRecordAsync(stream, records, cancellationToken).ConfigureAwait(false);
-        }
-
-        throw new InvalidDataException("Failed to move to extended variable length records");
-    }
+    internal async Task<ExtendedVariableLengthRecord> GetExtendedVariableLengthRecordAsync(IEnumerable<VariableLengthRecord> records, long extendedVariableLengthRecordPosition, CancellationToken cancellationToken = default) =>
+        this.IsInExtendedVariableLengthRecords(extendedVariableLengthRecordPosition) || await this.MoveToExtendedVariableLengthRecordsAsync(extendedVariableLengthRecordPosition, cancellationToken).ConfigureAwait(false)
+            ? await GetExtendedVariableLengthRecordAsync(stream, records, cancellationToken).ConfigureAwait(false)
+            : throw new InvalidDataException("Failed to move to extended variable length records");
 #endif
 
     private static (HeaderBlockBuilder Builder, ushort HeaderSize) CreateHeaderBlockBuilder(ReadOnlySpan<byte> source)
@@ -751,6 +741,10 @@ public class HeaderBlockReader(Stream stream)
     }
 
     private bool IsInVariableLengthRecords() => stream.Position >= this.headerSize && stream.Position < this.OffsetToPointData;
+
+#if LAS1_3_OR_GREATER
+    private bool IsInExtendedVariableLengthRecords(long extendedVariableLengthRecordPosition) => extendedVariableLengthRecordPosition >= this.headerSize && stream.Position > extendedVariableLengthRecordPosition && stream.Position < stream.Length;
+#endif
 
     [System.Runtime.InteropServices.StructLayout(System.Runtime.InteropServices.LayoutKind.Auto)]
     private readonly record struct HeaderValues(uint OffsetToPointData, uint VariableLengthRecordCount, ushort PointDataLength)
