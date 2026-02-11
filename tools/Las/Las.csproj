@@ -6,6 +6,9 @@
     
     <!-- turn off buggy analyzer -->
     <NoWarn>$(NoWarn);S1117</NoWarn>
+    
+    <!-- do not strip symbols on MacOS -->
+    <StripSymbols Condition="$([System.OperatingSystem]::IsMacOS())">false</StripSymbols>
   </PropertyGroup>
   
   <PropertyGroup Label="Publishing">
