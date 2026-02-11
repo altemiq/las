@@ -203,7 +203,7 @@ jobs:
           --arch ${{ matrix.arch }} 
           -property:PublishDir=${{ github.workspace }}/publish/${{ matrix.os }}-${{ matrix.arch }} 
           -property:Version=${{ needs.get-version.outputs.prefix }}
-          -property:IlcDisableModuleCache=true
+          -property:StripSymbols=false
 
       - uses: actions/upload-artifact@v6
         with:
