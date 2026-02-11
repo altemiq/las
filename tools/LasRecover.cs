@@ -4,7 +4,8 @@
 // </copyright>
 // -----------------------------------------------------------------------
 
-#:package Altemiq.CommandLine
+#:property ManagePackageVersionsCentrally=false
+#:package Altemiq.CommandLine@2.0.0
 #:project ../src/IO.Las.Compression/IO.Las.Compression.csproj
 
 using System.CommandLine;
@@ -120,8 +121,8 @@ root.SetAction(parseResult =>
         {
             return extraBytes.GetValue(index, data) switch
             {
-                double doubleValue => doubleValue,
-                IConvertible convertable => convertable.ToDouble(default),
+                { Value: double doubleValue } => doubleValue,
+                { Value: IConvertible convertable } => convertable.ToDouble(default),
                 _ => default,
             };
         }
