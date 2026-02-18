@@ -22,7 +22,7 @@ internal static class MemoryExtensions
         /// <param name="span">The span of memory.</param>
         /// <returns>A managed object that contains the data that the <paramref name="span"/> parameter points to.</returns>
         public static T? SpanToStructure<[System.Diagnostics.CodeAnalysis.DynamicallyAccessedMembers(System.Diagnostics.CodeAnalysis.DynamicallyAccessedMemberTypes.PublicConstructors | System.Diagnostics.CodeAnalysis.DynamicallyAccessedMemberTypes.NonPublicConstructors)] T>(ReadOnlySpan<byte> span) =>
-            System.Runtime.InteropServices.Marshal.PtrToStructure<T>(span.GetIntPtr());
+            System.Runtime.InteropServices.Marshal.PtrToStructure<T>(GetIntPtr(span));
 
         /// <summary>
         /// Marshals data from a managed object of a specified type to a block of memory.
@@ -32,16 +32,10 @@ internal static class MemoryExtensions
         /// <param name="span">The span of memory.</param>
         /// <param name="fDeleteOld"><see langword="true"/> to call the <see cref="System.Runtime.InteropServices.Marshal.DestroyStructure{T}"/> method on the <paramref name="span"/> parameter before this method copies the data. The block must contain valid data. Note that passing false when the memory block already contains data can lead to a memory leak.</param>
         public static void StructureToSpan<T>([System.Diagnostics.CodeAnalysis.DisallowNull] T structure, Span<byte> span, bool fDeleteOld = false) =>
-            System.Runtime.InteropServices.Marshal.StructureToPtr(structure, span.GetIntPtr(), fDeleteOld);
+            System.Runtime.InteropServices.Marshal.StructureToPtr(structure, GetIntPtr(span), fDeleteOld);
     }
 
-    extension<T>(Span<T> span)
-    {
-        private unsafe IntPtr GetIntPtr() => (IntPtr)System.Runtime.CompilerServices.Unsafe.AsPointer(ref System.Runtime.InteropServices.MemoryMarshal.GetReference(span));
-    }
+    private static unsafe IntPtr GetIntPtr<T>(Span<T> span) => (IntPtr)System.Runtime.CompilerServices.Unsafe.AsPointer(ref System.Runtime.InteropServices.MemoryMarshal.GetReference(span));
 
-    extension<T>(ReadOnlySpan<T> span)
-    {
-        private unsafe IntPtr GetIntPtr() => (IntPtr)System.Runtime.CompilerServices.Unsafe.AsPointer(ref System.Runtime.InteropServices.MemoryMarshal.GetReference(span));
-    }
+    private static unsafe IntPtr GetIntPtr<T>(ReadOnlySpan<T> span) => (IntPtr)System.Runtime.CompilerServices.Unsafe.AsPointer(ref System.Runtime.InteropServices.MemoryMarshal.GetReference(span));
 }

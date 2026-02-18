@@ -517,7 +517,7 @@ public static class CopcExtensions
             var info = reader.VariableLengthRecords.OfType<Cloud.CopcInfo>().Single();
             var hierarchy = reader.ExtendedVariableLengthRecords.OfType<Cloud.CopcHierarchy>().Single();
             var maximumDepth = info.GetDepthAtResolution(hierarchy, resolution);
-            return LazReader.ReadPointDataRecords(reader, hierarchy, maximumDepth);
+            return ReadPointDataRecords(reader, hierarchy, maximumDepth);
         }
 
         /// <summary>
@@ -525,7 +525,7 @@ public static class CopcExtensions
         /// </summary>
         /// <param name="maximumDepth">The maximum depth.</param>
         /// <returns>The points that are in <paramref name="maximumDepth"/>.</returns>
-        public IEnumerable<LasPointMemory> ReadPointDataRecords(int maximumDepth) => LazReader.ReadPointDataRecords(reader, reader.ExtendedVariableLengthRecords.OfType<Cloud.CopcHierarchy>().Single(), maximumDepth);
+        public IEnumerable<LasPointMemory> ReadPointDataRecords(int maximumDepth) => ReadPointDataRecords(reader, reader.ExtendedVariableLengthRecords.OfType<Cloud.CopcHierarchy>().Single(), maximumDepth);
 
         /// <summary>
         /// Reads the point data records for the specified resolution.
@@ -537,7 +537,7 @@ public static class CopcExtensions
         {
             var info = reader.VariableLengthRecords.OfType<Cloud.CopcInfo>().Single();
             var hierarchy = reader.ExtendedVariableLengthRecords.OfType<Cloud.CopcHierarchy>().Single();
-            return LazReader.ReadPointDataRecords(reader, box, hierarchy, info.GetDepthAtResolution(hierarchy, resolution));
+            return ReadPointDataRecords(reader, box, hierarchy, info.GetDepthAtResolution(hierarchy, resolution));
         }
 
         /// <summary>
@@ -546,7 +546,7 @@ public static class CopcExtensions
         /// <param name="box">The bounding box.</param>
         /// <param name="maximumDepth">The maximum depth.</param>
         /// <returns>The points that are in <paramref name="box"/> and <paramref name="maximumDepth"/>.</returns>
-        public IEnumerable<LasPointMemory> ReadPointDataRecords(BoundingBox box, int maximumDepth) => LazReader.ReadPointDataRecords(reader, box, reader.ExtendedVariableLengthRecords.OfType<Cloud.CopcHierarchy>().Single(), maximumDepth);
+        public IEnumerable<LasPointMemory> ReadPointDataRecords(BoundingBox box, int maximumDepth) => ReadPointDataRecords(reader, box, reader.ExtendedVariableLengthRecords.OfType<Cloud.CopcHierarchy>().Single(), maximumDepth);
 
         /// <summary>
         /// Gets the depth at the specified resolution.
@@ -558,39 +558,6 @@ public static class CopcExtensions
             var info = reader.VariableLengthRecords.OfType<Cloud.CopcInfo>().Single();
             var hierarchy = reader.ExtendedVariableLengthRecords.OfType<Cloud.CopcHierarchy>().Single();
             return info.GetDepthAtResolution(hierarchy, resolution);
-        }
-
-        private static IEnumerable<LasPointMemory> ReadPointDataRecords<TReader>(TReader lazReader, Cloud.CopcHierarchy hierarchy, int maximumDepth)
-            where TReader : ILasReader, ILazReader => hierarchy
-            .GetAllEntries()
-            .Where(entry => entry.Key.Level <= maximumDepth)
-            .OrderBy(static entry => entry.Offset)
-            .SelectMany(entry => lazReader.ReadPointDataRecords(entry));
-
-        private static IEnumerable<LasPointMemory> ReadPointDataRecords<TReader>(TReader lazReader, BoundingBox box, Cloud.CopcHierarchy hierarchy, int maximumDepth)
-            where TReader : ILasReader, ILazReader
-        {
-            var header = lazReader.Header;
-            var quantizer = new PointDataRecordQuantizer(header);
-
-            return hierarchy
-                .GetAllEntries()
-                .Where(entry => entry.Key.Level <= maximumDepth)
-                .OrderBy(static entry => entry.Offset)
-                .SelectMany(entry =>
-                {
-                    var keyBox = Cloud.VoxelKeyExtensions.ToBoundingBox(entry.Key, header);
-                    if (box.Contains(keyBox))
-                    {
-                        // If the node is within the box add all points
-                        return lazReader.ReadPointDataRecords(entry);
-                    }
-
-                    // If the node only crosses the box then get subset of points within box
-                    return box.IntersectsWith(keyBox)
-                        ? lazReader.ReadPointDataRecords(entry).Where(point => box.Contains(quantizer.Get(point.PointDataRecord!)))
-                        : [];
-                });
         }
     }
 
@@ -604,21 +571,16 @@ public static class CopcExtensions
         /// </summary>
         public void RegisterCloudOptimized()
         {
-            processor.Register(Cloud.CopcConstants.UserId, Cloud.CopcInfo.TagRecordId, VariableLengthRecordProcessor.ProcessCopcInfo);
-            processor.Register(Cloud.CopcConstants.UserId, Cloud.CopcHierarchy.TagRecordId, VariableLengthRecordProcessor.ProcessCopcHierarchy);
+            processor.Register(Cloud.CopcConstants.UserId, Cloud.CopcInfo.TagRecordId, ProcessCopcInfo);
+            processor.Register(Cloud.CopcConstants.UserId, Cloud.CopcHierarchy.TagRecordId, ProcessCopcHierarchy);
         }
 
         /// <summary>
         /// Registers cloud optimized VLRs.
         /// </summary>
         /// <returns><see langword="true" /> when the compression processors are successfully added to the dictionary; <see langword="false" /> when the dictionary already contains the processors, in which case nothing gets added.</returns>
-        public bool TryRegisterCloudOptimized() => processor.TryRegister(Cloud.CopcConstants.UserId, Cloud.CopcInfo.TagRecordId, VariableLengthRecordProcessor.ProcessCopcInfo)
-                                                   && processor.TryRegister(Cloud.CopcConstants.UserId, Cloud.CopcHierarchy.TagRecordId, VariableLengthRecordProcessor.ProcessCopcHierarchy);
-
-        private static Cloud.CopcInfo ProcessCopcInfo(VariableLengthRecordHeader header, ReadOnlySpan<byte> data) => new(header, data);
-
-        private static Cloud.CopcHierarchy ProcessCopcHierarchy(ExtendedVariableLengthRecordHeader header, IEnumerable<VariableLengthRecord> variableLengthRecords, long position, ReadOnlySpan<byte> data) =>
-            new(header, variableLengthRecords.OfType<Cloud.CopcInfo>().Single(), (ulong)position, data);
+        public bool TryRegisterCloudOptimized() => processor.TryRegister(Cloud.CopcConstants.UserId, Cloud.CopcInfo.TagRecordId, ProcessCopcInfo)
+                                                   && processor.TryRegister(Cloud.CopcConstants.UserId, Cloud.CopcHierarchy.TagRecordId, ProcessCopcHierarchy);
     }
 
     /// <summary>
@@ -680,6 +642,45 @@ public static class CopcExtensions
             return LoadPageHierarchy(hierarchy, page);
         }
     }
+
+    private static IEnumerable<LasPointMemory> ReadPointDataRecords<TReader>(TReader lazReader, Cloud.CopcHierarchy hierarchy, int maximumDepth)
+        where TReader : ILasReader, ILazReader =>
+        hierarchy
+            .GetAllEntries()
+            .Where(entry => entry.Key.Level <= maximumDepth)
+            .OrderBy(static entry => entry.Offset)
+            .SelectMany(entry => lazReader.ReadPointDataRecords(entry));
+
+    private static IEnumerable<LasPointMemory> ReadPointDataRecords<TReader>(TReader lazReader, BoundingBox box, Cloud.CopcHierarchy hierarchy, int maximumDepth)
+        where TReader : ILasReader, ILazReader
+    {
+        var header = lazReader.Header;
+        var quantizer = new PointDataRecordQuantizer(header);
+
+        return hierarchy
+            .GetAllEntries()
+            .Where(entry => entry.Key.Level <= maximumDepth)
+            .OrderBy(static entry => entry.Offset)
+            .SelectMany(entry =>
+            {
+                var keyBox = Cloud.VoxelKeyExtensions.ToBoundingBox(entry.Key, header);
+                if (box.Contains(keyBox))
+                {
+                    // If the node is within the box add all points
+                    return lazReader.ReadPointDataRecords(entry);
+                }
+
+                // If the node only crosses the box then get subset of points within box
+                return box.IntersectsWith(keyBox)
+                    ? lazReader.ReadPointDataRecords(entry).Where(point => box.Contains(quantizer.Get(point.PointDataRecord!)))
+                    : [];
+            });
+    }
+
+    private static Cloud.CopcInfo ProcessCopcInfo(VariableLengthRecordHeader header, ReadOnlySpan<byte> data) => new(header, data);
+
+    private static Cloud.CopcHierarchy ProcessCopcHierarchy(ExtendedVariableLengthRecordHeader header, IEnumerable<VariableLengthRecord> variableLengthRecords, long position, ReadOnlySpan<byte> data) =>
+        new(header, variableLengthRecords.OfType<Cloud.CopcInfo>().Single(), (ulong)position, data);
 
     private static IEnumerable<Cloud.CopcHierarchy.Entry> GetAllEntries(this Cloud.CopcHierarchy hierarchy) => LoadPageHierarchy(hierarchy, hierarchy.Root);
 

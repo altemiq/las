@@ -26,15 +26,13 @@ public static class IndexingExtensions
         /// <summary>
         /// Registers index VLRs.
         /// </summary>
-        public void RegisterIndexing() => processor.Register(Indexing.LaxTag.TagRecordId, VariableLengthRecordProcessor.ProcessLaxTag);
+        public void RegisterIndexing() => processor.Register(Indexing.LaxTag.TagRecordId, static (header, _, _, data) => new Indexing.LaxTag(header, data));
 
         /// <summary>
         /// Registers index VLRs.
         /// </summary>
         /// <returns><see langword="true" /> when the compression processors are successfully added to the dictionary; <see langword="false" /> when the dictionary already contains the processors, in which case nothing gets added.</returns>
-        public bool TryRegisterIndexing() => processor.TryRegister(Indexing.LaxTag.TagRecordId, VariableLengthRecordProcessor.ProcessLaxTag);
-
-        private static Indexing.LaxTag ProcessLaxTag(ExtendedVariableLengthRecordHeader header, IEnumerable<VariableLengthRecord> records, long position, ReadOnlySpan<byte> data) => new(header, data);
+        public bool TryRegisterIndexing() => processor.TryRegister(Indexing.LaxTag.TagRecordId, static (header, _, _, data) => new Indexing.LaxTag(header, data));
     }
 #endif
 

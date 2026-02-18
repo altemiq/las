@@ -21,14 +21,14 @@ public static class TilingExtensions
         /// <summary>
         /// Registers tiling VLRs.
         /// </summary>
-        public void RegisterTiling() => processor.Register(Tiling.LasToolsUserId, Tiling.TagRecordId, VariableLengthRecordProcessor.ProcessTiling);
+        public void RegisterTiling() => processor.Register(Tiling.LasToolsUserId, Tiling.TagRecordId, ProcessTiling);
 
         /// <summary>
         /// Registers tiling VLRs.
         /// </summary>
         /// <returns><see langword="true" /> when the compression processors are successfully added to the dictionary; <see langword="false" /> when the dictionary already contains the processors, in which case nothing gets added.</returns>
-        public bool TryRegisterCompression() => processor.TryRegister(Tiling.LasToolsUserId, Tiling.TagRecordId, VariableLengthRecordProcessor.ProcessTiling);
-
-        private static Tiling ProcessTiling(VariableLengthRecordHeader header, ReadOnlySpan<byte> data) => new(header, data);
+        public bool TryRegisterCompression() => processor.TryRegister(Tiling.LasToolsUserId, Tiling.TagRecordId, ProcessTiling);
     }
+
+    private static Tiling ProcessTiling(VariableLengthRecordHeader header, ReadOnlySpan<byte> data) => new(header, data);
 }
