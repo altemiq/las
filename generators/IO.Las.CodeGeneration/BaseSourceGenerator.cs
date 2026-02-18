@@ -6,6 +6,7 @@
 
 namespace Altemiq.IO.Las.CodeGeneration;
 
+using Humanizer;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
@@ -652,6 +653,22 @@ public abstract class BaseSourceGenerator : IIncrementalGenerator
     /// <returns>The cleaned identifier.</returns>
     protected static string CleanupIdentifier(string id)
     {
+        if (char.IsDigit(id[0]))
+        {
+            // get the numbers
+            int index = 0;
+            while (index < id.Length && char.IsDigit(id[index]))
+            {
+                index++;
+            }
+
+            // convert this to a number
+            var value = int.Parse(id.Substring(0, index), System.Globalization.CultureInfo.InvariantCulture);
+
+            // change the leading number to words
+            id = string.Concat(value.ToWords().Pascalize(), id.Substring(index));
+        }
+
         var returnChars = new char[id.Length];
         var count = default(int);
         foreach (var chr in id)
