@@ -45,6 +45,9 @@ public sealed class LazReader : LasReader, ILazReader
     /// <inheritdoc/>
     public bool IsCompressed => this.pointReader is not Las.RawReader;
 
+    /// <inheritdoc/>
+    bool ILazReader.IsChunked => this.pointReader is ChunkedReader;
+
     /// <summary>
     /// Creates either a <see cref="LazReader"/> or <see cref="LasReader"/> depending on whether the header specifies compression.
     /// </summary>
@@ -96,34 +99,40 @@ public sealed class LazReader : LasReader, ILazReader
         return point;
     }
 
-    /// <summary>
-    /// Moves to the specified chunk.
-    /// </summary>
-    /// <param name="index">The chunk index.</param>
-    /// <returns><see langword="true"/> if the move was successful; otherwise <see langword="false"/>.</returns>
+    /// <inheritdoc/>
+    ChunkedReader.ChunkedLasPointSpanEnumerable ILazReader.ReadChunk() =>
+        this.pointReader is ChunkedReader chunkedReader
+            ? chunkedReader.ReadChunk(this)
+            : default;
+
+    /// <inheritdoc/>
+    ChunkedReader.ChunkedLasPointSpanEnumerable ILazReader.ReadChunk(int chunk) =>
+        this.pointReader is ChunkedReader chunkedReader && this.MoveToChunkImpl(chunkedReader, chunk)
+            ? chunkedReader.ReadChunk(this)
+            : default;
+
+    /// <inheritdoc/>
+    ChunkedReader.ChunkedLasPointMemoryEnumerable ILazReader.ReadChunkAsync() =>
+        this.pointReader is ChunkedReader chunkedReader
+            ? chunkedReader.ReadChunkAsync(this)
+            : default;
+
+    /// <inheritdoc/>
+    ChunkedReader.ChunkedLasPointMemoryEnumerable ILazReader.ReadChunkAsync(int chunk) =>
+        this.pointReader is ChunkedReader chunkedReader && this.MoveToChunkImpl(chunkedReader, chunk)
+            ? chunkedReader.ReadChunkAsync(this)
+            : default;
+
+    /// <inheritdoc/>
     bool ILazReader.MoveToChunk(int index) => this.MoveToChunkImpl(index);
 
-    /// <summary>
-    /// Moves to the specified chunk start.
-    /// </summary>
-    /// <param name="chunkStart">The chunk start.</param>
-    /// <returns><see langword="true"/> if the move was successful; otherwise <see langword="false"/>.</returns>
+    /// <inheritdoc/>
     bool ILazReader.MoveToChunk(long chunkStart) => this.MoveToChunkImpl(this.GetChunkIndex(chunkStart));
 
-    /// <summary>
-    /// Moves to the specified chunk.
-    /// </summary>
-    /// <param name="index">The chunk index.</param>
-    /// <param name="cancellationToken">The cancellation token.</param>
-    /// <returns><see langword="true"/> if the move was successful; otherwise <see langword="false"/>.</returns>
+    /// <inheritdoc/>
     ValueTask<bool> ILazReader.MoveToChunkAsync(int index, CancellationToken cancellationToken) => this.MoveToChunkImplAsync(index, cancellationToken);
 
-    /// <summary>
-    /// Moves to the specified chunk start.
-    /// </summary>
-    /// <param name="chunkStart">The chunk start.</param>
-    /// <param name="cancellationToken">The cancellation token.</param>
-    /// <returns><see langword="true"/> if the move was successful; otherwise <see langword="false"/>.</returns>
+    /// <inheritdoc/>
     ValueTask<bool> ILazReader.MoveToChunkAsync(long chunkStart, CancellationToken cancellationToken) => this.MoveToChunkImplAsync(this.GetChunkIndex(chunkStart), cancellationToken);
 
     /// <summary>
@@ -148,9 +157,13 @@ public sealed class LazReader : LasReader, ILazReader
         _ => throw new NotSupportedException(),
     };
 
-    private bool MoveToChunkImpl(int index) => index >= 0 && this.pointReader is ChunkedReader chunkedReader && chunkedReader.MoveToChunk(this.BaseStream, this.GetCurrentIndex(), index);
+    private bool MoveToChunkImpl(int index) => this.pointReader is ChunkedReader chunkedReader && this.MoveToChunkImpl(chunkedReader, index);
 
-    private async ValueTask<bool> MoveToChunkImplAsync(int index, CancellationToken cancellationToken) => index >= 0 && this.pointReader is ChunkedReader chunkedReader && await chunkedReader.MoveToChunkAsync(this.BaseStream, this.GetCurrentIndex(), index, cancellationToken).ConfigureAwait(false);
+    private bool MoveToChunkImpl(ChunkedReader chunkedReader, int index) => index >= 0 && chunkedReader.MoveToChunk(this.BaseStream, this.GetCurrentIndex(), index);
+
+    private async ValueTask<bool> MoveToChunkImplAsync(int index, CancellationToken cancellationToken) => this.pointReader is ChunkedReader chunkedReader && await this.MoveToChunkImplAsync(chunkedReader, index, cancellationToken).ConfigureAwait(false);
+
+    private async ValueTask<bool> MoveToChunkImplAsync(ChunkedReader chunkedReader, int index, CancellationToken cancellationToken) => index >= 0 && await chunkedReader.MoveToChunkAsync(this.BaseStream, this.GetCurrentIndex(), index, cancellationToken).ConfigureAwait(false);
 
     private IPointReader CreatePointReader()
     {

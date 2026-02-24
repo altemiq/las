@@ -58,52 +58,7 @@ internal abstract class ChunkedReader : IPointReader
     /// <inheritdoc/>
     public LasPointSpan Read(Stream stream)
     {
-        if (this.chunkCount == this.chunkSize)
-        {
-            if (this.pointStart is not 0)
-            {
-                this.Reader.Decoder.Done();
-                this.currentChunk++;
-
-                // check integrity
-                if (this.currentChunk < this.tabledChunksValue)
-                {
-                    var here = stream.Position;
-                    if (this.chunkStartValues[this.currentChunk] != here)
-                    {
-                        // previous chunk was corrupt
-                        this.currentChunk--;
-                        throw new InvalidOperationException(Compression.Properties.Resources.PreviousChunkWasCorrupt);
-                    }
-                }
-            }
-
-            _ = stream.SwitchStreamIfMultiple(LazStreams.FormatChunk((int)this.currentChunk));
-            _ = this.InitializeDecoder(stream);
-
-            if (this.currentChunk == this.tabledChunksValue)
-            {
-                // no, or incomplete chunk table
-                if (this.currentChunk >= this.numberChunksValue)
-                {
-                    this.numberChunksValue += DefaultChunkCount;
-                    Array.Resize(ref this.chunkStartValues, (int)(this.numberChunksValue + 1));
-                }
-
-                this.chunkStartValues[this.tabledChunksValue] = this.pointStart; // needs fixing
-                this.tabledChunksValue++;
-            }
-
-            // read the chunk here
-            if (stream is ICacheStream cacheStream)
-            {
-                var chunkStart = this.chunkStartValues[this.currentChunk];
-                var chunkLength = this.chunkStartValues[this.currentChunk + 1] - chunkStart;
-                cacheStream.Cache(chunkStart, (int)chunkLength);
-            }
-
-            this.chunkCount = default;
-        }
+        this.MoveToNextChunkIfRequired(stream);
 
         this.chunkCount++;
 
@@ -113,64 +68,49 @@ internal abstract class ChunkedReader : IPointReader
     /// <inheritdoc/>
     public async ValueTask<LasPointMemory> ReadAsync(Stream stream, CancellationToken cancellationToken = default)
     {
-        if (this.chunkCount == this.chunkSize)
-        {
-            if (this.pointStart is not 0)
-            {
-                this.Reader.Decoder.Done();
-                this.currentChunk++;
-
-                // check integrity
-                if (this.currentChunk < this.tabledChunksValue)
-                {
-                    var here = stream.Position;
-                    if (this.chunkStartValues[this.currentChunk] != here)
-                    {
-                        // previous chunk was corrupt
-                        this.currentChunk--;
-                        throw new InvalidOperationException(Compression.Properties.Resources.PreviousChunkWasCorrupt);
-                    }
-                }
-            }
-
-            _ = stream.SwitchStreamIfMultiple(LazStreams.FormatChunk((int)this.currentChunk));
-            _ = this.InitializeDecoder(stream);
-
-            if (this.currentChunk == this.tabledChunksValue)
-            {
-                // no, or incomplete chunk table
-                if (this.currentChunk >= this.numberChunksValue)
-                {
-                    this.numberChunksValue += DefaultChunkCount;
-                    Array.Resize(ref this.chunkStartValues, (int)(this.numberChunksValue + 1));
-                }
-
-                this.chunkStartValues[this.tabledChunksValue] = this.pointStart; // needs fixing
-                this.tabledChunksValue++;
-            }
-
-            switch (stream)
-            {
-                // read the chunk here
-                case IAsyncCacheStream asyncCacheStream:
-                    var asyncChunkStart = this.chunkStartValues[this.currentChunk];
-                    var asyncChunkLength = this.chunkStartValues[this.currentChunk + 1] - asyncChunkStart;
-                    await asyncCacheStream.CacheAsync(asyncChunkStart, (int)asyncChunkLength, cancellationToken).ConfigureAwait(false);
-                    break;
-
-                case ICacheStream cacheStream:
-                    var chunkStart = this.chunkStartValues[this.currentChunk];
-                    var chunkLength = this.chunkStartValues[this.currentChunk + 1] - chunkStart;
-                    cacheStream.Cache(chunkStart, (int)chunkLength);
-                    break;
-            }
-
-            this.chunkCount = default;
-        }
+        await this.MoveToNextChunkIfRequiredAsync(stream, cancellationToken).ConfigureAwait(false);
 
         this.chunkCount++;
 
         return await this.Reader.ReadAsync(stream, cancellationToken).ConfigureAwait(false);
+    }
+
+    /// <summary>
+    /// Reads the rest of the chunk.
+    /// </summary>
+    /// <param name="reader">The <see cref="LasReader"/>.</param>
+    /// <returns>The rest of the chunk.</returns>
+    public ChunkedLasPointSpanEnumerable ReadChunk(LasReader reader) => this.ReadChunk(reader, reader.BaseStream);
+
+    /// <summary>
+    /// Reads the rest of the chunk.
+    /// </summary>
+    /// <param name="reader">The <see cref="ILasReader"/>.</param>
+    /// <param name="stream">The stream to read from.</param>
+    /// <returns>The rest of the chunk.</returns>
+    public ChunkedLasPointSpanEnumerable ReadChunk(ILasReader reader, Stream stream)
+    {
+        this.MoveToNextChunkIfRequired(stream);
+        return new(this, reader);
+    }
+
+    /// <summary>
+    /// Reads the rest of the chunk asynchronously.
+    /// </summary>
+    /// <param name="reader">The <see cref="LasReader"/>.</param>
+    /// <returns>The rest of the chunk.</returns>
+    public ChunkedLasPointMemoryEnumerable ReadChunkAsync(LasReader reader) => this.ReadChunkAsync(reader, reader.BaseStream);
+
+    /// <summary>
+    /// Reads the rest of the chunk asynchronously.
+    /// </summary>
+    /// <param name="reader">The <see cref="ILasReader"/>.</param>
+    /// <param name="stream">The stream to read from.</param>
+    /// <returns>The rest of the chunk.</returns>
+    public ChunkedLasPointMemoryEnumerable ReadChunkAsync(ILasReader reader, Stream stream)
+    {
+        this.MoveToNextChunkIfRequired(stream);
+        return new(this, reader);
     }
 
     /// <summary>
@@ -701,5 +641,190 @@ internal abstract class ChunkedReader : IPointReader
             }
         }
 #pragma warning restore S1121
+    }
+
+    private void MoveToNextChunkIfRequired(Stream stream)
+    {
+        if (this.chunkCount == this.chunkSize)
+        {
+            if (this.pointStart is not 0)
+            {
+                this.Reader.Decoder.Done();
+                this.currentChunk++;
+
+                // check integrity
+                if (this.currentChunk < this.tabledChunksValue)
+                {
+                    var here = stream.Position;
+                    if (this.chunkStartValues[this.currentChunk] != here)
+                    {
+                        // previous chunk was corrupt
+                        this.currentChunk--;
+                        throw new InvalidOperationException(Compression.Properties.Resources.PreviousChunkWasCorrupt);
+                    }
+                }
+            }
+
+            _ = stream.SwitchStreamIfMultiple(LazStreams.FormatChunk((int)this.currentChunk));
+            _ = this.InitializeDecoder(stream);
+
+            if (this.currentChunk == this.tabledChunksValue)
+            {
+                // no, or incomplete chunk table
+                if (this.currentChunk >= this.numberChunksValue)
+                {
+                    this.numberChunksValue += DefaultChunkCount;
+                    Array.Resize(ref this.chunkStartValues, (int)(this.numberChunksValue + 1));
+                }
+
+                this.chunkStartValues[this.tabledChunksValue] = this.pointStart; // needs fixing
+                this.tabledChunksValue++;
+            }
+
+            // read the chunk here
+            if (stream is ICacheStream cacheStream)
+            {
+                var chunkStart = this.chunkStartValues[this.currentChunk];
+                var chunkLength = this.chunkStartValues[this.currentChunk + 1] - chunkStart;
+                cacheStream.Cache(chunkStart, (int)chunkLength);
+            }
+
+            this.chunkCount = default;
+        }
+    }
+
+    private async ValueTask MoveToNextChunkIfRequiredAsync(Stream stream, CancellationToken cancellationToken)
+    {
+        if (this.chunkCount == this.chunkSize)
+        {
+            if (this.pointStart is not 0)
+            {
+                this.Reader.Decoder.Done();
+                this.currentChunk++;
+
+                // check integrity
+                if (this.currentChunk < this.tabledChunksValue)
+                {
+                    var here = stream.Position;
+                    if (this.chunkStartValues[this.currentChunk] != here)
+                    {
+                        // previous chunk was corrupt
+                        this.currentChunk--;
+                        throw new InvalidOperationException(Compression.Properties.Resources.PreviousChunkWasCorrupt);
+                    }
+                }
+            }
+
+            _ = stream.SwitchStreamIfMultiple(LazStreams.FormatChunk((int)this.currentChunk));
+            _ = this.InitializeDecoder(stream);
+
+            if (this.currentChunk == this.tabledChunksValue)
+            {
+                // no, or incomplete chunk table
+                if (this.currentChunk >= this.numberChunksValue)
+                {
+                    this.numberChunksValue += DefaultChunkCount;
+                    Array.Resize(ref this.chunkStartValues, (int)(this.numberChunksValue + 1));
+                }
+
+                this.chunkStartValues[this.tabledChunksValue] = this.pointStart; // needs fixing
+                this.tabledChunksValue++;
+            }
+
+            switch (stream)
+            {
+                // read the chunk here
+                case IAsyncCacheStream asyncCacheStream:
+                    var asyncChunkStart = this.chunkStartValues[this.currentChunk];
+                    var asyncChunkLength = this.chunkStartValues[this.currentChunk + 1] - asyncChunkStart;
+                    await asyncCacheStream.CacheAsync(asyncChunkStart, (int)asyncChunkLength, cancellationToken).ConfigureAwait(false);
+                    break;
+
+                case ICacheStream cacheStream:
+                    var chunkStart = this.chunkStartValues[this.currentChunk];
+                    var chunkLength = this.chunkStartValues[this.currentChunk + 1] - chunkStart;
+                    cacheStream.Cache(chunkStart, (int)chunkLength);
+                    break;
+            }
+
+            this.chunkCount = default;
+        }
+    }
+
+    /// <summary>
+    /// The <see cref="ChunkedReader"/> <see cref="IEnumerable{LasPointSpan}"/>.
+    /// </summary>
+    /// <param name="chunkedReader">The <see cref="ChunkedReader"/>.</param>
+    /// <param name="lasReader">The <see cref="ILasReader"/>.</param>
+    public readonly ref struct ChunkedLasPointSpanEnumerable(ChunkedReader chunkedReader, ILasReader lasReader)
+    {
+        /// <inheritdoc cref="IEnumerable{LasPointSpan}.GetEnumerator" />
+        public ChunkedLasPointSpanEnumerator GetEnumerator() => new(chunkedReader, lasReader);
+    }
+
+    /// <summary>
+    /// The <see cref="ChunkReader"/> <see cref="IEnumerator{LasPointSpan}"/>.
+    /// </summary>
+    /// <param name="chunkedReader">The <see cref="ChunkedReader"/>.</param>
+    /// <param name="lasReader">The <see cref="ILasReader"/>.</param>
+    public ref struct ChunkedLasPointSpanEnumerator(ChunkedReader chunkedReader, ILasReader lasReader)
+    {
+        /// <inheritdoc cref="IEnumerator{LasPointSpan}.Current" />
+        public LasPointSpan Current { get; private set; }
+
+        /// <inheritdoc cref="System.Collections.IEnumerator.MoveNext()" />
+        public bool MoveNext()
+        {
+            if (chunkedReader.chunkCount == chunkedReader.chunkSize)
+            {
+                return false;
+            }
+
+            this.Current = lasReader.ReadPointDataRecord();
+            return this.Current.PointDataRecord is not null;
+        }
+    }
+
+    /// <summary>
+    /// The <see cref="ChunkReader"/> <see cref="IAsyncEnumerable{LasPointMemory}"/>.
+    /// </summary>
+    /// <param name="chunkedReader">The <see cref="ChunkedReader"/>.</param>
+    /// <param name="lasReader">The <see cref="ILasReader"/>.</param>
+    public readonly struct ChunkedLasPointMemoryEnumerable(ChunkedReader chunkedReader, ILasReader lasReader) : IAsyncEnumerable<LasPointMemory>
+    {
+        /// <inheritdoc cref="IAsyncEnumerable{LasPointMemory}.GetAsyncEnumerator" />
+        public ChunkedLasPointMemoryEnumerator GetAsyncEnumerator(CancellationToken cancellationToken = default) => new(chunkedReader, lasReader, cancellationToken);
+
+        /// <inheritdoc/>
+        IAsyncEnumerator<LasPointMemory> IAsyncEnumerable<LasPointMemory>.GetAsyncEnumerator(CancellationToken cancellationToken) => this.GetAsyncEnumerator(cancellationToken);
+    }
+
+    /// <summary>
+    /// The <see cref="ChunkReader"/> <see cref="IAsyncEnumerator{LasPointMemory}"/>.
+    /// </summary>
+    /// <param name="chunkedReader">The <see cref="ChunkedReader"/>.</param>
+    /// <param name="lasReader">The <see cref="ILasReader"/>.</param>
+    /// <param name="cancellationToken">The cancellation token.</param>
+    public sealed class ChunkedLasPointMemoryEnumerator(ChunkedReader chunkedReader, ILasReader lasReader, CancellationToken cancellationToken) : IAsyncEnumerator<LasPointMemory>
+    {
+        private LasPointMemory current;
+
+        /// <inheritdoc/>
+        public LasPointMemory Current => this.current;
+
+        /// <inheritdoc/>
+        public ValueTask DisposeAsync() => default;
+
+        /// <inheritdoc/>
+        public async ValueTask<bool> MoveNextAsync()
+        {
+            if (chunkedReader.chunkCount == chunkedReader.chunkSize)
+            {
+                return false;
+            }
+
+            this.current = await lasReader.ReadPointDataRecordAsync(cancellationToken).ConfigureAwait(false);
+            return this.current.PointDataRecord is not null;
+        }
     }
 }

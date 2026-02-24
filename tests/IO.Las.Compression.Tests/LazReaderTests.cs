@@ -8,6 +8,66 @@ namespace Altemiq.IO.Las.Compression;
 
 public class LazReaderTests
 {
+#if LAS1_4_OR_GREATER
+    [Test]
+    public async Task ReadEnumerable()
+    {
+#if NETSTANDARD2_1_OR_GREATER || NETCOREAPP3_0_OR_GREATER
+        await
+#endif
+        using var stream = typeof(LazReaderTests).Assembly.GetManifestResourceStream(typeof(LazReaderTests), "fusa_height_7.laz")
+                           ?? throw new System.Diagnostics.UnreachableException("Failed to get stream");
+#if NETSTANDARD2_1_OR_GREATER || NETCOREAPP3_0_OR_GREATER
+        await
+#endif
+        using LazReader reader = new(stream);
+
+        IBasePointDataRecord pointDataRecord = default;
+        byte[] data = default;
+        var count = 0;
+
+        foreach (var point in reader.ReadChunk(0))
+        {
+            pointDataRecord = point.PointDataRecord;
+            data = point.ExtraBytes.ToArray();
+            count++;
+        }
+
+        await Assert.That(count).IsEqualTo(50000);
+        await Assert.That(pointDataRecord).IsTypeOf<ExtendedGpsColorPointDataRecord>().And.Member(p => p.X, x => x.IsNotDefault());
+        await Assert.That(data).IsNotEmpty();
+    }
+    
+    [Test]
+    public async Task ReadAsyncEnumerable()
+    {
+#if NETSTANDARD2_1_OR_GREATER || NETCOREAPP3_0_OR_GREATER
+        await
+#endif
+        using var stream = typeof(LazReaderTests).Assembly.GetManifestResourceStream(typeof(LazReaderTests), "fusa_height_7.laz")
+                               ?? throw new System.Diagnostics.UnreachableException("Failed to get stream");
+#if NETSTANDARD2_1_OR_GREATER || NETCOREAPP3_0_OR_GREATER
+        await
+#endif
+        using LazReader reader = new(stream);
+
+        IBasePointDataRecord pointDataRecord = default;
+        byte[] data = default;
+        var count = 0;
+
+        await foreach (var point in reader.ReadChunkAsync(0).WithCancellation(CancellationToken.None))
+        {
+            pointDataRecord = point.PointDataRecord;
+            data = point.ExtraBytes.ToArray();
+            count++;
+        }
+
+        await Assert.That(count).IsEqualTo(50000);
+        await Assert.That(pointDataRecord).IsTypeOf<ExtendedGpsColorPointDataRecord>().And.Member(p => p.X, x => x.IsNotDefault());
+        await Assert.That(data).IsNotEmpty();
+    }
+#endif
+    
 #if LAS1_2_OR_GREATER
     [Test]
 #if LAS1_4_OR_GREATER
@@ -25,6 +85,10 @@ public class LazReaderTests
 #endif
         using var stream = typeof(LazReaderTests).Assembly.GetManifestResourceStream(typeof(LazReaderTests), file)
                            ?? throw new System.Diagnostics.UnreachableException("Failed to get stream");
+      
+#if NETSTANDARD2_1_OR_GREATER || NETCOREAPP3_0_OR_GREATER
+        await
+#endif
         using LazReader reader = new(stream);
         _ = await Assert.That(reader.VariableLengthRecords).Count().IsEqualTo(vlrCount);
 
@@ -76,6 +140,10 @@ public class LazReaderTests
 #endif
         using var stream = typeof(LazReaderTests).Assembly.GetManifestResourceStream(typeof(LazReaderTests), "fusa_height.laz")
                            ?? throw new System.Diagnostics.UnreachableException("Failed to get stream");
+
+#if NETSTANDARD2_1_OR_GREATER || NETCOREAPP3_0_OR_GREATER
+        await
+#endif
         using LazReader reader = new(stream);
         await CheckHeader(reader.Header, new(1, 4));
         _ = await Assert.That(reader.VariableLengthRecords).Count().IsEqualTo(3);
@@ -119,6 +187,10 @@ public class LazReaderTests
 #endif
         using var stream = typeof(LazReaderTests).Assembly.GetManifestResourceStream(typeof(LazReaderTests), resource)
                            ?? throw new System.Diagnostics.UnreachableException("Failed to get stream");
+        
+#if NETSTANDARD2_1_OR_GREATER || NETCOREAPP3_0_OR_GREATER
+        await
+#endif
         using LazReader reader = new(stream);
         await CheckHeader(reader.Header, new(major, minor));
 
@@ -150,6 +222,10 @@ public class LazReaderTests
 #endif
         using var stream = typeof(LazReaderTests).Assembly.GetManifestResourceStream(typeof(LazReaderTests), file)
                            ?? throw new System.Diagnostics.UnreachableException("Failed to get stream");
+        
+#if NETSTANDARD2_1_OR_GREATER || NETCOREAPP3_0_OR_GREATER
+        await
+#endif
         using LazReader reader = new(stream);
         _ = await Assert.That(reader.VariableLengthRecords).Count().IsEqualTo(vlrCount);
 
@@ -176,6 +252,10 @@ public class LazReaderTests
 #endif
         using var stream = typeof(LazReaderTests).Assembly.GetManifestResourceStream(typeof(LazReaderTests), "fusa_height.laz")
                            ?? throw new System.Diagnostics.UnreachableException("Failed to get stream");
+        
+#if NETSTANDARD2_1_OR_GREATER || NETCOREAPP3_0_OR_GREATER
+        await
+#endif
         using LazReader reader = new(stream);
         await CheckHeader(reader.Header, new(1, 4));
         _ = await Assert.That(reader.VariableLengthRecords).Count().IsEqualTo(3);
@@ -210,6 +290,10 @@ public class LazReaderTests
 #endif
         using var stream = typeof(LazReaderTests).Assembly.GetManifestResourceStream(typeof(LazReaderTests), resource)
                            ?? throw new System.Diagnostics.UnreachableException("Failed to get stream");
+        
+#if NETSTANDARD2_1_OR_GREATER || NETCOREAPP3_0_OR_GREATER
+        await
+#endif
         using LazReader reader = new(stream);
         await CheckHeader(reader.Header, new(major, minor));
 

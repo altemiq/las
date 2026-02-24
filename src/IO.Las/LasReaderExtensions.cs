@@ -23,7 +23,7 @@ public static class LasReaderExtensions
         public LasPointSpanEnumerator GetEnumerator() => new(reader);
 
         /// <inheritdoc cref="IAsyncEnumerable{LasPointMemory}.GetAsyncEnumerator" />
-        public LasPointMemoryEnumerator GetAsyncEnumerator() => new(reader);
+        public LasPointMemoryEnumerator GetAsyncEnumerator(CancellationToken cancellationToken = default) => new(reader, cancellationToken);
     }
 
     /// <summary>
@@ -50,7 +50,8 @@ public static class LasReaderExtensions
     /// The <see cref="LasReader"/> <see cref="IAsyncEnumerator{LasPointMemory}"/>.
     /// </summary>
     /// <param name="reader">The reader.</param>
-    public class LasPointMemoryEnumerator(LasReader reader) : IAsyncEnumerator<LasPointMemory>
+    /// <param name="cancellationToken">The cancellation token.</param>
+    public sealed class LasPointMemoryEnumerator(LasReader reader, CancellationToken cancellationToken) : IAsyncEnumerator<LasPointMemory>
     {
         private LasPointMemory current;
 
@@ -58,16 +59,12 @@ public static class LasReaderExtensions
         public LasPointMemory Current => this.current;
 
         /// <inheritdoc />
-        public ValueTask DisposeAsync()
-        {
-            GC.SuppressFinalize(this);
-            return default;
-        }
+        public ValueTask DisposeAsync() => default;
 
         /// <inheritdoc />
         public async ValueTask<bool> MoveNextAsync()
         {
-            this.current = await reader.ReadPointDataRecordAsync().ConfigureAwait(false);
+            this.current = await reader.ReadPointDataRecordAsync(cancellationToken).ConfigureAwait(false);
             return this.current.PointDataRecord is not null;
         }
     }
