@@ -16,8 +16,8 @@
   </ItemGroup>
 
   <ItemGroup Label="AWS">
-    <PackageVersion Include="AWSSDK.Extensions.NETCore.Setup" Version="4.0.3.22" />
-    <PackageVersion Include="AWSSDK.S3" Version="4.0.18.4" />
+    <PackageVersion Include="AWSSDK.Extensions.NETCore.Setup" Version="4.0.3.23" />
+    <PackageVersion Include="AWSSDK.S3" Version="4.0.18.7" />
   </ItemGroup>
 
   <ItemGroup Label="Azure">
@@ -38,7 +38,7 @@
   </ItemGroup>
   
   <ItemGroup Label="Coding Standards">
-    <GlobalPackageReference Include="Altemiq.DotNet.CodingStandard" Version="1.0.186" />
+    <GlobalPackageReference Include="Altemiq.DotNet.CodingStandard" Version="1.0.204" />
   </ItemGroup>
 
 </Project>
