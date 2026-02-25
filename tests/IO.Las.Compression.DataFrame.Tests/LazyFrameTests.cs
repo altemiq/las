@@ -5,9 +5,14 @@ using static Polars.CSharp.Polars;
 public class LazyFrameTests
 {
     [Test]
-    public async Task ScanLaz()
+    [Arguments("fusa.laz")]
+#if LAS1_4_OR_GREATER
+    [Arguments("fusa_height.laz")]
+    [Arguments("fusa_height_7.laz")]
+#endif
+    public async Task ScanLaz(string filename)
     {
-        var stream = typeof(LazyFrameTests).Assembly.GetManifestResourceStream(typeof(LazyFrameTests), "fusa_height_7.laz")
+        var stream = typeof(LazyFrameTests).Assembly.GetManifestResourceStream(typeof(LazyFrameTests), filename)
                                  ?? throw new System.Diagnostics.UnreachableException("Failed to get stream");
 
         await using LazReader reader = new(stream);

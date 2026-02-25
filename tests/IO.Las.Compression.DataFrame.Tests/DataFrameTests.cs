@@ -5,9 +5,14 @@ using static Polars.CSharp.Polars;
 public class DataFrameTests
 {
     [Test]
-    public async Task ReadLaz()
+    [Arguments("fusa.laz")]
+#if LAS1_4_OR_GREATER
+    [Arguments("fusa_height.laz")]
+    [Arguments("fusa_height_7.laz")]
+#endif
+    public async Task ReadLaz(string filename)
     {
-        var stream = typeof(DataFrameTests).Assembly.GetManifestResourceStream(typeof(DataFrameTests), "fusa_height_7.laz")
+        var stream = typeof(DataFrameTests).Assembly.GetManifestResourceStream(typeof(DataFrameTests), filename)
                                  ?? throw new System.Diagnostics.UnreachableException("Failed to get stream");
 
         await using LazReader reader = new(stream);
