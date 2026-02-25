@@ -38,7 +38,7 @@
     <NoWarn>$(NoWarn);NETSDK1215</NoWarn>
   </PropertyGroup>
 
-  <PropertyGroup Label="Signing" Condition=" '$(Configuration)' != '' AND '$(Configuration)' != 'Debug' ">
+  <PropertyGroup Label="Signing" Condition=" '$(Configuration)' != '' AND '$(Configuration)' != 'Debug' AND '$(SignAssembly)' != 'false' ">
     <SignAssembly>true</SignAssembly>
     <AssemblyOriginatorKeyFile>$([MSBuild]::GetPathOfFileAbove(Las.snk))</AssemblyOriginatorKeyFile>
     <PublicKey>0024000004800000940000000602000000240000525341310004000001000100456b8fd2019183152ee79c69ed82b79375e258515290849ea4ed5b9c0301cebc52d17cb5e39ed8884d1baa126fb469e17d6869a352aa21b2c3059116246c31e9415cbdfe03fd09ce09cac79c8e870d133c80d3774dd0cadf65db139af6652b71c5b45361bd5ac7cd0733a4b27f86e2b6e7da20722bbc1657da2f06c68053eaad</PublicKey>

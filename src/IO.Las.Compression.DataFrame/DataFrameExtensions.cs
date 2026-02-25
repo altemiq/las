@@ -25,12 +25,6 @@ public static class DataFrameExtensions
         {
             var schema = reader.GetArrowSchema().ToPolarsCompatibleSchema();
 
-            if (reader.IsChunked)
-            {
-                // ensure we move to the first chunk
-                reader.MoveToChunk(0);
-            }
-
             var batches = reader.ToArrowBatches(schema);
 
             return DataFrame.ReadRecordBatches(batches, schema);

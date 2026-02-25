@@ -18,6 +18,14 @@
     </PropertyGroup>
   </Target>
   
+  <Target Name="_RemovePublicKey"
+          BeforeTargets="GetAssemblyAttributes"
+          Condition=" '$(SignAssembly)' == 'false' AND '$(PublicKey)' != '' ">
+    <PropertyGroup>
+      <PublicKey />
+    </PropertyGroup>
+  </Target>
+  
   <Target Name="_UpdateMeziantouPolyfill"
           BeforeTargets="GenerateMSBuildEditorConfigFileCore"
           DependsOnTargets="_UpdateMeziantouPolyfill_IncludedPolyfills;_UpdateMeziantouPolyfill_ExcludedPolyfills" />
