@@ -47,5 +47,9 @@
   <ItemGroup>
     <ProjectReference Include="..\IO.Las\IO.Las.csproj" />
   </ItemGroup>
+  
+  <ItemGroup>
+    <InternalsVisibleTo Include="$(AssemblyName.Replace('.Arrow', '.Compression.Arrow'))" />
+  </ItemGroup>
 
 </Project>

@@ -81,10 +81,13 @@
   
   <ItemGroup>
     <InternalsVisibleTo Include="$(AssemblyName.Replace('.Compression', '')).Cloud" />
+    <InternalsVisibleTo Include="$(AssemblyName).Arrow" />
+    <InternalsVisibleTo Include="$(AssemblyName).DataFrame" />
     <InternalsVisibleTo Include="las" />
   </ItemGroup>
 
   <ItemGroup Label="Tests" Condition=" '$(Configuration)' == 'Debug' ">
+    <InternalsVisibleTo Include="$(AssemblyName).Arrow.Tests" />
     <InternalsVisibleTo Include="$(AssemblyName).Tests" />
   </ItemGroup>
   

@@ -18,8 +18,6 @@ internal static class LasToArrowStream
     /// <param name="schema">The schema.</param>
     /// <param name="batchSize">The batch size.</param>
     /// <returns>The <see cref="RecordBatch"/> instances.</returns>
-    [System.Diagnostics.CodeAnalysis.SuppressMessage("Major Code Smell", "S1854:Unused assignments should be removed", Justification = "This _could_ be used.")]
-    [System.Diagnostics.CodeAnalysis.SuppressMessage("ReSharper", "RedundantAssignment", Justification = "This _could_ be used.")]
     internal static IEnumerable<RecordBatch> ToArrowBatches(ILasReader reader, Schema schema, int batchSize = 50_000)
     {
         IReadOnlyList<ColumnBuffer> buffers = [.. schema.FieldsList.Select(f => ColumnBuffer.Create(f.DataType.TypeId, capacity: batchSize))];
@@ -29,71 +27,7 @@ internal static class LasToArrowStream
 
         while (reader.ReadPointDataRecord() is { PointDataRecord: { } basePointDataRecord })
         {
-            // do the base values
-            var index = 0;
-            buffers[index++].Add(basePointDataRecord.X);
-            buffers[index++].Add(basePointDataRecord.Y);
-            buffers[index++].Add(basePointDataRecord.Z);
-            buffers[index++].Add(basePointDataRecord.Intensity);
-            buffers[index++].Add(basePointDataRecord.ReturnNumber);
-            buffers[index++].Add(basePointDataRecord.NumberOfReturns);
-            buffers[index++].Add(basePointDataRecord.ScanDirectionFlag);
-            buffers[index++].Add(basePointDataRecord.EdgeOfFlightLine);
-            buffers[index++].Add(basePointDataRecord.Synthetic);
-            buffers[index++].Add(basePointDataRecord.KeyPoint);
-            buffers[index++].Add(basePointDataRecord.Withheld);
-            buffers[index++].Add(basePointDataRecord.UserData);
-            buffers[index++].Add(basePointDataRecord.PointSourceId);
-
-            if (basePointDataRecord is IPointDataRecord pointDataRecord)
-            {
-                buffers[index++].Add((byte)pointDataRecord.Classification);
-                buffers[index++].Add(pointDataRecord.ScanAngleRank);
-            }
-
-#if LAS1_4_OR_GREATER
-            if (basePointDataRecord is IExtendedPointDataRecord extendedPointDataRecord)
-            {
-                buffers[index++].Add(extendedPointDataRecord.Overlap);
-                buffers[index++].Add(extendedPointDataRecord.ScannerChannel);
-                buffers[index++].Add((byte)extendedPointDataRecord.Classification);
-                buffers[index++].Add(extendedPointDataRecord.ScanAngle);
-            }
-#endif
-
-            if (basePointDataRecord is IGpsPointDataRecord gpsPointDataRecord)
-            {
-                buffers[index++].Add(gpsPointDataRecord.GpsTime);
-            }
-
-#if LAS1_2_OR_GREATER
-            if (basePointDataRecord is IColorPointDataRecord colorPointDataRecord)
-            {
-                buffers[index++].Add(colorPointDataRecord.Color.R);
-                buffers[index++].Add(colorPointDataRecord.Color.G);
-                buffers[index++].Add(colorPointDataRecord.Color.B);
-            }
-#endif
-
-#if LAS1_4_OR_GREATER
-            if (basePointDataRecord is INearInfraredPointDataRecord nearInfraredPointDataRecord)
-            {
-                buffers[index++].Add(nearInfraredPointDataRecord.NearInfrared);
-            }
-#endif
-
-#if LAS1_3_OR_GREATER
-            if (basePointDataRecord is IWaveformPointDataRecord waveformPointDataRecord)
-            {
-                buffers[index++].Add(waveformPointDataRecord.WavePacketDescriptorIndex);
-                buffers[index++].Add(waveformPointDataRecord.ByteOffsetToWaveformData);
-                buffers[index++].Add(waveformPointDataRecord.WaveformPacketSizeInBytes);
-                buffers[index++].Add(waveformPointDataRecord.ReturnPointWaveformLocation);
-                buffers[index++].Add(waveformPointDataRecord.ParametricDx);
-                buffers[index++].Add(waveformPointDataRecord.ParametricDy);
-                buffers[index].Add(waveformPointDataRecord.ParametricDz);
-            }
-#endif
+            AddPointDataRecordToBuffers(basePointDataRecord, buffers);
 
             rowCount++;
 
@@ -102,7 +36,7 @@ internal static class LasToArrowStream
                 continue;
             }
 
-            yield return Flush(schema, buffers, rowCount);
+            yield return FlushToRecordBatch(buffers, schema, rowCount);
 
             rowCount = 0;
             hasYielded = true;
@@ -110,42 +44,126 @@ internal static class LasToArrowStream
 
         if (rowCount > 0)
         {
-            yield return Flush(schema, buffers, rowCount);
+            yield return FlushToRecordBatch(buffers, schema, rowCount);
             hasYielded = true;
         }
 
         if (!hasYielded)
         {
-            yield return Flush(schema, buffers, 0);
+            yield return FlushToRecordBatch(buffers, schema, 0);
+        }
+    }
+
+    /// <summary>
+    /// Adds the <see cref="IBasePointDataRecord"/> to the buffers.
+    /// </summary>
+    /// <param name="basePointDataRecord">The point data record.</param>
+    /// <param name="buffers">The buffers.</param>
+    [System.Diagnostics.CodeAnalysis.SuppressMessage("Major Code Smell", "S1854:Unused assignments should be removed", Justification = "This _could_ be used.")]
+    [System.Diagnostics.CodeAnalysis.SuppressMessage("ReSharper", "RedundantAssignment", Justification = "This _could_ be used.")]
+    internal static void AddPointDataRecordToBuffers(IBasePointDataRecord basePointDataRecord, IReadOnlyList<ColumnBuffer> buffers)
+    {
+        // do the base values
+        var index = 0;
+        buffers[index++].Add(basePointDataRecord.X);
+        buffers[index++].Add(basePointDataRecord.Y);
+        buffers[index++].Add(basePointDataRecord.Z);
+        buffers[index++].Add(basePointDataRecord.Intensity);
+        buffers[index++].Add(basePointDataRecord.ReturnNumber);
+        buffers[index++].Add(basePointDataRecord.NumberOfReturns);
+        buffers[index++].Add(basePointDataRecord.ScanDirectionFlag);
+        buffers[index++].Add(basePointDataRecord.EdgeOfFlightLine);
+        buffers[index++].Add(basePointDataRecord.Synthetic);
+        buffers[index++].Add(basePointDataRecord.KeyPoint);
+        buffers[index++].Add(basePointDataRecord.Withheld);
+        buffers[index++].Add(basePointDataRecord.UserData);
+        buffers[index++].Add(basePointDataRecord.PointSourceId);
+
+        switch (basePointDataRecord)
+        {
+            case IPointDataRecord pointDataRecord:
+                buffers[index++].Add((byte)pointDataRecord.Classification);
+                buffers[index++].Add(pointDataRecord.ScanAngleRank);
+                break;
+#if LAS1_4_OR_GREATER
+            case IExtendedPointDataRecord extendedPointDataRecord:
+                buffers[index++].Add(extendedPointDataRecord.Overlap);
+                buffers[index++].Add(extendedPointDataRecord.ScannerChannel);
+                buffers[index++].Add((byte)extendedPointDataRecord.Classification);
+                buffers[index++].Add(extendedPointDataRecord.ScanAngle);
+                break;
+#endif
         }
 
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Performance", "CA1863:Use \'CompositeFormat\'", Justification = "This is for exceptions")]
-        static RecordBatch Flush(Schema schema, IReadOnlyList<ColumnBuffer> buffers, int length)
+        if (basePointDataRecord is IGpsPointDataRecord gpsPointDataRecord)
         {
-            return new(schema, GetArrays(schema, buffers, length), length);
+            buffers[index++].Add(gpsPointDataRecord.GpsTime);
+        }
 
-            static IEnumerable<IArrowArray> GetArrays(Schema schema, IReadOnlyList<ColumnBuffer> buffers, int length)
+#if LAS1_2_OR_GREATER
+        if (basePointDataRecord is IColorPointDataRecord colorPointDataRecord)
+        {
+            buffers[index++].Add(colorPointDataRecord.Color.R);
+            buffers[index++].Add(colorPointDataRecord.Color.G);
+            buffers[index++].Add(colorPointDataRecord.Color.B);
+        }
+#endif
+
+#if LAS1_3_OR_GREATER
+        if (basePointDataRecord is IWaveformPointDataRecord waveformPointDataRecord)
+        {
+            buffers[index++].Add(waveformPointDataRecord.WavePacketDescriptorIndex);
+            buffers[index++].Add(waveformPointDataRecord.ByteOffsetToWaveformData);
+            buffers[index++].Add(waveformPointDataRecord.WaveformPacketSizeInBytes);
+            buffers[index++].Add(waveformPointDataRecord.ReturnPointWaveformLocation);
+            buffers[index++].Add(waveformPointDataRecord.ParametricDx);
+            buffers[index++].Add(waveformPointDataRecord.ParametricDy);
+            buffers[index++].Add(waveformPointDataRecord.ParametricDz);
+        }
+#endif
+
+#if LAS1_4_OR_GREATER
+        if (basePointDataRecord is INearInfraredPointDataRecord nearInfraredPointDataRecord)
+        {
+            buffers[index++].Add(nearInfraredPointDataRecord.NearInfrared);
+        }
+#endif
+    }
+
+    /// <summary>
+    /// Flushes the buffers to the <see cref="RecordBatch"/>.
+    /// </summary>
+    /// <param name="buffers">The buffers.</param>
+    /// <param name="schema">The schema.</param>
+    /// <param name="length">The length.</param>
+    /// <returns>The record batch.</returns>
+    /// <exception cref="InvalidOperationException">Incorrect length.</exception>
+    [System.Diagnostics.CodeAnalysis.SuppressMessage("Performance", "CA1863:Use \'CompositeFormat\'", Justification = "This is for exceptions")]
+    internal static RecordBatch FlushToRecordBatch(IReadOnlyList<ColumnBuffer> buffers, Schema schema, int length)
+    {
+        return new(schema, GetArrays(schema, buffers, length), length);
+
+        static IEnumerable<IArrowArray> GetArrays(Schema schema, IReadOnlyList<ColumnBuffer> buffers, int length)
+        {
+            for (var i = 0; i < buffers.Count; i++)
             {
-                for (var i = 0; i < buffers.Count; i++)
+                var buffer = buffers[i];
+
+                if (buffer.Count != length)
                 {
-                    var buffer = buffers[i];
-
-                    if (buffer.Count != length)
-                    {
-                        throw new InvalidOperationException(string.Format(Arrow.Properties.Resources.Culture, Arrow.Properties.Resources.IncorrectBufferLength, i, schema.GetFieldByIndex(i).Name, buffer.Count, length));
-                    }
-
-                    var array = buffer.BuildArray();
-
-                    if (array.Length != length)
-                    {
-                        throw new InvalidOperationException(string.Format(Arrow.Properties.Resources.Culture, Arrow.Properties.Resources.IncorrectBullderBuildLength, i, array.Length, length));
-                    }
-
-                    buffer.Clear();
-
-                    yield return array;
+                    throw new InvalidOperationException(string.Format(Arrow.Properties.Resources.Culture, Arrow.Properties.Resources.IncorrectBufferLength, i, schema.GetFieldByIndex(i).Name, buffer.Count, length));
                 }
+
+                var array = buffer.BuildArray();
+
+                if (array.Length != length)
+                {
+                    throw new InvalidOperationException(string.Format(Arrow.Properties.Resources.Culture, Arrow.Properties.Resources.IncorrectBullderBuildLength, i, array.Length, length));
+                }
+
+                buffer.Clear();
+
+                yield return array;
             }
         }
     }
@@ -155,7 +173,14 @@ internal static class LasToArrowStream
     /// </summary>
     /// <param name="reader">The reader.</param>
     /// <returns>The arrow schema.</returns>
-    internal static Schema GetArrowSchema(ILasReader reader)
+    internal static Schema GetArrowSchema(ILasReader reader) => GetArrowSchema(reader.Header);
+
+    /// <summary>
+    /// Gets the arrow schema.
+    /// </summary>
+    /// <param name="header">The header.</param>
+    /// <returns>The arrow schema.</returns>
+    internal static Schema GetArrowSchema(in HeaderBlock header)
     {
         var builder = new Schema.Builder();
 
@@ -174,29 +199,29 @@ internal static class LasToArrowStream
             .Field(new Field(Constants.Columns.UserData, UInt8Type.Default, nullable: false))
             .Field(new Field(Constants.Columns.PointSourceId, UInt16Type.Default, nullable: false));
 
-        var pointDataFormatId = reader.Header.PointDataFormatId;
+        var pointDataFormatId = header.PointDataFormatId;
 #if LAS1_3_OR_GREATER
-        if (pointDataFormatId <= GpsColorWaveformPointDataRecord.Id)
+        switch (pointDataFormatId)
         {
-            builder
-                .Field(new Field(Constants.Columns.Legacy.Classification, UInt8Type.Default, nullable: false))
-                .Field(new Field(Constants.Columns.Legacy.ScanAngleRank, Int8Type.Default, nullable: false));
+            case <= GpsColorWaveformPointDataRecord.Id:
+                builder
+                    .Field(new Field(Constants.Columns.Legacy.Classification, UInt8Type.Default, nullable: false))
+                    .Field(new Field(Constants.Columns.Legacy.ScanAngleRank, Int8Type.Default, nullable: false));
+                break;
+#if LAS1_4_OR_GREATER
+            case > GpsColorWaveformPointDataRecord.Id:
+                builder
+                    .Field(new Field(Constants.Columns.Extended.Overlap, BooleanType.Default, nullable: false))
+                    .Field(new Field(Constants.Columns.Extended.ScannerChannel, UInt8Type.Default, nullable: false))
+                    .Field(new Field(Constants.Columns.Extended.Classification, UInt8Type.Default, nullable: false))
+                    .Field(new Field(Constants.Columns.Extended.ScanAngle, Int16Type.Default, nullable: false));
+                break;
+#endif
         }
 #else
         builder
             .Field(new Field(Constants.Columns.Legacy.Classification, UInt8Type.Default, nullable: false))
             .Field(new Field(Constants.Columns.Legacy.ScanAngleRank, Int8Type.Default, nullable: false));
-#endif
-
-#if LAS1_4_OR_GREATER
-        if (pointDataFormatId > GpsColorWaveformPointDataRecord.Id)
-        {
-            builder
-                .Field(new Field(Constants.Columns.Extended.Overlap, BooleanType.Default, nullable: false))
-                .Field(new Field(Constants.Columns.Extended.ScannerChannel, UInt8Type.Default, nullable: false))
-                .Field(new Field(Constants.Columns.Extended.Classification, UInt8Type.Default, nullable: false))
-                .Field(new Field(Constants.Columns.Extended.ScanAngle, Int16Type.Default, nullable: false));
-        }
 #endif
 
         // GPS point data formats
@@ -278,151 +303,15 @@ internal static class LasToArrowStream
 
         builder.Metadata(Constants.Metadata.PointDataFormatId, pointDataFormatId.ToString(System.Globalization.CultureInfo.InvariantCulture));
 #if LAS1_2_OR_GREATER
-        builder.Metadata(Constants.Metadata.GlobalEncoding, reader.Header.GlobalEncoding.ToString());
+        builder.Metadata(Constants.Metadata.GlobalEncoding, header.GlobalEncoding.ToString());
 #endif
-        builder.Metadata(Constants.Metadata.Version, reader.Header.Version.ToString());
-        builder.Metadata(Constants.Metadata.Offset, reader.Header.Offset.ToString(format: null, System.Globalization.CultureInfo.InvariantCulture));
-        builder.Metadata(Constants.Metadata.ScaleFactor, reader.Header.ScaleFactor.ToString(format: null, System.Globalization.CultureInfo.InvariantCulture));
+        builder.Metadata(Constants.Metadata.Version, header.Version.ToString());
+        builder.Metadata(Constants.Metadata.Offset, header.Offset.ToString(format: null, System.Globalization.CultureInfo.InvariantCulture));
+        builder.Metadata(Constants.Metadata.ScaleFactor, header.ScaleFactor.ToString(format: null, System.Globalization.CultureInfo.InvariantCulture));
 #if LAS1_5_OR_GREATER
-        builder.Metadata(Constants.Metadata.TimeOffset, reader.Header.TimeOffset.ToString(System.Globalization.CultureInfo.InvariantCulture));
+        builder.Metadata(Constants.Metadata.TimeOffset, header.TimeOffset.ToString(System.Globalization.CultureInfo.InvariantCulture));
 #endif
 
         return builder.Build();
-    }
-
-    private abstract class ColumnBuffer
-    {
-        public abstract int Count { get; }
-
-        public static ColumnBuffer Create(ArrowTypeId typeId, int capacity) =>
-            typeId switch
-            {
-                ArrowTypeId.Boolean => new BooleanColumnBuffer(capacity),
-                ArrowTypeId.UInt8 => new UInt8ColumnBuffer(capacity),
-                ArrowTypeId.Int8 => new Int8ColumnBuffer(capacity),
-                ArrowTypeId.UInt16 => new UInt16ColumnBuffer(capacity),
-                ArrowTypeId.Int16 => new Int16ColumnBuffer(capacity),
-                ArrowTypeId.UInt32 => new UInt32ColumnBuffer(capacity),
-                ArrowTypeId.Int32 => new Int32ColumnBuffer(capacity),
-                ArrowTypeId.UInt64 => new UInt64ColumnBuffer(capacity),
-                ArrowTypeId.Int64 => new Int64ColumnBuffer(capacity),
-                ArrowTypeId.Float => new SingleColumnBuffer(capacity),
-                ArrowTypeId.Double => new DoubleColumnBuffer(capacity),
-                _ => throw new NotSupportedException(),
-            };
-
-        public abstract void Add(object? value);
-
-        public abstract void Clear();
-
-        public abstract IArrowArray BuildArray();
-
-        private abstract class PrimitiveColumnBuffer<T, TArray, TBuilder>(int capacity) : ColumnBuffer, IEnumerable<T?>
-            where T : struct
-            where TArray : IArrowArray
-            where TBuilder : class, IArrowArrayBuilder<TArray>
-        {
-            private readonly List<T?> buffer = new(capacity);
-
-            public override int Count => this.buffer.Count;
-
-            public override void Add(object? value)
-            {
-                if (value is T t)
-                {
-                    this.buffer.Add(t);
-                }
-                else if (value is null || value == DBNull.Value)
-                {
-                    this.buffer.Add(default);
-                }
-                else
-                {
-                    // try to cast it
-                    this.buffer.Add((T)Convert.ChangeType(value, typeof(T), System.Globalization.CultureInfo.InvariantCulture));
-                }
-            }
-
-            public override void Clear() => this.buffer.Clear();
-
-            public override IArrowArray BuildArray()
-            {
-                var builder = this.GetArrayBuilder();
-                foreach (var v in this)
-                {
-                    if (v.HasValue)
-                    {
-                        builder.Append(v.Value);
-                    }
-                    else
-                    {
-                        builder.AppendNull();
-                    }
-                }
-
-                return builder.Build(allocator: default);
-            }
-
-            public IEnumerator<T?> GetEnumerator() => this.buffer.GetEnumerator();
-
-            System.Collections.IEnumerator System.Collections.IEnumerable.GetEnumerator() => this.GetEnumerator();
-
-            protected abstract IArrowArrayBuilder<T, TArray, TBuilder> GetArrayBuilder();
-        }
-
-        private sealed class BooleanColumnBuffer(int capacity) : PrimitiveColumnBuffer<bool, BooleanArray, BooleanArray.Builder>(capacity)
-        {
-            protected override IArrowArrayBuilder<bool, BooleanArray, BooleanArray.Builder> GetArrayBuilder() => new BooleanArray.Builder();
-        }
-
-        private sealed class UInt8ColumnBuffer(int capacity) : PrimitiveColumnBuffer<byte, UInt8Array, UInt8Array.Builder>(capacity)
-        {
-            protected override IArrowArrayBuilder<byte, UInt8Array, UInt8Array.Builder> GetArrayBuilder() => new UInt8Array.Builder();
-        }
-
-        private sealed class Int8ColumnBuffer(int capacity) : PrimitiveColumnBuffer<sbyte, Int8Array, Int8Array.Builder>(capacity)
-        {
-            protected override IArrowArrayBuilder<sbyte, Int8Array, Int8Array.Builder> GetArrayBuilder() => new Int8Array.Builder();
-        }
-
-        private sealed class UInt16ColumnBuffer(int capacity) : PrimitiveColumnBuffer<ushort, UInt16Array, UInt16Array.Builder>(capacity)
-        {
-            protected override IArrowArrayBuilder<ushort, UInt16Array, UInt16Array.Builder> GetArrayBuilder() => new UInt16Array.Builder();
-        }
-
-        private sealed class Int16ColumnBuffer(int capacity) : PrimitiveColumnBuffer<short, Int16Array, Int16Array.Builder>(capacity)
-        {
-            protected override IArrowArrayBuilder<short, Int16Array, Int16Array.Builder> GetArrayBuilder() => new Int16Array.Builder();
-        }
-
-        private sealed class UInt32ColumnBuffer(int capacity) : PrimitiveColumnBuffer<uint, UInt32Array, UInt32Array.Builder>(capacity)
-        {
-            protected override IArrowArrayBuilder<uint, UInt32Array, UInt32Array.Builder> GetArrayBuilder() => new UInt32Array.Builder();
-        }
-
-        private sealed class Int32ColumnBuffer(int capacity) : PrimitiveColumnBuffer<int, Int32Array, Int32Array.Builder>(capacity)
-        {
-            protected override IArrowArrayBuilder<int, Int32Array, Int32Array.Builder> GetArrayBuilder() => new Int32Array.Builder();
-        }
-
-        private sealed class UInt64ColumnBuffer(int capacity) : PrimitiveColumnBuffer<ulong, UInt64Array, UInt64Array.Builder>(capacity)
-        {
-            protected override IArrowArrayBuilder<ulong, UInt64Array, UInt64Array.Builder> GetArrayBuilder() => new UInt64Array.Builder();
-        }
-
-        private sealed class Int64ColumnBuffer(int capacity) : PrimitiveColumnBuffer<long, Int64Array, Int64Array.Builder>(capacity)
-        {
-            protected override IArrowArrayBuilder<long, Int64Array, Int64Array.Builder> GetArrayBuilder() => new Int64Array.Builder();
-        }
-
-        private sealed class SingleColumnBuffer(int capacity) : PrimitiveColumnBuffer<float, FloatArray, FloatArray.Builder>(capacity)
-        {
-            protected override IArrowArrayBuilder<float, FloatArray, FloatArray.Builder> GetArrayBuilder() => new FloatArray.Builder();
-        }
-
-        private sealed class DoubleColumnBuffer(int capacity) : PrimitiveColumnBuffer<double, DoubleArray, DoubleArray.Builder>(capacity)
-        {
-            protected override IArrowArrayBuilder<double, DoubleArray, DoubleArray.Builder> GetArrayBuilder() => new DoubleArray.Builder();
-        }
     }
 }

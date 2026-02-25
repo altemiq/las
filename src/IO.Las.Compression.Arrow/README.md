@@ -2,14 +2,13 @@
 
 <!-- A description of the package and where one can find more documentation -->
 
-Provides support for reading and writing Point Clouds to and from the Apache Arrow format.
+Provides support for reading compressed Point Clouds to the Apache Arrow format.
 
 ## Key Features
 
 <!-- The key features of this package -->
 
-* Read a LAS file as arrow record batches
-* Read arrow record batches as a LAS file
+* Reading a LAS file as arrow record batches
 
 ## How to Use
 
@@ -18,13 +17,10 @@ Provides support for reading and writing Point Clouds to and from the Apache Arr
 ```csharp
 using Altemiq.IO.Las;
 
-using LasReader reader = new("example.las");
+using LazReader reader = new("example.laz");
 
-// get the batches
+// get the batches, with each chunk being a batch
 var batches = reader.ToArrowBatches();
-
-// read the batches as a LAS file
-ArrowLasReader arrowReader = new(batches);
 ```
 
 ## Main Types
@@ -33,8 +29,7 @@ ArrowLasReader arrowReader = new(batches);
 
 The main types provided by this library are:
 
-* `Altemiq.IO.Las.ArrowLasReader`
-* `Altemiq.IO.Las.LasReaderExtensions`
+* `Altemiq.IO.Las.LazReaderExtensions`
 
 ## Additional Documentation
 

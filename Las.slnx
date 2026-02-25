@@ -26,6 +26,8 @@
     <Project Path="src/IO.Las.Arrow/IO.Las.Arrow.csproj" />
     <Project Path="src/IO.Las.Azure/IO.Las.Azure.csproj" />
     <Project Path="src/IO.Las.Cloud/IO.Las.Cloud.csproj" />
+    <Project Path="src/IO.Las.Compression.Arrow/IO.Las.Compression.Arrow.csproj" />
+    <Project Path="src/IO.Las.Compression.DataFrame/IO.Las.Compression.DataFrame.csproj" />
     <Project Path="src/IO.Las.Compression/IO.Las.Compression.csproj" />
     <Project Path="src/IO.Las.DataFrame/IO.Las.DataFrame.csproj" />
     <Project Path="src/IO.Las.Geodesy/IO.Las.Geodesy.csproj" />
@@ -46,6 +48,8 @@
     <Project Path="tests/IO.Las.Cloud.Tests/IO.Las.Cloud.Tests.csproj">
       <Build Solution="Release|*" Project="false" />
     </Project>
+    <Project Path="tests/IO.Las.Compression.Arrow.Tests/IO.Las.Compression.Arrow.Tests.csproj" />
+    <Project Path="tests/IO.Las.Compression.DataFrame.Tests/IO.Las.Compression.DataFrame.Tests.csproj" />
     <Project Path="tests/IO.Las.Compression.Tests/IO.Las.Compression.Tests.csproj">
       <Build Solution="Release|*" Project="false" />
     </Project>

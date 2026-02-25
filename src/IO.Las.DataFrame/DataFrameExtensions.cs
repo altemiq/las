@@ -25,10 +25,9 @@ public static class DataFrameExtensions
         {
             var schema = reader.GetArrowSchema().ToPolarsCompatibleSchema();
 
-            return NewDataFrame(
-                Polars.NET.Core.Arrow.ArrowStreamInterop.ImportEager(
-                    reader.ToArrowBatches(schema, batchSize),
-                    schema));
+            var batches = reader.ToArrowBatches(schema, batchSize);
+
+            return DataFrame.ReadRecordBatches(batches, schema);
         }
 
         /// <summary>
@@ -59,6 +58,14 @@ public static class DataFrameExtensions
 
             consumerTask.Wait();
         }
+
+        /// <summary>
+        /// Imports the stream eagerly.
+        /// </summary>
+        /// <param name="stream">The stream.</param>
+        /// <param name="schema">The schema.</param>
+        /// <returns>The data frame.</returns>
+        public static DataFrame ReadRecordBatches(IEnumerable<Apache.Arrow.RecordBatch> stream, Apache.Arrow.Schema schema) => NewDataFrame(Polars.NET.Core.Arrow.ArrowStreamInterop.ImportEager(stream, schema));
     }
 
     [System.Runtime.CompilerServices.UnsafeAccessor(System.Runtime.CompilerServices.UnsafeAccessorKind.Constructor)]

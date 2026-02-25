@@ -2,14 +2,14 @@
 
 <!-- A description of the package and where one can find more documentation -->
 
-Provides support for reading and writing Point Clouds to and from Polars DataFrames.
+Provides support for reading compressed chunked Point Clouds to Polars DataFrames.
 
 ## Key Features
 
 <!-- The key features of this package -->
 
-* Read a LAS file into a DataFrame
-* Read a LAS file into a LazyFrame
+* Read a chunked LAZ file into a DataFrame
+* Read a chunked LAZ file into a LazyFrame
 
 ## How to Use
 
@@ -20,16 +20,10 @@ Provides support for reading and writing Point Clouds to and from Polars DataFra
 ```csharp
 using Altemiq.IO.Las;
 
-using LasReader reader = new("example.las");
+using LazReader reader = new("example.laz");
 
 // read the data frame
-var data = Polars.CSharp.DataFrame.ReadLas(reader);
-
-// write the data frame as a LAS file
-data.WriteTo(arrowReader =>
-{
-    // use the arrow LAS reader
-});
+var data = Polars.CSharp.DataFrame.ReadLaz(reader);
 ```
 
 ### Lazy frame loading
@@ -37,16 +31,10 @@ data.WriteTo(arrowReader =>
 ```csharp
 using Altemiq.IO.Las;
 
-using LasReader reader = new("example.las");
+using LazReader reader = new("example.laz");
 
 // read the lazy frame
-var data = Polars.CSharp.LazyFrame.ScanLas(reader);
-
-// sink the lazy frame as a LAS file
-data.SinkTo(arrowReader =>
-{
-    // use the arrow LAS reader
-});
+var data = Polars.CSharp.LazyFrame.ScanLaz(reader);
 ```
 
 ## Main Types
@@ -57,7 +45,6 @@ The main types provided by this library are:
 
 * `Altemiq.IO.Las.DataFrameExtensions`
 * `Altemiq.IO.Las.LazyFrameExtensions`
-* `Altemiq.IO.Las.SchemaExtensions`
 
 ## Additional Documentation
 

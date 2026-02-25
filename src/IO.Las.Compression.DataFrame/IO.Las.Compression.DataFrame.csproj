@@ -2,7 +2,7 @@
 
   <PropertyGroup>
     <TargetFrameworks>net10.0;net9.0;net8.0</TargetFrameworks>
-    <RootNamespace>$(RootNamespace.Replace('.DataFrame', ''))</RootNamespace>
+    <RootNamespace>$(RootNamespace.Replace('.Compression.DataFrame', ''))</RootNamespace>
     <VersionSuffix Condition=" '$(VersionSuffix)' == '' ">beta1</VersionSuffix>
     <NoWarn Condition=" !$([MSBuild]::IsTargetFrameworkCompatible('$(TargetFramework)', 'net10.0')) ">$(NoWarn);AD0001</NoWarn>
     
@@ -17,21 +17,14 @@
     <Description>Provides support for reading LAS/LAZ to Polars data frames</Description>
     <PackageTags>$(PackageTags);$(_Tag.Replace(' ',';'))</PackageTags>
   </PropertyGroup>
-  
-  <ItemGroup>
-    <PackageReference Include="Polars.NET" VersionOverride="0.2.1-beta1" />
-  </ItemGroup>
-  
+    
   <ItemGroup>
     <Using Include="Polars.CSharp" />
   </ItemGroup>
   
   <ItemGroup>
-    <ProjectReference Include="..\IO.Las.Arrow\IO.Las.Arrow.csproj" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <InternalsVisibleTo Include="$(AssemblyName.Replace('.DataFrame', '.Compression.DataFrame'))" />
+    <ProjectReference Include="..\IO.Las.Compression.Arrow\IO.Las.Compression.Arrow.csproj" />
+    <ProjectReference Include="..\IO.Las.DataFrame\IO.Las.DataFrame.csproj" />
   </ItemGroup>
 
 </Project>

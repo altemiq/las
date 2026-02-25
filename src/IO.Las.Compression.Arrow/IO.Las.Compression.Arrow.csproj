@@ -1,0 +1,26 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFrameworks>net8.0;net6.0;netstandard2.0</TargetFrameworks>
+    <RootNamespace>$(RootNamespace.Replace('.Compression.Arrow', ''))</RootNamespace>
+    <IsAotCompatible>false</IsAotCompatible>
+  </PropertyGroup>
+
+  <PropertyGroup Label="Packaging">
+    <_Tag>Apache Arrow</_Tag>
+    <Product>$(Product.Replace('{Type}', '$(_Tag)'))</Product>
+    <Description>Provides support for reading chunked LAZ to Apache Arrow formats</Description>
+    <PackageTags>$(PackageTags);$(_Tag.Replace(' ',';'))</PackageTags>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <Using Include="Apache.Arrow" />
+    <Using Include="Apache.Arrow.Types" />
+  </ItemGroup>
+
+  <ItemGroup>
+   <ProjectReference Include="..\IO.Las.Arrow\IO.Las.Arrow.csproj" />
+   <ProjectReference Include="..\IO.Las.Compression\IO.Las.Compression.csproj" />
+  </ItemGroup>
+
+</Project>
