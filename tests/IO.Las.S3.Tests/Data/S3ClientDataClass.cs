@@ -14,7 +14,7 @@ public class S3ClientDataClass : IAsyncInitializer, IAsyncDisposable
         this.S3Client = services.GetRequiredAwsService<Amazon.S3.IAmazonS3>();
         if (GlobalHooks.NotificationService != null)
         {
-            await GlobalHooks.NotificationService.WaitForResourceAsync("localstack", KnownResourceStates.Running).WaitAsync(TimeSpan.FromSeconds(30));
+            await GlobalHooks.NotificationService.WaitForResourceAsync("localstack", KnownResourceStates.Running).WaitAsync(TimeSpan.FromSeconds(90));
         }
 
         // wait until the bucket is available
