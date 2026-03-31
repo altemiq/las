@@ -50,7 +50,7 @@ internal static class LazToArrowStream
 
         IEnumerator IEnumerable.GetEnumerator() => this.GetEnumerator();
 
-        [System.Diagnostics.CodeAnalysis.MemberNotNullWhen(true, nameof(this.Current))]
+        [System.Diagnostics.CodeAnalysis.MemberNotNullWhen(true, nameof(IEnumerator.Current))]
         public bool MoveNext()
         {
             var rowCount = 0;

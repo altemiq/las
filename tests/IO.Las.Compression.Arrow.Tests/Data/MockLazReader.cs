@@ -6,7 +6,7 @@ internal sealed class MockLazReader : ILasReader, ILazReader
 {
     private readonly MockPointDataRecordReader reader = new();
     private readonly MockChunkedReader chunkedReader;
-    
+
     public MockLazReader()
     {
         var builder = new HeaderBlockBuilder(GpsPointDataRecord.Id)
@@ -29,17 +29,17 @@ internal sealed class MockLazReader : ILasReader, ILazReader
 #endif
 
     public bool IsCompressed => true;
-    
+
     public bool IsChunked => true;
-    
+
     public LasPointSpan ReadPointDataRecord() => this.reader.Read([]);
-    
+
     public LasPointSpan ReadPointDataRecord(ulong index) => throw new NotImplementedException();
-    
+
     public ValueTask<LasPointMemory> ReadPointDataRecordAsync(CancellationToken cancellationToken = default) => this.reader.ReadAsync(ReadOnlyMemory<byte>.Empty, cancellationToken);
-    
+
     public ValueTask<LasPointMemory> ReadPointDataRecordAsync(ulong index, CancellationToken cancellationToken = default) => throw new NotImplementedException();
-    
+
     public ChunkedReader.ChunkedLasPointSpanEnumerable ReadChunk() => new(this.chunkedReader, this);
 
     public ChunkedReader.ChunkedLasPointSpanEnumerable ReadChunk(int chunk) => throw new NotImplementedException();
@@ -72,7 +72,7 @@ internal sealed class MockLazReader : ILasReader, ILazReader
             ref uint chunkCount = ref ChunkCountField(this);
             chunkCount = 0;
         }
-        
+
         [UnsafeAccessor(UnsafeAccessorKind.Field, Name = "chunkCount")]
         private static extern ref uint ChunkCountField(ChunkedReader reader);
     }
@@ -85,7 +85,7 @@ internal sealed class MockLazReader : ILasReader, ILazReader
             ref Readers.IPointDataRecordReader reader = ref ReaderField(this);
             reader = rawReader;
         }
-        
+
         [UnsafeAccessor(UnsafeAccessorKind.Field, Name = "reader")]
         private static extern ref Readers.IPointDataRecordReader ReaderField(PointWiseReader reader);
     }

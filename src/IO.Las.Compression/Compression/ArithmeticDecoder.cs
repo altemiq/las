@@ -18,7 +18,7 @@ internal sealed class ArithmeticDecoder : ArithmeticCoder, IEntropyDecoder
     private uint length;
 
     /// <inheritdoc/>
-    [System.Diagnostics.CodeAnalysis.MemberNotNullWhen(true, nameof(this.inputStream))]
+    [System.Diagnostics.CodeAnalysis.MemberNotNullWhen(true, nameof(inputStream))]
     public bool Initialize(Stream? stream, bool reallyInit = true)
     {
         if (stream is null)

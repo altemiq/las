@@ -8,8 +8,8 @@
   <Import Project="$([MSBuild]::GetPathOfFileAbove('$(MSBuildThisFileName.Replace('Packages', 'Versions'))$(MSBuildThisFileExtension)', '$(MSBuildThisFileDirectory)'))" />
 
   <ItemGroup>
-    <PackageVersion Include="Meziantou.Polyfill" Version="1.0.101" />
-    <PackageVersion Include="TUnit" Version="1.17.11" />
+    <PackageVersion Include="Meziantou.Polyfill" Version="1.0.105" />
+    <PackageVersion Include="TUnit" Version="1.24.0" />
   </ItemGroup>
   
   <ItemGroup Label="Apache">
@@ -17,16 +17,23 @@
   </ItemGroup>
   
   <ItemGroup Label="Aspire">
-    <PackageVersion Include="Aspire.Hosting.Testing" Version="13.1.1" />
+    <PackageVersion Include="Aspire.Hosting.Testing" Version="13.2.1" />
   </ItemGroup>
   
   <ItemGroup Label="AWS">
-    <PackageVersion Include="AWSSDK.Extensions.NETCore.Setup" Version="4.0.3.23" />
-    <PackageVersion Include="AWSSDK.S3" Version="4.0.14" />
+    <PackageVersion Include="AWSSDK.Extensions.NETCore.Setup" Version="4.0.3.28" />
+    <PackageVersion Include="AWSSDK.S3" Version="4.0.20" />
   </ItemGroup>
   
   <ItemGroup Label="Azure">
     <PackageVersion Include="Microsoft.Extensions.Azure" Version="1.13.1" />
+  </ItemGroup>
+  
+  <ItemGroup Label="DataFrames">
+    <PackageVersion Include="Polars.NET.Native.linux-arm64" Version="0.4.0" />
+    <PackageVersion Include="Polars.NET.Native.linux-x64" Version="0.4.0" />
+    <PackageVersion Include="Polars.NET.Native.win-x64" Version="0.4.0" />
+    <PackageVersion Include="Polars.NET.Native.osx-arm64" Version="0.4.0" />
   </ItemGroup>
   
   <ItemGroup Label="Microsoft.AspNetCore">
@@ -34,7 +41,7 @@
   </ItemGroup>
 
   <ItemGroup Label="SQLite">
-    <PackageVersion Include="Microsoft.Data.Sqlite" Version="10.0.3" />
+    <PackageVersion Include="Microsoft.Data.Sqlite" Version="10.0.5" />
     <PackageVersion Include="SQLitePCLRaw.bundle_e_sqlite3" Version="3.0.2" />
     <PackageVersion Include="SQLitePCLRaw.core" Version="3.0.2" />
   </ItemGroup>

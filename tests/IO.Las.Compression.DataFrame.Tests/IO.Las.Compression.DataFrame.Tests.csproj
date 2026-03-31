@@ -8,6 +8,25 @@
     <ProjectReference Include="..\..\src\IO.Las.Compression.DataFrame\IO.Las.Compression.DataFrame.csproj" />
   </ItemGroup>
 
+  <Choose>
+    <When Condition="$([System.OperatingSystem]::IsLinux())">
+      <ItemGroup>
+        <PackageReference Include="Polars.NET.Native.linux-arm64" />
+        <PackageReference Include="Polars.NET.Native.linux-x64" />
+      </ItemGroup>
+    </When>
+    <When Condition="$([System.OperatingSystem]::IsWindows())">
+      <ItemGroup>
+        <PackageReference Include="Polars.NET.Native.win-x64" />
+      </ItemGroup>
+    </When>
+    <When Condition="$([System.OperatingSystem]::IsMacOS())">
+      <ItemGroup>
+        <PackageReference Include="Polars.NET.Native.osx-arm64" />
+      </ItemGroup>
+    </When>
+  </Choose>
+
   <ItemGroup>
     <EmbeddedResource Include="..\..\data\laz\fusa.laz" />
     <EmbeddedResource Include="..\IO.Las.Compression.Tests\fusa_height*.laz" />

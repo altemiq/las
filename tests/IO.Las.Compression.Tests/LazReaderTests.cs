@@ -37,7 +37,7 @@ public class LazReaderTests
         await Assert.That(pointDataRecord).IsTypeOf<ExtendedGpsColorPointDataRecord>().And.Member(p => p.X, x => x.IsNotDefault());
         await Assert.That(data).IsNotEmpty();
     }
-    
+
     [Test]
     public async Task ReadAsyncEnumerable()
     {
@@ -67,7 +67,7 @@ public class LazReaderTests
         await Assert.That(data).IsNotEmpty();
     }
 #endif
-    
+
 #if LAS1_2_OR_GREATER
     [Test]
 #if LAS1_4_OR_GREATER
@@ -85,7 +85,7 @@ public class LazReaderTests
 #endif
         using var stream = typeof(LazReaderTests).Assembly.GetManifestResourceStream(typeof(LazReaderTests), file)
                            ?? throw new System.Diagnostics.UnreachableException("Failed to get stream");
-      
+
 #if NETSTANDARD2_1_OR_GREATER || NETCOREAPP3_0_OR_GREATER
         await
 #endif
@@ -187,7 +187,7 @@ public class LazReaderTests
 #endif
         using var stream = typeof(LazReaderTests).Assembly.GetManifestResourceStream(typeof(LazReaderTests), resource)
                            ?? throw new System.Diagnostics.UnreachableException("Failed to get stream");
-        
+
 #if NETSTANDARD2_1_OR_GREATER || NETCOREAPP3_0_OR_GREATER
         await
 #endif
@@ -222,7 +222,7 @@ public class LazReaderTests
 #endif
         using var stream = typeof(LazReaderTests).Assembly.GetManifestResourceStream(typeof(LazReaderTests), file)
                            ?? throw new System.Diagnostics.UnreachableException("Failed to get stream");
-        
+
 #if NETSTANDARD2_1_OR_GREATER || NETCOREAPP3_0_OR_GREATER
         await
 #endif
@@ -252,7 +252,7 @@ public class LazReaderTests
 #endif
         using var stream = typeof(LazReaderTests).Assembly.GetManifestResourceStream(typeof(LazReaderTests), "fusa_height.laz")
                            ?? throw new System.Diagnostics.UnreachableException("Failed to get stream");
-        
+
 #if NETSTANDARD2_1_OR_GREATER || NETCOREAPP3_0_OR_GREATER
         await
 #endif
@@ -290,7 +290,7 @@ public class LazReaderTests
 #endif
         using var stream = typeof(LazReaderTests).Assembly.GetManifestResourceStream(typeof(LazReaderTests), resource)
                            ?? throw new System.Diagnostics.UnreachableException("Failed to get stream");
-        
+
 #if NETSTANDARD2_1_OR_GREATER || NETCOREAPP3_0_OR_GREATER
         await
 #endif

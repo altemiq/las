@@ -30,7 +30,7 @@ internal sealed class ArithmeticEncoder : ArithmeticCoder, IEntropyEncoder
     }
 
     /// <inheritdoc/>
-    [System.Diagnostics.CodeAnalysis.MemberNotNullWhen(true, nameof(this.outputStream))]
+    [System.Diagnostics.CodeAnalysis.MemberNotNullWhen(true, nameof(outputStream))]
     public bool Initialize(Stream? stream)
     {
         if (stream is null)
