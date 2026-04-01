@@ -1,0 +1,183 @@
+Brand,Model,Code
+Riegl,VQ-820-G,R820
+Riegl,VQ-880-G,R881
+Riegl,VQ-880-GH,R88H
+Riegl,VQ-880-G-II,R882
+Riegl,VQ-840-G,R840
+Riegl,VQ-860-G,R860
+Riegl,VZ-200,RT20
+Riegl,VZ-400,RT40
+Riegl,VZ-400i,RT41
+Riegl,VZ-1000,RTA0
+Riegl,VZ-2000,RTB0
+Riegl,VZ-2000i,RTB1
+Riegl,VZ-4000,RTD0
+Riegl,VZ-6000,RTF0
+Riegl,VQ-1560,R156
+Riegl,VQ-1560i,R15I
+Riegl,VQ-1560ii,R15J
+Riegl,VQ-1560ii-S,R15S
+Riegl,VQ-1560iii-S,R15K
+Riegl,VQ-1560i-DW,R15D
+Riegl,VQ-1260,R120
+Riegl,VQ-1460,R140
+Riegl,VQ-780i,R78I
+Riegl,VQ-780ii,R78J
+Riegl,VQ-780ii-S,R78K
+Riegl,VQ-480ii,R482
+Riegl,VQ-580ii,R582
+Riegl,VUX-240,RX2H
+Riegl,VUX-1UAV,RX1U
+Riegl,VUX-1LR,RX1L
+Riegl,VUX-1HA,RX1A
+Riegl,miniVUX-1UAV,RmX1
+Riegl,miniVUX-1DL,RmX2
+Riegl,BathyCopter,RBC1
+Riegl,VMX-2HA,RM2A
+Riegl,VMQ-1HA,RMQA
+Riegl,Generic Riegl,R000
+Leica,ALS50,LA50
+Leica,ALS60,LA60
+Leica,ALS70,LA70
+Leica,ALS70 SP1,LA71
+Leica,ALS70 SP2,LA72
+Leica,ALS70 SP3,LA73
+Leica,ALS80,LA80
+Leica,TerrainMapper,LTM1
+Leica,TerrainMapper-2,LTM2
+Leica,TerrainMapper-3,LTM3
+Leica,CityMapper,LCM1
+Leica,CityMapper,LCM2
+Leica,CityMapper,LCM3
+Leica,Chiroptera,LCH1
+Leica,Chiroptera 4X,LCH2
+Leica,Chiroptera-5,LCH3
+Leica,HawkEye,LHE1
+Leica,HawkEye 4X,LHE2
+Leica,HawkEye-5,LHE3
+Leica,SPL100,LSP1
+Leica,ScanStation,LSS1
+Leica,ScanStation 2,LSS2
+Leica,ScanStation P20,LSP2
+Leica,ScanStation P30,LSP3
+Leica,ScanStation P40,LSP4
+Leica,ScanStation P50,LSP5
+Leica,BLK360,LBK1
+Leica,RTC360,LRT1
+Leica,Pegasus,LPG1
+Leica,Pegasus Two,LPG2
+Leica,Pegasus Backpack,LPB1
+Leica,Pegasus Stream,LPS1
+Leica,ADS100,LAD1
+Leica,DMCIII,LDM3
+Leica,RCD30,LRC3
+Leica,Generic Leica,L000
+Livox,Mid-40,LM00
+Livox,Mid-70,LM01
+Livox,Mid-100,LM02
+Livox,Avia,LA00
+Livox,Horizon,LH00
+Livox,Tele-15,LT00
+Hesai Technology,Pandar40M,HP00
+Hesai Technology,Pandar40P,HP01
+Hesai Technology,Pandar64,HP02
+Hesai Technology,PandarQT,HP03
+Hesai Technology,PandarXT,HP04
+Hesai Technology,Pandar128,HP05
+SureStar Technology,R-Fans-32M,ST00
+SureStar Technology,R-Fans-32,ST01
+SureStar Technology,AP-0600,ST02
+SureStar Technology,AP-1000,ST03
+SureStar Technology,AP-3500,ST04
+SureStar Technology,RA-0500,ST05
+SureStar Technology,RA-1000,ST06
+SureStar Technology,RA-1500,ST07
+Ouster,OS0-32,OU00
+Ouster,OS0-64,OU01
+Ouster,OS0-128,OU02
+Ouster,OS1-32,OU03
+Ouster,OS1-64,OU04
+Ouster,OS1-128,OU05
+Ouster,OS2-32,OU06
+Ouster,OS2-64,OU07
+Ouster,OS2-128,OU08
+L3Harris Technologies,L3Harris Geiger-mode LiDAR,HG01
+3DEO,Zion,3DZ1
+3DEO,Wrangell,3DW1
+3DEO,Sequoia,3DS1
+Fugro,RAMMS,FR01
+Teledyne Optech,Orion C,OOC1
+Teledyne Optech,Orion M,OOM1
+Teledyne Optech,Orion H,OOH1
+Teledyne Optech,Galaxy,OGL1
+Teledyne Optech,Eclipse,OEC1
+Teledyne Optech,Titan,OTT1
+Teledyne Optech,Pegasus HA500,OPA5
+Teledyne Optech,Pegasus HD500,OPD5
+Teledyne Optech,CZMIL,OCZ1
+Teledyne Optech,CZMIL Nova,OCZ2
+Teledyne Optech,CZMIL SuperNova,OCZ3
+Teledyne Optech,CS-6500,OC65
+Teledyne Optech,CS-10000,OCA0
+Teledyne Optech,Generic Optech,O000
+Ultracam,Eagle,UE10
+Ultracam,Eagle Mark 2,UE20
+Ultracam,Eagle Mark 3,UE30
+Ultracam,Falcon,UF10
+Ultracam,Falcon Mark 2,UF20
+Ultracam,Osprey,UO10
+Ultracam,Osprey Mark 2,UO20
+Ultracam,Osprey Mark 3,UO30
+Ultracam,Osprey Mark 3 Premium,UO31
+Ultracam,Condor,UC10
+Ultracam,Generic Ultracam,U000
+Velodyne,Puck VLP-16,VP01
+Velodyne,Puck Hi-Res,VPH1
+Velodyne,Puck LITE,VPL1
+Velodyne,Ultra Puck,VUP1
+Velodyne,Generic Velodyne,V000
+Sony RGB,Alpha a7,SA70
+Sony RGB,Alpha a7ii,SA72
+Sony RGB,Alpha a7iii,SA73
+Sony RGB,A7r,SA7R
+Sony RGB,Generic Sony,S000
+DJI,Zenmuse Z3,DZ30
+DJI,Zenmuse X5,DX50
+DJI,Zenmuse X5R,DX51
+DJI,Zenmuse Z30,DZ31
+DJI,Zenmuse X4S,DX40
+DJI,Zenmuse X5S,DZ52
+DJI,Zenmuse X7,DX70
+DJI,Zenmuse XT (thermal),DXT1
+DJI,Zenmuse XT2 (thermal),DXT2
+DJI,Generic DJI,D000
+MicaSense Multispec,Altum,MA10
+MicaSense Multispec,RedEdge,MR20
+MicaSense Multispec,RedEdge-MX,MR30
+MicaSense Multispec,RedEdge Dual Camera,MR40
+MicaSense Multispec,Generic MicaSense,M000
+Parrot Multispec,Sequoia,PS10
+Parrot Multispec,Sequoia+,PS20
+Parrot Multispec,Generic Parrot,P000
+BaySpec,OCI-F Hyperspec,BS10
+BaySpec,GoldenEye Snapshot Hyperspec,BS20
+BaySpec,OCI-M+ Hyperspec,BS30
+BaySpec,OCI UAV Hyperspec,BS40
+BaySpec,OCI-OEM Ultra-compact Hyperspec,BS50
+BaySpec,OCI-D Hyperspec,BS60
+BaySpec,Generic Bayspec,BS00
+Headwall,Micro-Hyperspec,HM10
+Headwall,Nano-Hyperspec,HN10
+Headwall,Co-Aligned VNIR-SWIR Hyperspec,HC10
+Headwall,Generic Headwall,H000
+Norbit,iWBMS STX Multibeam,MB01
+Teledyne Reson,SeaBat T20-P Multibeam,MB02
+Ross Laboratories,875-X Sonar Sweep System,SR01
+Generic,Any TOF lidar,000L
+Generic,Any phased lidar,000F
+Generic,Any photon counting lidar,000P
+Generic,Any 3-band camera,000C
+Generic,Any multiband camera,000D
+Generic,Any multibeam sonar,MB00
+Generic,Any singlebeam sonar,SB00
+Generic,Unknown,0000

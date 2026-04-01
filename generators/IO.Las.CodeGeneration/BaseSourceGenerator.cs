@@ -49,18 +49,19 @@ public abstract class BaseSourceGenerator : IIncrementalGenerator
     /// </summary>
     /// <param name="context">The context.</param>
     /// <returns>The incremental value provider.</returns>
-    protected static IncrementalValueProvider<(string Left, bool Right)> GetRootNamespaceAndExcludeFromCodeCoverage(IncrementalGeneratorInitializationContext context)
-    {
-        return context.AnalyzerConfigOptionsProvider.Select(static (options, _) => GetRootNamespace(options))
+    protected static IncrementalValueProvider<(string Left, bool Right)> GetRootNamespaceAndExcludeFromCodeCoverage(IncrementalGeneratorInitializationContext context) =>
+        GetRootNamespace(context)
             .Combine(context.CompilationProvider.Select(static (compilation, _) => compilation.GetTypeByMetadataName("System.Diagnostics.CodeAnalysis.ExcludeFromCodeCoverageAttribute") is not null));
 
-        static string GetRootNamespace(Microsoft.CodeAnalysis.Diagnostics.AnalyzerConfigOptionsProvider options)
-        {
-            return options.GlobalOptions.TryGetValue("build_property.rootnamespace", out var rootNamespace)
-                ? rootNamespace
-                : typeof(BaseSourceGenerator).Namespace?.Replace(".CodeGeneration", string.Empty) ?? string.Empty;
-        }
-    }
+    /// <summary>
+    /// Gets the root namespace.
+    /// </summary>
+    /// <param name="context">The context.</param>
+    /// <returns>The incremental value provider.</returns>
+    protected static IncrementalValueProvider<string> GetRootNamespace(IncrementalGeneratorInitializationContext context) =>
+        context.AnalyzerConfigOptionsProvider.Select(static (options, _) => options.GlobalOptions.TryGetValue("build_property.rootnamespace", out var rootNamespace)
+            ? rootNamespace
+            : typeof(BaseSourceGenerator).Namespace?.Replace(".CodeGeneration", string.Empty) ?? string.Empty);
 
     /// <summary>
     /// Creates the class.

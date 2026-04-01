@@ -48,6 +48,7 @@
     <Project Path="tests/IO.Las.Cloud.Tests/IO.Las.Cloud.Tests.csproj">
       <Build Solution="Release|*" Project="false" />
     </Project>
+    <Project Path="tests/IO.Las.CodeGeneration.Tests/IO.Las.CodeGeneration.Tests.csproj" />
     <Project Path="tests/IO.Las.Compression.Arrow.Tests/IO.Las.Compression.Arrow.Tests.csproj" />
     <Project Path="tests/IO.Las.Compression.DataFrame.Tests/IO.Las.Compression.DataFrame.Tests.csproj" />
     <Project Path="tests/IO.Las.Compression.Tests/IO.Las.Compression.Tests.csproj">

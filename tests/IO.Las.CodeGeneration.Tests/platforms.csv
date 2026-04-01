@@ -1,0 +1,11 @@
+Platform,Type,Code
+Crewed Fixed-Wing,Airborne,A
+Crewed Helicopter / Rotary,Airborne,R
+UAS / UAV / Drone: Copter,Airborne,U
+UAS / UAV / Drone: Fixed-Wing,Airborne,D
+Crewed Truck / Van / Vehicle,Mobile,M
+Crewed Watercraft,Mobile,W
+Remote Watercraft,Mobile,B
+Static / Tripod,Terrestrial,T
+Kinematic / Handheld / Backpack,Terrestrial,H
+Spaceborne / Satellite,Other,S

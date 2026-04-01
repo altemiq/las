@@ -21,19 +21,24 @@ public class ColorSourceGenerator : BaseSourceGenerator
     public override void Initialize(IncrementalGeneratorInitializationContext context)
     {
         base.Initialize(context);
-        var rootNamespaceAndExcludeFromCodeCoverage = GetRootNamespaceAndExcludeFromCodeCoverage(context);
-        var color = context.CompilationProvider
-            .Combine(rootNamespaceAndExcludeFromCodeCoverage)
-            .Select(static (c, _) => c.Left.GetTypeByMetadataName($"{c.Right.Left}.{nameof(System.Drawing.Color)}"))
+        var rootNamespaceAndExcludeFromCodeCoverage = GetRootNamespace(context);
+        var colors = context.SyntaxProvider.CreateSyntaxProvider(
+            (node, _) => node is StructDeclarationSyntax structNode && GetStructName(structNode) is "Color",
+            static (node, _) => "Color")
             .Combine(rootNamespaceAndExcludeFromCodeCoverage);
 
-        context.RegisterSourceOutput(color, static (context, colorWithNamespace) =>
+        context.RegisterSourceOutput(colors, static (context, colorWithNamespace) =>
         {
             if (colorWithNamespace.Left is { } color)
             {
-                context.AddSource($"{color.Name}.Known.cs", GetSourceText(CreateKnownColors(GetNamespace(colorWithNamespace.Right.Left))));
+                context.AddSource($"{color}.Known.cs", GetSourceText(CreateKnownColors(GetNamespace(colorWithNamespace.Right))));
             }
         });
+
+        static string GetStructName(StructDeclarationSyntax structDeclarationSyntax)
+        {
+            return structDeclarationSyntax.Identifier.ToString();
+        }
     }
 
     private static CompilationUnitSyntax CreateKnownColors(BaseNamespaceDeclarationSyntax @namespace)

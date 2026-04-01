@@ -1,0 +1,20 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFrameworks>net10.0;net9.0;net8.0</TargetFrameworks>
+  </PropertyGroup>
+  
+  <ItemGroup>
+    <EmbeddedResource Include="*.csv" />
+  </ItemGroup>
+  
+  <ItemGroup>
+    <ProjectReference Include="..\..\generators\IO.Las.CodeGeneration\IO.Las.CodeGeneration.csproj" />
+  </ItemGroup>
+
+  <ItemGroup Condition=" '$(SupportLas12)' != 'true' ">
+    <!-- Remove color point data records for versions below 1.2 -->
+    <Compile Remove="**\*Color*.cs" />
+  </ItemGroup>
+
+</Project>
