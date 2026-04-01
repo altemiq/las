@@ -11,11 +11,12 @@ public class S3ClientDataClass : IAsyncInitializer, IAsyncDisposable
         const string BucketName = "lidar";
 
         var services = GlobalHooks.App?.Services ?? throw new NullReferenceException();
-        this.S3Client = services.GetRequiredAwsService<Amazon.S3.IAmazonS3>();
         if (GlobalHooks.NotificationService != null)
         {
             await GlobalHooks.NotificationService.WaitForResourceAsync("localstack", KnownResourceStates.Running).WaitAsync(TimeSpan.FromSeconds(90));
         }
+
+        this.S3Client = services.GetRequiredAwsService<Amazon.S3.IAmazonS3>();
 
         // wait until the bucket is available
         while (!await Amazon.S3.Util.AmazonS3Util.DoesS3BucketExistV2Async(this.S3Client, BucketName))
