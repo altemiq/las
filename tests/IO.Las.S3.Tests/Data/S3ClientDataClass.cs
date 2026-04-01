@@ -19,7 +19,7 @@ public class S3ClientDataClass : IAsyncInitializer, IAsyncDisposable
         this.S3Client = services.GetRequiredAwsService<Amazon.S3.IAmazonS3>();
 
         // wait until the bucket is available
-        while (!await Amazon.S3.Util.AmazonS3Util.DoesS3BucketExistV2Async(this.S3Client, BucketName))
+        while (!await BucketExistsAsync(this.S3Client, BucketName))
         {
             await Task.Delay(500);
         }
@@ -64,9 +64,21 @@ public class S3ClientDataClass : IAsyncInitializer, IAsyncDisposable
             {
                 return await client.GetObjectMetadataAsync(bucketName, key, cancellationToken).ConfigureAwait(false) is { LastModified: not null };
             }
-            catch (Amazon.S3.AmazonS3Exception ex) when (ex.StatusCode == System.Net.HttpStatusCode.NotFound)
+            catch (Amazon.S3.AmazonS3Exception ex) when (ex.StatusCode == HttpStatusCode.NotFound)
             {
                 // File does not exist in S3
+                return false;
+            }
+        }
+
+        static async Task<bool> BucketExistsAsync(Amazon.S3.IAmazonS3 client, string bucketName)
+        {
+            try
+            {
+                return await Amazon.S3.Util.AmazonS3Util.DoesS3BucketExistV2Async(client, bucketName);
+            }
+            catch (HttpIOException)
+            {
                 return false;
             }
         }
