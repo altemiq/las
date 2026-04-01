@@ -77,7 +77,7 @@ public class S3ClientDataClass : IAsyncInitializer, IAsyncDisposable
             {
                 return await Amazon.S3.Util.AmazonS3Util.DoesS3BucketExistV2Async(client, bucketName);
             }
-            catch (HttpIOException)
+            catch (IOException)
             {
                 return false;
             }
