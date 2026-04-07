@@ -65,6 +65,10 @@
     <PackageReference Include="System.Runtime.CompilerServices.Unsafe" VersionOverride="4.5.3" />
   </ItemGroup>
 
+  <ItemGroup Condition=" $([MSBuild]::IsTargetFrameworkCompatible('$(TargetFramework)', 'net11.0')) ">
+    <Comile Remove="*Union*.cs" />
+  </ItemGroup>
+
   <ItemGroup Condition=" !$([MSBuild]::IsTargetFrameworkCompatible('$(TargetFramework)', 'net7.0')) ">
     <Compile Remove="IBasePointDataRecord{TSelf}.cs" />
   </ItemGroup>

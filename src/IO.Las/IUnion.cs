@@ -11,7 +11,7 @@ namespace System.Runtime.CompilerServices;
 /// <summary>
 /// Represents a union.
 /// </summary>
-public interface IUnion
+internal interface IUnion
 {
     /// <summary>
     /// Gets the value.
@@ -24,7 +24,7 @@ public interface IUnion
 /// Represents a type of union.
 /// </summary>
 /// <typeparam name="TUnion">The type of union.</typeparam>
-public interface IUnion<TUnion> : IUnion
+internal interface IUnion<TUnion> : IUnion
     where TUnion : IUnion<TUnion>
 {
     /// <summary>

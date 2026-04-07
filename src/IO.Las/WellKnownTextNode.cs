@@ -81,7 +81,7 @@ public readonly struct WellKnownTextNode : IEquatable<WellKnownTextNode>
         var id = System.Text.Encoding.UTF8.GetString(TrimWriteSpace(value[..startValue]));
 
         // get the name
-        var list = new List<WellKnownTextValue>();
+        ICollection<WellKnownTextValue> collection = [];
         startValue++;
         value = value[startValue..endValue];
         var split = new SpanSplitEnumerator<byte>(value, StartByte, EndByte, SeparatorByte);
@@ -91,23 +91,23 @@ public readonly struct WellKnownTextNode : IEquatable<WellKnownTextNode>
 
             if (item.IndexOf(StartByte) >= 0 && item.IndexOf(EndByte) >= 0)
             {
-                list.Add(Parse(item));
+                collection.Add(Parse(item));
             }
             else if (System.Buffers.Text.Utf8Parser.TryParse(item, out double doubleValue, out _))
             {
-                list.Add(doubleValue);
+                collection.Add(doubleValue);
             }
             else if (item[0] == '\"' && item[^1] == '\"')
             {
-                list.Add(System.Text.Encoding.UTF8.GetString(TrimValue(item, (byte)'\"')));
+                collection.Add(System.Text.Encoding.UTF8.GetString(TrimValue(item, (byte)'\"')));
             }
             else
             {
-                list.Add(new WellKnownTextLiteral(System.Text.Encoding.UTF8.GetString(item)));
+                collection.Add(new WellKnownTextLiteral(System.Text.Encoding.UTF8.GetString(item)));
             }
         }
 
-        return new(id, list);
+        return new(id, collection);
 
         static ReadOnlySpan<byte> TrimWriteSpace(ReadOnlySpan<byte> span)
         {
@@ -159,7 +159,7 @@ public readonly struct WellKnownTextNode : IEquatable<WellKnownTextNode>
         var id = value[..startValue].Trim().ToString();
 
         // get the name
-        var list = new List<WellKnownTextValue>();
+        ICollection<WellKnownTextValue> collection = [];
         startValue++;
         value = value[startValue..endValue];
         var split = new SpanSplitEnumerator<char>(value, StartChar, EndChar, SeparatorChar);
@@ -169,23 +169,23 @@ public readonly struct WellKnownTextNode : IEquatable<WellKnownTextNode>
 
             if (item.IndexOf(StartChar) >= 0 && item.IndexOf(EndChar) >= 0)
             {
-                list.Add(Parse(item));
+                collection.Add(Parse(item));
             }
             else if (double.TryParse(item, System.Globalization.NumberStyles.Float | System.Globalization.NumberStyles.AllowThousands, System.Globalization.CultureInfo.InvariantCulture, out var doubleValue))
             {
-                list.Add(doubleValue);
+                collection.Add(doubleValue);
             }
             else if (item[0] == '\"' && item[^1] == '\"')
             {
-                list.Add(item.Trim('\"').ToString());
+                collection.Add(item.Trim('\"').ToString());
             }
             else
             {
-                list.Add(new WellKnownTextLiteral(new(item)));
+                collection.Add(new WellKnownTextLiteral(new(item)));
             }
         }
 
-        return new(id, list);
+        return new(id, collection);
     }
 #else
     /// <summary>
@@ -222,29 +222,7 @@ public readonly struct WellKnownTextNode : IEquatable<WellKnownTextNode>
     }
 
     /// <inheritdoc />
-    public override string ToString()
-    {
-        var builder = new System.Text.StringBuilder();
-
-        builder.Append(this.Id);
-
-        builder.Append('[');
-        var first = true;
-        foreach (var value in this.Values)
-        {
-            if (!first)
-            {
-                builder.Append(',');
-            }
-
-            first = false;
-            builder.Append(value.ToString());
-        }
-
-        builder.Append(']');
-
-        return builder.ToString();
-    }
+    public override string ToString() => this.AppendTo(new()).ToString();
 
     /// <summary>
     /// Copies the contents of this instance into a destination <see cref="Span{T}"/>.
@@ -312,6 +290,31 @@ public readonly struct WellKnownTextNode : IEquatable<WellKnownTextNode>
         byteCount++;
 
         return byteCount;
+    }
+
+    /// <summary>
+    /// Appends a copy of this instance to the specified string builder.
+    /// </summary>
+    /// <param name="builder">The string builder.</param>
+    /// <returns>A reference to the string builder after the append operation has completed.</returns>
+    internal System.Text.StringBuilder AppendTo(System.Text.StringBuilder builder)
+    {
+        builder.Append(this.Id);
+
+        builder.Append('[');
+        var first = true;
+        foreach (var value in this.Values)
+        {
+            if (!first)
+            {
+                builder.Append(',');
+            }
+
+            first = false;
+            value.AppendTo(builder);
+        }
+
+        return builder.Append(']');
     }
 
     [System.Runtime.InteropServices.StructLayout(System.Runtime.InteropServices.LayoutKind.Auto)]

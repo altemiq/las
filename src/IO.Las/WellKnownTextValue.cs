@@ -9,48 +9,78 @@ namespace Altemiq.IO.Las;
 /// <summary>
 /// The well-known text value.
 /// </summary>
+[System.Runtime.CompilerServices.Union]
 public readonly struct WellKnownTextValue :
 #if NET7_0_OR_GREATER
     System.Runtime.CompilerServices.IUnion<WellKnownTextValue>,
 #else
-    System.Runtime.CompilerServices.IUnion,
+     System.Runtime.CompilerServices.IUnion,
 #endif
     IEquatable<WellKnownTextNode>,
     IEquatable<double>,
     IEquatable<string>,
     IEquatable<WellKnownTextLiteral>
 {
+    private readonly WellKnownTextNode nodeValue;
+    private readonly double doubleValue;
+    private readonly string? stringValue;
+    private readonly WellKnownTextLiteral literalValue;
+    private readonly int tag;
+
     /// <summary>
     /// Initialize a new instance of the <see cref="WellKnownTextValue"/> struct.
     /// </summary>
     /// <param name="node">The node.</param>
-    public WellKnownTextValue(WellKnownTextNode node) => this.Value = node;
+    public WellKnownTextValue(WellKnownTextNode node)
+    {
+        this.nodeValue = node;
+        this.tag = 1;
+    }
 
     /// <summary>
     /// Initialize a new instance of the <see cref="WellKnownTextValue"/> struct.
     /// </summary>
     /// <param name="value">The value.</param>
-    public WellKnownTextValue(double value) => this.Value = value;
+    public WellKnownTextValue(double value)
+    {
+        this.doubleValue = value;
+        this.tag = 2;
+    }
 
     /// <summary>
     /// Initialize a new instance of the <see cref="WellKnownTextValue"/> struct.
     /// </summary>
     /// <param name="value">The value.</param>
-    public WellKnownTextValue(string value) => this.Value = value;
+    public WellKnownTextValue(string value)
+    {
+        this.stringValue = value;
+        this.tag = this.stringValue is not null ? 3 : default;
+    }
 
     /// <summary>
     /// Initialize a new instance of the <see cref="WellKnownTextValue"/> struct.
     /// </summary>
     /// <param name="value">The value.</param>
-    public WellKnownTextValue(WellKnownTextLiteral value) => this.Value = value;
+    public WellKnownTextValue(WellKnownTextLiteral value)
+    {
+        this.literalValue = value;
+        this.tag = 4;
+    }
 
     /// <inheritdoc />
-    public object? Value { get; }
+    public object? Value => this.tag switch
+    {
+        1 => this.nodeValue,
+        2 => this.doubleValue,
+        3 => this.stringValue!,
+        4 => this.literalValue,
+        _ => null,
+    };
 
     /// <summary>
     /// Gets a value indicating whether this instance has a value.
     /// </summary>
-    public bool HasValue => this.Value != null;
+    public bool HasValue => this.tag is not 0;
 
     /// <summary>
     /// Converts the <see cref="WellKnownTextNode"/> to a <see cref="WellKnownTextValue"/>.
@@ -102,11 +132,11 @@ public readonly struct WellKnownTextValue :
     {
         (var returnValue, union) = value switch
         {
-            WellKnownTextNode node => (true, new WellKnownTextValue(node)),
+            WellKnownTextNode node => (true, node),
             double d => (true, d),
             string s => (true, s),
             WellKnownTextLiteral l => (true, l),
-            _ => (false, default),
+            _ => (false, default(WellKnownTextValue)),
         };
 
         return returnValue;
@@ -120,14 +150,8 @@ public readonly struct WellKnownTextValue :
     /// <returns>A value indicating whether <paramref name="value"/> was successfully obtained.</returns>
     public bool TryGetValue(out WellKnownTextNode value)
     {
-        if (this.Value is WellKnownTextNode node)
-        {
-            value = node;
-            return true;
-        }
-
-        value = default;
-        return false;
+        value = this.nodeValue;
+        return this.tag is 1;
     }
 
     /// <summary>
@@ -137,14 +161,8 @@ public readonly struct WellKnownTextValue :
     /// <returns>A value indicating whether <paramref name="value"/> was successfully obtained.</returns>
     public bool TryGetValue(out double value)
     {
-        if (this.Value is double d)
-        {
-            value = d;
-            return true;
-        }
-
-        value = default;
-        return false;
+        value = this.doubleValue;
+        return this.tag is 2;
     }
 
     /// <summary>
@@ -154,14 +172,8 @@ public readonly struct WellKnownTextValue :
     /// <returns>A value indicating whether <paramref name="value"/> was successfully obtained.</returns>
     public bool TryGetValue([System.Diagnostics.CodeAnalysis.MaybeNullWhen(false)] out string value)
     {
-        if (this.Value is string s)
-        {
-            value = s;
-            return true;
-        }
-
-        value = default;
-        return false;
+        value = this.stringValue;
+        return this.tag is 3;
     }
 
     /// <summary>
@@ -171,14 +183,8 @@ public readonly struct WellKnownTextValue :
     /// <returns>A value indicating whether <paramref name="value"/> was successfully obtained.</returns>
     public bool TryGetValue(out WellKnownTextLiteral value)
     {
-        if (this.Value is WellKnownTextLiteral literal)
-        {
-            value = literal;
-            return true;
-        }
-
-        value = default;
-        return false;
+        value = this.literalValue;
+        return this.tag is 4;
     }
 
     /// <inheritdoc />
@@ -194,20 +200,43 @@ public readonly struct WellKnownTextValue :
     public bool Equals(WellKnownTextLiteral other) => this.TryGetValue(out WellKnownTextLiteral value) && value.Equals(other);
 
     /// <inheritdoc />
-    public override bool Equals(object? obj) => this.Value is { } value ? value.Equals(obj) : obj is null;
-
-    /// <inheritdoc />
-    public override int GetHashCode() => this.Value?.GetHashCode() ?? 0;
-
-    /// <inheritdoc />
-    public override string? ToString() =>
-        this.Value switch
+    public override bool Equals(object? obj)
+    {
+        return (obj, this.tag) switch
         {
-            string s => $"\"{s}\"",
-            double d => d.ToString("G15", System.Globalization.CultureInfo.InvariantCulture),
-            not null => this.Value.ToString(),
-            _ => null,
+            (WellKnownTextValue var, var t) when var.tag == t => EqualsWellKnownTextValue(this, var),
+            (WellKnownTextNode node, 1) => this.nodeValue.Equals(node),
+            (double d, 2) => this.doubleValue.Equals(d),
+            (string s, 3) => StringComparer.Ordinal.Equals(this.stringValue, s),
+            (WellKnownTextLiteral literal, 4) => this.literalValue.Equals(literal),
+            _ => false,
         };
+
+        static bool EqualsWellKnownTextValue(WellKnownTextValue first, WellKnownTextValue second)
+        {
+            return first.tag switch
+            {
+                1 => first.Equals(second.nodeValue),
+                2 => first.Equals(second.doubleValue),
+                3 => StringComparer.Ordinal.Equals(first.stringValue, second.stringValue),
+                4 => first.literalValue.Equals(second.literalValue),
+                _ => true,
+            };
+        }
+    }
+
+    /// <inheritdoc />
+    public override int GetHashCode() => this.tag switch
+    {
+        1 => this.nodeValue.GetHashCode(),
+        2 => this.doubleValue.GetHashCode(),
+        3 => StringComparer.Ordinal.GetHashCode(this.stringValue!),
+        4 => this.literalValue.GetHashCode(),
+        _ => 0,
+    };
+
+    /// <inheritdoc />
+    public override string? ToString() => this.AppendTo(new()).ToString();
 
     /// <summary>
     /// Copies the contents of this instance into a destination <see cref="Span{T}"/>.
@@ -216,12 +245,12 @@ public readonly struct WellKnownTextValue :
     /// <returns>The number of bytes written.</returns>
     public int CopyTo(Span<byte> destination)
     {
-        return this.Value switch
+        return this.tag switch
         {
-            string s => WriteString(destination, s),
-            double d => WriteDouble(destination, d),
-            WellKnownTextLiteral literal => System.Text.Encoding.UTF8.GetBytes(literal.ToString(), destination),
-            WellKnownTextNode node => node.CopyTo(destination),
+            1 => this.nodeValue.CopyTo(destination),
+            2 => WriteDouble(destination, this.doubleValue),
+            3 => WriteString(destination, this.stringValue!),
+            4 => System.Text.Encoding.UTF8.GetBytes(this.literalValue.ToString(), destination),
             _ => default,
         };
 
@@ -237,7 +266,7 @@ public readonly struct WellKnownTextValue :
 
         static int WriteDouble(Span<byte> buffer, double d)
         {
-            System.Buffers.Text.Utf8Formatter.TryFormat(d, buffer, out var bytesWritten, System.Buffers.StandardFormat.Parse("G13"));
+            System.Buffers.Text.Utf8Formatter.TryFormat(d, buffer, out var bytesWritten, System.Buffers.StandardFormat.Parse("G15"));
             return bytesWritten;
         }
     }
@@ -248,20 +277,39 @@ public readonly struct WellKnownTextValue :
     /// <returns>The byte count.</returns>
     public int GetByteCount()
     {
-        return this.Value switch
+        return this.tag switch
         {
-            string s => System.Text.Encoding.UTF8.GetByteCount(s) + 2,
-            double d => GetDoubleByteCount(d),
-            WellKnownTextLiteral literal => literal.GetByteCount(),
-            WellKnownTextNode node => node.GetByteCount(),
+            1 => this.nodeValue.GetByteCount(),
+            2 => GetDoubleByteCount(this.doubleValue),
+            3 => System.Text.Encoding.UTF8.GetByteCount(this.stringValue!) + 2,
+            4 => this.literalValue.GetByteCount(),
             _ => default,
         };
 
         static int GetDoubleByteCount(double d)
         {
             Span<byte> buffer = stackalloc byte[20];
-            System.Buffers.Text.Utf8Formatter.TryFormat(d, buffer, out var bytesWritten, System.Buffers.StandardFormat.Parse("G13"));
+            System.Buffers.Text.Utf8Formatter.TryFormat(d, buffer, out var bytesWritten, System.Buffers.StandardFormat.Parse("G15"));
             return bytesWritten;
         }
     }
+
+    /// <summary>
+    /// Appends a copy of this instance to the specified string builder.
+    /// </summary>
+    /// <param name="builder">The string builder.</param>
+    /// <returns>A reference to the string builder after the append operation has completed.</returns>
+    internal System.Text.StringBuilder AppendTo(System.Text.StringBuilder builder) =>
+        this.tag switch
+        {
+            1 => this.nodeValue.AppendTo(builder),
+#if NET6_0_OR_GREATER
+            2 => builder.Append(System.Globalization.CultureInfo.InvariantCulture, $"{this.doubleValue:G15}"),
+#else
+             2 => builder.AppendFormat(System.Globalization.CultureInfo.InvariantCulture, "{0:G15}", this.doubleValue),
+#endif
+            3 => builder.Append('\"').Append(this.stringValue).Append('\"'),
+            4 => builder.Append(this.literalValue.ToString()),
+            _ => builder,
+        };
 }

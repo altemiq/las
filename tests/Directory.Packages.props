@@ -9,7 +9,7 @@
 
   <ItemGroup>
     <PackageVersion Include="Meziantou.Polyfill" Version="1.0.105" />
-    <PackageVersion Include="TUnit" Version="1.24.0" />
+    <PackageVersion Include="TUnit" Version="1.28.7" />
   </ItemGroup>
   
   <ItemGroup Label="Apache">

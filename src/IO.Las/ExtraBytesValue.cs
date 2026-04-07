@@ -9,6 +9,7 @@ namespace Altemiq.IO.Las;
 /// <summary>
 /// The <see cref="ExtraBytes"/> value.
 /// </summary>
+[System.Runtime.CompilerServices.Union]
 public readonly struct ExtraBytesValue :
 #if NET6_0_OR_GREATER
     System.Runtime.CompilerServices.IUnion<ExtraBytesValue>,
