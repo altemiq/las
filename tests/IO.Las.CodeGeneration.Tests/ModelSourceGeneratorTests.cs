@@ -1,19 +1,16 @@
-using Microsoft.CodeAnalysis;
-using Microsoft.CodeAnalysis.Text;
-
 namespace Altemiq.IO.Las.CodeGeneration;
+
+using Microsoft.CodeAnalysis;
 
 public class ModelSourceGeneratorTests
 {
     [Test]
     public async Task TestCaching()
     {
-        var compilation = Microsoft.CodeAnalysis.CSharp.CSharpCompilation.Create("TestProject",
-            [
-            ],
-            [
-                MetadataReference.CreateFromFile(typeof(object).Assembly.Location),
-            ],
+        var compilation = Microsoft.CodeAnalysis.CSharp.CSharpCompilation.Create(
+            "TestProject",
+            Helpers.GetSyntaxTrees("IO.Las", "Model.cs"),
+            [MetadataReference.CreateFromFile(typeof(object).Assembly.Location)],
             new(OutputKind.DynamicallyLinkedLibrary));
 
         var generator = new ModelSourceGenerator();
@@ -27,6 +24,9 @@ public class ModelSourceGeneratorTests
 
         // Run the generator
         driver = driver.RunGenerators(compilation);
+
+        // Ensure we generated something
+        await Assert.That(driver.GetRunResult().Results.Single().GeneratedSources).IsNotEmpty();
 
         // Update the compilation and rerun the generator
         compilation = compilation.AddSyntaxTrees(Microsoft.CodeAnalysis.CSharp.CSharpSyntaxTree.ParseText("// dummy"));

@@ -143,7 +143,6 @@
   </ItemGroup>
   
   <ItemGroup>
-    <CompilerVisibleProperty Include="RootNamespace" />
     <ProjectReference Include="..\..\generators\IO.Las.CodeGeneration\IO.Las.CodeGeneration.csproj"
                       SetTargetFramework="TargetFramework=netstandard2.0"
                       OutputItemType="Analyzer"

@@ -8,12 +8,10 @@ public class PlatformSourceGeneratorTests
     [Test]
     public async Task TestCaching()
     {
-        var compilation = Microsoft.CodeAnalysis.CSharp.CSharpCompilation.Create("TestProject",
-            [
-            ],
-            [
-                MetadataReference.CreateFromFile(typeof(object).Assembly.Location),
-            ],
+        var compilation = Microsoft.CodeAnalysis.CSharp.CSharpCompilation.Create(
+            "TestProject",
+            Helpers.GetSyntaxTrees("IO.Las", "Platform.cs"),
+            [MetadataReference.CreateFromFile(typeof(object).Assembly.Location)],
             new(OutputKind.DynamicallyLinkedLibrary));
 
         var generator = new PlatformSourceGenerator();
@@ -27,6 +25,9 @@ public class PlatformSourceGeneratorTests
 
         // Run the generator
         driver = driver.RunGenerators(compilation);
+
+        // Ensure we generated something
+        await Assert.That(driver.GetRunResult().Results.Single().GeneratedSources).IsNotEmpty();
 
         // Update the compilation and rerun the generator
         compilation = compilation.AddSyntaxTrees(Microsoft.CodeAnalysis.CSharp.CSharpSyntaxTree.ParseText("// dummy"));

@@ -21,30 +21,37 @@ public class PlatformSourceGenerator : BaseSourceGenerator
     public override void Initialize(IncrementalGeneratorInitializationContext context)
     {
         base.Initialize(context);
+        var platform = context.SyntaxProvider.CreateSyntaxProvider(
+            (node, _) => node is TypeDeclarationSyntax typeNode && GetIdentifier(typeNode) is "Platform",
+            static (node, _) => GetTypeToGenerate(node));
         var platformCsv = context.AdditionalTextsProvider
-            .Where(static file => Path.GetFileNameWithoutExtension(file.Path) is "platforms" && Path.GetExtension(file.Path) is ".csv")
-            .Combine(GetRootNamespaceAndExcludeFromCodeCoverage(context));
+            .Where(static file => Path.GetFileNameWithoutExtension(file.Path) is "platforms" && Path.GetExtension(file.Path) is ".csv");
 
-        context.RegisterSourceOutput(platformCsv, static (context, platformCsvWithNamespace) =>
+        var platformCsvArray = platformCsv.Collect();
+        var platformsToGenerate = platform
+            .Combine(platformCsvArray)
+            .Combine(GetExcludeFromCodeCoverage(context));
+
+        context.RegisterSourceOutput(platformsToGenerate, static (context, platformCsvWithNamespace) =>
         {
-            var platformCsv = platformCsvWithNamespace.Left;
+            var platformCsv = platformCsvWithNamespace.Left.Right.Single();
             var (ids, types) = GetIdsAndTypes(platformCsv);
-            var @namespace = GetNamespace(platformCsvWithNamespace.Right.Left);
-            var excludeFromCodeCoverage = platformCsvWithNamespace.Right.Right;
-            context.AddSource("PlatformId.cs", GetSourceText(CreatePlatformIds(@namespace, ids, excludeFromCodeCoverage)));
-            context.AddSource("PlatformType.cs", GetSourceText(CreatePlatformTypes(@namespace, types, excludeFromCodeCoverage)));
+            var @namespace = GetNamespace(platformCsvWithNamespace.Left.Left.Namespace);
+            var excludeFromCodeCoverage = platformCsvWithNamespace.Right;
+            context.AddSource("PlatformId.g.cs", GetSourceText(CreatePlatformIds(@namespace, ids, excludeFromCodeCoverage)));
+            context.AddSource("PlatformType.g.cs", GetSourceText(CreatePlatformTypes(@namespace, types, excludeFromCodeCoverage)));
 
             var platforms = GetPlatforms(platformCsv);
-            context.AddSource("Platforms.cs", GetSourceText(CreatePlatforms(@namespace, platforms)));
-            context.AddSource("Platform.Parse.cs", GetSourceText(CreatePlatformParse(@namespace, platforms, excludeFromCodeCoverage)));
+            context.AddSource("Platforms.g.cs", GetSourceText(CreatePlatforms(@namespace, platforms)));
+            context.AddSource("Platform.g.cs", GetSourceText(CreatePlatformParse(@namespace, platforms, excludeFromCodeCoverage)));
         });
 
-        static CompilationUnitSyntax CreatePlatformIds(BaseNamespaceDeclarationSyntax @namespace, IReadOnlyCollection<string?> ids, bool excludeFromCodeCoverage)
+        static CompilationUnitSyntax CreatePlatformIds(BaseNamespaceDeclarationSyntax? @namespace, IReadOnlyCollection<string?> ids, bool excludeFromCodeCoverage)
         {
             return CreateEnum(@namespace, "PlatformId", "The platforms.", ids, excludeFromCodeCoverage);
         }
 
-        static CompilationUnitSyntax CreatePlatformTypes(BaseNamespaceDeclarationSyntax @namespace, IReadOnlyCollection<string?> ids, bool excludeFromCodeCoverage)
+        static CompilationUnitSyntax CreatePlatformTypes(BaseNamespaceDeclarationSyntax? @namespace, IReadOnlyCollection<string?> ids, bool excludeFromCodeCoverage)
         {
             return CreateEnum(@namespace, "PlatformType", "The platform type.", ids, excludeFromCodeCoverage);
         }
@@ -77,7 +84,7 @@ public class PlatformSourceGenerator : BaseSourceGenerator
         }
     }
 
-    private static CompilationUnitSyntax CreatePlatforms(BaseNamespaceDeclarationSyntax @namespace, IEnumerable<(string? Id, string? Type, char Code)> platforms)
+    private static CompilationUnitSyntax CreatePlatforms(BaseNamespaceDeclarationSyntax? @namespace, IEnumerable<(string? Id, string? Type, char Code)> platforms)
     {
         return CreateClass(@namespace, "Platforms", "The platforms.", GetFields(platforms));
 
@@ -178,38 +185,55 @@ public class PlatformSourceGenerator : BaseSourceGenerator
         }
     }
 
-    private static CompilationUnitSyntax CreatePlatformParse(BaseNamespaceDeclarationSyntax @namespace, IReadOnlyCollection<(string? Id, string? Type, char Code)> platforms, bool excludeFromCodeCoverage)
+    private static CompilationUnitSyntax CreatePlatformParse(BaseNamespaceDeclarationSyntax? @namespace, IReadOnlyCollection<(string? Id, string? Type, char Code)> platforms, bool excludeFromCodeCoverage)
     {
-        return CompilationUnit()
-            .WithMembers(
-            SingletonList<MemberDeclarationSyntax>(
-                @namespace
-                .WithNamespaceKeyword(
-                    Token(
-                        TriviaList(Comment("// <autogenerated />")),
-                        SyntaxKind.NamespaceKeyword,
-                        TriviaList()))
+        if (@namespace is not null)
+        {
+            return CompilationUnit()
                 .WithMembers(
                     SingletonList<MemberDeclarationSyntax>(
-                        RecordDeclaration(
-                            Token(SyntaxKind.RecordKeyword),
-                            Identifier("Platform"))
-                        .WithModifiers(
-                            TokenList(
-                                Token(SyntaxKind.PublicKeyword),
-                                Token(SyntaxKind.PartialKeyword)))
-                        .WithClassOrStructKeyword(
-                            Token(SyntaxKind.StructKeyword))
-                        .WithOpenBraceToken(
-                            Token(SyntaxKind.OpenBraceToken))
-                        .WithMembers(
-                            List(
-                                [
-                                    GetParseMethod(platforms, excludeFromCodeCoverage),
-                                    CreateTryParseMethod(platforms, excludeFromCodeCoverage),
-                                ]))
-                        .WithCloseBraceToken(
-                            Token(SyntaxKind.CloseBraceToken))))));
+                        @namespace
+                            .WithNamespaceKeyword(
+                                Token(
+                                    SyntaxKind.NamespaceKeyword))
+                            .WithLeadingTrivia(
+                                TriviaList(
+                                    Comment("// <autogenerated />")))
+                            .WithMembers(
+                                SingletonList<MemberDeclarationSyntax>(
+                                    CreateRecord(platforms, excludeFromCodeCoverage)))));
+        }
+
+        return CompilationUnit()
+            .WithMembers(
+                SingletonList<MemberDeclarationSyntax>(
+                        CreateRecord(platforms, excludeFromCodeCoverage)))
+            .WithLeadingTrivia(
+                TriviaList(
+                    Comment("// <autogenerated />")));
+
+        static RecordDeclarationSyntax CreateRecord(IReadOnlyCollection<(string? Id, string? Type, char Code)> platforms, bool excludeFromCodeCoverage)
+        {
+            return RecordDeclaration(
+                    Token(SyntaxKind.RecordKeyword),
+                    Identifier("Platform"))
+                .WithModifiers(
+                    TokenList(
+                        Token(SyntaxKind.PublicKeyword),
+                        Token(SyntaxKind.PartialKeyword)))
+                .WithClassOrStructKeyword(
+                    Token(SyntaxKind.StructKeyword))
+                .WithOpenBraceToken(
+                    Token(SyntaxKind.OpenBraceToken))
+                .WithMembers(
+                    List(
+                    [
+                        GetParseMethod(platforms, excludeFromCodeCoverage),
+                        CreateTryParseMethod(platforms, excludeFromCodeCoverage),
+                    ]))
+                .WithCloseBraceToken(
+                    Token(SyntaxKind.CloseBraceToken));
+        }
 
         static MemberDeclarationSyntax GetParseMethod(IEnumerable<(string? Id, string? Type, char Code)> platforms, bool excludeFromCodeCoverage)
         {
