@@ -11,6 +11,7 @@ namespace System.Runtime.CompilerServices;
 /// <summary>
 /// Represents a union.
 /// </summary>
+[Microsoft.CodeAnalysis.Embedded]
 internal interface IUnion
 {
     /// <summary>
