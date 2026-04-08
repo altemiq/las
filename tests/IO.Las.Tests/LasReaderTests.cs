@@ -128,7 +128,7 @@ public class LasReaderTests
 
         while (reader.ReadPointDataRecord() is { PointDataRecord: not null } point)
         {
-            if (extraBytes[0].GetValue(point.ExtraBytes) is not { Value: double value })
+            if (extraBytes[0].GetValue(point.ExtraBytes) is not double value)
             {
                 continue;
             }
