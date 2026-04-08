@@ -20,6 +20,17 @@ public class WellKnownTextValueTests
     }
 
     [Test]
+    public async Task SwitchOnNoValue()
+    {
+        await Assert.That(default(WellKnownTextValue) switch
+        {
+            WellKnownTextNode or double or string or WellKnownTextLiteral => true,
+            _ => false,
+        }).IsFalse();
+
+    }
+
+    [Test]
     [InstanceMethodDataSource(nameof(Values))]
     public async Task EqualsInput(object input)
     {

@@ -1,7 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFrameworks>net10.0;net9.0;net7.0;net5.0;netstandard2.1;netstandard2.0</TargetFrameworks>
+    <TargetFrameworks>net11.0;net10.0;net9.0;net7.0;net5.0;netstandard2.1;netstandard2.0</TargetFrameworks>
     <MeziantouPolyfill_IncludedPolyfills>
       $(MeziantouPolyfill_IncludedPolyfills)|
       M:System.ArgumentNullException.ThrowIfNull(System.Object,System.String)|
@@ -39,6 +39,9 @@
     <!-- turn off buggy analyzer -->
     <NoWarn>$(NoWarn);S1117</NoWarn>
     <NoWarn Condition=" !$([MSBuild]::IsTargetFrameworkCompatible('$(TargetFramework)', 'net10.0')) ">$(NoWarn);AD0001</NoWarn>
+    
+    <!-- turn on preview for unions -->
+    <LangVersion>preview</LangVersion>
   </PropertyGroup>
 
   <PropertyGroup Label="Packaging">
