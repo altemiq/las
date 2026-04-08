@@ -42,6 +42,39 @@ public class ExtensionMethodTests
         await Assert.That(stream.Position).IsEqualTo(500);
     }
 
+    [Test]
+    public async Task RemoveGeoTiff()
+    {
+        IList<VariableLengthRecord> records =
+        [
+            new UnknownVariableLengthRecord(default, []),
+            new GeoAsciiParamsTag(),
+            new GeoDoubleParamsTag(),
+            new GeoKeyDirectoryTag(),
+        ];
+        
+        records.RemoveGeoTiff();
+
+        await Assert.That(records).Count().IsEqualTo(1).And.ContainsOnly(vlr => vlr is UnknownVariableLengthRecord);
+    }
+
+#if LAS1_4_OR_GREATER
+    [Test]
+    public async Task RemoveWkt()
+    {
+        IList<VariableLengthRecord> records =
+        [
+            new UnknownVariableLengthRecord(default, []),
+            new OgcCoordinateSystemWkt("EMPTY[]"),
+            new OgcMathTransformWkt("EMPTY[]"),
+        ];
+        
+        records.RemoveWkt();
+
+        await Assert.That(records).Count().IsEqualTo(1).And.ContainsOnly(vlr => vlr is UnknownVariableLengthRecord);
+    }
+#endif
+    
 
     private sealed class UnseekableStream(Stream stream) : Stream
     {

@@ -28,7 +28,7 @@ public static partial class ExtensionMethods
         {
             if (records[i].IsGeoTiff())
             {
-                records.RemoveAt(0);
+                records.RemoveAt(i);
             }
         }
     }
@@ -51,7 +51,7 @@ public static partial class ExtensionMethods
         {
             if (records[i].IsWkt())
             {
-                records.RemoveAt(0);
+                records.RemoveAt(i);
             }
         }
     }

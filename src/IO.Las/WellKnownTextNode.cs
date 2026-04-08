@@ -78,7 +78,7 @@ public readonly struct WellKnownTextNode : IEquatable<WellKnownTextNode>
         var endValue = value.LastIndexOf(EndByte);
 
         // get the name
-        var id = System.Text.Encoding.UTF8.GetString(TrimWriteSpace(value[..startValue]));
+        var id = System.Text.Encoding.UTF8.GetString(TrimUtf8(value[..startValue]));
 
         // get the name
         ICollection<WellKnownTextValue> collection = [];
@@ -97,9 +97,9 @@ public readonly struct WellKnownTextNode : IEquatable<WellKnownTextNode>
             {
                 collection.Add(doubleValue);
             }
-            else if (item[0] == '\"' && item[^1] == '\"')
+            else if (item is [(byte)'\"', .. var bytes, (byte)'\"'])
             {
-                collection.Add(System.Text.Encoding.UTF8.GetString(TrimValue(item, (byte)'\"')));
+                collection.Add(System.Text.Encoding.UTF8.GetString(bytes));
             }
             else
             {
@@ -109,28 +109,66 @@ public readonly struct WellKnownTextNode : IEquatable<WellKnownTextNode>
 
         return new(id, collection);
 
-        static ReadOnlySpan<byte> TrimWriteSpace(ReadOnlySpan<byte> span)
+        static ReadOnlySpan<byte> TrimUtf8(ReadOnlySpan<byte> span)
         {
-            return Trim(span, b => char.IsWhiteSpace((char)b));
-        }
+            if (span.Length is 0)
+            {
+                return span;
+            }
 
-        static ReadOnlySpan<byte> TrimValue(ReadOnlySpan<byte> span, byte value)
-        {
-            return Trim(span, b => b == value);
-        }
+#if NETCOREAPP3_0_OR_GREATER
+            _ = System.Text.Rune.DecodeFromUtf8(span, out System.Text.Rune first, out int firstBytesConsumed);
 
-        static ReadOnlySpan<T> Trim<T>(ReadOnlySpan<T> span, Func<T, bool> predicate)
-        {
+            if (System.Text.Rune.IsWhiteSpace(first))
+            {
+                return TrimFallback(span[firstBytesConsumed..]);
+            }
+
+            _ = System.Text.Rune.DecodeLastFromUtf8(span, out System.Text.Rune last, out int lastBytesConsumed);
+
+            return System.Text.Rune.IsWhiteSpace(last)
+                ? TrimFallback(span[..^lastBytesConsumed])
+                : span;
+
+            static ReadOnlySpan<byte> TrimFallback(ReadOnlySpan<byte> span)
+            {
+                while (span.Length != 0)
+                {
+                    _ = System.Text.Rune.DecodeFromUtf8(span, out System.Text.Rune current, out int bytesConsumed);
+
+                    if (!System.Text.Rune.IsWhiteSpace(current))
+                    {
+                        break;
+                    }
+
+                    span = span[bytesConsumed..];
+                }
+
+                while (span.Length != 0)
+                {
+                    _ = System.Text.Rune.DecodeLastFromUtf8(span, out System.Text.Rune current, out int bytesConsumed);
+
+                    if (!System.Text.Rune.IsWhiteSpace(current))
+                    {
+                        break;
+                    }
+
+                    span = span[..^bytesConsumed];
+                }
+
+                return span;
+            }
+#else
             for (var i = 0; i < span.Length; i++)
             {
-                if (predicate(span[i]))
+                if (char.IsWhiteSpace((char)span[i]))
                 {
                     continue;
                 }
 
                 for (var j = span.Length - 1; j >= i; j--)
                 {
-                    if (predicate(span[j]))
+                    if (char.IsWhiteSpace((char)span[j]))
                     {
                         continue;
                     }
@@ -140,6 +178,7 @@ public readonly struct WellKnownTextNode : IEquatable<WellKnownTextNode>
             }
 
             return default;
+#endif
         }
     }
 
@@ -175,9 +214,9 @@ public readonly struct WellKnownTextNode : IEquatable<WellKnownTextNode>
             {
                 collection.Add(doubleValue);
             }
-            else if (item[0] == '\"' && item[^1] == '\"')
+            else if (item is ['\"', .. var stringValue, '\"'])
             {
-                collection.Add(item.Trim('\"').ToString());
+                collection.Add(stringValue.ToString());
             }
             else
             {
