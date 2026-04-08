@@ -8,6 +8,8 @@ namespace Altemiq.IO.Las;
 
 using System.Runtime.CompilerServices;
 
+#pragma warning disable CA1708
+
 /// <content>
 /// Extension methods for <see cref="BitConverter"/>.
 /// </content>

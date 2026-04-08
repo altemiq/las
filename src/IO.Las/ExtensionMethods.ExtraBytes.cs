@@ -6,6 +6,8 @@
 
 namespace Altemiq.IO.Las;
 
+#pragma warning disable S2325, SA1101
+
 /// <content>
 /// Extension methods for <see cref="ExtraBytes"/>.
 /// </content>

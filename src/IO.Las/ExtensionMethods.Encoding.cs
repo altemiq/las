@@ -6,12 +6,11 @@
 
 namespace Altemiq.IO.Las;
 
+#pragma warning disable S2325, SA1101
+
 /// <content>
 /// Extension methods for <see cref="System.Text.Encoding"/>.
 /// </content>
-[System.Diagnostics.CodeAnalysis.SuppressMessage("StyleCop.CSharp.ReadabilityRules", "SA1101:Prefix local calls with this", Justification = "False positive")]
-[System.Diagnostics.CodeAnalysis.SuppressMessage("Minor Code Smell", "S2325:Methods and properties that don't access instance data should be static", Justification = "False positive")]
-[System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Performance", "CA1822: Mark members as static", Justification = "False positive")]
 public static partial class ExtensionMethods
 {
     /// <summary>
@@ -51,7 +50,7 @@ public static partial class ExtensionMethods
         /// <param name="bytes">The byte span to hold the encoded bytes.</param>
         public void GetNullTerminatedBytes(ReadOnlySpan<char> chars, Span<byte> bytes)
         {
-            var length = System.Text.Encoding.UTF8.GetBytes(chars[..Math.Min(bytes.Length, chars.Length)], bytes);
+            var length = encoding.GetBytes(chars[..Math.Min(bytes.Length, chars.Length)], bytes);
             bytes[length..].Clear();
         }
 

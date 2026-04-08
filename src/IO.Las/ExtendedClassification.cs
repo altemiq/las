@@ -100,7 +100,7 @@ public enum ExtendedClassification : byte
     /// <summary>
     /// Overhead Structure classification.
     /// </summary>
-    /// <remarks>e.g.,conveyors,mining equipment,trafﬁc lights.</remarks>
+    /// <remarks>e.g.,conveyors,mining equipment,traffic lights.</remarks>
     OverheadStructure = 19,
 
     /// <summary>

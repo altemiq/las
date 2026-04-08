@@ -6,10 +6,11 @@
 
 namespace Altemiq.IO.Las;
 
+#pragma warning disable SA1101
+
 /// <summary>
 /// Extension methods.
 /// </summary>
-[System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1708: Identifiers should differ by more than case", Justification = "Checked")]
 public static partial class ExtensionMethods
 {
     /// <summary>

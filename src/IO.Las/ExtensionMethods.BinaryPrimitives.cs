@@ -6,6 +6,8 @@
 
 namespace Altemiq.IO.Las;
 
+#pragma warning disable CA1708
+
 /// <content>
 /// Extension methods for <see cref="System.Buffers.Binary.BinaryPrimitives"/>.
 /// </content>
