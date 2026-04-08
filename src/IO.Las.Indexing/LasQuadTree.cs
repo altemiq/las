@@ -386,7 +386,7 @@ public sealed class LasQuadTree : IEquatable<LasQuadTree>
     /// Gets all the cells.
     /// </summary>
     /// <returns>The cell indexes.</returns>
-    internal IList<int> AllCells() => this.CellsWithinRectangle(this.minimum, this.maximum, this.levels);
+    internal IReadOnlyList<int> AllCells() => this.CellsWithinRectangle(this.minimum, this.maximum, this.levels);
 
     /// <summary>
     /// Intersects the spatial quad-tree with the rectangle.
@@ -396,7 +396,7 @@ public sealed class LasQuadTree : IEquatable<LasQuadTree>
     /// <param name="maxX">The maximum x-coordinate.</param>
     /// <param name="maxY">The maximum y-coordinate.</param>
     /// <returns>The intersected cell indexes.</returns>
-    internal IList<int> CellsWithinRectangle(float minX, float minY, float maxX, float maxY) => this.CellsWithinRectangle(minX, minY, maxX, maxY, this.levels);
+    internal IReadOnlyList<int> CellsWithinRectangle(float minX, float minY, float maxX, float maxY) => this.CellsWithinRectangle(minX, minY, maxX, maxY, this.levels);
 
     /// <summary>
     /// Intersects the spatial quad-tree with the rectangle.
@@ -407,7 +407,7 @@ public sealed class LasQuadTree : IEquatable<LasQuadTree>
     /// <param name="maxY">The maximum y-coordinate.</param>
     /// <param name="level">The level.</param>
     /// <returns>The intersected cell indexes.</returns>
-    internal IList<int> CellsWithinRectangle(float minX, float minY, float maxX, float maxY, int level) => this.CellsWithinRectangle(new(minX, minY), new(maxX, maxY), level);
+    internal IReadOnlyList<int> CellsWithinRectangle(float minX, float minY, float maxX, float maxY, int level) => this.CellsWithinRectangle(new(minX, minY), new(maxX, maxY), level);
 
     /// <summary>
     /// Intersects the spatial quad-tree with the rectangle.
@@ -416,14 +416,14 @@ public sealed class LasQuadTree : IEquatable<LasQuadTree>
     /// <param name="max">The maximum coordinate.</param>
     /// <param name="level">The level.</param>
     /// <returns>The intersected cell indexes.</returns>
-    internal IList<int> CellsWithinRectangle(Vector2 min, Vector2 max, int level)
+    internal IReadOnlyList<int> CellsWithinRectangle(Vector2 min, Vector2 max, int level)
     {
         if (VectorMath.LessThanOrEqualAny(max, this.minimum) || VectorMath.GreaterThanAny(min, this.maximum))
         {
             return [];
         }
 
-        var cellsInRectangle = new List<int>();
+        List<int> cellsInRectangle = [];
         if (this.adaptive is not null)
         {
             IntersectRectangleWithCellsAdaptive(cellsInRectangle, min, max, this.minimum, this.maximum, 0, 0);
@@ -616,7 +616,7 @@ public sealed class LasQuadTree : IEquatable<LasQuadTree>
     /// <param name="bottom">The lower-right y-coordinate.</param>
     /// <param name="size">The size of the tile.</param>
     /// <returns>The intersected cell indexes.</returns>
-    internal IList<int> CellsWithinTile(float left, float bottom, float size) => this.CellsWithinTile(left, bottom, size, this.levels);
+    internal IReadOnlyList<int> CellsWithinTile(float left, float bottom, float size) => this.CellsWithinTile(left, bottom, size, this.levels);
 
     /// <summary>
     /// Intersects the spatial quad-tree with the tile.
@@ -626,7 +626,7 @@ public sealed class LasQuadTree : IEquatable<LasQuadTree>
     /// <param name="size">The size of the tile.</param>
     /// <param name="level">The level.</param>
     /// <returns>The intersected cell indexes.</returns>
-    internal IList<int> CellsWithinTile(float left, float bottom, float size, int level)
+    internal IReadOnlyList<int> CellsWithinTile(float left, float bottom, float size, int level)
     {
         var bottomLeft = new Vector2(left, bottom);
         return this.CellsWithinTile(bottomLeft, bottomLeft + new Vector2(size), level);
@@ -639,14 +639,14 @@ public sealed class LasQuadTree : IEquatable<LasQuadTree>
     /// <param name="topRight">The upper-right coordinate.</param>
     /// <param name="level">The level.</param>
     /// <returns>The intersected cell indexes.</returns>
-    internal IList<int> CellsWithinTile(Vector2 bottomLeft, Vector2 topRight, int level)
+    internal IReadOnlyList<int> CellsWithinTile(Vector2 bottomLeft, Vector2 topRight, int level)
     {
         if (VectorMath.LessThanOrEqualAny(topRight, this.minimum) || VectorMath.GreaterThanAny(bottomLeft, this.maximum))
         {
             return [];
         }
 
-        var cellsWithinTile = new List<int>();
+        List<int> cellsWithinTile = [];
         if (this.adaptive is not null)
         {
             IntersectTileWithCellsAdaptive(cellsWithinTile, bottomLeft, topRight, this.minimum, this.maximum, 0, 0);

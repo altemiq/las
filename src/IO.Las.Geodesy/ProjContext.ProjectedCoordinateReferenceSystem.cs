@@ -112,7 +112,7 @@ public partial class ProjContext
         int geodeticCoordinateSystemCode;
         string conversionAuthName;
         int conversionCode;
-        IList<WellKnownTextValue> values = [];
+        ICollection<WellKnownTextValue> values = [];
         using (var reader = command.ExecuteReader())
         {
             if (!reader.Read())
@@ -226,7 +226,7 @@ public partial class ProjContext
 
             case WellKnownTextVersion.Wkt2_2015 or WellKnownTextVersion.Wkt2_2019:
                 {
-                    IList<WellKnownTextValue> values = [];
+                    ICollection<WellKnownTextValue> values = [];
                     IEnumerable<Parameter> parameters;
                     using (var reader = command.ExecuteReader())
                     {
@@ -260,7 +260,7 @@ public partial class ProjContext
         {
             // get each value
             const int Offset = 4;
-            IList<Parameter> parameters = [];
+            ICollection<Parameter> parameters = [];
 
             for (var i = 0; i < 7; i++)
             {

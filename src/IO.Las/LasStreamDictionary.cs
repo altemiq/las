@@ -11,8 +11,8 @@ namespace Altemiq.IO.Las;
 /// </summary>
 internal sealed class LasStreamDictionary(IComparer<string> comparer) : IDictionary<string, Stream>
 {
-    private readonly IList<string> keys = [];
-    private readonly IList<Stream> values = [];
+    private readonly List<string> keys = [];
+    private readonly List<Stream> values = [];
 
     /// <inheritdoc/>
     public ICollection<string> Keys => this.keys;
@@ -123,7 +123,7 @@ internal sealed class LasStreamDictionary(IComparer<string> comparer) : IDiction
     /// <inheritdoc/>
     System.Collections.IEnumerator System.Collections.IEnumerable.GetEnumerator() => this.GetEnumerator();
 
-    private struct Enumerator(IList<string> keys, IList<Stream> values) : IEnumerator<KeyValuePair<string, Stream>>
+    private struct Enumerator(IReadOnlyList<string> keys, IReadOnlyList<Stream> values) : IEnumerator<KeyValuePair<string, Stream>>
     {
         private int index = -1;
 

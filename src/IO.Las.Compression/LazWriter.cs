@@ -89,7 +89,7 @@ public sealed class LazWriter : LasWriter
             throw new InvalidOperationException("Cannot write header while writing is not complete");
         }
 
-        var recordsList = records is IList<VariableLengthRecord> { IsReadOnly: false } r ? r : [.. records];
+        var recordsList = records is ICollection<VariableLengthRecord> { IsReadOnly: false } r ? r : [.. records];
 #if LAS1_4_OR_GREATER
         (var extraByteCount, this.pointWriter) = GetExtraByteCountAndPointWriter(header, this.RawWriter, recordsList);
 #else

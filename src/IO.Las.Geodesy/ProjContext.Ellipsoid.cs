@@ -28,7 +28,7 @@ public partial class ProjContext
         command.CommandText = GetEllipsoidCommandText;
         AddAuthClause(command, authority, code, limit: 1);
 
-        IList<WellKnownTextValue> values = [];
+        ICollection<WellKnownTextValue> values = [];
         string authName;
         int authCode;
         using (var reader = command.ExecuteReader())

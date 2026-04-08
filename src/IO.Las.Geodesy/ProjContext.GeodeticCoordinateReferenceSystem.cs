@@ -38,7 +38,7 @@ public partial class ProjContext
     {
         command.CommandText = GetGeodeticCoordinateSystemCommandText;
         AddAuthClause(command, auth, code, alias: GeodeticCoordinateSystemAlias, limit: 1);
-        IList<WellKnownTextValue> values = [];
+        ICollection<WellKnownTextValue> values = [];
         string coordinateSystemAuthName;
         int coordinateSystemCode;
         string datumAuthName;

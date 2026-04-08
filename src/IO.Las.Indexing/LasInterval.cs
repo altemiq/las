@@ -212,7 +212,7 @@ internal sealed class LasInterval : IEnumerable<KeyValuePair<int, LasIntervalSta
 
         return true;
 
-        bool MergeCore(ref LasIntervalStartCell? mergedCells, IList<LasIntervalStartCell> cellsToMerge)
+        bool MergeCore(ref LasIntervalStartCell? mergedCells, ICollection<LasIntervalStartCell> cellsToMerge)
         {
             // maybe delete temporary merge cells from the previous merge
             if (mergedCells is not null)
@@ -236,11 +236,18 @@ internal sealed class LasInterval : IEnumerable<KeyValuePair<int, LasIntervalSta
                     return false;
 
                 // is there just one cell
+                case IList<LasIntervalStartCell> { Count: 1 } cellsToMergeList:
+                    this.mergedCellsTemporary = false;
+
+                    // simply use this cell as the merge cell
+                    mergedCells = cellsToMergeList[0];
+                    break;
+
                 case { Count: 1 }:
                     this.mergedCellsTemporary = false;
 
                     // simply use this cell as the merge cell
-                    mergedCells = cellsToMerge[0];
+                    mergedCells = cellsToMerge.First();
                     break;
 
                 default:
@@ -411,7 +418,7 @@ internal sealed class LasInterval : IEnumerable<KeyValuePair<int, LasIntervalSta
     /// </summary>
     /// <param name="cells">The cells to merge.</param>
     /// <returns>The mered cell; or <see langword="null"/> if <paramref name="cells"/> is <see langword="null"/> or empty.</returns>
-    public LasIntervalStartCell? Merge(IList<LasIntervalStartCell> cells)
+    public LasIntervalStartCell? Merge(ICollection<LasIntervalStartCell> cells)
     {
         var ignore = default(uint);
         return Merge(cells, this.threshold, ref ignore);
@@ -476,16 +483,18 @@ internal sealed class LasInterval : IEnumerable<KeyValuePair<int, LasIntervalSta
     /// <returns><see langword="true"/> if the interval contains the cell index; otherwise <see langword=""/>.</returns>
     public bool TryGetCell(int cellIndex, [System.Diagnostics.CodeAnalysis.NotNullWhen(true)] out LasIntervalStartCell? cell) => this.cellsDictionary.TryGetValue(cellIndex, out cell);
 
-    private static LasIntervalStartCell? Merge(IList<LasIntervalStartCell> cells, int threshold, ref uint numberOfIntervals)
+    private static LasIntervalStartCell? Merge(ICollection<LasIntervalStartCell> cells, int threshold, ref uint numberOfIntervals)
     {
         return cells switch
         {
             null or { Count: 0 } => null,
-            { Count: 1 } => cells[0],
+            IList<LasIntervalStartCell> { Count: 1 } cellList => cellList[0],
+            { Count: 1 } => cells.First(),
             { Count: > 1 } => MergeImpl(cells, threshold, ref numberOfIntervals),
+            _ => throw new System.Diagnostics.UnreachableException(),
         };
 
-        static LasIntervalStartCell MergeImpl(IList<LasIntervalStartCell> cells, int threshold, ref uint numberOfIntervals)
+        static LasIntervalStartCell MergeImpl(IEnumerable<LasIntervalStartCell> cells, int threshold, ref uint numberOfIntervals)
         {
             var merged = new LasIntervalStartCell();
             var sortedCells = new SortedDictionary<uint, LasIntervalCell>();

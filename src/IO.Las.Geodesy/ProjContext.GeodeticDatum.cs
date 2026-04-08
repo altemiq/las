@@ -30,7 +30,7 @@ public partial class ProjContext
                                WHERE {GeodeticDatumAlias}.{DeprecatedField} = 0
                                """;
         AddAuthClause(command, auth, code, alias: GeodeticDatumAlias, limit: 1);
-        IList<WellKnownTextValue> values = [];
+        ICollection<WellKnownTextValue> values = [];
         string ellipsoidAuthName;
         int ellipsoidCode;
         string primeMeridianAuthName;

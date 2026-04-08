@@ -585,7 +585,7 @@ internal sealed class JsonLasReaderFormatter(System.Text.Json.Utf8JsonWriter wri
             writer.WriteEndArray();
         }
 
-        static void FormatOverviewReturnNumber(IList<string> warnings, long value, int returnNumber)
+        static void FormatOverviewReturnNumber(ICollection<string> warnings, long value, int returnNumber)
         {
             if (value is 0)
             {

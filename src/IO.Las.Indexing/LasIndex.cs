@@ -440,9 +440,9 @@ public class LasIndex : IEnumerable<LasIndexCell>
         }
     }
 
-    private LasIntervalStartCell? GetCells(IList<int> cellIndexes)
+    private LasIntervalStartCell? GetCells(IEnumerable<int> cellIndexes)
     {
-        var cellsToMerge = new List<LasIntervalStartCell>();
+        ICollection<LasIntervalStartCell> cellsToMerge = [];
 
         foreach (var cellIndex in cellIndexes)
         {

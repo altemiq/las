@@ -38,7 +38,7 @@ public partial class ProjContext
         command.CommandText = GetPrimeMeridianCommandText;
         AddAuthClause(command, authority, code, limit: 1);
 
-        IList<WellKnownTextValue> values = [];
+        ICollection<WellKnownTextValue> values = [];
         string uomAuthName;
         int uomCode;
         using (var reader = command.ExecuteReader())
