@@ -96,12 +96,45 @@ internal static class Processor
             // read via cells
             var quantizer = new PointDataRecordQuantizer(reader.Header);
 
+            const int BatchSize = 1024;
+            var inputX = new int[BatchSize];
+            var inputY = new int[BatchSize];
+            var results = new System.Numerics.Vector2[BatchSize];
+            var points = new IBasePointDataRecord[BatchSize];
+            byte[]?[] extraBytes = new byte[BatchSize][];
+
+            var count = 0;
             while (reader.ReadPointDataRecord() is { PointDataRecord: { } point } record)
             {
-                var x = quantizer.GetX(point.X);
-                var y = quantizer.GetY(point.Y);
-                var cellIndex = GetCellIndex(cells, x, y);
-                writer.Write(PointConverter.ToExtended(point), record.ExtraBytes, cellIndex);
+                inputX[count] = point.X;
+                inputY[count] = point.Y;
+                points[count] = point;
+                extraBytes[count] ??= new byte[record.ExtraBytes.Length];
+                record.ExtraBytes.CopyTo(extraBytes[count]);
+
+                count++;
+
+                if (count is not BatchSize)
+                {
+                    continue;
+                }
+
+                quantizer.Quantize(inputX, inputY, results);
+                for (var i = 0; i < BatchSize; i++)
+                {
+                    writer.Write(PointConverter.ToExtended(points[i]), extraBytes[i], GetCellIndex(cells, results[i]));
+                }
+
+                count = 0;
+            }
+
+            if (count > 0)
+            {
+                quantizer.Quantize(inputX.AsSpan(0, count), inputY.AsSpan(0, count), results);
+                for (var i = 0; i < count; i++)
+                {
+                    writer.Write(PointConverter.ToExtended(points[i]), extraBytes[i], GetCellIndex(cells, results[i]));
+                }
             }
 
             var chunkCounts = writer.GetChunkCounts().ToArray();
@@ -156,11 +189,11 @@ internal static class Processor
             return new LazMultipleMemoryStream();
         }
 
-        static int GetCellIndex(IReadOnlyList<Indexing.LasIndexCell> cells, double x, double y)
+        static int GetCellIndex(IReadOnlyList<Indexing.LasIndexCell> cells, System.Numerics.Vector2 value)
         {
             for (var i = 0; i < cells.Count; i++)
             {
-                if (cells[i].Contains(x, y))
+                if (cells[i].Contains(value))
                 {
                     return i;
                 }

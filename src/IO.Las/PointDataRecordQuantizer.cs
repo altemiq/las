@@ -6,6 +6,11 @@
 
 namespace Altemiq.IO.Las;
 
+#if NETCOREAPP3_0_OR_GREATER
+using System.Runtime.Intrinsics;
+using System.Runtime.Intrinsics.X86;
+#endif
+
 /// <summary>
 /// The point converter.
 /// </summary>
@@ -128,6 +133,314 @@ public sealed class PointDataRecordQuantizer(Vector3D scaleFactor, Vector3D offs
         return ((int)rounded.X, (int)rounded.Y);
     }
 
+#if NETCOREAPP3_0_OR_GREATER
+    /// <summary>
+    /// Converts the points.
+    /// </summary>
+    /// <param name="x">The x-coordinates.</param>
+    /// <param name="y">The y-coordinates.</param>
+    /// <param name="z">The z-coordinates.</param>
+    /// <param name="destination">The destination.</param>
+    public void Quantize(ReadOnlySpan<int> x, ReadOnlySpan<int> y, ReadOnlySpan<int> z, Span<Vector3D> destination)
+    {
+        var length = x.Length;
+        var i = 0;
+        var size = Vector256<double>.Count;
+        var simdLimit = (length / size) * size;
+
+        var scaleX = Vector256.Create(scaleFactor.X);
+        var offsetX = Vector256.Create(offset.X);
+        var scaleY = Vector256.Create(scaleFactor.Y);
+        var offsetY = Vector256.Create(offset.Y);
+        var scaleZ = Vector256.Create(scaleFactor.Z);
+        var offsetZ = Vector256.Create(offset.Z);
+
+        while (i < simdLimit)
+        {
+#if NET7_0_OR_GREATER
+            var inputX = Vector128.LoadUnsafe(ref System.Runtime.InteropServices.MemoryMarshal.GetReference(x[i..]));
+            var inputY = Vector128.LoadUnsafe(ref System.Runtime.InteropServices.MemoryMarshal.GetReference(y[i..]));
+            var inputZ = Vector128.LoadUnsafe(ref System.Runtime.InteropServices.MemoryMarshal.GetReference(z[i..]));
+#else
+            var inputX = Vector128.Create(x[i], x[i + 1], x[i + 2], x[i + 3]);
+            var inputY = Vector128.Create(y[i], y[i + 1], y[i + 2], y[i + 3]);
+            var inputZ = Vector128.Create(z[i], z[i + 1], z[i + 2], z[i + 3]);
+#endif
+
+#if NET9_0_OR_GREATER
+            var quantizedX = Vector256.FusedMultiplyAdd(WidenToDouble(inputX), scaleX, offsetX);
+            var quantizedY = Vector256.FusedMultiplyAdd(WidenToDouble(inputY), scaleY, offsetY);
+            var quantizedZ = Vector256.FusedMultiplyAdd(WidenToDouble(inputZ), scaleZ, offsetZ);
+#else
+            Vector256<double> quantizedX;
+            Vector256<double> quantizedY;
+            Vector256<double> quantizedZ;
+            if (Fma.IsSupported)
+            {
+                quantizedX = Fma.MultiplyAdd(WidenToDouble(inputX), scaleX, offsetX);
+                quantizedY = Fma.MultiplyAdd(WidenToDouble(inputY), scaleY, offsetY);
+                quantizedZ = Fma.MultiplyAdd(WidenToDouble(inputZ), scaleZ, offsetZ);
+            }
+            else
+            {
+                quantizedX = Vector256.Add(Vector256.Multiply(WidenToDouble(inputX), scaleX), offsetX);
+                quantizedY = Vector256.Add(Vector256.Multiply(WidenToDouble(inputY), scaleY), offsetY);
+                quantizedZ = Vector256.Add(Vector256.Multiply(WidenToDouble(inputZ), scaleZ), offsetZ);
+            }
+#endif
+
+            for (var j = 0; j < size; j++)
+            {
+                destination[i + j] =
+#if NET7_0_OR_GREATER
+                    new(quantizedX[j], quantizedY[j], quantizedZ[j]);
+#else
+                    new(quantizedX.GetElement(j), quantizedY.GetElement(j), quantizedZ.GetElement(j));
+#endif
+            }
+
+            i += size;
+        }
+
+        for (; i < length; i++)
+        {
+            destination[i] = Get(x[i], y[i], z[i], scaleFactor, offset);
+        }
+    }
+
+    /// <summary>
+    /// Converts the points.
+    /// </summary>
+    /// <param name="x">The x-coordinates.</param>
+    /// <param name="y">The y-coordinates.</param>
+    /// <param name="z">The z-coordinates.</param>
+    /// <param name="destination">The destination.</param>
+    public void Quantize(ReadOnlySpan<int> x, ReadOnlySpan<int> y, ReadOnlySpan<int> z, Span<System.Numerics.Vector3> destination)
+    {
+        var length = x.Length;
+        var i = 0;
+        var size = Vector256<float>.Count;
+        var simdLimit = (length / size) * size;
+
+        var scaleFactorF = new System.Numerics.Vector3((float)scaleFactor.X, (float)scaleFactor.Y, (float)scaleFactor.Z);
+        var offsetF = new System.Numerics.Vector3((float)offset.X, (float)offset.Y, (float)offset.Z);
+
+        var scaleX = Vector256.Create(scaleFactorF.X);
+        var offsetX = Vector256.Create(offsetF.X);
+        var scaleY = Vector256.Create(scaleFactorF.Y);
+        var offsetY = Vector256.Create(offsetF.Y);
+        var scaleZ = Vector256.Create(scaleFactorF.Z);
+        var offsetZ = Vector256.Create(offsetF.Z);
+
+        while (i < simdLimit)
+        {
+#if NET7_0_OR_GREATER
+            var inputX = Vector256.LoadUnsafe(ref System.Runtime.InteropServices.MemoryMarshal.GetReference(x[i..]));
+            var inputY = Vector256.LoadUnsafe(ref System.Runtime.InteropServices.MemoryMarshal.GetReference(y[i..]));
+            var inputZ = Vector256.LoadUnsafe(ref System.Runtime.InteropServices.MemoryMarshal.GetReference(z[i..]));
+#else
+            var inputX =
+                Vector256.Create(
+                    Vector128.Create(x[i], x[i + 1], x[i + 2], x[i + 3]),
+                    Vector128.Create(x[i + 4], x[i + 5], x[i + 6], x[i + 7]));
+            var inputY =
+                Vector256.Create(
+                    Vector128.Create(y[i], y[i + 1], y[i + 2], y[i + 3]),
+                    Vector128.Create(y[i + 4], y[i + 5], y[i + 6], y[i + 7]));
+            var inputZ =
+                Vector256.Create(
+                    Vector128.Create(z[i], z[i + 1], z[i + 2], z[i + 3]),
+                    Vector128.Create(z[i + 4], z[i + 5], z[i + 6], z[i + 7]));
+#endif
+
+#if NET9_0_OR_GREATER
+            var quantizedX = Vector256.FusedMultiplyAdd(WidenToSingle(inputX), scaleX, offsetX);
+            var quantizedY = Vector256.FusedMultiplyAdd(WidenToSingle(inputY), scaleY, offsetY);
+            var quantizedZ = Vector256.FusedMultiplyAdd(WidenToSingle(inputZ), scaleZ, offsetZ);
+#elif NET7_0_OR_GREATER
+            Vector256<float> quantizedX;
+            Vector256<float> quantizedY;
+            Vector256<float> quantizedZ;
+            if (Fma.IsSupported)
+            {
+                quantizedX = Fma.MultiplyAdd(WidenToSingle(inputX), scaleX, offsetX);
+                quantizedY = Fma.MultiplyAdd(WidenToSingle(inputY), scaleY, offsetY);
+                quantizedZ = Fma.MultiplyAdd(WidenToSingle(inputZ), scaleZ, offsetZ);
+            }
+            else
+            {
+                quantizedX = Vector256.Add(Vector256.Multiply(WidenToSingle(inputX), scaleX), offsetX);
+                quantizedY = Vector256.Add(Vector256.Multiply(WidenToSingle(inputY), scaleY), offsetY);
+                quantizedZ = Vector256.Add(Vector256.Multiply(WidenToSingle(inputZ), scaleZ), offsetZ);
+            }
+#else
+            var quantizedX = ScaleAndOffset(inputX, scaleX, offsetX);
+            var quantizedY = ScaleAndOffset(inputY, scaleY, offsetY);
+            var quantizedZ = ScaleAndOffset(inputZ, scaleZ, offsetZ);
+#endif
+
+            for (var j = 0; j < size; j++)
+            {
+                destination[i + j] =
+#if NET7_0_OR_GREATER
+                    new(quantizedX[j], quantizedY[j], quantizedZ[j]);
+#else
+                    new(quantizedX.GetElement(j), quantizedY.GetElement(j), quantizedZ.GetElement(j));
+#endif
+            }
+
+            i += size;
+        }
+
+        for (; i < length; i++)
+        {
+            destination[i] = (new System.Numerics.Vector3(x[i], y[i], z[i]) * scaleFactorF) + offsetF;
+        }
+    }
+
+    /// <summary>
+    /// Converts the point.
+    /// </summary>
+    /// <param name="x">The x-coordinates.</param>
+    /// <param name="y">The y-coordinates.</param>
+    /// <param name="destination">The destination.</param>
+    public void Quantize(ReadOnlySpan<int> x, ReadOnlySpan<int> y, Span<Vector2D> destination)
+    {
+        var length = x.Length;
+        var i = 0;
+        var size = Vector256<double>.Count;
+        var simdLimit = (length / size) * size;
+
+        var scaleX = Vector256.Create(scaleFactor.X);
+        var offsetX = Vector256.Create(offset.X);
+        var scaleY = Vector256.Create(scaleFactor.Y);
+        var offsetY = Vector256.Create(offset.Y);
+
+        while (i < simdLimit)
+        {
+#if NET7_0_OR_GREATER
+            var inputX = Vector128.LoadUnsafe(ref System.Runtime.InteropServices.MemoryMarshal.GetReference(x[i..]));
+            var inputY = Vector128.LoadUnsafe(ref System.Runtime.InteropServices.MemoryMarshal.GetReference(y[i..]));
+#else
+            var inputX = Vector128.Create(x[i], x[i + 1], x[i + 2], x[i + 3]);
+            var inputY = Vector128.Create(y[i], y[i + 1], y[i + 2], y[i + 3]);
+#endif
+
+#if NET9_0_OR_GREATER
+            var quantizedX = Vector256.FusedMultiplyAdd(WidenToDouble(inputX), scaleX, offsetX);
+            var quantizedY = Vector256.FusedMultiplyAdd(WidenToDouble(inputY), scaleY, offsetY);
+#else
+            Vector256<double> quantizedX;
+            Vector256<double> quantizedY;
+            if (Fma.IsSupported)
+            {
+                quantizedX = Fma.MultiplyAdd(WidenToDouble(inputX), scaleX, offsetX);
+                quantizedY = Fma.MultiplyAdd(WidenToDouble(inputY), scaleY, offsetY);
+            }
+            else
+            {
+                quantizedX = Vector256.Add(Vector256.Multiply(WidenToDouble(inputX), scaleX), offsetX);
+                quantizedY = Vector256.Add(Vector256.Multiply(WidenToDouble(inputY), scaleY), offsetY);
+            }
+#endif
+
+            for (var j = 0; j < size; j++)
+            {
+                destination[i + j] =
+#if NET7_0_OR_GREATER
+                    new(quantizedX[j], quantizedY[j]);
+#else
+                    new(quantizedX.GetElement(j), quantizedY.GetElement(j));
+#endif
+            }
+
+            i += size;
+        }
+
+        for (; i < length; i++)
+        {
+            destination[i] = Get(x[i], y[i], scaleFactor, offset);
+        }
+    }
+
+    /// <summary>
+    /// Converts the points.
+    /// </summary>
+    /// <param name="x">The x-coordinates.</param>
+    /// <param name="y">The y-coordinates.</param>
+    /// <param name="destination">The destination.</param>
+    public void Quantize(ReadOnlySpan<int> x, ReadOnlySpan<int> y, Span<System.Numerics.Vector2> destination)
+    {
+        var length = x.Length;
+        var i = 0;
+        var size = Vector256<float>.Count;
+        var simdLimit = (length / size) * size;
+
+        var scaleFactorF = new System.Numerics.Vector2((float)scaleFactor.X, (float)scaleFactor.Y);
+        var offsetF = new System.Numerics.Vector2((float)offset.X, (float)offset.Y);
+
+        var scaleX = Vector256.Create(scaleFactorF.X);
+        var offsetX = Vector256.Create(offsetF.X);
+        var scaleY = Vector256.Create(scaleFactorF.Y);
+        var offsetY = Vector256.Create(offsetF.Y);
+
+        while (i < simdLimit)
+        {
+#if NET7_0_OR_GREATER
+            var inputX = Vector256.LoadUnsafe(ref System.Runtime.InteropServices.MemoryMarshal.GetReference(x[i..]));
+            var inputY = Vector256.LoadUnsafe(ref System.Runtime.InteropServices.MemoryMarshal.GetReference(y[i..]));
+#else
+            var inputX =
+                Vector256.Create(
+                    Vector128.Create(x[i], x[i + 1], x[i + 2], x[i + 3]),
+                    Vector128.Create(x[i + 4], x[i + 5], x[i + 6], x[i + 7]));
+            var inputY =
+                Vector256.Create(
+                    Vector128.Create(y[i], y[i + 1], y[i + 2], y[i + 3]),
+                    Vector128.Create(y[i + 4], y[i + 5], y[i + 6], y[i + 7]));
+#endif
+
+#if NET9_0_OR_GREATER
+            var quantizedX = Vector256.FusedMultiplyAdd(WidenToSingle(inputX), scaleX, offsetX);
+            var quantizedY = Vector256.FusedMultiplyAdd(WidenToSingle(inputY), scaleY, offsetY);
+#elif NET7_0_OR_GREATER
+            Vector256<float> quantizedX;
+            Vector256<float> quantizedY;
+            if (Fma.IsSupported)
+            {
+                quantizedX = Fma.MultiplyAdd(WidenToSingle(inputX), scaleX, offsetX);
+                quantizedY = Fma.MultiplyAdd(WidenToSingle(inputY), scaleY, offsetY);
+            }
+            else
+            {
+                quantizedX = Vector256.Add(Vector256.Multiply(WidenToSingle(inputX), scaleX), offsetX);
+                quantizedY = Vector256.Add(Vector256.Multiply(WidenToSingle(inputY), scaleY), offsetY);
+            }
+#else
+            var quantizedX = ScaleAndOffset(inputX, scaleX, offsetX);
+            var quantizedY = ScaleAndOffset(inputY, scaleY, offsetY);
+#endif
+
+            for (var j = 0; j < size; j++)
+            {
+                destination[i + j] =
+#if NET7_0_OR_GREATER
+                    new(quantizedX[j], quantizedY[j]);
+#else
+                    new(quantizedX.GetElement(j), quantizedY.GetElement(j));
+#endif
+            }
+
+            i += size;
+        }
+
+        for (; i < length; i++)
+        {
+            destination[i] = (new System.Numerics.Vector2(x[i], y[i]) * scaleFactorF) + offsetF;
+        }
+    }
+#endif
+
     /// <summary>
     /// Converts the x-coordinate.
     /// </summary>
@@ -191,4 +504,79 @@ public sealed class PointDataRecordQuantizer(Vector3D scaleFactor, Vector3D offs
     /// <returns>The GPS time.</returns>
     [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
     public double GetGpsTime(DateTime dateTime) => GpsTime.DateTimeToGpsTime(dateTime, gpsOffset);
+
+#if NETCOREAPP3_0_OR_GREATER
+    [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
+    private static Vector256<double> WidenToDouble(Vector128<int> input)
+    {
+        if (Avx.IsSupported)
+        {
+            return Avx.ConvertToVector256Double(input);
+        }
+
+        if (Sse2.IsSupported)
+        {
+            return Vector256.Create(
+                Sse2.ConvertToVector128Double(input),
+                Sse2.ConvertToVector128Double(Sse2.Shuffle(input, 0x32)));
+        }
+
+#if NET7_0_OR_GREATER
+        return Vector256.Create((double)input[0], input[1], input[2], input[3]);
+#else
+        return Vector256.Create((double)input.GetElement(0), input.GetElement(1), input.GetElement(2), input.GetElement(3));
+#endif
+    }
+
+    [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
+    private static Vector256<float> WidenToSingle(Vector256<int> input)
+    {
+        if (Avx.IsSupported)
+        {
+            return Avx.ConvertToVector256Single(input);
+        }
+
+        if (Sse2.IsSupported)
+        {
+            return Vector256.Create(
+                Sse2.ConvertToVector128Single(input.GetLower()),
+                Sse2.ConvertToVector128Single(input.GetUpper()));
+        }
+
+#if NET7_0_OR_GREATER
+        return Vector256.Create(
+            Vector128.Create((float)input[0], input[1], input[2], input[3]),
+            Vector128.Create((float)input[4], input[5], input[6], input[7]));
+#else
+        return Vector256.Create(
+            Vector128.Create((float)input.GetElement(0), input.GetElement(1), input.GetElement(2), input.GetElement(3)),
+            Vector128.Create((float)input.GetElement(4), input.GetElement(5), input.GetElement(6), input.GetElement(7)));
+#endif
+    }
+
+#if !NET7_0_OR_GREATER
+    private static Vector256<float> ScaleAndOffset(Vector256<int> input, Vector256<float> scale, Vector256<float> offset)
+    {
+        var widened = WidenToSingle(input);
+        if (Fma.IsSupported)
+        {
+            return Fma.MultiplyAdd(widened, scale, offset);
+        }
+
+        if (Avx.IsSupported)
+        {
+            return Avx.Add(Avx.Multiply(widened, scale), offset);
+        }
+
+        if (Sse.IsSupported)
+        {
+            return Vector256.Create(
+                Sse.Add(Sse.Multiply(widened.GetLower(), scale.GetLower()), offset.GetLower()),
+                Sse.Add(Sse.Multiply(widened.GetUpper(), scale.GetUpper()), offset.GetUpper()));
+        }
+
+        return ((widened.AsVector() * scale.AsVector()) + offset.AsVector()).AsVector256();
+    }
+#endif
+#endif
 }

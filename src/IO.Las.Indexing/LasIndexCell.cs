@@ -40,11 +40,22 @@ public readonly record struct LasIndexCell
     /// <param name="x">The x-coordinate.</param>
     /// <param name="y">The y-coordinate.</param>
     /// <returns><see langword="true"/> if the <paramref name="x"/>,<paramref name="y"/> is within this cell; otherwise <see langword="false"/>.</returns>
-    public bool Contains(double x, double y)
-    {
-        var value = new System.Numerics.Vector2((float)x, (float)y);
-        return VectorMath.LessThanOrEqualAll(this.Minimum, value) && VectorMath.LessThanAll(value, this.Maximum);
-    }
+    public bool Contains(float x, float y) => this.Contains(new System.Numerics.Vector2(x, y));
+
+    /// <summary>
+    /// Determines whether the specified coordinate is in this cell.
+    /// </summary>
+    /// <param name="value">The coordinate value.</param>
+    /// <returns><see langword="true"/> if the <paramref name="value.X"/>,<paramref name="value.Y"/> is within this cell; otherwise <see langword="false"/>.</returns>
+    public bool Contains(System.Numerics.Vector2 value) => VectorMath.LessThanOrEqualAll(this.Minimum, value) && VectorMath.LessThanAll(value, this.Maximum);
+
+    /// <summary>
+    /// Determines whether the specified coordinate is in this cell.
+    /// </summary>
+    /// <param name="x">The x-coordinate.</param>
+    /// <param name="y">The y-coordinate.</param>
+    /// <returns><see langword="true"/> if the <paramref name="x"/>,<paramref name="y"/> is within this cell; otherwise <see langword="false"/>.</returns>
+    public bool Contains(double x, double y) => this.Contains(new System.Numerics.Vector2((float)x, (float)y));
 
     /// <summary>
     /// Determines whether the specified index is in this cell.
@@ -58,7 +69,21 @@ public readonly record struct LasIndexCell
     /// </summary>
     /// <param name="x">The x-coordinate.</param>
     /// <returns><see langword="true"/> if the <paramref name="x"/> is within this cell; otherwise <see langword="false"/>.</returns>
+    public bool ContainsX(float x) => this.Minimum.X <= x && x < this.Maximum.X;
+
+    /// <summary>
+    /// Determines whether the specified x-coordinate is in this cell.
+    /// </summary>
+    /// <param name="x">The x-coordinate.</param>
+    /// <returns><see langword="true"/> if the <paramref name="x"/> is within this cell; otherwise <see langword="false"/>.</returns>
     public bool ContainsX(double x) => this.Minimum.X <= x && x < this.Maximum.X;
+
+    /// <summary>
+    /// Determines whether the specified y-coordinate is in this cell.
+    /// </summary>
+    /// <param name="y">The y-coordinate.</param>
+    /// <returns><see langword="true"/> if the <paramref name="y"/> is within this cell; otherwise <see langword="false"/>.</returns>
+    public bool ContainsY(float y) => this.Minimum.X <= y && y < this.Maximum.X;
 
     /// <summary>
     /// Determines whether the specified y-coordinate is in this cell.

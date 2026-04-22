@@ -81,12 +81,58 @@ public class LasIndex : IEnumerable<LasIndexCell>
         var index = new LasIndex(quadTree, threshold);
         var quantizer = new PointDataRecordQuantizer(header);
 
+#if NETCOREAPP3_0_OR_GREATER
+        const int BatchSize = 1024;
+        var inputX = new int[BatchSize];
+        var inputY = new int[BatchSize];
+        var inputZ = new int[BatchSize];
+        var results = new System.Numerics.Vector3[BatchSize];
+
+        var current = default(uint);
+        var count = 0;
+        while (reader.ReadPointDataRecord() is { PointDataRecord: { } record })
+        {
+            inputX[count] = record.X;
+            inputY[count] = record.Y;
+            inputZ[count] = record.Z;
+            count++;
+
+            if (count is not BatchSize)
+            {
+                continue;
+            }
+
+            quantizer.Quantize(inputX, inputY, inputZ, results);
+            for (var i = 0; i < BatchSize; i++)
+            {
+                var vector = results[i];
+                _ = index.Add(vector.X, vector.Y, current++);
+            }
+
+            count = 0;
+        }
+
+        if (count > 0)
+        {
+            quantizer.Quantize(
+                inputX.AsSpan(0, count),
+                inputY.AsSpan(0, count),
+                inputZ.AsSpan(0, count),
+                results);
+            for (var i = 0; i < count; i++)
+            {
+                var vector = results[i];
+                _ = index.Add(vector.X, vector.Y, current++);
+            }
+        }
+#else
         var current = default(uint);
         while (reader.ReadPointDataRecord() is { PointDataRecord: { } record })
         {
             var vector = quantizer.Get(record);
             _ = index.Add((float)vector.X, (float)vector.Y, current++);
         }
+#endif
 
         index.Complete(minimumPoints, maximumIntervals);
         return index;
