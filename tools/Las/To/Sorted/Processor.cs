@@ -65,6 +65,20 @@ internal static class Processor
     {
         var cells = index.AsReadOnly();
 
+        // Extract cell boundaries for vectorized lookup
+        var cellCount = cells.Count;
+        var minX = new float[cellCount];
+        var minY = new float[cellCount];
+        var maxX = new float[cellCount];
+        var maxY = new float[cellCount];
+        for (var i = 0; i < cellCount; i++)
+        {
+            minX[i] = cells[i].Minimum.X;
+            minY[i] = cells[i].Minimum.Y;
+            maxX[i] = cells[i].Maximum.X;
+            maxY[i] = cells[i].Maximum.Y;
+        }
+
         using var reader = LazReader.Create(input, leaveOpen: false);
 
         var systemIdentifier = string.IsNullOrEmpty(reader.Header.SystemIdentifier)
@@ -97,6 +111,8 @@ internal static class Processor
             var quantizer = new PointDataRecordQuantizer(reader.Header);
 
             const int BatchSize = 1024;
+            int pointLength = reader.PointDataLength;
+            byte[] buffer = new byte[BatchSize * pointLength];
             var inputX = new int[BatchSize];
             var inputY = new int[BatchSize];
             var results = new System.Numerics.Vector2[BatchSize];
@@ -104,28 +120,44 @@ internal static class Processor
             byte[]?[] extraBytes = new byte[BatchSize][];
 
             var count = 0;
-            while (reader.ReadPointDataRecord() is { PointDataRecord: { } point } record)
+            while (true)
             {
-                inputX[count] = point.X;
-                inputY[count] = point.Y;
-                points[count] = point;
-                extraBytes[count] ??= new byte[record.ExtraBytes.Length];
-                record.ExtraBytes.CopyTo(extraBytes[count]);
-
-                count++;
-
-                if (count is not BatchSize)
+                int pointsRead = reader.ReadPointDataRecordData(buffer);
+                if (pointsRead == 0)
                 {
-                    continue;
+                    break;
                 }
 
-                quantizer.Quantize(inputX, inputY, results);
-                for (var i = 0; i < BatchSize; i++)
+                for (var i = 0; i < pointsRead; i++)
                 {
-                    writer.Write(PointConverter.ToExtended(points[i]), extraBytes[i], GetCellIndex(cells, results[i]));
-                }
+                    var pointSpan = reader.Read(buffer.AsSpan(i * pointLength, pointLength));
+                    if (pointSpan.PointDataRecord is not { } point)
+                    {
+                        break;
+                    }
 
-                count = 0;
+                    inputX[count] = point.X;
+                    inputY[count] = point.Y;
+                    points[count] = point;
+
+                    extraBytes[count] ??= new byte[pointSpan.ExtraBytes.Length];
+                    pointSpan.ExtraBytes.CopyTo(extraBytes[count]);
+
+                    count++;
+
+                    if (count is not BatchSize)
+                    {
+                        continue;
+                    }
+
+                    quantizer.Quantize(inputX, inputY, results);
+                    for (var j = 0; j < BatchSize; j++)
+                    {
+                        writer.Write(PointConverter.ToExtended(points[j]), extraBytes[j], GetCellIndex(results[j], minX, minY, maxX, maxY));
+                    }
+
+                    count = 0;
+                }
             }
 
             if (count > 0)
@@ -133,7 +165,7 @@ internal static class Processor
                 quantizer.Quantize(inputX.AsSpan(0, count), inputY.AsSpan(0, count), results);
                 for (var i = 0; i < count; i++)
                 {
-                    writer.Write(PointConverter.ToExtended(points[i]), extraBytes[i], GetCellIndex(cells, results[i]));
+                    writer.Write(PointConverter.ToExtended(points[i]), extraBytes[i], GetCellIndex(results[i], minX, minY, maxX, maxY));
                 }
             }
 
@@ -189,11 +221,45 @@ internal static class Processor
             return new LazMultipleMemoryStream();
         }
 
-        static int GetCellIndex(IReadOnlyList<Indexing.LasIndexCell> cells, System.Numerics.Vector2 value)
+        static int GetCellIndex(System.Numerics.Vector2 value, float[] minX, float[] minY, float[] maxX, float[] maxY)
         {
-            for (var i = 0; i < cells.Count; i++)
+            var vectorX = new System.Numerics.Vector<float>(value.X);
+            var vectorY = new System.Numerics.Vector<float>(value.Y);
+
+            var vectorSize = System.Numerics.Vector<float>.Count;
+            for (var i = 0; i <= minX.Length - vectorSize; i += vectorSize)
             {
-                if (cells[i].Contains(value))
+                var vectorMinX = new System.Numerics.Vector<float>(minX, i);
+                var vectorMinY = new System.Numerics.Vector<float>(minY, i);
+                var vectorMaxX = new System.Numerics.Vector<float>(maxX, i);
+                var vectorMaxY = new System.Numerics.Vector<float>(maxY, i);
+
+                var mask = System.Numerics.Vector.GreaterThanOrEqual(vectorX, vectorMinX)
+                           & System.Numerics.Vector.GreaterThanOrEqual(vectorY, vectorMinY)
+                           & System.Numerics.Vector.LessThan(vectorX, vectorMaxX)
+                           & System.Numerics.Vector.LessThan(vectorY, vectorMaxY);
+
+                if (mask.Equals(System.Numerics.Vector<int>.Zero))
+                {
+                    continue;
+                }
+
+                // find the first set bit
+                for (var j = 0; j < vectorSize; j++)
+                {
+                    if (mask[j] is not 0)
+                    {
+                        return i + j;
+                    }
+                }
+            }
+
+            // remainder
+            var x = value.X;
+            var y = value.Y;
+            for (var i = (minX.Length / vectorSize) * vectorSize; i < minX.Length; i++)
+            {
+                if (x >= minX[i] && x < maxX[i] && y >= minY[i] && y < maxY[i])
                 {
                     return i;
                 }

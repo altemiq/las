@@ -90,26 +90,39 @@ public class LasIndex : IEnumerable<LasIndexCell>
 
         var current = default(uint);
         var count = 0;
-        while (reader.ReadPointDataRecord() is { PointDataRecord: { } record })
+        var pointLength = reader.PointDataLength;
+        var buffer = new byte[BatchSize * pointLength];
+
+        while (true)
         {
-            inputX[count] = record.X;
-            inputY[count] = record.Y;
-            inputZ[count] = record.Z;
-            count++;
-
-            if (count is not BatchSize)
+            var pointsRead = reader.ReadPointDataRecordData(buffer);
+            if (pointsRead is 0)
             {
-                continue;
+                break;
             }
 
-            quantizer.Quantize(inputX, inputY, inputZ, results);
-            for (var i = 0; i < BatchSize; i++)
+            for (var i = 0; i < pointsRead; i++)
             {
-                var vector = results[i];
-                _ = index.Add(vector.X, vector.Y, current++);
-            }
+                var pointSpan = buffer.AsSpan(i * pointLength, pointLength);
+                inputX[count] = FieldAccessors.PointDataRecord.GetX(pointSpan);
+                inputY[count] = FieldAccessors.PointDataRecord.GetY(pointSpan);
+                inputZ[count] = FieldAccessors.PointDataRecord.GetZ(pointSpan);
+                count++;
 
-            count = 0;
+                if (count is not BatchSize)
+                {
+                    continue;
+                }
+
+                quantizer.Quantize(inputX, inputY, inputZ, results);
+                for (var j = 0; j < BatchSize; j++)
+                {
+                    var vector = results[j];
+                    _ = index.Add(vector.X, vector.Y, current++);
+                }
+
+                count = 0;
+            }
         }
 
         if (count > 0)
