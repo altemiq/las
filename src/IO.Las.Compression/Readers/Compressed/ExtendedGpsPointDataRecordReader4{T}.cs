@@ -10,7 +10,7 @@ namespace Altemiq.IO.Las.Readers.Compressed;
 /// The compressed <see cref="Readers.IPointDataRecordReader"/> for <see cref="IExtendedPointDataRecord"/> instances.
 /// </summary>
 /// <typeparam name="T">The type of extended point data record.</typeparam>
-internal abstract class ExtendedGpsPointDataRecordReader4<T> : IPointDataRecordReader, IContext
+internal abstract class ExtendedGpsPointDataRecordReader4<T> : ICompressedPointDataRecordReader, IContext
     where T : IExtendedPointDataRecord
 {
     private const int Multiple = 500;
@@ -100,10 +100,26 @@ internal abstract class ExtendedGpsPointDataRecordReader4<T> : IPointDataRecordR
     }
 
     /// <inheritdoc/>
+    int ICompressedPointDataRecordReader.Read(Span<byte> destination)
+    {
+        ReadOnlySpan<byte> processedData = this.ProcessData();
+        processedData.CopyTo(destination);
+        return processedData.Length;
+    }
+
+    /// <inheritdoc/>
     async ValueTask<LasPointMemory> IPointDataRecordReader.ReadAsync(ReadOnlyMemory<byte> source, CancellationToken cancellationToken)
     {
         ReadOnlyMemory<byte> processedData = await this.ProcessDataAsync(cancellationToken).ConfigureAwait(false);
         return new(await this.ReadAsync(processedData[..this.basePointDataLength], cancellationToken).ConfigureAwait(false), processedData[this.basePointDataLength..]);
+    }
+
+    /// <inheritdoc/>
+    async ValueTask<int> ICompressedPointDataRecordReader.ReadAsync(Memory<byte> destination, CancellationToken cancellationToken)
+    {
+        ReadOnlyMemory<byte> processedData = await this.ProcessDataAsync(cancellationToken).ConfigureAwait(false);
+        processedData.CopyTo(destination);
+        return processedData.Length;
     }
 
     /// <inheritdoc/>

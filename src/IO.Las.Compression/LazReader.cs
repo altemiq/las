@@ -86,6 +86,32 @@ public sealed class LazReader : LasReader, ILazReader
         return point;
     }
 
+#if NETSTANDARD2_1_OR_GREATER || NETCOREAPP2_1_OR_GREATER
+    /// <inheritdoc/>
+    public override int ReadPointDataRecordData(Span<byte> buffer)
+    {
+        if (!this.CheckPointIndex())
+        {
+            return default;
+        }
+
+        // see how many points we can read
+        var pointCount = Math.Min((ulong)(buffer.Length / this.PointDataLength), this.Header.NumberOfPointRecords - this.GetCurrentIndex());
+
+        var count = (int)pointCount;
+        for (var i = 0; i < count; i++)
+        {
+            if (this.pointReader.Read(this.BaseStream, buffer.Slice(i * this.PointDataLength, this.PointDataLength)) is 0)
+            {
+                return i;
+            }
+        }
+
+        this.IncrementPointIndex(pointCount);
+        return count;
+    }
+#endif
+
     /// <inheritdoc />
     public override async ValueTask<LasPointMemory> ReadPointDataRecordAsync(CancellationToken cancellationToken = default)
     {
@@ -98,6 +124,37 @@ public sealed class LazReader : LasReader, ILazReader
         this.IncrementPointIndex();
         return point;
     }
+
+#if NETSTANDARD2_1_OR_GREATER || NETCOREAPP2_1_OR_GREATER
+    /// <inheritdoc/>
+    public override async ValueTask<int> ReadPointDataRecordDataAsync(Memory<byte> buffer, CancellationToken cancellationToken = default)
+    {
+        if (!this.CheckPointIndex())
+        {
+            return default;
+        }
+
+        // see how many points we can read
+        var pointCount = Math.Min((ulong)(buffer.Length / this.PointDataLength), this.Header.NumberOfPointRecords - this.GetCurrentIndex());
+
+        var count = (int)pointCount;
+        for (var i = 0; i < count; i++)
+        {
+            if (await this.pointReader
+                    .ReadAsync(
+                        this.BaseStream,
+                        buffer.Slice(i * this.PointDataLength, this.PointDataLength),
+                        cancellationToken)
+                    .ConfigureAwait(false) is 0)
+            {
+                return i;
+            }
+        }
+
+        this.IncrementPointIndex(pointCount);
+        return count;
+    }
+#endif
 
     /// <inheritdoc/>
     ChunkedReader.ChunkedLasPointSpanEnumerable ILazReader.ReadChunk() =>

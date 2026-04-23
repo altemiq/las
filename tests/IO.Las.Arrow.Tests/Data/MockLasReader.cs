@@ -63,6 +63,22 @@ internal sealed class MockLasReader : ILasReader
     public IReadOnlyList<ExtendedVariableLengthRecord> ExtendedVariableLengthRecords { get; } = [];
 #endif
 
+    public ushort PointDataLength => GpsPointDataRecord.Size;
+
+    public int ReadPointDataRecordData(Span<byte> buffer)
+    {
+        First.CopyTo(buffer);
+        Second.CopyTo(buffer[this.PointDataLength..]);
+        return this.PointDataLength * 2;
+    }
+
+    public ValueTask<int> ReadPointDataRecordDataAsync(Memory<byte> buffer, CancellationToken cancellationToken = default)
+    {
+        First.CopyTo(buffer.Span);
+        Second.CopyTo(buffer[this.PointDataLength..].Span);
+        return new(this.PointDataLength * 2);
+    }
+
     public LasPointSpan ReadPointDataRecord()
     {
         this.count++;

@@ -32,6 +32,12 @@ internal sealed class MockLazReader : ILasReader, ILazReader
 
     public bool IsChunked => true;
 
+    public ushort PointDataLength => GpsPointDataRecord.Size;
+
+    public int ReadPointDataRecordData(Span<byte> buffer) => this.reader.Read(buffer);
+
+    public ValueTask<int> ReadPointDataRecordDataAsync(Memory<byte> buffer, CancellationToken cancellationToken = default) => this.reader.ReadAsync(buffer, cancellationToken);
+
     public LasPointSpan ReadPointDataRecord() => this.reader.Read([]);
 
     public LasPointSpan ReadPointDataRecord(ulong index) => throw new NotImplementedException();
@@ -58,7 +64,7 @@ internal sealed class MockLazReader : ILasReader, ILazReader
 
     private sealed class MockChunkedReader : ChunkedReader
     {
-        public MockChunkedReader(Readers.IPointDataRecordReader reader, in HeaderBlock headerBlock, uint chunkSize) : base(
+        public MockChunkedReader(Readers.Compressed.ICompressedPointDataRecordReader reader, in HeaderBlock headerBlock, uint chunkSize) : base(
             new MockChunkReader(
                 reader,
                 headerBlock,
@@ -79,18 +85,18 @@ internal sealed class MockLazReader : ILasReader, ILazReader
 
     private sealed class MockChunkReader : ChunkReader
     {
-        public MockChunkReader(Readers.IPointDataRecordReader rawReader, in HeaderBlock header, LasZip zip, int pointDataLength)
+        public MockChunkReader(Readers.Compressed.ICompressedPointDataRecordReader rawReader, in HeaderBlock header, LasZip zip, int pointDataLength)
             : base(rawReader, in header, zip, pointDataLength)
         {
-            ref Readers.IPointDataRecordReader reader = ref ReaderField(this);
+            ref Readers.Compressed.ICompressedPointDataRecordReader reader = ref ReaderField(this);
             reader = rawReader;
         }
 
         [UnsafeAccessor(UnsafeAccessorKind.Field, Name = "reader")]
-        private static extern ref Readers.IPointDataRecordReader ReaderField(PointWiseReader reader);
+        private static extern ref Readers.Compressed.ICompressedPointDataRecordReader ReaderField(PointWiseReader reader);
     }
 
-    private sealed class MockPointDataRecordReader : Readers.IPointDataRecordReader
+    private sealed class MockPointDataRecordReader : Readers.Compressed.ICompressedPointDataRecordReader
     {
         private int count;
 
@@ -154,6 +160,20 @@ internal sealed class MockLazReader : ILasReader, ILazReader
                 2 => new(new LasPointMemory(Second, ReadOnlyMemory<byte>.Empty)),
                 _ => default,
             };
+        }
+
+        public int Read(Span<byte> buffer)
+        {
+            First.CopyTo(buffer);
+            Second.CopyTo(buffer[GpsPointDataRecord.Size..]);
+            return GpsPointDataRecord.Size * 2;
+        }
+
+        public ValueTask<int> ReadAsync(Memory<byte> buffer, CancellationToken cancellationToken = default)
+        {
+            First.CopyTo(buffer.Span);
+            Second.CopyTo(buffer[GpsPointDataRecord.Size..].Span);
+            return new(GpsPointDataRecord.Size * 2);
         }
     }
 }

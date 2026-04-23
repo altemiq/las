@@ -310,6 +310,71 @@ public class LazReaderTests
             .And.Member(p => p.Z, z => z.IsEqualTo(4228));
     }
 
+    [Test]
+    public async Task ReadToSpan()
+    {
+#if NETSTANDARD2_1_OR_GREATER || NETCOREAPP3_0_OR_GREATER
+        await
+#endif
+        using var stream = typeof(LazReaderTests).Assembly.GetManifestResourceStream(typeof(LazReaderTests), "fusa.laz")
+                               ?? throw new System.Diagnostics.UnreachableException("Failed to get stream");
+#if NETSTANDARD2_1_OR_GREATER || NETCOREAPP3_0_OR_GREATER
+        await
+#endif
+        using LazReader reader = new(stream);
+
+        var span = new byte[1024];
+
+        var pointsRead = await Assert.That(reader.ReadPointDataRecordData(span)).IsNotZero();
+
+        IBasePointDataRecord pointDataRecord = default;
+        byte[] data = default;
+
+        for (var i = 0; i < pointsRead; i++)
+        {
+            (pointDataRecord, var extraBytes) = reader.Read(span.AsSpan(i * reader.PointDataLength, reader.PointDataLength));
+            data = extraBytes.ToArray();
+        }
+
+        await Assert.That(pointDataRecord)
+            .IsTypeOf<GpsPointDataRecord>().And
+            .Member(p => p.X, x => x.IsNotDefault());
+        await Assert.That(data).IsEmpty();
+    }
+
+    [Test]
+    public async Task ReadToMemory()
+    {
+#if NETSTANDARD2_1_OR_GREATER || NETCOREAPP3_0_OR_GREATER
+        await
+#endif
+        using var stream = typeof(LazReaderTests).Assembly.GetManifestResourceStream(typeof(LazReaderTests), "fusa.laz")
+                               ?? throw new System.Diagnostics.UnreachableException("Failed to get stream");
+#if NETSTANDARD2_1_OR_GREATER || NETCOREAPP3_0_OR_GREATER
+        await
+#endif
+        using LazReader reader = new(stream);
+
+        var span = new byte[1024];
+
+        var pointsRead = await reader.ReadPointDataRecordDataAsync(span);
+        await Assert.That(pointsRead).IsNotZero();
+
+        IBasePointDataRecord pointDataRecord = default;
+        byte[] data = default;
+
+        for (var i = 0; i < pointsRead; i++)
+        {
+            (pointDataRecord, var extraBytes) = await reader.ReadAsync(span.AsMemory(i * reader.PointDataLength, reader.PointDataLength));
+            data = extraBytes.ToArray();
+        }
+
+        await Assert.That(pointDataRecord)
+            .IsTypeOf<GpsPointDataRecord>().And
+            .Member(p => p.X, x => x.IsNotDefault());
+        await Assert.That(data).IsEmpty();
+    }
+
     private static async Task CheckHeader(HeaderBlock headerBlock, Version expectedVersion)
     {
         _ = await Assert.That(headerBlock)

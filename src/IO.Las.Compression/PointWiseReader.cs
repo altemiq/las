@@ -11,9 +11,9 @@ namespace Altemiq.IO.Las;
 /// </summary>
 internal class PointWiseReader : RawReader
 {
-    private readonly Readers.IPointDataRecordReader compressedReader;
+    private readonly Readers.Compressed.ICompressedPointDataRecordReader compressedReader;
 
-    private Readers.IPointDataRecordReader? reader;
+    private Readers.Compressed.ICompressedPointDataRecordReader? reader;
 
     /// <summary>
     /// Initializes a new instance of the <see cref="PointWiseReader"/> class.
@@ -95,7 +95,7 @@ internal class PointWiseReader : RawReader
     {
         if (this.reader is not null)
         {
-            return this.reader.Read(default);
+            return this.reader.Read(default(ReadOnlySpan<byte>));
         }
 
         var point = base.Read(stream);
@@ -108,11 +108,35 @@ internal class PointWiseReader : RawReader
     }
 
     /// <inheritdoc/>
+    public sealed override int Read(Stream stream, Span<byte> destination)
+    {
+        if (this.reader is not null)
+        {
+            return this.reader.Read(destination);
+        }
+
+        var point = base.Read(stream);
+
+        this.InitializeCompression(stream, point.PointDataRecord!, point.ExtraBytes, this.compressedReader);
+
+        this.reader = this.compressedReader;
+
+        if (point.PointDataRecord is not { } pointDataRecord)
+        {
+            return 0;
+        }
+
+        var bytesWritten = pointDataRecord.CopyTo(destination);
+        point.ExtraBytes.CopyTo(destination[bytesWritten..]);
+        return bytesWritten + point.ExtraBytes.Length;
+    }
+
+    /// <inheritdoc/>
     public sealed override async ValueTask<LasPointMemory> ReadAsync(Stream stream, CancellationToken cancellationToken = default)
     {
         if (this.reader is not null)
         {
-            return await this.reader.ReadAsync(default, cancellationToken).ConfigureAwait(false);
+            return await this.reader.ReadAsync(default(ReadOnlyMemory<byte>), cancellationToken).ConfigureAwait(false);
         }
 
         var point = await base.ReadAsync(stream, cancellationToken).ConfigureAwait(false);
@@ -122,6 +146,30 @@ internal class PointWiseReader : RawReader
         this.reader = this.compressedReader;
 
         return point;
+    }
+
+    /// <inheritdoc/>
+    public sealed override async ValueTask<int> ReadAsync(Stream stream, Memory<byte> destination, CancellationToken cancellationToken = default)
+    {
+        if (this.reader is not null)
+        {
+            return await this.reader.ReadAsync(destination, cancellationToken).ConfigureAwait(false);
+        }
+
+        var point = await base.ReadAsync(stream, cancellationToken).ConfigureAwait(false);
+
+        this.InitializeCompression(stream, point.PointDataRecord!, point.ExtraBytes.Span, this.compressedReader);
+
+        this.reader = this.compressedReader;
+
+        if (point.PointDataRecord is not { } pointDataRecord)
+        {
+            return 0;
+        }
+
+        var bytesWritten = pointDataRecord.CopyTo(destination.Span);
+        point.ExtraBytes.CopyTo(destination[bytesWritten..]);
+        return bytesWritten + point.ExtraBytes.Length;
     }
 
     /// <summary>

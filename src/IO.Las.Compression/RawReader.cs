@@ -30,11 +30,18 @@ internal class RawReader(Readers.IPointDataRecordReader reader, int pointDataLen
     }
 
     /// <inheritdoc/>
+    public virtual int Read(Stream stream, Span<byte> destination) => stream.Read(destination[..pointDataLength]);
+
+    /// <inheritdoc/>
     public virtual async ValueTask<LasPointMemory> ReadAsync(Stream stream, CancellationToken cancellationToken = default)
     {
         var bytesRead = await stream.ReadAsync(this.buffer.AsMemory(0, pointDataLength), cancellationToken).ConfigureAwait(false);
         return await reader.ReadAsync(this.buffer.AsMemory(0, bytesRead), cancellationToken).ConfigureAwait(false);
     }
+
+    /// <inheritdoc/>
+    public virtual ValueTask<int> ReadAsync(Stream stream, Memory<byte> destination, CancellationToken cancellationToken = default) =>
+        stream.ReadAsync(destination[..pointDataLength], cancellationToken);
 
     /// <inheritdoc/>
     public virtual void Initialize(Stream stream) => stream.SwitchStreamIfMultiple(LasStreams.PointData);

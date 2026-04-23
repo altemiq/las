@@ -13,7 +13,7 @@ namespace Altemiq.IO.Las.Readers.Compressed;
 /// <param name="decoder">The decoder.</param>
 /// <param name="pointDataLength">The point data length.</param>
 /// <param name="basePointDataLength">The base point data length, without extra bytes.</param>
-internal abstract class PointDataRecordReader<T>(IEntropyDecoder decoder, int pointDataLength, int basePointDataLength) : IPointDataRecordReader, ISimple
+internal abstract class PointDataRecordReader<T>(IEntropyDecoder decoder, int pointDataLength, int basePointDataLength) : ICompressedPointDataRecordReader, ISimple
     where T : IBasePointDataRecord
 {
     private readonly ISymbolModel changedValuesModel = decoder.CreateSymbolModel(64);
@@ -86,10 +86,26 @@ internal abstract class PointDataRecordReader<T>(IEntropyDecoder decoder, int po
     }
 
     /// <inheritdoc/>
+    int ICompressedPointDataRecordReader.Read(Span<byte> destination)
+    {
+        ReadOnlySpan<byte> processedData = this.ProcessData();
+        processedData.CopyTo(destination);
+        return processedData.Length;
+    }
+
+    /// <inheritdoc/>
     async ValueTask<LasPointMemory> IPointDataRecordReader.ReadAsync(ReadOnlyMemory<byte> source, CancellationToken cancellationToken)
     {
         ReadOnlyMemory<byte> processedData = await this.ProcessDataAsync(cancellationToken).ConfigureAwait(false);
         return new(await this.ReadAsync(processedData[..basePointDataLength], cancellationToken).ConfigureAwait(false), processedData[basePointDataLength..]);
+    }
+
+    /// <inheritdoc/>
+    async ValueTask<int> ICompressedPointDataRecordReader.ReadAsync(Memory<byte> destination, CancellationToken cancellationToken)
+    {
+        ReadOnlyMemory<byte> processedData = await this.ProcessDataAsync(cancellationToken).ConfigureAwait(false);
+        processedData.CopyTo(destination);
+        return processedData.Length;
     }
 
     /// <inheritdoc cref="IPointDataRecordReader.Read"/>

@@ -28,6 +28,28 @@ public interface ILasReader
     IReadOnlyList<ExtendedVariableLengthRecord> ExtendedVariableLengthRecords { get; }
 #endif
 
+#if NETSTANDARD2_1_OR_GREATER || NETCOREAPP2_1_OR_GREATER
+    /// <summary>
+    /// Gets the point data length.
+    /// </summary>
+    ushort PointDataLength { get; }
+
+    /// <summary>
+    /// Reads the point data record data.
+    /// </summary>
+    /// <param name="buffer">The buffer to read into.</param>
+    /// <returns>The number of points read.</returns>
+    int ReadPointDataRecordData(Span<byte> buffer);
+
+    /// <summary>
+    /// Reads the point data record data asynchronously.
+    /// </summary>
+    /// <param name="buffer">The buffer to read into.</param>
+    /// <param name="cancellationToken">The cancellation token.</param>
+    /// <returns>The number of points read.</returns>
+    ValueTask<int> ReadPointDataRecordDataAsync(Memory<byte> buffer, CancellationToken cancellationToken = default);
+#endif
+
     /// <summary>
     /// Reads the point data record.
     /// </summary>

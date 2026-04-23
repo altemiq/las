@@ -66,6 +66,16 @@ internal abstract class ChunkedReader : IPointReader
     }
 
     /// <inheritdoc/>
+    public int Read(Stream stream, Span<byte> destination)
+    {
+        this.MoveToNextChunkIfRequired(stream);
+
+        this.chunkCount++;
+
+        return this.Reader.Read(stream, destination);
+    }
+
+    /// <inheritdoc/>
     public async ValueTask<LasPointMemory> ReadAsync(Stream stream, CancellationToken cancellationToken = default)
     {
         await this.MoveToNextChunkIfRequiredAsync(stream, cancellationToken).ConfigureAwait(false);
@@ -73,6 +83,16 @@ internal abstract class ChunkedReader : IPointReader
         this.chunkCount++;
 
         return await this.Reader.ReadAsync(stream, cancellationToken).ConfigureAwait(false);
+    }
+
+    /// <inheritdoc/>
+    public async ValueTask<int> ReadAsync(Stream stream, Memory<byte> destination, CancellationToken cancellationToken = default)
+    {
+        await this.MoveToNextChunkIfRequiredAsync(stream, cancellationToken).ConfigureAwait(false);
+
+        this.chunkCount++;
+
+        return await this.Reader.ReadAsync(stream, destination, cancellationToken).ConfigureAwait(false);
     }
 
     /// <summary>

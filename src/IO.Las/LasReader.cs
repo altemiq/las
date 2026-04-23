@@ -11,6 +11,7 @@ namespace Altemiq.IO.Las;
 /// </summary>
 public class LasReader :
     ILasReader,
+    Readers.IPointDataRecordReader,
 #if NETSTANDARD2_1_OR_GREATER || NETCOREAPP3_0_OR_GREATER
     IAsyncDisposable,
 #endif
@@ -40,7 +41,7 @@ public class LasReader :
 
     private readonly long endOfPointDataRecords;
 
-    private readonly byte[] buffer;
+    private readonly byte[] dataBuffer;
 
     private ulong currentPointIndex;
 
@@ -79,7 +80,7 @@ public class LasReader :
                 out this.endOfPointDataRecords);
 #endif
         this.numberOfPointRecords = this.Header.NumberOfPointRecords;
-        this.buffer = new byte[this.pointDataLength];
+        this.dataBuffer = new byte[this.pointDataLength];
     }
 
     /// <summary>
@@ -116,7 +117,7 @@ public class LasReader :
                 out this.endOfPointDataRecords);
 #endif
         this.numberOfPointRecords = this.Header.NumberOfPointRecords;
-        this.buffer = new byte[this.pointDataLength];
+        this.dataBuffer = new byte[this.pointDataLength];
     }
 
     /// <summary>
@@ -165,7 +166,7 @@ public class LasReader :
                 out this.endOfPointDataRecords);
 #endif
         this.numberOfPointRecords = header.NumberOfPointRecords;
-        this.buffer = new byte[this.pointDataLength];
+        this.dataBuffer = new byte[this.pointDataLength];
     }
 
     /// <inheritdoc/>
@@ -184,15 +185,26 @@ public class LasReader :
     /// </summary>
     public Stream BaseStream { get; }
 
+#if NETSTANDARD2_1_OR_GREATER || NETCOREAPP2_1_OR_GREATER
+    /// <inheritdoc/>
+    public ushort PointDataLength => this.pointDataLength;
+#else
+    /// <summary>
+    /// Gets the point data length.
+    /// </summary>
+    protected ushort PointDataLength => this.pointDataLength;
+#endif
+
     /// <summary>
     /// Gets the RAW reader.
     /// </summary>
     protected Readers.IPointDataRecordReader RawReader => this.rawReader;
 
-    /// <summary>
-    /// Gets the point data length.
-    /// </summary>
-    protected ushort PointDataLength => this.pointDataLength;
+    /// <inheritdoc/>
+    public LasPointSpan Read(ReadOnlySpan<byte> source) => this.rawReader.Read(source);
+
+    /// <inheritdoc/>
+    public ValueTask<LasPointMemory> ReadAsync(ReadOnlyMemory<byte> source, CancellationToken cancellationToken = default) => this.rawReader.ReadAsync(source, cancellationToken);
 
     /// <inheritdoc/>
     public virtual LasPointSpan ReadPointDataRecord()
@@ -206,11 +218,13 @@ public class LasReader :
         this.MoveToPointData();
 
         // read the data
-        _ = this.BaseStream.Read(this.buffer, 0, this.buffer.Length);
-        ReadOnlySpan<byte> data = this.buffer;
+        if (this.BaseStream.Read(this.dataBuffer) < this.pointDataLength)
+        {
+            return default;
+        }
 
         // read the point.
-        var point = this.rawReader.Read(data);
+        var point = this.rawReader.Read(this.dataBuffer);
         this.IncrementPointIndex();
         return point;
     }
@@ -219,9 +233,41 @@ public class LasReader :
     public LasPointSpan ReadPointDataRecord(ulong index)
     {
         this.MoveToPoint(index);
-        var pointSpan = this.ReadPointDataRecord();
-        return pointSpan.PointDataRecord is not null ? pointSpan : throw new KeyNotFoundException();
+        return this.ReadPointDataRecord() is { PointDataRecord: not null } pointSpan
+            ? pointSpan
+            : throw new KeyNotFoundException();
     }
+
+#if NETSTANDARD2_1_OR_GREATER || NETCOREAPP2_1_OR_GREATER
+    /// <inheritdoc/>
+    public virtual int ReadPointDataRecordData(Span<byte> buffer)
+    {
+        if (!this.CheckEndOfPointData() || !this.CheckPointIndex())
+        {
+            return 0;
+        }
+
+        _ = this.BaseStream.SwitchStreamIfMultiple(LasStreams.PointData);
+        this.MoveToPointData();
+
+        if (Math.Min(buffer.Length, (int)(this.endOfPointDataRecords - this.BaseStream.Position)) is not (> 0 and var bytesToRead))
+        {
+            return 0;
+        }
+
+        // make sure we do this in multiples of the point data length
+        bytesToRead -= bytesToRead % this.pointDataLength;
+
+        if (this.BaseStream.Read(buffer[..bytesToRead]) is not (> 0 and var bytesRead))
+        {
+            return 0;
+        }
+
+        var pointsRead = bytesRead / this.pointDataLength;
+        this.IncrementPointIndex((ulong)pointsRead);
+        return pointsRead;
+    }
+#endif
 
     /// <inheritdoc/>
     public virtual async ValueTask<LasPointMemory> ReadPointDataRecordAsync(CancellationToken cancellationToken = default)
@@ -235,10 +281,10 @@ public class LasReader :
         await this.MoveToPointDataAsync(cancellationToken).ConfigureAwait(false);
 
         // read the data
-        _ = await this.BaseStream.ReadAsync(this.buffer, cancellationToken).ConfigureAwait(false);
+        _ = await this.BaseStream.ReadAsync(this.dataBuffer, cancellationToken).ConfigureAwait(false);
 
         // read the point.
-        var point = await this.rawReader.ReadAsync(this.buffer, cancellationToken).ConfigureAwait(false);
+        var point = await this.rawReader.ReadAsync(this.dataBuffer, cancellationToken).ConfigureAwait(false);
         this.IncrementPointIndex();
         return point;
     }
@@ -250,6 +296,37 @@ public class LasReader :
         var pointSpan = await this.ReadPointDataRecordAsync(cancellationToken).ConfigureAwait(false);
         return pointSpan.PointDataRecord is not null ? pointSpan : throw new KeyNotFoundException();
     }
+
+#if NETSTANDARD2_1_OR_GREATER || NETCOREAPP2_1_OR_GREATER
+    /// <inheritdoc/>
+    public virtual async ValueTask<int> ReadPointDataRecordDataAsync(Memory<byte> buffer, CancellationToken cancellationToken = default)
+    {
+        if (!this.CheckEndOfPointData() || !this.CheckPointIndex())
+        {
+            return 0;
+        }
+
+        _ = this.BaseStream.SwitchStreamIfMultiple(LasStreams.PointData);
+        await this.MoveToPointDataAsync(cancellationToken).ConfigureAwait(false);
+
+        if (Math.Min(buffer.Length, (int)(this.endOfPointDataRecords - this.BaseStream.Position)) is not (> 0 and var bytesToRead))
+        {
+            return 0;
+        }
+
+        // make sure we do this in multiples of the point data length
+        bytesToRead -= bytesToRead % this.pointDataLength;
+
+        if (await this.BaseStream.ReadAsync(buffer[..bytesToRead], cancellationToken).ConfigureAwait(false) is not (> 0 and var bytesRead))
+        {
+            return 0;
+        }
+
+        var pointsRead = bytesRead / this.pointDataLength;
+        this.IncrementPointIndex((ulong)pointsRead);
+        return pointsRead;
+    }
+#endif
 
     /// <inheritdoc/>
     public void Dispose()
@@ -368,6 +445,12 @@ public class LasReader :
     /// Increments the point index.
     /// </summary>
     protected void IncrementPointIndex() => this.currentPointIndex++;
+
+    /// <summary>
+    /// Increments the point index.
+    /// </summary>
+    /// <param name="count">The number of points to increment.</param>
+    protected void IncrementPointIndex(ulong count) => this.currentPointIndex += count;
 
     /// <summary>
     /// Move to the point data.
