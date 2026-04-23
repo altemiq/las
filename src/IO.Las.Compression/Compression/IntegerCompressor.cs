@@ -160,11 +160,7 @@ internal sealed class IntegerCompressor
             var c1 = (uint)(c <= 0 ? -c : c - 1);
 
             // this loop could be replaced with more efficient code
-            while (c1 > 0)
-            {
-                c1 >>= 1;
-                this.K++;
-            }
+            this.K = c1 is 0 ? 0U : (uint)System.Numerics.BitOperations.Log2(c1) + 1;
 
             // the number k is between 0 and corrBits and describes the interval the corrector falls into
             // we can compress the exact location of c within this interval using k bits
