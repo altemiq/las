@@ -463,6 +463,8 @@ internal abstract class ChunkedReader : IPointReader
         {
             // read the 8 bytes that store the location of the chunk table
             _ = stream.SwitchStreamIfMultiple(LazStreams.ChunkTablePosition);
+            CacheStream(stream, sizeof(long));
+
             var chunkTableStartPosition = stream.ReadInt64LittleEndian();
 
             // this is where the chunks start
@@ -532,11 +534,8 @@ internal abstract class ChunkedReader : IPointReader
                     throw new InvalidOperationException(Compression.Properties.Resources.FailedToSeek);
                 }
 
-                if (stream is ICacheStream cacheStream)
-                {
-                    // prepare the chunk table
-                    cacheStream.Cache(chunkTableStartPosition, 2048);
-                }
+                // prepare the chunk table
+                CacheStream(stream, 2048);
 
                 this.ReadChunkTable(
                     stream,
@@ -573,6 +572,14 @@ internal abstract class ChunkedReader : IPointReader
             }
 
             return stream.Seek(chunksStart, SeekOrigin.Begin) is not 0;
+
+            static void CacheStream(Stream stream, int length)
+            {
+                if (stream is ICacheStream cacheStream)
+                {
+                    cacheStream.Cache(stream.Position, length);
+                }
+            }
         }
     }
 

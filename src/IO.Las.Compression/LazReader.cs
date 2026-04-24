@@ -19,7 +19,7 @@ public sealed class LazReader : LasReader, ILazReader
     /// <param name="input">The input.</param>
     /// <param name="leaveOpen"><see langword="true"/> to leave the stream open after the <see cref="LazReader"/> object is disposed; otherwise <see langword="false"/>.</param>
     public LazReader(Stream input, bool leaveOpen = false)
-        : base(input, leaveOpen) => this.pointReader = this.CreatePointReader();
+        : base(CachedStream.Create(input), leaveOpen) => this.pointReader = this.CreatePointReader();
 
     /// <summary>
     /// Initializes a new instance of the <see cref="LazReader"/> class based on the specified stream, and optionally leaves the stream open.
@@ -28,19 +28,19 @@ public sealed class LazReader : LasReader, ILazReader
     /// <param name="fileSignature">The file signature.</param>
     /// <param name="leaveOpen"><see langword="true"/> to leave the stream open after the <see cref="LazReader"/> object is disposed; otherwise <see langword="false"/>.</param>
     public LazReader(Stream input, string fileSignature, bool leaveOpen = false)
-        : base(input, fileSignature, leaveOpen) => this.pointReader = this.CreatePointReader();
+        : base(CachedStream.Create(input), fileSignature, leaveOpen) => this.pointReader = this.CreatePointReader();
 
     /// <summary>
     /// Initializes a new instance of the <see cref="LazReader"/> class based on the specified path.
     /// </summary>
     /// <param name="path">The file to be opened for reading.</param>
     public LazReader(string path)
-        : this(CreateStream(path))
+        : this(CachedStream.Create(CreateStream(path)))
     {
     }
 
     private LazReader(Stream input, bool leaveOpen, HeaderBlockReader headerReader, in HeaderBlock header)
-        : base(input, leaveOpen, headerReader, header) => this.pointReader = this.CreatePointReader();
+        : base(CachedStream.Create(input), leaveOpen, headerReader, header) => this.pointReader = this.CreatePointReader();
 
     /// <inheritdoc/>
     public bool IsCompressed => this.pointReader is not Las.RawReader;

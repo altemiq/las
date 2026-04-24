@@ -26,9 +26,19 @@ internal static class StreamExtensions
         /// <returns>The little endian value.</returns>
         public byte ReadByteLittleEndian()
         {
+            if (stream is CachedStream cachedStream && cachedStream.TryGetSpan(sizeof(byte), out var cacheBuffer))
+            {
+                return cacheBuffer[0];
+            }
+
             Span<byte> buffer = stackalloc byte[sizeof(byte)];
-            stream.ReadExactly(buffer);
-            return buffer[0];
+            var bytesRead = stream.Read(buffer);
+            if (bytesRead is sizeof(byte))
+            {
+                return buffer[0];
+            }
+
+            throw new EndOfStreamException();
         }
 
         /// <summary>
@@ -37,9 +47,13 @@ internal static class StreamExtensions
         /// <returns>The little endian value.</returns>
         public sbyte ReadSByteLittleEndian()
         {
+            if (stream is CachedStream cachedStream && cachedStream.TryGetSpan(sizeof(sbyte), out var cacheBuffer))
+            {
+                return (sbyte)cacheBuffer[0];
+            }
+
             Span<byte> buffer = stackalloc byte[sizeof(sbyte)];
-            stream.ReadExactly(buffer);
-            return (sbyte)buffer[0];
+            return stream.Read(buffer) is sizeof(sbyte) ? (sbyte)buffer[0] : throw new EndOfStreamException();
         }
 
         /// <summary>
@@ -48,9 +62,15 @@ internal static class StreamExtensions
         /// <returns>The little endian value.</returns>
         public short ReadInt16LittleEndian()
         {
+            if (stream is CachedStream cachedStream && cachedStream.TryGetSpan(sizeof(short), out var cacheBuffer))
+            {
+                return System.Buffers.Binary.BinaryPrimitives.ReadInt16LittleEndian(cacheBuffer);
+            }
+
             Span<byte> buffer = stackalloc byte[sizeof(short)];
-            stream.ReadExactly(buffer);
-            return System.Buffers.Binary.BinaryPrimitives.ReadInt16LittleEndian(buffer);
+            return stream.Read(buffer) is sizeof(short)
+                ? System.Buffers.Binary.BinaryPrimitives.ReadInt16LittleEndian(buffer)
+                : throw new EndOfStreamException();
         }
 
         /// <summary>
@@ -59,9 +79,15 @@ internal static class StreamExtensions
         /// <returns>The little endian value.</returns>
         public ushort ReadUInt16LittleEndian()
         {
+            if (stream is CachedStream cachedStream && cachedStream.TryGetSpan(sizeof(ushort), out var cacheBuffer))
+            {
+                return System.Buffers.Binary.BinaryPrimitives.ReadUInt16LittleEndian(cacheBuffer);
+            }
+
             Span<byte> buffer = stackalloc byte[sizeof(ushort)];
-            stream.ReadExactly(buffer);
-            return System.Buffers.Binary.BinaryPrimitives.ReadUInt16LittleEndian(buffer);
+            return stream.Read(buffer) is sizeof(ushort)
+                ? System.Buffers.Binary.BinaryPrimitives.ReadUInt16LittleEndian(buffer)
+                : throw new EndOfStreamException();
         }
 
         /// <summary>
@@ -70,9 +96,15 @@ internal static class StreamExtensions
         /// <returns>The little endian value.</returns>
         public int ReadInt32LittleEndian()
         {
+            if (stream is CachedStream cachedStream && cachedStream.TryGetSpan(sizeof(int), out var cacheBuffer))
+            {
+                return System.Buffers.Binary.BinaryPrimitives.ReadInt32LittleEndian(cacheBuffer);
+            }
+
             Span<byte> buffer = stackalloc byte[sizeof(int)];
-            stream.ReadExactly(buffer);
-            return System.Buffers.Binary.BinaryPrimitives.ReadInt32LittleEndian(buffer);
+            return stream.Read(buffer) is sizeof(int)
+                ? System.Buffers.Binary.BinaryPrimitives.ReadInt32LittleEndian(buffer)
+                : throw new EndOfStreamException();
         }
 
         /// <summary>
@@ -81,9 +113,15 @@ internal static class StreamExtensions
         /// <returns>The little endian value.</returns>
         public uint ReadUInt32LittleEndian()
         {
+            if (stream is CachedStream cachedStream && cachedStream.TryGetSpan(sizeof(uint), out var cacheBuffer))
+            {
+                return System.Buffers.Binary.BinaryPrimitives.ReadUInt32LittleEndian(cacheBuffer);
+            }
+
             Span<byte> buffer = stackalloc byte[sizeof(uint)];
-            stream.ReadExactly(buffer);
-            return System.Buffers.Binary.BinaryPrimitives.ReadUInt32LittleEndian(buffer);
+            return stream.Read(buffer) is sizeof(uint)
+                ? System.Buffers.Binary.BinaryPrimitives.ReadUInt32LittleEndian(buffer)
+                : throw new EndOfStreamException();
         }
 
         /// <summary>
@@ -92,9 +130,15 @@ internal static class StreamExtensions
         /// <returns>The little endian value.</returns>
         public long ReadInt64LittleEndian()
         {
+            if (stream is CachedStream cachedStream && cachedStream.TryGetSpan(sizeof(long), out var cacheBuffer))
+            {
+                return System.Buffers.Binary.BinaryPrimitives.ReadInt64LittleEndian(cacheBuffer);
+            }
+
             Span<byte> buffer = stackalloc byte[sizeof(long)];
-            stream.ReadExactly(buffer);
-            return System.Buffers.Binary.BinaryPrimitives.ReadInt64LittleEndian(buffer);
+            return stream.Read(buffer) is sizeof(long)
+                ? System.Buffers.Binary.BinaryPrimitives.ReadInt64LittleEndian(buffer)
+                : throw new EndOfStreamException();
         }
 
         /// <summary>
@@ -103,9 +147,15 @@ internal static class StreamExtensions
         /// <returns>The little endian value.</returns>
         public ulong ReadUInt64LittleEndian()
         {
+            if (stream is CachedStream cachedStream && cachedStream.TryGetSpan(sizeof(ulong), out var cacheBuffer))
+            {
+                return System.Buffers.Binary.BinaryPrimitives.ReadUInt64LittleEndian(cacheBuffer);
+            }
+
             Span<byte> buffer = stackalloc byte[sizeof(ulong)];
-            stream.ReadExactly(buffer);
-            return System.Buffers.Binary.BinaryPrimitives.ReadUInt64LittleEndian(buffer);
+            return stream.Read(buffer) is sizeof(ulong)
+                ? System.Buffers.Binary.BinaryPrimitives.ReadUInt64LittleEndian(buffer)
+                : throw new EndOfStreamException();
         }
 
         /// <summary>
@@ -114,9 +164,15 @@ internal static class StreamExtensions
         /// <returns>The little endian value.</returns>
         public float ReadSingleLittleEndian()
         {
+            if (stream is CachedStream cachedStream && cachedStream.TryGetSpan(sizeof(float), out var cacheBuffer))
+            {
+                return System.Buffers.Binary.BinaryPrimitives.ReadSingleLittleEndian(cacheBuffer);
+            }
+
             Span<byte> buffer = stackalloc byte[sizeof(float)];
-            stream.ReadExactly(buffer);
-            return System.Buffers.Binary.BinaryPrimitives.ReadSingleLittleEndian(buffer);
+            return stream.Read(buffer) is sizeof(float)
+                ? System.Buffers.Binary.BinaryPrimitives.ReadSingleLittleEndian(buffer)
+                : throw new EndOfStreamException();
         }
 
         /// <summary>
@@ -125,9 +181,15 @@ internal static class StreamExtensions
         /// <returns>The little endian value.</returns>
         public double ReadDoubleLittleEndian()
         {
+            if (stream is CachedStream cachedStream && cachedStream.TryGetSpan(sizeof(double), out var cacheBuffer))
+            {
+                return System.Buffers.Binary.BinaryPrimitives.ReadDoubleLittleEndian(cacheBuffer);
+            }
+
             Span<byte> buffer = stackalloc byte[sizeof(double)];
-            stream.ReadExactly(buffer);
-            return System.Buffers.Binary.BinaryPrimitives.ReadDoubleLittleEndian(buffer);
+            return stream.Read(buffer) is sizeof(double)
+                ? System.Buffers.Binary.BinaryPrimitives.ReadDoubleLittleEndian(buffer)
+                : throw new EndOfStreamException();
         }
 
         /// <summary>
@@ -247,30 +309,5 @@ internal static class StreamExtensions
             System.Buffers.Binary.BinaryPrimitives.WriteDoubleLittleEndian(buffer, value);
             stream.Write(buffer);
         }
-
-#if !NET7_0_OR_GREATER
-        /// <summary>
-        /// Reads bytes from the current stream and advances the position within the stream until the <paramref name="buffer"/> is filled.
-        /// </summary>
-        /// <param name="buffer">A region of memory. When this method returns, the contents of this region are replaced by the bytes read from the current stream.</param>
-        /// <exception cref="EndOfStreamException">The end of the stream is reached before filling the <paramref name="buffer"/>.</exception>
-        public void ReadExactly(Span<byte> buffer)
-        {
-#if NETSTANDARD2_1_OR_GREATER || NETCOREAPP2_1_OR_GREATER
-            if (stream.Read(buffer) < buffer.Length)
-            {
-                throw new EndOfStreamException();
-            }
-#else
-            var bufferTemp = new byte[buffer.Length];
-            if (stream.Read(bufferTemp, 0, bufferTemp.Length) < bufferTemp.Length)
-            {
-                throw new EndOfStreamException();
-            }
-
-            bufferTemp.AsSpan().CopyTo(buffer);
-#endif
-        }
-#endif
     }
 }

@@ -44,7 +44,7 @@ internal sealed class LayeredValue(bool requested)
     {
         var count = (int)this.ByteCount;
         _ = stream.Read(buffer, index, count);
-        _ = this.Decoder.Initialize(new MemoryStream(buffer, index, count));
+        _ = this.Decoder.Initialize(new CachedStream(new MemoryStream(buffer, index, count)));
         return this.ByteCount;
     }
 
@@ -62,7 +62,7 @@ internal sealed class LayeredValue(bool requested)
             if (this.ByteCount is not 0 and var count)
             {
                 _ = stream.Read(buffer, index, (int)count);
-                _ = this.Decoder.Initialize(new MemoryStream(buffer, index, (int)count));
+                _ = this.Decoder.Initialize(new CachedStream(new MemoryStream(buffer, index, (int)count)));
                 this.Changed = true;
                 return this.ByteCount;
             }
