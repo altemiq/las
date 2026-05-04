@@ -58,10 +58,6 @@ public class HeaderBlockReader(Stream stream)
         {
             stream.Position = 0;
         }
-        else if (stream is { Position: not 0 })
-        {
-            // throw an error, as we need to read this from the start of the stream
-        }
 
         // do a cache on the stream
         if (stream is ICacheStream cacheStream)

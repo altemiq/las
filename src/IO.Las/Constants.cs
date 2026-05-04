@@ -86,7 +86,7 @@ internal static class Constants
         /// <summary>
         /// The bitwise mask for bit 7.
         /// </summary>
-        public const int Mask7 = 0x80;
+        public const byte Mask7 = 0x80;
     }
 
     /// <summary>

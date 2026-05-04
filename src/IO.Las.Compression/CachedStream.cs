@@ -295,9 +295,8 @@ public sealed class CachedStream : Stream, ICacheStream, IAsyncCacheStream
 
         static int GetNextPower(int n)
         {
-            if (n is 0)
+            if (n <= 1)
             {
-                // By definition, next power of 2 for 0 is 1
                 return 1;
             }
 
@@ -314,8 +313,7 @@ public sealed class CachedStream : Stream, ICacheStream, IAsyncCacheStream
             n |= n >> 4;
             n |= n >> 8;
             n |= n >> 16;
-            n++;
-            return n;
+            return n + 1;
         }
     }
 }
