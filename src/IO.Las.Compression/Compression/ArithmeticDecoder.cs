@@ -33,10 +33,10 @@ internal sealed class ArithmeticDecoder : ArithmeticCoder, IEntropyDecoder
             return true;
         }
 
-        var tempValue = stream.ReadByte() << 24;
-        tempValue |= stream.ReadByte() << 16;
-        tempValue |= stream.ReadByte() << 8;
-        tempValue |= stream.ReadByte();
+        var tempValue = stream.ReadByteLittleEndian() << 24;
+        tempValue |= stream.ReadByteLittleEndian() << 16;
+        tempValue |= stream.ReadByteLittleEndian() << 8;
+        tempValue |= stream.ReadByteLittleEndian();
         this.value = (uint)tempValue;
 
         return true;

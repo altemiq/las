@@ -26,19 +26,18 @@ internal static class StreamExtensions
         /// <returns>The little endian value.</returns>
         public byte ReadByteLittleEndian()
         {
-            if (stream is CachedStream cachedStream && cachedStream.TryGetSpan(sizeof(byte), out var cacheBuffer))
+            return stream switch
             {
-                return cacheBuffer[0];
-            }
+                CachedStream cachedStream when cachedStream.TryGetSpan(sizeof(byte), out var cacheBuffer) => cacheBuffer[0],
+                MemoryStream memoryStream when memoryStream.TryGetSpan(sizeof(byte), out var memoryBuffer) => memoryBuffer[0],
+                _ => ReadByteLittleEndianCore(stream),
+            };
 
-            Span<byte> buffer = stackalloc byte[sizeof(byte)];
-            var bytesRead = stream.Read(buffer);
-            if (bytesRead is sizeof(byte))
+            static byte ReadByteLittleEndianCore(Stream stream)
             {
-                return buffer[0];
+                Span<byte> buffer = stackalloc byte[sizeof(byte)];
+                return stream.Read(buffer) is sizeof(byte) ? buffer[0] : throw new EndOfStreamException();
             }
-
-            throw new EndOfStreamException();
         }
 
         /// <summary>
@@ -47,13 +46,20 @@ internal static class StreamExtensions
         /// <returns>The little endian value.</returns>
         public sbyte ReadSByteLittleEndian()
         {
-            if (stream is CachedStream cachedStream && cachedStream.TryGetSpan(sizeof(sbyte), out var cacheBuffer))
+            return stream switch
             {
-                return (sbyte)cacheBuffer[0];
-            }
+                CachedStream cachedStream when cachedStream.TryGetSpan(sizeof(sbyte), out var cacheBuffer) => (sbyte)cacheBuffer[0],
+                MemoryStream memoryStream when memoryStream.TryGetSpan(sizeof(sbyte), out var memoryBuffer) => (sbyte)memoryBuffer[0],
+                _ => ReadSByteLittleEndianCore(stream),
+            };
 
-            Span<byte> buffer = stackalloc byte[sizeof(sbyte)];
-            return stream.Read(buffer) is sizeof(sbyte) ? (sbyte)buffer[0] : throw new EndOfStreamException();
+            static sbyte ReadSByteLittleEndianCore(Stream stream)
+            {
+                Span<byte> buffer = stackalloc byte[sizeof(sbyte)];
+                return stream.Read(buffer) is sizeof(sbyte)
+                    ? (sbyte)buffer[0]
+                    : throw new EndOfStreamException();
+            }
         }
 
         /// <summary>
@@ -62,15 +68,20 @@ internal static class StreamExtensions
         /// <returns>The little endian value.</returns>
         public short ReadInt16LittleEndian()
         {
-            if (stream is CachedStream cachedStream && cachedStream.TryGetSpan(sizeof(short), out var cacheBuffer))
+            return stream switch
             {
-                return System.Buffers.Binary.BinaryPrimitives.ReadInt16LittleEndian(cacheBuffer);
-            }
+                CachedStream cachedStream when cachedStream.TryGetSpan(sizeof(short), out var cacheBuffer) => System.Buffers.Binary.BinaryPrimitives.ReadInt16LittleEndian(cacheBuffer),
+                MemoryStream memoryStream when memoryStream.TryGetSpan(sizeof(short), out var memoryBuffer) => System.Buffers.Binary.BinaryPrimitives.ReadInt16LittleEndian(memoryBuffer),
+                _ => ReadInt16LittleEndianCore(stream),
+            };
 
-            Span<byte> buffer = stackalloc byte[sizeof(short)];
-            return stream.Read(buffer) is sizeof(short)
-                ? System.Buffers.Binary.BinaryPrimitives.ReadInt16LittleEndian(buffer)
-                : throw new EndOfStreamException();
+            static short ReadInt16LittleEndianCore(Stream stream)
+            {
+                Span<byte> buffer = stackalloc byte[sizeof(short)];
+                return stream.Read(buffer) is sizeof(short)
+                    ? System.Buffers.Binary.BinaryPrimitives.ReadInt16LittleEndian(buffer)
+                    : throw new EndOfStreamException();
+            }
         }
 
         /// <summary>
@@ -79,15 +90,20 @@ internal static class StreamExtensions
         /// <returns>The little endian value.</returns>
         public ushort ReadUInt16LittleEndian()
         {
-            if (stream is CachedStream cachedStream && cachedStream.TryGetSpan(sizeof(ushort), out var cacheBuffer))
+            return stream switch
             {
-                return System.Buffers.Binary.BinaryPrimitives.ReadUInt16LittleEndian(cacheBuffer);
-            }
+                CachedStream cachedStream when cachedStream.TryGetSpan(sizeof(ushort), out var cacheBuffer) => System.Buffers.Binary.BinaryPrimitives.ReadUInt16LittleEndian(cacheBuffer),
+                MemoryStream memoryStream when memoryStream.TryGetSpan(sizeof(ushort), out var memoryBuffer) => System.Buffers.Binary.BinaryPrimitives.ReadUInt16LittleEndian(memoryBuffer),
+                _ => ReadUInt16LittleEndianCore(stream),
+            };
 
-            Span<byte> buffer = stackalloc byte[sizeof(ushort)];
-            return stream.Read(buffer) is sizeof(ushort)
-                ? System.Buffers.Binary.BinaryPrimitives.ReadUInt16LittleEndian(buffer)
-                : throw new EndOfStreamException();
+            static ushort ReadUInt16LittleEndianCore(Stream stream)
+            {
+                Span<byte> buffer = stackalloc byte[sizeof(ushort)];
+                return stream.Read(buffer) is sizeof(ushort)
+                    ? System.Buffers.Binary.BinaryPrimitives.ReadUInt16LittleEndian(buffer)
+                    : throw new EndOfStreamException();
+            }
         }
 
         /// <summary>
@@ -96,15 +112,20 @@ internal static class StreamExtensions
         /// <returns>The little endian value.</returns>
         public int ReadInt32LittleEndian()
         {
-            if (stream is CachedStream cachedStream && cachedStream.TryGetSpan(sizeof(int), out var cacheBuffer))
+            return stream switch
             {
-                return System.Buffers.Binary.BinaryPrimitives.ReadInt32LittleEndian(cacheBuffer);
-            }
+                CachedStream cachedStream when cachedStream.TryGetSpan(sizeof(int), out var cacheBuffer) => System.Buffers.Binary.BinaryPrimitives.ReadInt32LittleEndian(cacheBuffer),
+                MemoryStream memoryStream when memoryStream.TryGetSpan(sizeof(int), out var memoryBuffer) => System.Buffers.Binary.BinaryPrimitives.ReadInt32LittleEndian(memoryBuffer),
+                _ => ReadInt32LittleEndianCore(stream),
+            };
 
-            Span<byte> buffer = stackalloc byte[sizeof(int)];
-            return stream.Read(buffer) is sizeof(int)
-                ? System.Buffers.Binary.BinaryPrimitives.ReadInt32LittleEndian(buffer)
-                : throw new EndOfStreamException();
+            static int ReadInt32LittleEndianCore(Stream stream)
+            {
+                Span<byte> buffer = stackalloc byte[sizeof(int)];
+                return stream.Read(buffer) is sizeof(int)
+                    ? System.Buffers.Binary.BinaryPrimitives.ReadInt32LittleEndian(buffer)
+                    : throw new EndOfStreamException();
+            }
         }
 
         /// <summary>
@@ -113,15 +134,20 @@ internal static class StreamExtensions
         /// <returns>The little endian value.</returns>
         public uint ReadUInt32LittleEndian()
         {
-            if (stream is CachedStream cachedStream && cachedStream.TryGetSpan(sizeof(uint), out var cacheBuffer))
+            return stream switch
             {
-                return System.Buffers.Binary.BinaryPrimitives.ReadUInt32LittleEndian(cacheBuffer);
-            }
+                CachedStream cachedStream when cachedStream.TryGetSpan(sizeof(uint), out var cacheBuffer) => System.Buffers.Binary.BinaryPrimitives.ReadUInt32LittleEndian(cacheBuffer),
+                MemoryStream memoryStream when memoryStream.TryGetSpan(sizeof(uint), out var memoryBuffer) => System.Buffers.Binary.BinaryPrimitives.ReadUInt32LittleEndian(memoryBuffer),
+                _ => ReadUInt32LittleEndianCore(stream),
+            };
 
-            Span<byte> buffer = stackalloc byte[sizeof(uint)];
-            return stream.Read(buffer) is sizeof(uint)
-                ? System.Buffers.Binary.BinaryPrimitives.ReadUInt32LittleEndian(buffer)
-                : throw new EndOfStreamException();
+            static uint ReadUInt32LittleEndianCore(Stream stream)
+            {
+                Span<byte> buffer = stackalloc byte[sizeof(uint)];
+                return stream.Read(buffer) is sizeof(uint)
+                    ? System.Buffers.Binary.BinaryPrimitives.ReadUInt32LittleEndian(buffer)
+                    : throw new EndOfStreamException();
+            }
         }
 
         /// <summary>
@@ -130,15 +156,20 @@ internal static class StreamExtensions
         /// <returns>The little endian value.</returns>
         public long ReadInt64LittleEndian()
         {
-            if (stream is CachedStream cachedStream && cachedStream.TryGetSpan(sizeof(long), out var cacheBuffer))
+            return stream switch
             {
-                return System.Buffers.Binary.BinaryPrimitives.ReadInt64LittleEndian(cacheBuffer);
-            }
+                CachedStream cachedStream when cachedStream.TryGetSpan(sizeof(long), out var cacheBuffer) => System.Buffers.Binary.BinaryPrimitives.ReadInt64LittleEndian(cacheBuffer),
+                MemoryStream memoryStream when memoryStream.TryGetSpan(sizeof(long), out var memoryBuffer) => System.Buffers.Binary.BinaryPrimitives.ReadInt64LittleEndian(memoryBuffer),
+                _ => ReadInt64LittleEndianCore(stream),
+            };
 
-            Span<byte> buffer = stackalloc byte[sizeof(long)];
-            return stream.Read(buffer) is sizeof(long)
-                ? System.Buffers.Binary.BinaryPrimitives.ReadInt64LittleEndian(buffer)
-                : throw new EndOfStreamException();
+            static long ReadInt64LittleEndianCore(Stream stream)
+            {
+                Span<byte> buffer = stackalloc byte[sizeof(long)];
+                return stream.Read(buffer) is sizeof(long)
+                    ? System.Buffers.Binary.BinaryPrimitives.ReadInt64LittleEndian(buffer)
+                    : throw new EndOfStreamException();
+            }
         }
 
         /// <summary>
@@ -147,15 +178,20 @@ internal static class StreamExtensions
         /// <returns>The little endian value.</returns>
         public ulong ReadUInt64LittleEndian()
         {
-            if (stream is CachedStream cachedStream && cachedStream.TryGetSpan(sizeof(ulong), out var cacheBuffer))
+            return stream switch
             {
-                return System.Buffers.Binary.BinaryPrimitives.ReadUInt64LittleEndian(cacheBuffer);
-            }
+                CachedStream cachedStream when cachedStream.TryGetSpan(sizeof(ulong), out var cacheBuffer) => System.Buffers.Binary.BinaryPrimitives.ReadUInt64LittleEndian(cacheBuffer),
+                MemoryStream memoryStream when memoryStream.TryGetSpan(sizeof(ulong), out var memoryBuffer) => System.Buffers.Binary.BinaryPrimitives.ReadUInt64LittleEndian(memoryBuffer),
+                _ => ReadUInt64LittleEndianCore(stream),
+            };
 
-            Span<byte> buffer = stackalloc byte[sizeof(ulong)];
-            return stream.Read(buffer) is sizeof(ulong)
-                ? System.Buffers.Binary.BinaryPrimitives.ReadUInt64LittleEndian(buffer)
-                : throw new EndOfStreamException();
+            static ulong ReadUInt64LittleEndianCore(Stream stream)
+            {
+                Span<byte> buffer = stackalloc byte[sizeof(ulong)];
+                return stream.Read(buffer) is sizeof(ulong)
+                    ? System.Buffers.Binary.BinaryPrimitives.ReadUInt64LittleEndian(buffer)
+                    : throw new EndOfStreamException();
+            }
         }
 
         /// <summary>
@@ -164,15 +200,20 @@ internal static class StreamExtensions
         /// <returns>The little endian value.</returns>
         public float ReadSingleLittleEndian()
         {
-            if (stream is CachedStream cachedStream && cachedStream.TryGetSpan(sizeof(float), out var cacheBuffer))
+            return stream switch
             {
-                return System.Buffers.Binary.BinaryPrimitives.ReadSingleLittleEndian(cacheBuffer);
-            }
+                CachedStream cachedStream when cachedStream.TryGetSpan(sizeof(float), out var cacheBuffer) => System.Buffers.Binary.BinaryPrimitives.ReadSingleLittleEndian(cacheBuffer),
+                MemoryStream memoryStream when memoryStream.TryGetSpan(sizeof(float), out var memoryBuffer) => System.Buffers.Binary.BinaryPrimitives.ReadSingleLittleEndian(memoryBuffer),
+                _ => ReadSingleLittleEndianCore(stream),
+            };
 
-            Span<byte> buffer = stackalloc byte[sizeof(float)];
-            return stream.Read(buffer) is sizeof(float)
-                ? System.Buffers.Binary.BinaryPrimitives.ReadSingleLittleEndian(buffer)
-                : throw new EndOfStreamException();
+            static float ReadSingleLittleEndianCore(Stream stream)
+            {
+                Span<byte> buffer = stackalloc byte[sizeof(float)];
+                return stream.Read(buffer) is sizeof(float)
+                    ? System.Buffers.Binary.BinaryPrimitives.ReadSingleLittleEndian(buffer)
+                    : throw new EndOfStreamException();
+            }
         }
 
         /// <summary>
@@ -181,15 +222,20 @@ internal static class StreamExtensions
         /// <returns>The little endian value.</returns>
         public double ReadDoubleLittleEndian()
         {
-            if (stream is CachedStream cachedStream && cachedStream.TryGetSpan(sizeof(double), out var cacheBuffer))
+            return stream switch
             {
-                return System.Buffers.Binary.BinaryPrimitives.ReadDoubleLittleEndian(cacheBuffer);
-            }
+                CachedStream cachedStream when cachedStream.TryGetSpan(sizeof(double), out var cacheBuffer) => System.Buffers.Binary.BinaryPrimitives.ReadDoubleLittleEndian(cacheBuffer),
+                MemoryStream memoryStream when memoryStream.TryGetSpan(sizeof(double), out var memoryBuffer) => System.Buffers.Binary.BinaryPrimitives.ReadDoubleLittleEndian(memoryBuffer),
+                _ => ReadDoubleLittleEndianCore(stream),
+            };
 
-            Span<byte> buffer = stackalloc byte[sizeof(double)];
-            return stream.Read(buffer) is sizeof(double)
-                ? System.Buffers.Binary.BinaryPrimitives.ReadDoubleLittleEndian(buffer)
-                : throw new EndOfStreamException();
+            static double ReadDoubleLittleEndianCore(Stream stream)
+            {
+                Span<byte> buffer = stackalloc byte[sizeof(double)];
+                return stream.Read(buffer) is sizeof(double)
+                    ? System.Buffers.Binary.BinaryPrimitives.ReadDoubleLittleEndian(buffer)
+                    : throw new EndOfStreamException();
+            }
         }
 
         /// <summary>
@@ -198,7 +244,9 @@ internal static class StreamExtensions
         /// <param name="value">The value to write.</param>
         public void WriteByteLittleEndian(byte value)
         {
-#if NET7_0_OR_GREATER
+#if NET8_0_OR_GREATER
+            var buffer = new ReadOnlySpan<byte>(in value);
+#elif NET7_0_OR_GREATER
             var buffer = new ReadOnlySpan<byte>(value);
 #else
             Span<byte> buffer = stackalloc byte[sizeof(byte)];
@@ -213,7 +261,10 @@ internal static class StreamExtensions
         /// <param name="value">The value to write.</param>
         public void WriteSByteLittleEndian(sbyte value)
         {
-#if NET7_0_OR_GREATER
+#if NET8_0_OR_GREATER
+            var byteValue = (byte)value;
+            var buffer = new ReadOnlySpan<byte>(in byteValue);
+#elif NET7_0_OR_GREATER
             var buffer = new ReadOnlySpan<byte>((byte)value);
 #else
             Span<byte> buffer = stackalloc byte[sizeof(sbyte)];
@@ -308,6 +359,45 @@ internal static class StreamExtensions
             Span<byte> buffer = stackalloc byte[sizeof(double)];
             System.Buffers.Binary.BinaryPrimitives.WriteDoubleLittleEndian(buffer, value);
             stream.Write(buffer);
+        }
+    }
+
+    extension(MemoryStream memoryStream)
+    {
+        /// <summary>
+        /// Tries to read the span of the required length.
+        /// </summary>
+        /// <param name="length">The required length.</param>
+        /// <param name="output">The output span.</param>
+        /// <returns><see langword="true"/> if the span was read correctly; otherwise <see langword="false"/>.</returns>
+        /// <remarks>When the return if <see langword="true"/> the stream has been moved forward by <paramref name="length"/>.</remarks>
+        public bool TryGetSpan(int length, out ReadOnlySpan<byte> output)
+        {
+#if NET8_0_OR_GREATER
+            var position = memoryStream.Position;
+            if (position + length < memoryStream.Length)
+            {
+                output = InternalReadSpan(memoryStream, length);
+                return true;
+
+                [System.Runtime.CompilerServices.UnsafeAccessor(System.Runtime.CompilerServices.UnsafeAccessorKind.Method, Name = nameof(InternalReadSpan))]
+                static extern ReadOnlySpan<byte> InternalReadSpan(MemoryStream stream, int count);
+            }
+#else
+            if (memoryStream.TryGetBuffer(out var memoryBuffer))
+            {
+                var position = (int)memoryStream.Position;
+                if (position + length < memoryBuffer.Count)
+                {
+                    output = memoryBuffer.AsSpan(position, length);
+                    memoryStream.Position += length;
+                    return true;
+                }
+            }
+#endif
+
+            output = default;
+            return false;
         }
     }
 }

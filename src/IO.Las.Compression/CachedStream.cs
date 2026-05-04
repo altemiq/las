@@ -9,36 +9,67 @@ namespace Altemiq.IO.Las;
 /// <summary>
 /// A cached <see cref="Stream"/>.
 /// </summary>
-/// <param name="baseStream">The base stream.</param>
-/// <param name="bufferSize">The buffer size.</param>
-public sealed class CachedStream(Stream baseStream, int bufferSize = ushort.MaxValue + 1) : Stream, ICacheStream, IAsyncCacheStream
+public sealed class CachedStream : Stream, ICacheStream, IAsyncCacheStream
 {
-    private byte[] internalBuffer = new byte[bufferSize];
+    private readonly Stream baseStream;
+
+    private readonly bool readable;
+
+    private byte[] internalBuffer;
 
     private long bufferStart;
 
-    private int bufferPosition;
+    private int bufferOffset;
+
+    private int bufferIndex;
 
     private int bufferLength;
 
-    /// <inheritdoc />
-    public override bool CanRead => baseStream.CanRead;
+    /// <summary>
+    /// Initializes a new instance of the <see cref="CachedStream"/> class.
+    /// </summary>
+    /// <param name="baseStream">The base stream.</param>
+    /// <param name="bufferSize">The buffer size.</param>
+    public CachedStream(Stream baseStream, int bufferSize = ushort.MaxValue + 1)
+    {
+        this.baseStream = baseStream;
+        if (baseStream is MemoryStream memoryStream
+            && memoryStream.TryGetBuffer(out var buffer)
+            && buffer.Array is { } byteArray)
+        {
+            this.internalBuffer = byteArray;
+            this.bufferStart = -buffer.Offset;
+            this.bufferOffset = buffer.Offset;
+            this.bufferLength = byteArray.Length;
+            this.bufferIndex = (int)memoryStream.Position;
+            this.readable = false;
+            return;
+        }
+
+        this.internalBuffer = new byte[bufferSize];
+        this.readable = true;
+    }
 
     /// <inheritdoc />
-    public override bool CanSeek => baseStream.CanSeek;
+    public override bool CanRead => this.baseStream.CanRead;
 
     /// <inheritdoc />
-    public override bool CanWrite => baseStream.CanWrite;
+    public override bool CanSeek => this.baseStream.CanSeek;
 
     /// <inheritdoc />
-    public override long Length => baseStream.Length;
+    public override bool CanWrite => this.baseStream.CanWrite;
+
+    /// <inheritdoc />
+    public override long Length => this.baseStream.Length;
 
     /// <inheritdoc />
     public override long Position
     {
-        get => this.bufferStart + this.bufferPosition;
+        get => this.bufferStart + this.BufferPosition;
         set => this.Seek(value, SeekOrigin.Begin);
     }
+
+    private int BufferPosition => this.bufferOffset + this.bufferIndex;
 
     /// <summary>
     /// Tries to read the span of the required length.
@@ -49,10 +80,10 @@ public sealed class CachedStream(Stream baseStream, int bufferSize = ushort.MaxV
     /// <remarks>When the return if <see langword="true"/> the stream has been moved forward by <paramref name="length"/>.</remarks>
     public bool TryGetSpan(int length, out ReadOnlySpan<byte> output)
     {
-        if (length <= this.bufferLength - this.bufferPosition)
+        if (length <= this.bufferLength - this.bufferIndex)
         {
-            output = this.internalBuffer.AsSpan(this.bufferPosition, length);
-            this.bufferPosition += length;
+            output = this.internalBuffer.AsSpan(this.BufferPosition, length);
+            this.bufferIndex += length;
             return true;
         }
 
@@ -61,23 +92,20 @@ public sealed class CachedStream(Stream baseStream, int bufferSize = ushort.MaxV
     }
 
     /// <inheritdoc/>
-    public override void Flush() => baseStream.Flush();
+    public override void Flush() => this.baseStream.Flush();
 
     /// <inheritdoc/>
     public override int ReadByte()
     {
-        if (this.bufferPosition != this.bufferLength)
+        if (this.bufferIndex != this.bufferLength)
         {
-            return this.internalBuffer[this.bufferPosition++];
+            return this.internalBuffer[this.bufferOffset + this.bufferIndex++];
         }
 
-        this.Cache(baseStream.Position);
-        if (this.bufferLength == 0)
-        {
-            return -1;
-        }
-
-        return this.internalBuffer[this.bufferPosition++];
+        this.Cache(this.baseStream.Position);
+        return this.bufferLength is not 0
+            ? this.internalBuffer[this.bufferOffset + this.bufferIndex++]
+            : -1;
     }
 
     /// <inheritdoc/>
@@ -86,19 +114,18 @@ public sealed class CachedStream(Stream baseStream, int bufferSize = ushort.MaxV
         var totalRead = 0;
         while (totalRead < count)
         {
-            if (this.bufferPosition == this.bufferLength)
+            if (this.bufferIndex == this.bufferLength)
             {
-                this.Cache(baseStream.Position);
-                if (this.bufferLength == 0)
+                this.Cache(this.baseStream.Position);
+                if (this.bufferLength is 0)
                 {
                     break;
                 }
             }
 
-            var length = Math.Min(this.bufferLength - this.bufferPosition, count - totalRead);
-
-            this.internalBuffer.AsSpan(this.bufferPosition, length).CopyTo(buffer.AsSpan(offset + totalRead));
-            this.bufferPosition += length;
+            var length = Math.Min(this.bufferLength - this.bufferIndex, count - totalRead);
+            this.internalBuffer.AsSpan(this.BufferPosition, length).CopyTo(buffer.AsSpan(offset + totalRead));
+            this.bufferIndex += length;
             totalRead += length;
         }
 
@@ -112,19 +139,18 @@ public sealed class CachedStream(Stream baseStream, int bufferSize = ushort.MaxV
         var totalRead = 0;
         while (totalRead < buffer.Length)
         {
-            if (this.bufferPosition == this.bufferLength)
+            if (this.bufferIndex == this.bufferLength)
             {
-                this.Cache(baseStream.Position);
-                if (this.bufferLength == 0)
+                this.Cache(this.baseStream.Position);
+                if (this.bufferLength is 0)
                 {
                     break;
                 }
             }
 
-            var length = Math.Min(this.bufferLength - this.bufferPosition, buffer.Length - totalRead);
-
-            this.internalBuffer.AsSpan(this.bufferPosition, length).CopyTo(buffer[totalRead..]);
-            this.bufferPosition += length;
+            var length = Math.Min(this.bufferLength - this.bufferIndex, buffer.Length - totalRead);
+            this.internalBuffer.AsSpan(this.BufferPosition, length).CopyTo(buffer[totalRead..]);
+            this.bufferIndex += length;
             totalRead += length;
         }
 
@@ -142,19 +168,18 @@ public sealed class CachedStream(Stream baseStream, int bufferSize = ushort.MaxV
         var totalRead = 0;
         while (totalRead < buffer.Length)
         {
-            if (this.bufferPosition == this.bufferLength)
+            if (this.bufferIndex == this.bufferLength)
             {
-                await this.CacheAsync(baseStream.Position, cancellationToken).ConfigureAwait(false);
-                if (this.bufferLength == 0)
+                await this.CacheAsync(this.baseStream.Position, cancellationToken).ConfigureAwait(false);
+                if (this.bufferLength is 0)
                 {
                     break;
                 }
             }
 
-            var length = Math.Min(this.bufferLength - this.bufferPosition, buffer.Length - totalRead);
-
-            this.internalBuffer.AsSpan(this.bufferPosition, length).CopyTo(buffer.Span[totalRead..]);
-            this.bufferPosition += length;
+            var length = Math.Min(this.bufferLength - this.bufferIndex, buffer.Length - totalRead);
+            this.internalBuffer.AsSpan(this.BufferPosition, length).CopyTo(buffer.Span[totalRead..]);
+            this.bufferIndex += length;
             totalRead += length;
         }
 
@@ -169,47 +194,49 @@ public sealed class CachedStream(Stream baseStream, int bufferSize = ushort.MaxV
         var position = origin switch
         {
             SeekOrigin.Begin => offset,
-            SeekOrigin.Current => this.bufferStart + this.bufferPosition + offset,
+            SeekOrigin.Current => this.Position + offset,
             SeekOrigin.End => this.Length - offset,
             _ => throw new System.Diagnostics.UnreachableException(),
         };
 
         // if this is within the current buffer, then just adjust
-        if (position >= this.bufferStart && position <= this.bufferStart + this.bufferLength)
+        if (position >= this.bufferStart + this.bufferOffset && position <= this.bufferStart + this.bufferOffset + this.bufferLength)
         {
-            this.bufferPosition = (int)(position - this.bufferStart);
-            return this.bufferStart + this.bufferPosition;
+            this.bufferIndex = (int)(position - this.bufferStart - this.bufferOffset);
+            return this.Position;
         }
 
         // set the base position and reset the cache
-        this.bufferPosition = 0;
+        this.bufferIndex = 0;
         this.bufferLength = 0;
-        return this.bufferStart = baseStream.Seek(position, SeekOrigin.Begin);
+        this.bufferOffset = 0;
+        return this.bufferStart = this.baseStream.Seek(position, SeekOrigin.Begin);
     }
 
     /// <inheritdoc/>
-    public override void SetLength(long value) => baseStream.SetLength(value);
+    public override void SetLength(long value) => this.baseStream.SetLength(value);
 
     /// <inheritdoc/>
-    public override void Write(byte[] buffer, int offset, int count) => baseStream.Write(buffer, offset, count);
+    public override void Write(byte[] buffer, int offset, int count) => this.baseStream.Write(buffer, offset, count);
 
-    /// <inheritdoc/>
+    /// <inheritdoc cref="ICacheStream.Cache(long)"/>
     public void Cache(long start) => this.Cache(start, this.internalBuffer.Length);
 
-    /// <inheritdoc/>
+    /// <inheritdoc cref="ICacheStream.Cache(long,int)"/>
     public void Cache(long start, int length)
     {
-        // check to see if the current buffer covers this
-        if (this.Position > start && this.Position < start + length)
+        // check to see we should read or if the current buffer covers this
+        if (!this.readable || (this.Position >= start && this.bufferStart + this.bufferOffset + this.bufferLength >= start + length))
         {
             return;
         }
 
-        baseStream.Seek(start, SeekOrigin.Begin);
-        this.bufferStart = baseStream.Position;
-        this.bufferPosition = 0;
+        this.baseStream.Seek(start, SeekOrigin.Begin);
+        this.bufferStart = this.baseStream.Position;
+        this.bufferOffset = 0;
+        this.bufferIndex = 0;
         this.Resize(length);
-        this.bufferLength = baseStream.Read(this.internalBuffer, 0, length);
+        this.bufferLength = this.baseStream.Read(this.internalBuffer, this.bufferOffset, length);
     }
 
     /// <inheritdoc/>
@@ -218,12 +245,19 @@ public sealed class CachedStream(Stream baseStream, int bufferSize = ushort.MaxV
     /// <inheritdoc/>
     public async ValueTask CacheAsync(long start, int length, CancellationToken cancellationToken = default)
     {
-        baseStream.Seek(start, SeekOrigin.Begin);
-        this.bufferStart = baseStream.Position;
-        this.bufferPosition = 0;
+        // check to see we should read or if the current buffer covers this
+        if (!this.readable || (this.Position >= start && this.bufferStart + this.bufferOffset + this.bufferLength >= start + length))
+        {
+            return;
+        }
+
+        this.baseStream.Seek(start, SeekOrigin.Begin);
+        this.bufferStart = this.baseStream.Position;
+        this.bufferOffset = 0;
+        this.bufferIndex = 0;
         this.Resize(length);
-        this.bufferLength = await baseStream
-            .ReadAsync(this.internalBuffer.AsMemory(0, length), cancellationToken)
+        this.bufferLength = await this.baseStream
+            .ReadAsync(this.internalBuffer.AsMemory(this.bufferOffset, length), cancellationToken)
             .ConfigureAwait(false);
     }
 
@@ -231,7 +265,7 @@ public sealed class CachedStream(Stream baseStream, int bufferSize = ushort.MaxV
     /// <inheritdoc />
     public async override ValueTask DisposeAsync()
     {
-        await baseStream.DisposeAsync().ConfigureAwait(false);
+        await this.baseStream.DisposeAsync().ConfigureAwait(false);
         await base.DisposeAsync().ConfigureAwait(false);
     }
 #endif
@@ -246,7 +280,7 @@ public sealed class CachedStream(Stream baseStream, int bufferSize = ushort.MaxV
     /// <inheritdoc />
     protected override void Dispose(bool disposing)
     {
-        baseStream.Dispose();
+        this.baseStream.Dispose();
         base.Dispose(disposing);
     }
 

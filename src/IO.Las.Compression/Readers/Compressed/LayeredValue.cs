@@ -44,7 +44,7 @@ internal sealed class LayeredValue(bool requested)
     {
         var count = (int)this.ByteCount;
         _ = stream.Read(buffer, index, count);
-        _ = this.Decoder.Initialize(new CachedStream(new MemoryStream(buffer, index, count)));
+        _ = this.Decoder.Initialize(new MemoryStream(buffer, index, count, writable: false, publiclyVisible: true));
         return this.ByteCount;
     }
 
@@ -57,26 +57,20 @@ internal sealed class LayeredValue(bool requested)
     /// <returns>The number of bytes read.</returns>
     public uint InitializeIfRequested(Stream stream, byte[] buffer, int index = 0)
     {
-        if (this.Requested)
+        if (this.ByteCount is not 0)
         {
-            if (this.ByteCount is not 0 and var count)
+            if (this.Requested)
             {
-                _ = stream.Read(buffer, index, (int)count);
-                _ = this.Decoder.Initialize(new CachedStream(new MemoryStream(buffer, index, (int)count)));
+                _ = stream.Read(buffer, index, (int)this.ByteCount);
+                _ = this.Decoder.Initialize(new MemoryStream(buffer, index, (int)this.ByteCount, writable: false, publiclyVisible: true));
                 this.Changed = true;
                 return this.ByteCount;
             }
-        }
-        else
-        {
-            if (this.ByteCount is not 0 and var count)
-            {
-                stream.Position += count;
-            }
+
+            stream.Position += this.ByteCount;
         }
 
         this.Changed = false;
-
         return default;
     }
 
