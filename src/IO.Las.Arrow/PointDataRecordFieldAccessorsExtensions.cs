@@ -55,6 +55,7 @@ internal static class PointDataRecordFieldAccessorsExtensions
         /// <param name="value">The value.</param>
         public static void SetScanAngleRank(Span<byte> bytes, sbyte value) => bytes[Constants.PointDataRecord.ScanAngleRankFieldOffset] = (byte)value;
 
+#if LAS1_2_OR_GREATER
         /// <summary>
         /// Sets the color.
         /// </summary>
@@ -82,7 +83,9 @@ internal static class PointDataRecordFieldAccessorsExtensions
             System.Buffers.Binary.BinaryPrimitives.WriteUInt16LittleEndian(bytes[(Constants.PointDataRecord.GpsColorFieldOffset + sizeof(ushort))..], g);
             System.Buffers.Binary.BinaryPrimitives.WriteUInt16LittleEndian(bytes[(Constants.PointDataRecord.GpsColorFieldOffset + sizeof(ushort) + sizeof(ushort))..], b);
         }
+#endif
 
+#if LAS1_3_OR_GREATER
         /// <summary>
         /// Sets the waveform values.
         /// </summary>
@@ -165,5 +168,6 @@ internal static class PointDataRecordFieldAccessorsExtensions
             System.Buffers.Binary.BinaryPrimitives.WriteSingleLittleEndian(bytes[ParametricDyFieldOffset..ParametricDzFieldOffset], parametricDy);
             System.Buffers.Binary.BinaryPrimitives.WriteSingleLittleEndian(bytes[ParametricDzFieldOffset..GpsColorWaveformPointDataRecord.Size], parametricDz);
         }
+#endif
     }
 }

@@ -7,9 +7,15 @@
       M:System.String.CopyTo(System.Span{System.Char})|
       M:System.String.Create(System.IFormatProvider,System.Runtime.CompilerServices.DefaultInterpolatedStringHandler@)|
       M:System.String.TryCopyTo(System.Span{System.Char})|
+      T:System.Diagnostics.CodeAnalysis.DoesNotReturnAttribute|
+      T:System.Diagnostics.CodeAnalysis.NotNullWhenAttribute|
+      T:System.Diagnostics.UnreachableException|
+      T:System.Index|
+      T:System.Range|
       T:System.Runtime.CompilerServices.DefaultInterpolatedStringHandler|
       T:System.Runtime.CompilerServices.InterpolatedStringHandlerArgumentAttribute|
       T:System.Runtime.CompilerServices.InterpolatedStringHandlerAttribute|
+      T:System.Runtime.CompilerServices.IsExternalInit|
     </MeziantouPolyfill_IncludedPolyfills>
   </PropertyGroup>
 

@@ -231,5 +231,6 @@ internal sealed class VariableLayeredChunkedWriter(Writers.IPointDataRecordWrite
     private static void ThrowAlreadyInChunkException() => throw new InvalidOperationException(Compression.Properties.Resources.CannotWriteChunkWhenAlreadyWritingAChunk);
 
     [System.Diagnostics.CodeAnalysis.DoesNotReturn]
+    [System.Diagnostics.CodeAnalysis.SuppressMessageAttribute("Performance", "CA1863:Use \'CompositeFormat\'", Justification = "This can change when the culture changes")]
     private static void ThrowLessPointsThanCount(string name, int count, int i) => throw new ArgumentException(string.Format(Compression.Properties.Resources.Culture, Compression.Properties.Resources.FailedToReadItems, count, name, i - 1), name);
 }

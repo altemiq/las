@@ -482,7 +482,7 @@ public sealed class LazWriter : LasWriter
 
         if (header.PointDataFormatId >= ExtendedGpsPointDataRecord.Id && zip.Compressor is not Compressor.LayeredChunked)
         {
-            throw new InvalidOperationException(string.Format(Compression.Properties.Resources.Culture, Compression.Properties.v1_4.Resources.RequireNativeExtension, header.PointDataFormatId));
+            ThrowInvalidLazVersion(header);
         }
 
         var pointDataRecordLength = header.GetPointDataRecordLength() + extraByteCount;
@@ -519,6 +519,13 @@ public sealed class LazWriter : LasWriter
             }
 
             return compressedTag;
+        }
+
+        [System.Diagnostics.CodeAnalysis.DoesNotReturn]
+        [System.Diagnostics.CodeAnalysis.SuppressMessageAttribute("Performance", "CA1863:Use \'CompositeFormat\'", Justification = "This can change when the culture changes")]
+        static void ThrowInvalidLazVersion(HeaderBlock headerBlock)
+        {
+            throw new InvalidOperationException(string.Format(Compression.Properties.Resources.Culture, Compression.Properties.v1_4.Resources.RequireNativeExtension, headerBlock.PointDataFormatId));
         }
     }
 #else

@@ -7,6 +7,11 @@
       M:System.Collections.Generic.Dictionary`2.TryAdd(`0,`1)|
       M:System.IO.Stream.Read(System.Span{System.Byte})|
       M:System.IO.Stream.ReadAsync(System.Memory{System.Byte},System.Threading.CancellationToken)|
+      T:System.Diagnostics.CodeAnalysis.DoesNotReturnAttribute|
+      T:System.Diagnostics.CodeAnalysis.NotNullWhenAttribute|
+      T:System.Diagnostics.UnreachableException|
+      T:System.Index|
+      T:System.Range|
     </MeziantouPolyfill_IncludedPolyfills>
   </PropertyGroup>
 
