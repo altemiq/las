@@ -6,11 +6,11 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageVersion Include="AWSSDK.S3" Version="4.0.18.7" />
+    <PackageVersion Include="AWSSDK.S3" Version="4.0.22.2" />
   </ItemGroup>
 
   <ItemGroup Label="Coding Standards">
-    <GlobalPackageReference Include="Altemiq.DotNet.CodingStandard" Version="1.0.229" />
+    <GlobalPackageReference Include="Altemiq.DotNet.CodingStandard" Version="1.0.251" />
   </ItemGroup>
   
 </Project>

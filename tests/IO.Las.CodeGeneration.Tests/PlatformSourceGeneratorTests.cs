@@ -1,7 +1,6 @@
 namespace Altemiq.IO.Las.CodeGeneration;
 
 using Microsoft.CodeAnalysis;
-using Microsoft.CodeAnalysis.Text;
 
 public class PlatformSourceGeneratorTests
 {
