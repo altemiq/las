@@ -55,10 +55,11 @@ public partial struct Vector3D
         var v1 = value1.AsVector256Unsafe();
         var v2 = vector2.AsVector256Unsafe();
 
-        var temp1 = Vector256.Shuffle(v1, Vector256.Create(1, 2, 0, 0)) * Vector256.Shuffle(v2, Vector256.Create(2, 0, 1, 0));
-        var temp2 = Vector256.Shuffle(v1, Vector256.Create(2, 0, 1, 0)) * Vector256.Shuffle(v2, Vector256.Create(1, 2, 0, 0));
+        // Using FMA operations for better performance on modern CPUs
+        var mul1 = Vector256.Multiply(v1, Vector256.Shuffle(v2, Vector256.Create(1, 2, 0, 0)));
+        var mul2 = Vector256.Multiply(v2, Vector256.Shuffle(v1, Vector256.Create(1, 2, 0, 0)));
 
-        return (temp1 - temp2).AsVector3D();
+        return Vector256.Subtract(mul1, mul2).AsVector3D();
     }
 #else
         => new(
