@@ -214,20 +214,8 @@ internal sealed class LasInterval : IEnumerable<KeyValuePair<int, LasIntervalSta
 
         bool MergeCore(ref LasIntervalStartCell? mergedCells, ICollection<LasIntervalStartCell> cellsToMerge)
         {
-            // maybe delete temporary merge cells from the previous merge
-            if (mergedCells is not null)
-            {
-                if (this.mergedCellsTemporary)
-                {
-                    var next = mergedCells.Next;
-                    while (next is not null)
-                    {
-                        next = next.Next;
-                    }
-                }
-
-                mergedCells = default;
-            }
+            // discard any previous merge result
+            mergedCells = default;
 
             switch (cellsToMerge)
             {
