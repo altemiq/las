@@ -43,10 +43,15 @@ internal sealed class LasInterval : IEnumerable<KeyValuePair<int, LasIntervalSta
     {
         var length = (int)(stream.Length - stream.Position);
         var bytes = System.Buffers.ArrayPool<byte>.Shared.Rent(length);
-        var bytesRead = stream.Read(bytes, 0, length);
-        var interval = ReadFrom(bytes.AsSpan(0, bytesRead));
-        System.Buffers.ArrayPool<byte>.Shared.Return(bytes);
-        return interval;
+        try
+        {
+            _ = stream.ReadAtLeast(bytes.AsSpan(0, length), length);
+            return ReadFrom(bytes.AsSpan(0, length));
+        }
+        finally
+        {
+            System.Buffers.ArrayPool<byte>.Shared.Return(bytes);
+        }
     }
 
     /// <summary>

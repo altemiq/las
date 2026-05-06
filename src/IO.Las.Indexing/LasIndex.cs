@@ -175,10 +175,15 @@ public class LasIndex : IEnumerable<LasIndexCell>, IEqualityComparer<LasIndex>
 
         var length = (int)(stream.Length - stream.Position);
         var bytes = System.Buffers.ArrayPool<byte>.Shared.Rent(length);
-        var bytesRead = stream.Read(bytes, 0, length);
-        var index = ReadFrom(bytes.AsSpan(0, bytesRead));
-        System.Buffers.ArrayPool<byte>.Shared.Return(bytes);
-        return index;
+        try
+        {
+            _ = stream.ReadAtLeast(bytes.AsSpan(0, length), length);
+            return ReadFrom(bytes.AsSpan(0, length));
+        }
+        finally
+        {
+            System.Buffers.ArrayPool<byte>.Shared.Return(bytes);
+        }
     }
 
     /// <summary>
@@ -229,11 +234,15 @@ public class LasIndex : IEnumerable<LasIndexCell>, IEqualityComparer<LasIndex>
 
         var length = (int)(stream.Length - stream.Position);
         var bytes = System.Buffers.ArrayPool<byte>.Shared.Rent(length);
-        var bytesRead = await stream.ReadAsync(bytes.AsMemory(0, length), cancellationToken).ConfigureAwait(false);
-
-        var index = ReadFrom(bytes.AsSpan(0, bytesRead));
-        System.Buffers.ArrayPool<byte>.Shared.Return(bytes);
-        return index;
+        try
+        {
+            _ = await stream.ReadAtLeastAsync(bytes.AsMemory(0, length), length, throwOnEndOfStream: true, cancellationToken).ConfigureAwait(false);
+            return ReadFrom(bytes.AsSpan(0, length));
+        }
+        finally
+        {
+            System.Buffers.ArrayPool<byte>.Shared.Return(bytes);
+        }
     }
 
     /// <summary>
