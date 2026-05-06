@@ -16,8 +16,8 @@ public class LasQuadTreeTests
     {
         var quadTree = new LasQuadTree(0, 1000, 0, 1000, 100);
         var (minimum, maximum) = quadTree.GetBounds(1, 1);
-        await Assert.That(minimum).IsEqualTo(new Vector2(500, -300));
-        await Assert.That(maximum).IsEqualTo(new Vector2(1300, 500));
+        await Assert.That(minimum).IsEqualTo(new(500, -300));
+        await Assert.That(maximum).IsEqualTo(new(1300, 500));
     }
 
     [Test]
@@ -25,8 +25,8 @@ public class LasQuadTreeTests
     {
         var quadTree = new LasQuadTree(0, 1000, 0, 1000, 100);
         var (minimum, maximum) = quadTree.GetBounds(new Vector2D(750, 250), 1);
-        await Assert.That(minimum).IsEqualTo(new Vector2(500, -300));
-        await Assert.That(maximum).IsEqualTo(new Vector2(1300, 500));
+        await Assert.That(minimum).IsEqualTo(new(500, -300));
+        await Assert.That(maximum).IsEqualTo(new(1300, 500));
     }
 
     [Test]

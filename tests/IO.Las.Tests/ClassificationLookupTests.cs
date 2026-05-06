@@ -10,7 +10,7 @@ public class ClassificationLookupTests
             new ClassificationLookupItem { ClassNumber = 113, Description = "Classification 113" },
             new ClassificationLookupItem { ClassNumber = 132, Description = "Classification 132" });
 
-        _ = await Assert.That(lookup.Select(l => l.ClassNumber)).IsEquivalentTo([(byte)112, (byte)113, (byte)132]);
+        await Assert.That(lookup.Select(l => l.ClassNumber)).IsEquivalentTo([(byte)112, (byte)113, (byte)132]);
     }
 
     [Test]
@@ -25,7 +25,7 @@ public class ClassificationLookupTests
 
         _ = lookup.CopyTo(bytes);
 
-        _ = await Assert.That(bytes[VariableLengthRecordHeader.Size]).IsEqualTo((byte)112);
-        _ = await Assert.That(bytes[VariableLengthRecordHeader.Size + ClassificationLookupItem.Size]).IsEqualTo((byte)113);
+        await Assert.That(bytes[VariableLengthRecordHeader.Size]).IsEqualTo((byte)112);
+        await Assert.That(bytes[VariableLengthRecordHeader.Size + ClassificationLookupItem.Size]).IsEqualTo((byte)113);
     }
 }

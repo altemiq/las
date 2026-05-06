@@ -1,3 +1,4 @@
+#if NETSTANDARD2_1_OR_GREATER || NETCOREAPP2_1_OR_GREATER
 namespace Altemiq.IO.Las.Arrow;
 
 [System.Diagnostics.CodeAnalysis.SuppressMessageAttribute("ReSharper", "InvokeAsExtensionMember")]
@@ -17,3 +18,4 @@ public class AccessorExtensionTests
     }
 #endif
 }
+#endif

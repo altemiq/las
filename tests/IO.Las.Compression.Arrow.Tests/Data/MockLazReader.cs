@@ -75,12 +75,26 @@ internal sealed class MockLazReader : ILasReader, ILazReader
 #endif
                 chunkSize)
         {
+
+#if NET8_0_OR_GREATER
             ref uint chunkCount = ref ChunkCountField(this);
             chunkCount = 0;
+#else
+            SetChunkCountField(this, 0U);
+#endif
         }
 
+#if NET8_0_OR_GREATER
         [UnsafeAccessor(UnsafeAccessorKind.Field, Name = "chunkCount")]
         private static extern ref uint ChunkCountField(ChunkedReader reader);
+#else
+        private static void SetChunkCountField(ChunkedReader reader, uint chunkCount)
+        {
+            var field = reader.GetType().GetField("chunkCount", System.Reflection.BindingFlags.Instance | System.Reflection.BindingFlags.NonPublic);
+
+            field!.SetValue(reader, chunkCount);
+        }
+#endif
     }
 
     private sealed class MockChunkReader : ChunkReader
@@ -88,12 +102,24 @@ internal sealed class MockLazReader : ILasReader, ILazReader
         public MockChunkReader(Readers.Compressed.ICompressedPointDataRecordReader rawReader, in HeaderBlock header, LasZip zip, int pointDataLength)
             : base(rawReader, in header, zip, pointDataLength)
         {
+#if NET8_0_OR_GREATER
             ref Readers.Compressed.ICompressedPointDataRecordReader reader = ref ReaderField(this);
             reader = rawReader;
+#else
+            SetReaderField(this, rawReader);
+#endif
         }
 
+#if NET8_0_OR_GREATER
         [UnsafeAccessor(UnsafeAccessorKind.Field, Name = "reader")]
         private static extern ref Readers.Compressed.ICompressedPointDataRecordReader ReaderField(PointWiseReader reader);
+#else
+        private static void SetReaderField(PointWiseReader reader, Readers.Compressed.ICompressedPointDataRecordReader rawReader)
+        {
+            var field = reader.GetType().GetField("reader", System.Reflection.BindingFlags.Instance | System.Reflection.BindingFlags.NonPublic);
+            field!.SetValue(reader, rawReader);
+        }
+#endif
     }
 
     private sealed class MockPointDataRecordReader : Readers.Compressed.ICompressedPointDataRecordReader

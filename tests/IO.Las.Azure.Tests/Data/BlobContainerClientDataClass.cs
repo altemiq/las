@@ -51,11 +51,9 @@ public class BlobContainerClientDataClass : IAsyncInitializer, IAsyncDisposable
                 continue;
             }
 
-#if NETSTANDARD2_1_OR_GREATER || NETCOREAPP3_0_OR_GREATER
-            await
-#endif
-                using var stream = typeof(BlobContainerClientDataClass).Assembly.GetManifestResourceStream(manifestResourceName);
+            var stream = typeof(BlobContainerClientDataClass).Assembly.GetManifestResourceStream(manifestResourceName);
             await blobClient.UploadAsync(stream);
+            await stream!.DisposeAsync();
         }
     }
 

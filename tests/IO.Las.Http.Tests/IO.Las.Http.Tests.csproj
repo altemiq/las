@@ -5,6 +5,7 @@
     <TargetFrameworks Condition=" '$(NetCoreOnly)' != 'true' ">$(TargetFrameworks);net472</TargetFrameworks>
     <MeziantouPolyfill_IncludedPolyfills>
       $(MeziantouPolyfill_IncludedPolyfills)|
+      M:System.IO.Stream.DisposeAsync()|
       M:System.IO.Stream.ReadAsync(System.Memory{System.Byte},System.Threading.CancellationToken)|
       M:System.IO.Stream.WriteAsync(System.ReadOnlyMemory{System.Byte},System.Threading.CancellationToken)|
       T:System.Diagnostics.CodeAnalysis.DoesNotReturnAttribute|

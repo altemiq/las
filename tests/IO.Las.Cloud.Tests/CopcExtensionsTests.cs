@@ -10,7 +10,7 @@ public class CopcExtensionsTests
         var max = new Vector3D(100, 100, 100);
         var boundingBox = key.ToBoundingBox(min, max);
         await Assert.That(boundingBox)
-            .IsEqualTo(new BoundingBox(0, 50, 50, 50, 100, 100)).And
+            .IsEqualTo(new(0, 50, 50, 50, 100, 100)).And
             .Satisfies(
                 bb => new BoundingBox(min, max).Contains(bb),
                 static contains => contains.IsTrue());

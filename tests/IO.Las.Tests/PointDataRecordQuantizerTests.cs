@@ -11,7 +11,7 @@ public class PointDataRecordQuantizerTests
     [MethodDataSource(nameof(GetToDoubleXY))]
     public async Task ConvertToDoubleXY(int inputX, int inputY, double expectedX, double expectedY)
     {
-        await Assert.That(this.quantizer.Get(inputX, inputY)).IsEqualTo(new Vector2D(expectedX, expectedY));
+        await Assert.That(this.quantizer.Get(inputX, inputY)).IsEqualTo(new(expectedX, expectedY));
     }
 
     [Test]
@@ -26,7 +26,7 @@ public class PointDataRecordQuantizerTests
     [Test]
     public async Task ConvertToDoubleXYZ()
     {
-        await Assert.That(this.quantizer.Get(321, 123, 456)).IsEqualTo(new Vector3D(126.21, 457.23, 793.56));
+        await Assert.That(this.quantizer.Get(321, 123, 456)).IsEqualTo(new(126.21, 457.23, 793.56));
     }
 
     [Test]

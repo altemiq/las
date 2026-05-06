@@ -12,15 +12,9 @@ public class LazReaderTests
     [Test]
     public async Task ReadEnumerable()
     {
-#if NETSTANDARD2_1_OR_GREATER || NETCOREAPP3_0_OR_GREATER
-        await
-#endif
-        using var stream = typeof(LazReaderTests).Assembly.GetManifestResourceStream(typeof(LazReaderTests), "fusa_height_7.laz")
+        var stream = typeof(LazReaderTests).Assembly.GetManifestResourceStream(typeof(LazReaderTests), "fusa_height_7.laz")
                            ?? throw new System.Diagnostics.UnreachableException("Failed to get stream");
-#if NETSTANDARD2_1_OR_GREATER || NETCOREAPP3_0_OR_GREATER
-        await
-#endif
-        using LazReader reader = new(stream);
+        LazReader reader = new(stream);
 
         IBasePointDataRecord pointDataRecord = default;
         byte[] data = default;
@@ -33,23 +27,21 @@ public class LazReaderTests
             count++;
         }
 
+        await reader.DisposeAsync();
+
         await Assert.That(count).IsEqualTo(50000);
         await Assert.That(pointDataRecord).IsTypeOf<ExtendedGpsColorPointDataRecord>().And.Member(p => p.X, x => x.IsNotDefault());
         await Assert.That(data).IsNotEmpty();
+
+        await stream.DisposeAsync();
     }
 
     [Test]
     public async Task ReadAsyncEnumerable()
     {
-#if NETSTANDARD2_1_OR_GREATER || NETCOREAPP3_0_OR_GREATER
-        await
-#endif
-        using var stream = typeof(LazReaderTests).Assembly.GetManifestResourceStream(typeof(LazReaderTests), "fusa_height_7.laz")
+        var stream = typeof(LazReaderTests).Assembly.GetManifestResourceStream(typeof(LazReaderTests), "fusa_height_7.laz")
                                ?? throw new System.Diagnostics.UnreachableException("Failed to get stream");
-#if NETSTANDARD2_1_OR_GREATER || NETCOREAPP3_0_OR_GREATER
-        await
-#endif
-        using LazReader reader = new(stream);
+        LazReader reader = new(stream);
 
         IBasePointDataRecord pointDataRecord = default;
         byte[] data = default;
@@ -62,9 +54,13 @@ public class LazReaderTests
             count++;
         }
 
+        await reader.DisposeAsync();
+
         await Assert.That(count).IsEqualTo(50000);
         await Assert.That(pointDataRecord).IsTypeOf<ExtendedGpsColorPointDataRecord>().And.Member(p => p.X, x => x.IsNotDefault());
         await Assert.That(data).IsNotEmpty();
+
+        await stream.DisposeAsync();
     }
 #endif
 
@@ -80,17 +76,11 @@ public class LazReaderTests
     public async Task ReadLaz(string file, Type expectedType, int vlrCount)
 #endif
     {
-#if NETSTANDARD2_1_OR_GREATER || NETCOREAPP3_0_OR_GREATER
-        await
-#endif
-        using var stream = typeof(LazReaderTests).Assembly.GetManifestResourceStream(typeof(LazReaderTests), file)
+        var stream = typeof(LazReaderTests).Assembly.GetManifestResourceStream(typeof(LazReaderTests), file)
                            ?? throw new System.Diagnostics.UnreachableException("Failed to get stream");
 
-#if NETSTANDARD2_1_OR_GREATER || NETCOREAPP3_0_OR_GREATER
-        await
-#endif
-        using LazReader reader = new(stream);
-        _ = await Assert.That(reader.VariableLengthRecords).Count().IsEqualTo(vlrCount);
+        LazReader reader = new(stream);
+        await Assert.That(reader.VariableLengthRecords).Count().IsEqualTo(vlrCount);
 
         var count = 10;
         while (--count > 0)
@@ -98,16 +88,19 @@ public class LazReaderTests
             await TestPoint(reader);
         }
 
+        await reader.DisposeAsync();
+
         async Task TestPoint(LasReader pointReader)
         {
-            var record = pointReader.ReadPointDataRecord();
-            var point = record.PointDataRecord;
-            var extraBytes = record.ExtraBytes.ToArray();
-            _ = await Assert.That(point).IsNotNull().And.IsTypeOf(expectedType);
+            var (point, data) = pointReader.ReadPointDataRecord();
+            var extraBytes = data.ToArray();
+            await Assert.That(point).IsNotNull().And.IsTypeOf(expectedType);
 #if LAS1_4_OR_GREATER
             _ = hasExtraBytes ? await Assert.That(extraBytes).IsNotEmpty() : await Assert.That(extraBytes).IsEmpty();
 #endif
         }
+
+        await stream.DisposeAsync();
     }
 #endif
 
@@ -118,39 +111,33 @@ public class LazReaderTests
 #endif
     public async Task Create(string resource)
     {
-#if NETSTANDARD2_1_OR_GREATER || NETCOREAPP3_0_OR_GREATER
-        await
-#endif
-        using var stream = typeof(LazReaderTests).Assembly.GetManifestResourceStream(typeof(LazReaderTests), resource)
+        var stream = typeof(LazReaderTests).Assembly.GetManifestResourceStream(typeof(LazReaderTests), resource)
                            ?? throw new System.Diagnostics.UnreachableException("Failed to get stream");
 
         var reader = LazReader.Create(stream);
-        _ = await Assert.That(reader)
+        await Assert.That(reader)
             .IsNotNull()
             .And.IsTypeOf<LazReader>()
             .And.Member(static x => x.IsCompressed, x => x.IsTrue());
+
+        await reader.DisposeAsync();
+        await stream.DisposeAsync();
     }
 
 #if LAS1_4_OR_GREATER
     [Test]
     public async Task ReadWithExtraBytes()
     {
-#if NETSTANDARD2_1_OR_GREATER || NETCOREAPP3_0_OR_GREATER
-        await
-#endif
-        using var stream = typeof(LazReaderTests).Assembly.GetManifestResourceStream(typeof(LazReaderTests), "fusa_height.laz")
+        var stream = typeof(LazReaderTests).Assembly.GetManifestResourceStream(typeof(LazReaderTests), "fusa_height.laz")
                            ?? throw new System.Diagnostics.UnreachableException("Failed to get stream");
-
-#if NETSTANDARD2_1_OR_GREATER || NETCOREAPP3_0_OR_GREATER
-        await
-#endif
-        using LazReader reader = new(stream);
-        await CheckHeader(reader.Header, new(1, 4));
-        _ = await Assert.That(reader.VariableLengthRecords).Count().IsEqualTo(3);
-        var extraBytesTag = reader.VariableLengthRecords.OfType<ExtraBytes>().Single();
 
         var min = double.MaxValue;
         var max = double.MinValue;
+
+        LazReader reader = new(stream);
+        await CheckHeader(reader.Header, new(1, 4));
+        await Assert.That(reader.VariableLengthRecords).Count().IsEqualTo(3);
+        var extraBytesTag = reader.VariableLengthRecords.OfType<ExtraBytes>().Single();
 
         while (true)
         {
@@ -162,16 +149,20 @@ public class LazReaderTests
 
             var extraBytes = record.ExtraBytes.ToArray();
 
-            _ = await Assert.That(point).IsTypeOf<GpsPointDataRecord>();
-            _ = await Assert.That(extraBytes).IsNotEmpty();
+            await Assert.That(point).IsTypeOf<GpsPointDataRecord>();
+            await Assert.That(extraBytes).IsNotEmpty();
 
             var value = await Assert.That(extraBytesTag[0].GetValue(extraBytes.AsSpan())).ValueIsTypeOf<double>();
-            min = Math.Min(value, min);
-            max = Math.Max(value, max);
+            Interlocked.MinExchange(ref min, value);
+            Interlocked.MaxExchange(ref max, value);
         }
 
-        _ = await Assert.That(min).IsEqualTo(-1.76).Within(0.001);
-        _ = await Assert.That(max).IsEqualTo(19.72).Within(0.001);
+        await reader.DisposeAsync();
+
+        await stream.DisposeAsync();
+
+        await Assert.That(min).IsEqualTo(-1.76).Within(0.001);
+        await Assert.That(max).IsEqualTo(19.72).Within(0.001);
     }
 #endif
 
@@ -182,16 +173,10 @@ public class LazReaderTests
 #endif
     public async Task ReadByPointIndex(string resource, int major, int minor)
     {
-#if NETSTANDARD2_1_OR_GREATER || NETCOREAPP3_0_OR_GREATER
-        await
-#endif
-        using var stream = typeof(LazReaderTests).Assembly.GetManifestResourceStream(typeof(LazReaderTests), resource)
+        var stream = typeof(LazReaderTests).Assembly.GetManifestResourceStream(typeof(LazReaderTests), resource)
                            ?? throw new System.Diagnostics.UnreachableException("Failed to get stream");
 
-#if NETSTANDARD2_1_OR_GREATER || NETCOREAPP3_0_OR_GREATER
-        await
-#endif
-        using LazReader reader = new(stream);
+        LazReader reader = new(stream);
         await CheckHeader(reader.Header, new(major, minor));
 
         var point = reader.ReadPointDataRecord(10).PointDataRecord!;
@@ -205,6 +190,9 @@ public class LazReaderTests
             .And.Member(p => p.X, x => x.IsEqualTo(27775097))
             .And.Member(p => p.Y, y => y.IsEqualTo(612225071))
             .And.Member(p => p.Z, z => z.IsEqualTo(4228));
+
+        await reader.DisposeAsync();
+        await stream.DisposeAsync();
     }
 
 
@@ -217,25 +205,22 @@ public class LazReaderTests
 #endif
     public async Task ReadLazAsync(string file, Type expectedType, int vlrCount, bool hasExtraBytes)
     {
-#if NETSTANDARD2_1_OR_GREATER || NETCOREAPP3_0_OR_GREATER
-        await
-#endif
-        using var stream = typeof(LazReaderTests).Assembly.GetManifestResourceStream(typeof(LazReaderTests), file)
+        var stream = typeof(LazReaderTests).Assembly.GetManifestResourceStream(typeof(LazReaderTests), file)
                            ?? throw new System.Diagnostics.UnreachableException("Failed to get stream");
 
-#if NETSTANDARD2_1_OR_GREATER || NETCOREAPP3_0_OR_GREATER
-        await
-#endif
-        using LazReader reader = new(stream);
-        _ = await Assert.That(reader.VariableLengthRecords).Count().IsEqualTo(vlrCount);
+        LazReader reader = new(stream);
+        await Assert.That(reader.VariableLengthRecords).Count().IsEqualTo(vlrCount);
 
         await TestPointAsync(reader, expectedType, hasExtraBytes);
         await TestPointAsync(reader, expectedType, hasExtraBytes);
+
+        await reader.DisposeAsync();
+        await stream.DisposeAsync();
 
         static async Task TestPointAsync(LasReader pointReader, Type expectedType, bool hasExtraBytes)
         {
             var point = await pointReader.ReadPointDataRecordAsync();
-            _ = await Assert.That(point.PointDataRecord)
+            await Assert.That(point.PointDataRecord)
                 .IsNotNull()
                 .And.IsTypeOf(expectedType);
             _ = hasExtraBytes ? await Assert.That(point.ExtraBytes.IsEmpty).IsFalse() : await Assert.That(point.ExtraBytes.IsEmpty).IsTrue();
@@ -247,34 +232,31 @@ public class LazReaderTests
     [Test]
     public async Task ReadWithExtraBytesAsync()
     {
-#if NETSTANDARD2_1_OR_GREATER || NETCOREAPP3_0_OR_GREATER
-        await
-#endif
-        using var stream = typeof(LazReaderTests).Assembly.GetManifestResourceStream(typeof(LazReaderTests), "fusa_height.laz")
-                           ?? throw new System.Diagnostics.UnreachableException("Failed to get stream");
-
-#if NETSTANDARD2_1_OR_GREATER || NETCOREAPP3_0_OR_GREATER
-        await
-#endif
-        using LazReader reader = new(stream);
-        await CheckHeader(reader.Header, new(1, 4));
-        _ = await Assert.That(reader.VariableLengthRecords).Count().IsEqualTo(3);
-        var extraBytes = reader.VariableLengthRecords.OfType<ExtraBytes>().Single();
+        var stream = typeof(LazReaderTests).Assembly.GetManifestResourceStream(typeof(LazReaderTests), "fusa_height.laz")
+                     ?? throw new System.Diagnostics.UnreachableException("Failed to get stream");
 
         var min = double.MaxValue;
         var max = double.MinValue;
 
+        LazReader reader = new(stream);
+        await CheckHeader(reader.Header, new(1, 4));
+        await Assert.That(reader.VariableLengthRecords).Count().IsEqualTo(3);
+        var extraBytes = reader.VariableLengthRecords.OfType<ExtraBytes>().Single();
+
         while (await reader.ReadPointDataRecordAsync() is { PointDataRecord: not null } point)
         {
-            _ = await Assert.That(point.PointDataRecord).IsTypeOf<GpsPointDataRecord>();
-            _ = await Assert.That(point.ExtraBytes.IsEmpty).IsFalse();
+            await Assert.That(point.PointDataRecord).IsTypeOf<GpsPointDataRecord>();
+            await Assert.That(point.ExtraBytes.IsEmpty).IsFalse();
             var value = await Assert.That(await extraBytes.GetValueAsync(0, point.ExtraBytes)).ValueIsTypeOf<double>();
-            min = Math.Min(value, min);
-            max = Math.Max(value, max);
+            Interlocked.MinExchange(ref min, value);
+            Interlocked.MaxExchange(ref max, value);
         }
 
-        _ = await Assert.That(min).IsEqualTo(-1.76).Within(0.001);
-        _ = await Assert.That(max).IsEqualTo(19.72).Within(0.001);
+        await reader.DisposeAsync();
+        await stream.DisposeAsync();
+
+        await Assert.That(min).IsEqualTo(-1.76).Within(0.001);
+        await Assert.That(max).IsEqualTo(19.72).Within(0.001);
     }
 #endif
 
@@ -285,16 +267,10 @@ public class LazReaderTests
 #endif
     public async Task ReadByPointIndexAsync(string resource, int major, int minor)
     {
-#if NETSTANDARD2_1_OR_GREATER || NETCOREAPP3_0_OR_GREATER
-        await
-#endif
-        using var stream = typeof(LazReaderTests).Assembly.GetManifestResourceStream(typeof(LazReaderTests), resource)
+        var stream = typeof(LazReaderTests).Assembly.GetManifestResourceStream(typeof(LazReaderTests), resource)
                            ?? throw new System.Diagnostics.UnreachableException("Failed to get stream");
 
-#if NETSTANDARD2_1_OR_GREATER || NETCOREAPP3_0_OR_GREATER
-        await
-#endif
-        using LazReader reader = new(stream);
+        LazReader reader = new(stream);
         await CheckHeader(reader.Header, new(major, minor));
 
         var record = await reader.ReadPointDataRecordAsync(10);
@@ -308,20 +284,18 @@ public class LazReaderTests
             .And.Member(p => p.X, x => x.IsEqualTo(27775097))
             .And.Member(p => p.Y, y => y.IsEqualTo(612225071))
             .And.Member(p => p.Z, z => z.IsEqualTo(4228));
+
+        await reader.DisposeAsync();
+        await stream.DisposeAsync();
     }
 
+#if NETSTANDARD2_1_OR_GREATER || NETCOREAPP2_1_OR_GREATER
     [Test]
     public async Task ReadToSpan()
     {
-#if NETSTANDARD2_1_OR_GREATER || NETCOREAPP3_0_OR_GREATER
-        await
-#endif
-        using var stream = typeof(LazReaderTests).Assembly.GetManifestResourceStream(typeof(LazReaderTests), "fusa.laz")
+        var stream = typeof(LazReaderTests).Assembly.GetManifestResourceStream(typeof(LazReaderTests), "fusa.laz")
                                ?? throw new System.Diagnostics.UnreachableException("Failed to get stream");
-#if NETSTANDARD2_1_OR_GREATER || NETCOREAPP3_0_OR_GREATER
-        await
-#endif
-        using LazReader reader = new(stream);
+        LazReader reader = new(stream);
 
         var span = new byte[1024];
 
@@ -340,20 +314,17 @@ public class LazReaderTests
             .IsTypeOf<GpsPointDataRecord>().And
             .Member(p => p.X, x => x.IsNotDefault());
         await Assert.That(data).IsEmpty();
+
+        await reader.DisposeAsync();
+        await stream.DisposeAsync();
     }
 
     [Test]
     public async Task ReadToMemory()
     {
-#if NETSTANDARD2_1_OR_GREATER || NETCOREAPP3_0_OR_GREATER
-        await
-#endif
-        using var stream = typeof(LazReaderTests).Assembly.GetManifestResourceStream(typeof(LazReaderTests), "fusa.laz")
+        var stream = typeof(LazReaderTests).Assembly.GetManifestResourceStream(typeof(LazReaderTests), "fusa.laz")
                                ?? throw new System.Diagnostics.UnreachableException("Failed to get stream");
-#if NETSTANDARD2_1_OR_GREATER || NETCOREAPP3_0_OR_GREATER
-        await
-#endif
-        using LazReader reader = new(stream);
+        LazReader reader = new(stream);
 
         var span = new byte[1024];
 
@@ -369,15 +340,19 @@ public class LazReaderTests
             data = extraBytes.ToArray();
         }
 
+        await reader.DisposeAsync();
+        await stream.DisposeAsync();
+
         await Assert.That(pointDataRecord)
             .IsTypeOf<GpsPointDataRecord>().And
             .Member(p => p.X, x => x.IsNotDefault());
         await Assert.That(data).IsEmpty();
     }
+#endif
 
     private static async Task CheckHeader(HeaderBlock headerBlock, Version expectedVersion)
     {
-        _ = await Assert.That(headerBlock)
+        await Assert.That(headerBlock)
             .Member(static headerBlock => headerBlock.FileSignature, static fileSignature => fileSignature.IsEqualTo("LASF"))
             .And.Member(static headerBlock => headerBlock.FileSourceId, static fileSourceId => fileSourceId.IsDefault())
 #if LAS1_2_OR_GREATER
@@ -386,7 +361,7 @@ public class LazReaderTests
             .And.Member(static headerBlock => headerBlock.ProjectId, static projectId => projectId.IsEqualTo(Guid.Empty))
             .And.Member(static headerBlock => headerBlock.Version, version => version.IsEqualTo(expectedVersion))
             .And.Member(static headerBlock => headerBlock.SystemIdentifier, static systemIdentifier => systemIdentifier.Contains("LAStools").And.Contains("rapidlasso"))
-            .And.Member(static headerBlock => headerBlock.FileCreation.GetValueOrDefault(), static fileCreation => fileCreation.IsEqualTo(new DateTime(2010, 2, 9)))
+            .And.Member(static headerBlock => headerBlock.FileCreation.GetValueOrDefault(), static fileCreation => fileCreation.IsEqualTo(new(2010, 2, 9)))
 #if LAS1_4_OR_GREATER
             .And.Member(static headerBlock => headerBlock.NumberOfPointRecords, static numberOfPointRecords => numberOfPointRecords.IsEqualTo(277573UL))
             .And.Member(static headerBlock => headerBlock.LegacyNumberOfPointsByReturn, static legacyNumberOfPointsByReturn => legacyNumberOfPointsByReturn.IsEquivalentTo([263413U, 13879U, 281U, 0U, 0U]))
@@ -398,9 +373,9 @@ public class LazReaderTests
             .And.Member(static headerBlock => headerBlock.NumberOfPointRecords, numberOfPointRecords => numberOfPointRecords.IsEqualTo(277573U))
             .And.Member(static headerBlock => headerBlock.NumberOfPointsByReturn, numberOfPointsByReturn => numberOfPointsByReturn.IsEquivalentTo([263413U, 13879U, 281U, 0U, 0U]))
 #endif
-            .And.Member(static headerBlock => headerBlock.ScaleFactor, scaleFactor => scaleFactor.IsEqualTo(new Vector3D(0.01, 0.01, 0.01)))
+            .And.Member(static headerBlock => headerBlock.ScaleFactor, scaleFactor => scaleFactor.IsEqualTo(new(0.01, 0.01, 0.01)))
             .And.Member(static headerBlock => headerBlock.Offset, offset => offset.IsDefault())
-            .And.Member(static headerBlock => headerBlock.Min, min => min.IsEqualTo(new Vector3D(277750.0, 6122250.0, 42.21)))
-            .And.Member(static headerBlock => headerBlock.Max, max => max.IsEqualTo(new Vector3D(277999.99, 6122499.99, 64.35)));
+            .And.Member(static headerBlock => headerBlock.Min, min => min.IsEqualTo(new(277750.0, 6122250.0, 42.21)))
+            .And.Member(static headerBlock => headerBlock.Max, max => max.IsEqualTo(new(277999.99, 6122499.99, 64.35)));
     }
 }

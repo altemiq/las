@@ -8,12 +8,12 @@
   <Import Project="$([MSBuild]::GetPathOfFileAbove('$(MSBuildThisFileName.Replace('Packages', 'Versions'))$(MSBuildThisFileExtension)', '$(MSBuildThisFileDirectory)'))" />
 
   <ItemGroup>
-    <PackageVersion Include="Meziantou.Polyfill" Version="1.0.122" />
+    <PackageVersion Include="Meziantou.Polyfill" Version="1.0.123" />
     <PackageVersion Include="TUnit" Version="1.43.11" />
   </ItemGroup>
   
   <ItemGroup Label="Apache">
-    <PackageVersion Include="Apache.Arrow" Version="22.1.0" />
+    <PackageVersion Include="Apache.Arrow" Version="23.0.0" />
   </ItemGroup>
   
   <ItemGroup Label="Aspire">

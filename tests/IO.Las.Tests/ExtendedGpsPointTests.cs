@@ -68,7 +68,7 @@ public class ExtendedGpsPointTests
     {
         var destination = new byte[Bytes.Length];
         _ = Point.WriteLittleEndian(destination);
-        _ = await Assert.That(destination).IsEquivalentTo(Bytes);
+        await Assert.That(destination).IsEquivalentTo(Bytes);
     }
 
     [Test]
@@ -81,7 +81,7 @@ public class ExtendedGpsPointTests
 
     private static async Task CheckPoint(ExtendedGpsPointDataRecord record)
     {
-        _ = await Assert.That(record)
+        await Assert.That(record)
             .Member(p => p.X, x => x.IsEqualTo(5977566))
             .And.Member(p => p.Y, y => y.IsEqualTo(957396))
             .And.Member(p => p.Z, z => z.IsEqualTo(-513145))

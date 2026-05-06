@@ -2,313 +2,269 @@ namespace Altemiq.IO.Las;
 
 public class PointConverterTests
 {
-    private static
-#if !NETFRAMEWORK
-        readonly
-#endif
-        PointDataRecord PointDataRecord = new()
-        {
-            X = Values.X,
-            Y = Values.Y,
-            Z = Values.Z,
-            Intensity = Values.Intensity,
-            ReturnNumber = Values.ReturnNumber,
-            NumberOfReturns = Values.NumberOfReturns,
-            Synthetic = Values.Synthetic,
-            KeyPoint = Values.KeyPoint,
-            Withheld = Values.Withheld,
-            ScanAngleRank = Values.ScanAngleRank,
-            ScanDirectionFlag = Values.ScanDirectionFlag,
-            EdgeOfFlightLine = Values.EdgeOfFlightLine,
-            Classification = Values.Classification,
-            UserData = Values.UserData,
-            PointSourceId = Values.PointSourceId,
-        };
+    private static readonly PointDataRecord PointDataRecord = new()
+    {
+        X = Values.X,
+        Y = Values.Y,
+        Z = Values.Z,
+        Intensity = Values.Intensity,
+        ReturnNumber = Values.ReturnNumber,
+        NumberOfReturns = Values.NumberOfReturns,
+        Synthetic = Values.Synthetic,
+        KeyPoint = Values.KeyPoint,
+        Withheld = Values.Withheld,
+        ScanAngleRank = Values.ScanAngleRank,
+        ScanDirectionFlag = Values.ScanDirectionFlag,
+        EdgeOfFlightLine = Values.EdgeOfFlightLine,
+        Classification = Values.Classification,
+        UserData = Values.UserData,
+        PointSourceId = Values.PointSourceId,
+    };
 
-    private static
-#if !NETFRAMEWORK
-        readonly
-#endif
-        GpsPointDataRecord GpsPointDataRecord = new()
-        {
-            X = Values.X,
-            Y = Values.Y,
-            Z = Values.Z,
-            Intensity = Values.Intensity,
-            ReturnNumber = Values.ReturnNumber,
-            NumberOfReturns = Values.NumberOfReturns,
-            Synthetic = Values.Synthetic,
-            KeyPoint = Values.KeyPoint,
-            Withheld = Values.Withheld,
-            ScanAngleRank = Values.ScanAngleRank,
-            ScanDirectionFlag = Values.ScanDirectionFlag,
-            EdgeOfFlightLine = Values.EdgeOfFlightLine,
-            Classification = Classification.MediumVegetation,
-            UserData = Values.UserData,
-            PointSourceId = Values.PointSourceId,
-            GpsTime = Values.GpsTime,
-        };
+    private static readonly GpsPointDataRecord GpsPointDataRecord = new()
+    {
+        X = Values.X,
+        Y = Values.Y,
+        Z = Values.Z,
+        Intensity = Values.Intensity,
+        ReturnNumber = Values.ReturnNumber,
+        NumberOfReturns = Values.NumberOfReturns,
+        Synthetic = Values.Synthetic,
+        KeyPoint = Values.KeyPoint,
+        Withheld = Values.Withheld,
+        ScanAngleRank = Values.ScanAngleRank,
+        ScanDirectionFlag = Values.ScanDirectionFlag,
+        EdgeOfFlightLine = Values.EdgeOfFlightLine,
+        Classification = Classification.MediumVegetation,
+        UserData = Values.UserData,
+        PointSourceId = Values.PointSourceId,
+        GpsTime = Values.GpsTime,
+    };
 
-    private static
-#if !NETFRAMEWORK
-        readonly
-#endif
-        ColorPointDataRecord ColorPointDataRecord = new()
-        {
-            X = Values.X,
-            Y = Values.Y,
-            Z = Values.Z,
-            Intensity = Values.Intensity,
-            ReturnNumber = Values.ReturnNumber,
-            NumberOfReturns = Values.NumberOfReturns,
-            Synthetic = Values.Synthetic,
-            KeyPoint = Values.KeyPoint,
-            Withheld = Values.Withheld,
-            ScanAngleRank = Values.ScanAngleRank,
-            ScanDirectionFlag = Values.ScanDirectionFlag,
-            EdgeOfFlightLine = Values.EdgeOfFlightLine,
-            Classification = Classification.MediumVegetation,
-            UserData = Values.UserData,
-            PointSourceId = Values.PointSourceId,
-            Color = Values.Color,
-        };
+    private static readonly ColorPointDataRecord ColorPointDataRecord = new()
+    {
+        X = Values.X,
+        Y = Values.Y,
+        Z = Values.Z,
+        Intensity = Values.Intensity,
+        ReturnNumber = Values.ReturnNumber,
+        NumberOfReturns = Values.NumberOfReturns,
+        Synthetic = Values.Synthetic,
+        KeyPoint = Values.KeyPoint,
+        Withheld = Values.Withheld,
+        ScanAngleRank = Values.ScanAngleRank,
+        ScanDirectionFlag = Values.ScanDirectionFlag,
+        EdgeOfFlightLine = Values.EdgeOfFlightLine,
+        Classification = Classification.MediumVegetation,
+        UserData = Values.UserData,
+        PointSourceId = Values.PointSourceId,
+        Color = Values.Color,
+    };
 
-    private static
-#if !NETFRAMEWORK
-        readonly
-#endif
-        GpsColorPointDataRecord GpsColorPointDataRecord = new()
-        {
-            X = Values.X,
-            Y = Values.Y,
-            Z = Values.Z,
-            Intensity = Values.Intensity,
-            ReturnNumber = Values.ReturnNumber,
-            NumberOfReturns = Values.NumberOfReturns,
-            Synthetic = Values.Synthetic,
-            KeyPoint = Values.KeyPoint,
-            Withheld = Values.Withheld,
-            ScanAngleRank = Values.ScanAngleRank,
-            ScanDirectionFlag = Values.ScanDirectionFlag,
-            EdgeOfFlightLine = Values.EdgeOfFlightLine,
-            Classification = Values.Classification,
-            UserData = Values.UserData,
-            PointSourceId = Values.PointSourceId,
-            GpsTime = Values.GpsTime,
-            Color = Values.Color,
-        };
+    private static readonly GpsColorPointDataRecord GpsColorPointDataRecord = new()
+    {
+        X = Values.X,
+        Y = Values.Y,
+        Z = Values.Z,
+        Intensity = Values.Intensity,
+        ReturnNumber = Values.ReturnNumber,
+        NumberOfReturns = Values.NumberOfReturns,
+        Synthetic = Values.Synthetic,
+        KeyPoint = Values.KeyPoint,
+        Withheld = Values.Withheld,
+        ScanAngleRank = Values.ScanAngleRank,
+        ScanDirectionFlag = Values.ScanDirectionFlag,
+        EdgeOfFlightLine = Values.EdgeOfFlightLine,
+        Classification = Values.Classification,
+        UserData = Values.UserData,
+        PointSourceId = Values.PointSourceId,
+        GpsTime = Values.GpsTime,
+        Color = Values.Color,
+    };
 
-    private static
-#if !NETFRAMEWORK
-        readonly
-#endif
-        GpsWaveformPointDataRecord GpsWaveformPointDataRecord = new()
-        {
-            X = Values.X,
-            Y = Values.Y,
-            Z = Values.Z,
-            Intensity = Values.Intensity,
-            ReturnNumber = Values.ReturnNumber,
-            NumberOfReturns = Values.NumberOfReturns,
-            Synthetic = Values.Synthetic,
-            KeyPoint = Values.KeyPoint,
-            Withheld = Values.Withheld,
-            ScanAngleRank = Values.ScanAngleRank,
-            ScanDirectionFlag = Values.ScanDirectionFlag,
-            EdgeOfFlightLine = Values.EdgeOfFlightLine,
-            Classification = Values.Classification,
-            UserData = Values.UserData,
-            PointSourceId = Values.PointSourceId,
-            GpsTime = Values.GpsTime,
-            WavePacketDescriptorIndex = Values.WavePacketDescriptorIndex,
-            ByteOffsetToWaveformData = Values.ByteOffsetToWaveformData,
-            WaveformPacketSizeInBytes = Values.WaveformPacketSizeInBytes,
-            ReturnPointWaveformLocation = Values.ReturnPointWaveformLocation,
-            ParametricDx = Values.ParametricDx,
-            ParametricDy = Values.ParametricDy,
-            ParametricDz = Values.ParametricDz,
-        };
+    private static readonly GpsWaveformPointDataRecord GpsWaveformPointDataRecord = new()
+    {
+        X = Values.X,
+        Y = Values.Y,
+        Z = Values.Z,
+        Intensity = Values.Intensity,
+        ReturnNumber = Values.ReturnNumber,
+        NumberOfReturns = Values.NumberOfReturns,
+        Synthetic = Values.Synthetic,
+        KeyPoint = Values.KeyPoint,
+        Withheld = Values.Withheld,
+        ScanAngleRank = Values.ScanAngleRank,
+        ScanDirectionFlag = Values.ScanDirectionFlag,
+        EdgeOfFlightLine = Values.EdgeOfFlightLine,
+        Classification = Values.Classification,
+        UserData = Values.UserData,
+        PointSourceId = Values.PointSourceId,
+        GpsTime = Values.GpsTime,
+        WavePacketDescriptorIndex = Values.WavePacketDescriptorIndex,
+        ByteOffsetToWaveformData = Values.ByteOffsetToWaveformData,
+        WaveformPacketSizeInBytes = Values.WaveformPacketSizeInBytes,
+        ReturnPointWaveformLocation = Values.ReturnPointWaveformLocation,
+        ParametricDx = Values.ParametricDx,
+        ParametricDy = Values.ParametricDy,
+        ParametricDz = Values.ParametricDz,
+    };
 
-    private static
-#if !NETFRAMEWORK
-        readonly
-#endif
-        GpsColorWaveformPointDataRecord GpsColorWaveformPointDataRecord = new()
-        {
-            X = Values.X,
-            Y = Values.Y,
-            Z = Values.Z,
-            Intensity = Values.Intensity,
-            ReturnNumber = Values.ReturnNumber,
-            NumberOfReturns = Values.NumberOfReturns,
-            Synthetic = Values.Synthetic,
-            KeyPoint = Values.KeyPoint,
-            Withheld = Values.Withheld,
-            ScanAngleRank = Values.ScanAngleRank,
-            ScanDirectionFlag = Values.ScanDirectionFlag,
-            EdgeOfFlightLine = Values.EdgeOfFlightLine,
-            Classification = Values.Classification,
-            UserData = Values.UserData,
-            PointSourceId = Values.PointSourceId,
-            GpsTime = Values.GpsTime,
-            Color = Values.Color,
-            WavePacketDescriptorIndex = Values.WavePacketDescriptorIndex,
-            ByteOffsetToWaveformData = Values.ByteOffsetToWaveformData,
-            WaveformPacketSizeInBytes = Values.WaveformPacketSizeInBytes,
-            ReturnPointWaveformLocation = Values.ReturnPointWaveformLocation,
-            ParametricDx = Values.ParametricDx,
-            ParametricDy = Values.ParametricDy,
-            ParametricDz = Values.ParametricDz,
-        };
+    private static readonly GpsColorWaveformPointDataRecord GpsColorWaveformPointDataRecord = new()
+    {
+        X = Values.X,
+        Y = Values.Y,
+        Z = Values.Z,
+        Intensity = Values.Intensity,
+        ReturnNumber = Values.ReturnNumber,
+        NumberOfReturns = Values.NumberOfReturns,
+        Synthetic = Values.Synthetic,
+        KeyPoint = Values.KeyPoint,
+        Withheld = Values.Withheld,
+        ScanAngleRank = Values.ScanAngleRank,
+        ScanDirectionFlag = Values.ScanDirectionFlag,
+        EdgeOfFlightLine = Values.EdgeOfFlightLine,
+        Classification = Values.Classification,
+        UserData = Values.UserData,
+        PointSourceId = Values.PointSourceId,
+        GpsTime = Values.GpsTime,
+        Color = Values.Color,
+        WavePacketDescriptorIndex = Values.WavePacketDescriptorIndex,
+        ByteOffsetToWaveformData = Values.ByteOffsetToWaveformData,
+        WaveformPacketSizeInBytes = Values.WaveformPacketSizeInBytes,
+        ReturnPointWaveformLocation = Values.ReturnPointWaveformLocation,
+        ParametricDx = Values.ParametricDx,
+        ParametricDy = Values.ParametricDy,
+        ParametricDz = Values.ParametricDz,
+    };
 
-    private static
-#if !NETFRAMEWORK
-        readonly
-#endif
-        ExtendedGpsPointDataRecord ExtendedGpsPointDataRecord = new()
-        {
-            X = Values.X,
-            Y = Values.Y,
-            Z = Values.Z,
-            Intensity = Values.Intensity,
-            ReturnNumber = Values.ReturnNumber,
-            NumberOfReturns = Values.NumberOfReturns,
-            Synthetic = Values.Synthetic,
-            KeyPoint = Values.KeyPoint,
-            Withheld = Values.Withheld,
-            Overlap = Values.Overlap,
-            ScannerChannel = Values.ScannerChannel,
-            ScanDirectionFlag = Values.ScanDirectionFlag,
-            EdgeOfFlightLine = Values.EdgeOfFlightLine,
-            Classification = Values.ExtendedClassification,
-            UserData = Values.UserData,
-            ScanAngle = Values.ScanAngle,
-            PointSourceId = Values.PointSourceId,
-            GpsTime = Values.GpsTime,
-        };
+    private static readonly ExtendedGpsPointDataRecord ExtendedGpsPointDataRecord = new()
+    {
+        X = Values.X,
+        Y = Values.Y,
+        Z = Values.Z,
+        Intensity = Values.Intensity,
+        ReturnNumber = Values.ReturnNumber,
+        NumberOfReturns = Values.NumberOfReturns,
+        Synthetic = Values.Synthetic,
+        KeyPoint = Values.KeyPoint,
+        Withheld = Values.Withheld,
+        Overlap = Values.Overlap,
+        ScannerChannel = Values.ScannerChannel,
+        ScanDirectionFlag = Values.ScanDirectionFlag,
+        EdgeOfFlightLine = Values.EdgeOfFlightLine,
+        Classification = Values.ExtendedClassification,
+        UserData = Values.UserData,
+        ScanAngle = Values.ScanAngle,
+        PointSourceId = Values.PointSourceId,
+        GpsTime = Values.GpsTime,
+    };
 
-    private static
-#if !NETFRAMEWORK
-        readonly
-#endif
-        ExtendedGpsColorPointDataRecord ExtendedGpsColorPointDataRecord = new()
-        {
-            X = Values.X,
-            Y = Values.Y,
-            Z = Values.Z,
-            Intensity = Values.Intensity,
-            ReturnNumber = Values.ReturnNumber,
-            NumberOfReturns = Values.NumberOfReturns,
-            Synthetic = Values.Synthetic,
-            KeyPoint = Values.KeyPoint,
-            Withheld = Values.Withheld,
-            Overlap = Values.Overlap,
-            ScannerChannel = Values.ScannerChannel,
-            ScanDirectionFlag = Values.ScanDirectionFlag,
-            EdgeOfFlightLine = Values.EdgeOfFlightLine,
-            Classification = Values.ExtendedClassification,
-            UserData = Values.UserData,
-            ScanAngle = Values.ScanAngle,
-            PointSourceId = Values.PointSourceId,
-            GpsTime = Values.GpsTime,
-            Color = Values.Color,
-        };
+    private static readonly ExtendedGpsColorPointDataRecord ExtendedGpsColorPointDataRecord = new()
+    {
+        X = Values.X,
+        Y = Values.Y,
+        Z = Values.Z,
+        Intensity = Values.Intensity,
+        ReturnNumber = Values.ReturnNumber,
+        NumberOfReturns = Values.NumberOfReturns,
+        Synthetic = Values.Synthetic,
+        KeyPoint = Values.KeyPoint,
+        Withheld = Values.Withheld,
+        Overlap = Values.Overlap,
+        ScannerChannel = Values.ScannerChannel,
+        ScanDirectionFlag = Values.ScanDirectionFlag,
+        EdgeOfFlightLine = Values.EdgeOfFlightLine,
+        Classification = Values.ExtendedClassification,
+        UserData = Values.UserData,
+        ScanAngle = Values.ScanAngle,
+        PointSourceId = Values.PointSourceId,
+        GpsTime = Values.GpsTime,
+        Color = Values.Color,
+    };
 
-    private static
-#if !NETFRAMEWORK
-        readonly
-#endif
-        ExtendedGpsColorNearInfraredPointDataRecord ExtendedGpsColorNearInfraredPointDataRecord = new()
-        {
-            X = Values.X,
-            Y = Values.Y,
-            Z = Values.Z,
-            Intensity = Values.Intensity,
-            ReturnNumber = Values.ReturnNumber,
-            NumberOfReturns = Values.NumberOfReturns,
-            Synthetic = Values.Synthetic,
-            KeyPoint = Values.KeyPoint,
-            Withheld = Values.Withheld,
-            Overlap = Values.Overlap,
-            ScannerChannel = Values.ScannerChannel,
-            ScanDirectionFlag = Values.ScanDirectionFlag,
-            EdgeOfFlightLine = Values.EdgeOfFlightLine,
-            Classification = Values.ExtendedClassification,
-            UserData = Values.UserData,
-            ScanAngle = Values.ScanAngle,
-            PointSourceId = Values.PointSourceId,
-            GpsTime = Values.GpsTime,
-            Color = Values.Color,
-            NearInfrared = Values.NearInfrared,
-        };
+    private static readonly ExtendedGpsColorNearInfraredPointDataRecord ExtendedGpsColorNearInfraredPointDataRecord = new()
+    {
+        X = Values.X,
+        Y = Values.Y,
+        Z = Values.Z,
+        Intensity = Values.Intensity,
+        ReturnNumber = Values.ReturnNumber,
+        NumberOfReturns = Values.NumberOfReturns,
+        Synthetic = Values.Synthetic,
+        KeyPoint = Values.KeyPoint,
+        Withheld = Values.Withheld,
+        Overlap = Values.Overlap,
+        ScannerChannel = Values.ScannerChannel,
+        ScanDirectionFlag = Values.ScanDirectionFlag,
+        EdgeOfFlightLine = Values.EdgeOfFlightLine,
+        Classification = Values.ExtendedClassification,
+        UserData = Values.UserData,
+        ScanAngle = Values.ScanAngle,
+        PointSourceId = Values.PointSourceId,
+        GpsTime = Values.GpsTime,
+        Color = Values.Color,
+        NearInfrared = Values.NearInfrared,
+    };
 
-    private static
-#if !NETFRAMEWORK
-        readonly
-#endif
-        ExtendedGpsWaveformPointDataRecord ExtendedGpsWaveformPointDataRecord = new()
-        {
-            X = Values.X,
-            Y = Values.Y,
-            Z = Values.Z,
-            Intensity = Values.Intensity,
-            ReturnNumber = Values.ReturnNumber,
-            NumberOfReturns = Values.NumberOfReturns,
-            Synthetic = Values.Synthetic,
-            KeyPoint = Values.KeyPoint,
-            Withheld = Values.Withheld,
-            Overlap = Values.Overlap,
-            ScannerChannel = Values.ScannerChannel,
-            ScanDirectionFlag = Values.ScanDirectionFlag,
-            EdgeOfFlightLine = Values.EdgeOfFlightLine,
-            Classification = Values.ExtendedClassification,
-            UserData = Values.UserData,
-            ScanAngle = Values.ScanAngle,
-            PointSourceId = Values.PointSourceId,
-            GpsTime = Values.GpsTime,
-            WavePacketDescriptorIndex = Values.WavePacketDescriptorIndex,
-            ByteOffsetToWaveformData = Values.ByteOffsetToWaveformData,
-            WaveformPacketSizeInBytes = Values.WaveformPacketSizeInBytes,
-            ReturnPointWaveformLocation = Values.ReturnPointWaveformLocation,
-            ParametricDx = Values.ParametricDx,
-            ParametricDy = Values.ParametricDy,
-            ParametricDz = Values.ParametricDz,
-        };
+    private static readonly ExtendedGpsWaveformPointDataRecord ExtendedGpsWaveformPointDataRecord = new()
+    {
+        X = Values.X,
+        Y = Values.Y,
+        Z = Values.Z,
+        Intensity = Values.Intensity,
+        ReturnNumber = Values.ReturnNumber,
+        NumberOfReturns = Values.NumberOfReturns,
+        Synthetic = Values.Synthetic,
+        KeyPoint = Values.KeyPoint,
+        Withheld = Values.Withheld,
+        Overlap = Values.Overlap,
+        ScannerChannel = Values.ScannerChannel,
+        ScanDirectionFlag = Values.ScanDirectionFlag,
+        EdgeOfFlightLine = Values.EdgeOfFlightLine,
+        Classification = Values.ExtendedClassification,
+        UserData = Values.UserData,
+        ScanAngle = Values.ScanAngle,
+        PointSourceId = Values.PointSourceId,
+        GpsTime = Values.GpsTime,
+        WavePacketDescriptorIndex = Values.WavePacketDescriptorIndex,
+        ByteOffsetToWaveformData = Values.ByteOffsetToWaveformData,
+        WaveformPacketSizeInBytes = Values.WaveformPacketSizeInBytes,
+        ReturnPointWaveformLocation = Values.ReturnPointWaveformLocation,
+        ParametricDx = Values.ParametricDx,
+        ParametricDy = Values.ParametricDy,
+        ParametricDz = Values.ParametricDz,
+    };
 
-    private static
-#if !NETFRAMEWORK
-        readonly
-#endif
-        ExtendedGpsColorNearInfraredWaveformPointDataRecord ExtendedGpsColorNearInfraredWaveformPointDataRecord = new()
-        {
-            X = Values.X,
-            Y = Values.Y,
-            Z = Values.Z,
-            Intensity = Values.Intensity,
-            ReturnNumber = Values.ReturnNumber,
-            NumberOfReturns = Values.NumberOfReturns,
-            Synthetic = Values.Synthetic,
-            KeyPoint = Values.KeyPoint,
-            Withheld = Values.Withheld,
-            Overlap = Values.Overlap,
-            ScannerChannel = Values.ScannerChannel,
-            ScanDirectionFlag = Values.ScanDirectionFlag,
-            EdgeOfFlightLine = Values.EdgeOfFlightLine,
-            Classification = Values.ExtendedClassification,
-            UserData = Values.UserData,
-            ScanAngle = Values.ScanAngle,
-            PointSourceId = Values.PointSourceId,
-            GpsTime = Values.GpsTime,
-            Color = Values.Color,
-            NearInfrared = Values.NearInfrared,
-            WavePacketDescriptorIndex = Values.WavePacketDescriptorIndex,
-            ByteOffsetToWaveformData = Values.ByteOffsetToWaveformData,
-            WaveformPacketSizeInBytes = Values.WaveformPacketSizeInBytes,
-            ReturnPointWaveformLocation = Values.ReturnPointWaveformLocation,
-            ParametricDx = Values.ParametricDx,
-            ParametricDy = Values.ParametricDy,
-            ParametricDz = Values.ParametricDz,
-        };
+    private static readonly ExtendedGpsColorNearInfraredWaveformPointDataRecord ExtendedGpsColorNearInfraredWaveformPointDataRecord = new()
+    {
+        X = Values.X,
+        Y = Values.Y,
+        Z = Values.Z,
+        Intensity = Values.Intensity,
+        ReturnNumber = Values.ReturnNumber,
+        NumberOfReturns = Values.NumberOfReturns,
+        Synthetic = Values.Synthetic,
+        KeyPoint = Values.KeyPoint,
+        Withheld = Values.Withheld,
+        Overlap = Values.Overlap,
+        ScannerChannel = Values.ScannerChannel,
+        ScanDirectionFlag = Values.ScanDirectionFlag,
+        EdgeOfFlightLine = Values.EdgeOfFlightLine,
+        Classification = Values.ExtendedClassification,
+        UserData = Values.UserData,
+        ScanAngle = Values.ScanAngle,
+        PointSourceId = Values.PointSourceId,
+        GpsTime = Values.GpsTime,
+        Color = Values.Color,
+        NearInfrared = Values.NearInfrared,
+        WavePacketDescriptorIndex = Values.WavePacketDescriptorIndex,
+        ByteOffsetToWaveformData = Values.ByteOffsetToWaveformData,
+        WaveformPacketSizeInBytes = Values.WaveformPacketSizeInBytes,
+        ReturnPointWaveformLocation = Values.ReturnPointWaveformLocation,
+        ParametricDx = Values.ParametricDx,
+        ParametricDy = Values.ParametricDy,
+        ParametricDz = Values.ParametricDz,
+    };
 
     [Test]
     [MethodDataSource(nameof(ToExtendedData))]

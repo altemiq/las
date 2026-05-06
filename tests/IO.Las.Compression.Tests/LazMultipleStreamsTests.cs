@@ -6,10 +6,7 @@ public class LazMultipleStreamsTests
     public async Task Sorted()
     {
         SortedDictionary<string, Stream> dictionary = new(LazStreams.Comparer);
-#if NETSTANDARD2_1_OR_GREATER || NETCOREAPP3_0_OR_GREATER
-        await
-#endif
-        using BasicLazMultipleMemoryStreams stream = new(dictionary);
+        BasicLazMultipleMemoryStreams stream = new(dictionary);
 #if LAS1_3_OR_GREATER
         stream.SwitchTo(LasStreams.ExtendedVariableLengthRecord);
 #endif
@@ -40,16 +37,15 @@ public class LazMultipleStreamsTests
                 LazStreams.SpecialExtendedVariableLengthRecord,
 #endif
             ]);
+
+        await stream.DisposeAsync();
     }
 
     [Test]
     public async Task AddSameTwice()
     {
         SortedDictionary<string, Stream> dictionary = new(LazStreams.Comparer);
-#if NETSTANDARD2_1_OR_GREATER || NETCOREAPP3_0_OR_GREATER
-        await
-#endif
-        using BasicLazMultipleMemoryStreams stream = new(dictionary);
+        BasicLazMultipleMemoryStreams stream = new(dictionary);
         _ = stream.SwitchTo(LasStreams.Header);
         _ = stream.SwitchTo(LasStreams.VariableLengthRecord);
         _ = stream.SwitchTo(LazStreams.FormatChunk(0));
@@ -65,7 +61,7 @@ public class LazMultipleStreamsTests
         _ = stream.SwitchTo(LasStreams.Header);
         _ = stream.SwitchTo(LasStreams.VariableLengthRecord);
 
-        _ = await Assert.That(dictionary.Keys).IsEquivalentTo(
+        await Assert.That(dictionary.Keys).IsEquivalentTo(
             [
                 LasStreams.Header,
                 LasStreams.VariableLengthRecord,
@@ -73,6 +69,8 @@ public class LazMultipleStreamsTests
                 LazStreams.FormatChunk(1),
                 LazStreams.FormatChunk(2),
             ]);
+
+        await stream.DisposeAsync();
     }
 
     private class BasicLazMultipleMemoryStreams(IDictionary<string, Stream> dictionary) : LazMultipleMemoryStream(dictionary);

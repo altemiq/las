@@ -74,6 +74,7 @@ internal sealed class MockLasReader : ILasReader
 
     public ValueTask<int> ReadPointDataRecordDataAsync(Memory<byte> buffer, CancellationToken cancellationToken = default)
     {
+        cancellationToken.ThrowIfCancellationRequested();
         First.CopyTo(buffer.Span);
         Second.CopyTo(buffer[this.PointDataLength..].Span);
         return new(this.PointDataLength * 2);

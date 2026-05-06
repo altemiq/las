@@ -22,7 +22,7 @@ public class ExtendedVariableLengthRecordHeaderTests
     [LittleEndianOnly]
     public async Task FromMemory()
     {
-        _ = await Assert.That(Marshal.PtrToStructure<ExtendedVariableLengthRecordHeader>(Marshal.UnsafeAddrOfPinnedArrayElement(Bytes, 0)))
+        await Assert.That(Marshal.PtrToStructure<ExtendedVariableLengthRecordHeader>(Marshal.UnsafeAddrOfPinnedArrayElement(Bytes, 0)))
             .IsNotDefault()
             .And.Member(h => h.UserId, userId => userId.IsEqualTo("copc"))
             .And.Member(h => h.RecordId, recordId => recordId.IsEqualTo((ushort)1000))
@@ -32,7 +32,7 @@ public class ExtendedVariableLengthRecordHeaderTests
     [Test]
     public async Task FromBytes()
     {
-        _ = await Assert.That(new ExtendedVariableLengthRecordHeader(Bytes))
+        await Assert.That(new ExtendedVariableLengthRecordHeader(Bytes))
             .IsNotDefault()
             .And.Member(h => h.UserId, userId => userId.IsEqualTo("copc"))
             .And.Member(h => h.RecordId, recordId => recordId.IsEqualTo((ushort)1000))
@@ -46,7 +46,7 @@ public class ExtendedVariableLengthRecordHeaderTests
         var destination = new byte[Bytes.Length];
         Marshal.StructureToPtr(Header, Marshal.UnsafeAddrOfPinnedArrayElement(destination, 0), fDeleteOld: false);
         Array.Copy(Bytes, destination, 2);
-        _ = await Assert.That(destination).IsEquivalentTo(Bytes);
+        await Assert.That(destination).IsEquivalentTo(Bytes);
     }
 
     [Test]
@@ -55,7 +55,7 @@ public class ExtendedVariableLengthRecordHeaderTests
         var destination = new byte[Bytes.Length];
         Header.WriteLittleEndian(destination);
         Array.Copy(Bytes, destination, 2);
-        _ = await Assert.That(destination).IsEquivalentTo(Bytes);
+        await Assert.That(destination).IsEquivalentTo(Bytes);
     }
 
     [Test]
