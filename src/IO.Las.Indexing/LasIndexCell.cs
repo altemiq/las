@@ -83,14 +83,14 @@ public readonly record struct LasIndexCell
     /// </summary>
     /// <param name="y">The y-coordinate.</param>
     /// <returns><see langword="true"/> if the <paramref name="y"/> is within this cell; otherwise <see langword="false"/>.</returns>
-    public bool ContainsY(float y) => this.Minimum.X <= y && y < this.Maximum.X;
+    public bool ContainsY(float y) => this.Minimum.Y <= y && y < this.Maximum.Y;
 
     /// <summary>
     /// Determines whether the specified y-coordinate is in this cell.
     /// </summary>
     /// <param name="y">The y-coordinate.</param>
     /// <returns><see langword="true"/> if the <paramref name="y"/> is within this cell; otherwise <see langword="false"/>.</returns>
-    public bool ContainsY(double y) => this.Minimum.X <= y && y < this.Maximum.X;
+    public bool ContainsY(double y) => this.Minimum.Y <= y && y < this.Maximum.Y;
 
     /// <inheritdoc/>
     public override int GetHashCode() => HashCode.Combine(this.Minimum, this.Maximum);
