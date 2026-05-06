@@ -811,7 +811,10 @@ public sealed class LasQuadTree : IEquatable<LasQuadTree>
 
     private static int[] CreateLevelOffset()
     {
-        var offsets = new int[20];
+        // populate all 17 meaningful levels (0..16). `4^17` overflows `int`, so higher levels
+        // are not representable and we trap them explicitly in `GetLevel` rather than by
+        // silently rolling over.
+        var offsets = new int[17];
         for (var i = 0; i < 16; i++)
         {
             offsets[i + 1] = offsets[i] + ((1 << i) * (1 << i));
@@ -822,13 +825,24 @@ public sealed class LasQuadTree : IEquatable<LasQuadTree>
 
     private static int GetLevel(int cellIndex)
     {
+        if (cellIndex < 0)
+        {
+            throw new ArgumentOutOfRangeException(nameof(cellIndex), cellIndex, message: null);
+        }
+
         var level = default(int);
-        while (cellIndex >= LevelOffset[level + 1])
+
+        // LevelOffset has one entry per representable level plus a final "end" marker; bail out
+        // with a clear exception rather than walking past the array bounds when a malformed cell
+        // index exceeds the representable range.
+        while (level + 1 < LevelOffset.Length && cellIndex >= LevelOffset[level + 1])
         {
             level++;
         }
 
-        return level;
+        return level + 1 < LevelOffset.Length
+            ? level
+            : throw new ArgumentOutOfRangeException(nameof(cellIndex), cellIndex, message: null);
     }
 
     private int GetCellIndex(float x, float y, int level) => this.sublevel is not 0
