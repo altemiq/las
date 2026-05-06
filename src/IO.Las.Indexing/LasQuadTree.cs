@@ -780,11 +780,16 @@ public sealed class LasQuadTree : IEquatable<LasQuadTree>
     internal bool ManageCell(int cellIndex)
     {
         var adaptivePosition = cellIndex / 32;
-        this.adaptive ??= new uint[adaptivePosition + 1];
-        if (adaptivePosition >= this.adaptive.Length)
+        if (this.adaptive is null)
         {
-            // increase by 2
-            Array.Resize(ref this.adaptive, adaptivePosition * 2);
+            this.adaptive = new uint[adaptivePosition + 1];
+        }
+        else if (adaptivePosition >= this.adaptive.Length)
+        {
+            // grow by at least 2x, ensuring the new length covers `adaptivePosition` so we do not
+            // have to resize again on the next adjacent write (amortized O(1) per cell)
+            var newLength = Math.Max(this.adaptive.Length * 2, adaptivePosition + 1);
+            Array.Resize(ref this.adaptive, newLength);
         }
 
         var adaptiveBit = 1U << (cellIndex % 32);
