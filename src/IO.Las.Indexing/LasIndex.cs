@@ -255,7 +255,18 @@ public class LasIndex : IEnumerable<LasIndexCell>, IEqualityComparer<LasIndex>
     /// Returns this instance as a read-only list of <see cref="LasIndexCell"/>.
     /// </summary>
     /// <returns>A read-only list of <see cref="LasIndexCell"/>.</returns>
-    public IReadOnlyList<LasIndexCell> AsReadOnly() => new ReadOnlyLasIndex([.. this]);
+    public IReadOnlyList<LasIndexCell> AsReadOnly()
+    {
+        // pre-size using the known cell count so we can fill directly without going via `List<T>`
+        var cells = new LasIndexCell[this.interval.GetNumberOfCells()];
+        var i = 0;
+        foreach (var cell in this)
+        {
+            cells[i++] = cell;
+        }
+
+        return new ReadOnlyLasIndex(cells);
+    }
 
     /// <summary>
     /// Adds the specified x, y point to the index.
