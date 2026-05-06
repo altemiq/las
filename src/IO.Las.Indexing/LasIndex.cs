@@ -320,16 +320,17 @@ public class LasIndex : IEnumerable<LasIndexCell>, IEqualityComparer<LasIndex>
     {
         if (minimumPoints is not 0)
         {
+            var initialCount = this.interval.GetNumberOfCells();
             var cellHashes = new[]
             {
-                GetHashes(this.interval),
-                new Dictionary<int, uint>(),
+                GetHashes(this.interval, initialCount),
+                new Dictionary<int, uint>(initialCount),
             };
 
             var firstHash = default(int);
             while (cellHashes[firstHash].Count > 0)
             {
-                var secondHash = (firstHash + 1) % 2;
+                var secondHash = firstHash ^ 1;
                 cellHashes[secondHash].Clear();
 
                 // coarsen if a coarser cell will still have fewer than the minimum points (and points in all subcells)
@@ -363,6 +364,8 @@ public class LasIndex : IEnumerable<LasIndexCell>, IEqualityComparer<LasIndex>
                         }
 
                         full += inner.Value;
+
+                        // zero the current pass's entry so we do not re-visit it during this enumeration
                         cellHashes[firstHash][inner.Key] = default;
                         numberFilled++;
                     }
@@ -382,18 +385,16 @@ public class LasIndex : IEnumerable<LasIndexCell>, IEqualityComparer<LasIndex>
                     break;
                 }
 
-                firstHash = (firstHash + 1) % 2;
+                firstHash ^= 1;
             }
 
             ManageCells(this.interval, this.spatial);
 
-            static IDictionary<int, uint> GetHashes(LasInterval interval)
+            static IDictionary<int, uint> GetHashes(LasInterval interval, int capacity)
             {
-                var cellHash = new Dictionary<int, uint>();
-                using var enumerator = interval.GetEnumerator();
-                while (enumerator.MoveNext())
+                var cellHash = new Dictionary<int, uint>(capacity);
+                foreach (var current in interval)
                 {
-                    var current = enumerator.Current;
                     cellHash[current.Key] = current.Value.Full;
                 }
 
