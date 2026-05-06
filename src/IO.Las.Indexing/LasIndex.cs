@@ -497,7 +497,8 @@ public class LasIndex : IEnumerable<LasIndexCell>, IEqualityComparer<LasIndex>
     /// <param name="writer">The writer.</param>
     public void WriteTo(BinaryWriter writer)
     {
-        writer.Write(Signature.ToCharArray());
+        // write the 4-char ASCII signature as a little-endian uint to avoid the `char[4]` allocation from `ToCharArray`
+        writer.Write(SignatureValue);
         writer.Write(0U); // version
         this.spatial.WriteTo(writer);
         this.interval.WriteTo(writer);

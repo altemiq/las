@@ -220,10 +220,11 @@ public sealed class LasQuadTree : IEquatable<LasQuadTree>
     /// <param name="writer">The writer.</param>
     public void WriteTo(BinaryWriter writer)
     {
-        writer.Write("LASS".ToCharArray());
+        // write both 4-char ASCII signatures as little-endian uints to avoid `char[4]` allocations from `ToCharArray`
+        writer.Write(SpatialSignatureValue);
         writer.Write(LasSpatialQuadTree);
 
-        writer.Write(Signature.ToCharArray());
+        writer.Write(QuadTreeSignatureValue);
         writer.Write(0U); // version
 
         writer.Write((uint)this.levels);

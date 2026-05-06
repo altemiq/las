@@ -363,7 +363,8 @@ internal sealed class LasInterval : IEnumerable<KeyValuePair<int, LasIntervalSta
     /// <param name="writer">The writer.</param>
     public void WriteTo(BinaryWriter writer)
     {
-        writer.Write(Signature.ToCharArray());
+        // write the 4-char ASCII signature as a little-endian uint to avoid the `char[4]` allocation from `ToCharArray`
+        writer.Write(SignatureValue);
         writer.Write(0U); // version
 
         // number of cells
