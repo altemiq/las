@@ -370,32 +370,61 @@ internal sealed class LasInterval : IEnumerable<KeyValuePair<int, LasIntervalSta
         // number of cells
         writer.Write((uint)this.cellsDictionary.Count);
 
+        var baseStream = writer.BaseStream;
+        var canSeek = baseStream.CanSeek;
+
         // loop over all cells
         foreach (var item in this.cellsDictionary)
         {
-            // count number of intervals and points in cell
-            var numberOfIntervals = default(uint);
             var numberOfPoints = item.Value.Full;
-
-            LasIntervalCell? cell = item.Value;
-            while (cell is not null)
-            {
-                numberOfIntervals++;
-                cell = cell.Next;
-            }
 
             // write index of cell
             writer.Write(item.Key);
-            writer.Write(numberOfIntervals);
-            writer.Write(numberOfPoints);
 
-            // write intervals
-            cell = item.Value;
-            while (cell is not null)
+            if (canSeek)
             {
-                writer.Write(cell.Start);
-                writer.Write(cell.End);
-                cell = cell.Next;
+                // reserve 4 bytes for the interval count, write the payload, then seek back and patch.
+                // this folds the previous count-then-write double-walk into a single linked-list traversal.
+                var countPosition = baseStream.Position;
+                writer.Write(0U);
+                writer.Write(numberOfPoints);
+
+                var numberOfIntervals = default(uint);
+                LasIntervalCell? cell = item.Value;
+                while (cell is not null)
+                {
+                    writer.Write(cell.Start);
+                    writer.Write(cell.End);
+                    numberOfIntervals++;
+                    cell = cell.Next;
+                }
+
+                var endPosition = baseStream.Position;
+                baseStream.Position = countPosition;
+                writer.Write(numberOfIntervals);
+                baseStream.Position = endPosition;
+            }
+            else
+            {
+                // non-seekable stream: fall back to the two-pass approach
+                var numberOfIntervals = default(uint);
+                LasIntervalCell? cell = item.Value;
+                while (cell is not null)
+                {
+                    numberOfIntervals++;
+                    cell = cell.Next;
+                }
+
+                writer.Write(numberOfIntervals);
+                writer.Write(numberOfPoints);
+
+                cell = item.Value;
+                while (cell is not null)
+                {
+                    writer.Write(cell.Start);
+                    writer.Write(cell.End);
+                    cell = cell.Next;
+                }
             }
         }
     }
