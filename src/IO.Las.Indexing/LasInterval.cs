@@ -296,7 +296,7 @@ internal sealed class LasInterval : IEnumerable<KeyValuePair<int, LasIntervalSta
 
         // order intervals by smallest gap
         var sortedCells = new SortedList<uint, LasIntervalCell>(new DuplicateKeyComparer<uint>());
-        foreach (var startCell in this.cellsDictionary.Select(static item => item.Value))
+        foreach (var startCell in this.cellsDictionary.Values)
         {
             LasIntervalCell cell = startCell;
             while (cell.Next is { } next)
@@ -345,12 +345,23 @@ internal sealed class LasInterval : IEnumerable<KeyValuePair<int, LasIntervalSta
             }
         }
 
-        this.numberIntervals -= (uint)sortedCells
-            .Select(static item => item.Value)
-            .Count(static cell => cell is { Start: 1, End: 0 });
+        // subtract any sentinel cells still pending in `sortedCells` (Start == 1, End == 0) that we did not
+        // consume in the main loop, and recompute `Total` on every start cell in a single final sweep.
+        var pendingSentinels = default(uint);
+#pragma warning disable S3267 // plain foreach avoids the LINQ iterator on a hot path
+        foreach (var cell in sortedCells.Values)
+        {
+            if (cell is { Start: 1, End: 0 })
+            {
+                pendingSentinels++;
+            }
+        }
+#pragma warning restore S3267
+
+        this.numberIntervals -= pendingSentinels;
 
         // update totals
-        foreach (var startCell in this.cellsDictionary.Select(static item => item.Value))
+        foreach (var startCell in this.cellsDictionary.Values)
         {
             startCell.Total = default;
             LasIntervalCell? cell = startCell;
