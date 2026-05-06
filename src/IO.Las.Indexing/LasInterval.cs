@@ -24,8 +24,6 @@ internal sealed class LasInterval : IEnumerable<KeyValuePair<int, LasIntervalSta
 
     private LasIntervalStartCell? lastCell;
 
-    private bool mergedCellsTemporary;
-
     /// <summary>
     /// Initializes a new instance of the <see cref="LasInterval"/> class.
     /// </summary>
@@ -225,21 +223,16 @@ internal sealed class LasInterval : IEnumerable<KeyValuePair<int, LasIntervalSta
 
                 // is there just one cell
                 case IList<LasIntervalStartCell> { Count: 1 } cellsToMergeList:
-                    this.mergedCellsTemporary = false;
-
                     // simply use this cell as the merge cell
                     mergedCells = cellsToMergeList[0];
                     break;
 
                 case { Count: 1 }:
-                    this.mergedCellsTemporary = false;
-
                     // simply use this cell as the merge cell
                     mergedCells = cellsToMerge.First();
                     break;
 
                 default:
-                    this.mergedCellsTemporary = true;
                     mergedCells = Merge(cellsToMerge, this.threshold, ref this.numberIntervals);
                     break;
             }
