@@ -390,7 +390,7 @@ public class LasIndex : IEnumerable<LasIndexCell>
             LasIntervalCell? current = cell;
             while (current is not null)
             {
-                if (current.Start >= index && current.End <= index)
+                if (current.Start <= index && index <= current.End)
                 {
                     return true;
                 }
