@@ -492,14 +492,18 @@ internal sealed class LasInterval : IEnumerable<KeyValuePair<int, LasIntervalSta
         static LasIntervalStartCell MergeImpl(IEnumerable<LasIntervalStartCell> cells, int threshold, ref uint numberOfIntervals)
         {
             var merged = new LasIntervalStartCell();
-            var sortedCells = new SortedDictionary<uint, LasIntervalCell>();
+
+            // collect every cell in the chain into a flat list and sort by Start; using a flat list avoids the
+            // exception thrown by `SortedDictionary` on duplicate `Start` keys (which can occur with overlapping
+            // intervals produced by coarsening) and removes per-insert O(log n) rebalancing.
+            var sortedCells = new List<LasIntervalCell>();
             foreach (var cell in cells)
             {
                 merged.Full += cell.Full;
                 LasIntervalCell? next = cell;
                 while (next is not null)
                 {
-                    sortedCells.Add(next.Start, next);
+                    sortedCells.Add(next);
                     next = next.Next;
                 }
             }
@@ -509,22 +513,19 @@ internal sealed class LasInterval : IEnumerable<KeyValuePair<int, LasIntervalSta
                 return merged;
             }
 
+            sortedCells.Sort(static (a, b) => a.Start.CompareTo(b.Start));
+
             // initialize merged with first interval
-            using var enumerator = sortedCells.GetEnumerator();
-
-            // we know we have at least one.
-            _ = enumerator.MoveNext();
-
-            var current = enumerator.Current.Value;
+            var current = sortedCells[0];
             merged.Start = current.Start;
             merged.End = current.End;
             merged.Total = current.End - current.Start + 1;
 
             // merge intervals
             LasIntervalCell last = merged;
-            while (enumerator.MoveNext())
+            for (var i = 1; i < sortedCells.Count; i++)
             {
-                current = enumerator.Current.Value;
+                current = sortedCells[i];
                 var diff = (int)(current.Start - last.End);
                 if (diff > threshold)
                 {
