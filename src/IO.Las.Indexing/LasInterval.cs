@@ -523,7 +523,12 @@ internal sealed class LasInterval : IEnumerable<KeyValuePair<int, LasIntervalSta
     }
 
     /// <inheritdoc/>
-    public override int GetHashCode() => HashCode.Combine(this.cellsDictionary, this.threshold);
+    /// <remarks>
+    /// Hashes only the cell count (the cheapest structural invariant that <see cref="Equals(object?)"/>
+    /// also checks). Including the dictionary reference identity or `threshold` here would violate the
+    /// Equals/GetHashCode contract, since neither is compared by <see cref="Equals(object?)"/>.
+    /// </remarks>
+    public override int GetHashCode() => this.cellsDictionary.Count;
 
     /// <summary>
     /// Gets the cell at the specified index.
