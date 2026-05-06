@@ -5,6 +5,7 @@
     <MeziantouPolyfill_IncludedPolyfills>
       $(MeziantouPolyfill_IncludedPolyfills)|
       M:System.Collections.Generic.Dictionary`2.TryAdd(`0,`1)|
+      M:System.Collections.Generic.KeyValuePair`2.Deconstruct(`0@,`1@)|
       M:System.IO.Stream.Read(System.Span{System.Byte})|
       M:System.IO.Stream.ReadAsync(System.Memory{System.Byte},System.Threading.CancellationToken)|
       M:System.IO.Stream.ReadAtLeast(System.Span{System.Byte},System.Int32,System.Boolean)|

@@ -32,7 +32,7 @@ public class LasIndex : IEnumerable<LasIndexCell>, IEqualityComparer<LasIndex>
     public const float DefaultTileSize = default;
 
     private const string Signature = "LASX";
-    private const uint SignatureValue = ((uint)'X' << 24) | ((uint)'S' << 16) | ((uint)'A' << 8) | (uint)'L';
+    private const uint SignatureValue = ((uint)'X' << 24) | ((uint)'S' << 16) | ((uint)'A' << 8) | 'L';
     private readonly LasQuadTree spatial;
     private readonly LasInterval interval;
 
@@ -421,25 +421,19 @@ public class LasIndex : IEnumerable<LasIndexCell>, IEqualityComparer<LasIndex>
     /// <returns>The index of the cell containing <paramref name="pointIndex"/>; otherwise -1.</returns>
     public int IndexOf(uint pointIndex)
     {
-        // traverse the tree to find the index
-        var i = this.interval.FirstOrDefault(i => Contains(i.Value, pointIndex));
-        return i.Value is null ? -1 : i.Key;
-
-        static bool Contains(LasIntervalStartCell cell, uint index)
+        // traverse the tree to find the cell containing this point index
+        foreach (var kvp in this.interval)
         {
-            LasIntervalCell? current = cell;
-            while (current is not null)
+            foreach (var (start, end) in this.interval.EnumerateIntervals(kvp.Value))
             {
-                if (current.Start <= index && index <= current.End)
+                if (start <= pointIndex && pointIndex <= end)
                 {
-                    return true;
+                    return kvp.Key;
                 }
-
-                current = current.Next;
             }
-
-            return false;
         }
+
+        return -1;
     }
 
     /// <summary>
@@ -473,7 +467,7 @@ public class LasIndex : IEnumerable<LasIndexCell>, IEqualityComparer<LasIndex>
     /// Gets all the ranges.
     /// </summary>
     /// <returns>The ranges.</returns>
-    public IEnumerable<Range> All() => GetRanges(this.GetCells(this.spatial.AllCells()));
+    public IEnumerable<Range> All() => GetRanges(this.interval, this.GetCells(this.spatial.AllCells()));
 
     /// <summary>
     /// Gets the ranges within the specified rectangle.
@@ -483,7 +477,7 @@ public class LasIndex : IEnumerable<LasIndexCell>, IEqualityComparer<LasIndex>
     /// <param name="maxX">The maximum x-coordinate.</param>
     /// <param name="maxY">The maximum y-coordinate.</param>
     /// <returns>The ranges.</returns>
-    public IEnumerable<Range> WithinRectangle(float minX, float minY, float maxX, float maxY) => GetRanges(this.GetCells(this.spatial.CellsWithinRectangle(minX, minY, maxX, maxY)));
+    public IEnumerable<Range> WithinRectangle(float minX, float minY, float maxX, float maxY) => GetRanges(this.interval, this.GetCells(this.spatial.CellsWithinRectangle(minX, minY, maxX, maxY)));
 
     /// <summary>
     /// Gets the ranges within the specified tile.
@@ -492,7 +486,7 @@ public class LasIndex : IEnumerable<LasIndexCell>, IEqualityComparer<LasIndex>
     /// <param name="bottom">The lower-right y-coordinate.</param>
     /// <param name="size">The size of the tile.</param>
     /// <returns>The ranges.</returns>
-    public IEnumerable<Range> WithinTile(float left, float bottom, float size) => GetRanges(this.GetCells(this.spatial.CellsWithinTile(left, bottom, size)));
+    public IEnumerable<Range> WithinTile(float left, float bottom, float size) => GetRanges(this.interval, this.GetCells(this.spatial.CellsWithinTile(left, bottom, size)));
 
     /// <summary>
     /// Writes this instance to the specified stream.
@@ -551,13 +545,16 @@ public class LasIndex : IEnumerable<LasIndexCell>, IEqualityComparer<LasIndex>
         }
     }
 
-    private static IEnumerable<Range> GetRanges(LasIntervalStartCell? cell)
+    private static IEnumerable<Range> GetRanges(LasInterval interval, LasIntervalStartCell? cell)
     {
-        LasIntervalCell? current = cell;
-        while (current is not null)
+        if (cell is null)
         {
-            yield return new(Index.FromStart(current.Start), Index.FromStart(current.End));
-            current = current.Next;
+            yield break;
+        }
+
+        foreach (var (start, end) in interval.EnumerateIntervals(cell))
+        {
+            yield return new(Index.FromStart(start), Index.FromStart(end));
         }
     }
 
@@ -582,13 +579,15 @@ public class LasIndex : IEnumerable<LasIndexCell>, IEqualityComparer<LasIndex>
 
         private readonly LasQuadTree quadTree = index.spatial;
 
+        private readonly LasInterval interval = index.interval;
+
         public LasIndexCell Current
         {
             get
             {
                 var current = this.enumerator.Current;
                 var (minimum, maximum) = this.quadTree.GetBounds(current.Key);
-                return new(minimum, maximum, GetRanges(current.Value));
+                return new(minimum, maximum, GetRanges(this.interval, current.Value));
             }
         }
 

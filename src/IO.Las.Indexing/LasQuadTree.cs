@@ -15,8 +15,8 @@ public sealed class LasQuadTree : IEquatable<LasQuadTree>
 {
     private const uint LasSpatialQuadTree = default;
     private const string Signature = "LASQ";
-    private const uint SpatialSignatureValue = ((uint)'S' << 24) | ((uint)'S' << 16) | ((uint)'A' << 8) | (uint)'L';
-    private const uint QuadTreeSignatureValue = ((uint)'Q' << 24) | ((uint)'S' << 16) | ((uint)'A' << 8) | (uint)'L';
+    private const uint SpatialSignatureValue = ((uint)'S' << 24) | ((uint)'S' << 16) | ((uint)'A' << 8) | 'L';
+    private const uint QuadTreeSignatureValue = ((uint)'Q' << 24) | ((uint)'S' << 16) | ((uint)'A' << 8) | 'L';
 
     private static readonly int[] LevelOffset = CreateLevelOffset();
 
@@ -817,7 +817,7 @@ public sealed class LasQuadTree : IEquatable<LasQuadTree>
     private static int[] CreateLevelOffset()
     {
         // populate all 17 meaningful levels (0..16). `4^17` overflows `int`, so higher levels
-        // are not representable and we trap them explicitly in `GetLevel` rather than by
+        // are not representable, and we trap them explicitly in `GetLevel` rather than by
         // silently rolling over.
         var offsets = new int[17];
         for (var i = 0; i < 16; i++)
