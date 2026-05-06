@@ -435,41 +435,47 @@ internal sealed class LasInterval : IEnumerable<KeyValuePair<int, LasIntervalSta
         var firstEnumerator = this.cellsDictionary.GetEnumerator();
         var secondEnumerator = interval.cellsDictionary.GetEnumerator();
 
-        if (firstEnumerator.MoveNext())
+        while (firstEnumerator.MoveNext())
         {
-            if (secondEnumerator.MoveNext())
-            {
-                var first = firstEnumerator.Current;
-                var second = secondEnumerator.Current;
-
-                if (first.Key != second.Key)
-                {
-                    return false;
-                }
-
-                if (!CheckCell(first.Value, second.Value))
-                {
-                    return false;
-                }
-            }
-            else
+            if (!secondEnumerator.MoveNext())
             {
                 return false;
             }
-        }
-        else if (secondEnumerator.MoveNext())
-        {
-            return false;
+
+            var first = firstEnumerator.Current;
+            var second = secondEnumerator.Current;
+
+            if (first.Key != second.Key)
+            {
+                return false;
+            }
+
+            if (!CheckCell(first.Value, second.Value))
+            {
+                return false;
+            }
+
+            static bool CheckCell(LasIntervalCell? first, LasIntervalCell? second)
+            {
+                while (true)
+                {
+                    if (first is null)
+                    {
+                        return second is null;
+                    }
+
+                    if (second is null || first.Start != second.Start || first.End != second.End)
+                    {
+                        return false;
+                    }
+
+                    first = first.Next;
+                    second = second.Next;
+                }
+            }
         }
 
-        return true;
-
-        static bool CheckCell(LasIntervalCell? first, LasIntervalCell? second)
-        {
-            return first is null
-                ? second is null
-                : second is not null && first.Start == second.Start && first.End == second.End && CheckCell(first.Next, second.Next);
-        }
+        return !secondEnumerator.MoveNext();
     }
 
     /// <inheritdoc/>
