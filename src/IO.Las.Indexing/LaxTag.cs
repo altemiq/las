@@ -60,8 +60,9 @@ public sealed record LaxTag : ExtendedVariableLengthRecord
         return ExtendedVariableLengthRecordHeader.Size + this.data.Length;
     }
 
-    private static byte[] GetBytes(LasIndex index)
+    private static ReadOnlyMemory<byte> GetBytes(LasIndex index)
     {
+        // use a publicly visible buffer so we can return it without the extra copy that `ToArray()` would incur
         using var memoryStream = new MemoryStream();
 
         using (var binaryWriter = new BinaryWriter(memoryStream, System.Text.Encoding.UTF8, leaveOpen: true))
@@ -69,6 +70,6 @@ public sealed record LaxTag : ExtendedVariableLengthRecord
             index.WriteTo(binaryWriter);
         }
 
-        return memoryStream.ToArray();
+        return memoryStream.GetBuffer().AsMemory(0, (int)memoryStream.Position);
     }
 }
