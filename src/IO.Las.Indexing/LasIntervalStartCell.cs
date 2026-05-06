@@ -57,6 +57,20 @@ internal sealed class LasIntervalStartCell : LasIntervalCell
     /// <returns><see langword="true"/> if a new interval is created for this point; otherwise <see langword="false" />.</returns>
     public bool Add(uint pointIndex, int threshold)
     {
+        // The `last` pointer is not persisted and is not populated when we are
+        // deserialized via `LasInterval.ReadFrom`, so rehydrate it from `Next`
+        // the first time we are mutated after a read.
+        if (this.last is null && this.Next is not null)
+        {
+            var tail = this.Next;
+            while (tail.Next is not null)
+            {
+                tail = tail.Next;
+            }
+
+            this.last = tail;
+        }
+
         var currentEnd = this.last?.End ?? this.End;
 
         System.Diagnostics.Debug.Assert(pointIndex > currentEnd, "Point index is beyond the current end.");
