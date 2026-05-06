@@ -69,38 +69,53 @@ internal sealed class LasInterval : IEnumerable<KeyValuePair<int, LasIntervalSta
         // ignore 4..8
         var numberOfCells = System.Buffers.Binary.BinaryPrimitives.ReadUInt32LittleEndian(source[8..12]);
 
-        var incoming = new Dictionary<int, LasIntervalStartCell>();
+        // pre-size the dictionary to avoid rehashing; `numberOfCells` is the exact final count
+        var incoming = new Dictionary<int, LasIntervalStartCell>((int)numberOfCells);
         var index = 12;
         while (numberOfCells is not 0)
         {
             var cellIndex = System.Buffers.Binary.BinaryPrimitives.ReadInt32LittleEndian(source[index..]);
             index += sizeof(int);
-            var startCell = new LasIntervalStartCell();
-            incoming.Add(cellIndex, startCell);
-            LasIntervalCell cell = startCell;
 
             var intervals = System.Buffers.Binary.BinaryPrimitives.ReadUInt32LittleEndian(source[index..]);
             index += sizeof(uint);
-            startCell.Full = System.Buffers.Binary.BinaryPrimitives.ReadUInt32LittleEndian(source[index..]);
+            var full = System.Buffers.Binary.BinaryPrimitives.ReadUInt32LittleEndian(source[index..]);
             index += sizeof(uint);
-            startCell.Total = default;
 
+            LasIntervalStartCell startCell;
+            if (intervals is 0)
+            {
+                startCell = new LasIntervalStartCell { Full = full };
+            }
+            else
+            {
+                // consume the first interval off the span so we can initialize the start cell directly via its ctor
+                var firstStart = System.Buffers.Binary.BinaryPrimitives.ReadUInt32LittleEndian(source[index..]);
+                index += sizeof(uint);
+                var firstEnd = System.Buffers.Binary.BinaryPrimitives.ReadUInt32LittleEndian(source[index..]);
+                index += sizeof(uint);
+
+                startCell = new LasIntervalStartCell(firstStart, firstEnd) { Full = full };
+                intervals--;
+            }
+
+            incoming.Add(cellIndex, startCell);
+
+            LasIntervalCell tail = startCell;
             while (intervals is not 0)
             {
-                cell.Start = System.Buffers.Binary.BinaryPrimitives.ReadUInt32LittleEndian(source[index..]);
-                index += sizeof(uint);
-                cell.End = System.Buffers.Binary.BinaryPrimitives.ReadUInt32LittleEndian(source[index..]);
-                index += sizeof(uint);
-
-                startCell.Total += cell.End - cell.Start + 1;
-                intervals--;
-                if (intervals is 0)
+                var next = new LasIntervalCell
                 {
-                    continue;
-                }
+                    Start = System.Buffers.Binary.BinaryPrimitives.ReadUInt32LittleEndian(source[index..]),
+                };
+                index += sizeof(uint);
+                next.End = System.Buffers.Binary.BinaryPrimitives.ReadUInt32LittleEndian(source[index..]);
+                index += sizeof(uint);
 
-                cell.Next = new();
-                cell = cell.Next;
+                startCell.Total += next.End - next.Start + 1;
+                tail.Next = next;
+                tail = next;
+                intervals--;
             }
 
             numberOfCells--;
