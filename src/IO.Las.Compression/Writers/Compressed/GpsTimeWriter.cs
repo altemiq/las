@@ -121,7 +121,7 @@ internal sealed class GpsTimeWriter : ISimpleWriter
                     // no other sequence found. start new sequence.
                     this.encoder.EncodeSymbol(this.gpsTimeZeroDiffModel, 2);
                     this.gpsTimeIntegerCompressor.Compress((int)(this.lastGpsTime[this.last] >> 32), (int)(gpsTime >> 32), 8);
-                    this.encoder.WriteInt((uint)gpsTime);
+                    this.encoder.WriteUInt32((uint)gpsTime);
                     this.next = (this.next + 1) & 3;
                     this.last = this.next;
                     this.lastGpsTimeDiff[this.last] = default;
@@ -230,7 +230,7 @@ internal sealed class GpsTimeWriter : ISimpleWriter
                     // no other sequence found. start new sequence.
                     this.encoder.EncodeSymbol(this.gpsTimeMultiModel, MultipleCodeFull);
                     this.gpsTimeIntegerCompressor.Compress((int)(this.lastGpsTime[this.last] >> 32), (int)(gpsTime >> 32), 8);
-                    this.encoder.WriteInt((uint)gpsTime);
+                    this.encoder.WriteUInt32((uint)gpsTime);
                     this.next = (this.next + 1) & 3;
                     this.last = this.next;
                     this.lastGpsTimeDiff[this.last] = default;

@@ -52,7 +52,7 @@ internal sealed class IntegerCompressor
                 correctorBits++;
             }
 
-            if (this.correctorRange == (1u << (int)(correctorBits - 1)))
+            if (this.correctorRange == (1U << (int)(correctorBits - 1)))
             {
                 correctorBits--;
             }
@@ -209,7 +209,7 @@ internal sealed class IntegerCompressor
                     this.encoder.EncodeSymbol(this.correctorModels[this.K], (uint)c);
 
                     // store the lower k1 bits raw
-                    this.encoder.WriteBits((uint)k1, c1);
+                    this.encoder.WriteBits(k1, c1);
                 }
             }
             else

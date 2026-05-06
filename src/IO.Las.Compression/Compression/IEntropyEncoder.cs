@@ -19,64 +19,64 @@ internal interface IEntropyEncoder : IEntropyCoder
     bool Initialize(Stream stream);
 
     /// <summary>
-    /// Encode a bit with modelling.
+    /// Encode a bit with modeling.
     /// </summary>
     /// <param name="model">The model.</param>
     /// <param name="sym">The symbol to write.</param>
     void EncodeBit(IBitModel model, uint sym);
 
     /// <summary>
-    /// Encode a symbol with modelling.
+    /// Encode a symbol with modeling.
     /// </summary>
     /// <param name="model">The model.</param>
     /// <param name="sym">The symbol to write.</param>
     void EncodeSymbol(ISymbolModel model, uint sym);
 
     /// <summary>
-    /// Encode a bit without modelling.
+    /// Encode a bit without modeling.
     /// </summary>
     /// <param name="sym">The symbol to write.</param>
     void WriteBit(uint sym);
 
     /// <summary>
-    /// Encode bits without modelling.
+    /// Encode bits without modeling.
     /// </summary>
     /// <param name="bits">The bits.</param>
     /// <param name="sym">The symbol to write.</param>
-    void WriteBits(uint bits, uint sym);
+    void WriteBits(int bits, uint sym);
 
     /// <summary>
-    /// Encode an unsigned char without modelling.
+    /// Encode an unsigned char without modeling.
     /// </summary>
     /// <param name="sym">The symbol to write.</param>
     void WriteByte(byte sym);
 
     /// <summary>
-    /// Encode an unsigned short without modelling.
+    /// Encode an unsigned short without modeling.
     /// </summary>
     /// <param name="sym">The symbol to write.</param>
-    void WriteShort(ushort sym);
+    void WriteUInt16(ushort sym);
 
     /// <summary>
-    /// Encode an unsigned int without modelling.
+    /// Encode an unsigned int without modeling.
     /// </summary>
     /// <param name="sym">The symbol to write.</param>
-    void WriteInt(uint sym);
+    void WriteUInt32(uint sym);
 
     /// <summary>
-    /// Encode a float without modelling.
+    /// Encode a float without modeling.
     /// </summary>
     /// <param name="sym">The symbol to write.</param>
-    void WriteFloat(float sym);
+    void WriteSingle(float sym);
 
     /// <summary>
-    /// Encode an unsigned 64 bit int without modelling.
+    /// Encode an unsigned 64 bit int without modeling.
     /// </summary>
     /// <param name="sym">The symbol to write.</param>
-    void WriteInt64(ulong sym);
+    void WriteUInt64(ulong sym);
 
     /// <summary>
-    /// Encode a double without modelling.
+    /// Encode a double without modeling.
     /// </summary>
     /// <param name="sym">The symbol to write.</param>
     void WriteDouble(double sym);

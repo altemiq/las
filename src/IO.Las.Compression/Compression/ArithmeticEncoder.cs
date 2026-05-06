@@ -11,23 +11,14 @@ namespace Altemiq.IO.Las.Compression;
 /// </summary>
 internal sealed class ArithmeticEncoder : ArithmeticCoder, IEntropyEncoder
 {
-    private readonly byte[] outBuffer;
-    private readonly int endBuffer;
+    private const int Size = sizeof(byte) * 2 * BufferSize;
+    private readonly byte[] outBuffer = new byte[Size];
     private Stream? outputStream;
     private int outByte;
     private int endByte;
 
     private uint @base;
     private uint length;
-
-    /// <summary>
-    /// Initializes a new instance of the <see cref="ArithmeticEncoder"/> class.
-    /// </summary>
-    public ArithmeticEncoder()
-    {
-        this.outBuffer = new byte[sizeof(byte) * 2 * BufferSize];
-        this.endBuffer = this.outBuffer.Length;
-    }
 
     /// <inheritdoc/>
     [System.Diagnostics.CodeAnalysis.MemberNotNullWhen(true, nameof(outputStream))]
@@ -42,7 +33,7 @@ internal sealed class ArithmeticEncoder : ArithmeticCoder, IEntropyEncoder
         this.@base = default;
         this.length = MaxLength;
         this.outByte = default;
-        this.endByte = this.endBuffer;
+        this.endByte = Size;
 
         return true;
     }
@@ -87,7 +78,7 @@ internal sealed class ArithmeticEncoder : ArithmeticCoder, IEntropyEncoder
         // renormalization = output last bytes
         this.RenormEncInterval();
 
-        if (this.endByte != this.endBuffer)
+        if (this.endByte != Size)
         {
             this.outputStream.Write(this.outBuffer, BufferSize, BufferSize);
         }
@@ -113,7 +104,7 @@ internal sealed class ArithmeticEncoder : ArithmeticCoder, IEntropyEncoder
     public void EncodeBit(IBitModel model, uint sym)
     {
         // product l x p0 update interval
-        var x = model.BitZeroProb * (this.length >> (int)ArithmeticBitModel.LengthShift);
+        var x = model.BitZeroProb * (this.length >> ArithmeticBitModel.LengthShift);
 
         if (sym is 0)
         {
@@ -152,7 +143,7 @@ internal sealed class ArithmeticEncoder : ArithmeticCoder, IEntropyEncoder
         var initialBase = this.@base;
         if (sym == model.LastSymbol)
         {
-            var x = model.Distribution[sym] * (this.length >> (int)ArithmeticSymbolModel.LengthShift);
+            var x = model.Distribution[sym] * (this.length >> ArithmeticSymbolModel.LengthShift);
 
             // update interval
             this.@base += x;
@@ -162,7 +153,7 @@ internal sealed class ArithmeticEncoder : ArithmeticCoder, IEntropyEncoder
         }
         else
         {
-            this.length >>= (int)ArithmeticSymbolModel.LengthShift;
+            this.length >>= ArithmeticSymbolModel.LengthShift;
             var x = model.Distribution[sym] * this.length;
 
             // update interval
@@ -213,11 +204,11 @@ internal sealed class ArithmeticEncoder : ArithmeticCoder, IEntropyEncoder
     }
 
     /// <inheritdoc/>
-    public void WriteBits(uint bits, uint sym)
+    public void WriteBits(int bits, uint sym)
     {
         if (bits > 19)
         {
-            this.WriteShort((ushort)(sym & ushort.MaxValue));
+            this.WriteUInt16((ushort)(sym & ushort.MaxValue));
             sym >>= 16;
             bits -= 16;
         }
@@ -225,7 +216,7 @@ internal sealed class ArithmeticEncoder : ArithmeticCoder, IEntropyEncoder
         var initialBase = this.@base;
 
         // new interval base and length
-        this.length >>= (int)bits;
+        this.length >>= bits;
         this.@base += sym * this.length;
 
         if (initialBase > this.@base)
@@ -264,7 +255,7 @@ internal sealed class ArithmeticEncoder : ArithmeticCoder, IEntropyEncoder
     }
 
     /// <inheritdoc/>
-    public void WriteShort(ushort sym)
+    public void WriteUInt16(ushort sym)
     {
         var initialBase = this.@base;
 
@@ -286,30 +277,30 @@ internal sealed class ArithmeticEncoder : ArithmeticCoder, IEntropyEncoder
     }
 
     /// <inheritdoc/>
-    public void WriteInt(uint sym)
+    public void WriteUInt32(uint sym)
     {
         // lower 16 bits
-        this.WriteShort((ushort)(sym & 0xFFFF));
+        this.WriteUInt16((ushort)(sym & 0xFFFF));
 
         // UPPER 16 bits
-        this.WriteShort((ushort)(sym >> 16));
+        this.WriteUInt16((ushort)(sym >> 16));
     }
 
     /// <inheritdoc/>
-    public void WriteFloat(float sym) => this.WriteInt(BitConverter.SingleToUInt32Bits(sym));
+    public void WriteSingle(float sym) => this.WriteUInt32(BitConverter.SingleToUInt32Bits(sym));
 
     /// <inheritdoc/>
-    public void WriteInt64(ulong sym)
+    public void WriteUInt64(ulong sym)
     {
         // lower 32 bits
-        this.WriteInt((uint)(sym & 0xFFFFFFFF));
+        this.WriteUInt32((uint)(sym & 0xFFFFFFFF));
 
         // UPPER 32 bits
-        this.WriteInt((uint)(sym >> 32));
+        this.WriteUInt32((uint)(sym >> 32));
     }
 
     /// <inheritdoc/>
-    public void WriteDouble(double sym) => this.WriteInt64(BitConverter.DoubleToUInt64Bits(sym));
+    public void WriteDouble(double sym) => this.WriteUInt64(BitConverter.DoubleToUInt64Bits(sym));
 
     /// <summary>
     /// Gets the stream.
@@ -320,23 +311,23 @@ internal sealed class ArithmeticEncoder : ArithmeticCoder, IEntropyEncoder
 
     private void PropagateCarry()
     {
-        var p = this.outByte is 0
-            ? this.endBuffer - 1
+        var current = this.outByte is 0
+            ? Size - 1
             : this.outByte - 1;
-        while (this.outBuffer[p] is byte.MaxValue)
+        while (this.outBuffer[current] is byte.MaxValue)
         {
-            this.outBuffer[p] = default;
-            if (p is 0)
+            this.outBuffer[current] = default;
+            if (current is 0)
             {
-                p = this.endBuffer - 1;
+                current = Size - 1;
             }
             else
             {
-                p--;
+                current--;
             }
         }
 
-        this.outBuffer[p]++;
+        this.outBuffer[current]++;
     }
 
     private void RenormEncInterval()
@@ -362,7 +353,7 @@ internal sealed class ArithmeticEncoder : ArithmeticCoder, IEntropyEncoder
             throw new CompressionNotInitializedException();
         }
 
-        if (this.outByte == this.endBuffer)
+        if (this.outByte is Size)
         {
             this.outByte = default;
         }

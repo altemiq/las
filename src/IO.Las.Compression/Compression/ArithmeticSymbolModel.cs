@@ -14,9 +14,9 @@ internal sealed class ArithmeticSymbolModel : ISymbolModel
     /// <summary>
     /// Length bits discarded before mult.
     /// </summary>
-    internal const uint LengthShift = 15;
+    internal const int LengthShift = 15;
 
-    private const uint MaxCount = 1U << (int)LengthShift;
+    private const uint MaxCount = 1U << LengthShift;
 
     private readonly bool compress;
 
@@ -50,7 +50,7 @@ internal sealed class ArithmeticSymbolModel : ISymbolModel
             }
 
             this.tableSize = 1U << tableBits;
-            this.TableShift = LengthShift - (uint)tableBits;
+            this.TableShift = (uint)(LengthShift - tableBits);
             this.Distribution = new uint[symbols];
             this.DecoderTable = new uint[this.tableSize + 2];
         }
@@ -138,7 +138,7 @@ internal sealed class ArithmeticSymbolModel : ISymbolModel
 
         // compute cumulative distribution, decoder table
         var scale = 0x80000000U / this.totalCount;
-        const int DistributionLeftShift = (int)(31U - LengthShift);
+        const int DistributionLeftShift = 31 - LengthShift;
 
         if (this.compress || (this.tableSize is default(uint)))
         {

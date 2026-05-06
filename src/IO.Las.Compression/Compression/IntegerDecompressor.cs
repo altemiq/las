@@ -119,7 +119,7 @@ internal sealed class IntegerDecompressor
     /// <returns>The decompressed value.</returns>
     public int Decompress(int pred, uint context = default)
     {
-        var real = pred + ReadCorrector(this.bitsModels[(int)context]);
+        var real = pred + ReadCorrector(this.bitsModels[context]);
         if (real < 0)
         {
             real += (int)this.correctorRange;

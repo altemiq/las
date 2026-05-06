@@ -115,7 +115,7 @@ internal sealed class WavePacketWriter2 : ISimpleWriter
             this.encoder.EncodeSymbol(this.offsetDiff[this.symLastOffsetDiff], 3);
             this.symLastOffsetDiff = 3;
 
-            this.encoder.WriteInt64(currentWavePacket.Offset);
+            this.encoder.WriteUInt64(currentWavePacket.Offset);
         }
 
         this.icPacketSize.Compress((int)lastWavePacket.PacketSize, (int)currentWavePacket.PacketSize);

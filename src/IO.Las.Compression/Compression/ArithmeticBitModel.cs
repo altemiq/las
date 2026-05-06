@@ -14,9 +14,9 @@ internal sealed class ArithmeticBitModel : IBitModel
     /// <summary>
     /// Length bits discarded before mult.
     /// </summary>
-    internal const uint LengthShift = 13;
+    internal const int LengthShift = 13;
 
-    private const uint MaxCount = 1U << (int)LengthShift;
+    private const uint MaxCount = 1U << LengthShift;
 
     private uint updateCycle;
     private uint bitsUntilUpdate;
@@ -45,7 +45,7 @@ internal sealed class ArithmeticBitModel : IBitModel
         // initialization to equiprobable model
         this.BitZeroCount = 1;
         this.bitCount = 2;
-        this.BitZeroProb = 1U << (int)(LengthShift - 1);
+        this.BitZeroProb = 1U << (LengthShift - 1);
 
         // start with frequent updates
         this.updateCycle = this.bitsUntilUpdate = 4;
@@ -71,7 +71,7 @@ internal sealed class ArithmeticBitModel : IBitModel
 
         // compute scaled bit 0 probability
         var scale = 0x80000000U / this.bitCount;
-        this.BitZeroProb = (this.BitZeroCount * scale) >> (int)(31 - LengthShift);
+        this.BitZeroProb = (this.BitZeroCount * scale) >> (31 - LengthShift);
 
         // set frequency of model updates
         this.updateCycle = (5 * this.updateCycle) >> 2;

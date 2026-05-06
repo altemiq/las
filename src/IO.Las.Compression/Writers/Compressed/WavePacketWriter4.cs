@@ -133,7 +133,7 @@ internal sealed class WavePacketWriter4 : IContextWriter
             this.valueWavePacket.Encoder.EncodeSymbol(processingContext.OffsetDiff[processingContext.SymLastOffsetDiff], 3);
             processingContext.SymLastOffsetDiff = 3;
 
-            this.valueWavePacket.Encoder.WriteInt64(currentWavePacket.Offset);
+            this.valueWavePacket.Encoder.WriteUInt64(currentWavePacket.Offset);
         }
 
         processingContext.IcPacketSize.Compress((int)lastWavePacket.PacketSize, (int)currentWavePacket.PacketSize);

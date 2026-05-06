@@ -48,7 +48,7 @@ internal sealed class ArithmeticDecoder : ArithmeticCoder, IEntropyDecoder
     /// <inheritdoc/>
     public uint DecodeBit(IBitModel model)
     {
-        const int BitLengthShift = (int)ArithmeticBitModel.LengthShift;
+        const int BitLengthShift = ArithmeticBitModel.LengthShift;
 
         // product l x p0
         var x = model.BitZeroProb * (this.length >> BitLengthShift);
@@ -93,7 +93,7 @@ internal sealed class ArithmeticDecoder : ArithmeticCoder, IEntropyDecoder
             throw new CompressionNotInitializedException();
         }
 
-        const int SymbolLengthShift = (int)ArithmeticSymbolModel.LengthShift;
+        const int SymbolLengthShift = ArithmeticSymbolModel.LengthShift;
         var symbol = default(uint);
         var x = default(uint);
         var y = this.length;

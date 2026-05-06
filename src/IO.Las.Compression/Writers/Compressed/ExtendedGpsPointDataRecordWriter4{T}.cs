@@ -581,7 +581,7 @@ internal abstract class ExtendedGpsPointDataRecordWriter4<T> : Writers.PointData
                 // no other sequence found. start new sequence.
                 this.valueGpsTime.Encoder.EncodeSymbol(processingContext.GpsTimeZeroDiffModel, 1);
                 processingContext.GpsTimeIntegerCompressor.Compress((int)(processingContext.LastGpsTime[processingContext.Last] >> 32), (int)(gpsTime >> 32), 8);
-                this.valueGpsTime.Encoder.WriteInt((uint)gpsTime);
+                this.valueGpsTime.Encoder.WriteUInt32((uint)gpsTime);
                 processingContext.Next = (processingContext.Next + 1) & 3;
                 processingContext.Last = processingContext.Next;
                 processingContext.LastGpsTimeDiff[processingContext.Last] = default;
@@ -679,7 +679,7 @@ internal abstract class ExtendedGpsPointDataRecordWriter4<T> : Writers.PointData
                 // no other sequence found. start new sequence.
                 this.valueGpsTime.Encoder.EncodeSymbol(processingContext.GpsTimeMultiModel, MultipleCodeFull);
                 processingContext.GpsTimeIntegerCompressor.Compress((int)(processingContext.LastGpsTime[processingContext.Last] >> 32), (int)(gpsTime >> 32), 8);
-                this.valueGpsTime.Encoder.WriteInt((uint)gpsTime);
+                this.valueGpsTime.Encoder.WriteUInt32((uint)gpsTime);
                 processingContext.Next = (processingContext.Next + 1) & 3;
                 processingContext.Last = processingContext.Next;
                 processingContext.LastGpsTimeDiff[processingContext.Last] = default;
