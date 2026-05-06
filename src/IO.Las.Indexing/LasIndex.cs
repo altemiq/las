@@ -580,8 +580,6 @@ public class LasIndex : IEnumerable<LasIndexCell>, IEqualityComparer<LasIndex>
 
         private readonly LasQuadTree quadTree = index.spatial;
 
-        private readonly int hashCode = index.GetHashCode();
-
         public LasIndexCell Current
         {
             get
@@ -602,7 +600,7 @@ public class LasIndex : IEnumerable<LasIndexCell>, IEqualityComparer<LasIndex>
 
         public override bool Equals([System.Diagnostics.CodeAnalysis.NotNullWhen(true)] object? obj) => obj is Enumerator e && this.quadTree == e.quadTree;
 
-        public override int GetHashCode() => this.hashCode;
+        public override int GetHashCode() => this.quadTree.GetHashCode();
 
         public override string ToString() => this.quadTree.ToString();
     }
