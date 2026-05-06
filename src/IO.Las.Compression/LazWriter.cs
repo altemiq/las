@@ -447,6 +447,15 @@ public sealed class LazWriter : LasWriter
         base.Dispose(disposing);
     }
 
+#if NETSTANDARD2_1_OR_GREATER || NETCOREAPP3_0_OR_GREATER
+    /// <inheritdoc/>
+    protected override ValueTask DisposeAsyncCore()
+    {
+        this.CloseWriting();
+        return base.DisposeAsyncCore();
+    }
+#endif
+
     private static Stream CreateStream(string path) => path switch
     {
         not null when Directory.Exists(path) => LazMultipleFileStream.OpenWrite(path),
