@@ -1,5 +1,5 @@
 // -----------------------------------------------------------------------
-// <copyright file="Vector3D.Instrinsics.cs" company="Altemiq">
+// <copyright file="Vector3D.Intrinsics.cs" company="Altemiq">
 // Copyright (c) Altemiq. All rights reserved.
 // </copyright>
 // -----------------------------------------------------------------------
@@ -8,9 +8,6 @@
 namespace Altemiq.IO.Las;
 
 using System.Runtime.Intrinsics;
-#if !NET7_0_OR_GREATER
-using System.Runtime.Intrinsics.X86;
-#endif
 
 #pragma warning disable SA1600
 

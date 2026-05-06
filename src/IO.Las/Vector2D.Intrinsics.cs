@@ -1,5 +1,5 @@
 // -----------------------------------------------------------------------
-// <copyright file="Vector2D.Instrinsics.cs" company="Altemiq">
+// <copyright file="Vector2D.Intrinsics.cs" company="Altemiq">
 // Copyright (c) Altemiq. All rights reserved.
 // </copyright>
 // -----------------------------------------------------------------------

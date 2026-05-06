@@ -6,7 +6,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 - Build: `dotnet build`
 - Test all: `dotnet test`
-- Test single project: `dotnet test tests/Path.To.Project.Tests/Path.To.Project.Tests.csproj`
+- Test single project: `dotnet test --project tests/Path.To.Project.Tests/Path.To.Project.Tests.csproj`
 - Format: `./format.sh`
 - Clean: `./clean.sh`
 - Coverage: `./coverage.sh`

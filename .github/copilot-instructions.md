@@ -3,7 +3,7 @@
 ## Development Commands
 - **Build**: `dotnet build`
 - **Test All**: `dotnet test`
-- **Test Single Project**: `dotnet test tests/Path.To.Project.Tests/Path.To.Project.Tests.csproj`
+- **Test Single Project**: `dotnet test --project tests/Path.To.Project.Tests/Path.To.Project.Tests.csproj`
 - **Format**: `./format.sh`
 - **Clean**: `./clean.sh`
 - **Coverage**: `./coverage.sh`
