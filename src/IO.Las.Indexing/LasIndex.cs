@@ -66,16 +66,17 @@ public class LasIndex : IEnumerable<LasIndexCell>, IEqualityComparer<LasIndex>
         var header = reader.Header;
         if (tileSize is DefaultTileSize)
         {
-#pragma warning disable IDE0055
-            tileSize = (header.Max.X - header.Min.X, header.Max.Y - header.Min.Y) switch
+            // the bucket pattern only advanced when both dimensions fell below a threshold, which
+            // is semantically identical to testing `max(dx, dy)`; switch to the simpler form.
+            var extent = Math.Max(header.Max.X - header.Min.X, header.Max.Y - header.Min.Y);
+            tileSize = extent switch
             {
-                (< 1000, < 1000) => 10F,
-                (< 10000, < 10000) => 100F,
-                (< 100000, < 100000) => 1000F,
-                (< 1000000, < 1000000) => 10000F,
+                < 1000 => 10F,
+                < 10000 => 100F,
+                < 100000 => 1000F,
+                < 1000000 => 10000F,
                 _ => 100000F,
             };
-#pragma warning restore IDE0055
         }
 
         var quadTree = new LasQuadTree(header.Min.X, header.Max.X, header.Min.Y, header.Max.Y, tileSize);
