@@ -13,6 +13,7 @@ internal sealed class LasInterval : IEnumerable<KeyValuePair<int, LasIntervalSta
 {
     private const int DefaultThreshold = 1000;
     private const string Signature = "LASV";
+    private const uint SignatureValue = ((uint)'V' << 24) | ((uint)'S' << 16) | ((uint)'A' << 8) | (uint)'L';
 
     private readonly Dictionary<int, LasIntervalStartCell> cellsDictionary;
 
@@ -55,10 +56,9 @@ internal sealed class LasInterval : IEnumerable<KeyValuePair<int, LasIntervalSta
     /// <returns>The LAS interval.</returns>
     public static LasInterval ReadFrom(ReadOnlySpan<byte> source)
     {
-        var signature = System.Text.Encoding.UTF8.GetString(source[..4]);
-        if (signature is not Signature)
+        if (System.Buffers.Binary.BinaryPrimitives.ReadUInt32LittleEndian(source[..4]) is not SignatureValue)
         {
-            ThrowInvalidSignature(signature, nameof(source));
+            ThrowInvalidSignature(System.Text.Encoding.UTF8.GetString(source[..4]), nameof(source));
         }
 
         // ignore 4..8

@@ -15,6 +15,8 @@ public sealed class LasQuadTree : IEquatable<LasQuadTree>
 {
     private const uint LasSpatialQuadTree = default;
     private const string Signature = "LASQ";
+    private const uint SpatialSignatureValue = ((uint)'S' << 24) | ((uint)'S' << 16) | ((uint)'A' << 8) | (uint)'L';
+    private const uint QuadTreeSignatureValue = ((uint)'Q' << 24) | ((uint)'S' << 16) | ((uint)'A' << 8) | (uint)'L';
 
     private static readonly int[] LevelOffset = CreateLevelOffset();
 
@@ -159,10 +161,9 @@ public sealed class LasQuadTree : IEquatable<LasQuadTree>
     /// <returns>The LAS quad-tree.</returns>
     public static LasQuadTree ReadFrom(ReadOnlySpan<byte> source)
     {
-        var signature = System.Text.Encoding.UTF8.GetString(source[..4]);
-        if (signature is not "LASS")
+        if (System.Buffers.Binary.BinaryPrimitives.ReadUInt32LittleEndian(source[..4]) is not SpatialSignatureValue)
         {
-            ThrowInvalidSignature(signature, "LASS", nameof(source));
+            ThrowInvalidSignature(System.Text.Encoding.UTF8.GetString(source[..4]), "LASS", nameof(source));
         }
 
         if (System.Buffers.Binary.BinaryPrimitives.ReadUInt32LittleEndian(source[4..8]) is not LasSpatialQuadTree)
@@ -170,10 +171,9 @@ public sealed class LasQuadTree : IEquatable<LasQuadTree>
             throw new ArgumentException(Properties.Resources.IncorrectQuadTreeSignature, nameof(source));
         }
 
-        signature = System.Text.Encoding.UTF8.GetString(source[8..12]);
-        if (signature is not Signature)
+        if (System.Buffers.Binary.BinaryPrimitives.ReadUInt32LittleEndian(source[8..12]) is not QuadTreeSignatureValue)
         {
-            ThrowInvalidSignature(signature, Signature, nameof(source));
+            ThrowInvalidSignature(System.Text.Encoding.UTF8.GetString(source[8..12]), Signature, nameof(source));
         }
 
         // ignore 12..16

@@ -32,6 +32,7 @@ public class LasIndex : IEnumerable<LasIndexCell>, IEqualityComparer<LasIndex>
     public const float DefaultTileSize = default;
 
     private const string Signature = "LASX";
+    private const uint SignatureValue = ((uint)'X' << 24) | ((uint)'S' << 16) | ((uint)'A' << 8) | (uint)'L';
     private readonly LasQuadTree spatial;
     private readonly LasInterval interval;
 
@@ -187,10 +188,9 @@ public class LasIndex : IEnumerable<LasIndexCell>, IEqualityComparer<LasIndex>
     /// <returns>The LAS index.</returns>
     public static LasIndex ReadFrom(ReadOnlySpan<byte> source)
     {
-        var signature = System.Text.Encoding.UTF8.GetString(source[..4]);
-        if (signature is not Signature)
+        if (System.Buffers.Binary.BinaryPrimitives.ReadUInt32LittleEndian(source[..4]) is not SignatureValue)
         {
-            ThrowInvalidSignature(signature, nameof(source));
+            ThrowInvalidSignature(System.Text.Encoding.UTF8.GetString(source[..4]), nameof(source));
         }
 
         // ignore 4..8
