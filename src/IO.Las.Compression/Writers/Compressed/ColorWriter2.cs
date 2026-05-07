@@ -74,7 +74,7 @@ internal sealed class ColorWriter2(IEntropyEncoder encoder) : ISimpleWriter
         {
             if ((sym & (1 << 2)) is not 0)
             {
-                var corr = (System.Buffers.Binary.BinaryPrimitives.ReadUInt16LittleEndian(item[sizeof(ushort)..]) & 0xFF) - (diffL + (this.lastItem[1] & 0xFF).Clamp());
+                var corr = (System.Buffers.Binary.BinaryPrimitives.ReadUInt16LittleEndian(item[sizeof(ushort)..]) & 0xFF) - (diffL + (this.lastItem[1] & 0xFF)).Clamp();
                 encoder.EncodeSymbol(this.rgbDiffModels2, corr.Fold());
             }
 

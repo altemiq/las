@@ -122,7 +122,7 @@ internal sealed class ColorWriter3 : IContextWriter
         {
             if ((sym & (1 << 2)) is not 0)
             {
-                var corr = (System.Buffers.Binary.BinaryPrimitives.ReadUInt16LittleEndian(item[sizeof(ushort)..]) & 0xFF) - (diffL + (lastItem[1] & 0xFF).Clamp());
+                var corr = (System.Buffers.Binary.BinaryPrimitives.ReadUInt16LittleEndian(item[sizeof(ushort)..]) & 0xFF) - (diffL + (lastItem[1] & 0xFF)).Clamp();
                 this.valueRgb.Encoder.EncodeSymbol(processingContext.RgbDiffModels[2], corr.Fold());
             }
 
