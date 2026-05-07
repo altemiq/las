@@ -11,7 +11,7 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <EmbeddedResource Include="..\..\data\laz\*.lax" />
+    <EmbeddedResource Include="..\..\data\las\fusa.*" />
   </ItemGroup>
 
   <ItemGroup>

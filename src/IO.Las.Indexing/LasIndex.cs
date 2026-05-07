@@ -9,7 +9,7 @@ namespace Altemiq.IO.Las.Indexing;
 /// <summary>
 /// LAS index.
 /// </summary>
-public class LasIndex : IEnumerable<LasIndexCell>
+public class LasIndex : IEnumerable<LasIndexCell>, IEqualityComparer<LasIndex>
 {
     /// <summary>
     /// The default threshold.
@@ -85,8 +85,7 @@ public class LasIndex : IEnumerable<LasIndexCell>
         const int BatchSize = 1024;
         var inputX = new int[BatchSize];
         var inputY = new int[BatchSize];
-        var inputZ = new int[BatchSize];
-        var results = new System.Numerics.Vector3[BatchSize];
+        var results = new Vector2D[BatchSize];
 
         var current = default(uint);
         var count = 0;
@@ -106,7 +105,6 @@ public class LasIndex : IEnumerable<LasIndexCell>
                 var pointSpan = buffer.AsSpan(i * pointLength, pointLength);
                 inputX[count] = FieldAccessors.PointDataRecord.GetX(pointSpan);
                 inputY[count] = FieldAccessors.PointDataRecord.GetY(pointSpan);
-                inputZ[count] = FieldAccessors.PointDataRecord.GetZ(pointSpan);
                 count++;
 
                 if (count is not BatchSize)
@@ -114,11 +112,11 @@ public class LasIndex : IEnumerable<LasIndexCell>
                     continue;
                 }
 
-                quantizer.Quantize(inputX, inputY, inputZ, results);
+                quantizer.Quantize(inputX, inputY, results);
                 for (var j = 0; j < BatchSize; j++)
                 {
                     var vector = results[j];
-                    _ = index.Add(vector.X, vector.Y, current++);
+                    _ = index.Add(vector, current++);
                 }
 
                 count = 0;
@@ -130,12 +128,11 @@ public class LasIndex : IEnumerable<LasIndexCell>
             quantizer.Quantize(
                 inputX.AsSpan(0, count),
                 inputY.AsSpan(0, count),
-                inputZ.AsSpan(0, count),
                 results);
             for (var i = 0; i < count; i++)
             {
                 var vector = results[i];
-                _ = index.Add(vector.X, vector.Y, current++);
+                _ = index.Add(vector, current++);
             }
         }
 #else
@@ -258,11 +255,32 @@ public class LasIndex : IEnumerable<LasIndexCell>
     /// <param name="y">The y-coordinate.</param>
     /// <param name="index">The index.</param>
     /// <returns><see langword="true"/> if the point was added; otherwise <see langword="false"/>.</returns>
-    public bool Add(float x, float y, uint index)
-    {
-        var cell = this.spatial.GetCellIndex(x, y);
-        return this.interval.Add(index, cell);
-    }
+    public bool Add(float x, float y, uint index) => this.interval.Add(index, this.spatial.GetCellIndex(x, y));
+
+    /// <summary>
+    /// Adds the specified x, y point to the index.
+    /// </summary>
+    /// <param name="vector">The vector.</param>
+    /// <param name="index">The index.</param>
+    /// <returns><see langword="true"/> if the point was added; otherwise <see langword="false"/>.</returns>
+    public bool Add(System.Numerics.Vector2 vector, uint index) => this.interval.Add(index, this.spatial.GetCellIndex(vector));
+
+    /// <summary>
+    /// Adds the specified x, y point to the index.
+    /// </summary>
+    /// <param name="x">The x-coordinate.</param>
+    /// <param name="y">The y-coordinate.</param>
+    /// <param name="index">The index.</param>
+    /// <returns><see langword="true"/> if the point was added; otherwise <see langword="false"/>.</returns>
+    public bool Add(double x, double y, uint index) => this.interval.Add(index, this.spatial.GetCellIndex(x, y));
+
+    /// <summary>
+    /// Adds the specified x, y point to the index.
+    /// </summary>
+    /// <param name="vector">The vector.</param>
+    /// <param name="index">The index.</param>
+    /// <returns><see langword="true"/> if the point was added; otherwise <see langword="false"/>.</returns>
+    public bool Add(Vector2D vector, uint index) => this.interval.Add(index, this.spatial.GetCellIndex(vector));
 
     /// <summary>
     /// Adds the specified start and end at the specified index to the index.
@@ -420,6 +438,16 @@ public class LasIndex : IEnumerable<LasIndexCell>
     public int GetCellIndex(float x, float y, float width, float height) => this.spatial.GetCellIndex(new System.Numerics.Vector2(x, y), new(width, height));
 
     /// <summary>
+    /// Gets the cell index.
+    /// </summary>
+    /// <param name="x">The x-coordinate.</param>
+    /// <param name="y">The y-coordinate.</param>
+    /// <param name="width">The cell width.</param>
+    /// <param name="height">The cell height.</param>
+    /// <returns>The cell index.</returns>
+    public int GetCellIndex(double x, double y, double width, double height) => this.spatial.GetCellIndex(new Vector2D(x, y), new(width, height));
+
+    /// <summary>
     /// Gets all the ranges.
     /// </summary>
     /// <returns>The ranges.</returns>
@@ -473,9 +501,20 @@ public class LasIndex : IEnumerable<LasIndexCell>
     System.Collections.IEnumerator System.Collections.IEnumerable.GetEnumerator() => this.GetEnumerator();
 
     /// <inheritdoc/>
-    public override bool Equals(object? obj) => obj is LasIndex index
-        && this.spatial.Equals(index.spatial)
-        && this.interval.Equals(index.interval);
+    public override bool Equals(object? obj) => this.Equals(this, obj as LasIndex);
+
+    /// <inheritdoc/>
+    public bool Equals(LasIndex? x, LasIndex? y) =>
+        (x, y) switch
+        {
+            _ when ReferenceEquals(x, y) => true,
+            (null, not null) => false,
+            (_, null) => false,
+            _ => x.spatial.Equals(y.spatial) && x.interval.Equals(y.interval),
+        };
+
+    /// <inheritdoc/>
+    public int GetHashCode(LasIndex obj) => obj.GetHashCode();
 
     /// <inheritdoc/>
     public override int GetHashCode() => HashCode.Combine(this.spatial, this.interval);

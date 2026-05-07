@@ -236,42 +236,21 @@ public sealed class LasQuadTree : IEquatable<LasQuadTree>
     }
 
     /// <inheritdoc/>
-    public bool Equals(LasQuadTree? other)
-    {
-        return other switch
+    public bool Equals(LasQuadTree? other) =>
+        other switch
         {
             null => false,
             not null when ReferenceEquals(this, other) => true,
-            not null => CheckSequence(other.adaptive, this.adaptive)
-                        && other.levels == this.levels
+            not null => other.levels == this.levels
                         && other.maximum == this.maximum
-                        && other.minimum == this.minimum
-                        && other.sublevel == this.sublevel
-                        && other.sublevelIndex == this.sublevelIndex,
+                        && other.minimum == this.minimum,
         };
-
-        static bool CheckSequence<T>(IEnumerable<T>? first, IEnumerable<T>? second)
-        {
-            return first is null
-                ? second is null
-                : second is not null && first.SequenceEqual(second);
-        }
-    }
 
     /// <inheritdoc/>
     public override bool Equals(object? obj) => this.Equals(obj as LasQuadTree);
 
     /// <inheritdoc/>
-    public override int GetHashCode()
-    {
-        var hashCode = default(HashCode);
-        hashCode.Add(this.levels);
-        hashCode.Add(this.maximum);
-        hashCode.Add(this.minimum);
-        hashCode.Add(this.sublevel);
-        hashCode.Add(this.sublevelIndex);
-        return hashCode.ToHashCode();
-    }
+    public override int GetHashCode() => HashCode.Combine(this.levels, this.maximum, this.minimum);
 
     /// <inheritdoc />
     public override string ToString() =>
@@ -843,12 +822,44 @@ public sealed class LasQuadTree : IEquatable<LasQuadTree>
     /// <summary>
     /// Gets the cell index for the specified x, y coordinates.
     /// </summary>
+    /// <param name="vector">The vector.</param>
+    /// <returns>The cell index.</returns>
+    internal int GetCellIndex(System.Numerics.Vector2 vector) => this.GetCellIndex(vector.X, vector.Y, this.levels);
+
+    /// <summary>
+    /// Gets the cell index for the specified x, y coordinates.
+    /// </summary>
+    /// <param name="x">The x-coordinate.</param>
+    /// <param name="y">The y-coordinate.</param>
+    /// <returns>The cell index.</returns>
+    internal int GetCellIndex(double x, double y) => this.GetCellIndex(x, y, this.levels);
+
+    /// <summary>
+    /// Gets the cell index for the specified x, y coordinates.
+    /// </summary>
+    /// <param name="vector">The vector.</param>
+    /// <returns>The cell index.</returns>
+    internal int GetCellIndex(Vector2D vector) => this.GetCellIndex(vector.X, vector.Y, this.levels);
+
+    /// <summary>
+    /// Gets the cell index for the specified x, y coordinates.
+    /// </summary>
     /// <param name="x">The x-coordinate.</param>
     /// <param name="y">The y-coordinate.</param>
     /// <param name="width">The width of the cell.</param>
     /// <param name="height">The height of the cell.</param>
     /// <returns>The cell index.</returns>
     internal int GetCellIndex(float x, float y, float width, float height) => this.GetCellIndex(new Vector2(x, y), new(width, height));
+
+    /// <summary>
+    /// Gets the cell index for the specified x, y coordinates.
+    /// </summary>
+    /// <param name="x">The x-coordinate.</param>
+    /// <param name="y">The y-coordinate.</param>
+    /// <param name="width">The width of the cell.</param>
+    /// <param name="height">The height of the cell.</param>
+    /// <returns>The cell index.</returns>
+    internal int GetCellIndex(double x, double y, double width, double height) => this.GetCellIndex(new Vector2D(x, y), new(width, height));
 
     /// <summary>
     /// Gets the cell index for the specified x, y coordinates.
@@ -872,6 +883,41 @@ public sealed class LasQuadTree : IEquatable<LasQuadTree>
             }
 
             return level;
+        }
+    }
+
+    /// <summary>
+    /// Gets the cell index for the specified x, y coordinates.
+    /// </summary>
+    /// <param name="center">The center coordinate.</param>
+    /// <param name="size">The size of the cell.</param>
+    /// <returns>The cell index.</returns>
+    internal int GetCellIndex(Vector2D center, Vector2D size)
+    {
+        return this.GetCellIndex(center.X, center.Y, GetLevelCore(size));
+
+        int GetLevelCore(Vector2D required)
+        {
+            var current = new Vector2D(this.maximum.X - this.minimum.X, this.maximum.Y - this.minimum.Y);
+
+            var level = 0;
+            while (LessThanAll(required, current))
+            {
+                level++;
+                current *= 0.5;
+            }
+
+            return level;
+
+            [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
+            static bool LessThanAll(Vector2D left, Vector2D right)
+            {
+#if NET7_0_OR_GREATER
+                return System.Runtime.Intrinsics.Vector128.LessThanAll(left.AsVector128Unsafe(), right.AsVector128Unsafe());
+#else
+                return left.X < right.X && left.Y < right.Y;
+#endif
+            }
         }
     }
 
@@ -979,6 +1025,10 @@ public sealed class LasQuadTree : IEquatable<LasQuadTree>
         ? LevelOffset[this.sublevel + level] + (this.sublevelIndex << (level * 2)) + this.GetLevelIndex(x, y, level)
         : LevelOffset[level] + this.GetLevelIndex(x, y, level);
 
+    private int GetCellIndex(double x, double y, int level) => this.sublevel is not 0
+        ? LevelOffset[this.sublevel + level] + (this.sublevelIndex << (level * 2)) + this.GetLevelIndex(x, y, level)
+        : LevelOffset[level] + this.GetLevelIndex(x, y, level);
+
     private int GetCellIndex(int levelIndex, int level) => this.sublevel is not 0
         ? levelIndex + (this.sublevelIndex << (level * 2)) + LevelOffset[this.sublevel + level]
         : levelIndex + LevelOffset[level];
@@ -1017,6 +1067,45 @@ public sealed class LasQuadTree : IEquatable<LasQuadTree>
             else
             {
                 cellMin.Y = cellMid.Y;
+                levelIndex |= 2;
+            }
+
+            level--;
+        }
+
+        return levelIndex;
+    }
+
+    private int GetLevelIndex(double x, double y, int level)
+    {
+        var cellMin = new Vector2D(this.minimum.X, this.minimum.Y);
+        var cellMax = new Vector2D(this.maximum.X, this.maximum.Y);
+
+        var levelIndex = default(int);
+
+        while (level is not 0)
+        {
+            levelIndex <<= 2;
+
+            var cellMid = (cellMin + cellMax) * 0.5;
+
+            if (x < cellMid.X)
+            {
+                cellMax = new(cellMid.X, cellMax.Y);
+            }
+            else
+            {
+                cellMin = new(cellMid.X, cellMin.Y);
+                levelIndex |= 1;
+            }
+
+            if (y < cellMid.Y)
+            {
+                cellMax = new(cellMax.X, cellMid.Y);
+            }
+            else
+            {
+                cellMin = new(cellMin.X, cellMid.Y);
                 levelIndex |= 2;
             }
 

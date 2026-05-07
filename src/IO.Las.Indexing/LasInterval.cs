@@ -432,25 +432,27 @@ internal sealed class LasInterval : IEnumerable<KeyValuePair<int, LasIntervalSta
             return false;
         }
 
-        var firstEnumerator = this.cellsDictionary.GetEnumerator();
-        var secondEnumerator = interval.cellsDictionary.GetEnumerator();
+        using var firstEnumerator = this.cellsDictionary.OrderBy(kvp => kvp.Key).GetEnumerator();
+        using var secondEnumerator = interval.cellsDictionary.OrderBy(kvp => kvp.Key).GetEnumerator();
 
         while (firstEnumerator.MoveNext())
         {
-            if (!secondEnumerator.MoveNext())
+            if (secondEnumerator.MoveNext())
             {
-                return false;
+                var first = firstEnumerator.Current;
+                var second = secondEnumerator.Current;
+
+                if (first.Key != second.Key)
+                {
+                    return false;
+                }
+
+                if (!CheckCell(first.Value, second.Value))
+                {
+                    return false;
+                }
             }
-
-            var first = firstEnumerator.Current;
-            var second = secondEnumerator.Current;
-
-            if (first.Key != second.Key)
-            {
-                return false;
-            }
-
-            if (!CheckCell(first.Value, second.Value))
+            else
             {
                 return false;
             }

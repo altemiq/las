@@ -17,4 +17,20 @@ public class LasIndexTests
         var index = new LasIndex(new(0, 50, 0, 50, 50)) { { 1F, 1F, 5 } };
         await Assert.That(index.IndexOf(5)).IsEqualTo(1);
     }
+
+    [Test]
+    public async Task CreateFromReader()
+    {
+        var stream = typeof(LasIndexTests).Assembly.GetManifestResourceStream(typeof(LasIndexTests), "fusa.lax")
+                     ?? throw new System.Diagnostics.UnreachableException();
+        var fromLax = await Assert.That(() => LasIndex.ReadFrom(stream)).ThrowsNothing().And.IsTypeOf<LasIndex>();
+        await stream.DisposeAsync();
+
+        var reader = new LasReader(typeof(LasIndexTests).Assembly.GetManifestResourceStream(typeof(LasIndexTests), "fusa.las")
+                                   ?? throw new System.Diagnostics.UnreachableException());
+        var fromLas = await Assert.That(() => LasIndex.Create(reader)).ThrowsNothing().And.IsTypeOf<LasIndex>();
+        await reader.DisposeAsync();
+        
+        await Assert.That(fromLax).IsEqualTo(fromLas);
+    }
 }
