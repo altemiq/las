@@ -105,9 +105,11 @@ internal sealed class IntegerDecompressor
         }
 
         _ = this.correctorBitModel.Initialize();
-        foreach (var correctorModel in this.correctorModels.Skip(1))
+
+        // correctorModels[0] is intentionally null; only indices 1..Length-1 are populated.
+        for (var i = 1; i < this.correctorModels.Length; i++)
         {
-            _ = correctorModel.Initialize();
+            _ = this.correctorModels[i].Initialize();
         }
     }
 

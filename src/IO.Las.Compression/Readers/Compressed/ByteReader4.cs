@@ -76,7 +76,7 @@ internal sealed class ByteReader4 : IContextReader
         var stream = this.decoder.GetStream();
 
         // how many bytes do we need to read
-        var byteCount = this.valueBytes.Sum(static valueBytes => valueBytes.GetByteCountIfRequested());
+        var byteCount = this.valueBytes.Aggregate(0U, static (current, valueByte) => current + valueByte.GetByteCountIfRequested());
 
         // make sure the buffer is sufficiently large
         if (byteCount > this.bytes.Length)
@@ -85,7 +85,13 @@ internal sealed class ByteReader4 : IContextReader
         }
 
         // load the requested bytes and init the corresponding instreams and decoders
-        _ = this.valueBytes.Aggregate(default(uint), (index, valueByte) => index + valueByte.InitializeIfRequested(stream, this.bytes, (int)index));
+        uint index = 0;
+#pragma warning disable LoopCanBeConvertedToQuery
+        foreach (var valueByte in this.valueBytes)
+        {
+            index += valueByte.InitializeIfRequested(stream, this.bytes, (int)index);
+        }
+#pragma warning restore LoopCanBeConvertedToQuery
 
         // mark the four scanner channel contexts as unused
         for (var c = 0; c < 4; c++)
