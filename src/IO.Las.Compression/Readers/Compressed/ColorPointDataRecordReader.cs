@@ -30,20 +30,10 @@ internal sealed class ColorPointDataRecordReader(IEntropyDecoder decoder, int ex
     protected override ColorPointDataRecord Read(ReadOnlySpan<byte> source) => ColorPointDataRecord.Create(source);
 
     /// <inheritdoc/>
-    protected override Span<byte> ProcessData()
+    protected override void ProcessData(Span<byte> destination)
     {
-        var data = base.ProcessData();
-        this.colorReader.Read(data[PointDataRecord.Size..]);
-        this.byteReader.Read(data[ColorPointDataRecord.Size..]);
-        return data;
-    }
-
-    /// <inheritdoc/>
-    protected override async ValueTask<Memory<byte>> ProcessDataAsync(CancellationToken cancellationToken = default)
-    {
-        var data = await base.ProcessDataAsync(cancellationToken).ConfigureAwait(false);
-        this.colorReader.Read(data[PointDataRecord.Size..].Span);
-        this.byteReader.Read(data[ColorPointDataRecord.Size..].Span);
-        return data;
+        base.ProcessData(destination);
+        this.colorReader.Read(destination[PointDataRecord.Size..]);
+        this.byteReader.Read(destination[ColorPointDataRecord.Size..]);
     }
 }

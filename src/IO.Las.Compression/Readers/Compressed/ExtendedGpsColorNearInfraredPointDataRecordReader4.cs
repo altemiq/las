@@ -54,24 +54,11 @@ internal sealed class ExtendedGpsColorNearInfraredPointDataRecordReader4(IEntrop
     protected override ExtendedGpsColorNearInfraredPointDataRecord Read(ReadOnlySpan<byte> source) => ExtendedGpsColorNearInfraredPointDataRecord.Create(source);
 
     /// <inheritdoc/>
-    protected override byte[] ProcessData()
+    protected override void ProcessData(Span<byte> destination)
     {
         var context = default(uint);
-        var data = this.ProcessData(ref context);
-        Span<byte> span = data;
-        this.colorNearInfraredReader.Read(span[ExtendedGpsPointDataRecord.Size..], context);
-        this.byteReader.Read(span[ExtendedGpsColorNearInfraredPointDataRecord.Size..], context);
-        return data;
-    }
-
-    /// <inheritdoc/>
-    protected override async ValueTask<Memory<byte>> ProcessDataAsync(CancellationToken cancellationToken = default)
-    {
-        var context = default(uint);
-        var data = await this.ProcessDataAsync(ref context, cancellationToken).ConfigureAwait(false);
-        var span = data.Span;
-        this.colorNearInfraredReader.Read(span[ExtendedGpsPointDataRecord.Size..], context);
-        this.byteReader.Read(span[ExtendedGpsColorNearInfraredPointDataRecord.Size..], context);
-        return data;
+        this.ProcessData(ref context, destination);
+        this.colorNearInfraredReader.Read(destination[ExtendedGpsPointDataRecord.Size..], context);
+        this.byteReader.Read(destination[ExtendedGpsColorNearInfraredPointDataRecord.Size..], context);
     }
 }

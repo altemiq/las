@@ -33,22 +33,11 @@ internal sealed class GpsColorPointDataRecordReader(IEntropyDecoder decoder, int
     protected override GpsColorPointDataRecord Read(ReadOnlySpan<byte> source) => GpsColorPointDataRecord.Create(source);
 
     /// <inheritdoc/>
-    protected override Span<byte> ProcessData()
+    protected override void ProcessData(Span<byte> destination)
     {
-        var data = base.ProcessData();
-        this.gpsTimeReader.Read(data[PointDataRecord.Size..]);
-        this.colorReader.Read(data[GpsPointDataRecord.Size..]);
-        this.byteReader.Read(data[GpsColorPointDataRecord.Size..]);
-        return data;
-    }
-
-    /// <inheritdoc/>
-    protected override async ValueTask<Memory<byte>> ProcessDataAsync(CancellationToken cancellationToken = default)
-    {
-        var data = await base.ProcessDataAsync(cancellationToken).ConfigureAwait(false);
-        this.gpsTimeReader.Read(data[PointDataRecord.Size..].Span);
-        this.colorReader.Read(data[GpsPointDataRecord.Size..].Span);
-        this.byteReader.Read(data[GpsColorPointDataRecord.Size..].Span);
-        return data;
+        base.ProcessData(destination);
+        this.gpsTimeReader.Read(destination[PointDataRecord.Size..]);
+        this.colorReader.Read(destination[GpsPointDataRecord.Size..]);
+        this.byteReader.Read(destination[GpsColorPointDataRecord.Size..]);
     }
 }

@@ -54,24 +54,11 @@ internal sealed class ExtendedGpsColorPointDataRecordReader3(IEntropyDecoder dec
     protected override ExtendedGpsColorPointDataRecord Read(ReadOnlySpan<byte> source) => ExtendedGpsColorPointDataRecord.Create(source);
 
     /// <inheritdoc/>
-    protected override byte[] ProcessData()
+    protected override void ProcessData(Span<byte> destination)
     {
         var context = default(uint);
-        var data = this.ProcessData(ref context);
-        Span<byte> span = data;
-        this.colorReader.Read(span[ExtendedGpsPointDataRecord.Size..], context);
-        this.byteReader.Read(span[ExtendedGpsColorPointDataRecord.Size..], context);
-        return data;
-    }
-
-    /// <inheritdoc/>
-    protected override async ValueTask<Memory<byte>> ProcessDataAsync(CancellationToken cancellationToken = default)
-    {
-        var context = default(uint);
-        var data = await this.ProcessDataAsync(ref context, cancellationToken).ConfigureAwait(false);
-        var span = data.Span;
-        this.colorReader.Read(span[ExtendedGpsPointDataRecord.Size..], context);
-        this.byteReader.Read(span[ExtendedGpsColorPointDataRecord.Size..], context);
-        return data;
+        this.ProcessData(ref context, destination);
+        this.colorReader.Read(destination[ExtendedGpsPointDataRecord.Size..], context);
+        this.byteReader.Read(destination[ExtendedGpsColorPointDataRecord.Size..], context);
     }
 }

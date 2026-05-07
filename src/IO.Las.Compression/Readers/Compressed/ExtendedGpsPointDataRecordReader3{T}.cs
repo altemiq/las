@@ -102,9 +102,10 @@ internal abstract class ExtendedGpsPointDataRecordReader3<T> : ICompressedPointD
     /// <inheritdoc/>
     int ICompressedPointDataRecordReader.Read(Span<byte> destination)
     {
-        ReadOnlySpan<byte> processedData = this.ProcessData();
-        processedData.CopyTo(destination);
-        return processedData.Length;
+        // Decompress directly into the caller's destination buffer, avoiding the
+        // intermediate copy into this.data that ProcessData() performs.
+        this.ProcessData(destination);
+        return this.pointDataLength;
     }
 
     /// <inheritdoc/>
@@ -117,9 +118,8 @@ internal abstract class ExtendedGpsPointDataRecordReader3<T> : ICompressedPointD
     /// <inheritdoc/>
     async ValueTask<int> ICompressedPointDataRecordReader.ReadAsync(Memory<byte> destination, CancellationToken cancellationToken)
     {
-        ReadOnlyMemory<byte> processedData = await this.ProcessDataAsync(cancellationToken).ConfigureAwait(false);
-        processedData.CopyTo(destination);
-        return processedData.Length;
+        await this.ProcessDataAsync(destination, cancellationToken).ConfigureAwait(false);
+        return this.pointDataLength;
     }
 
     /// <inheritdoc/>
@@ -192,29 +192,43 @@ internal abstract class ExtendedGpsPointDataRecordReader3<T> : ICompressedPointD
     }
 
     /// <summary>
-    /// Processes the data.
+    /// Processes the data into the reader's internal buffer and returns it.
     /// </summary>
     /// <returns>The processed data.</returns>
-    protected virtual byte[] ProcessData()
+    /// <remarks>
+    /// The returned array is owned by the reader; its contents remain valid
+    /// until the next call to <see cref="ProcessData()"/>.
+    /// </remarks>
+    protected byte[] ProcessData()
     {
-        var context = default(uint);
-        return this.ProcessData(ref context);
+        this.ProcessData(this.data);
+        return this.data;
     }
 
     /// <summary>
-    /// Processes the data.
+    /// Processes the data directly into the caller-supplied <paramref name="destination"/>.
     /// </summary>
-    /// <param name="context">The context.</param>
-    /// <returns>The processed data.</returns>
-    protected virtual byte[] ProcessData(ref uint context) => this.ProcessData(ref context, this.pointDataLength);
+    /// <param name="destination">The destination buffer.</param>
+    protected virtual void ProcessData(Span<byte> destination)
+    {
+        var context = default(uint);
+        this.ProcessData(ref context, destination);
+    }
 
     /// <summary>
-    /// Processes the data.
+    /// Processes the data into <paramref name="destination"/> using the given <paramref name="context"/>.
+    /// </summary>
+    /// <param name="context">The context.</param>
+    /// <param name="destination">The destination buffer.</param>
+    protected virtual void ProcessData(ref uint context, Span<byte> destination) => this.ProcessData(ref context, this.pointDataLength, destination);
+
+    /// <summary>
+    /// Processes the data into <paramref name="destination"/> using the given <paramref name="context"/> and GPS-time-change index.
     /// </summary>
     /// <param name="context">The context.</param>
     /// <param name="gpsTimeChangeIndex">The GPS time change index.</param>
-    /// <returns>The processed data.</returns>
-    protected byte[] ProcessData(ref uint context, int gpsTimeChangeIndex)
+    /// <param name="destination">The destination buffer.</param>
+    protected void ProcessData(ref uint context, int gpsTimeChangeIndex, Span<byte> destination)
     {
         var processingContext = this.contexts[this.currentContext];
 
@@ -486,12 +500,11 @@ internal abstract class ExtendedGpsPointDataRecordReader3<T> : ICompressedPointD
             System.Buffers.Binary.BinaryPrimitives.WriteDoubleLittleEndian(lastPoint.AsSpan(Constants.ExtendedPointDataRecord.GpsTimeFieldOffset), BitConverter.UInt64BitsToDouble(processingContext.LastGpsTime[processingContext.Last]));
         }
 
-        // copy the last item
-        Array.Copy(lastPoint, this.data, ExtendedGpsPointDataRecord.Size);
+        // copy the last item into the caller-supplied destination
+        lastPoint.AsSpan(0, ExtendedGpsPointDataRecord.Size).CopyTo(destination);
 
         // remember if the last point had a GPS time change
         lastPoint[gpsTimeChangeIndex] = gpsTimeChange ? (byte)0x01 : (byte)0x00;
-        return this.data;
 
         static int GetLastPointReturn(ReadOnlySpan<byte> lastPoint, byte gpsTimeChange)
         {
@@ -511,36 +524,28 @@ internal abstract class ExtendedGpsPointDataRecordReader3<T> : ICompressedPointD
     }
 
     /// <summary>
-    /// Processes the data.
+    /// Processes the data asynchronously into the reader's internal buffer.
     /// </summary>
     /// <param name="cancellationToken">The cancellation token.</param>
     /// <returns>The processed data.</returns>
-    protected virtual ValueTask<Memory<byte>> ProcessDataAsync(CancellationToken cancellationToken = default)
+    protected ValueTask<Memory<byte>> ProcessDataAsync(CancellationToken cancellationToken = default)
     {
-        var context = default(uint);
-        return this.ProcessDataAsync(ref context, cancellationToken);
+        cancellationToken.ThrowIfCancellationRequested();
+        this.ProcessData(this.data);
+        return new(this.data);
     }
 
     /// <summary>
-    /// Processes the data.
+    /// Processes the data asynchronously directly into <paramref name="destination"/>.
     /// </summary>
-    /// <param name="context">The context.</param>
+    /// <param name="destination">The destination buffer.</param>
     /// <param name="cancellationToken">The cancellation token.</param>
-    /// <returns>The processed data.</returns>
-    protected ValueTask<Memory<byte>> ProcessDataAsync(ref uint context, CancellationToken cancellationToken = default) => this.ProcessDataAsync(ref context, this.pointDataLength, cancellationToken);
-
-    /// <summary>
-    /// Processes the data.
-    /// </summary>
-    /// <param name="context">The context.</param>
-    /// <param name="gpsTimeChangeIndex">The GPS time change index.</param>
-    /// <param name="cancellationToken">The cancellation token.</param>
-    /// <returns>The processed data.</returns>
-    [System.Diagnostics.CodeAnalysis.SuppressMessage("Design", "MA0042:Do not use blocking calls in an async method", Justification = "This would cause recursion.")]
-    protected ValueTask<Memory<byte>> ProcessDataAsync(ref uint context, int gpsTimeChangeIndex, CancellationToken cancellationToken = default)
+    /// <returns>A completed task.</returns>
+    protected virtual ValueTask ProcessDataAsync(Memory<byte> destination, CancellationToken cancellationToken = default)
     {
         cancellationToken.ThrowIfCancellationRequested();
-        return new(this.ProcessData(ref context, gpsTimeChangeIndex));
+        this.ProcessData(destination.Span);
+        return default;
     }
 
     private void CreateAndInitModelsAndDecompressors(uint context, ReadOnlySpan<byte> item, int gpsTimeChangeIndex)

@@ -50,21 +50,10 @@ internal sealed class ExtendedGpsPointDataRecordReader3(IEntropyDecoder decoder,
     protected override ExtendedGpsPointDataRecord Read(ReadOnlySpan<byte> source) => new(source);
 
     /// <inheritdoc/>
-    protected override byte[] ProcessData()
+    protected override void ProcessData(Span<byte> destination)
     {
         var context = default(uint);
-        var data = this.ProcessData(ref context);
-        Span<byte> span = data;
-        this.byteReader.Read(span[ExtendedGpsPointDataRecord.Size..], context);
-        return data;
-    }
-
-    /// <inheritdoc/>
-    protected override async ValueTask<Memory<byte>> ProcessDataAsync(CancellationToken cancellationToken = default)
-    {
-        var context = default(uint);
-        var data = await this.ProcessDataAsync(ref context, cancellationToken).ConfigureAwait(false);
-        this.byteReader.Read(data[ExtendedGpsPointDataRecord.Size..].Span, context);
-        return data;
+        this.ProcessData(ref context, destination);
+        this.byteReader.Read(destination[ExtendedGpsPointDataRecord.Size..], context);
     }
 }

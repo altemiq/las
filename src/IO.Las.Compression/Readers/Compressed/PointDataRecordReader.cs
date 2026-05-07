@@ -27,18 +27,9 @@ internal sealed class PointDataRecordReader(IEntropyDecoder decoder, int extraBy
     protected override PointDataRecord Read(ReadOnlySpan<byte> source) => PointDataRecord.Create(source);
 
     /// <inheritdoc/>
-    protected override Span<byte> ProcessData()
+    protected override void ProcessData(Span<byte> destination)
     {
-        var data = base.ProcessData();
-        this.byteReader.Read(data[PointDataRecord.Size..]);
-        return data;
-    }
-
-    /// <inheritdoc/>
-    protected override async ValueTask<Memory<byte>> ProcessDataAsync(CancellationToken cancellationToken = default)
-    {
-        var data = await base.ProcessDataAsync(cancellationToken).ConfigureAwait(false);
-        this.byteReader.Read(data[PointDataRecord.Size..].Span);
-        return data;
+        base.ProcessData(destination);
+        this.byteReader.Read(destination[PointDataRecord.Size..]);
     }
 }
