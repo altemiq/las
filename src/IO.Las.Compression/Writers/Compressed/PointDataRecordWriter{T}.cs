@@ -91,8 +91,8 @@ internal abstract class PointDataRecordWriter<T> : IPointDataRecordWriter, ISimp
         // init state
         for (var i = 0; i < 16; i++)
         {
-            this.lastXDiffMedian5[i] = new();
-            this.lastYDiffMedian5[i] = new();
+            this.lastXDiffMedian5[i] = default;
+            this.lastYDiffMedian5[i] = default;
             this.lastIntensity[i] = default;
             this.lastHeight[i / 2] = default;
         }

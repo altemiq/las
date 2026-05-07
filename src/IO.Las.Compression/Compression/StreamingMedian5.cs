@@ -7,13 +7,34 @@
 namespace Altemiq.IO.Las.Compression;
 
 /// <summary>
-/// The stream median of 5 values.
+/// The streaming median of 5 values.
 /// </summary>
-internal sealed class StreamingMedian5
+/// <remarks>
+/// This is a value type so that arrays of <see cref="StreamingMedian5"/> are stored
+/// contiguously as a single heap allocation, rather than as an array of references
+/// to separately-allocated instances each containing its own <c>int[5]</c>. For the
+/// per-point LAZ decode/encode hot path this removes 16-96 heap allocations and
+/// 16-96 pointer indirections per reader/writer instance.
+/// <para>
+/// A default-constructed (e.g. zero-initialised array element) instance behaves
+/// identically to the previous class' parameterless constructor: all five values
+/// are zero and the insertion phase starts in the "high" state. The latter is
+/// encoded here as the inverted field <see cref="low"/> so that
+/// <c>default(StreamingMedian5)</c> matches the class behaviour (<c>low == false</c>
+/// corresponds to the class' <c>high = true</c>).
+/// </para>
+/// </remarks>
+internal struct StreamingMedian5
 {
-    private readonly int[] values = new int[5];
+    private int v0;
+    private int v1;
+    private int v2;
+    private int v3;
+    private int v4;
 
-    private bool high = true;
+    // Inverted so that default(struct) (low == false) corresponds to the
+    // original class' parameterless constructor state (high == true).
+    private bool low;
 
     /// <summary>
     /// Add the value to the stream.
@@ -21,76 +42,76 @@ internal sealed class StreamingMedian5
     /// <param name="value">The value.</param>
     public void Add(int value)
     {
-        if (this.high)
+        if (!this.low)
         {
-            if (value < this.values[2])
+            if (value < this.v2)
             {
-                this.values[4] = this.values[3];
-                this.values[3] = this.values[2];
-                if (value < this.values[0])
+                this.v4 = this.v3;
+                this.v3 = this.v2;
+                if (value < this.v0)
                 {
-                    this.values[2] = this.values[1];
-                    this.values[1] = this.values[0];
-                    this.values[0] = value;
+                    this.v2 = this.v1;
+                    this.v1 = this.v0;
+                    this.v0 = value;
                 }
-                else if (value < this.values[1])
+                else if (value < this.v1)
                 {
-                    this.values[2] = this.values[1];
-                    this.values[1] = value;
+                    this.v2 = this.v1;
+                    this.v1 = value;
                 }
                 else
                 {
-                    this.values[2] = value;
+                    this.v2 = value;
                 }
             }
             else
             {
-                if (value < this.values[3])
+                if (value < this.v3)
                 {
-                    this.values[4] = this.values[3];
-                    this.values[3] = value;
+                    this.v4 = this.v3;
+                    this.v3 = value;
                 }
                 else
                 {
-                    this.values[4] = value;
+                    this.v4 = value;
                 }
 
-                this.high = false;
+                this.low = true;
             }
         }
-        else if (this.values[2] < value)
+        else if (this.v2 < value)
         {
-            this.values[0] = this.values[1];
-            this.values[1] = this.values[2];
-            if (this.values[4] < value)
+            this.v0 = this.v1;
+            this.v1 = this.v2;
+            if (this.v4 < value)
             {
-                this.values[2] = this.values[3];
-                this.values[3] = this.values[4];
-                this.values[4] = value;
+                this.v2 = this.v3;
+                this.v3 = this.v4;
+                this.v4 = value;
             }
-            else if (this.values[3] < value)
+            else if (this.v3 < value)
             {
-                this.values[2] = this.values[3];
-                this.values[3] = value;
+                this.v2 = this.v3;
+                this.v3 = value;
             }
             else
             {
-                this.values[2] = value;
+                this.v2 = value;
             }
         }
         else
         {
-            if (this.values[1] < value)
+            if (this.v1 < value)
             {
-                this.values[0] = this.values[1];
-                this.values[1] = value;
+                this.v0 = this.v1;
+                this.v1 = value;
             }
             else
             {
-                this.values[0] = value;
+                this.v0 = value;
             }
 
-            this.high = true;
+            this.low = false;
         }
     }
 
@@ -98,5 +119,5 @@ internal sealed class StreamingMedian5
     /// Gets the median value.
     /// </summary>
     /// <returns>The median value.</returns>
-    public int Get() => this.values[2];
+    public readonly int Get() => this.v2;
 }

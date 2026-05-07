@@ -570,8 +570,8 @@ internal abstract class ExtendedGpsPointDataRecordReader3<T> : ICompressedPointD
         contextToInitialize.DeltaYIntegerDecompressor.Initialize();
         for (var i = 0; i < 12; i++)
         {
-            contextToInitialize.LastXDiffMedian5[i] = new();
-            contextToInitialize.LastYDiffMedian5[i] = new();
+            contextToInitialize.LastXDiffMedian5[i] = default;
+            contextToInitialize.LastYDiffMedian5[i] = default;
         }
 
         // for the Z layer

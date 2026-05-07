@@ -45,8 +45,8 @@ internal abstract class PointDataRecordReader<T>(IEntropyDecoder decoder, int po
         // init state
         for (var i = 0; i < 16; i++)
         {
-            this.lastXDiffMedian5[i] = new();
-            this.lastYDiffMedian5[i] = new();
+            this.lastXDiffMedian5[i] = default;
+            this.lastYDiffMedian5[i] = default;
             this.lastIntensity[i] = default;
             this.lastHeight[i / 2] = default;
         }

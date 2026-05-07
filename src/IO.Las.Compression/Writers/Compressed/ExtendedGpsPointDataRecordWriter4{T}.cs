@@ -491,8 +491,8 @@ internal abstract class ExtendedGpsPointDataRecordWriter4<T> : Writers.PointData
         contextToInitialize.DeltaYIntegerCompressor.Initialize();
         for (var i = 0; i < 12; i++)
         {
-            contextToInitialize.LastXDiffMedian5[i] = new();
-            contextToInitialize.LastYDiffMedian5[i] = new();
+            contextToInitialize.LastXDiffMedian5[i] = default;
+            contextToInitialize.LastYDiffMedian5[i] = default;
         }
 
         // for the Z layer
