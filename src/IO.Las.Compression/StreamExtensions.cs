@@ -399,5 +399,96 @@ internal static class StreamExtensions
             output = default;
             return false;
         }
+
+        /// <summary>
+        /// Retargets <paramref name="memoryStream"/> at a new window of
+        /// <paramref name="buffer"/> in-place, without allocating a new
+        /// <see cref="MemoryStream"/> instance.
+        /// </summary>
+        /// <param name="buffer">The new backing buffer.</param>
+        /// <param name="index">The start offset within <paramref name="buffer"/>.</param>
+        /// <param name="count">The length of the window.</param>
+        /// <remarks>
+        /// <para>
+        /// <see cref="MemoryStream"/> has no public API to change the backing
+        /// buffer after construction: the constructor parameters are all
+        /// stored in private (one of which, <c>_origin</c>, is
+        /// <see langword="readonly"/>). This extension reaches into those
+        /// fields using <c>System.Runtime.CompilerServices.UnsafeAccessor</c>
+        /// on net8+, and cached <see cref="System.Reflection.FieldInfo"/>
+        /// on older TFMs (which can still assign readonly fields).
+        /// </para>
+        /// <para>
+        /// The result is equivalent to constructing
+        /// <c>new MemoryStream(buffer, index, count, writable: false, publiclyVisible: true)</c>
+        /// but reuses the existing instance, so hot paths that re-initialise a
+        /// stream per chunk allocate nothing. The caller is responsible for
+        /// ensuring <paramref name="memoryStream"/> was originally constructed
+        /// as a non-expandable, non-writable byte-array-backed stream (the
+        /// typical shape produced by the
+        /// <c>new MemoryStream(byte[], int, int, bool, bool)</c> constructor).
+        /// </para>
+        /// </remarks>
+        public void SetBuffer(byte[] buffer, int index, int count)
+        {
+            ArgumentNullException.ThrowIfNull(buffer);
+            ArgumentOutOfRangeException.ThrowIfNegative(index);
+            ArgumentOutOfRangeException.ThrowIfNegative(count);
+
+            if (buffer.Length - index < count)
+            {
+                throw new ArgumentException(Compression.Properties.Resources.OffsetLengthOutOfBounds, nameof(buffer));
+            }
+
+#if NET8_0_OR_GREATER
+            BufferRef(memoryStream) = buffer;
+            OriginRef(memoryStream) = index;
+            PositionRef(memoryStream) = index;
+            LengthRef(memoryStream) = index + count;
+            CapacityRef(memoryStream) = index + count;
+
+            [System.Runtime.CompilerServices.UnsafeAccessor(System.Runtime.CompilerServices.UnsafeAccessorKind.Field, Name = "_buffer")]
+            static extern ref byte[] BufferRef(MemoryStream stream);
+
+            [System.Runtime.CompilerServices.UnsafeAccessor(System.Runtime.CompilerServices.UnsafeAccessorKind.Field, Name = "_origin")]
+            static extern ref int OriginRef(MemoryStream stream);
+
+            [System.Runtime.CompilerServices.UnsafeAccessor(System.Runtime.CompilerServices.UnsafeAccessorKind.Field, Name = "_position")]
+            static extern ref int PositionRef(MemoryStream stream);
+
+            [System.Runtime.CompilerServices.UnsafeAccessor(System.Runtime.CompilerServices.UnsafeAccessorKind.Field, Name = "_length")]
+            static extern ref int LengthRef(MemoryStream stream);
+
+            [System.Runtime.CompilerServices.UnsafeAccessor(System.Runtime.CompilerServices.UnsafeAccessorKind.Field, Name = "_capacity")]
+            static extern ref int CapacityRef(MemoryStream stream);
+#else
+            MemoryStreamFields.Buffer.SetValue(memoryStream, buffer);
+            MemoryStreamFields.Origin.SetValue(memoryStream, index);
+            MemoryStreamFields.Position.SetValue(memoryStream, index);
+            MemoryStreamFields.Length.SetValue(memoryStream, index + count);
+            MemoryStreamFields.Capacity.SetValue(memoryStream, index + count);
+#endif
+        }
     }
+
+#if !NET8_0_OR_GREATER
+    /// <summary>
+    /// Cached <see cref="System.Reflection.FieldInfo"/> handles for the
+    /// private <see cref="MemoryStream"/> backing fields. Used by the
+    /// pre-net8 implementation of <c>SetBuffer</c>.
+    /// </summary>
+    [System.Diagnostics.CodeAnalysis.SuppressMessage("Major Code Smell", "S3011:Reflection should not be used to increase accessibility of classes, methods, or fields", Justification = "Deliberate: MemoryStream has no public API to swap its backing buffer; reflection is the documented fallback for pre-net8 TFMs that lack UnsafeAccessor.")]
+    private static class MemoryStreamFields
+    {
+        public static readonly System.Reflection.FieldInfo Buffer = GetField("_buffer");
+        public static readonly System.Reflection.FieldInfo Origin = GetField("_origin");
+        public static readonly System.Reflection.FieldInfo Position = GetField("_position");
+        public static readonly System.Reflection.FieldInfo Length = GetField("_length");
+        public static readonly System.Reflection.FieldInfo Capacity = GetField("_capacity");
+
+        private static System.Reflection.FieldInfo GetField(string name) =>
+            typeof(MemoryStream).GetField(name, System.Reflection.BindingFlags.Instance | System.Reflection.BindingFlags.NonPublic)
+                ?? throw new MissingFieldException(nameof(MemoryStream), name);
+    }
+#endif
 }

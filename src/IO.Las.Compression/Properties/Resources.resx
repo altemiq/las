@@ -149,4 +149,7 @@
     <value>Invalid chunk name</value>
     <comment>Error message for an invalid chunk name.@Invariant</comment>
   </data>
+  <data name="OffsetLengthOutOfBounds" xml:space="preserve">
+    <value>Offset and length were out of bounds</value>
+  </data>
 </root>

@@ -11,6 +11,7 @@ namespace Altemiq.IO.Las.Readers.Compressed;
 /// </summary>
 /// <param name="requested">Set to <see langword="true"/> to indicated that this is requested.</param>
 [System.Diagnostics.CodeAnalysis.SuppressMessage("StyleCop.CSharp.MaintainabilityRules", "SA1401:Fields should be private", Justification = "This is designed for quick access.")]
+[System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Design", "CA1001:Types that own disposable fields should be disposable", Justification = "The held MemoryStream has no unmanaged resources; disposal would be a no-op and LayeredValue instances outlive individual chunks by design.")]
 internal sealed class LayeredValue(bool requested)
 {
     /// <summary>
@@ -22,6 +23,15 @@ internal sealed class LayeredValue(bool requested)
     /// The value indicating whether this instance is requested.
     /// </summary>
     public readonly bool Requested = requested;
+
+    /// <summary>
+    /// The reusable stream over the current chunk's slice of the shared byte
+    /// buffer. Initialised to an empty non-expandable MemoryStream and
+    /// re-targeted on every chunk via the <c>SetBuffer</c> extension method,
+    /// instead of being reallocated. Eliminates what used to be
+    /// N-layers-per-chunk <see cref="MemoryStream"/> allocations.
+    /// </summary>
+    private readonly MemoryStream bufferStream = new([], index: 0, count: 0, writable: false, publiclyVisible: true);
 
     /// <summary>
     /// Gets a value indicating whether this instance has changed.
@@ -44,7 +54,8 @@ internal sealed class LayeredValue(bool requested)
     {
         var count = (int)this.ByteCount;
         _ = stream.Read(buffer, index, count);
-        _ = this.Decoder.Initialize(new MemoryStream(buffer, index, count, writable: false, publiclyVisible: true));
+        this.bufferStream.SetBuffer(buffer, index, count);
+        _ = this.Decoder.Initialize(this.bufferStream);
         return this.ByteCount;
     }
 
@@ -61,8 +72,10 @@ internal sealed class LayeredValue(bool requested)
         {
             if (this.Requested)
             {
-                _ = stream.Read(buffer, index, (int)this.ByteCount);
-                _ = this.Decoder.Initialize(new MemoryStream(buffer, index, (int)this.ByteCount, writable: false, publiclyVisible: true));
+                var count = (int)this.ByteCount;
+                _ = stream.Read(buffer, index, count);
+                this.bufferStream.SetBuffer(buffer, index, count);
+                _ = this.Decoder.Initialize(this.bufferStream);
                 this.Changed = true;
                 return this.ByteCount;
             }
