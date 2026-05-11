@@ -204,17 +204,15 @@ internal abstract class PointDataRecordWriter<T> : IPointDataRecordWriter, ISimp
         }
 
         // compress x coordinate
-        var median = this.lastXDiffMedian5[m].Get();
         var diff = FieldAccessors.PointDataRecord.GetX(item) - FieldAccessors.PointDataRecord.GetX(this.lastItem);
+        var median = this.lastXDiffMedian5[m].GetAndAdd(diff);
         this.deltaXIntegerCompressor.Compress(median, diff, numberOfReturns is 1 ? 1U : 0U);
-        this.lastXDiffMedian5[m].Add(diff);
 
         // compress y coordinate
         var kBits = this.deltaXIntegerCompressor.K;
-        median = this.lastYDiffMedian5[m].Get();
         diff = FieldAccessors.PointDataRecord.GetY(item) - FieldAccessors.PointDataRecord.GetY(this.lastItem);
+        median = this.lastYDiffMedian5[m].GetAndAdd(diff);
         this.deltaYIntegerCompressor.Compress(median, diff, (numberOfReturns is 1 ? 1U : 0U) + (kBits < 20 ? kBits.ZeroBit0() : 20U));
-        this.lastYDiffMedian5[m].Add(diff);
 
         // compress z coordinate
         kBits = (this.deltaXIntegerCompressor.K + this.deltaYIntegerCompressor.K) / 2;

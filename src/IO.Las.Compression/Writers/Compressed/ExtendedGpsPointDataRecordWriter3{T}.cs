@@ -321,18 +321,16 @@ internal abstract class ExtendedGpsPointDataRecordWriter3<T> : Writers.PointData
 
         // compress X coordinate
         var mapContext = (m << 1) | (gpsTimeChange ? 1U : 0U);
-        var median = processingContext.LastXDiffMedian5[mapContext].Get();
         var diff = point.X - lastPoint.X;
         var coordinateContext = numberOfReturns is 1U ? 1U : 0U;
+        var median = processingContext.LastXDiffMedian5[mapContext].GetAndAdd(diff);
         processingContext.DeltaXIntegerCompressor.Compress(median, diff, coordinateContext);
-        processingContext.LastXDiffMedian5[mapContext].Add(diff);
 
         // compress Y coordinate
         var kBits = processingContext.DeltaXIntegerCompressor.K;
-        median = processingContext.LastYDiffMedian5[mapContext].Get();
         diff = point.Y - lastPoint.Y;
+        median = processingContext.LastYDiffMedian5[mapContext].GetAndAdd(diff);
         processingContext.DeltaYIntegerCompressor.Compress(median, diff, coordinateContext + (kBits < 20U ? kBits.ZeroBit0() : 20));
-        processingContext.LastYDiffMedian5[mapContext].Add(diff);
 
         ////////////////////////////////////////
         // compress Z layer

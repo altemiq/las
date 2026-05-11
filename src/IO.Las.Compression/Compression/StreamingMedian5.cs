@@ -4,7 +4,9 @@
 // </copyright>
 // -----------------------------------------------------------------------
 
-namespace Altemiq.IO.Las.Compression;
+﻿namespace Altemiq.IO.Las.Compression;
+
+using System.Runtime.CompilerServices;
 
 /// <summary>
 /// The streaming median of 5 values.
@@ -119,5 +121,20 @@ internal struct StreamingMedian5
     /// Gets the median value.
     /// </summary>
     /// <returns>The median value.</returns>
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public readonly int Get() => this.v2;
+
+    /// <summary>
+    /// Gets the current median and adds a new value in one operation.
+    /// This can reduce cache misses when both operations are needed.
+    /// </summary>
+    /// <param name="value">The value to add.</param>
+    /// <returns>The median before adding the new value.</returns>
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public int GetAndAdd(int value)
+    {
+        var median = this.v2;
+        this.Add(value);
+        return median;
+    }
 }
