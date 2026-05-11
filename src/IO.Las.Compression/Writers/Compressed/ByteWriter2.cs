@@ -11,22 +11,22 @@ namespace Altemiq.IO.Las.Writers.Compressed;
 /// </summary>
 internal sealed class ByteWriter2 : ISimpleWriter
 {
-    private readonly IEntropyEncoder encoder;
+    private readonly ArithmeticEncoder encoder;
 
     private readonly byte[] lastItem;
 
-    private readonly ISymbolModel[] bytesModels;
+    private readonly ArithmeticSymbolModel[] bytesModels;
 
     /// <summary>
     /// Initializes a new instance of the <see cref="ByteWriter2"/> class.
     /// </summary>
     /// <param name="encoder">The encoder.</param>
     /// <param name="number">The number of values.</param>
-    public ByteWriter2(IEntropyEncoder encoder, uint number)
+    public ByteWriter2(ArithmeticEncoder encoder, uint number)
     {
         ArgumentNullException.ThrowIfNull(encoder);
         this.encoder = encoder;
-        this.bytesModels = new ISymbolModel[number];
+        this.bytesModels = new ArithmeticSymbolModel[number];
 
         for (var i = 0; i < number; i++)
         {

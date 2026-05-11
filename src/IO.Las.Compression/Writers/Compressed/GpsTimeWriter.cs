@@ -21,7 +21,7 @@ internal sealed class GpsTimeWriter : ISimpleWriter
 
     private const int MultipleTotal = Multiple - MultipleMinus + 6;
 
-    private readonly IEntropyEncoder encoder;
+    private readonly ArithmeticEncoder encoder;
 
     private readonly ulong[] lastGpsTime = new ulong[4];
 
@@ -29,9 +29,9 @@ internal sealed class GpsTimeWriter : ISimpleWriter
 
     private readonly int[] multiExtremeCounter = new int[4];
 
-    private readonly ISymbolModel gpsTimeMultiModel;
+    private readonly ArithmeticSymbolModel gpsTimeMultiModel;
 
-    private readonly ISymbolModel gpsTimeZeroDiffModel;
+    private readonly ArithmeticSymbolModel gpsTimeZeroDiffModel;
 
     private readonly IntegerCompressor gpsTimeIntegerCompressor;
 
@@ -43,7 +43,7 @@ internal sealed class GpsTimeWriter : ISimpleWriter
     /// Initializes a new instance of the <see cref="GpsTimeWriter"/> class.
     /// </summary>
     /// <param name="encoder">The encoder.</param>
-    public GpsTimeWriter(IEntropyEncoder encoder)
+    public GpsTimeWriter(ArithmeticEncoder encoder)
     {
         this.encoder = encoder;
 

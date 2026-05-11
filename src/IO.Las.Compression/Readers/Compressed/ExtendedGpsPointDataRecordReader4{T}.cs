@@ -21,7 +21,7 @@ internal abstract class ExtendedGpsPointDataRecordReader4<T> : ICompressedPointD
 
     private const int MultipleTotal = Multiple - MultipleMinus + 5;
 
-    private readonly IEntropyDecoder decoder;
+    private readonly ArithmeticDecoder decoder;
     private readonly Context[] contexts = new Context[4];
     private readonly LayeredValue valueChannelReturnsXY;
     private readonly LayeredValue valueZ;
@@ -47,7 +47,7 @@ internal abstract class ExtendedGpsPointDataRecordReader4<T> : ICompressedPointD
     /// <param name="pointDataLength">The point data length.</param>
     /// <param name="basePointDataLength">The base point data length.</param>
     /// <param name="decompressSelective">The selective compress value.</param>
-    protected ExtendedGpsPointDataRecordReader4(IEntropyDecoder decoder, int pointDataLength, int basePointDataLength, DecompressSelections decompressSelective = DecompressSelections.All)
+    protected ExtendedGpsPointDataRecordReader4(ArithmeticDecoder decoder, int pointDataLength, int basePointDataLength, DecompressSelections decompressSelective = DecompressSelections.All)
     {
         this.decoder = decoder;
 
@@ -761,17 +761,17 @@ internal abstract class ExtendedGpsPointDataRecordReader4<T> : ICompressedPointD
         public readonly int[] LastGpsTimeDiff = new int[4];
         public readonly int[] MultiExtremeCounter = new int[4];
 
-        public readonly ISymbolModel[] ChangedValuesModels = new ISymbolModel[8];
-        public readonly ISymbolModel?[] NumberOfReturnsModels = new ISymbolModel[16];
-        public readonly ISymbolModel?[] ReturnNumberModels = new ISymbolModel[16];
-        public readonly ISymbolModel?[] ClassificationModels = new ISymbolModel[64];
-        public readonly ISymbolModel?[] FlagsModels = new ISymbolModel[64];
-        public readonly ISymbolModel?[] UserDataModels = new ISymbolModel[64];
+        public readonly ArithmeticSymbolModel[] ChangedValuesModels = new ArithmeticSymbolModel[8];
+        public readonly ArithmeticSymbolModel?[] NumberOfReturnsModels = new ArithmeticSymbolModel[16];
+        public readonly ArithmeticSymbolModel?[] ReturnNumberModels = new ArithmeticSymbolModel[16];
+        public readonly ArithmeticSymbolModel?[] ClassificationModels = new ArithmeticSymbolModel[64];
+        public readonly ArithmeticSymbolModel?[] FlagsModels = new ArithmeticSymbolModel[64];
+        public readonly ArithmeticSymbolModel?[] UserDataModels = new ArithmeticSymbolModel[64];
 
-        public readonly ISymbolModel ScannerChannelModel;
-        public readonly ISymbolModel ReturnNumberGpsSameModel;
-        public readonly ISymbolModel GpsTimeMultiModel;
-        public readonly ISymbolModel GpsTimeZeroDiffModel;
+        public readonly ArithmeticSymbolModel ScannerChannelModel;
+        public readonly ArithmeticSymbolModel ReturnNumberGpsSameModel;
+        public readonly ArithmeticSymbolModel GpsTimeMultiModel;
+        public readonly ArithmeticSymbolModel GpsTimeZeroDiffModel;
 
         public readonly IntegerDecompressor DeltaXIntegerDecompressor;
         public readonly IntegerDecompressor DeltaYIntegerDecompressor;

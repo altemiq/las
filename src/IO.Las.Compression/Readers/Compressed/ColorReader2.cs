@@ -11,16 +11,16 @@ namespace Altemiq.IO.Las.Readers.Compressed;
 /// </summary>
 internal sealed class ColorReader2 : ISimpleReader
 {
-    private readonly IEntropyDecoder decoder;
+    private readonly ArithmeticDecoder decoder;
 
-    private readonly ISymbolModel byteUsedModel;
+    private readonly ArithmeticSymbolModel byteUsedModel;
 
-    private readonly ISymbolModel rgbDiffModels0;
-    private readonly ISymbolModel rgbDiffModels1;
-    private readonly ISymbolModel rgbDiffModels2;
-    private readonly ISymbolModel rgbDiffModels3;
-    private readonly ISymbolModel rgbDiffModels4;
-    private readonly ISymbolModel rgbDiffModels5;
+    private readonly ArithmeticSymbolModel rgbDiffModels0;
+    private readonly ArithmeticSymbolModel rgbDiffModels1;
+    private readonly ArithmeticSymbolModel rgbDiffModels2;
+    private readonly ArithmeticSymbolModel rgbDiffModels3;
+    private readonly ArithmeticSymbolModel rgbDiffModels4;
+    private readonly ArithmeticSymbolModel rgbDiffModels5;
 
     private ushort lastRed;
     private ushort lastGreen;
@@ -30,7 +30,7 @@ internal sealed class ColorReader2 : ISimpleReader
     /// Initializes a new instance of the <see cref="ColorReader2"/> class.
     /// </summary>
     /// <param name="decoder">The decoder.</param>
-    public ColorReader2(IEntropyDecoder decoder)
+    public ColorReader2(ArithmeticDecoder decoder)
     {
         ArgumentNullException.ThrowIfNull(decoder);
         this.decoder = decoder;

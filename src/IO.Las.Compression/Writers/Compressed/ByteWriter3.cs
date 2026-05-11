@@ -11,7 +11,7 @@ namespace Altemiq.IO.Las.Writers.Compressed;
 /// </summary>
 internal sealed class ByteWriter3 : IContextWriter
 {
-    private readonly IEntropyEncoder encoder;
+    private readonly ArithmeticEncoder encoder;
 
     private readonly Context[] contexts = new Context[4];
 
@@ -24,7 +24,7 @@ internal sealed class ByteWriter3 : IContextWriter
     /// </summary>
     /// <param name="encoder">The encoder.</param>
     /// <param name="number">The number of values.</param>
-    public ByteWriter3(IEntropyEncoder encoder, uint number)
+    public ByteWriter3(ArithmeticEncoder encoder, uint number)
     {
         this.encoder = encoder;
 
@@ -164,13 +164,13 @@ internal sealed class ByteWriter3 : IContextWriter
     {
         public readonly byte[] LastItem;
 
-        public readonly ISymbolModel[] BytesModels;
+        public readonly ArithmeticSymbolModel[] BytesModels;
 
         public bool Unused;
 
         public Context(LayeredValue[] valueBytes)
         {
-            var bytesModels = new ISymbolModel[valueBytes.Length];
+            var bytesModels = new ArithmeticSymbolModel[valueBytes.Length];
             for (var i = 0; i < valueBytes.Length; i++)
             {
                 bytesModels[i] = valueBytes[i].Encoder.CreateSymbolModel(ArithmeticCoder.ModelCount);

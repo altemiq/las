@@ -13,17 +13,17 @@ namespace Altemiq.IO.Las.Readers.Compressed;
 /// <param name="decoder">The decoder.</param>
 /// <param name="pointDataLength">The point data length.</param>
 /// <param name="basePointDataLength">The base point data length, without extra bytes.</param>
-internal abstract class PointDataRecordReader<T>(IEntropyDecoder decoder, int pointDataLength, int basePointDataLength) : ICompressedPointDataRecordReader, ISimple
+internal abstract class PointDataRecordReader<T>(ArithmeticDecoder decoder, int pointDataLength, int basePointDataLength) : ICompressedPointDataRecordReader, ISimple
     where T : IBasePointDataRecord
 {
-    private readonly ISymbolModel changedValuesModel = decoder.CreateSymbolModel(64);
+    private readonly ArithmeticSymbolModel changedValuesModel = decoder.CreateSymbolModel(64);
     private readonly IntegerDecompressor intensityIntegerDecompressor = new(decoder, 16, 4);
-    private readonly ISymbolModel scanAngleRankModels0 = decoder.CreateSymbolModel(ArithmeticCoder.ModelCount);
-    private readonly ISymbolModel scanAngleRankModels1 = decoder.CreateSymbolModel(ArithmeticCoder.ModelCount);
+    private readonly ArithmeticSymbolModel scanAngleRankModels0 = decoder.CreateSymbolModel(ArithmeticCoder.ModelCount);
+    private readonly ArithmeticSymbolModel scanAngleRankModels1 = decoder.CreateSymbolModel(ArithmeticCoder.ModelCount);
     private readonly IntegerDecompressor pointSourceIdIntegerDecompressor = new(decoder);
-    private readonly ISymbolModel?[] bitByteModels = new ISymbolModel[ArithmeticCoder.ModelCount];
-    private readonly ISymbolModel?[] classificationModels = new ISymbolModel[ArithmeticCoder.ModelCount];
-    private readonly ISymbolModel?[] userDataModels = new ISymbolModel[ArithmeticCoder.ModelCount];
+    private readonly ArithmeticSymbolModel?[] bitByteModels = new ArithmeticSymbolModel[ArithmeticCoder.ModelCount];
+    private readonly ArithmeticSymbolModel?[] classificationModels = new ArithmeticSymbolModel[ArithmeticCoder.ModelCount];
+    private readonly ArithmeticSymbolModel?[] userDataModels = new ArithmeticSymbolModel[ArithmeticCoder.ModelCount];
     private readonly IntegerDecompressor deltaXIntegerDecompressor = new(decoder, 32, 2);
     private readonly IntegerDecompressor deltaYIntegerDecompressor = new(decoder, 32, 22);
     private readonly IntegerDecompressor zIntegerDecompressor = new(decoder, 32, 20);

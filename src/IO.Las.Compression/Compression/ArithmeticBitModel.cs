@@ -9,7 +9,7 @@ namespace Altemiq.IO.Las.Compression;
 /// <summary>
 /// The arithmetic bit model.
 /// </summary>
-internal sealed class ArithmeticBitModel : IBitModel
+internal sealed class ArithmeticBitModel
 {
     /// <summary>
     /// Length bits discarded before mult.
@@ -27,19 +27,34 @@ internal sealed class ArithmeticBitModel : IBitModel
     /// </summary>
     public ArithmeticBitModel() => this.Initialize();
 
-    /// <inheritdoc/>
+    /// <summary>
+    /// Gets the bit-0 count.
+    /// </summary>
     public uint BitZeroProb { get; private set; }
 
-    /// <inheritdoc/>
+    /// <summary>
+    /// Gets the bit-0 prob.
+    /// </summary>
     public uint BitZeroCount { get; private set; }
 
-    /// <inheritdoc/>
+    /// <summary>
+    /// Decrements the bits until update.
+    /// </summary>
+    /// <returns>The bits until update.</returns>
+    [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
     public uint DecrementBitsUntilUpdate() => --this.bitsUntilUpdate;
 
-    /// <inheritdoc/>
+    /// <summary>
+    /// Increments the <see cref="BitZeroCount"/>.
+    /// </summary>
+    [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
     public void IncrementBitZeroCount() => this.BitZeroCount++;
 
-    /// <inheritdoc/>
+    /// <summary>
+    /// Initializes the entropy model.
+    /// </summary>
+    /// <param name="table">The table.</param>
+    /// <returns>The return.</returns>
     public bool Initialize(uint[]? table = null)
     {
         // initialization to equiprobable model

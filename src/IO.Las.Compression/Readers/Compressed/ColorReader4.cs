@@ -11,7 +11,7 @@ namespace Altemiq.IO.Las.Readers.Compressed;
 /// </summary>
 /// <param name="decoder">The decoder.</param>
 /// <param name="decompressSelective">The selective decompress value.</param>
-internal sealed class ColorReader4(IEntropyDecoder decoder, DecompressSelections decompressSelective = DecompressSelections.All) : IContextReader
+internal sealed class ColorReader4(ArithmeticDecoder decoder, DecompressSelections decompressSelective = DecompressSelections.All) : IContextReader
 {
     private readonly Context[] contexts = [new(decoder), new(decoder), new(decoder), new(decoder)];
 
@@ -202,16 +202,16 @@ internal sealed class ColorReader4(IEntropyDecoder decoder, DecompressSelections
     }
 
     [System.Diagnostics.CodeAnalysis.SuppressMessage("StyleCop.CSharp.MaintainabilityRules", "SA1401:FieldsShouldBePrivate", Justification = "This is used as an internal property bag.")]
-    private sealed class Context(IEntropyDecoder decoder)
+    private sealed class Context(ArithmeticDecoder decoder)
     {
-        public readonly ISymbolModel ByteUsedModel = decoder.CreateSymbolModel(ArithmeticCoder.HalfModelCount);
+        public readonly ArithmeticSymbolModel ByteUsedModel = decoder.CreateSymbolModel(ArithmeticCoder.HalfModelCount);
 
-        public readonly ISymbolModel RgbDiffModels0 = decoder.CreateSymbolModel(ArithmeticCoder.ModelCount);
-        public readonly ISymbolModel RgbDiffModels1 = decoder.CreateSymbolModel(ArithmeticCoder.ModelCount);
-        public readonly ISymbolModel RgbDiffModels2 = decoder.CreateSymbolModel(ArithmeticCoder.ModelCount);
-        public readonly ISymbolModel RgbDiffModels3 = decoder.CreateSymbolModel(ArithmeticCoder.ModelCount);
-        public readonly ISymbolModel RgbDiffModels4 = decoder.CreateSymbolModel(ArithmeticCoder.ModelCount);
-        public readonly ISymbolModel RgbDiffModels5 = decoder.CreateSymbolModel(ArithmeticCoder.ModelCount);
+        public readonly ArithmeticSymbolModel RgbDiffModels0 = decoder.CreateSymbolModel(ArithmeticCoder.ModelCount);
+        public readonly ArithmeticSymbolModel RgbDiffModels1 = decoder.CreateSymbolModel(ArithmeticCoder.ModelCount);
+        public readonly ArithmeticSymbolModel RgbDiffModels2 = decoder.CreateSymbolModel(ArithmeticCoder.ModelCount);
+        public readonly ArithmeticSymbolModel RgbDiffModels3 = decoder.CreateSymbolModel(ArithmeticCoder.ModelCount);
+        public readonly ArithmeticSymbolModel RgbDiffModels4 = decoder.CreateSymbolModel(ArithmeticCoder.ModelCount);
+        public readonly ArithmeticSymbolModel RgbDiffModels5 = decoder.CreateSymbolModel(ArithmeticCoder.ModelCount);
 
         public ushort LastItem0;
         public ushort LastItem1;

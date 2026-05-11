@@ -11,7 +11,7 @@ namespace Altemiq.IO.Las.Readers.Compressed;
 /// </summary>
 internal sealed class ByteReader3 : IContextReader
 {
-    private readonly IEntropyDecoder decoder;
+    private readonly ArithmeticDecoder decoder;
 
     private readonly Context[] contexts = new Context[4];
 
@@ -27,7 +27,7 @@ internal sealed class ByteReader3 : IContextReader
     /// <param name="decoder">The decoder.</param>
     /// <param name="number">The number.</param>
     /// <param name="decompressSelective">The selective decompress value.</param>
-    public ByteReader3(IEntropyDecoder decoder, uint number, DecompressSelections decompressSelective = DecompressSelections.All)
+    public ByteReader3(ArithmeticDecoder decoder, uint number, DecompressSelections decompressSelective = DecompressSelections.All)
     {
         const int Byte0 = (int)DecompressSelections.Byte0;
         this.decoder = decoder;
@@ -164,7 +164,7 @@ internal sealed class ByteReader3 : IContextReader
     [System.Diagnostics.CodeAnalysis.SuppressMessage("StyleCop.CSharp.MaintainabilityRules", "SA1401:FieldsShouldBePrivate", Justification = "This is used as an internal property bag.")]
     private sealed class Context
     {
-        public readonly ISymbolModel[] BytesModels;
+        public readonly ArithmeticSymbolModel[] BytesModels;
 
         public readonly byte[] LastItem;
 
@@ -172,7 +172,7 @@ internal sealed class ByteReader3 : IContextReader
 
         public Context(LayeredValue[] layeredValues)
         {
-            this.BytesModels = new ISymbolModel[layeredValues.Length];
+            this.BytesModels = new ArithmeticSymbolModel[layeredValues.Length];
             for (var i = 0; i < layeredValues.Length; i++)
             {
                 this.BytesModels[i] = layeredValues[i].Decoder.CreateSymbolModel(ArithmeticCoder.ModelCount);

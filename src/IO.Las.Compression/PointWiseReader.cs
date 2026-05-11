@@ -85,7 +85,7 @@ internal class PointWiseReader : RawReader
     /// <summary>
     /// Gets the decoder.
     /// </summary>
-    public IEntropyDecoder Decoder { get; }
+    public ArithmeticDecoder Decoder { get; }
 
     /// <inheritdoc/>
     public sealed override void Close(Stream stream) => this.Decoder.Done();

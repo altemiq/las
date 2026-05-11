@@ -12,7 +12,7 @@ namespace Altemiq.IO.Las.Readers.Compressed;
 /// <param name="decoder">The decoder.</param>
 /// <param name="extraBytes">The number of extra bytes.</param>
 /// <param name="decompressSelective">The selective decompress value.</param>
-internal sealed class ExtendedGpsPointDataRecordReader3(IEntropyDecoder decoder, int extraBytes, DecompressSelections decompressSelective = DecompressSelections.All) : ExtendedGpsPointDataRecordReader3<ExtendedGpsPointDataRecord>(decoder, ExtendedGpsPointDataRecord.Size + extraBytes, ExtendedGpsPointDataRecord.Size, decompressSelective), IDisposable
+internal sealed class ExtendedGpsPointDataRecordReader3(ArithmeticDecoder decoder, int extraBytes, DecompressSelections decompressSelective = DecompressSelections.All) : ExtendedGpsPointDataRecordReader3<ExtendedGpsPointDataRecord>(decoder, ExtendedGpsPointDataRecord.Size + extraBytes, ExtendedGpsPointDataRecord.Size, decompressSelective), IDisposable
 {
     private readonly IContextReader byteReader = extraBytes switch
     {

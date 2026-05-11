@@ -11,13 +11,13 @@ namespace Altemiq.IO.Las.Readers.Compressed;
 /// </summary>
 internal sealed class WavePacketReader1 : ISimpleReader
 {
-    private readonly IEntropyDecoder decoder;
+    private readonly ArithmeticDecoder decoder;
 
     private readonly byte[] lastItem = new byte[28];
 
-    private readonly ISymbolModel packetIndex;
+    private readonly ArithmeticSymbolModel packetIndex;
 
-    private readonly ISymbolModel[] offsetDiff = new ISymbolModel[4];
+    private readonly ArithmeticSymbolModel[] offsetDiff = new ArithmeticSymbolModel[4];
 
     private readonly IntegerDecompressor icOffsetDiff;
 
@@ -35,7 +35,7 @@ internal sealed class WavePacketReader1 : ISimpleReader
     /// Initializes a new instance of the <see cref="WavePacketReader1"/> class.
     /// </summary>
     /// <param name="decoder">The decoder.</param>
-    public WavePacketReader1(IEntropyDecoder decoder)
+    public WavePacketReader1(ArithmeticDecoder decoder)
     {
         ArgumentNullException.ThrowIfNull(decoder);
         this.decoder = decoder;

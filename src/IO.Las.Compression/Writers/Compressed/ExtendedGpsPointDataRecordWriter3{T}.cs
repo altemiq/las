@@ -21,7 +21,7 @@ internal abstract class ExtendedGpsPointDataRecordWriter3<T> : Writers.PointData
 
     private const int MultipleTotal = Multiple - MultipleMinus + 5;
 
-    private readonly IEntropyEncoder encoder;
+    private readonly ArithmeticEncoder encoder;
     private readonly Context[] contexts = new Context[4];
     private readonly LayeredValue valueChannelReturnsXY = new();
     private readonly LayeredValue valueZ = new();
@@ -39,7 +39,7 @@ internal abstract class ExtendedGpsPointDataRecordWriter3<T> : Writers.PointData
     /// Initializes a new instance of the <see cref="ExtendedGpsPointDataRecordWriter3"/> class.
     /// </summary>
     /// <param name="encoder">The Encoder.</param>
-    protected ExtendedGpsPointDataRecordWriter3(IEntropyEncoder encoder)
+    protected ExtendedGpsPointDataRecordWriter3(ArithmeticEncoder encoder)
     {
         this.encoder = encoder;
         this.contexts[0] = new(this.valueChannelReturnsXY, this.valueZ, this.valueIntensity, this.valueScanAngle, this.valuePointSource, this.valueGpsTime);
@@ -263,7 +263,7 @@ internal abstract class ExtendedGpsPointDataRecordWriter3<T> : Writers.PointData
             processingContext = this.contexts[this.currentContext];
         }
 
-        ISymbolModel? model;
+        ArithmeticSymbolModel? model;
 
         // if number of returns is different we compress it
         if ((changedValues & (1 << 2)) is not 0)
@@ -702,17 +702,17 @@ internal abstract class ExtendedGpsPointDataRecordWriter3<T> : Writers.PointData
         public readonly StreamingMedian5[] LastYDiffMedian5 = new StreamingMedian5[12];
         public readonly int[] LastZ = new int[8];
 
-        public readonly ISymbolModel[] ChangedValuesModels = new ISymbolModel[8];
-        public readonly ISymbolModel?[] NumberOfReturnsModels = new ISymbolModel[16];
-        public readonly ISymbolModel?[] ReturnNumberModels = new ISymbolModel[16];
-        public readonly ISymbolModel?[] ClassificationModels = new ISymbolModel[64];
-        public readonly ISymbolModel?[] FlagsModels = new ISymbolModel[64];
-        public readonly ISymbolModel?[] UserDataModels = new ISymbolModel[64];
+        public readonly ArithmeticSymbolModel[] ChangedValuesModels = new ArithmeticSymbolModel[8];
+        public readonly ArithmeticSymbolModel?[] NumberOfReturnsModels = new ArithmeticSymbolModel[16];
+        public readonly ArithmeticSymbolModel?[] ReturnNumberModels = new ArithmeticSymbolModel[16];
+        public readonly ArithmeticSymbolModel?[] ClassificationModels = new ArithmeticSymbolModel[64];
+        public readonly ArithmeticSymbolModel?[] FlagsModels = new ArithmeticSymbolModel[64];
+        public readonly ArithmeticSymbolModel?[] UserDataModels = new ArithmeticSymbolModel[64];
 
-        public readonly ISymbolModel ScannerChannelModel;
-        public readonly ISymbolModel ReturnNumberGpsSameModel;
-        public readonly ISymbolModel GpsTimeMultiModel;
-        public readonly ISymbolModel GpsTimeZeroDiffModel;
+        public readonly ArithmeticSymbolModel ScannerChannelModel;
+        public readonly ArithmeticSymbolModel ReturnNumberGpsSameModel;
+        public readonly ArithmeticSymbolModel GpsTimeMultiModel;
+        public readonly ArithmeticSymbolModel GpsTimeZeroDiffModel;
 
         public readonly IntegerCompressor DeltaXIntegerCompressor;
         public readonly IntegerCompressor DeltaYIntegerCompressor;

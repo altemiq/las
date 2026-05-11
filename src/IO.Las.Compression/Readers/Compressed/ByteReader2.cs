@@ -11,24 +11,24 @@ namespace Altemiq.IO.Las.Readers.Compressed;
 /// </summary>
 internal sealed class ByteReader2 : ISimpleReader
 {
-    private readonly IEntropyDecoder decoder;
+    private readonly ArithmeticDecoder decoder;
 
     private readonly byte[] lastItem;
 
-    private readonly ISymbolModel[] byteModels;
+    private readonly ArithmeticSymbolModel[] byteModels;
 
     /// <summary>
     /// Initializes a new instance of the <see cref="ByteReader2"/> class.
     /// </summary>
     /// <param name="decoder">The decoder.</param>
     /// <param name="number">The number.</param>
-    public ByteReader2(IEntropyDecoder decoder, uint number)
+    public ByteReader2(ArithmeticDecoder decoder, uint number)
     {
         ArgumentNullException.ThrowIfNull(decoder);
         this.decoder = decoder;
 
         // create models and integer compressors
-        this.byteModels = new ISymbolModel[number];
+        this.byteModels = new ArithmeticSymbolModel[number];
         for (var i = 0U; i < number; i++)
         {
             this.byteModels[i] = decoder.CreateSymbolModel(ArithmeticCoder.ModelCount);

@@ -11,7 +11,7 @@ namespace Altemiq.IO.Las.Writers.Compressed;
 /// </summary>
 /// <param name="encoder">The encoder.</param>
 /// <param name="extraBytes">The number of extra bytes.</param>
-internal sealed class PointDataRecordWriter(IEntropyEncoder encoder, int extraBytes) : PointDataRecordWriter<PointDataRecord>(encoder)
+internal sealed class PointDataRecordWriter(ArithmeticEncoder encoder, int extraBytes) : PointDataRecordWriter<PointDataRecord>(encoder)
 {
     private readonly ISimpleWriter byteWriter = extraBytes switch
     {

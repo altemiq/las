@@ -12,7 +12,7 @@ namespace Altemiq.IO.Las.Readers.Compressed;
 /// <param name="decoder">The decoder.</param>
 /// <param name="extraBytes">The extra bytes.</param>
 /// <param name="decompressSelective">The selected items to decompress.</param>
-internal sealed class ExtendedGpsColorNearInfraredPointDataRecordReader3(IEntropyDecoder decoder, int extraBytes, DecompressSelections decompressSelective = DecompressSelections.All) : ExtendedGpsPointDataRecordReader3<ExtendedGpsColorNearInfraredPointDataRecord>(decoder, ExtendedGpsColorNearInfraredPointDataRecord.Size + extraBytes, ExtendedGpsColorNearInfraredPointDataRecord.Size, decompressSelective), IDisposable
+internal sealed class ExtendedGpsColorNearInfraredPointDataRecordReader3(ArithmeticDecoder decoder, int extraBytes, DecompressSelections decompressSelective = DecompressSelections.All) : ExtendedGpsPointDataRecordReader3<ExtendedGpsColorNearInfraredPointDataRecord>(decoder, ExtendedGpsColorNearInfraredPointDataRecord.Size + extraBytes, ExtendedGpsColorNearInfraredPointDataRecord.Size, decompressSelective), IDisposable
 {
     private readonly ColorNearInfraredReader3 colorNearInfraredReader = new(decoder, decompressSelective);
 

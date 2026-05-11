@@ -1,0 +1,7 @@
+﻿<Project>
+
+  <ItemGroup Condition=" '$(IsBenchmarkProject)' == 'true' ">
+    <PackageReference Include="BenchmarkDotNet" />
+  </ItemGroup>
+
+</Project>

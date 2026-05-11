@@ -11,7 +11,7 @@ namespace Altemiq.IO.Las.Writers.Compressed;
 /// </summary>
 internal sealed class ColorWriter4 : IContextWriter
 {
-    private readonly IEntropyEncoder encoder;
+    private readonly ArithmeticEncoder encoder;
 
     private readonly Context[] contexts = new Context[4];
 
@@ -23,7 +23,7 @@ internal sealed class ColorWriter4 : IContextWriter
     /// Initializes a new instance of the <see cref="ColorWriter4"/> class.
     /// </summary>
     /// <param name="encoder">The encoder.</param>
-    public ColorWriter4(IEntropyEncoder encoder)
+    public ColorWriter4(ArithmeticEncoder encoder)
     {
         this.encoder = encoder;
         this.valueRgb = new();
@@ -185,13 +185,13 @@ internal sealed class ColorWriter4 : IContextWriter
     }
 
     [System.Diagnostics.CodeAnalysis.SuppressMessage("StyleCop.CSharp.MaintainabilityRules", "SA1401:FieldsShouldBePrivate", Justification = "This is used as an internal property bag.")]
-    private sealed class Context(IEntropyEncoder encoder)
+    private sealed class Context(ArithmeticEncoder encoder)
     {
         public readonly ushort[] LastItem = new ushort[3];
 
-        public readonly ISymbolModel ByteUsedModel = encoder.CreateSymbolModel(ArithmeticCoder.HalfModelCount);
+        public readonly ArithmeticSymbolModel ByteUsedModel = encoder.CreateSymbolModel(ArithmeticCoder.HalfModelCount);
 
-        public readonly ISymbolModel[] RgbDiffModels =
+        public readonly ArithmeticSymbolModel[] RgbDiffModels =
         [
             encoder.CreateSymbolModel(ArithmeticCoder.ModelCount),
             encoder.CreateSymbolModel(ArithmeticCoder.ModelCount),

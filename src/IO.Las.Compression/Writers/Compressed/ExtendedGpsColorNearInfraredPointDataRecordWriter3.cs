@@ -11,7 +11,7 @@ namespace Altemiq.IO.Las.Writers.Compressed;
 /// </summary>
 /// <param name="encoder">The encoder.</param>
 /// <param name="extraBytes">The number of extra bytes.</param>
-internal sealed class ExtendedGpsColorNearInfraredPointDataRecordWriter3(IEntropyEncoder encoder, int extraBytes) : ExtendedGpsPointDataRecordWriter3<ExtendedGpsColorNearInfraredPointDataRecord>(encoder)
+internal sealed class ExtendedGpsColorNearInfraredPointDataRecordWriter3(ArithmeticEncoder encoder, int extraBytes) : ExtendedGpsPointDataRecordWriter3<ExtendedGpsColorNearInfraredPointDataRecord>(encoder)
 {
     private readonly ColorNearInfraredWriter3 colorNearInfraredWriter = new(encoder);
 

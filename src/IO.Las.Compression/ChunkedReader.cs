@@ -368,7 +368,7 @@ internal abstract class ChunkedReader : IPointReader
     /// <param name="readChunkTotals">Set to <see langword="true"/> to read the chunk totals.</param>
     /// <param name="decoder">The decoder.</param>
     /// <returns>The chunk table.</returns>
-    internal static (long[] ChunkStarts, uint NumberChunks, uint TabledChunks, uint[]? ChunkTotals) ReadChunkTable(Stream stream, long chunksStart, bool readChunkTotals, IEntropyDecoder decoder)
+    internal static (long[] ChunkStarts, uint NumberChunks, uint TabledChunks, uint[]? ChunkTotals) ReadChunkTable(Stream stream, long chunksStart, bool readChunkTotals, ArithmeticDecoder decoder)
     {
         long[]? chunkStarts = default;
         uint numberChunks = default;
@@ -392,7 +392,7 @@ internal abstract class ChunkedReader : IPointReader
     protected static void ReadChunkTable(
         Stream stream,
         long chunksStart,
-        IEntropyDecoder decoder,
+        ArithmeticDecoder decoder,
         [System.Diagnostics.CodeAnalysis.NotNullIfNotNull(nameof(stream))]
         ref long[]? chunkStarts,
         ref uint numberChunks,
@@ -412,7 +412,7 @@ internal abstract class ChunkedReader : IPointReader
     protected static void ReadChunkTable(
         Stream stream,
         long chunksStart,
-        IEntropyDecoder decoder,
+        ArithmeticDecoder decoder,
         [System.Diagnostics.CodeAnalysis.NotNullIfNotNull(nameof(stream))]
         ref long[]? chunkStarts,
         ref uint numberChunks,
@@ -617,7 +617,7 @@ internal abstract class ChunkedReader : IPointReader
         long chunksStart,
         [System.Diagnostics.CodeAnalysis.DoesNotReturnIf(true)]
         bool readChunkTotals, // hack for forcing chunkTotals to not be null when `true`
-        IEntropyDecoder decoder,
+        ArithmeticDecoder decoder,
         [System.Diagnostics.CodeAnalysis.NotNullIfNotNull(nameof(stream))]
         ref long[]? chunkStarts,
         ref uint numberChunks,

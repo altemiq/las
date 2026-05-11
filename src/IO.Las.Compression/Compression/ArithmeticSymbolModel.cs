@@ -9,7 +9,7 @@ namespace Altemiq.IO.Las.Compression;
 /// <summary>
 /// The arithmetic symbol model.
 /// </summary>
-internal sealed class ArithmeticSymbolModel : ISymbolModel
+internal sealed class ArithmeticSymbolModel
 {
     /// <summary>
     /// Length bits discarded before mult.
@@ -68,31 +68,53 @@ internal sealed class ArithmeticSymbolModel : ISymbolModel
         this.SymbolCount = new uint[symbols];
     }
 
-    /// <inheritdoc/>
+    /// <summary>
+    /// Gets the distribution.
+    /// </summary>
     public uint[] Distribution { get; }
 
-    /// <inheritdoc/>
+    /// <summary>
+    /// Gets the symbol count.
+    /// </summary>
     public uint[] SymbolCount { get; }
 
-    /// <inheritdoc/>
+    /// <summary>
+    /// Gets the decoder table.
+    /// </summary>
     public uint[]? DecoderTable { get; }
 
-    /// <inheritdoc/>
+    /// <summary>
+    /// Gets the number of symbols in this model.
+    /// </summary>
     public uint Symbols { get; }
 
-    /// <inheritdoc/>
+    /// <summary>
+    /// Gets the last symbol index (<c><see cref="Symbols"/> - 1</c>).
+    /// </summary>
     public uint LastSymbol { get; }
 
-    /// <inheritdoc/>
+    /// <summary>
+    /// Gets the table shift.
+    /// </summary>
     public uint TableShift { get; }
 
-    /// <inheritdoc/>
+    /// <summary>
+    /// Gets a value indicating whether this instance has been initialized.
+    /// </summary>
     public bool Initialized { get; private set; }
 
-    /// <inheritdoc/>
+    /// <summary>
+    /// Decrements the symbols-until-update counter.
+    /// </summary>
+    /// <returns>The remaining symbols until the next update.</returns>
+    [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
     public uint DecrementSymbolsUntilUpdate() => --this.symbolsUntilUpdate;
 
-    /// <inheritdoc/>
+    /// <summary>
+    /// Initializes the symbol counts from <paramref name="table"/> (or all-ones when <see langword="null"/>).
+    /// </summary>
+    /// <param name="table">The initial symbol count table, or <see langword="null"/> to use uniform counts.</param>
+    /// <returns><see langword="true"/> once initialized.</returns>
     public bool Initialize(uint[]? table = null)
     {
         this.totalCount = default;

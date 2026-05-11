@@ -9,7 +9,7 @@ namespace Altemiq.IO.Las.Compression;
 /// <summary>
 /// The arithmetic decoder.
 /// </summary>
-internal sealed class ArithmeticDecoder : ArithmeticCoder, IEntropyDecoder
+internal sealed class ArithmeticDecoder : ArithmeticCoder
 {
     private Stream? inputStream;
 
@@ -17,7 +17,12 @@ internal sealed class ArithmeticDecoder : ArithmeticCoder, IEntropyDecoder
 
     private uint length;
 
-    /// <inheritdoc/>
+    /// <summary>
+    /// Initializes this instance against the specified input <paramref name="stream"/>.
+    /// </summary>
+    /// <param name="stream">The stream to decode from.</param>
+    /// <param name="reallyInit">Set to <see langword="true"/> to prime the decoder with the first 4 bytes.</param>
+    /// <returns><see langword="true"/> if initialized, or <see langword="false"/> if <paramref name="stream"/> was <see langword="null"/>.</returns>
     [System.Diagnostics.CodeAnalysis.MemberNotNullWhen(true, nameof(inputStream))]
     public bool Initialize(Stream? stream, bool reallyInit = true)
     {
@@ -42,11 +47,16 @@ internal sealed class ArithmeticDecoder : ArithmeticCoder, IEntropyDecoder
         return true;
     }
 
-    /// <inheritdoc/>
+    /// <inheritdoc />
     public override void Done() => this.inputStream = null;
 
-    /// <inheritdoc/>
-    public uint DecodeBit(IBitModel model)
+    /// <summary>
+    /// Decodes a bit with modelling.
+    /// </summary>
+    /// <param name="model">The model.</param>
+    /// <returns>The decoded bit.</returns>
+    [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
+    public uint DecodeBit(ArithmeticBitModel model)
     {
         const int BitLengthShift = ArithmeticBitModel.LengthShift;
 
@@ -85,8 +95,13 @@ internal sealed class ArithmeticDecoder : ArithmeticCoder, IEntropyDecoder
         return sym;
     }
 
-    /// <inheritdoc/>
-    public uint DecodeSymbol(ISymbolModel model)
+    /// <summary>
+    /// Decodes a symbol with modelling.
+    /// </summary>
+    /// <param name="model">The model.</param>
+    /// <returns>The decoded symbol.</returns>
+    [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
+    public uint DecodeSymbol(ArithmeticSymbolModel model)
     {
         if (!model.Initialized)
         {
@@ -179,7 +194,10 @@ internal sealed class ArithmeticDecoder : ArithmeticCoder, IEntropyDecoder
         return symbol;
     }
 
-    /// <inheritdoc/>
+    /// <summary>
+    /// Decodes the next bit without using a model.
+    /// </summary>
+    /// <returns>The decoded bit (0 or 1).</returns>
     public uint ReadBit()
     {
         // decode symbol, change length
@@ -198,7 +216,11 @@ internal sealed class ArithmeticDecoder : ArithmeticCoder, IEntropyDecoder
         return sym;
     }
 
-    /// <inheritdoc/>
+    /// <summary>
+    /// Decodes the next <paramref name="bits"/> bits without using a model.
+    /// </summary>
+    /// <param name="bits">The number of bits to read (1-32).</param>
+    /// <returns>The decoded value.</returns>
     public uint ReadBits(uint bits)
     {
         if (bits > 19)
@@ -223,7 +245,10 @@ internal sealed class ArithmeticDecoder : ArithmeticCoder, IEntropyDecoder
         return sym;
     }
 
-    /// <inheritdoc/>
+    /// <summary>
+    /// Decodes the next byte without using a model.
+    /// </summary>
+    /// <returns>The decoded byte.</returns>
     public byte ReadByte()
     {
         // decode symbol, change length
@@ -242,7 +267,10 @@ internal sealed class ArithmeticDecoder : ArithmeticCoder, IEntropyDecoder
         return (byte)sym;
     }
 
-    /// <inheritdoc/>
+    /// <summary>
+    /// Decodes the next <see cref="ushort"/> without using a model.
+    /// </summary>
+    /// <returns>The decoded value.</returns>
     public ushort ReadUInt16()
     {
         // decode symbol, change length
@@ -261,7 +289,10 @@ internal sealed class ArithmeticDecoder : ArithmeticCoder, IEntropyDecoder
         return (ushort)sym;
     }
 
-    /// <inheritdoc/>
+    /// <summary>
+    /// Decodes the next <see cref="uint"/> without using a model.
+    /// </summary>
+    /// <returns>The decoded value.</returns>
     public uint ReadUInt32()
     {
         uint lowerInt = this.ReadUInt16();
@@ -269,10 +300,16 @@ internal sealed class ArithmeticDecoder : ArithmeticCoder, IEntropyDecoder
         return (upperInt << 16) | lowerInt;
     }
 
-    /// <inheritdoc/>
+    /// <summary>
+    /// Decodes the next <see cref="float"/> without using a model.
+    /// </summary>
+    /// <returns>The decoded value.</returns>
     public float ReadSingle() => BitConverter.UInt32BitsToSingle(this.ReadUInt32());
 
-    /// <inheritdoc/>
+    /// <summary>
+    /// Decodes the next <see cref="ulong"/> without using a model.
+    /// </summary>
+    /// <returns>The decoded value.</returns>
     public ulong ReadUInt64()
     {
         ulong lowerInt = this.ReadUInt32();
@@ -280,10 +317,17 @@ internal sealed class ArithmeticDecoder : ArithmeticCoder, IEntropyDecoder
         return (upperInt << 32) | lowerInt;
     }
 
-    /// <inheritdoc/>
+    /// <summary>
+    /// Decodes the next <see cref="double"/> without using a model.
+    /// </summary>
+    /// <returns>The decoded value.</returns>
     public double ReadDouble() => BitConverter.UInt64BitsToDouble(this.ReadUInt64());
 
-    /// <inheritdoc/>
+    /// <summary>
+    /// Gets the underlying input stream.
+    /// </summary>
+    /// <returns>The stream.</returns>
+    /// <exception cref="CompressionNotInitializedException">The decoder has not been initialized.</exception>
     public Stream GetStream() => this.inputStream ?? throw new CompressionNotInitializedException();
 
     private void RenormalizeDecimalInterval()

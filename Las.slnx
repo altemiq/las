@@ -19,6 +19,14 @@
     <File Path="Directory.Versions.props" />
     <File Path="nuget.config" />
   </Folder>
+  <Folder Name="/benchmarks/">
+    <File Path="benchmarks/Directory.Build.props" />
+    <File Path="benchmarks/Directory.Build.targets" />
+    <File Path="benchmarks/Directory.Packages.props" />
+    <Project Path="benchmarks/IO.Las.Compression.Benchmarks/IO.Las.Compression.Benchmarks.csproj">
+      <Build Solution="Release|*" Project="false" />
+    </Project>
+  </Folder>
   <Folder Name="/src/">
     <File Path="src/Directory.Build.props" />
     <File Path="src/Directory.Build.targets" />

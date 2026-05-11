@@ -11,7 +11,7 @@ namespace Altemiq.IO.Las.Compression;
 /// </summary>
 internal sealed class IntegerCompressor
 {
-    private readonly IEntropyEncoder encoder;
+    private readonly ArithmeticEncoder encoder;
 
     private readonly uint bitsHigh;
 
@@ -21,11 +21,11 @@ internal sealed class IntegerCompressor
 
     private readonly int correctorMax;
 
-    private readonly ISymbolModel[] bitsModels;
+    private readonly ArithmeticSymbolModel[] bitsModels;
 
-    private readonly ISymbolModel[] correctorModels;
+    private readonly ArithmeticSymbolModel[] correctorModels;
 
-    private readonly IBitModel correctorBitModel;
+    private readonly ArithmeticBitModel correctorBitModel;
 
     /// <summary>
     /// Initializes a new instance of the <see cref="IntegerCompressor"/> class.
@@ -35,7 +35,7 @@ internal sealed class IntegerCompressor
     /// <param name="contexts">The contexts.</param>
     /// <param name="bitsHigh">The high bits.</param>
     /// <param name="range">The range.</param>
-    public IntegerCompressor(IEntropyEncoder enc, uint bits = 16, uint contexts = 1, uint bitsHigh = 8, uint range = 0)
+    public IntegerCompressor(ArithmeticEncoder enc, uint bits = 16, uint contexts = 1, uint bitsHigh = 8, uint range = 0)
     {
         this.encoder = enc;
         this.bitsHigh = bitsHigh;
@@ -81,8 +81,8 @@ internal sealed class IntegerCompressor
         }
 
         this.K = default;
-        this.bitsModels = new ISymbolModel[contexts];
-        this.correctorModels = new ISymbolModel[correctorBits + 1];
+        this.bitsModels = new ArithmeticSymbolModel[contexts];
+        this.correctorModels = new ArithmeticSymbolModel[correctorBits + 1];
 
         for (var i = 0; i < this.bitsModels.Length; i++)
         {
@@ -153,7 +153,7 @@ internal sealed class IntegerCompressor
 
         WriteCorrector(corr, this.bitsModels[context]);
 
-        void WriteCorrector(int c, ISymbolModel model)
+        void WriteCorrector(int c, ArithmeticSymbolModel model)
         {
             // find the highest interval [ - (2^k - 1)  ...  + (2^k) ] that contains c
             this.K = default;

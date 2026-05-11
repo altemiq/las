@@ -15,7 +15,7 @@ internal sealed class LayeredValue
     /// <summary>
     /// The encoder.
     /// </summary>
-    public readonly IEntropyEncoder Encoder = new ArithmeticEncoder();
+    public readonly ArithmeticEncoder Encoder = new ArithmeticEncoder();
 
     /// <summary>
     /// The value indicating whether this instance has changed.
@@ -42,12 +42,12 @@ internal sealed class LayeredValue
     }
 
     /// <summary>
-    /// Calls the <see cref="Compression.IEntropyCoder.Done"/> method for the <see cref="LayeredValue"/>.
+    /// Calls the <see cref="Compression.ArithmeticCoder.Done"/> method for the <see cref="LayeredValue"/>.
     /// </summary>
     public void EncoderDone() => this.Encoder.Done();
 
     /// <summary>
-    /// Calls the <see cref="Compression.IEntropyCoder.Done"/> method for the <see cref="LayeredValue"/> if <see cref="LayeredValue.Changed"/> is <see langword="true"/>.
+    /// Calls the <see cref="Compression.ArithmeticCoder.Done"/> method for the <see cref="LayeredValue"/> if <see cref="LayeredValue.Changed"/> is <see langword="true"/>.
     /// </summary>
     public void EncoderDoneIfChanged()
     {

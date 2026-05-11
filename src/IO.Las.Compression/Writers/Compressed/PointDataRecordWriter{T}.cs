@@ -13,14 +13,14 @@ namespace Altemiq.IO.Las.Writers.Compressed;
 internal abstract class PointDataRecordWriter<T> : IPointDataRecordWriter, ISimpleWriter
     where T : IBasePointDataRecord
 {
-    private readonly IEntropyEncoder encoder;
-    private readonly ISymbolModel changedValuesModel;
+    private readonly ArithmeticEncoder encoder;
+    private readonly ArithmeticSymbolModel changedValuesModel;
     private readonly IntegerCompressor intensityIntegerCompressor;
-    private readonly ISymbolModel[] scanAngleRankModels = new ISymbolModel[2];
+    private readonly ArithmeticSymbolModel[] scanAngleRankModels = new ArithmeticSymbolModel[2];
     private readonly IntegerCompressor pointSourceIdIntegerCompressor;
-    private readonly ISymbolModel?[] bitByteModels = new ISymbolModel[ArithmeticCoder.ModelCount];
-    private readonly ISymbolModel?[] classificationModels = new ISymbolModel[ArithmeticCoder.ModelCount];
-    private readonly ISymbolModel?[] userDataModels = new ISymbolModel[ArithmeticCoder.ModelCount];
+    private readonly ArithmeticSymbolModel?[] bitByteModels = new ArithmeticSymbolModel[ArithmeticCoder.ModelCount];
+    private readonly ArithmeticSymbolModel?[] classificationModels = new ArithmeticSymbolModel[ArithmeticCoder.ModelCount];
+    private readonly ArithmeticSymbolModel?[] userDataModels = new ArithmeticSymbolModel[ArithmeticCoder.ModelCount];
     private readonly IntegerCompressor deltaXIntegerCompressor;
     private readonly IntegerCompressor deltaYIntegerCompressor;
     private readonly IntegerCompressor zIntegerCompressor;
@@ -34,7 +34,7 @@ internal abstract class PointDataRecordWriter<T> : IPointDataRecordWriter, ISimp
     /// Initializes a new instance of the <see cref="PointDataRecordWriter{T}"/> class.
     /// </summary>
     /// <param name="encoder">The encoder.</param>
-    protected PointDataRecordWriter(IEntropyEncoder encoder)
+    protected PointDataRecordWriter(ArithmeticEncoder encoder)
     {
         this.encoder = encoder;
 

@@ -1,0 +1,37 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net10.0</TargetFramework>
+    <!--
+      Controls whether the benchmark builds against the local source tree
+      (the default, empty) or a specific published Altemiq.IO.Las.Compression
+      NuGet package. BenchmarkDotNet's NuGet-swap pattern (see
+      https://benchmarkdotnet.org/articles/samples/IntroNuGet.html) passes this
+      property per-job via WithMsBuildArguments("/p:LasCompressionVersion=...").
+    -->
+    <LasCompressionVersion Condition=" '$(LasCompressionVersion)' == '' "></LasCompressionVersion>
+  </PropertyGroup>
+
+  <!-- Local source (default): reference the in-tree Compression project. -->
+  <ItemGroup Condition=" '$(LasCompressionVersion)' == '' ">
+    <ProjectReference Include="..\..\src\IO.Las.Compression\IO.Las.Compression.csproj" />
+  </ItemGroup>
+
+  <!-- Published NuGet baseline: reference the package at the requested version.
+       We set VersionOverride so the exact version flows from
+       /p:LasCompressionVersion=... rather than from the central PackageVersion
+       declaration in benchmarks/Directory.Packages.props (which is a high-
+       enough placeholder to satisfy CPM but never actually selects a package,
+       because VersionOverride wins). -->
+  <ItemGroup Condition=" '$(LasCompressionVersion)' != '' ">
+    <PackageReference Include="Altemiq.IO.Las.Compression" VersionOverride="[$(LasCompressionVersion)]" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Include="..\..\data\laz\fusa.laz" Link="data\fusa.laz" CopyToOutputDirectory="PreserveNewest" />
+    <None Include="..\..\tests\IO.Las.Compression.Tests\coloured.laz" Link="data\coloured.laz" CopyToOutputDirectory="PreserveNewest" />
+    <None Include="..\..\tests\IO.Las.Compression.Tests\fusa_height_7.laz" Link="data\fusa_height_7.laz" CopyToOutputDirectory="PreserveNewest" />
+  </ItemGroup>
+
+</Project>
+

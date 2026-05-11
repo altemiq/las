@@ -11,7 +11,7 @@ namespace Altemiq.IO.Las.Writers.Compressed;
 /// </summary>
 internal sealed class WavePacketWriter3 : IContextWriter
 {
-    private readonly IEntropyEncoder encoder;
+    private readonly ArithmeticEncoder encoder;
 
     private readonly Context[] contexts = new Context[4];
 
@@ -23,7 +23,7 @@ internal sealed class WavePacketWriter3 : IContextWriter
     /// Initializes a new instance of the <see cref="WavePacketWriter3"/> class.
     /// </summary>
     /// <param name="encoder">The encoder.</param>
-    public WavePacketWriter3(IEntropyEncoder encoder)
+    public WavePacketWriter3(ArithmeticEncoder encoder)
     {
         this.encoder = encoder;
         this.valueWavePacket = new();
@@ -190,11 +190,11 @@ internal sealed class WavePacketWriter3 : IContextWriter
     }
 
     [System.Diagnostics.CodeAnalysis.SuppressMessage("StyleCop.CSharp.MaintainabilityRules", "SA1401:FieldsShouldBePrivate", Justification = "This is used as an internal property bag.")]
-    private sealed class Context(IEntropyEncoder encoder)
+    private sealed class Context(ArithmeticEncoder encoder)
     {
         public readonly byte[] LastItem = new byte[29];
 
-        public readonly ISymbolModel[] OffsetDiff =
+        public readonly ArithmeticSymbolModel[] OffsetDiff =
         [
             encoder.CreateSymbolModel(4),
             encoder.CreateSymbolModel(4),
@@ -202,7 +202,7 @@ internal sealed class WavePacketWriter3 : IContextWriter
             encoder.CreateSymbolModel(4),
         ];
 
-        public readonly ISymbolModel PacketIndex = encoder.CreateSymbolModel(ArithmeticCoder.ModelCount);
+        public readonly ArithmeticSymbolModel PacketIndex = encoder.CreateSymbolModel(ArithmeticCoder.ModelCount);
 
         public readonly IntegerCompressor IcOffsetDiff = new(encoder, 32);
         public readonly IntegerCompressor IcPacketSize = new(encoder, 32);

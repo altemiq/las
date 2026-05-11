@@ -47,14 +47,14 @@ public class IntegerCoderInitializeTests
 
         decompressor.Initialize();
 
-        await Assert.That(CorrectorModelsDec.GetValue(decompressor) as ISymbolModel[])
+        await Assert.That(CorrectorModelsDec.GetValue(decompressor) as ArithmeticSymbolModel[])
             .IsNotNull().And
             .Count().IsEqualTo(17).And
             .Satisfies(cm => cm[0], m => m.IsNull()).And
-            .Satisfies(cm => cm.Skip(1), m=> m.All((ISymbolModel sm) => sm?.Initialized is true, "Is initialized"));
+            .Satisfies(cm => cm.Skip(1), m=> m.All((ArithmeticSymbolModel sm) => sm?.Initialized is true, "Is initialized"));
 
         // All bitsModels and the corrector bit model must be initialized.
-        await Assert.That(BitsModelsDec.GetValue(decompressor) as ISymbolModel[])
+        await Assert.That(BitsModelsDec.GetValue(decompressor) as ArithmeticSymbolModel[])
             .IsNotNull().And
             .Count().IsEqualTo(4).And.All(m => m.Initialized);
 
@@ -70,13 +70,13 @@ public class IntegerCoderInitializeTests
 
         compressor.Initialize();
 
-        await Assert.That(CorrectorModelsEnc.GetValue(compressor) as ISymbolModel[])
+        await Assert.That(CorrectorModelsEnc.GetValue(compressor) as ArithmeticSymbolModel[])
             .IsNotNull().And
             .Count().IsEqualTo(17).And
             .Satisfies(cm => cm[0], m => m.IsNull()).And
-            .Satisfies(cm => cm.Skip(1), m=> m.All((ISymbolModel sm) => sm?.Initialized is true, "Is initialized"));
+            .Satisfies(cm => cm.Skip(1), m=> m.All((ArithmeticSymbolModel sm) => sm?.Initialized is true, "Is initialized"));
 
-        await Assert.That(BitsModelsEnc.GetValue(compressor) as ISymbolModel[])
+        await Assert.That(BitsModelsEnc.GetValue(compressor) as ArithmeticSymbolModel[])
             .IsNotNull().And
             .Count().IsEqualTo(4).And.All(m => m.Initialized);
 

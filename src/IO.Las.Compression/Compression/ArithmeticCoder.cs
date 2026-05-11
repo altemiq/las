@@ -9,7 +9,7 @@ namespace Altemiq.IO.Las.Compression;
 /// <summary>
 /// The arithmetic encoder.
 /// </summary>
-internal abstract class ArithmeticCoder : IEntropyCoder
+internal abstract class ArithmeticCoder
 {
     /// <summary>
     /// The default model count.
@@ -36,12 +36,25 @@ internal abstract class ArithmeticCoder : IEntropyCoder
     /// </summary>
     protected const uint MaxLength = 0xFFFFFFFFU;
 
-    /// <inheritdoc/>
+    /// <summary>
+    /// Finalizes this instance.
+    /// </summary>
     public abstract void Done();
 
-    /// <inheritdoc/>
-    public IBitModel CreateBitModel() => new ArithmeticBitModel();
+    /// <summary>
+    /// Creates the bit model.
+    /// </summary>
+    /// <returns>The bit model.</returns>
+    [System.Diagnostics.CodeAnalysis.SuppressMessage("Performance", "CA1822:Mark members as static", Justification = "Factory method kept as instance for uniform call syntax across encoder/decoder.")]
+    [System.Diagnostics.CodeAnalysis.SuppressMessage("Minor Code Smell", "S2325:Methods and properties that don't access instance data should be static", Justification = "Factory method kept as instance for uniform call syntax across encoder/decoder.")]
+    public ArithmeticBitModel CreateBitModel() => new();
 
-    /// <inheritdoc/>
-    public ISymbolModel CreateSymbolModel(uint n) => new ArithmeticSymbolModel(n, compress: false);
+    /// <summary>
+    /// Creates an entropy model for n symbols.
+    /// </summary>
+    /// <param name="n">The number of symbols.</param>
+    /// <returns>The symbol model.</returns>
+    [System.Diagnostics.CodeAnalysis.SuppressMessage("Performance", "CA1822:Mark members as static", Justification = "Factory method kept as instance for uniform call syntax across encoder/decoder.")]
+    [System.Diagnostics.CodeAnalysis.SuppressMessage("Minor Code Smell", "S2325:Methods and properties that don't access instance data should be static", Justification = "Factory method kept as instance for uniform call syntax across encoder/decoder.")]
+    public ArithmeticSymbolModel CreateSymbolModel(uint n) => new(n, compress: false);
 }

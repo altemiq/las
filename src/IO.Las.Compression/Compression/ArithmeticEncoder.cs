@@ -9,7 +9,7 @@ namespace Altemiq.IO.Las.Compression;
 /// <summary>
 /// The arithmetic encoder.
 /// </summary>
-internal sealed class ArithmeticEncoder : ArithmeticCoder, IEntropyEncoder
+internal sealed class ArithmeticEncoder : ArithmeticCoder
 {
     private const int Size = sizeof(byte) * 2 * BufferSize;
     private readonly byte[] outBuffer = new byte[Size];
@@ -20,7 +20,11 @@ internal sealed class ArithmeticEncoder : ArithmeticCoder, IEntropyEncoder
     private uint @base;
     private uint length;
 
-    /// <inheritdoc/>
+    /// <summary>
+    /// Initializes this instance against the specified output <paramref name="stream"/>.
+    /// </summary>
+    /// <param name="stream">The stream to encode into.</param>
+    /// <returns><see langword="true"/> if initialized, or <see langword="false"/> if <paramref name="stream"/> was <see langword="null"/>.</returns>
     [System.Diagnostics.CodeAnalysis.MemberNotNullWhen(true, nameof(outputStream))]
     public bool Initialize(Stream? stream)
     {
@@ -38,7 +42,7 @@ internal sealed class ArithmeticEncoder : ArithmeticCoder, IEntropyEncoder
         return true;
     }
 
-    /// <inheritdoc/>
+    /// <inheritdoc />
     public override void Done()
     {
         if (this.outputStream is null)
@@ -100,8 +104,13 @@ internal sealed class ArithmeticEncoder : ArithmeticCoder, IEntropyEncoder
         this.outputStream = null;
     }
 
-    /// <inheritdoc/>
-    public void EncodeBit(IBitModel model, uint sym)
+    /// <summary>
+    /// Encodes a bit with modelling.
+    /// </summary>
+    /// <param name="model">The bit model.</param>
+    /// <param name="sym">The symbol (0 or 1).</param>
+    [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
+    public void EncodeBit(ArithmeticBitModel model, uint sym)
     {
         // product l x p0 update interval
         var x = model.BitZeroProb * (this.length >> ArithmeticBitModel.LengthShift);
@@ -136,8 +145,13 @@ internal sealed class ArithmeticEncoder : ArithmeticCoder, IEntropyEncoder
         }
     }
 
-    /// <inheritdoc/>
-    public void EncodeSymbol(ISymbolModel model, uint sym)
+    /// <summary>
+    /// Encodes a symbol with modelling.
+    /// </summary>
+    /// <param name="model">The symbol model.</param>
+    /// <param name="sym">The symbol index.</param>
+    [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
+    public void EncodeSymbol(ArithmeticSymbolModel model, uint sym)
     {
         // compute products
         var initialBase = this.@base;
@@ -181,7 +195,10 @@ internal sealed class ArithmeticEncoder : ArithmeticCoder, IEntropyEncoder
         }
     }
 
-    /// <inheritdoc/>
+    /// <summary>
+    /// Encodes the next bit without using a model.
+    /// </summary>
+    /// <param name="sym">The bit (0 or 1).</param>
     public void WriteBit(uint sym)
     {
         var initialBase = this.@base;
@@ -203,7 +220,11 @@ internal sealed class ArithmeticEncoder : ArithmeticCoder, IEntropyEncoder
         }
     }
 
-    /// <inheritdoc/>
+    /// <summary>
+    /// Encodes the next <paramref name="bits"/> bits without using a model.
+    /// </summary>
+    /// <param name="bits">The number of bits to write (1-32).</param>
+    /// <param name="sym">The value to encode.</param>
     public void WriteBits(int bits, uint sym)
     {
         if (bits > 19)
@@ -232,7 +253,10 @@ internal sealed class ArithmeticEncoder : ArithmeticCoder, IEntropyEncoder
         }
     }
 
-    /// <inheritdoc/>
+    /// <summary>
+    /// Encodes the next byte without using a model.
+    /// </summary>
+    /// <param name="sym">The byte to encode.</param>
     public void WriteByte(byte sym)
     {
         var initialBase = this.@base;
@@ -254,7 +278,10 @@ internal sealed class ArithmeticEncoder : ArithmeticCoder, IEntropyEncoder
         }
     }
 
-    /// <inheritdoc/>
+    /// <summary>
+    /// Encodes the next <see cref="ushort"/> without using a model.
+    /// </summary>
+    /// <param name="sym">The value to encode.</param>
     public void WriteUInt16(ushort sym)
     {
         var initialBase = this.@base;
@@ -276,7 +303,10 @@ internal sealed class ArithmeticEncoder : ArithmeticCoder, IEntropyEncoder
         }
     }
 
-    /// <inheritdoc/>
+    /// <summary>
+    /// Encodes the next <see cref="uint"/> without using a model.
+    /// </summary>
+    /// <param name="sym">The value to encode.</param>
     public void WriteUInt32(uint sym)
     {
         // lower 16 bits
@@ -286,10 +316,16 @@ internal sealed class ArithmeticEncoder : ArithmeticCoder, IEntropyEncoder
         this.WriteUInt16((ushort)(sym >> 16));
     }
 
-    /// <inheritdoc/>
+    /// <summary>
+    /// Encodes the next <see cref="float"/> without using a model.
+    /// </summary>
+    /// <param name="sym">The value to encode.</param>
     public void WriteSingle(float sym) => this.WriteUInt32(BitConverter.SingleToUInt32Bits(sym));
 
-    /// <inheritdoc/>
+    /// <summary>
+    /// Encodes the next <see cref="ulong"/> without using a model.
+    /// </summary>
+    /// <param name="sym">The value to encode.</param>
     public void WriteUInt64(ulong sym)
     {
         // lower 32 bits
@@ -299,7 +335,10 @@ internal sealed class ArithmeticEncoder : ArithmeticCoder, IEntropyEncoder
         this.WriteUInt32((uint)(sym >> 32));
     }
 
-    /// <inheritdoc/>
+    /// <summary>
+    /// Encodes the next <see cref="double"/> without using a model.
+    /// </summary>
+    /// <param name="sym">The value to encode.</param>
     public void WriteDouble(double sym) => this.WriteUInt64(BitConverter.DoubleToUInt64Bits(sym));
 
     /// <summary>

@@ -11,13 +11,13 @@ namespace Altemiq.IO.Las.Writers.Compressed;
 /// </summary>
 internal sealed class WavePacketWriter2 : ISimpleWriter
 {
-    private readonly IEntropyEncoder encoder;
+    private readonly ArithmeticEncoder encoder;
 
     private readonly byte[] lastItem = new byte[28];
 
-    private readonly ISymbolModel packetIndex;
+    private readonly ArithmeticSymbolModel packetIndex;
 
-    private readonly ISymbolModel[] offsetDiff = new ISymbolModel[6];
+    private readonly ArithmeticSymbolModel[] offsetDiff = new ArithmeticSymbolModel[6];
 
     private readonly IntegerCompressor icOffsetDiff;
 
@@ -35,7 +35,7 @@ internal sealed class WavePacketWriter2 : ISimpleWriter
     /// Initializes a new instance of the <see cref="WavePacketWriter2"/> class.
     /// </summary>
     /// <param name="encoder">The encoder.</param>
-    public WavePacketWriter2(IEntropyEncoder encoder)
+    public WavePacketWriter2(ArithmeticEncoder encoder)
     {
         this.encoder = encoder;
 
