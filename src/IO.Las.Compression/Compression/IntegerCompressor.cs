@@ -44,13 +44,8 @@ internal sealed class IntegerCompressor
         if (range is not 0)
         {
             // the corrector's significant bits and range
-            correctorBits = default;
             this.correctorRange = range;
-            while (range > 0)
-            {
-                range >>= 1;
-                correctorBits++;
-            }
+            correctorBits = (uint)System.Numerics.BitOperations.Log2(range) + 1;
 
             if (this.correctorRange == (1U << (int)(correctorBits - 1)))
             {

@@ -350,12 +350,23 @@ internal sealed class ArithmeticEncoder : ArithmeticCoder
 
     private void PropagateCarry()
     {
+        // Walk backwards from outByte, zeroing out a run of trailing 0xFF bytes
+        // and then incrementing the byte immediately before them. The buffer
+        // length is a compile-time constant (Size), so we use a ref to the
+        // buffer start + Unsafe.Add to eliminate the per-iteration
+        // array-bounds check.
+#if NET5_0_OR_GREATER
+        ref var bufferRef = ref System.Runtime.InteropServices.MemoryMarshal.GetArrayDataReference(this.outBuffer);
+#else
+        ref var bufferRef = ref this.outBuffer[0];
+#endif
+
         var current = this.outByte is 0
             ? Size - 1
             : this.outByte - 1;
-        while (this.outBuffer[current] is byte.MaxValue)
+        while (System.Runtime.CompilerServices.Unsafe.Add(ref bufferRef, current) is byte.MaxValue)
         {
-            this.outBuffer[current] = default;
+            System.Runtime.CompilerServices.Unsafe.Add(ref bufferRef, current) = default;
             if (current is 0)
             {
                 current = Size - 1;
@@ -366,7 +377,7 @@ internal sealed class ArithmeticEncoder : ArithmeticCoder
             }
         }
 
-        this.outBuffer[current]++;
+        System.Runtime.CompilerServices.Unsafe.Add(ref bufferRef, current)++;
     }
 
     private void RenormEncInterval()
