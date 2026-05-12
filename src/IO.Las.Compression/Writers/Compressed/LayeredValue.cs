@@ -15,7 +15,7 @@ internal sealed class LayeredValue
     /// <summary>
     /// The encoder.
     /// </summary>
-    public readonly ArithmeticEncoder Encoder = new ArithmeticEncoder();
+    public readonly ArithmeticEncoder Encoder = new();
 
     /// <summary>
     /// The value indicating whether this instance has changed.

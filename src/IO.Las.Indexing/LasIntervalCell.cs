@@ -14,34 +14,24 @@ namespace Altemiq.IO.Las.Indexing;
 /// mutate through <see langword="ref"/> via the arena indexer (<see cref="IntervalArena.this"/>) to avoid
 /// silently modifying a copy.
 /// </remarks>
+/// <param name="start">The start point index.</param>
+/// <param name="end">The end point index.</param>
 [System.Runtime.InteropServices.StructLayout(System.Runtime.InteropServices.LayoutKind.Auto)]
-internal struct LasIntervalCell
+internal struct LasIntervalCell(uint start, uint end)
 {
-    /// <summary>
-    /// Initializes a new instance of the <see cref="LasIntervalCell"/> struct.
-    /// </summary>
-    /// <param name="start">The start point index.</param>
-    /// <param name="end">The end point index.</param>
-    public LasIntervalCell(uint start, uint end)
-    {
-        this.Start = start;
-        this.End = end;
-        this.Next = IntervalArena.NullIndex;
-    }
-
     /// <summary>
     /// Gets or sets the inclusive start point index of this interval.
     /// </summary>
-    public uint Start { get; set; }
+    public uint Start { get; set; } = start;
 
     /// <summary>
     /// Gets or sets the inclusive end point index of this interval.
     /// </summary>
-    public uint End { get; set; }
+    public uint End { get; set; } = end;
 
     /// <summary>
     /// Gets or sets the arena index of the next cell in the chain, or <see cref="IntervalArena.NullIndex"/>
     /// if this is the last cell.
     /// </summary>
-    public int Next { get; set; }
+    public int Next { get; set; } = IntervalArena.NullIndex;
 }

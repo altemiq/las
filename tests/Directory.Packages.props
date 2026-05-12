@@ -8,7 +8,7 @@
   <Import Project="$([MSBuild]::GetPathOfFileAbove('$(MSBuildThisFileName.Replace('Packages', 'Versions'))$(MSBuildThisFileExtension)', '$(MSBuildThisFileDirectory)'))" />
 
   <ItemGroup>
-    <PackageVersion Include="Meziantou.Polyfill" Version="1.0.127" />
+    <PackageVersion Include="Meziantou.Polyfill" Version="1.0.128" />
     <PackageVersion Include="TUnit" Version="1.44.0" />
   </ItemGroup>
   

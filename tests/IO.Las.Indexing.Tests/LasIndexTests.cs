@@ -30,7 +30,7 @@ public class LasIndexTests
                                    ?? throw new System.Diagnostics.UnreachableException());
         var fromLas = await Assert.That(() => LasIndex.Create(reader)).ThrowsNothing().And.IsTypeOf<LasIndex>();
         await reader.DisposeAsync();
-        
-        await Assert.That(fromLax).IsEqualTo(fromLas);
+
+        await Assert.That(fromLax).IsEquivalentTo(fromLas);
     }
 }

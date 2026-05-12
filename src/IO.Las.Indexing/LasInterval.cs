@@ -41,11 +41,6 @@ internal sealed class LasInterval : IEnumerable<KeyValuePair<int, LasIntervalSta
     }
 
     /// <summary>
-    /// Gets the arena backing this interval's tail cells.
-    /// </summary>
-    public IntervalArena Arena => this.arena;
-
-    /// <summary>
     /// Reads the interval from the specified stream.
     /// </summary>
     /// <param name="stream">The stream.</param>
@@ -661,22 +656,22 @@ internal sealed class LasInterval : IEnumerable<KeyValuePair<int, LasIntervalSta
             flattened.Sort(static (a, b) => a.Start.CompareTo(b.Start));
 
             // initialize merged with the first interval as the inline head
-            var first = flattened[0];
-            merged.Start = first.Start;
-            merged.End = first.End;
+            var (start, end) = flattened[0];
+            merged.Start = start;
+            merged.End = end;
             merged.HasInlineInterval = true;
-            merged.Total = first.End - first.Start + 1;
+            merged.Total = end - start + 1;
 
             // merge intervals, appending new tail cells into the shared arena
             var previousTail = IntervalArena.NullIndex;
             var tailEnd = merged.End;
             for (var i = 1; i < flattened.Count; i++)
             {
-                var current = flattened[i];
-                var diff = (int)(current.Start - tailEnd);
+                (start, end) = flattened[i];
+                var diff = (int)(start - tailEnd);
                 if (diff > threshold)
                 {
-                    var newIndex = arena.Allocate(current.Start, current.End);
+                    var newIndex = arena.Allocate(start, end);
                     if (previousTail is IntervalArena.NullIndex)
                     {
                         merged.FirstTail = newIndex;
@@ -687,24 +682,24 @@ internal sealed class LasInterval : IEnumerable<KeyValuePair<int, LasIntervalSta
                     }
 
                     previousTail = newIndex;
-                    tailEnd = current.End;
-                    merged.Total += current.End - current.Start + 1;
+                    tailEnd = end;
+                    merged.Total += end - start + 1;
                 }
                 else
                 {
-                    var extension = (int)(current.End - tailEnd);
+                    var extension = (int)(end - tailEnd);
                     if (extension > 0)
                     {
                         if (previousTail is IntervalArena.NullIndex)
                         {
-                            merged.End = current.End;
+                            merged.End = end;
                         }
                         else
                         {
-                            arena[previousTail].End = current.End;
+                            arena[previousTail].End = end;
                         }
 
-                        tailEnd = current.End;
+                        tailEnd = end;
                         merged.Total += (uint)extension;
                     }
 

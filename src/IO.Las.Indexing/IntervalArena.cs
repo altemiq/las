@@ -16,27 +16,17 @@ namespace Altemiq.IO.Las.Indexing;
 /// lifetime of the arena. A single arena is shared across all <see cref="LasIntervalStartCell"/>s
 /// owned by the same <see cref="LasInterval"/>.
 /// </remarks>
-internal sealed class IntervalArena
+/// <param name="capacity">The initial capacity.</param>
+internal sealed class IntervalArena(int capacity = 16)
 {
     /// <summary>
     /// Sentinel representing a missing / null cell index.
     /// </summary>
     public const int NullIndex = -1;
 
-    private LasIntervalCell[] cells;
+    private LasIntervalCell[] cells = new LasIntervalCell[Math.Max(capacity, 4)];
 
     private int count;
-
-    /// <summary>
-    /// Initializes a new instance of the <see cref="IntervalArena"/> class.
-    /// </summary>
-    /// <param name="capacity">The initial capacity.</param>
-    public IntervalArena(int capacity = 16) => this.cells = new LasIntervalCell[Math.Max(capacity, 4)];
-
-    /// <summary>
-    /// Gets the number of cells allocated so far.
-    /// </summary>
-    public int Count => this.count;
 
     /// <summary>
     /// Gets a reference to the cell at the specified arena index.

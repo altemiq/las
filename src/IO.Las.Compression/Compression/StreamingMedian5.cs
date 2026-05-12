@@ -4,7 +4,7 @@
 // </copyright>
 // -----------------------------------------------------------------------
 
-﻿namespace Altemiq.IO.Las.Compression;
+namespace Altemiq.IO.Las.Compression;
 
 using System.Runtime.CompilerServices;
 

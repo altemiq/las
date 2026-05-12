@@ -53,9 +53,8 @@ internal sealed class ArithmeticBitModel
     /// <summary>
     /// Initializes the entropy model.
     /// </summary>
-    /// <param name="table">The table.</param>
     /// <returns>The return.</returns>
-    public bool Initialize(uint[]? table = null)
+    public bool Initialize()
     {
         // initialization to equiprobable model
         this.BitZeroCount = 1;

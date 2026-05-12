@@ -17,7 +17,7 @@ internal sealed class LayeredValue(bool requested)
     /// <summary>
     /// The decoder.
     /// </summary>
-    public readonly ArithmeticDecoder Decoder = new ArithmeticDecoder();
+    public readonly ArithmeticDecoder Decoder = new();
 
     /// <summary>
     /// The value indicating whether this instance is requested.

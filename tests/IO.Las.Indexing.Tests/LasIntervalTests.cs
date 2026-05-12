@@ -307,6 +307,6 @@ public class LasIntervalTests
             return [];
         }
 
-        return owner.EnumerateIntervals(cell).Select(t => (t.Start, t.End)).ToList();
+        return [.. owner.EnumerateIntervals(cell).Select(t => (t.Start, t.End))];
     }
 }
