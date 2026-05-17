@@ -14,7 +14,7 @@ public readonly struct WellKnownTextValue :
 #if NET7_0_OR_GREATER
     System.Runtime.CompilerServices.IUnion<WellKnownTextValue>,
 #else
-     System.Runtime.CompilerServices.IUnion,
+    System.Runtime.CompilerServices.IUnion,
 #endif
     IEquatable<WellKnownTextNode>,
     IEquatable<double>,
@@ -306,7 +306,7 @@ public readonly struct WellKnownTextValue :
 #if NET6_0_OR_GREATER
             2 => builder.Append(System.Globalization.CultureInfo.InvariantCulture, $"{this.doubleValue:G15}"),
 #else
-             2 => builder.AppendFormat(System.Globalization.CultureInfo.InvariantCulture, "{0:G15}", this.doubleValue),
+            2 => builder.AppendFormat(System.Globalization.CultureInfo.InvariantCulture, "{0:G15}", this.doubleValue),
 #endif
             3 => builder.Append('\"').Append(this.stringValue).Append('\"'),
             4 => builder.Append(this.literalValue.ToString()),
