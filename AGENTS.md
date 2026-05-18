@@ -28,18 +28,22 @@
 - Modular design with separate packages:
   - Core: IO.Las
   - Extensions: Arrow, Azure, Cloud, Compression, DataFrame, Geodesy, Http, Indexing, S3, Tiling
-- Conditional compilation for LAS version support
+- Conditional compilation for LAS version support using MSBuild properties
 - Code generation via IO.Las.CodeGeneration project
 - Command-line tool (las) with container support
 
 ## Testing
 - Uses Microsoft.Testing.Platform with TUnit test framework
 - Run specific test: `dotnet test --project tests/[Project].Tests`
-- Run all tests: `dotnet test --solution .`
-- Tests run in CI against all LAS versions
+- Run all tests: `dotnet test`
+- Tests run in CI against all LAS versions (1.1-1.5)
 
 ## Build Process
 - Restore: `dotnet restore`
 - Build: `dotnet build`
 - Pack (NuGet): `dotnet pack`
 - Publish AOT tool: `dotnet publish tools/Las --configuration Release`
+
+## Versioning
+- Uses semantic versioning with version determined by MaximumLasVersion property
+- Version suffixes: alpha (PR), beta (push to main), final (release)
