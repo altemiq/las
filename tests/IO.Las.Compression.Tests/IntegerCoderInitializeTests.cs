@@ -10,12 +10,8 @@ using System.Reflection;
 using Readers.Compressed;
 
 /// <summary>
-/// Tests asserting the Initialize paths in <see cref="IntegerCompressor"/>,
-/// <see cref="IntegerDecompressor"/>, and the layered <see cref="LayeredValue"/> byte readers.
-///
-/// These tests are specifically written to guard the LINQ-to-for-loop refactor
-/// in <c>IntegerCompressor.Initialize</c>, <c>IntegerDecompressor.Initialize</c>,
-/// <c>ByteReader3.Initialize</c>, and <c>ByteReader4.Initialize</c>.
+/// Tests asserting the Initialize paths in <see cref="IntegerCompressor"/>, <see cref="IntegerDecompressor"/>.
+/// These tests are specifically written to guard the LINQ-to-for-loop refactor in <c>IntegerCompressor.Initialize</c>, <c>IntegerDecompressor.Initialize</c>.
 /// </summary>
 public class IntegerCoderInitializeTests
 {
@@ -156,6 +152,7 @@ public class IntegerCoderInitializeTests
         decoder.Done();
     }
 
+#if LAS1_4_OR_GREATER
     [Test]
     public async Task LayeredValueInitializeIfRequestedCumulativeIndexing()
     {
@@ -215,4 +212,5 @@ public class IntegerCoderInitializeTests
         await Assert.That(requested2.Changed).IsTrue();
         await Assert.That(requested3.Changed).IsFalse();
     }
+#endif
 }

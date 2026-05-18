@@ -69,7 +69,9 @@ public class LazEncodeBenchmarks
         builder.Version = new(1, 2); // format 1 is valid for LAS 1.2-1.4
         builder.NumberOfPointRecords = (uint)this.points.Length;
         builder.FileCreation = new DateTime(2024, 1, 1, 0, 0, 0, DateTimeKind.Utc);
+#if LAS1_2_OR_GREATER
         builder.GlobalEncoding = GlobalEncoding.StandardGpsTime;
+#endif
         builder.SetCompressed();
 
         using (var writer = new LazWriter(stream, leaveOpen: true))

@@ -18,6 +18,11 @@
     <EmbeddedResource Include="..\..\data\laz\fusa.laz" />
     <EmbeddedResource Include="*.laz" />
   </ItemGroup>
+  
+  <ItemGroup Condition=" '$(SupportLas12)' != 'true' ">
+    <!-- Remove color point data records for versions below 1.2 -->
+    <Compile Remove="**\*Color*.cs" />
+  </ItemGroup>
 
   <Choose>
     <When Condition=" '$(SupportLas14)' == 'true' ">
@@ -27,9 +32,10 @@
     </When>
     <Otherwise>
       <ItemGroup>
-        <!-- remove new VLRs -->
+        <!-- Remove extended point data records for versions below 1.4 -->
         <Compile Remove="**\ExtendedVariableLengthRecord*.cs" />
         <Compile Remove="**\*ExtraBytes*.cs" />
+        <Compile Remove="**\*Layered*.cs" />
       </ItemGroup>
     </Otherwise>
   </Choose>
