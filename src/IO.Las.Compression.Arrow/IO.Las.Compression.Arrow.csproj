@@ -4,6 +4,11 @@
     <TargetFrameworks>net8.0;net6.0;netstandard2.0</TargetFrameworks>
     <RootNamespace>$(RootNamespace.Replace('.Compression.Arrow', ''))</RootNamespace>
     <IsAotCompatible>false</IsAotCompatible>
+
+    <MeziantouPolyfill_IncludedPolyfills>
+      $(MeziantouPolyfill_IncludedPolyfills)|
+      T:System.Diagnostics.CodeAnalysis.MemberNotNullWhenAttribute|
+    </MeziantouPolyfill_IncludedPolyfills>
   </PropertyGroup>
 
   <PropertyGroup Label="Packaging">
@@ -12,6 +17,13 @@
     <Description>Provides support for reading chunked LAZ to Apache Arrow formats</Description>
     <PackageTags>$(PackageTags);$(_Tag.Replace(' ',';'))</PackageTags>
   </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Meziantou.Polyfill">
+      <PrivateAssets>all</PrivateAssets>
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+    </PackageReference>
+  </ItemGroup>
 
   <ItemGroup>
     <Using Include="Apache.Arrow" />

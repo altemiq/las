@@ -213,7 +213,7 @@ internal static class ExtensionMethods
 #if LAS1_4_OR_GREATER
             for (var i = 0; i < extraBytesRecord.Count; i++)
             {
-                if (extraBytesRecord.GetValue(i, data) is { } value)
+                if (extraBytesRecord.GetValue(i, data) is var value)
                 {
                     extraBytes[i].Update(value);
                 }

@@ -15,7 +15,7 @@ namespace Altemiq.IO.Las.Info;
 public struct LazyInterpolatedStringHandler(int literalLength, int formattedCount)
 {
     private readonly SortedList<int, string?> literals = [];
-    private readonly SortedList<int, (IFormattable, string?)> formattable = new(formattedCount);
+    private readonly SortedList<int, (IFormattable, string?)> formattable = [with(formattedCount)];
     private int current = 0;
 
     /// <summary>
