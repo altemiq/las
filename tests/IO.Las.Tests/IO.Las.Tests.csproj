@@ -15,6 +15,9 @@
       T:System.Index|
       T:System.Range|
     </MeziantouPolyfill_IncludedPolyfills>
+    
+    <!-- preview for unions --> 
+    <LangVersion>preview</LangVersion>
   </PropertyGroup>
 
   <ItemGroup>

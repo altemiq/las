@@ -12,4 +12,5 @@ namespace System.Runtime.CompilerServices;
 /// The attribute for <see cref="IUnion"/>.
 /// </summary>
 [AttributeUsage(AttributeTargets.Class | AttributeTargets.Struct)]
+[Microsoft.CodeAnalysis.Embedded]
 internal sealed class UnionAttribute : Attribute;

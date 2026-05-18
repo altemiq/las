@@ -1,0 +1,27 @@
+{
+  "$schema": "https://opencode.ai/config.json",
+  "mcp": {
+    "aspire": {
+      "type": "local",
+      "command": [
+        "dotnet",
+        "aspire",
+        "agent",
+        "mcp"
+      ],
+      "enabled": true
+    },
+    "nuget": {
+      "type": "local",
+      "command": [
+        "dotnet",
+        "dnx",
+        "NuGet.Mcp.Server",
+        "--source",
+        "https://api.nuget.org/v3/index.json",
+        "--yes"
+      ],
+      "enabled": true
+    }
+  }
+}

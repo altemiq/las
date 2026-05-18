@@ -8,8 +8,8 @@
   <Import Project="$([MSBuild]::GetPathOfFileAbove('$(MSBuildThisFileName.Replace('Packages', 'Versions'))$(MSBuildThisFileExtension)', '$(MSBuildThisFileDirectory)'))" />
 
   <ItemGroup>
-    <PackageVersion Include="Meziantou.Polyfill" Version="1.0.128" />
-    <PackageVersion Include="TUnit" Version="1.44.0" />
+    <PackageVersion Include="Meziantou.Polyfill" Version="1.0.130" />
+    <PackageVersion Include="TUnit" Version="1.44.39" />
   </ItemGroup>
   
   <ItemGroup Label="Apache">
@@ -17,12 +17,12 @@
   </ItemGroup>
   
   <ItemGroup Label="Aspire">
-    <PackageVersion Include="Aspire.Hosting.Testing" Version="13.3.0" />
+    <PackageVersion Include="Aspire.Hosting.Testing" Version="13.3.3" />
   </ItemGroup>
   
   <ItemGroup Label="AWS">
-    <PackageVersion Include="AWSSDK.Extensions.NETCore.Setup" Version="4.0.3.37" />
-    <PackageVersion Include="AWSSDK.S3" Version="4.0.23" />
+    <PackageVersion Include="AWSSDK.Extensions.NETCore.Setup" Version="4.0.3.40" />
+    <PackageVersion Include="AWSSDK.S3" Version="4.0.23.3" />
   </ItemGroup>
   
   <ItemGroup Label="Azure">
@@ -37,11 +37,11 @@
   </ItemGroup>
   
   <ItemGroup Label="Microsoft.AspNetCore">
-    <PackageVersion Include="Microsoft.AspNetCore.Server.Kestrel" Version="2.3.9" />
+    <PackageVersion Include="Microsoft.AspNetCore.Server.Kestrel" Version="2.3.10" />
   </ItemGroup>
 
   <ItemGroup Label="SQLite">
-    <PackageVersion Include="Microsoft.Data.Sqlite" Version="10.0.7" />
+    <PackageVersion Include="Microsoft.Data.Sqlite" Version="10.0.8" />
     <PackageVersion Include="SQLitePCLRaw.bundle_e_sqlite3" Version="3.0.2" />
     <PackageVersion Include="SQLitePCLRaw.core" Version="3.0.2" />
   </ItemGroup>

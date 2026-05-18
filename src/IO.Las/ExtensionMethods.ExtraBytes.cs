@@ -29,17 +29,17 @@ public static partial class ExtensionMethods
         {
             return item.RemoveOffsetAndDescale(value) switch
             {
-                { Value: byte v } => WriteByte(destination, v),
-                { Value: sbyte v } => WriteSByte(destination, v),
-                { Value: short v } => WriteInt16(destination, v),
-                { Value: ushort v } => WriteUInt16(destination, v),
-                { Value: int v } => WriteInt32(destination, v),
-                { Value: uint v } => WriteUInt32(destination, v),
-                { Value: long v } => WriteInt64(destination, v),
-                { Value: ulong v } => WriteUInt64(destination, v),
-                { Value: float v } => WriteSingle(destination, v),
-                { Value: double v } => WriteDouble(destination, v),
-                { Value: byte[] v } => WriteBytes(destination, v),
+                byte v => WriteByte(destination, v),
+                sbyte v => WriteSByte(destination, v),
+                short v => WriteInt16(destination, v),
+                ushort v => WriteUInt16(destination, v),
+                int v => WriteInt32(destination, v),
+                uint v => WriteUInt32(destination, v),
+                long v => WriteInt64(destination, v),
+                ulong v => WriteUInt64(destination, v),
+                float v => WriteSingle(destination, v),
+                double v => WriteDouble(destination, v),
+                byte[] v => WriteBytes(destination, v),
                 _ => throw new ArgumentOutOfRangeException(nameof(value)),
             };
 
