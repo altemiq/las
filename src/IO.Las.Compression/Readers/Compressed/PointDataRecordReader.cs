@@ -11,7 +11,7 @@ namespace Altemiq.IO.Las.Readers.Compressed;
 /// </summary>
 /// <param name="decoder">The decoder.</param>
 /// <param name="extraBytes">The number of extra bytes.</param>
-internal sealed class PointDataRecordReader(IEntropyDecoder decoder, int extraBytes) : PointDataRecordReader<PointDataRecord>(decoder, PointDataRecord.Size + extraBytes, PointDataRecord.Size)
+internal sealed class PointDataRecordReader(ArithmeticDecoder decoder, int extraBytes) : PointDataRecordReader<PointDataRecord>(decoder, PointDataRecord.Size + extraBytes, PointDataRecord.Size)
 {
     private readonly ISimpleReader byteReader = extraBytes switch
     {
@@ -27,18 +27,9 @@ internal sealed class PointDataRecordReader(IEntropyDecoder decoder, int extraBy
     protected override PointDataRecord Read(ReadOnlySpan<byte> source) => PointDataRecord.Create(source);
 
     /// <inheritdoc/>
-    protected override Span<byte> ProcessData()
+    protected override void ProcessData(Span<byte> destination)
     {
-        var data = base.ProcessData();
-        this.byteReader.Read(data[PointDataRecord.Size..]);
-        return data;
-    }
-
-    /// <inheritdoc/>
-    protected override async ValueTask<Memory<byte>> ProcessDataAsync(CancellationToken cancellationToken = default)
-    {
-        var data = await base.ProcessDataAsync(cancellationToken).ConfigureAwait(false);
-        this.byteReader.Read(data[PointDataRecord.Size..].Span);
-        return data;
+        base.ProcessData(destination);
+        this.byteReader.Read(destination[PointDataRecord.Size..]);
     }
 }

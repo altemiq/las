@@ -10,15 +10,15 @@ namespace Altemiq.IO.Las.Writers.Compressed;
 /// The compressed writer for <see cref="Color"/> values, version 2.
 /// </summary>
 /// <param name="encoder">The encoder.</param>
-internal sealed class ColorWriter2(IEntropyEncoder encoder) : ISimpleWriter
+internal sealed class ColorWriter2(ArithmeticEncoder encoder) : ISimpleWriter
 {
-    private readonly ISymbolModel byteUsedModel = encoder.CreateSymbolModel(ArithmeticCoder.HalfModelCount);
-    private readonly ISymbolModel rgbDiffModels0 = encoder.CreateSymbolModel(ArithmeticCoder.ModelCount);
-    private readonly ISymbolModel rgbDiffModels1 = encoder.CreateSymbolModel(ArithmeticCoder.ModelCount);
-    private readonly ISymbolModel rgbDiffModels2 = encoder.CreateSymbolModel(ArithmeticCoder.ModelCount);
-    private readonly ISymbolModel rgbDiffModels3 = encoder.CreateSymbolModel(ArithmeticCoder.ModelCount);
-    private readonly ISymbolModel rgbDiffModels4 = encoder.CreateSymbolModel(ArithmeticCoder.ModelCount);
-    private readonly ISymbolModel rgbDiffModels5 = encoder.CreateSymbolModel(ArithmeticCoder.ModelCount);
+    private readonly ArithmeticSymbolModel byteUsedModel = encoder.CreateSymbolModel(ArithmeticCoder.HalfModelCount);
+    private readonly ArithmeticSymbolModel rgbDiffModels0 = encoder.CreateSymbolModel(ArithmeticCoder.ModelCount);
+    private readonly ArithmeticSymbolModel rgbDiffModels1 = encoder.CreateSymbolModel(ArithmeticCoder.ModelCount);
+    private readonly ArithmeticSymbolModel rgbDiffModels2 = encoder.CreateSymbolModel(ArithmeticCoder.ModelCount);
+    private readonly ArithmeticSymbolModel rgbDiffModels3 = encoder.CreateSymbolModel(ArithmeticCoder.ModelCount);
+    private readonly ArithmeticSymbolModel rgbDiffModels4 = encoder.CreateSymbolModel(ArithmeticCoder.ModelCount);
+    private readonly ArithmeticSymbolModel rgbDiffModels5 = encoder.CreateSymbolModel(ArithmeticCoder.ModelCount);
 
     private readonly ushort[] lastItem = new ushort[3];
 
@@ -74,7 +74,7 @@ internal sealed class ColorWriter2(IEntropyEncoder encoder) : ISimpleWriter
         {
             if ((sym & (1 << 2)) is not 0)
             {
-                var corr = (System.Buffers.Binary.BinaryPrimitives.ReadUInt16LittleEndian(item[sizeof(ushort)..]) & 0xFF) - (diffL + (this.lastItem[1] & 0xFF).Clamp());
+                var corr = (System.Buffers.Binary.BinaryPrimitives.ReadUInt16LittleEndian(item[sizeof(ushort)..]) & 0xFF) - (diffL + (this.lastItem[1] & 0xFF)).Clamp();
                 encoder.EncodeSymbol(this.rgbDiffModels2, corr.Fold());
             }
 

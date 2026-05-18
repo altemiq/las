@@ -21,7 +21,7 @@ public class LazyFrameTests
 
         await Assert.That(lazy).IsNotNull();
 
-        await Assert.That(await lazy.Filter(Col(Constants.Columns.ReturnNumber) == 3).CollectAsync())
+        await Assert.That(await lazy.Filter(Col(Arrow.Constants.Columns.ReturnNumber) == 3).CollectAsync())
             .IsNotNull().And
             .Member(static m => ((Polars.CSharp.DataFrame)m).Height, static height => height.IsEqualTo(281));
     }

@@ -11,7 +11,7 @@ namespace Altemiq.IO.Las.Writers.Compressed;
 /// </summary>
 internal sealed class WavePacketWriter4 : IContextWriter
 {
-    private readonly IEntropyEncoder encoder;
+    private readonly ArithmeticEncoder encoder;
 
     private readonly Context[] contexts = new Context[4];
 
@@ -23,7 +23,7 @@ internal sealed class WavePacketWriter4 : IContextWriter
     /// Initializes a new instance of the <see cref="WavePacketWriter4"/> class.
     /// </summary>
     /// <param name="encoder">The encoder.</param>
-    public WavePacketWriter4(IEntropyEncoder encoder)
+    public WavePacketWriter4(ArithmeticEncoder encoder)
     {
         this.encoder = encoder;
         this.valueWavePacket = new();
@@ -133,7 +133,7 @@ internal sealed class WavePacketWriter4 : IContextWriter
             this.valueWavePacket.Encoder.EncodeSymbol(processingContext.OffsetDiff[processingContext.SymLastOffsetDiff], 3);
             processingContext.SymLastOffsetDiff = 3;
 
-            this.valueWavePacket.Encoder.WriteInt64(currentWavePacket.Offset);
+            this.valueWavePacket.Encoder.WriteUInt64(currentWavePacket.Offset);
         }
 
         processingContext.IcPacketSize.Compress((int)lastWavePacket.PacketSize, (int)currentWavePacket.PacketSize);
@@ -191,11 +191,11 @@ internal sealed class WavePacketWriter4 : IContextWriter
     }
 
     [System.Diagnostics.CodeAnalysis.SuppressMessage("StyleCop.CSharp.MaintainabilityRules", "SA1401:FieldsShouldBePrivate", Justification = "This is used as an internal property bag.")]
-    private sealed class Context(IEntropyEncoder encoder)
+    private sealed class Context(ArithmeticEncoder encoder)
     {
         public readonly byte[] LastItem = new byte[29];
 
-        public readonly ISymbolModel[] OffsetDiff =
+        public readonly ArithmeticSymbolModel[] OffsetDiff =
         [
             encoder.CreateSymbolModel(4),
             encoder.CreateSymbolModel(4),
@@ -203,7 +203,7 @@ internal sealed class WavePacketWriter4 : IContextWriter
             encoder.CreateSymbolModel(4),
         ];
 
-        public readonly ISymbolModel PacketIndex = encoder.CreateSymbolModel(ArithmeticCoder.ModelCount);
+        public readonly ArithmeticSymbolModel PacketIndex = encoder.CreateSymbolModel(ArithmeticCoder.ModelCount);
 
         public readonly IntegerCompressor IcOffsetDiff = new(encoder, 32);
         public readonly IntegerCompressor IcPacketSize = new(encoder, 32);

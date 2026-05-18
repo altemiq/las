@@ -22,16 +22,16 @@ public static class LasReaderExtensions
         /// <summary>
         /// From <see cref="ILasReader"/> infer <see cref="Apache.Arrow"/> <see cref="Apache.Arrow.Schema"/>.
         /// </summary>
-        public Schema GetArrowSchema() => LasToArrowStream.GetArrowSchema(reader);
+        public Schema GetArrowSchema() => Arrow.LasToArrowStream.GetArrowSchema(reader);
 
         /// <summary>
         /// Convert <see cref="ILasReader"/> to <see cref="Apache.Arrow"/> <see cref="Apache.Arrow.RecordBatch"/> Stream.
         /// </summary>
-        public IEnumerable<RecordBatch> ToArrowBatches(int batchSize = 50_000) => LasToArrowStream.ToArrowBatches(reader, LasToArrowStream.GetArrowSchema(reader), batchSize);
+        public IEnumerable<RecordBatch> ToArrowBatches(int batchSize = 50_000) => Arrow.LasToArrowStream.ToArrowBatches(reader, Arrow.LasToArrowStream.GetArrowSchema(reader), batchSize);
 
         /// <summary>
         /// Convert <see cref="ILasReader"/> to <see cref="Apache.Arrow"/> <see cref="Apache.Arrow.RecordBatch"/> Stream.
         /// </summary>
-        public IEnumerable<RecordBatch> ToArrowBatches(Schema schema, int batchSize = 50_000) => LasToArrowStream.ToArrowBatches(reader, schema, batchSize);
+        public IEnumerable<RecordBatch> ToArrowBatches(Schema schema, int batchSize = 50_000) => Arrow.LasToArrowStream.ToArrowBatches(reader, schema, batchSize);
     }
 }

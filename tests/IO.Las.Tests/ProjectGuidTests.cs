@@ -10,7 +10,7 @@ public class ProjectGuidTests
     [Arguments(ProjectGuid2, new byte[] { 0x33, 0x22, 0x11, 0x00, 0x55, 0x44, 0x77, 0x66, 0x4D, 0x79, 0x50, 0x72, 0x6F, 0x6A, 0x30, 0x31 })]
     public async Task HaveTheCorrectBytes(string id, byte[] bytes)
     {
-        _ = await Assert.That(Guid.Parse(id).ToByteArray()).IsEquivalentTo(bytes);
+        await Assert.That(Guid.Parse(id).ToByteArray()).IsEquivalentTo(bytes);
     }
 
     [Test]
@@ -26,13 +26,13 @@ public class ProjectGuidTests
         var length = (int)stream.Length;
         var bytes = System.Buffers.ArrayPool<byte>.Shared.Rent(length);
 #if NET
-        _ = await Assert.That(await stream.ReadAsync(bytes.AsMemory(0, length))).IsEqualTo(length);
+        await Assert.That(await stream.ReadAsync(bytes.AsMemory(0, length))).IsEqualTo(length);
 #else
-        _ = await Assert.That(await stream.ReadAsync(bytes, 0, length)).IsEqualTo(length);
+        await Assert.That(await stream.ReadAsync(bytes, 0, length)).IsEqualTo(length);
 #endif
-        _ = await Assert.That(bytes).Count().IsEqualTo(16);
+        await Assert.That(bytes).Count().IsEqualTo(16);
 
-        _ = await Assert.That(new Guid(bytes)).IsEqualTo(Guid.Parse(id));
+        await Assert.That(new Guid(bytes)).IsEqualTo(Guid.Parse(id));
         System.Buffers.ArrayPool<byte>.Shared.Return(bytes);
     }
 
@@ -49,7 +49,7 @@ public class ProjectGuidTests
                            ?? throw new System.Diagnostics.UnreachableException("Failed to get stream");
         HeaderBlockReader headerReader = new(stream);
         var headerBlock = headerReader.GetHeaderBlock();
-        _ = await Assert.That(headerBlock.ProjectId).IsEqualTo(Guid.Parse(id));
+        await Assert.That(headerBlock.ProjectId).IsEqualTo(Guid.Parse(id));
     }
 #endif
 }

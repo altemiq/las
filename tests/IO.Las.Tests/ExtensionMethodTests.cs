@@ -52,7 +52,7 @@ public class ExtensionMethodTests
             new GeoDoubleParamsTag(),
             new GeoKeyDirectoryTag(),
         ];
-        
+
         records.RemoveGeoTiff();
 
         await Assert.That(records).Count().IsEqualTo(1).And.ContainsOnly(vlr => vlr is UnknownVariableLengthRecord);
@@ -68,13 +68,13 @@ public class ExtensionMethodTests
             new OgcCoordinateSystemWkt("EMPTY[]"),
             new OgcMathTransformWkt("EMPTY[]"),
         ];
-        
+
         records.RemoveWkt();
 
         await Assert.That(records).Count().IsEqualTo(1).And.ContainsOnly(vlr => vlr is UnknownVariableLengthRecord);
     }
 #endif
-    
+
 
     private sealed class UnseekableStream(Stream stream) : Stream
     {

@@ -53,20 +53,16 @@ public class HeaderBlockReader(Stream stream)
     {
         _ = stream.SwitchStreamIfMultiple(LasStreams.Header);
 
-        // do a cache on the stream
-        if (stream is ICacheStream cacheStream)
-        {
-            cacheStream.Cache(0, 2024);
-        }
-
         // move this to the start if we can
         if (stream.CanSeek)
         {
             stream.Position = 0;
         }
-        else if (stream is { Position: not 0 })
+
+        // do a cache on the stream
+        if (stream is ICacheStream cacheStream)
         {
-            // throw an error, as we need to read this from the start of the stream
+            cacheStream.Cache(0, 2024);
         }
 
         // read this

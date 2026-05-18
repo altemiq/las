@@ -12,7 +12,7 @@ namespace Altemiq.IO.Las.Readers.Compressed;
 /// <param name="decoder">The decoder.</param>
 /// <param name="extraBytes">The number of extra bytes.</param>
 /// <param name="decompressSelective">The selective decompress value.</param>
-internal sealed class ExtendedGpsPointDataRecordReader4(IEntropyDecoder decoder, int extraBytes, DecompressSelections decompressSelective = DecompressSelections.All) : ExtendedGpsPointDataRecordReader4<ExtendedGpsPointDataRecord>(decoder, ExtendedGpsPointDataRecord.Size + extraBytes, ExtendedGpsPointDataRecord.Size, decompressSelective), IDisposable
+internal sealed class ExtendedGpsPointDataRecordReader4(ArithmeticDecoder decoder, int extraBytes, DecompressSelections decompressSelective = DecompressSelections.All) : ExtendedGpsPointDataRecordReader4<ExtendedGpsPointDataRecord>(decoder, ExtendedGpsPointDataRecord.Size + extraBytes, ExtendedGpsPointDataRecord.Size, decompressSelective), IDisposable
 {
     private readonly IContextReader byteReader = extraBytes switch
     {
@@ -50,21 +50,10 @@ internal sealed class ExtendedGpsPointDataRecordReader4(IEntropyDecoder decoder,
     protected override ExtendedGpsPointDataRecord Read(ReadOnlySpan<byte> source) => new(source);
 
     /// <inheritdoc/>
-    protected override byte[] ProcessData()
+    protected override void ProcessData(Span<byte> destination)
     {
         var context = default(uint);
-        var data = this.ProcessData(ref context);
-        Span<byte> span = data;
-        this.byteReader.Read(span[ExtendedGpsPointDataRecord.Size..], context);
-        return data;
-    }
-
-    /// <inheritdoc/>
-    protected override async ValueTask<Memory<byte>> ProcessDataAsync(CancellationToken cancellationToken = default)
-    {
-        var context = default(uint);
-        var data = await this.ProcessDataAsync(ref context, cancellationToken).ConfigureAwait(false);
-        this.byteReader.Read(data[ExtendedGpsPointDataRecord.Size..].Span, context);
-        return data;
+        this.ProcessData(ref context, destination);
+        this.byteReader.Read(destination[ExtendedGpsPointDataRecord.Size..], context);
     }
 }

@@ -66,6 +66,16 @@ internal abstract class ChunkedReader : IPointReader
     }
 
     /// <inheritdoc/>
+    public int Read(Stream stream, Span<byte> destination)
+    {
+        this.MoveToNextChunkIfRequired(stream);
+
+        this.chunkCount++;
+
+        return this.Reader.Read(stream, destination);
+    }
+
+    /// <inheritdoc/>
     public async ValueTask<LasPointMemory> ReadAsync(Stream stream, CancellationToken cancellationToken = default)
     {
         await this.MoveToNextChunkIfRequiredAsync(stream, cancellationToken).ConfigureAwait(false);
@@ -73,6 +83,16 @@ internal abstract class ChunkedReader : IPointReader
         this.chunkCount++;
 
         return await this.Reader.ReadAsync(stream, cancellationToken).ConfigureAwait(false);
+    }
+
+    /// <inheritdoc/>
+    public async ValueTask<int> ReadAsync(Stream stream, Memory<byte> destination, CancellationToken cancellationToken = default)
+    {
+        await this.MoveToNextChunkIfRequiredAsync(stream, cancellationToken).ConfigureAwait(false);
+
+        this.chunkCount++;
+
+        return await this.Reader.ReadAsync(stream, destination, cancellationToken).ConfigureAwait(false);
     }
 
     /// <summary>
@@ -348,7 +368,7 @@ internal abstract class ChunkedReader : IPointReader
     /// <param name="readChunkTotals">Set to <see langword="true"/> to read the chunk totals.</param>
     /// <param name="decoder">The decoder.</param>
     /// <returns>The chunk table.</returns>
-    internal static (long[] ChunkStarts, uint NumberChunks, uint TabledChunks, uint[]? ChunkTotals) ReadChunkTable(Stream stream, long chunksStart, bool readChunkTotals, IEntropyDecoder decoder)
+    internal static (long[] ChunkStarts, uint NumberChunks, uint TabledChunks, uint[]? ChunkTotals) ReadChunkTable(Stream stream, long chunksStart, bool readChunkTotals, ArithmeticDecoder decoder)
     {
         long[]? chunkStarts = default;
         uint numberChunks = default;
@@ -372,7 +392,7 @@ internal abstract class ChunkedReader : IPointReader
     protected static void ReadChunkTable(
         Stream stream,
         long chunksStart,
-        IEntropyDecoder decoder,
+        ArithmeticDecoder decoder,
         [System.Diagnostics.CodeAnalysis.NotNullIfNotNull(nameof(stream))]
         ref long[]? chunkStarts,
         ref uint numberChunks,
@@ -392,7 +412,7 @@ internal abstract class ChunkedReader : IPointReader
     protected static void ReadChunkTable(
         Stream stream,
         long chunksStart,
-        IEntropyDecoder decoder,
+        ArithmeticDecoder decoder,
         [System.Diagnostics.CodeAnalysis.NotNullIfNotNull(nameof(stream))]
         ref long[]? chunkStarts,
         ref uint numberChunks,
@@ -443,6 +463,8 @@ internal abstract class ChunkedReader : IPointReader
         {
             // read the 8 bytes that store the location of the chunk table
             _ = stream.SwitchStreamIfMultiple(LazStreams.ChunkTablePosition);
+            CacheStream(stream, sizeof(long));
+
             var chunkTableStartPosition = stream.ReadInt64LittleEndian();
 
             // this is where the chunks start
@@ -512,11 +534,8 @@ internal abstract class ChunkedReader : IPointReader
                     throw new InvalidOperationException(Compression.Properties.Resources.FailedToSeek);
                 }
 
-                if (stream is ICacheStream cacheStream)
-                {
-                    // prepare the chunk table
-                    cacheStream.Cache(chunkTableStartPosition, 2048);
-                }
+                // prepare the chunk table
+                CacheStream(stream, 2048);
 
                 this.ReadChunkTable(
                     stream,
@@ -553,6 +572,14 @@ internal abstract class ChunkedReader : IPointReader
             }
 
             return stream.Seek(chunksStart, SeekOrigin.Begin) is not 0;
+
+            static void CacheStream(Stream stream, int length)
+            {
+                if (stream is ICacheStream cacheStream)
+                {
+                    cacheStream.Cache(stream.Position, length);
+                }
+            }
         }
     }
 
@@ -590,7 +617,7 @@ internal abstract class ChunkedReader : IPointReader
         long chunksStart,
         [System.Diagnostics.CodeAnalysis.DoesNotReturnIf(true)]
         bool readChunkTotals, // hack for forcing chunkTotals to not be null when `true`
-        IEntropyDecoder decoder,
+        ArithmeticDecoder decoder,
         [System.Diagnostics.CodeAnalysis.NotNullIfNotNull(nameof(stream))]
         ref long[]? chunkStarts,
         ref uint numberChunks,

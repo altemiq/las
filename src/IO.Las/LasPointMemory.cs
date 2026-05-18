@@ -29,4 +29,15 @@ public readonly struct LasPointMemory(IBasePointDataRecord pointDataRecord, Read
     /// <param name="pointMemory">The point.</param>
     /// <returns>The span based point.</returns>
     public static implicit operator LasPointSpan(LasPointMemory pointMemory) => new(pointMemory.PointDataRecord!, pointMemory.ExtraBytes.Span);
+
+    /// <summary>
+    /// Deconstructs this instance into its parts.
+    /// </summary>
+    /// <param name="pointDataRecord">The point data record.</param>
+    /// <param name="extraBytes">The extra bytes.</param>
+    public void Deconstruct(out IBasePointDataRecord? pointDataRecord, out ReadOnlyMemory<byte> extraBytes)
+    {
+        pointDataRecord = this.PointDataRecord;
+        extraBytes = this.ExtraBytes;
+    }
 }

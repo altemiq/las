@@ -5,12 +5,13 @@
     <TargetFrameworks Condition=" '$(NetCoreOnly)' != 'true' ">$(TargetFrameworks);net472</TargetFrameworks>
     <MeziantouPolyfill_IncludedPolyfills>
       $(MeziantouPolyfill_IncludedPolyfills)|
+      M:System.IO.Stream.DisposeAsync()|
       T:System.Diagnostics.UnreachableException|
     </MeziantouPolyfill_IncludedPolyfills>
   </PropertyGroup>
 
   <ItemGroup>
-    <EmbeddedResource Include="..\..\data\laz\*.lax" />
+    <EmbeddedResource Include="..\..\data\las\fusa.*" />
   </ItemGroup>
 
   <ItemGroup>

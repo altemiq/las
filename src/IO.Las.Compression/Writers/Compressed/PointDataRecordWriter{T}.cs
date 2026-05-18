@@ -13,14 +13,14 @@ namespace Altemiq.IO.Las.Writers.Compressed;
 internal abstract class PointDataRecordWriter<T> : IPointDataRecordWriter, ISimpleWriter
     where T : IBasePointDataRecord
 {
-    private readonly IEntropyEncoder encoder;
-    private readonly ISymbolModel changedValuesModel;
+    private readonly ArithmeticEncoder encoder;
+    private readonly ArithmeticSymbolModel changedValuesModel;
     private readonly IntegerCompressor intensityIntegerCompressor;
-    private readonly ISymbolModel[] scanAngleRankModels = new ISymbolModel[2];
+    private readonly ArithmeticSymbolModel[] scanAngleRankModels = new ArithmeticSymbolModel[2];
     private readonly IntegerCompressor pointSourceIdIntegerCompressor;
-    private readonly ISymbolModel?[] bitByteModels = new ISymbolModel[ArithmeticCoder.ModelCount];
-    private readonly ISymbolModel?[] classificationModels = new ISymbolModel[ArithmeticCoder.ModelCount];
-    private readonly ISymbolModel?[] userDataModels = new ISymbolModel[ArithmeticCoder.ModelCount];
+    private readonly ArithmeticSymbolModel?[] bitByteModels = new ArithmeticSymbolModel[ArithmeticCoder.ModelCount];
+    private readonly ArithmeticSymbolModel?[] classificationModels = new ArithmeticSymbolModel[ArithmeticCoder.ModelCount];
+    private readonly ArithmeticSymbolModel?[] userDataModels = new ArithmeticSymbolModel[ArithmeticCoder.ModelCount];
     private readonly IntegerCompressor deltaXIntegerCompressor;
     private readonly IntegerCompressor deltaYIntegerCompressor;
     private readonly IntegerCompressor zIntegerCompressor;
@@ -34,7 +34,7 @@ internal abstract class PointDataRecordWriter<T> : IPointDataRecordWriter, ISimp
     /// Initializes a new instance of the <see cref="PointDataRecordWriter{T}"/> class.
     /// </summary>
     /// <param name="encoder">The encoder.</param>
-    protected PointDataRecordWriter(IEntropyEncoder encoder)
+    protected PointDataRecordWriter(ArithmeticEncoder encoder)
     {
         this.encoder = encoder;
 
@@ -91,8 +91,8 @@ internal abstract class PointDataRecordWriter<T> : IPointDataRecordWriter, ISimp
         // init state
         for (var i = 0; i < 16; i++)
         {
-            this.lastXDiffMedian5[i] = new();
-            this.lastYDiffMedian5[i] = new();
+            this.lastXDiffMedian5[i] = default;
+            this.lastYDiffMedian5[i] = default;
             this.lastIntensity[i] = default;
             this.lastHeight[i / 2] = default;
         }
@@ -204,17 +204,15 @@ internal abstract class PointDataRecordWriter<T> : IPointDataRecordWriter, ISimp
         }
 
         // compress x coordinate
-        var median = this.lastXDiffMedian5[m].Get();
         var diff = FieldAccessors.PointDataRecord.GetX(item) - FieldAccessors.PointDataRecord.GetX(this.lastItem);
+        var median = this.lastXDiffMedian5[m].GetAndAdd(diff);
         this.deltaXIntegerCompressor.Compress(median, diff, numberOfReturns is 1 ? 1U : 0U);
-        this.lastXDiffMedian5[m].Add(diff);
 
         // compress y coordinate
         var kBits = this.deltaXIntegerCompressor.K;
-        median = this.lastYDiffMedian5[m].Get();
         diff = FieldAccessors.PointDataRecord.GetY(item) - FieldAccessors.PointDataRecord.GetY(this.lastItem);
+        median = this.lastYDiffMedian5[m].GetAndAdd(diff);
         this.deltaYIntegerCompressor.Compress(median, diff, (numberOfReturns is 1 ? 1U : 0U) + (kBits < 20 ? kBits.ZeroBit0() : 20U));
-        this.lastYDiffMedian5[m].Add(diff);
 
         // compress z coordinate
         kBits = (this.deltaXIntegerCompressor.K + this.deltaYIntegerCompressor.K) / 2;

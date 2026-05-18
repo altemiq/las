@@ -1,5 +1,5 @@
 // -----------------------------------------------------------------------
-// <copyright file="Vector2D.Instrinsics.cs" company="Altemiq">
+// <copyright file="Vector2D.Intrinsics.cs" company="Altemiq">
 // Copyright (c) Altemiq. All rights reserved.
 // </copyright>
 // -----------------------------------------------------------------------
@@ -49,11 +49,14 @@ public partial struct Vector2D
     public static partial double Cross(Vector2D value1, Vector2D vector2)
 #if NET7_0_OR_GREATER
     {
-        var mul =
-            Vector256.Shuffle(value1.AsVector256Unsafe(), Vector256.Create(0, 1, 0, 1)) *
-            Vector256.Shuffle(vector2.AsVector256Unsafe(), Vector256.Create(1, 0, 1, 0));
+        var v1 = value1.AsVector256Unsafe();
+        var v2 = vector2.AsVector256Unsafe();
 
-        return (mul - Vector256.Shuffle(mul, Vector256.Create(1, 0, 1, 0))).ToScalar();
+        // Using FMA operations for better performance on modern CPUs
+        var mul1 = Vector256.Multiply(v1, Vector256.Shuffle(v2, Vector256.Create(1, 0, 1, 0)));
+        var mul2 = Vector256.Multiply(v2, Vector256.Shuffle(v1, Vector256.Create(1, 0, 1, 0)));
+
+        return Vector256.Subtract(mul1, mul2).ToScalar();
     }
 #else
         => (value1.X * vector2.Y) - (value1.Y * vector2.X);

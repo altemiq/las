@@ -21,7 +21,7 @@ internal abstract class ExtendedGpsPointDataRecordWriter4<T> : Writers.PointData
 
     private const int MultipleTotal = Multiple - MultipleMinus + 5;
 
-    private readonly IEntropyEncoder encoder;
+    private readonly ArithmeticEncoder encoder;
     private readonly Context[] contexts = new Context[4];
     private readonly LayeredValue valueChannelReturnsXY = new();
     private readonly LayeredValue valueZ = new();
@@ -39,7 +39,7 @@ internal abstract class ExtendedGpsPointDataRecordWriter4<T> : Writers.PointData
     /// Initializes a new instance of the <see cref="ExtendedGpsPointDataRecordWriter4{T}"/> class.
     /// </summary>
     /// <param name="encoder">The encoder.</param>
-    protected ExtendedGpsPointDataRecordWriter4(IEntropyEncoder encoder)
+    protected ExtendedGpsPointDataRecordWriter4(ArithmeticEncoder encoder)
     {
         this.encoder = encoder;
         this.contexts[0] = new(this.valueChannelReturnsXY, this.valueZ, this.valueIntensity, this.valueScanAngle, this.valuePointSource, this.valueGpsTime);
@@ -264,7 +264,7 @@ internal abstract class ExtendedGpsPointDataRecordWriter4<T> : Writers.PointData
         context = this.currentContext; // the POINT14 writer sets context for all other items
         processingContext = this.contexts[this.currentContext];
 
-        ISymbolModel? model;
+        ArithmeticSymbolModel? model;
 
         // if number of returns is different we compress it
         if ((changedValues & (1 << 2)) is not 0)
@@ -322,18 +322,16 @@ internal abstract class ExtendedGpsPointDataRecordWriter4<T> : Writers.PointData
 
         // compress X coordinate
         var mapContext = (m << 1) | (gpsTimeChange ? 1U : 0U);
-        var median = processingContext.LastXDiffMedian5[mapContext].Get();
         var diff = point.X - lastPoint.X;
         var coordinateContext = numberOfReturns is 1U ? 1U : 0U;
+        var median = processingContext.LastXDiffMedian5[mapContext].GetAndAdd(diff);
         processingContext.DeltaXIntegerCompressor.Compress(median, diff, coordinateContext);
-        processingContext.LastXDiffMedian5[mapContext].Add(diff);
 
         // compress Y coordinate
         var kBits = processingContext.DeltaXIntegerCompressor.K;
-        median = processingContext.LastYDiffMedian5[mapContext].Get();
         diff = point.Y - lastPoint.Y;
+        median = processingContext.LastYDiffMedian5[mapContext].GetAndAdd(diff);
         processingContext.DeltaYIntegerCompressor.Compress(median, diff, coordinateContext + (kBits < 20U ? kBits.ZeroBit0() : 20));
-        processingContext.LastYDiffMedian5[mapContext].Add(diff);
 
         ////////////////////////////////////////
         // compress Z layer
@@ -491,8 +489,8 @@ internal abstract class ExtendedGpsPointDataRecordWriter4<T> : Writers.PointData
         contextToInitialize.DeltaYIntegerCompressor.Initialize();
         for (var i = 0; i < 12; i++)
         {
-            contextToInitialize.LastXDiffMedian5[i] = new();
-            contextToInitialize.LastYDiffMedian5[i] = new();
+            contextToInitialize.LastXDiffMedian5[i] = default;
+            contextToInitialize.LastYDiffMedian5[i] = default;
         }
 
         // for the Z layer
@@ -581,7 +579,7 @@ internal abstract class ExtendedGpsPointDataRecordWriter4<T> : Writers.PointData
                 // no other sequence found. start new sequence.
                 this.valueGpsTime.Encoder.EncodeSymbol(processingContext.GpsTimeZeroDiffModel, 1);
                 processingContext.GpsTimeIntegerCompressor.Compress((int)(processingContext.LastGpsTime[processingContext.Last] >> 32), (int)(gpsTime >> 32), 8);
-                this.valueGpsTime.Encoder.WriteInt((uint)gpsTime);
+                this.valueGpsTime.Encoder.WriteUInt32((uint)gpsTime);
                 processingContext.Next = (processingContext.Next + 1) & 3;
                 processingContext.Last = processingContext.Next;
                 processingContext.LastGpsTimeDiff[processingContext.Last] = default;
@@ -679,7 +677,7 @@ internal abstract class ExtendedGpsPointDataRecordWriter4<T> : Writers.PointData
                 // no other sequence found. start new sequence.
                 this.valueGpsTime.Encoder.EncodeSymbol(processingContext.GpsTimeMultiModel, MultipleCodeFull);
                 processingContext.GpsTimeIntegerCompressor.Compress((int)(processingContext.LastGpsTime[processingContext.Last] >> 32), (int)(gpsTime >> 32), 8);
-                this.valueGpsTime.Encoder.WriteInt((uint)gpsTime);
+                this.valueGpsTime.Encoder.WriteUInt32((uint)gpsTime);
                 processingContext.Next = (processingContext.Next + 1) & 3;
                 processingContext.Last = processingContext.Next;
                 processingContext.LastGpsTimeDiff[processingContext.Last] = default;
@@ -703,17 +701,17 @@ internal abstract class ExtendedGpsPointDataRecordWriter4<T> : Writers.PointData
         public readonly StreamingMedian5[] LastYDiffMedian5 = new StreamingMedian5[12];
         public readonly int[] LastZ = new int[8];
 
-        public readonly ISymbolModel[] ChangedValuesModels = new ISymbolModel[8];
-        public readonly ISymbolModel?[] NumberOfReturnsModels = new ISymbolModel[16];
-        public readonly ISymbolModel?[] ReturnNumberModels = new ISymbolModel[16];
-        public readonly ISymbolModel?[] ClassificationModels = new ISymbolModel[64];
-        public readonly ISymbolModel?[] FlagsModels = new ISymbolModel[64];
-        public readonly ISymbolModel?[] UserDataModels = new ISymbolModel[64];
+        public readonly ArithmeticSymbolModel[] ChangedValuesModels = new ArithmeticSymbolModel[8];
+        public readonly ArithmeticSymbolModel?[] NumberOfReturnsModels = new ArithmeticSymbolModel[16];
+        public readonly ArithmeticSymbolModel?[] ReturnNumberModels = new ArithmeticSymbolModel[16];
+        public readonly ArithmeticSymbolModel?[] ClassificationModels = new ArithmeticSymbolModel[64];
+        public readonly ArithmeticSymbolModel?[] FlagsModels = new ArithmeticSymbolModel[64];
+        public readonly ArithmeticSymbolModel?[] UserDataModels = new ArithmeticSymbolModel[64];
 
-        public readonly ISymbolModel ScannerChannelModel;
-        public readonly ISymbolModel ReturnNumberGpsSameModel;
-        public readonly ISymbolModel GpsTimeMultiModel;
-        public readonly ISymbolModel GpsTimeZeroDiffModel;
+        public readonly ArithmeticSymbolModel ScannerChannelModel;
+        public readonly ArithmeticSymbolModel ReturnNumberGpsSameModel;
+        public readonly ArithmeticSymbolModel GpsTimeMultiModel;
+        public readonly ArithmeticSymbolModel GpsTimeZeroDiffModel;
 
         public readonly IntegerCompressor DeltaXIntegerCompressor;
         public readonly IntegerCompressor DeltaYIntegerCompressor;

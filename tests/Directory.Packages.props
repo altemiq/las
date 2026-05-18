@@ -13,7 +13,7 @@
   </ItemGroup>
   
   <ItemGroup Label="Apache">
-    <PackageVersion Include="Apache.Arrow" Version="22.1.0" />
+    <PackageVersion Include="Apache.Arrow" Version="23.0.0" />
   </ItemGroup>
   
   <ItemGroup Label="Aspire">
@@ -26,7 +26,7 @@
   </ItemGroup>
   
   <ItemGroup Label="Azure">
-    <PackageVersion Include="Microsoft.Extensions.Azure" Version="1.13.1" />
+    <PackageVersion Include="Microsoft.Extensions.Azure" Version="1.14.0" />
   </ItemGroup>
   
   <ItemGroup Label="DataFrames">

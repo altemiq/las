@@ -19,6 +19,7 @@ public class WellKnownTextValueTests
             .Member(static v => v.Value, static value => value.IsNull());
     }
 
+#if NET6_0_OR_GREATER
     [Test]
     public async Task SwitchOnNoValue()
     {
@@ -38,6 +39,7 @@ public class WellKnownTextValueTests
         await Assert.That(result).IsTypeOf<object>().And.IsEqualTo(result);
         await Assert.That(result).IsTypeOf<object>().And.IsEqualTo(input);
     }
+#endif
 
     [Test]
     public async Task FromNode()

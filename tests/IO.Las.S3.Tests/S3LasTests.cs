@@ -6,10 +6,10 @@ public class S3LasTests
     [MethodDataSource(nameof(GetUris))]
     public async Task TryParseUri(string uri, Amazon.RegionEndpoint region)
     {
-        _ = await Assert.That(Amazon.S3.Util.AmazonS3Uri.TryParseAmazonS3Uri(uri, out var output)).IsTrue();
-        _ = await Assert.That(output.Bucket).IsEqualTo(Data.S3UriData.BucketName);
-        _ = await Assert.That(output.Key).IsEqualTo(Data.S3UriData.Path);
-        _ = await Assert.That(output.Region).IsEqualTo(region);
+        await Assert.That(Amazon.S3.Util.AmazonS3Uri.TryParseAmazonS3Uri(uri, out var output)).IsTrue();
+        await Assert.That(output.Bucket).IsEqualTo(Data.S3UriData.BucketName);
+        await Assert.That(output.Key).IsEqualTo(Data.S3UriData.Path);
+        await Assert.That(output.Region).IsEqualTo(region);
     }
 
     public static IEnumerable<Func<(string Uri, Amazon.RegionEndpoint Region)>> GetUris()

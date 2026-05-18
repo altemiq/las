@@ -28,6 +28,6 @@ public static class LazReaderExtensions
         /// <summary>
         /// Convert <see cref="ILasReader"/> to <see cref="Apache.Arrow"/> <see cref="Apache.Arrow.RecordBatch"/> Stream.
         /// </summary>
-        public IEnumerable<RecordBatch> ToArrowBatches(Schema schema) => LazToArrowStream.ToArrowBatches(reader, schema);
+        public IEnumerable<RecordBatch> ToArrowBatches(Schema schema) => Arrow.LazToArrowStream.ToArrowBatches(reader, schema);
     }
 }

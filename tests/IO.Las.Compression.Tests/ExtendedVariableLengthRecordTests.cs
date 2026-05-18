@@ -25,31 +25,27 @@ public class ExtendedVariableLengthRecordTests
             },
             []);
         HeaderBlockBuilder headerBuilder = new();
-#if NETSTANDARD2_1_OR_GREATER || NETCOREAPP3_0_OR_GREATER
-        await
-#endif
-        using var stream = Activator.CreateInstance(type) as Stream ?? throw new InvalidCastException();
-        using (LasWriter writer = new(stream, true))
-        {
-            writer.Write(headerBuilder.HeaderBlock);
+        var stream = Activator.CreateInstance(type) as Stream ?? throw new InvalidCastException();
+        LasWriter writer = new(stream, true);
+        writer.Write(headerBuilder.HeaderBlock);
 
-            // write a point
-            IBasePointDataRecord pt =
+        // write a point
+        IBasePointDataRecord pt =
 #if LAS1_5_OR_GREATER
-                new ExtendedGpsPointDataRecord
-                {
-                    X = default,
-                    Y = default,
-                    Z = default,
-                    ReturnNumber = 1,
-                    NumberOfReturns = 1,
-                    ScanDirectionFlag = default,
-                    Classification = default,
-                    EdgeOfFlightLine = default,
-                    GpsTime = default,
-                    PointSourceId = default,
-                    ScanAngle = default,
-                };
+            new ExtendedGpsPointDataRecord
+            {
+                X = default,
+                Y = default,
+                Z = default,
+                ReturnNumber = 1,
+                NumberOfReturns = 1,
+                ScanDirectionFlag = default,
+                Classification = default,
+                EdgeOfFlightLine = default,
+                GpsTime = default,
+                PointSourceId = default,
+                ScanAngle = default,
+            };
 #else
                 new PointDataRecord
                 {
@@ -65,27 +61,31 @@ public class ExtendedVariableLengthRecordTests
                     ScanAngleRank = default,
                 };
 #endif
-            await writer.WriteAsync(pt);
-            headerBuilder.Add(pt);
-            await writer.WriteAsync(pt);
-            headerBuilder.Add(pt);
+        await writer.WriteAsync(pt);
+        headerBuilder.Add(pt);
+        await writer.WriteAsync(pt);
+        headerBuilder.Add(pt);
 
-            writer.Write(evlr);
-
-            stream.Position = 0;
-            writer.Write(headerBuilder.HeaderBlock);
-        }
+        writer.Write(evlr);
 
         stream.Position = 0;
-        using LasReader reader = new(stream);
+        writer.Write(headerBuilder.HeaderBlock);
+
+        await writer.DisposeAsync();
+
+        stream.Position = 0;
+        LasReader reader = new(stream);
 #if LAS1_5_OR_GREATER
-        _ = await Assert.That(reader.Header.NumberOfPointRecords).IsEqualTo(2UL);
-        _ = await Assert.That(reader.Header.LegacyNumberOfPointRecords).IsEqualTo(0U);
+        await Assert.That(reader.Header.NumberOfPointRecords).IsEqualTo(2UL);
+        await Assert.That(reader.Header.LegacyNumberOfPointRecords).IsEqualTo(0U);
 #else
-        _ = await Assert.That(reader.Header.LegacyNumberOfPointRecords).IsEqualTo(2U);
+        await Assert.That(reader.Header.LegacyNumberOfPointRecords).IsEqualTo(2U);
 #endif
-        _ = await Assert.That(reader.ExtendedVariableLengthRecords).Count().IsEqualTo(1)
+        await Assert.That(reader.ExtendedVariableLengthRecords).Count().IsEqualTo(1)
             .And.Member(x => x[0], x => x.IsEqualTo(evlr, ExtendedVariableLengthRecordComparer.Instance));
+
+        await reader.DisposeAsync();
+        await stream.DisposeAsync();
     }
 
     internal sealed class ForwardOnlyMemoryStream : MemoryStream

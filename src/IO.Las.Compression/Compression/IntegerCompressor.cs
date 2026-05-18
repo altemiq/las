@@ -11,7 +11,7 @@ namespace Altemiq.IO.Las.Compression;
 /// </summary>
 internal sealed class IntegerCompressor
 {
-    private readonly IEntropyEncoder encoder;
+    private readonly ArithmeticEncoder encoder;
 
     private readonly uint bitsHigh;
 
@@ -21,11 +21,11 @@ internal sealed class IntegerCompressor
 
     private readonly int correctorMax;
 
-    private readonly ISymbolModel[] bitsModels;
+    private readonly ArithmeticSymbolModel[] bitsModels;
 
-    private readonly ISymbolModel[] correctorModels;
+    private readonly ArithmeticSymbolModel[] correctorModels;
 
-    private readonly IBitModel correctorBitModel;
+    private readonly ArithmeticBitModel correctorBitModel;
 
     /// <summary>
     /// Initializes a new instance of the <see cref="IntegerCompressor"/> class.
@@ -35,7 +35,7 @@ internal sealed class IntegerCompressor
     /// <param name="contexts">The contexts.</param>
     /// <param name="bitsHigh">The high bits.</param>
     /// <param name="range">The range.</param>
-    public IntegerCompressor(IEntropyEncoder enc, uint bits = 16, uint contexts = 1, uint bitsHigh = 8, uint range = 0)
+    public IntegerCompressor(ArithmeticEncoder enc, uint bits = 16, uint contexts = 1, uint bitsHigh = 8, uint range = 0)
     {
         this.encoder = enc;
         this.bitsHigh = bitsHigh;
@@ -44,15 +44,10 @@ internal sealed class IntegerCompressor
         if (range is not 0)
         {
             // the corrector's significant bits and range
-            correctorBits = default;
             this.correctorRange = range;
-            while (range > 0)
-            {
-                range >>= 1;
-                correctorBits++;
-            }
+            correctorBits = (uint)System.Numerics.BitOperations.Log2(range) + 1;
 
-            if (this.correctorRange == (1u << (int)(correctorBits - 1)))
+            if (this.correctorRange == (1U << (int)(correctorBits - 1)))
             {
                 correctorBits--;
             }
@@ -81,8 +76,8 @@ internal sealed class IntegerCompressor
         }
 
         this.K = default;
-        this.bitsModels = new ISymbolModel[contexts];
-        this.correctorModels = new ISymbolModel[correctorBits + 1];
+        this.bitsModels = new ArithmeticSymbolModel[contexts];
+        this.correctorModels = new ArithmeticSymbolModel[correctorBits + 1];
 
         for (var i = 0; i < this.bitsModels.Length; i++)
         {
@@ -114,9 +109,11 @@ internal sealed class IntegerCompressor
         }
 
         _ = this.correctorBitModel.Initialize();
-        foreach (var correctorModel in this.correctorModels.Skip(1))
+
+        // correctorModels[0] is intentionally null; only indices 1..Length-1 are populated.
+        for (var i = 1; i < this.correctorModels.Length; i++)
         {
-            _ = correctorModel.Initialize();
+            _ = this.correctorModels[i].Initialize();
         }
     }
 
@@ -151,7 +148,7 @@ internal sealed class IntegerCompressor
 
         WriteCorrector(corr, this.bitsModels[context]);
 
-        void WriteCorrector(int c, ISymbolModel model)
+        void WriteCorrector(int c, ArithmeticSymbolModel model)
         {
             // find the highest interval [ - (2^k - 1)  ...  + (2^k) ] that contains c
             this.K = default;
@@ -160,11 +157,7 @@ internal sealed class IntegerCompressor
             var c1 = (uint)(c <= 0 ? -c : c - 1);
 
             // this loop could be replaced with more efficient code
-            while (c1 > 0)
-            {
-                c1 >>= 1;
-                this.K++;
-            }
+            this.K = c1 is 0 ? 0U : (uint)System.Numerics.BitOperations.Log2(c1) + 1;
 
             // the number k is between 0 and corrBits and describes the interval the corrector falls into
             // we can compress the exact location of c within this interval using k bits
@@ -213,7 +206,7 @@ internal sealed class IntegerCompressor
                     this.encoder.EncodeSymbol(this.correctorModels[this.K], (uint)c);
 
                     // store the lower k1 bits raw
-                    this.encoder.WriteBits((uint)k1, c1);
+                    this.encoder.WriteBits(k1, c1);
                 }
             }
             else

@@ -9,7 +9,7 @@ namespace Altemiq.IO.Las.Indexing;
 /// <summary>
 /// LAS index.
 /// </summary>
-public class LasIndex : IEnumerable<LasIndexCell>
+public class LasIndex : IEnumerable<LasIndexCell>, IEqualityComparer<LasIndex>
 {
     /// <summary>
     /// The default threshold.
@@ -32,6 +32,7 @@ public class LasIndex : IEnumerable<LasIndexCell>
     public const float DefaultTileSize = default;
 
     private const string Signature = "LASX";
+    private const uint SignatureValue = ((uint)'X' << 24) | ((uint)'S' << 16) | ((uint)'A' << 8) | 'L';
     private readonly LasQuadTree spatial;
     private readonly LasInterval interval;
 
@@ -65,28 +66,85 @@ public class LasIndex : IEnumerable<LasIndexCell>
         var header = reader.Header;
         if (tileSize is DefaultTileSize)
         {
-#pragma warning disable IDE0055
-            tileSize = (header.Max.X - header.Min.X, header.Max.Y - header.Min.Y) switch
+            // the bucket pattern only advanced when both dimensions fell below a threshold, which
+            // is semantically identical to testing `max(dx, dy)`; switch to the simpler form.
+            var extent = Math.Max(header.Max.X - header.Min.X, header.Max.Y - header.Min.Y);
+            tileSize = extent switch
             {
-                (< 1000, < 1000) => 10F,
-                (< 10000, < 10000) => 100F,
-                (< 100000, < 100000) => 1000F,
-                (< 1000000, < 1000000) => 10000F,
+                < 1000 => 10F,
+                < 10000 => 100F,
+                < 100000 => 1000F,
+                < 1000000 => 10000F,
                 _ => 100000F,
             };
-#pragma warning restore IDE0055
         }
 
         var quadTree = new LasQuadTree(header.Min.X, header.Max.X, header.Min.Y, header.Max.Y, tileSize);
         var index = new LasIndex(quadTree, threshold);
         var quantizer = new PointDataRecordQuantizer(header);
 
+#if NETCOREAPP3_0_OR_GREATER
+        const int BatchSize = 1024;
+        var inputX = new int[BatchSize];
+        var inputY = new int[BatchSize];
+        var results = new Vector2D[BatchSize];
+
+        var current = default(uint);
+        var count = 0;
+        var pointLength = reader.PointDataLength;
+        var buffer = new byte[BatchSize * pointLength];
+
+        while (true)
+        {
+            var pointsRead = reader.ReadPointDataRecordData(buffer);
+            if (pointsRead is 0)
+            {
+                break;
+            }
+
+            for (var i = 0; i < pointsRead; i++)
+            {
+                var pointSpan = buffer.AsSpan(i * pointLength, pointLength);
+                inputX[count] = FieldAccessors.PointDataRecord.GetX(pointSpan);
+                inputY[count] = FieldAccessors.PointDataRecord.GetY(pointSpan);
+                count++;
+
+                if (count is not BatchSize)
+                {
+                    continue;
+                }
+
+                quantizer.Quantize(inputX, inputY, results);
+                for (var j = 0; j < BatchSize; j++)
+                {
+                    var vector = results[j];
+                    _ = index.Add(vector, current++);
+                }
+
+                count = 0;
+            }
+        }
+
+        if (count > 0)
+        {
+            quantizer.Quantize(
+                inputX.AsSpan(0, count),
+                inputY.AsSpan(0, count),
+                results);
+            for (var i = 0; i < count; i++)
+            {
+                var vector = results[i];
+                _ = index.Add(vector, current++);
+            }
+        }
+#else
         var current = default(uint);
         while (reader.ReadPointDataRecord() is { PointDataRecord: { } record })
         {
             var vector = quantizer.Get(record);
             _ = index.Add((float)vector.X, (float)vector.Y, current++);
         }
+#endif
 
         index.Complete(minimumPoints, maximumIntervals);
         return index;
@@ -118,10 +176,15 @@ public class LasIndex : IEnumerable<LasIndexCell>
 
         var length = (int)(stream.Length - stream.Position);
         var bytes = System.Buffers.ArrayPool<byte>.Shared.Rent(length);
-        var bytesRead = stream.Read(bytes, 0, length);
-        var index = ReadFrom(bytes.AsSpan(0, bytesRead));
-        System.Buffers.ArrayPool<byte>.Shared.Return(bytes);
-        return index;
+        try
+        {
+            _ = stream.ReadAtLeast(bytes.AsSpan(0, length), length);
+            return ReadFrom(bytes.AsSpan(0, length));
+        }
+        finally
+        {
+            System.Buffers.ArrayPool<byte>.Shared.Return(bytes);
+        }
     }
 
     /// <summary>
@@ -131,10 +194,9 @@ public class LasIndex : IEnumerable<LasIndexCell>
     /// <returns>The LAS index.</returns>
     public static LasIndex ReadFrom(ReadOnlySpan<byte> source)
     {
-        var signature = System.Text.Encoding.UTF8.GetString(source[..4]);
-        if (signature is not Signature)
+        if (System.Buffers.Binary.BinaryPrimitives.ReadUInt32LittleEndian(source[..4]) is not SignatureValue)
         {
-            ThrowInvalidSignature(signature, nameof(source));
+            ThrowInvalidSignature(System.Text.Encoding.UTF8.GetString(source[..4]), nameof(source));
         }
 
         // ignore 4..8
@@ -173,11 +235,15 @@ public class LasIndex : IEnumerable<LasIndexCell>
 
         var length = (int)(stream.Length - stream.Position);
         var bytes = System.Buffers.ArrayPool<byte>.Shared.Rent(length);
-        var bytesRead = await stream.ReadAsync(bytes.AsMemory(0, length), cancellationToken).ConfigureAwait(false);
-
-        var index = ReadFrom(bytes.AsSpan(0, bytesRead));
-        System.Buffers.ArrayPool<byte>.Shared.Return(bytes);
-        return index;
+        try
+        {
+            _ = await stream.ReadAtLeastAsync(bytes.AsMemory(0, length), length, throwOnEndOfStream: true, cancellationToken).ConfigureAwait(false);
+            return ReadFrom(bytes.AsSpan(0, length));
+        }
+        finally
+        {
+            System.Buffers.ArrayPool<byte>.Shared.Return(bytes);
+        }
     }
 
     /// <summary>
@@ -190,7 +256,18 @@ public class LasIndex : IEnumerable<LasIndexCell>
     /// Returns this instance as a read-only list of <see cref="LasIndexCell"/>.
     /// </summary>
     /// <returns>A read-only list of <see cref="LasIndexCell"/>.</returns>
-    public IReadOnlyList<LasIndexCell> AsReadOnly() => new ReadOnlyLasIndex([.. this]);
+    public IReadOnlyList<LasIndexCell> AsReadOnly()
+    {
+        // pre-size using the known cell count so we can fill directly without going via `List<T>`
+        var cells = new LasIndexCell[this.interval.GetNumberOfCells()];
+        var i = 0;
+        foreach (var cell in this)
+        {
+            cells[i++] = cell;
+        }
+
+        return new ReadOnlyLasIndex(cells);
+    }
 
     /// <summary>
     /// Adds the specified x, y point to the index.
@@ -199,11 +276,32 @@ public class LasIndex : IEnumerable<LasIndexCell>
     /// <param name="y">The y-coordinate.</param>
     /// <param name="index">The index.</param>
     /// <returns><see langword="true"/> if the point was added; otherwise <see langword="false"/>.</returns>
-    public bool Add(float x, float y, uint index)
-    {
-        var cell = this.spatial.GetCellIndex(x, y);
-        return this.interval.Add(index, cell);
-    }
+    public bool Add(float x, float y, uint index) => this.interval.Add(index, this.spatial.GetCellIndex(x, y));
+
+    /// <summary>
+    /// Adds the specified x, y point to the index.
+    /// </summary>
+    /// <param name="vector">The vector.</param>
+    /// <param name="index">The index.</param>
+    /// <returns><see langword="true"/> if the point was added; otherwise <see langword="false"/>.</returns>
+    public bool Add(System.Numerics.Vector2 vector, uint index) => this.interval.Add(index, this.spatial.GetCellIndex(vector));
+
+    /// <summary>
+    /// Adds the specified x, y point to the index.
+    /// </summary>
+    /// <param name="x">The x-coordinate.</param>
+    /// <param name="y">The y-coordinate.</param>
+    /// <param name="index">The index.</param>
+    /// <returns><see langword="true"/> if the point was added; otherwise <see langword="false"/>.</returns>
+    public bool Add(double x, double y, uint index) => this.interval.Add(index, this.spatial.GetCellIndex(x, y));
+
+    /// <summary>
+    /// Adds the specified x, y point to the index.
+    /// </summary>
+    /// <param name="vector">The vector.</param>
+    /// <param name="index">The index.</param>
+    /// <returns><see langword="true"/> if the point was added; otherwise <see langword="false"/>.</returns>
+    public bool Add(Vector2D vector, uint index) => this.interval.Add(index, this.spatial.GetCellIndex(vector));
 
     /// <summary>
     /// Adds the specified start and end at the specified index to the index.
@@ -223,16 +321,17 @@ public class LasIndex : IEnumerable<LasIndexCell>
     {
         if (minimumPoints is not 0)
         {
+            var initialCount = this.interval.GetNumberOfCells();
             var cellHashes = new[]
             {
-                GetHashes(this.interval),
-                new Dictionary<int, uint>(),
+                GetHashes(this.interval, initialCount),
+                new Dictionary<int, uint>(initialCount),
             };
 
             var firstHash = default(int);
             while (cellHashes[firstHash].Count > 0)
             {
-                var secondHash = (firstHash + 1) % 2;
+                var secondHash = firstHash ^ 1;
                 cellHashes[secondHash].Clear();
 
                 // coarsen if a coarser cell will still have fewer than the minimum points (and points in all subcells)
@@ -266,6 +365,8 @@ public class LasIndex : IEnumerable<LasIndexCell>
                         }
 
                         full += inner.Value;
+
+                        // zero the current pass's entry so we do not re-visit it during this enumeration
                         cellHashes[firstHash][inner.Key] = default;
                         numberFilled++;
                     }
@@ -285,18 +386,16 @@ public class LasIndex : IEnumerable<LasIndexCell>
                     break;
                 }
 
-                firstHash = (firstHash + 1) % 2;
+                firstHash ^= 1;
             }
 
             ManageCells(this.interval, this.spatial);
 
-            static IDictionary<int, uint> GetHashes(LasInterval interval)
+            static IDictionary<int, uint> GetHashes(LasInterval interval, int capacity)
             {
-                var cellHash = new Dictionary<int, uint>();
-                using var enumerator = interval.GetEnumerator();
-                while (enumerator.MoveNext())
+                var cellHash = new Dictionary<int, uint>(capacity);
+                foreach (var current in interval)
                 {
-                    var current = enumerator.Current;
                     cellHash[current.Key] = current.Value.Full;
                 }
 
@@ -322,25 +421,19 @@ public class LasIndex : IEnumerable<LasIndexCell>
     /// <returns>The index of the cell containing <paramref name="pointIndex"/>; otherwise -1.</returns>
     public int IndexOf(uint pointIndex)
     {
-        // traverse the tree to find the index
-        var i = this.interval.FirstOrDefault(i => Contains(i.Value, pointIndex));
-        return i.Value is null ? -1 : i.Key;
-
-        static bool Contains(LasIntervalStartCell cell, uint index)
+        // traverse the tree to find the cell containing this point index
+        foreach (var kvp in this.interval)
         {
-            LasIntervalCell? current = cell;
-            while (current is not null)
+            foreach (var (start, end) in this.interval.EnumerateIntervals(kvp.Value))
             {
-                if (current.Start >= index && current.End <= index)
+                if (start <= pointIndex && pointIndex <= end)
                 {
-                    return true;
+                    return kvp.Key;
                 }
-
-                current = current.Next;
             }
-
-            return false;
         }
+
+        return -1;
     }
 
     /// <summary>
@@ -361,10 +454,20 @@ public class LasIndex : IEnumerable<LasIndexCell>
     public int GetCellIndex(float x, float y, float width, float height) => this.spatial.GetCellIndex(new System.Numerics.Vector2(x, y), new(width, height));
 
     /// <summary>
+    /// Gets the cell index.
+    /// </summary>
+    /// <param name="x">The x-coordinate.</param>
+    /// <param name="y">The y-coordinate.</param>
+    /// <param name="width">The cell width.</param>
+    /// <param name="height">The cell height.</param>
+    /// <returns>The cell index.</returns>
+    public int GetCellIndex(double x, double y, double width, double height) => this.spatial.GetCellIndex(new Vector2D(x, y), new(width, height));
+
+    /// <summary>
     /// Gets all the ranges.
     /// </summary>
     /// <returns>The ranges.</returns>
-    public IEnumerable<Range> All() => GetRanges(this.GetCells(this.spatial.AllCells()));
+    public IEnumerable<Range> All() => GetRanges(this.interval, this.GetCells(this.spatial.AllCells()));
 
     /// <summary>
     /// Gets the ranges within the specified rectangle.
@@ -374,7 +477,7 @@ public class LasIndex : IEnumerable<LasIndexCell>
     /// <param name="maxX">The maximum x-coordinate.</param>
     /// <param name="maxY">The maximum y-coordinate.</param>
     /// <returns>The ranges.</returns>
-    public IEnumerable<Range> WithinRectangle(float minX, float minY, float maxX, float maxY) => GetRanges(this.GetCells(this.spatial.CellsWithinRectangle(minX, minY, maxX, maxY)));
+    public IEnumerable<Range> WithinRectangle(float minX, float minY, float maxX, float maxY) => GetRanges(this.interval, this.GetCells(this.spatial.CellsWithinRectangle(minX, minY, maxX, maxY)));
 
     /// <summary>
     /// Gets the ranges within the specified tile.
@@ -383,7 +486,7 @@ public class LasIndex : IEnumerable<LasIndexCell>
     /// <param name="bottom">The lower-right y-coordinate.</param>
     /// <param name="size">The size of the tile.</param>
     /// <returns>The ranges.</returns>
-    public IEnumerable<Range> WithinTile(float left, float bottom, float size) => GetRanges(this.GetCells(this.spatial.CellsWithinTile(left, bottom, size)));
+    public IEnumerable<Range> WithinTile(float left, float bottom, float size) => GetRanges(this.interval, this.GetCells(this.spatial.CellsWithinTile(left, bottom, size)));
 
     /// <summary>
     /// Writes this instance to the specified stream.
@@ -401,7 +504,8 @@ public class LasIndex : IEnumerable<LasIndexCell>
     /// <param name="writer">The writer.</param>
     public void WriteTo(BinaryWriter writer)
     {
-        writer.Write(Signature.ToCharArray());
+        // write the 4-char ASCII signature as a little-endian uint to avoid the `char[4]` allocation from `ToCharArray`
+        writer.Write(SignatureValue);
         writer.Write(0U); // version
         this.spatial.WriteTo(writer);
         this.interval.WriteTo(writer);
@@ -414,9 +518,20 @@ public class LasIndex : IEnumerable<LasIndexCell>
     System.Collections.IEnumerator System.Collections.IEnumerable.GetEnumerator() => this.GetEnumerator();
 
     /// <inheritdoc/>
-    public override bool Equals(object? obj) => obj is LasIndex index
-        && this.spatial.Equals(index.spatial)
-        && this.interval.Equals(index.interval);
+    public override bool Equals(object? obj) => this.Equals(this, obj as LasIndex);
+
+    /// <inheritdoc/>
+    public bool Equals(LasIndex? x, LasIndex? y) =>
+        (x, y) switch
+        {
+            _ when ReferenceEquals(x, y) => true,
+            (null, not null) => false,
+            (_, null) => false,
+            _ => x.spatial.Equals(y.spatial) && x.interval.Equals(y.interval),
+        };
+
+    /// <inheritdoc/>
+    public int GetHashCode(LasIndex obj) => obj.GetHashCode();
 
     /// <inheritdoc/>
     public override int GetHashCode() => HashCode.Combine(this.spatial, this.interval);
@@ -430,13 +545,16 @@ public class LasIndex : IEnumerable<LasIndexCell>
         }
     }
 
-    private static IEnumerable<Range> GetRanges(LasIntervalStartCell? cell)
+    private static IEnumerable<Range> GetRanges(LasInterval interval, LasIntervalStartCell? cell)
     {
-        LasIntervalCell? current = cell;
-        while (current is not null)
+        if (cell is null)
         {
-            yield return new(Index.FromStart(current.Start), Index.FromStart(current.End));
-            current = current.Next;
+            yield break;
+        }
+
+        foreach (var (start, end) in interval.EnumerateIntervals(cell))
+        {
+            yield return new(Index.FromStart(start), Index.FromStart(end));
         }
     }
 
@@ -461,7 +579,7 @@ public class LasIndex : IEnumerable<LasIndexCell>
 
         private readonly LasQuadTree quadTree = index.spatial;
 
-        private readonly int hashCode = index.GetHashCode();
+        private readonly LasInterval interval = index.interval;
 
         public LasIndexCell Current
         {
@@ -469,7 +587,7 @@ public class LasIndex : IEnumerable<LasIndexCell>
             {
                 var current = this.enumerator.Current;
                 var (minimum, maximum) = this.quadTree.GetBounds(current.Key);
-                return new(minimum, maximum, GetRanges(current.Value));
+                return new(minimum, maximum, GetRanges(this.interval, current.Value));
             }
         }
 
@@ -483,7 +601,7 @@ public class LasIndex : IEnumerable<LasIndexCell>
 
         public override bool Equals([System.Diagnostics.CodeAnalysis.NotNullWhen(true)] object? obj) => obj is Enumerator e && this.quadTree == e.quadTree;
 
-        public override int GetHashCode() => this.hashCode;
+        public override int GetHashCode() => this.quadTree.GetHashCode();
 
         public override string ToString() => this.quadTree.ToString();
     }

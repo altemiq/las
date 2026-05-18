@@ -9,14 +9,14 @@ namespace Altemiq.IO.Las.Compression;
 /// <summary>
 /// The arithmetic bit model.
 /// </summary>
-internal sealed class ArithmeticBitModel : IBitModel
+internal sealed class ArithmeticBitModel
 {
     /// <summary>
     /// Length bits discarded before mult.
     /// </summary>
-    internal const uint LengthShift = 13;
+    internal const int LengthShift = 13;
 
-    private const uint MaxCount = 1U << (int)LengthShift;
+    private const uint MaxCount = 1U << LengthShift;
 
     private uint updateCycle;
     private uint bitsUntilUpdate;
@@ -27,25 +27,39 @@ internal sealed class ArithmeticBitModel : IBitModel
     /// </summary>
     public ArithmeticBitModel() => this.Initialize();
 
-    /// <inheritdoc/>
+    /// <summary>
+    /// Gets the bit-0 count.
+    /// </summary>
     public uint BitZeroProb { get; private set; }
 
-    /// <inheritdoc/>
+    /// <summary>
+    /// Gets the bit-0 prob.
+    /// </summary>
     public uint BitZeroCount { get; private set; }
 
-    /// <inheritdoc/>
+    /// <summary>
+    /// Decrements the bits until update.
+    /// </summary>
+    /// <returns>The bits until update.</returns>
+    [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
     public uint DecrementBitsUntilUpdate() => --this.bitsUntilUpdate;
 
-    /// <inheritdoc/>
+    /// <summary>
+    /// Increments the <see cref="BitZeroCount"/>.
+    /// </summary>
+    [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
     public void IncrementBitZeroCount() => this.BitZeroCount++;
 
-    /// <inheritdoc/>
-    public bool Initialize(uint[]? table = null)
+    /// <summary>
+    /// Initializes the entropy model.
+    /// </summary>
+    /// <returns>The return.</returns>
+    public bool Initialize()
     {
         // initialization to equiprobable model
         this.BitZeroCount = 1;
         this.bitCount = 2;
-        this.BitZeroProb = 1U << (int)(LengthShift - 1);
+        this.BitZeroProb = 1U << (LengthShift - 1);
 
         // start with frequent updates
         this.updateCycle = this.bitsUntilUpdate = 4;
@@ -71,7 +85,7 @@ internal sealed class ArithmeticBitModel : IBitModel
 
         // compute scaled bit 0 probability
         var scale = 0x80000000U / this.bitCount;
-        this.BitZeroProb = (this.BitZeroCount * scale) >> (int)(31 - LengthShift);
+        this.BitZeroProb = (this.BitZeroCount * scale) >> (31 - LengthShift);
 
         // set frequency of model updates
         this.updateCycle = (5 * this.updateCycle) >> 2;

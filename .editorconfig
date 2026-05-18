@@ -47,7 +47,7 @@ csharp_style_var_when_type_is_apparent = true:silent
 # preferences
 csharp_style_prefer_unbound_generic_type_in_nameof = false:silent
 
-#### Supressions ####
+#### Suppressions ####
 
 ## Roslynator
 

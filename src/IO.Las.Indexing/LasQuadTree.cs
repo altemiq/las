@@ -15,6 +15,8 @@ public sealed class LasQuadTree : IEquatable<LasQuadTree>
 {
     private const uint LasSpatialQuadTree = default;
     private const string Signature = "LASQ";
+    private const uint SpatialSignatureValue = ((uint)'S' << 24) | ((uint)'S' << 16) | ((uint)'A' << 8) | 'L';
+    private const uint QuadTreeSignatureValue = ((uint)'Q' << 24) | ((uint)'S' << 16) | ((uint)'A' << 8) | 'L';
 
     private static readonly int[] LevelOffset = CreateLevelOffset();
 
@@ -159,10 +161,9 @@ public sealed class LasQuadTree : IEquatable<LasQuadTree>
     /// <returns>The LAS quad-tree.</returns>
     public static LasQuadTree ReadFrom(ReadOnlySpan<byte> source)
     {
-        var signature = System.Text.Encoding.UTF8.GetString(source[..4]);
-        if (signature is not "LASS")
+        if (System.Buffers.Binary.BinaryPrimitives.ReadUInt32LittleEndian(source[..4]) is not SpatialSignatureValue)
         {
-            ThrowInvalidSignature(signature, "LASS", nameof(source));
+            ThrowInvalidSignature(System.Text.Encoding.UTF8.GetString(source[..4]), "LASS", nameof(source));
         }
 
         if (System.Buffers.Binary.BinaryPrimitives.ReadUInt32LittleEndian(source[4..8]) is not LasSpatialQuadTree)
@@ -170,10 +171,9 @@ public sealed class LasQuadTree : IEquatable<LasQuadTree>
             throw new ArgumentException(Properties.Resources.IncorrectQuadTreeSignature, nameof(source));
         }
 
-        signature = System.Text.Encoding.UTF8.GetString(source[8..12]);
-        if (signature is not Signature)
+        if (System.Buffers.Binary.BinaryPrimitives.ReadUInt32LittleEndian(source[8..12]) is not QuadTreeSignatureValue)
         {
-            ThrowInvalidSignature(signature, Signature, nameof(source));
+            ThrowInvalidSignature(System.Text.Encoding.UTF8.GetString(source[8..12]), Signature, nameof(source));
         }
 
         // ignore 12..16
@@ -220,10 +220,11 @@ public sealed class LasQuadTree : IEquatable<LasQuadTree>
     /// <param name="writer">The writer.</param>
     public void WriteTo(BinaryWriter writer)
     {
-        writer.Write("LASS".ToCharArray());
+        // write both 4-char ASCII signatures as little-endian uints to avoid `char[4]` allocations from `ToCharArray`
+        writer.Write(SpatialSignatureValue);
         writer.Write(LasSpatialQuadTree);
 
-        writer.Write(Signature.ToCharArray());
+        writer.Write(QuadTreeSignatureValue);
         writer.Write(0U); // version
 
         writer.Write((uint)this.levels);
@@ -236,42 +237,21 @@ public sealed class LasQuadTree : IEquatable<LasQuadTree>
     }
 
     /// <inheritdoc/>
-    public bool Equals(LasQuadTree? other)
-    {
-        return other switch
+    public bool Equals(LasQuadTree? other) =>
+        other switch
         {
             null => false,
             not null when ReferenceEquals(this, other) => true,
-            not null => CheckSequence(other.adaptive, this.adaptive)
-                        && other.levels == this.levels
+            not null => other.levels == this.levels
                         && other.maximum == this.maximum
-                        && other.minimum == this.minimum
-                        && other.sublevel == this.sublevel
-                        && other.sublevelIndex == this.sublevelIndex,
+                        && other.minimum == this.minimum,
         };
-
-        static bool CheckSequence<T>(IEnumerable<T>? first, IEnumerable<T>? second)
-        {
-            return first is null
-                ? second is null
-                : second is not null && first.SequenceEqual(second);
-        }
-    }
 
     /// <inheritdoc/>
     public override bool Equals(object? obj) => this.Equals(obj as LasQuadTree);
 
     /// <inheritdoc/>
-    public override int GetHashCode()
-    {
-        var hashCode = default(HashCode);
-        hashCode.Add(this.levels);
-        hashCode.Add(this.maximum);
-        hashCode.Add(this.minimum);
-        hashCode.Add(this.sublevel);
-        hashCode.Add(this.sublevelIndex);
-        return hashCode.ToHashCode();
-    }
+    public override int GetHashCode() => HashCode.Combine(this.levels, this.maximum, this.minimum);
 
     /// <inheritdoc />
     public override string ToString() =>
@@ -639,198 +619,7 @@ public sealed class LasQuadTree : IEquatable<LasQuadTree>
     /// <param name="topRight">The upper-right coordinate.</param>
     /// <param name="level">The level.</param>
     /// <returns>The intersected cell indexes.</returns>
-    internal IReadOnlyList<int> CellsWithinTile(Vector2 bottomLeft, Vector2 topRight, int level)
-    {
-        if (VectorMath.LessThanOrEqualAny(topRight, this.minimum) || VectorMath.GreaterThanAny(bottomLeft, this.maximum))
-        {
-            return [];
-        }
-
-        List<int> cellsWithinTile = [];
-        if (this.adaptive is not null)
-        {
-            IntersectTileWithCellsAdaptive(cellsWithinTile, bottomLeft, topRight, this.minimum, this.maximum, 0, 0);
-        }
-        else
-        {
-            IntersectTileWithCells(cellsWithinTile, LevelOffset[level], bottomLeft, topRight, this.minimum, this.maximum, level, 0);
-        }
-
-        return cellsWithinTile;
-
-        void IntersectTileWithCellsAdaptive(ICollection<int> cells, Vector2 tileMin, Vector2 tileMax, Vector2 cellMin, Vector2 cellMax, int currentLevel, int levelIndex)
-        {
-            while (true)
-            {
-                var cellIndex = this.GetCellIndex(levelIndex, currentLevel);
-                var adaptivePos = cellIndex / 32;
-                var adaptiveBit = 1U << (cellIndex % 32);
-                if ((currentLevel < this.levels) && ((this.adaptive[adaptivePos] & adaptiveBit) is not 0))
-                {
-                    currentLevel++;
-                    levelIndex <<= 2;
-
-                    var cellMid = (cellMin + cellMax) * 0.5F;
-
-                    if (tileMax.X <= cellMid.X)
-                    {
-                        if (tileMax.Y <= cellMid.Y)
-                        {
-                            cellMax = cellMid;
-                            continue;
-                        }
-
-                        if (tileMin.Y >= cellMid.Y)
-                        {
-                            cellMin.Y = cellMid.Y;
-                            cellMax.X = cellMid.X;
-                            levelIndex |= 2;
-                            continue;
-                        }
-
-                        IntersectTileWithCellsAdaptive(cells, tileMin, tileMax, cellMin, cellMid, currentLevel, levelIndex);
-                        cellMin.Y = cellMid.Y;
-                        cellMax.X = cellMid.X;
-                        levelIndex |= 2;
-                        continue;
-                    }
-
-                    if (tileMin.X >= cellMid.X)
-                    {
-                        if (tileMax.Y <= cellMid.Y)
-                        {
-                            cellMin.X = cellMid.X;
-                            cellMax.Y = cellMid.Y;
-                            levelIndex |= 1;
-                            continue;
-                        }
-
-                        if (tileMin.Y >= cellMid.Y)
-                        {
-                            cellMin = cellMid;
-                            levelIndex |= 3;
-                            continue;
-                        }
-
-                        IntersectTileWithCellsAdaptive(cells, tileMin, tileMax, new(cellMid.X, cellMin.Y), new(cellMax.X, cellMid.Y), currentLevel, levelIndex | 1);
-                        cellMin = cellMid;
-                        levelIndex |= 3;
-                        continue;
-                    }
-
-                    if (tileMax.Y <= cellMid.Y)
-                    {
-                        IntersectTileWithCellsAdaptive(cells, tileMin, tileMax, cellMin, cellMid, currentLevel, levelIndex);
-                        cellMin.X = cellMid.X;
-                        cellMax.Y = cellMid.Y;
-                        levelIndex |= 1;
-                        continue;
-                    }
-
-                    if (tileMin.Y >= cellMid.Y)
-                    {
-                        IntersectTileWithCellsAdaptive(cells, tileMin, tileMax, new(cellMin.X, cellMid.Y), new(cellMid.X, cellMax.Y), currentLevel, levelIndex | 2);
-                        cellMin = cellMid;
-                        levelIndex |= 3;
-                        continue;
-                    }
-
-                    IntersectTileWithCellsAdaptive(cells, tileMin, tileMax, cellMin, cellMid, currentLevel, levelIndex);
-                    IntersectTileWithCellsAdaptive(cells, tileMin, tileMax, new(cellMid.X, cellMin.Y), new(cellMax.X, cellMid.Y), currentLevel, levelIndex | 1);
-                    IntersectTileWithCellsAdaptive(cells, tileMin, tileMax, new(cellMin.X, cellMid.Y), new(cellMid.X, cellMax.Y), currentLevel, levelIndex | 2);
-                    cellMin = cellMid;
-                    levelIndex |= 3;
-                    continue;
-                }
-
-                cells.Add(cellIndex);
-
-                break;
-            }
-        }
-
-        static void IntersectTileWithCells(ICollection<int> cells, int levelOffset, Vector2 tileMin, Vector2 tileMax, Vector2 cellMin, Vector2 cellMax, int currentLevel, int levelIndex)
-        {
-            while (currentLevel is not 0)
-            {
-                currentLevel--;
-                levelIndex <<= 2;
-
-                var cellMid = (cellMin + cellMax) * 0.5F;
-
-                if (tileMax.X <= cellMid.X)
-                {
-                    if (tileMax.Y <= cellMid.Y)
-                    {
-                        cellMax = cellMid;
-                        continue;
-                    }
-
-                    if (tileMin.Y >= cellMid.Y)
-                    {
-                        cellMin.Y = cellMid.Y;
-                        cellMax.X = cellMid.X;
-                        levelIndex |= 2;
-                        continue;
-                    }
-
-                    IntersectTileWithCells(cells, levelOffset, tileMin, tileMax, cellMin, cellMid, currentLevel, levelIndex);
-                    cellMin.Y = cellMid.Y;
-                    cellMax.X = cellMid.X;
-                    levelIndex |= 2;
-                    continue;
-                }
-
-                if (tileMin.X >= cellMid.X)
-                {
-                    if (tileMax.Y <= cellMid.Y)
-                    {
-                        cellMin.X = cellMid.X;
-                        cellMax.Y = cellMid.Y;
-                        levelIndex |= 1;
-                        continue;
-                    }
-
-                    if (tileMin.Y >= cellMid.Y)
-                    {
-                        cellMin = cellMid;
-                        levelIndex |= 3;
-                        continue;
-                    }
-
-                    IntersectTileWithCells(cells, levelOffset, tileMin, tileMax, new(cellMid.X, cellMin.Y), new(cellMax.X, cellMid.Y), currentLevel, levelIndex | 1);
-                    cellMin = cellMid;
-                    levelIndex |= 3;
-                    continue;
-                }
-
-                if (tileMax.Y <= cellMid.Y)
-                {
-                    IntersectTileWithCells(cells, levelOffset, tileMin, tileMax, cellMin, cellMid, currentLevel, levelIndex);
-                    cellMin.X = cellMid.X;
-                    cellMax.Y = cellMid.Y;
-                    levelIndex |= 1;
-                    continue;
-                }
-
-                if (tileMin.Y >= cellMid.Y)
-                {
-                    IntersectTileWithCells(cells, levelOffset, tileMin, tileMax, new(cellMin.X, cellMid.Y), new(cellMid.X, cellMax.Y), currentLevel, levelIndex | 2);
-                    cellMin = cellMid;
-                    levelIndex |= 3;
-                    continue;
-                }
-
-                IntersectTileWithCells(cells, levelOffset, tileMin, tileMax, cellMin, cellMid, currentLevel, levelIndex);
-                IntersectTileWithCells(cells, levelOffset, tileMin, tileMax, new(cellMid.X, cellMin.Y), new(cellMax.X, cellMid.Y), currentLevel, levelIndex | 1);
-                IntersectTileWithCells(cells, levelOffset, tileMin, tileMax, new(cellMin.X, cellMid.Y), new(cellMid.X, cellMax.Y), currentLevel, levelIndex | 2);
-                cellMin = cellMid;
-                levelIndex |= 3;
-            }
-
-            cells.Add(levelOffset + levelIndex);
-        }
-    }
+    internal IReadOnlyList<int> CellsWithinTile(Vector2 bottomLeft, Vector2 topRight, int level) => this.CellsWithinRectangle(bottomLeft, topRight, level);
 
     /// <summary>
     /// Gets the cell index for the specified x, y coordinates.
@@ -843,12 +632,44 @@ public sealed class LasQuadTree : IEquatable<LasQuadTree>
     /// <summary>
     /// Gets the cell index for the specified x, y coordinates.
     /// </summary>
+    /// <param name="vector">The vector.</param>
+    /// <returns>The cell index.</returns>
+    internal int GetCellIndex(System.Numerics.Vector2 vector) => this.GetCellIndex(vector.X, vector.Y, this.levels);
+
+    /// <summary>
+    /// Gets the cell index for the specified x, y coordinates.
+    /// </summary>
+    /// <param name="x">The x-coordinate.</param>
+    /// <param name="y">The y-coordinate.</param>
+    /// <returns>The cell index.</returns>
+    internal int GetCellIndex(double x, double y) => this.GetCellIndex(x, y, this.levels);
+
+    /// <summary>
+    /// Gets the cell index for the specified x, y coordinates.
+    /// </summary>
+    /// <param name="vector">The vector.</param>
+    /// <returns>The cell index.</returns>
+    internal int GetCellIndex(Vector2D vector) => this.GetCellIndex(vector.X, vector.Y, this.levels);
+
+    /// <summary>
+    /// Gets the cell index for the specified x, y coordinates.
+    /// </summary>
     /// <param name="x">The x-coordinate.</param>
     /// <param name="y">The y-coordinate.</param>
     /// <param name="width">The width of the cell.</param>
     /// <param name="height">The height of the cell.</param>
     /// <returns>The cell index.</returns>
     internal int GetCellIndex(float x, float y, float width, float height) => this.GetCellIndex(new Vector2(x, y), new(width, height));
+
+    /// <summary>
+    /// Gets the cell index for the specified x, y coordinates.
+    /// </summary>
+    /// <param name="x">The x-coordinate.</param>
+    /// <param name="y">The y-coordinate.</param>
+    /// <param name="width">The width of the cell.</param>
+    /// <param name="height">The height of the cell.</param>
+    /// <returns>The cell index.</returns>
+    internal int GetCellIndex(double x, double y, double width, double height) => this.GetCellIndex(new Vector2D(x, y), new(width, height));
 
     /// <summary>
     /// Gets the cell index for the specified x, y coordinates.
@@ -872,6 +693,41 @@ public sealed class LasQuadTree : IEquatable<LasQuadTree>
             }
 
             return level;
+        }
+    }
+
+    /// <summary>
+    /// Gets the cell index for the specified x, y coordinates.
+    /// </summary>
+    /// <param name="center">The center coordinate.</param>
+    /// <param name="size">The size of the cell.</param>
+    /// <returns>The cell index.</returns>
+    internal int GetCellIndex(Vector2D center, Vector2D size)
+    {
+        return this.GetCellIndex(center.X, center.Y, GetLevelCore(size));
+
+        int GetLevelCore(Vector2D required)
+        {
+            var current = new Vector2D(this.maximum.X - this.minimum.X, this.maximum.Y - this.minimum.Y);
+
+            var level = 0;
+            while (LessThanAll(required, current))
+            {
+                level++;
+                current *= 0.5;
+            }
+
+            return level;
+
+            [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
+            static bool LessThanAll(Vector2D left, Vector2D right)
+            {
+#if NET7_0_OR_GREATER
+                return System.Runtime.Intrinsics.Vector128.LessThanAll(left.AsVector128Unsafe(), right.AsVector128Unsafe());
+#else
+                return left.X < right.X && left.Y < right.Y;
+#endif
+            }
         }
     }
 
@@ -924,11 +780,16 @@ public sealed class LasQuadTree : IEquatable<LasQuadTree>
     internal bool ManageCell(int cellIndex)
     {
         var adaptivePosition = cellIndex / 32;
-        this.adaptive ??= new uint[adaptivePosition + 1];
-        if (adaptivePosition >= this.adaptive.Length)
+        if (this.adaptive is null)
         {
-            // increase by 2
-            Array.Resize(ref this.adaptive, adaptivePosition * 2);
+            this.adaptive = new uint[adaptivePosition + 1];
+        }
+        else if (adaptivePosition >= this.adaptive.Length)
+        {
+            // grow by at least 2x, ensuring the new length covers `adaptivePosition` so we do not
+            // have to resize again on the next adjacent write (amortized O(1) per cell)
+            var newLength = Math.Max(this.adaptive.Length * 2, adaptivePosition + 1);
+            Array.Resize(ref this.adaptive, newLength);
         }
 
         var adaptiveBit = 1U << (cellIndex % 32);
@@ -955,7 +816,10 @@ public sealed class LasQuadTree : IEquatable<LasQuadTree>
 
     private static int[] CreateLevelOffset()
     {
-        var offsets = new int[20];
+        // populate all 17 meaningful levels (0..16). `4^17` overflows `int`, so higher levels
+        // are not representable, and we trap them explicitly in `GetLevel` rather than by
+        // silently rolling over.
+        var offsets = new int[17];
         for (var i = 0; i < 16; i++)
         {
             offsets[i + 1] = offsets[i] + ((1 << i) * (1 << i));
@@ -966,16 +830,31 @@ public sealed class LasQuadTree : IEquatable<LasQuadTree>
 
     private static int GetLevel(int cellIndex)
     {
+        if (cellIndex < 0)
+        {
+            throw new ArgumentOutOfRangeException(nameof(cellIndex), cellIndex, message: null);
+        }
+
         var level = default(int);
-        while (cellIndex >= LevelOffset[level + 1])
+
+        // LevelOffset has one entry per representable level plus a final "end" marker; bail out
+        // with a clear exception rather than walking past the array bounds when a malformed cell
+        // index exceeds the representable range.
+        while (level + 1 < LevelOffset.Length && cellIndex >= LevelOffset[level + 1])
         {
             level++;
         }
 
-        return level;
+        return level + 1 < LevelOffset.Length
+            ? level
+            : throw new ArgumentOutOfRangeException(nameof(cellIndex), cellIndex, message: null);
     }
 
     private int GetCellIndex(float x, float y, int level) => this.sublevel is not 0
+        ? LevelOffset[this.sublevel + level] + (this.sublevelIndex << (level * 2)) + this.GetLevelIndex(x, y, level)
+        : LevelOffset[level] + this.GetLevelIndex(x, y, level);
+
+    private int GetCellIndex(double x, double y, int level) => this.sublevel is not 0
         ? LevelOffset[this.sublevel + level] + (this.sublevelIndex << (level * 2)) + this.GetLevelIndex(x, y, level)
         : LevelOffset[level] + this.GetLevelIndex(x, y, level);
 
@@ -1017,6 +896,45 @@ public sealed class LasQuadTree : IEquatable<LasQuadTree>
             else
             {
                 cellMin.Y = cellMid.Y;
+                levelIndex |= 2;
+            }
+
+            level--;
+        }
+
+        return levelIndex;
+    }
+
+    private int GetLevelIndex(double x, double y, int level)
+    {
+        var cellMin = new Vector2D(this.minimum.X, this.minimum.Y);
+        var cellMax = new Vector2D(this.maximum.X, this.maximum.Y);
+
+        var levelIndex = default(int);
+
+        while (level is not 0)
+        {
+            levelIndex <<= 2;
+
+            var cellMid = (cellMin + cellMax) * 0.5;
+
+            if (x < cellMid.X)
+            {
+                cellMax = new(cellMid.X, cellMax.Y);
+            }
+            else
+            {
+                cellMin = new(cellMid.X, cellMin.Y);
+                levelIndex |= 1;
+            }
+
+            if (y < cellMid.Y)
+            {
+                cellMax = new(cellMax.X, cellMid.Y);
+            }
+            else
+            {
+                cellMin = new(cellMin.X, cellMid.Y);
                 levelIndex |= 2;
             }
 

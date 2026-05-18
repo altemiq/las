@@ -12,7 +12,7 @@ namespace Altemiq.IO.Las.Readers.Compressed;
 /// <param name="decoder">The decoder.</param>
 /// <param name="extraBytes">The extra bytes.</param>
 /// <param name="decompressSelective">The selected items to decompress.</param>
-internal sealed class ExtendedGpsWaveformPointDataRecordReader3(IEntropyDecoder decoder, int extraBytes, DecompressSelections decompressSelective = DecompressSelections.All) : ExtendedGpsPointDataRecordReader3<ExtendedGpsWaveformPointDataRecord>(decoder, ExtendedGpsWaveformPointDataRecord.Size + extraBytes, ExtendedGpsWaveformPointDataRecord.Size, decompressSelective), IDisposable
+internal sealed class ExtendedGpsWaveformPointDataRecordReader3(ArithmeticDecoder decoder, int extraBytes, DecompressSelections decompressSelective = DecompressSelections.All) : ExtendedGpsPointDataRecordReader3<ExtendedGpsWaveformPointDataRecord>(decoder, ExtendedGpsWaveformPointDataRecord.Size + extraBytes, ExtendedGpsWaveformPointDataRecord.Size, decompressSelective), IDisposable
 {
     private readonly WavePacketReader3 waveformReader = new(decoder, decompressSelective);
 
@@ -54,24 +54,11 @@ internal sealed class ExtendedGpsWaveformPointDataRecordReader3(IEntropyDecoder 
     protected override ExtendedGpsWaveformPointDataRecord Read(ReadOnlySpan<byte> source) => ExtendedGpsWaveformPointDataRecord.Create(source);
 
     /// <inheritdoc/>
-    protected override byte[] ProcessData()
+    protected override void ProcessData(Span<byte> destination)
     {
         var context = default(uint);
-        var data = this.ProcessData(ref context);
-        Span<byte> span = data;
-        this.waveformReader.Read(span[ExtendedGpsPointDataRecord.Size..], context);
-        this.byteReader.Read(span[ExtendedGpsWaveformPointDataRecord.Size..], context);
-        return data;
-    }
-
-    /// <inheritdoc/>
-    protected override async ValueTask<Memory<byte>> ProcessDataAsync(CancellationToken cancellationToken = default)
-    {
-        var context = default(uint);
-        var data = await this.ProcessDataAsync(ref context, cancellationToken).ConfigureAwait(false);
-        var span = data.Span;
-        this.waveformReader.Read(span[ExtendedGpsPointDataRecord.Size..], context);
-        this.byteReader.Read(span[ExtendedGpsWaveformPointDataRecord.Size..], context);
-        return data;
+        this.ProcessData(ref context, destination);
+        this.waveformReader.Read(destination[ExtendedGpsPointDataRecord.Size..], context);
+        this.byteReader.Read(destination[ExtendedGpsWaveformPointDataRecord.Size..], context);
     }
 }

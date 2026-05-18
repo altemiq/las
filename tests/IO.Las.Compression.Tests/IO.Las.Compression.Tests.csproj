@@ -3,6 +3,11 @@
   <PropertyGroup>
     <TargetFrameworks>net10.0;net9.0;net8.0</TargetFrameworks>
     <TargetFrameworks Condition=" '$(NetCoreOnly)' != 'true' ">$(TargetFrameworks);net472</TargetFrameworks>
+    <MeziantouPolyfill_IncludedPolyfills>
+      $(MeziantouPolyfill_IncludedPolyfills)|
+      M:System.IO.Stream.DisposeAsync()|
+      T:System.Diagnostics.UnreachableException|
+    </MeziantouPolyfill_IncludedPolyfills>
   </PropertyGroup>
 
   <ItemGroup>
@@ -13,6 +18,11 @@
     <EmbeddedResource Include="..\..\data\laz\fusa.laz" />
     <EmbeddedResource Include="*.laz" />
   </ItemGroup>
+  
+  <ItemGroup Condition=" '$(SupportLas12)' != 'true' ">
+    <!-- Remove color point data records for versions below 1.2 -->
+    <Compile Remove="**\*Color*.cs" />
+  </ItemGroup>
 
   <Choose>
     <When Condition=" '$(SupportLas14)' == 'true' ">
@@ -22,9 +32,10 @@
     </When>
     <Otherwise>
       <ItemGroup>
-        <!-- remove new VLRs -->
+        <!-- Remove extended point data records for versions below 1.4 -->
         <Compile Remove="**\ExtendedVariableLengthRecord*.cs" />
         <Compile Remove="**\*ExtraBytes*.cs" />
+        <Compile Remove="**\*Layered*.cs" />
       </ItemGroup>
     </Otherwise>
   </Choose>

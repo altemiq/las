@@ -136,8 +136,8 @@ public static class CopcExtensions
             {
                 if (pointDataRecord is IGpsPointDataRecord { GpsTime: var gpsTime })
                 {
-                    _ = ExchangeIfLessThan(ref gpsTimeMinimum, gpsTime);
-                    _ = ExchangeIfGreaterThan(ref gpsTimeMaximum, gpsTime);
+                    _ = System.Threading.Interlocked.MinExchange(ref gpsTimeMinimum, gpsTime);
+                    _ = System.Threading.Interlocked.MaxExchange(ref gpsTimeMaximum, gpsTime);
                 }
 
                 finalizer.Add(pointDataRecord);
@@ -216,34 +216,6 @@ public static class CopcExtensions
 
             writer.BaseStream.Position = 0;
             writer.Write(builder.HeaderBlock, variableLengthRecords);
-
-            static bool ExchangeIfLessThan(ref double location1, double value)
-            {
-                double snapshot;
-                bool stillLess;
-                do
-                {
-                    snapshot = location1;
-                    stillLess = value < snapshot;
-                }
-                while (stillLess && !Interlocked.CompareExchange(ref location1, value, snapshot).Equals(snapshot));
-
-                return stillLess;
-            }
-
-            static bool ExchangeIfGreaterThan(ref double location1, double value)
-            {
-                double snapshot;
-                bool stillMore;
-                do
-                {
-                    snapshot = location1;
-                    stillMore = value > snapshot;
-                }
-                while (stillMore && !Interlocked.CompareExchange(ref location1, value, snapshot).Equals(snapshot));
-
-                return stillMore;
-            }
 
             static List<Cloud.CopcHierarchy.Entry> ProcessPoints(
                 ILasReader reader,

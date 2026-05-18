@@ -11,7 +11,7 @@ namespace Altemiq.IO.Las.Writers.Compressed;
 /// </summary>
 /// <param name="encoder">The encoder.</param>
 /// <param name="extraBytes">The number of extra bytes.</param>
-internal sealed class ExtendedGpsWaveformPointDataRecordWriter3(IEntropyEncoder encoder, int extraBytes) : ExtendedGpsPointDataRecordWriter3<ExtendedGpsWaveformPointDataRecord>(encoder)
+internal sealed class ExtendedGpsWaveformPointDataRecordWriter3(ArithmeticEncoder encoder, int extraBytes) : ExtendedGpsPointDataRecordWriter3<ExtendedGpsWaveformPointDataRecord>(encoder)
 {
     private readonly WavePacketWriter3 wavePacketWriter = new(encoder);
 

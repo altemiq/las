@@ -10,7 +10,7 @@ namespace Altemiq.IO.Las.Readers.Compressed;
 /// The compressed <see cref="Readers.IPointDataRecordReader"/> for <see cref="IExtendedPointDataRecord"/> instances.
 /// </summary>
 /// <typeparam name="T">The type of extended point data record.</typeparam>
-internal abstract class ExtendedGpsPointDataRecordReader4<T> : IPointDataRecordReader, IContext
+internal abstract class ExtendedGpsPointDataRecordReader4<T> : ICompressedPointDataRecordReader, IContext
     where T : IExtendedPointDataRecord
 {
     private const int Multiple = 500;
@@ -21,7 +21,7 @@ internal abstract class ExtendedGpsPointDataRecordReader4<T> : IPointDataRecordR
 
     private const int MultipleTotal = Multiple - MultipleMinus + 5;
 
-    private readonly IEntropyDecoder decoder;
+    private readonly ArithmeticDecoder decoder;
     private readonly Context[] contexts = new Context[4];
     private readonly LayeredValue valueChannelReturnsXY;
     private readonly LayeredValue valueZ;
@@ -47,7 +47,7 @@ internal abstract class ExtendedGpsPointDataRecordReader4<T> : IPointDataRecordR
     /// <param name="pointDataLength">The point data length.</param>
     /// <param name="basePointDataLength">The base point data length.</param>
     /// <param name="decompressSelective">The selective compress value.</param>
-    protected ExtendedGpsPointDataRecordReader4(IEntropyDecoder decoder, int pointDataLength, int basePointDataLength, DecompressSelections decompressSelective = DecompressSelections.All)
+    protected ExtendedGpsPointDataRecordReader4(ArithmeticDecoder decoder, int pointDataLength, int basePointDataLength, DecompressSelections decompressSelective = DecompressSelections.All)
     {
         this.decoder = decoder;
 
@@ -100,10 +100,26 @@ internal abstract class ExtendedGpsPointDataRecordReader4<T> : IPointDataRecordR
     }
 
     /// <inheritdoc/>
+    int ICompressedPointDataRecordReader.Read(Span<byte> destination)
+    {
+        // Decompress directly into the caller's destination buffer, avoiding the
+        // intermediate copy into this.data that ProcessData() performs.
+        this.ProcessData(destination);
+        return this.pointDataLength;
+    }
+
+    /// <inheritdoc/>
     async ValueTask<LasPointMemory> IPointDataRecordReader.ReadAsync(ReadOnlyMemory<byte> source, CancellationToken cancellationToken)
     {
         ReadOnlyMemory<byte> processedData = await this.ProcessDataAsync(cancellationToken).ConfigureAwait(false);
         return new(await this.ReadAsync(processedData[..this.basePointDataLength], cancellationToken).ConfigureAwait(false), processedData[this.basePointDataLength..]);
+    }
+
+    /// <inheritdoc/>
+    async ValueTask<int> ICompressedPointDataRecordReader.ReadAsync(Memory<byte> destination, CancellationToken cancellationToken)
+    {
+        await this.ProcessDataAsync(destination, cancellationToken).ConfigureAwait(false);
+        return this.pointDataLength;
     }
 
     /// <inheritdoc/>
@@ -176,29 +192,43 @@ internal abstract class ExtendedGpsPointDataRecordReader4<T> : IPointDataRecordR
     }
 
     /// <summary>
-    /// Processes the data.
+    /// Processes the data into the reader's internal buffer and returns it.
     /// </summary>
     /// <returns>The processed data.</returns>
-    protected virtual byte[] ProcessData()
+    /// <remarks>
+    /// The returned array is owned by the reader; its contents remain valid
+    /// until the next call to <see cref="ProcessData()"/>.
+    /// </remarks>
+    protected byte[] ProcessData()
     {
-        var context = default(uint);
-        return this.ProcessData(ref context);
+        this.ProcessData(this.data);
+        return this.data;
     }
 
     /// <summary>
-    /// Processes the data.
+    /// Processes the data directly into the caller-supplied <paramref name="destination"/>.
     /// </summary>
-    /// <param name="context">The context.</param>
-    /// <returns>The processed data.</returns>
-    protected virtual byte[] ProcessData(ref uint context) => this.ProcessData(ref context, this.pointDataLength);
+    /// <param name="destination">The destination buffer.</param>
+    protected virtual void ProcessData(Span<byte> destination)
+    {
+        var context = default(uint);
+        this.ProcessData(ref context, destination);
+    }
 
     /// <summary>
-    /// Processes the data.
+    /// Processes the data into <paramref name="destination"/> using the given <paramref name="context"/>.
+    /// </summary>
+    /// <param name="context">The context.</param>
+    /// <param name="destination">The destination buffer.</param>
+    protected virtual void ProcessData(ref uint context, Span<byte> destination) => this.ProcessData(ref context, this.pointDataLength, destination);
+
+    /// <summary>
+    /// Processes the data into <paramref name="destination"/> using the given <paramref name="context"/> and GPS-time-change index.
     /// </summary>
     /// <param name="context">The context.</param>
     /// <param name="gpsTimeChangeIndex">The GPS time change index.</param>
-    /// <returns>The processed data.</returns>
-    protected byte[] ProcessData(ref uint context, int gpsTimeChangeIndex)
+    /// <param name="destination">The destination buffer.</param>
+    protected void ProcessData(ref uint context, int gpsTimeChangeIndex, Span<byte> destination)
     {
         var processingContext = this.contexts[this.currentContext];
 
@@ -470,12 +500,11 @@ internal abstract class ExtendedGpsPointDataRecordReader4<T> : IPointDataRecordR
             System.Buffers.Binary.BinaryPrimitives.WriteDoubleLittleEndian(lastPoint.AsSpan(Constants.ExtendedPointDataRecord.GpsTimeFieldOffset), BitConverter.UInt64BitsToDouble(processingContext.LastGpsTime[processingContext.Last]));
         }
 
-        // copy the last item
-        Array.Copy(lastPoint, this.data, ExtendedGpsPointDataRecord.Size);
+        // copy the last item into the caller-supplied destination
+        lastPoint.AsSpan(0, ExtendedGpsPointDataRecord.Size).CopyTo(destination);
 
         // remember if the last point had a GPS time change
         lastPoint[gpsTimeChangeIndex] = gpsTimeChange ? (byte)0x01 : (byte)0x00;
-        return this.data;
 
         static int GetLastPointReturn(ReadOnlySpan<byte> lastPoint, byte gpsTimeChange)
         {
@@ -495,36 +524,28 @@ internal abstract class ExtendedGpsPointDataRecordReader4<T> : IPointDataRecordR
     }
 
     /// <summary>
-    /// Processes the data.
+    /// Processes the data asynchronously into the reader's internal buffer.
     /// </summary>
     /// <param name="cancellationToken">The cancellation token.</param>
     /// <returns>The processed data.</returns>
-    protected virtual ValueTask<Memory<byte>> ProcessDataAsync(CancellationToken cancellationToken = default)
+    protected ValueTask<Memory<byte>> ProcessDataAsync(CancellationToken cancellationToken = default)
     {
-        var context = default(uint);
-        return this.ProcessDataAsync(ref context, cancellationToken);
+        cancellationToken.ThrowIfCancellationRequested();
+        this.ProcessData(this.data);
+        return new(this.data);
     }
 
     /// <summary>
-    /// Processes the data.
+    /// Processes the data asynchronously directly into <paramref name="destination"/>.
     /// </summary>
-    /// <param name="context">The context.</param>
+    /// <param name="destination">The destination buffer.</param>
     /// <param name="cancellationToken">The cancellation token.</param>
-    /// <returns>The processed data.</returns>
-    protected ValueTask<Memory<byte>> ProcessDataAsync(ref uint context, CancellationToken cancellationToken = default) => this.ProcessDataAsync(ref context, this.pointDataLength, cancellationToken);
-
-    /// <summary>
-    /// Processes the data.
-    /// </summary>
-    /// <param name="context">The context.</param>
-    /// <param name="gpsTimeChangeIndex">The GPS time change index.</param>
-    /// <param name="cancellationToken">The cancellation token.</param>
-    /// <returns>The processed data.</returns>
-    [System.Diagnostics.CodeAnalysis.SuppressMessage("Design", "MA0042:Do not use blocking calls in an async method", Justification = "This would cause recursion.")]
-    protected ValueTask<Memory<byte>> ProcessDataAsync(ref uint context, int gpsTimeChangeIndex, CancellationToken cancellationToken = default)
+    /// <returns>A completed task.</returns>
+    protected virtual ValueTask ProcessDataAsync(Memory<byte> destination, CancellationToken cancellationToken = default)
     {
         cancellationToken.ThrowIfCancellationRequested();
-        return new(this.ProcessData(ref context, gpsTimeChangeIndex));
+        this.ProcessData(destination.Span);
+        return default;
     }
 
     private void CreateAndInitModelsAndDecompressors(uint context, ReadOnlySpan<byte> item, int gpsTimeChangeIndex)
@@ -554,8 +575,8 @@ internal abstract class ExtendedGpsPointDataRecordReader4<T> : IPointDataRecordR
         contextToInitialize.DeltaYIntegerDecompressor.Initialize();
         for (var i = 0; i < 12; i++)
         {
-            contextToInitialize.LastXDiffMedian5[i] = new();
-            contextToInitialize.LastYDiffMedian5[i] = new();
+            contextToInitialize.LastXDiffMedian5[i] = default;
+            contextToInitialize.LastYDiffMedian5[i] = default;
         }
 
         // for the Z layer
@@ -740,17 +761,17 @@ internal abstract class ExtendedGpsPointDataRecordReader4<T> : IPointDataRecordR
         public readonly int[] LastGpsTimeDiff = new int[4];
         public readonly int[] MultiExtremeCounter = new int[4];
 
-        public readonly ISymbolModel[] ChangedValuesModels = new ISymbolModel[8];
-        public readonly ISymbolModel?[] NumberOfReturnsModels = new ISymbolModel[16];
-        public readonly ISymbolModel?[] ReturnNumberModels = new ISymbolModel[16];
-        public readonly ISymbolModel?[] ClassificationModels = new ISymbolModel[64];
-        public readonly ISymbolModel?[] FlagsModels = new ISymbolModel[64];
-        public readonly ISymbolModel?[] UserDataModels = new ISymbolModel[64];
+        public readonly ArithmeticSymbolModel[] ChangedValuesModels = new ArithmeticSymbolModel[8];
+        public readonly ArithmeticSymbolModel?[] NumberOfReturnsModels = new ArithmeticSymbolModel[16];
+        public readonly ArithmeticSymbolModel?[] ReturnNumberModels = new ArithmeticSymbolModel[16];
+        public readonly ArithmeticSymbolModel?[] ClassificationModels = new ArithmeticSymbolModel[64];
+        public readonly ArithmeticSymbolModel?[] FlagsModels = new ArithmeticSymbolModel[64];
+        public readonly ArithmeticSymbolModel?[] UserDataModels = new ArithmeticSymbolModel[64];
 
-        public readonly ISymbolModel ScannerChannelModel;
-        public readonly ISymbolModel ReturnNumberGpsSameModel;
-        public readonly ISymbolModel GpsTimeMultiModel;
-        public readonly ISymbolModel GpsTimeZeroDiffModel;
+        public readonly ArithmeticSymbolModel ScannerChannelModel;
+        public readonly ArithmeticSymbolModel ReturnNumberGpsSameModel;
+        public readonly ArithmeticSymbolModel GpsTimeMultiModel;
+        public readonly ArithmeticSymbolModel GpsTimeZeroDiffModel;
 
         public readonly IntegerDecompressor DeltaXIntegerDecompressor;
         public readonly IntegerDecompressor DeltaYIntegerDecompressor;

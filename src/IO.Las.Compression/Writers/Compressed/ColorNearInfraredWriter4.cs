@@ -11,7 +11,7 @@ namespace Altemiq.IO.Las.Writers.Compressed;
 /// </summary>
 internal sealed class ColorNearInfraredWriter4 : IContextWriter
 {
-    private readonly IEntropyEncoder encoder;
+    private readonly ArithmeticEncoder encoder;
 
     private readonly Context[] contexts = new Context[4];
 
@@ -25,7 +25,7 @@ internal sealed class ColorNearInfraredWriter4 : IContextWriter
     /// Initializes a new instance of the <see cref="ColorNearInfraredWriter4"/> class.
     /// </summary>
     /// <param name="encoder">The encoder.</param>
-    public ColorNearInfraredWriter4(IEntropyEncoder encoder)
+    public ColorNearInfraredWriter4(ArithmeticEncoder encoder)
     {
         this.encoder = encoder;
         this.valueRgb = new();
@@ -136,7 +136,7 @@ internal sealed class ColorNearInfraredWriter4 : IContextWriter
         {
             if ((sym & (1 << 2)) is not 0)
             {
-                var corr = (System.Buffers.Binary.BinaryPrimitives.ReadUInt16LittleEndian(item[sizeof(ushort)..]) & 0xFF) - (diffL + (lastItem[1] & 0xFF).Clamp());
+                var corr = (System.Buffers.Binary.BinaryPrimitives.ReadUInt16LittleEndian(item[sizeof(ushort)..]) & 0xFF) - (diffL + (lastItem[1] & 0xFF)).Clamp();
                 this.valueRgb.Encoder.EncodeSymbol(processingContext.RgbDiffModels[2], corr.Fold());
             }
 
@@ -221,13 +221,13 @@ internal sealed class ColorNearInfraredWriter4 : IContextWriter
     }
 
     [System.Diagnostics.CodeAnalysis.SuppressMessage("StyleCop.CSharp.MaintainabilityRules", "SA1401:FieldsShouldBePrivate", Justification = "This is used as an internal property bag.")]
-    private sealed class Context(IEntropyEncoder rgbEncoder, IEntropyEncoder nirEncoder)
+    private sealed class Context(ArithmeticEncoder rgbEncoder, ArithmeticEncoder nirEncoder)
     {
         public readonly ushort[] LastItem = new ushort[4];
 
-        public readonly ISymbolModel RgbByteUsedModel = rgbEncoder.CreateSymbolModel(ArithmeticCoder.HalfModelCount);
+        public readonly ArithmeticSymbolModel RgbByteUsedModel = rgbEncoder.CreateSymbolModel(ArithmeticCoder.HalfModelCount);
 
-        public readonly ISymbolModel[] RgbDiffModels =
+        public readonly ArithmeticSymbolModel[] RgbDiffModels =
         [
             rgbEncoder.CreateSymbolModel(ArithmeticCoder.ModelCount),
             rgbEncoder.CreateSymbolModel(ArithmeticCoder.ModelCount),
@@ -237,9 +237,9 @@ internal sealed class ColorNearInfraredWriter4 : IContextWriter
             rgbEncoder.CreateSymbolModel(ArithmeticCoder.ModelCount),
         ];
 
-        public readonly ISymbolModel NirByteUsedModel = nirEncoder.CreateSymbolModel(4);
+        public readonly ArithmeticSymbolModel NirByteUsedModel = nirEncoder.CreateSymbolModel(4);
 
-        public readonly ISymbolModel[] NirDiffModels =
+        public readonly ArithmeticSymbolModel[] NirDiffModels =
         [
             nirEncoder.CreateSymbolModel(ArithmeticCoder.ModelCount),
             nirEncoder.CreateSymbolModel(ArithmeticCoder.ModelCount),

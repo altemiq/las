@@ -9,14 +9,14 @@ namespace Altemiq.IO.Las.Compression;
 /// <summary>
 /// The arithmetic symbol model.
 /// </summary>
-internal sealed class ArithmeticSymbolModel : ISymbolModel
+internal sealed class ArithmeticSymbolModel
 {
     /// <summary>
     /// Length bits discarded before mult.
     /// </summary>
-    internal const uint LengthShift = 15;
+    internal const int LengthShift = 15;
 
-    private const uint MaxCount = 1U << (int)LengthShift;
+    private const uint MaxCount = 1U << LengthShift;
 
     private readonly bool compress;
 
@@ -50,7 +50,7 @@ internal sealed class ArithmeticSymbolModel : ISymbolModel
             }
 
             this.tableSize = 1U << tableBits;
-            this.TableShift = LengthShift - (uint)tableBits;
+            this.TableShift = (uint)(LengthShift - tableBits);
             this.Distribution = new uint[symbols];
             this.DecoderTable = new uint[this.tableSize + 2];
         }
@@ -68,31 +68,53 @@ internal sealed class ArithmeticSymbolModel : ISymbolModel
         this.SymbolCount = new uint[symbols];
     }
 
-    /// <inheritdoc/>
+    /// <summary>
+    /// Gets the distribution.
+    /// </summary>
     public uint[] Distribution { get; }
 
-    /// <inheritdoc/>
+    /// <summary>
+    /// Gets the symbol count.
+    /// </summary>
     public uint[] SymbolCount { get; }
 
-    /// <inheritdoc/>
+    /// <summary>
+    /// Gets the decoder table.
+    /// </summary>
     public uint[]? DecoderTable { get; }
 
-    /// <inheritdoc/>
+    /// <summary>
+    /// Gets the number of symbols in this model.
+    /// </summary>
     public uint Symbols { get; }
 
-    /// <inheritdoc/>
+    /// <summary>
+    /// Gets the last symbol index (<c><see cref="Symbols"/> - 1</c>).
+    /// </summary>
     public uint LastSymbol { get; }
 
-    /// <inheritdoc/>
+    /// <summary>
+    /// Gets the table shift.
+    /// </summary>
     public uint TableShift { get; }
 
-    /// <inheritdoc/>
+    /// <summary>
+    /// Gets a value indicating whether this instance has been initialized.
+    /// </summary>
     public bool Initialized { get; private set; }
 
-    /// <inheritdoc/>
+    /// <summary>
+    /// Decrements the symbols-until-update counter.
+    /// </summary>
+    /// <returns>The remaining symbols until the next update.</returns>
+    [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
     public uint DecrementSymbolsUntilUpdate() => --this.symbolsUntilUpdate;
 
-    /// <inheritdoc/>
+    /// <summary>
+    /// Initializes the symbol counts from <paramref name="table"/> (or all-ones when <see langword="null"/>).
+    /// </summary>
+    /// <param name="table">The initial symbol count table, or <see langword="null"/> to use uniform counts.</param>
+    /// <returns><see langword="true"/> once initialized.</returns>
     public bool Initialize(uint[]? table = null)
     {
         this.totalCount = default;
@@ -138,7 +160,7 @@ internal sealed class ArithmeticSymbolModel : ISymbolModel
 
         // compute cumulative distribution, decoder table
         var scale = 0x80000000U / this.totalCount;
-        const int DistributionLeftShift = (int)(31U - LengthShift);
+        const int DistributionLeftShift = 31 - LengthShift;
 
         if (this.compress || (this.tableSize is default(uint)))
         {

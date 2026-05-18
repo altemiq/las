@@ -1,0 +1,34 @@
+﻿<Project>
+  <Import Project="$([MSBuild]::GetPathOfFileAbove('$(MSBuildThisFileName.Replace('Build', 'Versions'))$(MSBuildThisFileExtension)', '$(MSBuildThisFileDirectory)'))" />
+
+  <PropertyGroup>
+    <!--
+      Keep AssemblyName = MSBuildProjectName (unlike tests/ which prefixes with
+      "Altemiq.") because BenchmarkDotNet's default CsProj toolchain locates the
+      project file by scanning the repo for a .csproj whose output assembly
+      matches the currently-loaded benchmark assembly. If the two names diverge,
+      BDN fails with "Unable to find ... in repo root and its subfolders".
+    -->
+    <AssemblyName>$(MSBuildProjectName)</AssemblyName>
+    <RootNamespace>Altemiq.$(MSBuildProjectName.Replace('.Benchmarks', ''))</RootNamespace>
+
+    <IsBenchmarkProject>true</IsBenchmarkProject>
+
+    <OutputType>Exe</OutputType>
+
+    <LangVersion>latest</LangVersion>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+
+    <IsPackable>false</IsPackable>
+    <IsPublishable>false</IsPublishable>
+
+    <!-- Benchmarks must run in Release with optimisations; override Debug default -->
+    <Optimize Condition=" '$(Configuration)' != 'Debug' ">true</Optimize>
+    <DebugType Condition=" '$(Configuration)' != 'Debug' ">pdbonly</DebugType>
+    <ServerGarbageCollection>true</ServerGarbageCollection>
+    <ConcurrentGarbageCollection>true</ConcurrentGarbageCollection>
+  </PropertyGroup>
+
+</Project>
+

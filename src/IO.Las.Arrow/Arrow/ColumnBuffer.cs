@@ -4,7 +4,7 @@
 // </copyright>
 // -----------------------------------------------------------------------
 
-namespace Altemiq.IO.Las;
+namespace Altemiq.IO.Las.Arrow;
 
 /// <summary>
 /// The column buffer.

@@ -11,7 +11,7 @@ namespace Altemiq.IO.Las.Readers.Compressed;
 /// </summary>
 internal sealed class ByteReader4 : IContextReader
 {
-    private readonly IEntropyDecoder decoder;
+    private readonly ArithmeticDecoder decoder;
 
     private readonly Context[] contexts = new Context[4];
 
@@ -27,7 +27,7 @@ internal sealed class ByteReader4 : IContextReader
     /// <param name="decoder">The decoder.</param>
     /// <param name="number">The number.</param>
     /// <param name="decompressSelective">The selective decompress value.</param>
-    public ByteReader4(IEntropyDecoder decoder, uint number, DecompressSelections decompressSelective = DecompressSelections.All)
+    public ByteReader4(ArithmeticDecoder decoder, uint number, DecompressSelections decompressSelective = DecompressSelections.All)
     {
         const int Byte0 = (int)DecompressSelections.Byte0;
         this.decoder = decoder;
@@ -76,7 +76,7 @@ internal sealed class ByteReader4 : IContextReader
         var stream = this.decoder.GetStream();
 
         // how many bytes do we need to read
-        var byteCount = this.valueBytes.Sum(static valueBytes => valueBytes.GetByteCountIfRequested());
+        var byteCount = this.valueBytes.Aggregate(0U, static (current, valueByte) => current + valueByte.GetByteCountIfRequested());
 
         // make sure the buffer is sufficiently large
         if (byteCount > this.bytes.Length)
@@ -85,7 +85,13 @@ internal sealed class ByteReader4 : IContextReader
         }
 
         // load the requested bytes and init the corresponding instreams and decoders
-        _ = this.valueBytes.Aggregate(default(uint), (index, valueByte) => index + valueByte.InitializeIfRequested(stream, this.bytes, (int)index));
+        uint index = 0;
+#pragma warning disable LoopCanBeConvertedToQuery
+        foreach (var valueByte in this.valueBytes)
+        {
+            index += valueByte.InitializeIfRequested(stream, this.bytes, (int)index);
+        }
+#pragma warning restore LoopCanBeConvertedToQuery
 
         // mark the four scanner channel contexts as unused
         for (var c = 0; c < 4; c++)
@@ -159,7 +165,7 @@ internal sealed class ByteReader4 : IContextReader
     [System.Diagnostics.CodeAnalysis.SuppressMessage("StyleCop.CSharp.MaintainabilityRules", "SA1401:FieldsShouldBePrivate", Justification = "This is used as an internal property bag.")]
     private sealed class Context
     {
-        public readonly ISymbolModel[] BytesModels;
+        public readonly ArithmeticSymbolModel[] BytesModels;
 
         public readonly byte[] LastItem;
 
@@ -167,7 +173,7 @@ internal sealed class ByteReader4 : IContextReader
 
         public Context(LayeredValue[] layeredValues)
         {
-            this.BytesModels = new ISymbolModel[layeredValues.Length];
+            this.BytesModels = new ArithmeticSymbolModel[layeredValues.Length];
             for (var i = 0; i < layeredValues.Length; i++)
             {
                 this.BytesModels[i] = layeredValues[i].Decoder.CreateSymbolModel(ArithmeticCoder.ModelCount);

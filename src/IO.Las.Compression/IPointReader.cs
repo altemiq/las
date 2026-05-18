@@ -31,12 +31,29 @@ internal interface IPointReader
     LasPointSpan Read(Stream stream);
 
     /// <summary>
+    /// Reads the point into the destination.
+    /// </summary>
+    /// <param name="stream">The stream.</param>
+    /// <param name="destination">The destination.</param>
+    /// <returns>The number of bytes read into <paramref name="destination"/>.</returns>
+    int Read(Stream stream, Span<byte> destination);
+
+    /// <summary>
     /// Reads the point asynchronously.
     /// </summary>
     /// <param name="stream">The stream.</param>
     /// <param name="cancellationToken">The cancellation token.</param>
     /// <returns>The point.</returns>
     ValueTask<LasPointMemory> ReadAsync(Stream stream, CancellationToken cancellationToken = default);
+
+    /// <summary>
+    /// Reads the point into the destination.
+    /// </summary>
+    /// <param name="stream">The stream.</param>
+    /// <param name="destination">The destination.</param>
+    /// <param name="cancellationToken">The cancellation token.</param>
+    /// <returns>The number of bytes read into <paramref name="destination"/>.</returns>
+    ValueTask<int> ReadAsync(Stream stream, Memory<byte> destination, CancellationToken cancellationToken = default);
 
     /// <summary>
     /// Moves to the specified target point.

@@ -63,7 +63,7 @@ public class PointTests
     {
         var destination = new byte[Bytes.Length];
         _ = Point.WriteLittleEndian(destination);
-        _ = await Assert.That(destination).IsEquivalentTo(Bytes);
+        await Assert.That(destination).IsEquivalentTo(Bytes);
     }
 
     [Test]
@@ -88,7 +88,7 @@ public class PointTests
             PointSourceId = 10,
         };
 
-        _ = await Assert.That(point)
+        await Assert.That(point)
             .Member(p => p.X, x => x.IsEqualTo(1))
             .And.Member(p => p.Y, y => y.IsEqualTo(2))
             .And.Member(p => p.Z, z => z.IsEqualTo(3))
@@ -108,7 +108,7 @@ public class PointTests
 
     private static async Task CheckPoint(PointDataRecord point)
     {
-        _ = await Assert.That(point)
+        await Assert.That(point)
             .Member(p => p.X, x => x.IsEqualTo(2757))
             .And.Member(p => p.Y, y => y.IsEqualTo(-1377))
             .And.Member(p => p.Z, z => z.IsEqualTo(-6717))

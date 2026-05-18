@@ -29,27 +29,18 @@ public class LasWriterTests
         ];
 
         MemoryStream memoryStream = new();
-#if NETSTANDARD2_1_OR_GREATER || NETCOREAPP3_0_OR_GREATER
-        await
-#endif
-        using (LasWriter lasWriter = new(memoryStream, true))
-        {
-            lasWriter.Write(builder.HeaderBlock, geoKeyDirectoryTag);
-        }
+        LasWriter lasWriter = new(memoryStream, true);
+        lasWriter.Write(builder.HeaderBlock, geoKeyDirectoryTag);
+        await lasWriter.DisposeAsync();
 
         memoryStream.Position = 0;
-        HeaderBlock outputHeader;
-#if NETSTANDARD2_1_OR_GREATER || NETCOREAPP3_0_OR_GREATER
-        await
-#endif
-        using (LasReader lasReader = new(memoryStream))
-        {
-            outputHeader = lasReader.Header;
-        }
+        LasReader lasReader = new(memoryStream);
+        var outputHeader = lasReader.Header;
+        await lasReader.DisposeAsync();
 
-        _ = await Assert.That(outputHeader.SystemIdentifier).IsEqualTo("LAS tests");
-        _ = await Assert.That(outputHeader.GeneratingSoftware).IsEqualTo("Las.Tests.exe");
-        _ = await Assert.That(outputHeader.PointDataFormatId).IsEqualTo((byte)1);
+        await Assert.That(outputHeader.SystemIdentifier).IsEqualTo("LAS tests");
+        await Assert.That(outputHeader.GeneratingSoftware).IsEqualTo("Las.Tests.exe");
+        await Assert.That(outputHeader.PointDataFormatId).IsEqualTo((byte)1);
     }
 
 #if LAS1_4_OR_GREATER
@@ -89,57 +80,45 @@ public class LasWriterTests
         MemoryStream memoryStream = new();
         const double ExtraValue = 123.34;
         Span<byte> span = stackalloc byte[sizeof(short)];
-#if NETSTANDARD2_1_OR_GREATER || NETCOREAPP3_0_OR_GREATER
-        await
-#endif
-        using (LasWriter lasWriter = new(memoryStream, true))
+        LasWriter lasWriter = new(memoryStream, true);
+        lasWriter.Write(builder.HeaderBlock, geoKeyDirectoryTag, extraBytes);
+
+        GpsPointDataRecord point = new()
         {
-            lasWriter.Write(builder.HeaderBlock, geoKeyDirectoryTag, extraBytes);
+            X = 0,
+            Y = 0,
+            Z = 0,
+            ReturnNumber = 0,
+            NumberOfReturns = 0,
+            Classification = Classification.LowVegetation,
+            ScanDirectionFlag = false,
+            EdgeOfFlightLine = false,
+            ScanAngleRank = 0,
+            PointSourceId = 0,
+            GpsTime = 0,
+        };
 
-            GpsPointDataRecord point = new()
-            {
-                X = 0,
-                Y = 0,
-                Z = 0,
-                ReturnNumber = 0,
-                NumberOfReturns = 0,
-                Classification = Classification.LowVegetation,
-                ScanDirectionFlag = false,
-                EdgeOfFlightLine = false,
-                ScanAngleRank = 0,
-                PointSourceId = 0,
-                GpsTime = 0,
-            };
-
-            _ = extraBytes.Write(span, ExtraValue);
-            lasWriter.Write(point, span);
-        }
+        _ = extraBytes.Write(span, ExtraValue);
+        lasWriter.Write(point, span);
+        await lasWriter.DisposeAsync();
 
         memoryStream.Position = 0;
-        HeaderBlock outputHeader;
-        IBasePointDataRecord outputPoint;
-        byte[] extra;
-#if NETSTANDARD2_1_OR_GREATER || NETCOREAPP3_0_OR_GREATER
-        await
-#endif
-        using (LasReader lasReader = new(memoryStream))
-        {
-            outputHeader = lasReader.Header;
-            var point = lasReader.ReadPointDataRecord();
-            outputPoint = point.PointDataRecord;
-            extra = point.ExtraBytes.ToArray();
-        }
+        LasReader lasReader = new(memoryStream);
+        var outputHeader = lasReader.Header;
+        var (outputPoint, bytes) = lasReader.ReadPointDataRecord();
+        var extra = bytes.ToArray();
+        await lasReader.DisposeAsync();
 
-        _ = await Assert.That(outputHeader.SystemIdentifier).IsEqualTo("LAS tests");
-        _ = await Assert.That(outputHeader.GeneratingSoftware).IsEqualTo("Las.Tests.exe");
-        _ = await Assert.That(outputHeader.PointDataFormatId).IsEqualTo((byte)1);
+        await Assert.That(outputHeader.SystemIdentifier).IsEqualTo("LAS tests");
+        await Assert.That(outputHeader.GeneratingSoftware).IsEqualTo("Las.Tests.exe");
+        await Assert.That(outputHeader.PointDataFormatId).IsEqualTo((byte)1);
 
-        _ = await Assert.That(outputPoint)
+        await Assert.That(outputPoint)
             .IsNotNull()
             .And.IsTypeOf<IPointDataRecord>()
             .And.Member(p => p.Classification, classification => classification.IsEqualTo(Classification.LowVegetation));
 
-        _ = await Assert.That(extraBytes.GetValue(0, extra)).ValueIsTypeOf<double>().And.IsEqualTo(ExtraValue);
+        await Assert.That(extraBytes.GetValue(0, extra)).ValueIsTypeOf<double>().And.IsEqualTo(ExtraValue);
     }
 
     [Test]
@@ -178,54 +157,45 @@ public class LasWriterTests
         MemoryStream memoryStream = new();
         const double ExtraValue = 123.34;
         var span = new byte[sizeof(short)];
-#if NETSTANDARD2_1_OR_GREATER || NETCOREAPP3_0_OR_GREATER
-        await
-#endif
-        using (LasWriter lasWriter = new(memoryStream, true))
+        LasWriter lasWriter = new(memoryStream, true);
+        lasWriter.Write(builder.HeaderBlock, geoKeyDirectoryTag, extraBytes);
+
+        GpsPointDataRecord point = new()
         {
-            lasWriter.Write(builder.HeaderBlock, geoKeyDirectoryTag, extraBytes);
+            X = 0,
+            Y = 0,
+            Z = 0,
+            ReturnNumber = 0,
+            NumberOfReturns = 0,
+            Classification = Classification.LowVegetation,
+            ScanDirectionFlag = false,
+            EdgeOfFlightLine = false,
+            ScanAngleRank = 0,
+            PointSourceId = 0,
+            GpsTime = 0,
+        };
 
-            GpsPointDataRecord point = new()
-            {
-                X = 0,
-                Y = 0,
-                Z = 0,
-                ReturnNumber = 0,
-                NumberOfReturns = 0,
-                Classification = Classification.LowVegetation,
-                ScanDirectionFlag = false,
-                EdgeOfFlightLine = false,
-                ScanAngleRank = 0,
-                PointSourceId = 0,
-                GpsTime = 0,
-            };
+        _ = extraBytes.Write(span, ExtraValue);
+        await lasWriter.WriteAsync(point, span);
 
-            _ = extraBytes.Write(span, ExtraValue);
-            await lasWriter.WriteAsync(point, span);
-        }
+        await lasWriter.DisposeAsync();
 
         memoryStream.Position = 0;
-        HeaderBlock outputHeader;
-        LasPointMemory outputPoint;
-#if NETSTANDARD2_1_OR_GREATER || NETCOREAPP3_0_OR_GREATER
-        await
-#endif
-        using (LasReader lasReader = new(memoryStream))
-        {
-            outputHeader = lasReader.Header;
-            outputPoint = await lasReader.ReadPointDataRecordAsync();
-        }
+        LasReader lasReader = new(memoryStream);
+        var outputHeader = lasReader.Header;
+        var outputPoint = await lasReader.ReadPointDataRecordAsync();
+        await lasReader.DisposeAsync();
 
-        _ = await Assert.That(outputHeader.SystemIdentifier).IsEqualTo("LAS tests");
-        _ = await Assert.That(outputHeader.GeneratingSoftware).IsEqualTo("Las.Tests.exe");
-        _ = await Assert.That(outputHeader.PointDataFormatId).IsEqualTo((byte)1);
+        await Assert.That(outputHeader.SystemIdentifier).IsEqualTo("LAS tests");
+        await Assert.That(outputHeader.GeneratingSoftware).IsEqualTo("Las.Tests.exe");
+        await Assert.That(outputHeader.PointDataFormatId).IsEqualTo((byte)1);
 
-        _ = await Assert.That(outputPoint.PointDataRecord)
+        await Assert.That(outputPoint.PointDataRecord)
             .IsNotNull()
             .And.IsTypeOf<IPointDataRecord>()
             .And.Member(p => p.Classification, classification => classification.IsEqualTo(Classification.LowVegetation));
 
-        _ = await Assert.That(await extraBytes.GetValueAsync(0, outputPoint.ExtraBytes)).ValueIsTypeOf<double>().And.IsEqualTo(ExtraValue);
+        await Assert.That(await extraBytes.GetValueAsync(0, outputPoint.ExtraBytes)).ValueIsTypeOf<double>().And.IsEqualTo(ExtraValue);
     }
 #endif
 
@@ -266,59 +236,52 @@ public class LasWriterTests
         ];
 #endif
 
-#if NETSTANDARD2_1_OR_GREATER || NETCOREAPP3_0_OR_GREATER
-        await
-#endif
-        using LasMultipleMemoryStream stream = new();
+        LasMultipleMemoryStream stream = new();
 
 #if LAS1_4_OR_GREATER
         const double ExtraValue = 123.34;
         Span<byte> span = stackalloc byte[sizeof(ushort)];
 #endif
 
-#if NETSTANDARD2_1_OR_GREATER || NETCOREAPP3_0_OR_GREATER
-        await
-#endif
-        using (LasWriter lasWriter = new(stream, true))
-        {
+        LasWriter lasWriter = new(stream, true);
 #if LAS1_4_OR_GREATER
-            lasWriter.Write(builder.HeaderBlock, geoKeyDirectoryTag, extraBytes);
+        lasWriter.Write(builder.HeaderBlock, geoKeyDirectoryTag, extraBytes);
 
-            extraBytes.Write(span, 124.56);
-            lasWriter.Write(
-                new GpsPointDataRecord
-                {
-                    X = default,
-                    Y = default,
-                    Z = default,
-                    Classification = Classification.HighVegetation,
-                    EdgeOfFlightLine = default,
-                    GpsTime = default,
-                    NumberOfReturns = 1,
-                    ReturnNumber = 1,
-                    PointSourceId = default,
-                    ScanDirectionFlag = default,
-                    ScanAngleRank = default,
-                },
-                span);
+        extraBytes.Write(span, 124.56);
+        lasWriter.Write(
+            new GpsPointDataRecord
+            {
+                X = default,
+                Y = default,
+                Z = default,
+                Classification = Classification.HighVegetation,
+                EdgeOfFlightLine = default,
+                GpsTime = default,
+                NumberOfReturns = 1,
+                ReturnNumber = 1,
+                PointSourceId = default,
+                ScanDirectionFlag = default,
+                ScanAngleRank = default,
+            },
+            span);
 
-            extraBytes.Write(span, ExtraValue);
-            lasWriter.Write(
-                new GpsPointDataRecord
-                {
-                    X = 1,
-                    Y = 1,
-                    Z = 1,
-                    Classification = Classification.LowVegetation,
-                    EdgeOfFlightLine = default,
-                    GpsTime = default,
-                    NumberOfReturns = 1,
-                    ReturnNumber = 1,
-                    PointSourceId = default,
-                    ScanDirectionFlag = default,
-                    ScanAngleRank = default,
-                },
-                span);
+        extraBytes.Write(span, ExtraValue);
+        lasWriter.Write(
+            new GpsPointDataRecord
+            {
+                X = 1,
+                Y = 1,
+                Z = 1,
+                Classification = Classification.LowVegetation,
+                EdgeOfFlightLine = default,
+                GpsTime = default,
+                NumberOfReturns = 1,
+                ReturnNumber = 1,
+                PointSourceId = default,
+                ScanDirectionFlag = default,
+                ScanAngleRank = default,
+            },
+            span);
 #else
             lasWriter.Write(builder.HeaderBlock, geoKeyDirectoryTag);
 
@@ -352,35 +315,30 @@ public class LasWriterTests
                 ScanAngleRank = default,
             });
 #endif
-        }
+
+        await lasWriter.DisposeAsync();
 
         stream.Reset();
-        HeaderBlock outputHeader;
-        IBasePointDataRecord outputPoint;
-        byte[] bytes;
-#if NETSTANDARD2_1_OR_GREATER || NETCOREAPP3_0_OR_GREATER
-        await
-#endif
-        using (LasReader lasReader = new(stream))
-        {
-            outputHeader = lasReader.Header;
-            _ = lasReader.ReadPointDataRecord();
-            var record = lasReader.ReadPointDataRecord();
-            outputPoint = record.PointDataRecord;
-            bytes = record.ExtraBytes.ToArray();
-        }
+        LasReader lasReader = new(stream);
+        var outputHeader = lasReader.Header;
+        _ = lasReader.ReadPointDataRecord();
+        var (outputPoint, data) = lasReader.ReadPointDataRecord();
+        var bytes = data.ToArray();
+        await lasReader.DisposeAsync();
 
-        _ = await Assert.That(outputHeader.SystemIdentifier).IsEqualTo("LAS tests");
-        _ = await Assert.That(outputHeader.GeneratingSoftware).IsEqualTo("Las.Tests.exe");
-        _ = await Assert.That(outputHeader.PointDataFormatId).IsEqualTo((byte)1);
+        await stream.DisposeAsync();
 
-        _ = await Assert.That(outputPoint)
+        await Assert.That(outputHeader.SystemIdentifier).IsEqualTo("LAS tests");
+        await Assert.That(outputHeader.GeneratingSoftware).IsEqualTo("Las.Tests.exe");
+        await Assert.That(outputHeader.PointDataFormatId).IsEqualTo((byte)1);
+
+        await Assert.That(outputPoint)
             .IsNotNull()
             .And.IsTypeOf<IPointDataRecord>()
             .And.Member(p => p.Classification, classification => classification.IsEqualTo(Classification.LowVegetation));
 
 #if LAS1_4_OR_GREATER
-        _ = await Assert.That(extraBytes.GetValue(0, bytes)).ValueIsTypeOf<double>().And.IsEqualTo(ExtraValue);
+        await Assert.That(extraBytes.GetValue(0, bytes)).ValueIsTypeOf<double>().And.IsEqualTo(ExtraValue);
 #endif
     }
 
@@ -398,29 +356,22 @@ public class LasWriterTests
                 RecordLengthAfterHeader = 0,
             },
             []);
-#if NETSTANDARD2_1_OR_GREATER || NETCOREAPP3_0_OR_GREATER
-        await
-#endif
-        using Stream memoryStream = exploded
+        Stream memoryStream = exploded
             ? new LasMultipleMemoryStream()
             : new MemoryStream();
-#if NETSTANDARD2_1_OR_GREATER || NETCOREAPP3_0_OR_GREATER
-        await
-#endif
-        using (LasWriter writer = new(memoryStream, leaveOpen: true))
-        {
-            HeaderBlockBuilder headerBuilder = new();
-            writer.Write(headerBuilder.HeaderBlock);
-            writer.Write(record);
-        }
+        LasWriter writer = new(memoryStream, leaveOpen: true);
+        HeaderBlockBuilder headerBuilder = new();
+        writer.Write(headerBuilder.HeaderBlock);
+        writer.Write(record);
+        await writer.DisposeAsync();
 
         memoryStream.Position = 0;
-#if NETSTANDARD2_1_OR_GREATER || NETCOREAPP3_0_OR_GREATER
-        await
-#endif
-        using LasReader reader = new(memoryStream);
-        _ = await Assert.That(reader.ExtendedVariableLengthRecords).HasSingleItem()
+        LasReader reader = new(memoryStream);
+        await Assert.That(reader.ExtendedVariableLengthRecords).HasSingleItem()
             .And.Member(static x => x.Single(), x => x.IsEqualTo(record));
+
+        await reader.DisposeAsync();
+        await memoryStream.DisposeAsync();
     }
 #endif
 }

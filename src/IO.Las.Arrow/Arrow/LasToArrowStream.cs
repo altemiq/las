@@ -4,7 +4,7 @@
 // </copyright>
 // -----------------------------------------------------------------------
 
-namespace Altemiq.IO.Las;
+namespace Altemiq.IO.Las.Arrow;
 
 /// <summary>
 /// The <see cref="ILasReader"/> to <see cref="Apache.Arrow"/> Stream.
@@ -151,14 +151,14 @@ internal static class LasToArrowStream
 
                 if (buffer.Count != length)
                 {
-                    throw new InvalidOperationException(string.Format(Arrow.Properties.Resources.Culture, Arrow.Properties.Resources.IncorrectBufferLength, i, schema.GetFieldByIndex(i).Name, buffer.Count, length));
+                    throw new InvalidOperationException(string.Format(Properties.Resources.Culture, Properties.Resources.IncorrectBufferLength, i, schema.GetFieldByIndex(i).Name, buffer.Count, length));
                 }
 
                 var array = buffer.BuildArray();
 
                 if (array.Length != length)
                 {
-                    throw new InvalidOperationException(string.Format(Arrow.Properties.Resources.Culture, Arrow.Properties.Resources.IncorrectBullderBuildLength, i, array.Length, length));
+                    throw new InvalidOperationException(string.Format(Properties.Resources.Culture, Properties.Resources.IncorrectBullderBuildLength, i, array.Length, length));
                 }
 
                 buffer.Clear();
@@ -220,8 +220,8 @@ internal static class LasToArrowStream
         }
 #else
         builder
-            .Field(new Field(Constants.Columns.Legacy.Classification, UInt8Type.Default, nullable: false))
-            .Field(new Field(Constants.Columns.Legacy.ScanAngleRank, Int8Type.Default, nullable: false));
+            .Field(new Field(Arrow.Constants.Columns.Legacy.Classification, UInt8Type.Default, nullable: false))
+            .Field(new Field(Arrow.Constants.Columns.Legacy.ScanAngleRank, Int8Type.Default, nullable: false));
 #endif
 
         // GPS point data formats

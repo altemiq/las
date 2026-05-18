@@ -13,17 +13,17 @@ namespace Altemiq.IO.Las.Readers.Compressed;
 /// <param name="decoder">The decoder.</param>
 /// <param name="pointDataLength">The point data length.</param>
 /// <param name="basePointDataLength">The base point data length, without extra bytes.</param>
-internal abstract class PointDataRecordReader<T>(IEntropyDecoder decoder, int pointDataLength, int basePointDataLength) : IPointDataRecordReader, ISimple
+internal abstract class PointDataRecordReader<T>(ArithmeticDecoder decoder, int pointDataLength, int basePointDataLength) : ICompressedPointDataRecordReader, ISimple
     where T : IBasePointDataRecord
 {
-    private readonly ISymbolModel changedValuesModel = decoder.CreateSymbolModel(64);
+    private readonly ArithmeticSymbolModel changedValuesModel = decoder.CreateSymbolModel(64);
     private readonly IntegerDecompressor intensityIntegerDecompressor = new(decoder, 16, 4);
-    private readonly ISymbolModel scanAngleRankModels0 = decoder.CreateSymbolModel(ArithmeticCoder.ModelCount);
-    private readonly ISymbolModel scanAngleRankModels1 = decoder.CreateSymbolModel(ArithmeticCoder.ModelCount);
+    private readonly ArithmeticSymbolModel scanAngleRankModels0 = decoder.CreateSymbolModel(ArithmeticCoder.ModelCount);
+    private readonly ArithmeticSymbolModel scanAngleRankModels1 = decoder.CreateSymbolModel(ArithmeticCoder.ModelCount);
     private readonly IntegerDecompressor pointSourceIdIntegerDecompressor = new(decoder);
-    private readonly ISymbolModel?[] bitByteModels = new ISymbolModel[ArithmeticCoder.ModelCount];
-    private readonly ISymbolModel?[] classificationModels = new ISymbolModel[ArithmeticCoder.ModelCount];
-    private readonly ISymbolModel?[] userDataModels = new ISymbolModel[ArithmeticCoder.ModelCount];
+    private readonly ArithmeticSymbolModel?[] bitByteModels = new ArithmeticSymbolModel[ArithmeticCoder.ModelCount];
+    private readonly ArithmeticSymbolModel?[] classificationModels = new ArithmeticSymbolModel[ArithmeticCoder.ModelCount];
+    private readonly ArithmeticSymbolModel?[] userDataModels = new ArithmeticSymbolModel[ArithmeticCoder.ModelCount];
     private readonly IntegerDecompressor deltaXIntegerDecompressor = new(decoder, 32, 2);
     private readonly IntegerDecompressor deltaYIntegerDecompressor = new(decoder, 32, 22);
     private readonly IntegerDecompressor zIntegerDecompressor = new(decoder, 32, 20);
@@ -45,8 +45,8 @@ internal abstract class PointDataRecordReader<T>(IEntropyDecoder decoder, int po
         // init state
         for (var i = 0; i < 16; i++)
         {
-            this.lastXDiffMedian5[i] = new();
-            this.lastYDiffMedian5[i] = new();
+            this.lastXDiffMedian5[i] = default;
+            this.lastYDiffMedian5[i] = default;
             this.lastIntensity[i] = default;
             this.lastHeight[i / 2] = default;
         }
@@ -86,10 +86,27 @@ internal abstract class PointDataRecordReader<T>(IEntropyDecoder decoder, int po
     }
 
     /// <inheritdoc/>
+    int ICompressedPointDataRecordReader.Read(Span<byte> destination)
+    {
+        // Decompress directly into the caller's destination buffer, avoiding the
+        // intermediate copy into this.data that the parameterless ProcessData()
+        // performs.
+        this.ProcessData(destination);
+        return pointDataLength;
+    }
+
+    /// <inheritdoc/>
     async ValueTask<LasPointMemory> IPointDataRecordReader.ReadAsync(ReadOnlyMemory<byte> source, CancellationToken cancellationToken)
     {
         ReadOnlyMemory<byte> processedData = await this.ProcessDataAsync(cancellationToken).ConfigureAwait(false);
         return new(await this.ReadAsync(processedData[..basePointDataLength], cancellationToken).ConfigureAwait(false), processedData[basePointDataLength..]);
+    }
+
+    /// <inheritdoc/>
+    async ValueTask<int> ICompressedPointDataRecordReader.ReadAsync(Memory<byte> destination, CancellationToken cancellationToken)
+    {
+        await this.ProcessDataAsync(destination, cancellationToken).ConfigureAwait(false);
+        return pointDataLength;
     }
 
     /// <inheritdoc cref="IPointDataRecordReader.Read"/>
@@ -103,23 +120,55 @@ internal abstract class PointDataRecordReader<T>(IEntropyDecoder decoder, int po
     }
 
     /// <summary>
-    /// Processes the data.
+    /// Processes the data into the reader's internal buffer and returns a span over it.
     /// </summary>
     /// <returns>The processed data.</returns>
-    protected virtual Span<byte> ProcessData() => this.ProcessDataCore();
+    /// <remarks>
+    /// The returned span is backed by a buffer owned by the reader; it remains valid
+    /// until the next call to <see cref="ProcessData()"/>.
+    /// </remarks>
+    protected Span<byte> ProcessData()
+    {
+        this.ProcessData(this.data);
+        return this.data;
+    }
 
     /// <summary>
-    /// Processes the data asynchronously.
+    /// Processes the data directly into the caller-supplied <paramref name="destination"/>.
+    /// </summary>
+    /// <param name="destination">The destination buffer.</param>
+    /// <remarks>
+    /// Subclasses override this to append any per-format trailing bytes (GPS time,
+    /// color, waveform, extra bytes) into <c>destination[pointDataRecordSize..]</c>.
+    /// </remarks>
+    protected virtual void ProcessData(Span<byte> destination) => this.ProcessDataCore(destination);
+
+    /// <summary>
+    /// Processes the data asynchronously into the reader's internal buffer.
     /// </summary>
     /// <param name="cancellationToken">The cancellation token.</param>
     /// <returns>The processed data.</returns>
-    protected virtual ValueTask<Memory<byte>> ProcessDataAsync(CancellationToken cancellationToken = default)
+    protected ValueTask<Memory<byte>> ProcessDataAsync(CancellationToken cancellationToken = default)
     {
         cancellationToken.ThrowIfCancellationRequested();
-        return new(this.ProcessDataCore());
+        this.ProcessData(this.data);
+        return new(this.data);
     }
 
-    private byte[] ProcessDataCore()
+    /// <summary>
+    /// Processes the data asynchronously directly into <paramref name="destination"/>.
+    /// </summary>
+    /// <param name="destination">The destination buffer.</param>
+    /// <param name="cancellationToken">The cancellation token.</param>
+    /// <returns>A completed task.</returns>
+    protected virtual ValueTask ProcessDataAsync(Memory<byte> destination, CancellationToken cancellationToken = default)
+    {
+        cancellationToken.ThrowIfCancellationRequested();
+        this.ProcessData(destination.Span);
+        return default;
+    }
+
+    private void ProcessDataCore(Span<byte> destination)
     {
         // decompress which other values have changed
         var changedValues = (int)decoder.DecodeSymbol(this.changedValuesModel);
@@ -231,9 +280,7 @@ internal abstract class PointDataRecordReader<T>(IEntropyDecoder decoder, int po
         FieldAccessors.PointDataRecord.SetZ(this.lastPoint, z);
         this.lastHeight[returnLevel] = z;
 
-        // copy the last point
-        Array.Copy(this.lastPoint, this.data, PointDataRecord.Size);
-
-        return this.data;
+        // copy the last point into the caller-supplied destination
+        this.lastPoint.AsSpan(0, PointDataRecord.Size).CopyTo(destination);
     }
 }

@@ -11,7 +11,7 @@ namespace Altemiq.IO.Las.Writers.Compressed;
 /// </summary>
 /// <param name="encoder">The encoder.</param>
 /// <param name="extraBytes">The extra bytes.</param>
-internal sealed class ColorPointDataRecordWriter(IEntropyEncoder encoder, int extraBytes) : PointDataRecordWriter<ColorPointDataRecord>(encoder)
+internal sealed class ColorPointDataRecordWriter(ArithmeticEncoder encoder, int extraBytes) : PointDataRecordWriter<ColorPointDataRecord>(encoder)
 {
     private readonly ColorWriter2 colorWriter = new(encoder);
 

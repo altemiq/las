@@ -78,12 +78,15 @@ public static class LazExtensions
     /// Sets the compressed indicator in the specified header.
     /// </summary>
     /// <param name="builder">The header builder.</param>
-    public static void SetCompressed(this HeaderBlockBuilder builder) => builder.PointDataFormat = SetCompressed(builder.PointDataFormat);
-
-    private static byte SetCompressed(byte pointDataFormat)
+    public static void SetCompressed(this HeaderBlockBuilder builder)
     {
-        BitManipulation.Apply(ref pointDataFormat, Constants.BitMasks.Mask6, set: false);
-        BitManipulation.Apply(ref pointDataFormat, Constants.BitMasks.Mask7, set: true);
-        return pointDataFormat;
+        builder.PointDataFormat = SetCompressedCore(builder.PointDataFormat);
+
+        static byte SetCompressedCore(byte pointDataFormat)
+        {
+            BitManipulation.Apply(ref pointDataFormat, Constants.BitMasks.Mask6, set: false);
+            BitManipulation.Apply(ref pointDataFormat, Constants.BitMasks.Mask7, set: true);
+            return pointDataFormat;
+        }
     }
 }

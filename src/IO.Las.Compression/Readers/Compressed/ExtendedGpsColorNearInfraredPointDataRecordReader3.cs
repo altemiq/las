@@ -12,7 +12,7 @@ namespace Altemiq.IO.Las.Readers.Compressed;
 /// <param name="decoder">The decoder.</param>
 /// <param name="extraBytes">The extra bytes.</param>
 /// <param name="decompressSelective">The selected items to decompress.</param>
-internal sealed class ExtendedGpsColorNearInfraredPointDataRecordReader3(IEntropyDecoder decoder, int extraBytes, DecompressSelections decompressSelective = DecompressSelections.All) : ExtendedGpsPointDataRecordReader3<ExtendedGpsColorNearInfraredPointDataRecord>(decoder, ExtendedGpsColorNearInfraredPointDataRecord.Size + extraBytes, ExtendedGpsColorNearInfraredPointDataRecord.Size, decompressSelective), IDisposable
+internal sealed class ExtendedGpsColorNearInfraredPointDataRecordReader3(ArithmeticDecoder decoder, int extraBytes, DecompressSelections decompressSelective = DecompressSelections.All) : ExtendedGpsPointDataRecordReader3<ExtendedGpsColorNearInfraredPointDataRecord>(decoder, ExtendedGpsColorNearInfraredPointDataRecord.Size + extraBytes, ExtendedGpsColorNearInfraredPointDataRecord.Size, decompressSelective), IDisposable
 {
     private readonly ColorNearInfraredReader3 colorNearInfraredReader = new(decoder, decompressSelective);
 
@@ -54,24 +54,11 @@ internal sealed class ExtendedGpsColorNearInfraredPointDataRecordReader3(IEntrop
     protected override ExtendedGpsColorNearInfraredPointDataRecord Read(ReadOnlySpan<byte> source) => ExtendedGpsColorNearInfraredPointDataRecord.Create(source);
 
     /// <inheritdoc/>
-    protected override byte[] ProcessData()
+    protected override void ProcessData(Span<byte> destination)
     {
         var context = default(uint);
-        var data = this.ProcessData(ref context);
-        Span<byte> span = data;
-        this.colorNearInfraredReader.Read(span[ExtendedGpsPointDataRecord.Size..], context);
-        this.byteReader.Read(span[ExtendedGpsColorNearInfraredPointDataRecord.Size..], context);
-        return data;
-    }
-
-    /// <inheritdoc/>
-    protected override async ValueTask<Memory<byte>> ProcessDataAsync(CancellationToken cancellationToken = default)
-    {
-        var context = default(uint);
-        var data = await this.ProcessDataAsync(ref context, cancellationToken).ConfigureAwait(false);
-        var span = data.Span;
-        this.colorNearInfraredReader.Read(span[ExtendedGpsPointDataRecord.Size..], context);
-        this.byteReader.Read(span[ExtendedGpsColorNearInfraredPointDataRecord.Size..], context);
-        return data;
+        this.ProcessData(ref context, destination);
+        this.colorNearInfraredReader.Read(destination[ExtendedGpsPointDataRecord.Size..], context);
+        this.byteReader.Read(destination[ExtendedGpsColorNearInfraredPointDataRecord.Size..], context);
     }
 }

@@ -16,16 +16,19 @@ public static class RangeExtensions
     /// </summary>
     /// <param name="range">The range.</param>
     /// <returns>The indexes for <paramref name="range"/>.</returns>
+    /// <remarks>The range is treated as inclusive of both <see cref="Range.Start"/> and <see cref="Range.End"/>, matching the on-disk LAX interval format.</remarks>
     public static IEnumerable<uint> GetIndexes(this Range range)
     {
         var start = range.Start.Value;
         var end = range.End.Value;
 
-        do
+        while (start < end)
         {
             yield return start++;
         }
-        while (start <= end);
+
+        // emit `end` outside the loop so we do not overflow when end == uint.MaxValue
+        yield return end;
     }
 
     /// <summary>

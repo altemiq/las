@@ -22,13 +22,6 @@ internal static class VectorMath
     extension(Vector2 value)
     {
         /// <summary>
-        /// Reinterprets a <see cref="Vector2"/> as a new <see cref="Vector64{Single}"/>.
-        /// </summary>
-        /// <returns>value reinterpreted as a new <see cref="Vector64{Single}"/>.</returns>
-        [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
-        private Vector64<float> AsVector64() => System.Runtime.CompilerServices.Unsafe.As<Vector2, Vector64<float>>(ref value);
-
-        /// <summary>
         /// Reinterprets a <see cref="Vector2"/> as a new <see cref="Vector64{Single}"/>, leaving the new elements undefined.
         /// </summary>
         /// <returns>value reinterpreted as a new <see cref="Vector64{Single}"/>.</returns>

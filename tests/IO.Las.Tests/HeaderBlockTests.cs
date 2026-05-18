@@ -20,7 +20,7 @@ public class HeaderBlockTests
         var first = builder.HeaderBlock;
         var second = builder.HeaderBlock;
 
-        _ = await Assert.That(first).IsEqualTo(second);
+        await Assert.That(first).IsEqualTo(second);
     }
 
     [Test]
@@ -31,7 +31,7 @@ public class HeaderBlockTests
         builder.ProjectId = Guid.NewGuid();
         var second = builder.HeaderBlock;
 
-        _ = await Assert.That(first).IsNotEqualTo(second);
+        await Assert.That(first).IsNotEqualTo(second);
     }
 
     [Test]
@@ -92,7 +92,7 @@ public class HeaderBlockTests
     public async Task HashCode()
     {
         HeaderBlockBuilder builder = new();
-        _ = await Assert.That(builder.HeaderBlock.GetHashCode()).IsNotEqualTo(0);
+        await Assert.That(builder.HeaderBlock.GetHashCode()).IsNotEqualTo(0);
     }
 
     [Test]
@@ -100,7 +100,7 @@ public class HeaderBlockTests
     {
         HeaderBlockBuilder headerBlockBuilder = new();
         headerBlockBuilder.SetOffset(123456.123, 234567.321, 123.456);
-        _ = await Assert.That(headerBlockBuilder.Offset).IsEqualTo(new Vector3D(123000D, 234000D, 100D));
+        await Assert.That(headerBlockBuilder.Offset).IsEqualTo(new(123000D, 234000D, 100D));
     }
 
     [Test]
@@ -128,8 +128,8 @@ public class HeaderBlockTests
             .And.Member(static headerBlockBuilder => headerBlockBuilder.NumberOfPointRecords, numberOfPointRecords => numberOfPointRecords.IsEqualTo(1U))
             .And.Member(static headerBlockBuilder => headerBlockBuilder.NumberOfPointsByReturn, numberOfPointsByReturn => numberOfPointsByReturn.Member(x => x.ElementAt(returnNumber - 1), static x => x.IsEqualTo(1U)))
 #endif
-            .And.Member(static headerBlockBuilder => headerBlockBuilder.Min, min => min.IsEqualTo(new Vector3D(X, Y, Z)))
-            .And.Member(static headerBlockBuilder => headerBlockBuilder.Max, max => max.IsEqualTo(new Vector3D(X, Y, Z)));
+            .And.Member(static headerBlockBuilder => headerBlockBuilder.Min, min => min.IsEqualTo(new(X, Y, Z)))
+            .And.Member(static headerBlockBuilder => headerBlockBuilder.Max, max => max.IsEqualTo(new(X, Y, Z)));
     }
 
     [Test]
@@ -153,8 +153,8 @@ public class HeaderBlockTests
             .And.Member(static headerBlockBuilder => headerBlockBuilder.NumberOfPointRecords, numberOfPointRecords => numberOfPointRecords.IsEqualTo(1U))
             .And.Member(static headerBlockBuilder => headerBlockBuilder.NumberOfPointsByReturn, numberOfPointsByReturn => numberOfPointsByReturn.Member(x => x.ElementAt(returnNumber - 1), static x => x.IsEqualTo(1U)))
 #endif
-            .And.Member(static headerBlockBuilder => headerBlockBuilder.Min, min => min.IsEqualTo(new Vector3D(X, Y, Z)))
-            .And.Member(static headerBlockBuilder => headerBlockBuilder.Max, max => max.IsEqualTo(new Vector3D(X, Y, Z)));
+            .And.Member(static headerBlockBuilder => headerBlockBuilder.Min, min => min.IsEqualTo(new(X, Y, Z)))
+            .And.Member(static headerBlockBuilder => headerBlockBuilder.Max, max => max.IsEqualTo(new(X, Y, Z)));
     }
 
     [Test]
@@ -184,7 +184,7 @@ public class HeaderBlockTests
         await Assert.That(header.NumberOfPointRecords).IsDefault();
         await Assert.That(header.NumberOfPointsByReturn).IsEquivalentTo(Enumerable.Repeat(0U, 5));
 #endif
-        await Assert.That(header.ScaleFactor).IsEqualTo(new Vector3D(0.001));
+        await Assert.That(header.ScaleFactor).IsEqualTo(new(0.001));
         await Assert.That(header.Min).IsEqualTo(Vector3D.Zero);
         await Assert.That(header.Max).IsEqualTo(Vector3D.Zero);
         await Assert.That(header.Offset).IsEqualTo(Vector3D.Zero);
@@ -197,42 +197,38 @@ public class HeaderBlockTests
     [Test]
     public async Task Read()
     {
-#if NETSTANDARD2_1_OR_GREATER || NETCOREAPP3_0_OR_GREATER
-        await
-#endif
-            using var stream = typeof(LasReaderTests).Assembly.GetManifestResourceStream(typeof(LasReaderTests), "fusa.las")
+        var stream = typeof(LasReaderTests).Assembly.GetManifestResourceStream(typeof(LasReaderTests), "fusa.las")
                                ?? throw new System.Diagnostics.UnreachableException("Failed to get stream");
         var reader = new HeaderBlockReader(stream);
-        await Assert.That(() => reader.GetFileSignature()).IsEqualTo("LASF");
-        var headerBlock = await Assert.That(reader.GetHeaderBlock("LASF")).IsNotDefault();
-        await Assert.That(() => reader.GetVariableLengthRecord()).IsNotDefault();
+        await Assert.That(reader.GetFileSignature).IsEquivalentTo("LASF");
+        await Assert.That(() => reader.GetHeaderBlock("LASF")).IsNotDefault();
+        await Assert.That(reader.GetVariableLengthRecord).IsNotDefault();
 #if LAS1_4_OR_GREATER
         await Assert.That(() => reader.GetExtendedVariableLengthRecord([])).Throws<InvalidDataException>();
 #endif
+        await stream.DisposeAsync();
     }
 
     [Test]
     public async Task ReadAsync()
     {
-#if NETSTANDARD2_1_OR_GREATER || NETCOREAPP3_0_OR_GREATER
-        await
-#endif
-            using var stream = typeof(LasReaderTests).Assembly.GetManifestResourceStream(typeof(LasReaderTests), "fusa.las")
+        var stream = typeof(LasReaderTests).Assembly.GetManifestResourceStream(typeof(LasReaderTests), "fusa.las")
                                ?? throw new System.Diagnostics.UnreachableException("Failed to get stream");
         var reader = new HeaderBlockReader(stream);
         await Assert.That(async () => await reader.GetFileSignatureAsync()).IsEqualTo("LASF");
-        var headerBlock = await Assert.That(reader.GetHeaderBlock("LASF")).IsNotDefault();
+        await Assert.That(async () => await reader.GetHeaderBlockAsync("LASF")).IsNotDefault();
         await Assert.That(async () => await reader.GetVariableLengthRecordAsync()).IsNotDefault();
 #if LAS1_4_OR_GREATER
         await Assert.That(async () => await reader.GetExtendedVariableLengthRecordAsync([])).Throws<InvalidDataException>();
 #endif
+        await stream.DisposeAsync();
     }
 
     [Test]
     [MethodDataSource(nameof(GetPointTypes))]
     public async Task CreateFromType(Type type, byte number)
     {
-        _ = await Assert.That(typeof(HeaderBlockBuilder).GetMethod(nameof(HeaderBlockBuilder.FromPointType))!.MakeGenericMethod(type).Invoke(default, default)).IsTypeOf<HeaderBlockBuilder>().And.Member(x => x.PointDataFormatId, pointDataFormatId => pointDataFormatId.IsEqualTo(number));
+        await Assert.That(typeof(HeaderBlockBuilder).GetMethod(nameof(HeaderBlockBuilder.FromPointType))!.MakeGenericMethod(type).Invoke(default, default)).IsTypeOf<HeaderBlockBuilder>().And.Member(x => x.PointDataFormatId, pointDataFormatId => pointDataFormatId.IsEqualTo(number));
     }
 
     public static IEnumerable<Func<(int, bool)>> GetReturnNumbers()

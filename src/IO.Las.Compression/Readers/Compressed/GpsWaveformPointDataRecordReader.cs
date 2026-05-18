@@ -11,7 +11,7 @@ namespace Altemiq.IO.Las.Readers.Compressed;
 /// </summary>
 /// <param name="decoder">The decoder.</param>
 /// <param name="extraBytes">The number of extra bytes.</param>
-internal sealed class GpsWaveformPointDataRecordReader(IEntropyDecoder decoder, int extraBytes) : PointDataRecordReader<GpsWaveformPointDataRecord>(decoder, GpsWaveformPointDataRecord.Size + extraBytes, GpsWaveformPointDataRecord.Size)
+internal sealed class GpsWaveformPointDataRecordReader(ArithmeticDecoder decoder, int extraBytes) : PointDataRecordReader<GpsWaveformPointDataRecord>(decoder, GpsWaveformPointDataRecord.Size + extraBytes, GpsWaveformPointDataRecord.Size)
 {
     private readonly GpsTimeReader gpsTimeReader = new(decoder);
 
@@ -33,22 +33,11 @@ internal sealed class GpsWaveformPointDataRecordReader(IEntropyDecoder decoder, 
     protected override GpsWaveformPointDataRecord Read(ReadOnlySpan<byte> source) => GpsWaveformPointDataRecord.Create(source);
 
     /// <inheritdoc/>
-    protected override Span<byte> ProcessData()
+    protected override void ProcessData(Span<byte> destination)
     {
-        var data = base.ProcessData();
-        this.gpsTimeReader.Read(data[PointDataRecord.Size..]);
-        this.waveformReader.Read(data[GpsPointDataRecord.Size..]);
-        this.byteReader.Read(data[GpsWaveformPointDataRecord.Size..]);
-        return data;
-    }
-
-    /// <inheritdoc/>
-    protected override async ValueTask<Memory<byte>> ProcessDataAsync(CancellationToken cancellationToken = default)
-    {
-        var data = await base.ProcessDataAsync(cancellationToken).ConfigureAwait(false);
-        this.gpsTimeReader.Read(data[PointDataRecord.Size..].Span);
-        this.waveformReader.Read(data[GpsPointDataRecord.Size..].Span);
-        this.byteReader.Read(data[GpsWaveformPointDataRecord.Size..].Span);
-        return data;
+        base.ProcessData(destination);
+        this.gpsTimeReader.Read(destination[PointDataRecord.Size..]);
+        this.waveformReader.Read(destination[GpsPointDataRecord.Size..]);
+        this.byteReader.Read(destination[GpsWaveformPointDataRecord.Size..]);
     }
 }

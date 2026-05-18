@@ -11,7 +11,7 @@ namespace Altemiq.IO.Las.Readers.Compressed;
 /// </summary>
 internal sealed class WavePacketReader3 : IContextReader
 {
-    private readonly IEntropyDecoder decoder;
+    private readonly ArithmeticDecoder decoder;
 
     private readonly Context[] contexts = new Context[4];
 
@@ -26,7 +26,7 @@ internal sealed class WavePacketReader3 : IContextReader
     /// </summary>
     /// <param name="decoder">The decoder.</param>
     /// <param name="decompressSelective">The selective decompress value.</param>
-    public WavePacketReader3(IEntropyDecoder decoder, DecompressSelections decompressSelective = DecompressSelections.All)
+    public WavePacketReader3(ArithmeticDecoder decoder, DecompressSelections decompressSelective = DecompressSelections.All)
     {
         this.decoder = decoder;
         this.valueWavePacket = new(decompressSelective.HasFlag(DecompressSelections.WavePacket));
@@ -160,9 +160,9 @@ internal sealed class WavePacketReader3 : IContextReader
     {
         public readonly byte[] LastItem = new byte[29];
 
-        public readonly ISymbolModel[] OffsetDiff = new ISymbolModel[4];
+        public readonly ArithmeticSymbolModel[] OffsetDiff = new ArithmeticSymbolModel[4];
 
-        public readonly ISymbolModel? PacketIndex;
+        public readonly ArithmeticSymbolModel? PacketIndex;
 
         public readonly IntegerDecompressor? IcOffsetDiff;
 

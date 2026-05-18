@@ -97,42 +97,37 @@ public class WebApplicationFactory : TUnit.Core.Interfaces.IAsyncInitializer, IA
                 var manifestPath = $"{typeof(WebApplicationFactory).Namespace}.Data.{urlPath.Replace('/', '.')}";
                 if (typeof(WebApplicationFactory).Assembly.GetManifestResourceStream(manifestPath) is { } manifestResourceStream)
                 {
-#if NETSTANDARD2_1_OR_GREATER || NETCOREAPP3_0_OR_GREATER
-                    await
-#endif
-                    using (manifestResourceStream)
+                    if (context.Request.Method == HttpMethod.Head.Method)
                     {
-
-                        if (context.Request.Method == HttpMethod.Head.Method)
-                        {
-                            // just return the length
-                            context.Response.ContentLength = manifestResourceStream.Length;
-                            context.Response.ContentType = GetMimeType(urlPath);
-                            return;
-                        }
-
-                        var byteRange = manifestResourceStream.Length;
-                        if (context.Request.Headers.TryGetValue("Range", out var rangeValues)
-                            && rangeValues is [{ } rangeValue, ..])
-                        {
-                            var range = rangeValue.Replace("bytes=", "").Split('-');
-                            var startByte = int.Parse(range[0]);
-                            if (string.IsNullOrEmpty(range[1].Trim()) || !long.TryParse(range[1], out var endByte))
-                            {
-                                endByte = manifestResourceStream.Length - 1;
-                            }
-
-                            byteRange = endByte - startByte + 1;
-                            manifestResourceStream.Seek(startByte, SeekOrigin.Begin);
-                            context.Response.Headers.Append("Content-Range", $"bytes {startByte}-{byteRange - 1}/{byteRange}");
-                        }
-
-                        byte[] buffer = new byte[byteRange];
-                        var read = await manifestResourceStream.ReadAsync(buffer.AsMemory(0, buffer.Length));
+                        // just return the length
+                        context.Response.ContentLength = manifestResourceStream.Length;
                         context.Response.ContentType = GetMimeType(urlPath);
-                        context.Response.ContentLength = read;
-                        await context.Response.Body.WriteAsync(buffer.AsMemory(0, read));
+                        return;
                     }
+
+                    var byteRange = manifestResourceStream.Length;
+                    if (context.Request.Headers.TryGetValue("Range", out var rangeValues)
+                        && rangeValues is [{ } rangeValue, ..])
+                    {
+                        var range = rangeValue.Replace("bytes=", "").Split('-');
+                        var startByte = int.Parse(range[0]);
+                        if (string.IsNullOrEmpty(range[1].Trim()) || !long.TryParse(range[1], out var endByte))
+                        {
+                            endByte = manifestResourceStream.Length - 1;
+                        }
+
+                        byteRange = endByte - startByte + 1;
+                        manifestResourceStream.Seek(startByte, SeekOrigin.Begin);
+                        context.Response.Headers.Append("Content-Range", $"bytes {startByte}-{byteRange - 1}/{byteRange}");
+                    }
+
+                    byte[] buffer = new byte[byteRange];
+                    var read = await manifestResourceStream.ReadAsync(buffer.AsMemory(0, buffer.Length));
+                    context.Response.ContentType = GetMimeType(urlPath);
+                    context.Response.ContentLength = read;
+                    await context.Response.Body.WriteAsync(buffer.AsMemory(0, read));
+
+                    await manifestResourceStream.DisposeAsync();
                 }
                 else
                 {

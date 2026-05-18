@@ -32,6 +32,12 @@ internal sealed class MockLazReader : ILasReader, ILazReader
 
     public bool IsChunked => true;
 
+    public ushort PointDataLength => GpsPointDataRecord.Size;
+
+    public int ReadPointDataRecordData(Span<byte> buffer) => this.reader.Read(buffer);
+
+    public ValueTask<int> ReadPointDataRecordDataAsync(Memory<byte> buffer, CancellationToken cancellationToken = default) => this.reader.ReadAsync(buffer, cancellationToken);
+
     public LasPointSpan ReadPointDataRecord() => this.reader.Read([]);
 
     public LasPointSpan ReadPointDataRecord(ulong index) => throw new NotImplementedException();
@@ -58,7 +64,7 @@ internal sealed class MockLazReader : ILasReader, ILazReader
 
     private sealed class MockChunkedReader : ChunkedReader
     {
-        public MockChunkedReader(Readers.IPointDataRecordReader reader, in HeaderBlock headerBlock, uint chunkSize) : base(
+        public MockChunkedReader(Readers.Compressed.ICompressedPointDataRecordReader reader, in HeaderBlock headerBlock, uint chunkSize) : base(
             new MockChunkReader(
                 reader,
                 headerBlock,
@@ -69,28 +75,54 @@ internal sealed class MockLazReader : ILasReader, ILazReader
 #endif
                 chunkSize)
         {
+
+#if NET8_0_OR_GREATER
             ref uint chunkCount = ref ChunkCountField(this);
             chunkCount = 0;
+#else
+            SetChunkCountField(this, 0U);
+#endif
         }
 
+#if NET8_0_OR_GREATER
         [UnsafeAccessor(UnsafeAccessorKind.Field, Name = "chunkCount")]
         private static extern ref uint ChunkCountField(ChunkedReader reader);
+#else
+        private static void SetChunkCountField(ChunkedReader reader, uint chunkCount)
+        {
+            var field = reader.GetType().GetField("chunkCount", System.Reflection.BindingFlags.Instance | System.Reflection.BindingFlags.NonPublic);
+
+            field!.SetValue(reader, chunkCount);
+        }
+#endif
     }
 
     private sealed class MockChunkReader : ChunkReader
     {
-        public MockChunkReader(Readers.IPointDataRecordReader rawReader, in HeaderBlock header, LasZip zip, int pointDataLength)
+        public MockChunkReader(Readers.Compressed.ICompressedPointDataRecordReader rawReader, in HeaderBlock header, LasZip zip, int pointDataLength)
             : base(rawReader, in header, zip, pointDataLength)
         {
-            ref Readers.IPointDataRecordReader reader = ref ReaderField(this);
+#if NET8_0_OR_GREATER
+            ref Readers.Compressed.ICompressedPointDataRecordReader reader = ref ReaderField(this);
             reader = rawReader;
+#else
+            SetReaderField(this, rawReader);
+#endif
         }
 
+#if NET8_0_OR_GREATER
         [UnsafeAccessor(UnsafeAccessorKind.Field, Name = "reader")]
-        private static extern ref Readers.IPointDataRecordReader ReaderField(PointWiseReader reader);
+        private static extern ref Readers.Compressed.ICompressedPointDataRecordReader ReaderField(PointWiseReader reader);
+#else
+        private static void SetReaderField(PointWiseReader reader, Readers.Compressed.ICompressedPointDataRecordReader rawReader)
+        {
+            var field = reader.GetType().GetField("reader", System.Reflection.BindingFlags.Instance | System.Reflection.BindingFlags.NonPublic);
+            field!.SetValue(reader, rawReader);
+        }
+#endif
     }
 
-    private sealed class MockPointDataRecordReader : Readers.IPointDataRecordReader
+    private sealed class MockPointDataRecordReader : Readers.Compressed.ICompressedPointDataRecordReader
     {
         private int count;
 
@@ -154,6 +186,20 @@ internal sealed class MockLazReader : ILasReader, ILazReader
                 2 => new(new LasPointMemory(Second, ReadOnlyMemory<byte>.Empty)),
                 _ => default,
             };
+        }
+
+        public int Read(Span<byte> buffer)
+        {
+            First.CopyTo(buffer);
+            Second.CopyTo(buffer[GpsPointDataRecord.Size..]);
+            return GpsPointDataRecord.Size * 2;
+        }
+
+        public ValueTask<int> ReadAsync(Memory<byte> buffer, CancellationToken cancellationToken = default)
+        {
+            First.CopyTo(buffer.Span);
+            Second.CopyTo(buffer[GpsPointDataRecord.Size..].Span);
+            return new(GpsPointDataRecord.Size * 2);
         }
     }
 }

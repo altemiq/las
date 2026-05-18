@@ -1,7 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFrameworks>net8.0;net6.0;netstandard2.0</TargetFrameworks>
+    <TargetFrameworks>net8.0;net6.0;netstandard2.1;netstandard2.0</TargetFrameworks>
     <RootNamespace>$(RootNamespace.Replace('.Arrow', ''))</RootNamespace>
     <IsAotCompatible>false</IsAotCompatible>
 
@@ -50,6 +50,17 @@
   
   <ItemGroup>
     <InternalsVisibleTo Include="$(AssemblyName.Replace('.Arrow', '.Compression.Arrow'))" />
+    <InternalsVisibleTo Include="$(AssemblyName).Tests" />
+  </ItemGroup>
+
+  <ItemGroup Condition=" '$(SupportLas14)' != 'true' ">
+    <!-- Remove extended point data records for versions below 1.4 -->
+    <Compile Remove="**\*Extended*PointDataRecord*.cs" />
+  </ItemGroup>
+
+  <ItemGroup Condition=" !$([MSBuild]::IsTargetFrameworkCompatible('$(TargetFramework)', 'netstandard2.1')) and !$([MSBuild]::IsTargetFrameworkCompatible('$(TargetFramework)', 'netcoreapp2.1')) ">
+    <!-- Remove field accessors for other frameworks -->
+    <Compile Remove="*FieldAccessorsExtensions.cs" />
   </ItemGroup>
 
 </Project>

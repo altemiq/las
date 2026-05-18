@@ -12,7 +12,7 @@ namespace Altemiq.IO.Las.Readers.Compressed;
 /// <param name="decoder">The decoder.</param>
 /// <param name="extraBytes">The extra bytes.</param>
 /// <param name="decompressSelective">The selected items to decompress.</param>
-internal sealed class ExtendedGpsColorPointDataRecordReader4(IEntropyDecoder decoder, int extraBytes, DecompressSelections decompressSelective = DecompressSelections.All) : ExtendedGpsPointDataRecordReader4<ExtendedGpsColorPointDataRecord>(decoder, ExtendedGpsColorPointDataRecord.Size + extraBytes, ExtendedGpsColorPointDataRecord.Size, decompressSelective), IDisposable
+internal sealed class ExtendedGpsColorPointDataRecordReader4(ArithmeticDecoder decoder, int extraBytes, DecompressSelections decompressSelective = DecompressSelections.All) : ExtendedGpsPointDataRecordReader4<ExtendedGpsColorPointDataRecord>(decoder, ExtendedGpsColorPointDataRecord.Size + extraBytes, ExtendedGpsColorPointDataRecord.Size, decompressSelective), IDisposable
 {
     private readonly ColorReader4 colorReader = new(decoder, decompressSelective);
 
@@ -54,24 +54,11 @@ internal sealed class ExtendedGpsColorPointDataRecordReader4(IEntropyDecoder dec
     protected override ExtendedGpsColorPointDataRecord Read(ReadOnlySpan<byte> source) => ExtendedGpsColorPointDataRecord.Create(source);
 
     /// <inheritdoc/>
-    protected override byte[] ProcessData()
+    protected override void ProcessData(Span<byte> destination)
     {
         var context = default(uint);
-        var data = this.ProcessData(ref context);
-        Span<byte> span = data;
-        this.colorReader.Read(span[ExtendedGpsPointDataRecord.Size..], context);
-        this.byteReader.Read(span[ExtendedGpsColorPointDataRecord.Size..], context);
-        return data;
-    }
-
-    /// <inheritdoc/>
-    protected override async ValueTask<Memory<byte>> ProcessDataAsync(CancellationToken cancellationToken = default)
-    {
-        var context = default(uint);
-        var data = await this.ProcessDataAsync(ref context, cancellationToken).ConfigureAwait(false);
-        var span = data.Span;
-        this.colorReader.Read(span[ExtendedGpsPointDataRecord.Size..], context);
-        this.byteReader.Read(span[ExtendedGpsColorPointDataRecord.Size..], context);
-        return data;
+        this.ProcessData(ref context, destination);
+        this.colorReader.Read(destination[ExtendedGpsPointDataRecord.Size..], context);
+        this.byteReader.Read(destination[ExtendedGpsColorPointDataRecord.Size..], context);
     }
 }

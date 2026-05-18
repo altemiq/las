@@ -41,7 +41,7 @@ public sealed class SystemIdentifier : IEquatable<SystemIdentifier>
     {
         null => throw new ArgumentNullException(nameof(s)),
         { Length: not 5 } => throw new ArgumentOutOfRangeException(nameof(s)),
-        var value => new SystemIdentifier(Platform.Parse(value[0]), Model.Parse(value[1..])),
+        var value => new(Platform.Parse(value[0]), Model.Parse(value[1..])),
     };
 
     /// <summary>

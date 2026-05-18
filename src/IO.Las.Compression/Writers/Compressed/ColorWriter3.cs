@@ -11,7 +11,7 @@ namespace Altemiq.IO.Las.Writers.Compressed;
 /// </summary>
 internal sealed class ColorWriter3 : IContextWriter
 {
-    private readonly IEntropyEncoder encoder;
+    private readonly ArithmeticEncoder encoder;
 
     private readonly Context[] contexts = new Context[4];
 
@@ -23,7 +23,7 @@ internal sealed class ColorWriter3 : IContextWriter
     /// Initializes a new instance of the <see cref="ColorWriter3"/> class.
     /// </summary>
     /// <param name="encoder">The encoder.</param>
-    public ColorWriter3(IEntropyEncoder encoder)
+    public ColorWriter3(ArithmeticEncoder encoder)
     {
         this.encoder = encoder;
         this.valueRgb = new();
@@ -122,7 +122,7 @@ internal sealed class ColorWriter3 : IContextWriter
         {
             if ((sym & (1 << 2)) is not 0)
             {
-                var corr = (System.Buffers.Binary.BinaryPrimitives.ReadUInt16LittleEndian(item[sizeof(ushort)..]) & 0xFF) - (diffL + (lastItem[1] & 0xFF).Clamp());
+                var corr = (System.Buffers.Binary.BinaryPrimitives.ReadUInt16LittleEndian(item[sizeof(ushort)..]) & 0xFF) - (diffL + (lastItem[1] & 0xFF)).Clamp();
                 this.valueRgb.Encoder.EncodeSymbol(processingContext.RgbDiffModels[2], corr.Fold());
             }
 
@@ -184,13 +184,13 @@ internal sealed class ColorWriter3 : IContextWriter
     }
 
     [System.Diagnostics.CodeAnalysis.SuppressMessage("StyleCop.CSharp.MaintainabilityRules", "SA1401:FieldsShouldBePrivate", Justification = "This is used as an internal property bag.")]
-    private sealed class Context(IEntropyEncoder encoder)
+    private sealed class Context(ArithmeticEncoder encoder)
     {
         public readonly ushort[] LastItem = new ushort[3];
 
-        public readonly ISymbolModel ByteUsedModel = encoder.CreateSymbolModel(ArithmeticCoder.HalfModelCount);
+        public readonly ArithmeticSymbolModel ByteUsedModel = encoder.CreateSymbolModel(ArithmeticCoder.HalfModelCount);
 
-        public readonly ISymbolModel[] RgbDiffModels =
+        public readonly ArithmeticSymbolModel[] RgbDiffModels =
         [
             encoder.CreateSymbolModel(ArithmeticCoder.ModelCount),
             encoder.CreateSymbolModel(ArithmeticCoder.ModelCount),

@@ -11,13 +11,13 @@ namespace Altemiq.IO.Las.Compression;
 /// </summary>
 internal sealed class IntegerDecompressor
 {
-    private readonly IEntropyDecoder decoder;
+    private readonly ArithmeticDecoder decoder;
     private readonly uint bitsHigh;
     private readonly uint correctorRange;
     private readonly int correctorMin;
-    private readonly ISymbolModel[] bitsModels;
-    private readonly ISymbolModel[] correctorModels;
-    private readonly IBitModel correctorBitModel;
+    private readonly ArithmeticSymbolModel[] bitsModels;
+    private readonly ArithmeticSymbolModel[] correctorModels;
+    private readonly ArithmeticBitModel correctorBitModel;
 
     /// <summary>
     /// Initializes a new instance of the <see cref="IntegerDecompressor"/> class.
@@ -27,7 +27,7 @@ internal sealed class IntegerDecompressor
     /// <param name="contexts">The contexts.</param>
     /// <param name="bitsHigh">The high bits.</param>
     /// <param name="range">The range.</param>
-    public IntegerDecompressor(IEntropyDecoder decoder, uint bits = 16, uint contexts = 1, uint bitsHigh = 8, uint range = 0)
+    public IntegerDecompressor(ArithmeticDecoder decoder, uint bits = 16, uint contexts = 1, uint bitsHigh = 8, uint range = 0)
     {
         this.decoder = decoder;
         this.bitsHigh = bitsHigh;
@@ -36,13 +36,8 @@ internal sealed class IntegerDecompressor
         if (range is not 0)
         {
             // the corrector's significant bits and range
-            correctorBits = default;
             this.correctorRange = range;
-            while (range > 0)
-            {
-                range >>= 1;
-                correctorBits++;
-            }
+            correctorBits = (uint)System.Numerics.BitOperations.Log2(range) + 1;
 
             if (this.correctorRange == (1U << (int)(correctorBits - 1)))
             {
@@ -71,8 +66,8 @@ internal sealed class IntegerDecompressor
 
         this.K = default;
 
-        this.bitsModels = new ISymbolModel[contexts];
-        this.correctorModels = new ISymbolModel[correctorBits + 1];
+        this.bitsModels = new ArithmeticSymbolModel[contexts];
+        this.correctorModels = new ArithmeticSymbolModel[correctorBits + 1];
 
         for (var i = 0; i < this.bitsModels.Length; i++)
         {
@@ -105,9 +100,11 @@ internal sealed class IntegerDecompressor
         }
 
         _ = this.correctorBitModel.Initialize();
-        foreach (var correctorModel in this.correctorModels.Skip(1))
+
+        // correctorModels[0] is intentionally null; only indices 1..Length-1 are populated.
+        for (var i = 1; i < this.correctorModels.Length; i++)
         {
-            _ = correctorModel.Initialize();
+            _ = this.correctorModels[i].Initialize();
         }
     }
 
@@ -119,7 +116,7 @@ internal sealed class IntegerDecompressor
     /// <returns>The decompressed value.</returns>
     public int Decompress(int pred, uint context = default)
     {
-        var real = pred + ReadCorrector(this.bitsModels[(int)context]);
+        var real = pred + ReadCorrector(this.bitsModels[context]);
         if (real < 0)
         {
             real += (int)this.correctorRange;
@@ -131,7 +128,7 @@ internal sealed class IntegerDecompressor
 
         return real;
 
-        int ReadCorrector(ISymbolModel bitsModel)
+        int ReadCorrector(ArithmeticSymbolModel bitsModel)
         {
             // decode within which interval the corrector is falling
             this.K = this.decoder.DecodeSymbol(bitsModel);
@@ -163,7 +160,7 @@ internal sealed class IntegerDecompressor
                 // otherwise c is in the interval [ 0 ...  + 2^(k-1) - 1 ] so we translate c back into the interval [ - (2^k - 1)  ...  - (2^(k-1)) ] by subtracting (2^k - 1)
                 : c - ((1 << k) - 1);
 
-            int GetLargeK(ISymbolModel model)
+            int GetLargeK(ArithmeticSymbolModel model)
             {
                 var k1 = this.K - this.bitsHigh;
 

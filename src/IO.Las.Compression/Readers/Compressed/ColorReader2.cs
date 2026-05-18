@@ -11,16 +11,16 @@ namespace Altemiq.IO.Las.Readers.Compressed;
 /// </summary>
 internal sealed class ColorReader2 : ISimpleReader
 {
-    private readonly IEntropyDecoder decoder;
+    private readonly ArithmeticDecoder decoder;
 
-    private readonly ISymbolModel byteUsedModel;
+    private readonly ArithmeticSymbolModel byteUsedModel;
 
-    private readonly ISymbolModel rgbDiffModels0;
-    private readonly ISymbolModel rgbDiffModels1;
-    private readonly ISymbolModel rgbDiffModels2;
-    private readonly ISymbolModel rgbDiffModels3;
-    private readonly ISymbolModel rgbDiffModels4;
-    private readonly ISymbolModel rgbDiffModels5;
+    private readonly ArithmeticSymbolModel rgbDiffModels0;
+    private readonly ArithmeticSymbolModel rgbDiffModels1;
+    private readonly ArithmeticSymbolModel rgbDiffModels2;
+    private readonly ArithmeticSymbolModel rgbDiffModels3;
+    private readonly ArithmeticSymbolModel rgbDiffModels4;
+    private readonly ArithmeticSymbolModel rgbDiffModels5;
 
     private ushort lastRed;
     private ushort lastGreen;
@@ -30,7 +30,7 @@ internal sealed class ColorReader2 : ISimpleReader
     /// Initializes a new instance of the <see cref="ColorReader2"/> class.
     /// </summary>
     /// <param name="decoder">The decoder.</param>
-    public ColorReader2(IEntropyDecoder decoder)
+    public ColorReader2(ArithmeticDecoder decoder)
     {
         ArgumentNullException.ThrowIfNull(decoder);
         this.decoder = decoder;
@@ -68,90 +68,77 @@ internal sealed class ColorReader2 : ISimpleReader
     public void Read(Span<byte> item)
     {
         var sym = this.decoder.DecodeSymbol(this.byteUsedModel);
-        if ((sym & 1) is not 0)
-        {
-            var corr = (byte)this.decoder.DecodeSymbol(this.rgbDiffModels0);
-            System.Buffers.Binary.BinaryPrimitives.WriteUInt16LittleEndian(item, (corr + (this.lastRed & 0xFF)).Fold());
-        }
-        else
-        {
-            System.Buffers.Binary.BinaryPrimitives.WriteUInt16LittleEndian(item, (ushort)(this.lastRed & 0xFF));
-        }
 
-        if ((sym & (1 << 1)) is not 0)
-        {
-            var corr = (byte)this.decoder.DecodeSymbol(this.rgbDiffModels1);
-            var value = (ushort)(System.Buffers.Binary.BinaryPrimitives.ReadUInt16LittleEndian(item) | (ushort)((corr + (this.lastRed >> 8)).Fold() << 8));
-            System.Buffers.Binary.BinaryPrimitives.WriteUInt16LittleEndian(item, value);
-        }
-        else
-        {
-            var value = (ushort)(System.Buffers.Binary.BinaryPrimitives.ReadUInt16LittleEndian(item) | (this.lastRed & 0xFF00));
-            System.Buffers.Binary.BinaryPrimitives.WriteUInt16LittleEndian(item, value);
-        }
+        // Snapshot last values once; work in locals (red/green/blue as two halves each)
+        // and emit a single LE write per component at the end. This avoids the
+        // ~20 span read/write round-trips the previous version did on the 6-byte
+        // destination buffer.
+        var lastRedLo = this.lastRed & 0xFF;
+        var lastRedHi = (this.lastRed >> 8) & 0xFF;
+        var lastGreenLo = this.lastGreen & 0xFF;
+        var lastGreenHi = (this.lastGreen >> 8) & 0xFF;
+        var lastBlueLo = this.lastBlue & 0xFF;
+        var lastBlueHi = (this.lastBlue >> 8) & 0xFF;
 
+        // Red low byte
+        var redLo = (sym & 1) is not 0
+            ? ((byte)this.decoder.DecodeSymbol(this.rgbDiffModels0) + lastRedLo).Fold()
+            : lastRedLo;
+
+        // Red high byte
+        var redHi = (sym & (1 << 1)) is not 0
+            ? ((byte)this.decoder.DecodeSymbol(this.rgbDiffModels1) + lastRedHi).Fold()
+            : lastRedHi;
+
+        int greenLo;
+        int greenHi;
+        int blueLo;
+        int blueHi;
         if ((sym & (1 << 6)) is not 0)
         {
-            var diff = (System.Buffers.Binary.BinaryPrimitives.ReadUInt16LittleEndian(item) & 0x00FF) - (this.lastRed & 0x00FF);
-            if ((sym & (1 << 2)) is not 0)
-            {
-                var corr = (byte)this.decoder.DecodeSymbol(this.rgbDiffModels2);
-                ushort value = (corr + (diff + (this.lastGreen & 0xFF)).Clamp()).Fold();
-                System.Buffers.Binary.BinaryPrimitives.WriteUInt16LittleEndian(item[sizeof(ushort)..], value);
-            }
-            else
-            {
-                var value = (ushort)(this.lastGreen & 0xFF);
-                System.Buffers.Binary.BinaryPrimitives.WriteUInt16LittleEndian(item[sizeof(ushort)..], value);
-            }
+            // Low-byte green
+            var diff = redLo - lastRedLo;
+            greenLo = (sym & (1 << 2)) is not 0
+                ? ((byte)this.decoder.DecodeSymbol(this.rgbDiffModels2) + (diff + lastGreenLo).Clamp()).Fold()
+                : lastGreenLo;
 
-            if ((sym & (1 << 4)) is not 0)
-            {
-                var corr = (byte)this.decoder.DecodeSymbol(this.rgbDiffModels4);
-                diff = (diff + ((System.Buffers.Binary.BinaryPrimitives.ReadUInt16LittleEndian(item[sizeof(ushort)..]) & 0x00FF) - (this.lastGreen & 0x00FF))) / 2;
-                ushort value = (corr + (diff + (this.lastBlue & 0xFF)).Clamp()).Fold();
-                System.Buffers.Binary.BinaryPrimitives.WriteUInt16LittleEndian(item[(2 * sizeof(ushort))..], value);
-            }
-            else
-            {
-                var value = (ushort)(this.lastBlue & 0xFF);
-                System.Buffers.Binary.BinaryPrimitives.WriteUInt16LittleEndian(item[(2 * sizeof(ushort))..], value);
-            }
+            // Low-byte blue; diff halves into the green/red average
+            var blueDiffLo = (diff + (greenLo - lastGreenLo)) / 2;
+            blueLo = (sym & (1 << 4)) is not 0
+                ? ((byte)this.decoder.DecodeSymbol(this.rgbDiffModels4) + (blueDiffLo + lastBlueLo).Clamp()).Fold()
+                : lastBlueLo;
 
-            diff = (System.Buffers.Binary.BinaryPrimitives.ReadUInt16LittleEndian(item) >> 8) - (this.lastRed >> 8);
-            if ((sym & (1 << 3)) is not 0)
-            {
-                var corr = (byte)this.decoder.DecodeSymbol(this.rgbDiffModels3);
-                var value = (ushort)(System.Buffers.Binary.BinaryPrimitives.ReadUInt16LittleEndian(item[sizeof(ushort)..]) | (ushort)((corr + (diff + (this.lastGreen >> 8)).Clamp()).Fold() << 8));
-                System.Buffers.Binary.BinaryPrimitives.WriteUInt16LittleEndian(item[sizeof(ushort)..], value);
-            }
-            else
-            {
-                var value = (ushort)(System.Buffers.Binary.BinaryPrimitives.ReadUInt16LittleEndian(item[sizeof(ushort)..]) | (this.lastGreen & 0xFF00));
-                System.Buffers.Binary.BinaryPrimitives.WriteUInt16LittleEndian(item[sizeof(ushort)..], value);
-            }
+            // High-byte green
+            diff = redHi - lastRedHi;
+            greenHi = (sym & (1 << 3)) is not 0
+                ? ((byte)this.decoder.DecodeSymbol(this.rgbDiffModels3) + (diff + lastGreenHi).Clamp()).Fold()
+                : lastGreenHi;
 
-            if ((sym & (1 << 5)) is not 0)
-            {
-                var corr = (byte)this.decoder.DecodeSymbol(this.rgbDiffModels5);
-                diff = (diff + ((System.Buffers.Binary.BinaryPrimitives.ReadUInt16LittleEndian(item[sizeof(ushort)..]) >> 8) - (this.lastGreen >> 8))) / 2;
-                var value = (ushort)(System.Buffers.Binary.BinaryPrimitives.ReadUInt16LittleEndian(item[(2 * sizeof(ushort))..]) | ((corr + (diff + (this.lastBlue >> 8)).Clamp()).Fold() << 8));
-                System.Buffers.Binary.BinaryPrimitives.WriteUInt16LittleEndian(item[(2 * sizeof(ushort))..], value);
-            }
-            else
-            {
-                var value = (ushort)(System.Buffers.Binary.BinaryPrimitives.ReadUInt16LittleEndian(item[(2 * sizeof(ushort))..]) | (ushort)(this.lastBlue & 0xFF00));
-                System.Buffers.Binary.BinaryPrimitives.WriteUInt16LittleEndian(item[(2 * sizeof(ushort))..], value);
-            }
+            // High-byte blue
+            var blueDiffHi = (diff + (greenHi - lastGreenHi)) / 2;
+            blueHi = (sym & (1 << 5)) is not 0
+                ? ((byte)this.decoder.DecodeSymbol(this.rgbDiffModels5) + (blueDiffHi + lastBlueHi).Clamp()).Fold()
+                : lastBlueHi;
         }
         else
         {
-            System.Buffers.Binary.BinaryPrimitives.WriteUInt16LittleEndian(item[sizeof(ushort)..], System.Buffers.Binary.BinaryPrimitives.ReadUInt16LittleEndian(item));
-            System.Buffers.Binary.BinaryPrimitives.WriteUInt16LittleEndian(item[(2 * sizeof(ushort))..], System.Buffers.Binary.BinaryPrimitives.ReadUInt16LittleEndian(item));
+            // When bit 6 is unset, green and blue both take the red value.
+            greenLo = redLo;
+            greenHi = redHi;
+            blueLo = redLo;
+            blueHi = redHi;
         }
 
-        this.lastRed = System.Buffers.Binary.BinaryPrimitives.ReadUInt16LittleEndian(item);
-        this.lastGreen = System.Buffers.Binary.BinaryPrimitives.ReadUInt16LittleEndian(item[sizeof(ushort)..]);
-        this.lastBlue = System.Buffers.Binary.BinaryPrimitives.ReadUInt16LittleEndian(item[(2 * sizeof(ushort))..]);
+        var red = (ushort)(redLo | (redHi << 8));
+        var green = (ushort)(greenLo | (greenHi << 8));
+        var blue = (ushort)(blueLo | (blueHi << 8));
+
+        System.Buffers.Binary.BinaryPrimitives.WriteUInt16LittleEndian(item, red);
+        System.Buffers.Binary.BinaryPrimitives.WriteUInt16LittleEndian(item[sizeof(ushort)..], green);
+        System.Buffers.Binary.BinaryPrimitives.WriteUInt16LittleEndian(item[(2 * sizeof(ushort))..], blue);
+
+        this.lastRed = red;
+        this.lastGreen = green;
+        this.lastBlue = blue;
     }
 }

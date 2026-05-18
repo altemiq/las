@@ -17,7 +17,7 @@ internal sealed class ColorNearInfraredReader3 : IContextReader
 
     private readonly LayeredValue valueNir;
 
-    private readonly IEntropyDecoder decoder;
+    private readonly ArithmeticDecoder decoder;
 
     private byte[] bytes = [];
 
@@ -28,7 +28,7 @@ internal sealed class ColorNearInfraredReader3 : IContextReader
     /// </summary>
     /// <param name="decoder">The decoder.</param>
     /// <param name="decompressSelective">The selective decompress value.</param>
-    public ColorNearInfraredReader3(IEntropyDecoder decoder, DecompressSelections decompressSelective = DecompressSelections.All)
+    public ColorNearInfraredReader3(ArithmeticDecoder decoder, DecompressSelections decompressSelective = DecompressSelections.All)
     {
         this.decoder = decoder;
         this.valueRgb = new(decompressSelective.HasFlag(DecompressSelections.RGB));
@@ -271,18 +271,18 @@ internal sealed class ColorNearInfraredReader3 : IContextReader
     [System.Diagnostics.CodeAnalysis.SuppressMessage("StyleCop.CSharp.MaintainabilityRules", "SA1401:FieldsShouldBePrivate", Justification = "This is used as an internal property bag.")]
     private sealed class Context
     {
-        public readonly ISymbolModel? RgbByteUsedModel;
+        public readonly ArithmeticSymbolModel? RgbByteUsedModel;
 
-        public readonly ISymbolModel? RgbDiffModels0;
-        public readonly ISymbolModel? RgbDiffModels1;
-        public readonly ISymbolModel? RgbDiffModels2;
-        public readonly ISymbolModel? RgbDiffModels3;
-        public readonly ISymbolModel? RgbDiffModels4;
-        public readonly ISymbolModel? RgbDiffModels5;
+        public readonly ArithmeticSymbolModel? RgbDiffModels0;
+        public readonly ArithmeticSymbolModel? RgbDiffModels1;
+        public readonly ArithmeticSymbolModel? RgbDiffModels2;
+        public readonly ArithmeticSymbolModel? RgbDiffModels3;
+        public readonly ArithmeticSymbolModel? RgbDiffModels4;
+        public readonly ArithmeticSymbolModel? RgbDiffModels5;
 
-        public readonly ISymbolModel? NirByteUsedModel;
-        public readonly ISymbolModel? NirDiffModels0;
-        public readonly ISymbolModel? NirDiffModels1;
+        public readonly ArithmeticSymbolModel? NirByteUsedModel;
+        public readonly ArithmeticSymbolModel? NirDiffModels0;
+        public readonly ArithmeticSymbolModel? NirDiffModels1;
 
         public ushort LastRed;
         public ushort LastGreen;

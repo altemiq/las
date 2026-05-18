@@ -64,7 +64,7 @@ public class ColorPointTests
     {
         var destination = new byte[Bytes.Length];
         _ = Point.WriteLittleEndian(destination);
-        _ = await Assert.That(destination).IsEquivalentTo(Bytes);
+        await Assert.That(destination).IsEquivalentTo(Bytes);
     }
 
     [Test]
@@ -77,7 +77,7 @@ public class ColorPointTests
 
     private static async Task CheckPoint(ColorPointDataRecord record)
     {
-        _ = await Assert.That(record)
+        await Assert.That(record)
             .Member(p => p.X, x => x.IsEqualTo(2757))
             .And.Member(p => p.Y, y => y.IsEqualTo(-1377))
             .And.Member(p => p.Z, z => z.IsEqualTo(-6717))

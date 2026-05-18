@@ -6,6 +6,8 @@
     <IsTestProject Condition=" '$(SupportLas14)' != 'true' ">false</IsTestProject>
     <MeziantouPolyfill_IncludedPolyfills>
       $(MeziantouPolyfill_IncludedPolyfills)|
+      T:System.Diagnostics.CodeAnalysis.DoesNotReturnAttribute|
+      T:System.Diagnostics.CodeAnalysis.NotNullWhenAttribute|
       T:System.Index|
       T:System.Range|
     </MeziantouPolyfill_IncludedPolyfills>
