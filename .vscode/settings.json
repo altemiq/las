@@ -2,5 +2,6 @@
     "json.schemaDownload.trustedDomains": {
         "https://models.dev": true,
         "https://opencode.ai": true
-    }
+    },
+    "yaml.format.singleQuote": true
 }

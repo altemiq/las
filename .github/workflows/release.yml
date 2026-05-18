@@ -47,32 +47,32 @@ jobs:
       - name: promote docker container
         run: |
           echo ${{ secrets.GITHUB_TOKEN }} | docker login ghcr.io -u ${{ github.actor }} --password-stdin
-          
+
           repository_name=ghcr.io/${{ github.repository_owner }}/io/las
           pre_release_version=${{ inputs.version }}
           pre_release_image_name=$repository_name:$pre_release_version
           docker pull $pre_release_image_name
-          
+
           # strip off the pre-release
           release_version=${pre_release_version%%'-'*}
           docker image tag $pre_release_image_name $repository_name:$release_version
-          
+
           # strip off the patch version
           release_version=${release_version%'.'*}
           docker image tag $pre_release_image_name $repository_name:$release_version
-          
+
           # strip off the minor version
           release_version=${release_version%'.'*}
           docker image tag $pre_release_image_name $repository_name:$release_version
-          
+
           # use the 'latest' tag
           docker image tag $pre_release_image_name $repository_name:latest
-          
+
           docker image push --all-tags $repository_name
 
   create-release:
     runs-on: ubuntu-latest
-    
+
     steps:
       - uses: actions/checkout@v6
         with:
@@ -91,6 +91,3 @@ jobs:
           release: v${{ steps.get-version.outputs.release_version }}
           tag: v${{ steps.get-version.outputs.release_version }}
           prerelease: false
-
-
-
