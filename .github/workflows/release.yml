@@ -26,19 +26,11 @@ jobs:
         env:
           NUGET_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: dotnet tool install
-        run: |
-          dotnet tool install ${{ github.repository_owner }}.nuget.release --global
-
       - name: promote nuget
         run: |
-          dotnet nuget-promote source Altemiq.IO.Las --version ${{ inputs.version }}
-          dotnet nuget-promote source Altemiq.IO.Las.Compression --version ${{ inputs.version }}
-          dotnet nuget-promote source Altemiq.IO.Las.Tiling --version ${{ inputs.version }}
-          dotnet nuget-promote source Altemiq.IO.Las.Cloud --version ${{ inputs.version }}
-          dotnet nuget-promote source Altemiq.IO.Las.Http --version ${{ inputs.version }}
-          dotnet nuget-promote source Altemiq.IO.Las.S3 --version ${{ inputs.version }}
-          dotnet nuget-promote source Altemiq.IO.Las.Indexing --version ${{ inputs.version }}
+          for dir in "./src"/*/; do
+            dotnet dnx ${{ github.repository_owner }}.nuget.promote -- source Altemiq.$(basename "$dir") --version ${{ inputs.version }}
+          done
 
   promote-docker:
     runs-on: ubuntu-latest

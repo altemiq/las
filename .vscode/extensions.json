@@ -3,6 +3,7 @@
         "github.vscode-github-actions",
         "ms-dotnettools.csdevkit",
         "sst-dev.opencode",
-        "redhat.vscode-yaml"
+        "redhat.vscode-yaml",
+        "ms-azuretools.vscode-containers"
     ]
 }
