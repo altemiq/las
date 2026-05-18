@@ -19,8 +19,8 @@
     <AutoGenerateBindingRedirects Condition=" '$([MSBuild]::GetTargetFrameworkIdentifier($(TargetFramework)))' == '.NETFramework' ">true</AutoGenerateBindingRedirects>
     <GenerateBindingRedirectsOutputType Condition=" '$(AutoGenerateBindingRedirects)' == 'true' ">true</GenerateBindingRedirectsOutputType>
 
-<!--    <NetCoreOnly Condition=" '$(NetCoreOnly)' == '' and '$([System.OperatingSystem]::IsWindows())' == 'true' ">false</NetCoreOnly>-->
-<!--    <NetCoreOnly Condition=" '$(NetCoreOnly)' == '' and '$([System.OperatingSystem]::IsWindows())' != 'true' ">true</NetCoreOnly>-->
+    <NetCoreOnly Condition=" '$(NetCoreOnly)' == '' and '$([System.OperatingSystem]::IsWindows())' == 'true' ">false</NetCoreOnly>
+    <NetCoreOnly Condition=" '$(NetCoreOnly)' == '' and '$([System.OperatingSystem]::IsWindows())' != 'true' ">true</NetCoreOnly>
 
     <MSBuildWarningsAsMessages>$(MSBuildWarningsAsMessages);MSB3836</MSBuildWarningsAsMessages>
     <SuppressTfmSupportBuildWarnings>true</SuppressTfmSupportBuildWarnings>
