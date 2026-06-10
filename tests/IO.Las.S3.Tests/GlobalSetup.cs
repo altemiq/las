@@ -34,10 +34,10 @@ public class GlobalHooks
                 GetValue(profile.SecretAccessKey.GetValueAsync(CancellationToken.None)));
 
             // Set service URL and region
-            var localStackServer = model.Resources.OfType<LocalStackServerResource>().Single();
-            var endpoint = localStackServer.GetEndpoint(Uri.UriSchemeHttp, KnownNetworkIdentifiers.LocalhostNetwork);
+            var ministackServer = model.Resources.OfType<MiniStackServerResource>().Single();
+            var endpoint = ministackServer.GetEndpoint(Uri.UriSchemeHttp, KnownNetworkIdentifiers.LocalhostNetwork);
             options.DefaultClientConfig.ServiceURL = endpoint.Url;
-            options.DefaultClientConfig.AuthenticationRegion = localStackServer.Region;
+            options.DefaultClientConfig.AuthenticationRegion = ministackServer.Region;
 
             options.DefaultClientConfig.ServiceSpecificSettings.TryAdd(nameof(Amazon.S3.AmazonS3Config.UseAccelerateEndpoint), bool.FalseString);
             options.DefaultClientConfig.ServiceSpecificSettings.TryAdd(nameof(Amazon.S3.AmazonS3Config.ForcePathStyle), bool.TrueString);

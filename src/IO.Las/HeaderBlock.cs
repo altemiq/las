@@ -133,6 +133,7 @@ public readonly struct HeaderBlock : IEquatable<HeaderBlock>
 #endif
     }
 
+#pragma warning disable MA0202
 #if LAS1_5_OR_GREATER
     /// <include file="Properties/v1.5/Documentation.xml" path="doc/members/member[@name='M:Altemiq.IO.Las.HeaderBlock.Constructor']/*" />
 #elif LAS1_4_OR_GREATER
@@ -142,6 +143,7 @@ public readonly struct HeaderBlock : IEquatable<HeaderBlock>
 #else
     /// <include file="Properties/v1.1/Documentation.xml" path="doc/members/member[@name='M:Altemiq.IO.Las.HeaderBlock.Constructor']/*" />
 #endif
+#pragma warning restore MA0202
     internal HeaderBlock(
         ushort fileSourceId,
 #if LAS1_2_OR_GREATER
@@ -252,6 +254,7 @@ public readonly struct HeaderBlock : IEquatable<HeaderBlock>
     /// </remarks>
     public ushort FileSourceId { get; }
 
+#pragma warning disable MA0202
 #if LAS1_5_OR_GREATER
     /// <include file="Properties/v1.5/Documentation.xml" path="doc/members/member[@name='P:Altemiq.IO.Las.HeaderBlock.GlobalEncoding']/*" />
     public GlobalEncoding GlobalEncoding { get; }
@@ -265,6 +268,7 @@ public readonly struct HeaderBlock : IEquatable<HeaderBlock>
     /// <include file="Properties/v1.2/Documentation.xml" path="doc/members/member[@name='P:Altemiq.IO.Las.HeaderBlock.GlobalEncoding']/*" />
     public GlobalEncoding GlobalEncoding { get; }
 #endif
+#pragma warning restore MA0202
 
     /// <summary>
     /// Gets the project id.

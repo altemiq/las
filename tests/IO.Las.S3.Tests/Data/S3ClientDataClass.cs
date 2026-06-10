@@ -13,7 +13,7 @@ public class S3ClientDataClass : IAsyncInitializer, IAsyncDisposable
         var services = GlobalHooks.App?.Services ?? throw new NullReferenceException();
         if (GlobalHooks.NotificationService != null)
         {
-            await GlobalHooks.NotificationService.WaitForResourceAsync("localstack", KnownResourceStates.Running).WaitAsync(TimeSpan.FromSeconds(90));
+            await GlobalHooks.NotificationService.WaitForResourceAsync("ministack", KnownResourceStates.Running).WaitAsync(TimeSpan.FromSeconds(90));
         }
 
         this.S3Client = services.GetRequiredAwsService<Amazon.S3.IAmazonS3>();

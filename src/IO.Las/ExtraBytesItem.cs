@@ -204,7 +204,7 @@ public readonly record struct ExtraBytesItem
     /// <summary>
     /// Gets a value indicating whether this instance has a value <see cref="Scale"/> value.
     /// </summary>
-    public bool HasScale => (this.Options & ExtraBytesOptions.Scale) is ExtraBytesOptions.Scale;
+    public bool HasScale => this.Options.HasFlag(ExtraBytesOptions.Scale);
 
     /// <summary>
     /// Gets the offset.
@@ -214,7 +214,7 @@ public readonly record struct ExtraBytesItem
     /// <summary>
     /// Gets a value indicating whether this instance has a value <see cref="Offset"/> value.
     /// </summary>
-    public bool HasOffset => (this.Options & ExtraBytesOptions.Offset) is ExtraBytesOptions.Offset;
+    public bool HasOffset => this.Options.HasFlag(ExtraBytesOptions.Offset);
 
     /// <summary>
     /// Gets the data.
