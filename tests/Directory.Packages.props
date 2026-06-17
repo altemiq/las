@@ -8,8 +8,8 @@
   <Import Project="$([MSBuild]::GetPathOfFileAbove('$(MSBuildThisFileName.Replace('Packages', 'Versions'))$(MSBuildThisFileExtension)', '$(MSBuildThisFileDirectory)'))" />
 
   <ItemGroup>
-    <PackageVersion Include="Meziantou.Polyfill" Version="1.0.148" />
-    <PackageVersion Include="TUnit" Version="1.53.0" />
+    <PackageVersion Include="Meziantou.Polyfill" Version="1.0.151" />
+    <PackageVersion Include="TUnit" Version="1.56.0" />
   </ItemGroup>
   
   <ItemGroup Label="Apache">
@@ -17,12 +17,12 @@
   </ItemGroup>
   
   <ItemGroup Label="Aspire">
-    <PackageVersion Include="Aspire.Hosting.Testing" Version="13.4.3" />
+    <PackageVersion Include="Aspire.Hosting.Testing" Version="13.4.5" />
   </ItemGroup>
   
   <ItemGroup Label="AWS">
-    <PackageVersion Include="AWSSDK.Extensions.NETCore.Setup" Version="4.0.4.5" />
-    <PackageVersion Include="AWSSDK.S3" Version="4.0.24.2" />
+    <PackageVersion Include="AWSSDK.Extensions.NETCore.Setup" Version="4.0.4.9" />
+    <PackageVersion Include="AWSSDK.S3" Version="4.0.25.1" />
   </ItemGroup>
   
   <ItemGroup Label="Azure">

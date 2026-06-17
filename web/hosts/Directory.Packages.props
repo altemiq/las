@@ -3,13 +3,13 @@
   <Import Project="$([MSBuild]::GetPathOfFileAbove('$(MSBuildThisFile)', '$(MSBuildThisFileDirectory)../'))" />
 
   <ItemGroup Label="AWS">
-    <PackageVersion Include="Altemiq.Aspire.Hosting.MiniStack" Version="13.4.2-preview.4" />
-    <PackageVersion Include="AWSSDK.Extensions.NETCore.Setup" Version="4.0.4.5" />
+    <PackageVersion Include="Altemiq.Aspire.Hosting.MiniStack" Version="13.4.3" />
+    <PackageVersion Include="AWSSDK.Extensions.NETCore.Setup" Version="4.0.4.9" />
   </ItemGroup>
   
   <ItemGroup Label="Azure">
     <PackageVersion Include="Azure.Storage.Blobs" Version="12.29.0" />
-    <PackageVersion Include="Aspire.Hosting.Azure.Storage" Version="13.4.3" />
+    <PackageVersion Include="Aspire.Hosting.Azure.Storage" Version="13.4.5" />
   </ItemGroup>
   
 </Project>

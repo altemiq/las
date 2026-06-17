@@ -16,13 +16,13 @@
   </ItemGroup>
 
   <ItemGroup Label="AWS">
-    <PackageVersion Include="AWSSDK.Extensions.NETCore.Setup" Version="4.0.4.5" />
-    <PackageVersion Include="AWSSDK.S3" Version="4.0.24.2" />
+    <PackageVersion Include="AWSSDK.Extensions.NETCore.Setup" Version="4.0.4.9" />
+    <PackageVersion Include="AWSSDK.S3" Version="4.0.25.1" />
   </ItemGroup>
 
   <ItemGroup Label="Azure">
     <PackageVersion Include="Azure.Core" Version="1.59.0" />
-    <PackageVersion Include="Azure.Storage.Blobs" Version="12.28.0" />
+    <PackageVersion Include="Azure.Storage.Blobs" Version="12.29.0" />
     <PackageVersion Include="Microsoft.Extensions.Azure" Version="1.14.0" />
   </ItemGroup>
   
@@ -38,7 +38,7 @@
   </ItemGroup>
   
   <ItemGroup Label="Coding Standards">
-    <GlobalPackageReference Include="Altemiq.DotNet.CodingStandard" Version="1.0.293" />
+    <GlobalPackageReference Include="Altemiq.DotNet.CodingStandard" Version="1.0.295" />
   </ItemGroup>
 
 </Project>

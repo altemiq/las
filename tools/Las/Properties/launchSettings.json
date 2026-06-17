@@ -1,0 +1,8 @@
+{
+  "profiles": {
+    "Las": {
+      "commandName": "Project",
+      "commandLineArgs": "info $(UserProfile)\\Downloads\\tile080.las"
+    }
+  }
+}
