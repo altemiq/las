@@ -239,9 +239,9 @@ public readonly struct BoundingBox : IEquatable<BoundingBox>
 #if NET7_0_OR_GREATER
         => this.Contains(new Vector3D(x, y, z));
 #else
-        => (this.Height > 0 ? this.Bottom <= y && y < this.Top : this.Bottom >= y && y > this.Top)
-           && (this.Width > 0 ? this.Left <= x && x < this.Right : this.Left >= x && x > this.Right)
-           && (this.Depth > 0 ? this.Front <= z && z < this.Back : this.Front >= z && z > this.Back);
+        => (this.Height > 0 ? this.Bottom <= y && y <= this.Top : this.Bottom >= y && y >= this.Top)
+            && (this.Width > 0 ? this.Left <= x && x <= this.Right : this.Left >= x && x >= this.Right)
+            && (this.Depth > 0 ? this.Front <= z && z <= this.Back : this.Front >= z && z >= this.Back);
 #endif
 
     /// <summary>
