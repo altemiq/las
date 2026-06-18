@@ -21,6 +21,13 @@ public readonly struct WellKnownTextValue :
     IEquatable<string>,
     IEquatable<WellKnownTextLiteral>
 {
+    private static readonly System.Buffers.StandardFormat DoubleFormat =
+#if NETSTANDARD2_0
+        new('G');
+#else
+        new('G', 15);
+#endif
+
     private readonly WellKnownTextNode nodeValue;
     private readonly double doubleValue;
     private readonly string? stringValue;
@@ -72,7 +79,7 @@ public readonly struct WellKnownTextValue :
     {
         1 => this.nodeValue,
         2 => this.doubleValue,
-        3 => this.stringValue!,
+        3 => this.stringValue,
         4 => this.literalValue,
         _ => null,
     };
@@ -266,7 +273,7 @@ public readonly struct WellKnownTextValue :
 
         static int WriteDouble(Span<byte> buffer, double d)
         {
-            System.Buffers.Text.Utf8Formatter.TryFormat(d, buffer, out var bytesWritten, System.Buffers.StandardFormat.Parse("G15"));
+            System.Buffers.Text.Utf8Formatter.TryFormat(d, buffer, out var bytesWritten, DoubleFormat);
             return bytesWritten;
         }
     }
@@ -289,7 +296,7 @@ public readonly struct WellKnownTextValue :
         static int GetDoubleByteCount(double d)
         {
             Span<byte> buffer = stackalloc byte[20];
-            System.Buffers.Text.Utf8Formatter.TryFormat(d, buffer, out var bytesWritten, System.Buffers.StandardFormat.Parse("G15"));
+            System.Buffers.Text.Utf8Formatter.TryFormat(d, buffer, out var bytesWritten, DoubleFormat);
             return bytesWritten;
         }
     }
