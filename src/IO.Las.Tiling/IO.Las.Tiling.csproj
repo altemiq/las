@@ -32,4 +32,11 @@
     <ProjectReference Include="..\IO.Las\IO.Las.csproj" />
   </ItemGroup>
 
+  <ItemGroup Label="Polyfills" Condition=" !$([MSBuild]::IsTargetFrameworkCompatible('$(TargetFramework)', 'net6.0')) ">
+    <Compile Remove="EmbeddedAttribute.cs" Condition=" $([MSBuild]::IsTargetFrameworkCompatible('$(TargetFramework)', 'net6.0')) " />
+    <Compile Include="..\IO.Las\PolyfillExtensions.cs" />
+    <Compile Include="..\IO.Las\PolyfillExtensions.BinaryPrimitives.cs" Condition=" !$([MSBuild]::IsTargetFrameworkCompatible('$(TargetFramework)', 'net5.0')) " />
+    <Compile Include="..\IO.Las\PolyfillExtensions.BitConverter.cs"  />
+  </ItemGroup>
+
 </Project>

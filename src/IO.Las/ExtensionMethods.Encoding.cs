@@ -6,7 +6,7 @@
 
 namespace Altemiq.IO.Las;
 
-#pragma warning disable S2325, SA1101
+#pragma warning disable CA1708, S2325, SA1101
 
 /// <content>
 /// Extension methods for <see cref="System.Text.Encoding"/>.
@@ -23,15 +23,14 @@ public static partial class ExtensionMethods
         /// </summary>
         /// <param name="bytes">A read-only byte span to decode to a Unicode string.</param>
         /// <returns>A string that contains the decoded bytes from the provided read-only span.</returns>
-        public
-#if NET6_0_OR_GREATER
-            unsafe
-#endif
-            string GetNullTerminatedString(ReadOnlySpan<byte> bytes)
+        public string GetNullTerminatedString(ReadOnlySpan<byte> bytes)
         {
 #if NET6_0_OR_GREATER
-            var ptr = (byte*)System.Runtime.CompilerServices.Unsafe.AsPointer(ref System.Runtime.InteropServices.MemoryMarshal.GetReference(bytes));
-            return encoding.GetString(System.Runtime.InteropServices.MemoryMarshal.CreateReadOnlySpanFromNullTerminated(ptr));
+            unsafe
+            {
+                var ptr = (byte*)System.Runtime.CompilerServices.Unsafe.AsPointer(ref System.Runtime.InteropServices.MemoryMarshal.GetReference(bytes));
+                return encoding.GetString(System.Runtime.InteropServices.MemoryMarshal.CreateReadOnlySpanFromNullTerminated(ptr));
+            }
 #else
             var endIndex = bytes.IndexOf((byte)0);
             if (endIndex is -1)
@@ -53,47 +52,5 @@ public static partial class ExtensionMethods
             var length = encoding.GetBytes(chars[..Math.Min(bytes.Length, chars.Length)], bytes);
             bytes[length..].Clear();
         }
-
-#if !NETSTANDARD2_1_OR_GREATER && !NETCOREAPP2_1_OR_GREATER
-        /// <summary>
-        /// Decodes all the bytes in the specified byte span into a string.
-        /// </summary>
-        /// <param name="bytes">A read-only byte span to decode to a Unicode string.</param>
-        /// <returns>A string that contains the decoded bytes from the provided read-only span.</returns>
-        public unsafe string GetString(ReadOnlySpan<byte> bytes)
-        {
-            var ptr = (byte*)System.Runtime.CompilerServices.Unsafe.AsPointer(ref System.Runtime.InteropServices.MemoryMarshal.GetReference(bytes));
-            return encoding.GetString(ptr, bytes.Length);
-        }
-
-        /// <summary>
-        /// Calculates the number of bytes produced by encoding the characters in the specified character span.
-        /// </summary>
-        /// <param name="chars">The span of characters to encode.</param>
-        /// <returns>The number of bytes produced by encoding the specified character span.</returns>
-        public unsafe int GetByteCount(ReadOnlySpan<byte> chars)
-        {
-            var ptr = (char*)System.Runtime.CompilerServices.Unsafe.AsPointer(ref System.Runtime.InteropServices.MemoryMarshal.GetReference(chars));
-            return encoding.GetByteCount(ptr, chars.Length);
-        }
-
-        /// <summary>
-        /// Encodes into a span of bytes a set of characters from the specified read-only span.
-        /// </summary>
-        /// <param name="chars">The span containing the set of characters to encode.</param>
-        /// <param name="bytes">The byte span to hold the encoded bytes.</param>
-        /// <returns>The number of encoded bytes.</returns>
-        public unsafe int GetBytes(ReadOnlySpan<char> chars, Span<byte> bytes)
-        {
-            if (chars.Length is 0)
-            {
-                return 0;
-            }
-
-            var charsPtr = (char*)System.Runtime.CompilerServices.Unsafe.AsPointer(ref System.Runtime.InteropServices.MemoryMarshal.GetReference(chars));
-            var bytesPtr = (byte*)System.Runtime.CompilerServices.Unsafe.AsPointer(ref System.Runtime.InteropServices.MemoryMarshal.GetReference(bytes));
-            return encoding.GetBytes(charsPtr, chars.Length, bytesPtr, bytes.Length);
-        }
-#endif
     }
 }

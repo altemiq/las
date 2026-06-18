@@ -42,6 +42,12 @@
     <ProjectReference Include="..\IO.Las.Compression\IO.Las.Compression.csproj" />
   </ItemGroup>
 
+  <ItemGroup Label="Polyfills" Condition=" !$([MSBuild]::IsTargetFrameworkCompatible('$(TargetFramework)', 'net6.0')) ">
+    <Compile Include="..\IO.Las\PolyfillExtensions.cs" />
+    <Compile Include="..\IO.Las\PolyfillExtensions.BinaryPrimitives.cs" Condition=" !$([MSBuild]::IsTargetFrameworkCompatible('$(TargetFramework)', 'net5.0')) " />
+    <Compile Include="..\IO.Las\PolyfillExtensions.BitConverter.cs"  />
+  </ItemGroup>
+
   <ItemGroup Label="Tests" Condition=" '$(Configuration)' == 'Debug' ">
     <InternalsVisibleTo Include="$(AssemblyName).Tests" />
   </ItemGroup>

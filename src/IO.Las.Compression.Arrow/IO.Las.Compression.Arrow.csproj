@@ -26,13 +26,13 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Using Include="Apache.Arrow" />
-    <Using Include="Apache.Arrow.Types" />
+   <ProjectReference Include="..\IO.Las.Arrow\IO.Las.Arrow.csproj" />
+   <ProjectReference Include="..\IO.Las.Compression\IO.Las.Compression.csproj" />
   </ItemGroup>
 
   <ItemGroup>
-   <ProjectReference Include="..\IO.Las.Arrow\IO.Las.Arrow.csproj" />
-   <ProjectReference Include="..\IO.Las.Compression\IO.Las.Compression.csproj" />
+    <Using Include="Apache.Arrow" />
+    <Using Include="Apache.Arrow.Types" />
   </ItemGroup>
 
 </Project>

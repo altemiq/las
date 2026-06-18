@@ -347,7 +347,7 @@ public class LasWriterTests
     [MatrixDataSource]
     public async Task ExtendedVariableLengthRecords([Matrix(true, false)] bool exploded)
     {
-        ExtendedVariableLengthRecord record = new UnknownExtendedVariableLengthRecord(
+        UnknownExtendedVariableLengthRecord record = new UnknownExtendedVariableLengthRecord(
             new()
             {
                 UserId = "mine",
@@ -355,7 +355,7 @@ public class LasWriterTests
                 Description = "test EVLR",
                 RecordLengthAfterHeader = 0,
             },
-            []);
+            [1, 2, 3, 4]);
         Stream memoryStream = exploded
             ? new LasMultipleMemoryStream()
             : new MemoryStream();

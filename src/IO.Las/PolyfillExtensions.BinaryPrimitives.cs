@@ -1,5 +1,5 @@
 ﻿// -----------------------------------------------------------------------
-// <copyright file="ExtensionMethods.BinaryPrimitives.cs" company="Altemiq">
+// <copyright file="PolyfillExtensions.BinaryPrimitives.cs" company="Altemiq">
 // Copyright (c) Altemiq. All rights reserved.
 // </copyright>
 // -----------------------------------------------------------------------
@@ -11,7 +11,7 @@ namespace Altemiq.IO.Las;
 /// <content>
 /// Extension methods for <see cref="System.Buffers.Binary.BinaryPrimitives"/>.
 /// </content>
-public static partial class ExtensionMethods
+internal static partial class PolyfillExtensions
 {
     /// <summary>
     /// <see cref="System.Buffers.Binary.BinaryPrimitives"/> extensions.

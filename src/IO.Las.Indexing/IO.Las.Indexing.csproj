@@ -1,7 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFrameworks>net10.0;net7.0;net5.0;netstandard2.1;netstandard2.0</TargetFrameworks>
+    <TargetFrameworks>net10.0;net7.0;net5.0;netstandard2.1;netstandard2.0;net461</TargetFrameworks>
     <MeziantouPolyfill_IncludedPolyfills>
       $(MeziantouPolyfill_IncludedPolyfills)|
       M:System.Collections.Generic.Dictionary`2.TryAdd(`0,`1)|
@@ -35,6 +35,13 @@
 
   <ItemGroup>
     <ProjectReference Include="..\IO.Las\IO.Las.csproj" />
+  </ItemGroup>
+
+  <ItemGroup Label="Polyfills" Condition=" !$([MSBuild]::IsTargetFrameworkCompatible('$(TargetFramework)', 'net6.0')) ">
+    <Compile Include="..\IO.Las\PolyfillExtensions.cs" />
+    <Compile Include="..\IO.Las\PolyfillExtensions.BinaryPrimitives.cs" Condition=" !$([MSBuild]::IsTargetFrameworkCompatible('$(TargetFramework)', 'net5.0')) " />
+    <Compile Include="..\IO.Las\PolyfillExtensions.BitConverter.cs"  />
+    <Compile Include="..\IO.Las\PolyfillExtensions.Encoding.cs" Condition=" !$([MSBuild]::IsTargetFrameworkCompatible('$(TargetFramework)', 'netstandard2.1')) and !$([MSBuild]::IsTargetFrameworkCompatible('$(TargetFramework)', 'netcoreapp2.1')) " />
   </ItemGroup>
 
   <ItemGroup Condition=" '$(SupportLas14)' != 'true' ">

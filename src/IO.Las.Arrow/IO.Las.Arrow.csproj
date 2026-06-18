@@ -38,14 +38,20 @@
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
   </ItemGroup>
-  
+
+  <ItemGroup>
+    <ProjectReference Include="..\IO.Las\IO.Las.csproj" />
+  </ItemGroup>
+
   <ItemGroup>
     <Using Include="Apache.Arrow" />
     <Using Include="Apache.Arrow.Types" />
   </ItemGroup>
 
-  <ItemGroup>
-    <ProjectReference Include="..\IO.Las\IO.Las.csproj" />
+  <ItemGroup Label="Polyfills" Condition=" !$([MSBuild]::IsTargetFrameworkCompatible('$(TargetFramework)', 'net6.0')) ">
+    <Compile Include="..\IO.Las\PolyfillExtensions.cs" />
+    <Compile Include="..\IO.Las\PolyfillExtensions.BinaryPrimitives.cs" Condition=" !$([MSBuild]::IsTargetFrameworkCompatible('$(TargetFramework)', 'net5.0')) " />
+    <Compile Include="..\IO.Las\PolyfillExtensions.BitConverter.cs"  />
   </ItemGroup>
   
   <ItemGroup>

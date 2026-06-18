@@ -47,15 +47,15 @@ public static partial class ExtensionMethods
             where T : System.Numerics.IComparisonOperators<T, T, bool>
         {
             T snapshot;
-            bool stillLess;
+            bool stillMore;
             do
             {
                 snapshot = location1;
-                stillLess = value > snapshot;
+                stillMore = value > snapshot;
             }
-            while (stillLess && !Interlocked.CompareExchange(ref location1, value, snapshot).Equals(snapshot));
+            while (stillMore && !Interlocked.CompareExchange(ref location1, value, snapshot).Equals(snapshot));
 
-            return stillLess;
+            return stillMore;
         }
 #else
         /// <summary>

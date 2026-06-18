@@ -55,6 +55,18 @@
     <ProjectReference Include="..\IO.Las\IO.Las.csproj" />
   </ItemGroup>
 
+  <ItemGroup Label="Polyfills" Condition=" !$([MSBuild]::IsTargetFrameworkCompatible('$(TargetFramework)', 'net6.0')) ">
+    <Compile Include="..\IO.Las\PolyfillExtensions.cs" />
+    <Compile Include="..\IO.Las\PolyfillExtensions.BinaryPrimitives.cs" Condition=" !$([MSBuild]::IsTargetFrameworkCompatible('$(TargetFramework)', 'net5.0')) " />
+    <Compile Include="..\IO.Las\PolyfillExtensions.BitConverter.cs"  />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Compile Update="ExtensionMethods.*.cs;PolyfillExtensions.*.cs">
+      <DependentUpon>$([System.Text.RegularExpressions.Regex]::Replace('%(Filename)%(Extension)', '\.[^.]+\%(Extension)$', '%(Extension)'))</DependentUpon>
+    </Compile>
+  </ItemGroup>
+
   <ItemGroup Condition=" '$(SupportLas12)' != 'true' ">
     <!-- Remove color point data records for versions below 1.2 -->
     <Compile Remove="**\*Color*.cs" />

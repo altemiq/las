@@ -23,12 +23,13 @@ public class LasIndexTests
     {
         var stream = typeof(LasIndexTests).Assembly.GetManifestResourceStream(typeof(LasIndexTests), "fusa.lax")
                      ?? throw new System.Diagnostics.UnreachableException();
-        var fromLax = await Assert.That(() => LasIndex.ReadFrom(stream)).ThrowsNothing().And.IsTypeOf<LasIndex>();
+        var fromLax = await Assert.That(() => LasIndex.ReadFrom(stream)).IsTypeOf<LasIndex>();
         await stream.DisposeAsync();
 
         var reader = new LasReader(typeof(LasIndexTests).Assembly.GetManifestResourceStream(typeof(LasIndexTests), "fusa.las")
                                    ?? throw new System.Diagnostics.UnreachableException());
-        var fromLas = await Assert.That(() => LasIndex.Create(reader)).ThrowsNothing().And.IsTypeOf<LasIndex>();
+        //var rdr = LasIndex.Create(reader);
+        var fromLas = await Assert.That(() => LasIndex.Create(reader)).IsTypeOf<LasIndex>();
         await reader.DisposeAsync();
 
         await Assert.That(fromLax).IsEquivalentTo(fromLas);

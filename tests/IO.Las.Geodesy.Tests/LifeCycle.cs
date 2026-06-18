@@ -26,6 +26,13 @@ public static class LifeCycle
         }
 
         context.OutputWriter.WriteLine("Removing temp proj.db");
-        File.Delete(TestLocation);
+        try
+        {
+            File.Delete(TestLocation);
+        }
+        catch
+        {
+            context.OutputWriter.WriteLine("Failed to remove temp proj.db");
+        }
     }
 }

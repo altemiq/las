@@ -79,7 +79,7 @@ public readonly struct WellKnownTextValue :
     {
         1 => this.nodeValue,
         2 => this.doubleValue,
-        3 => this.stringValue,
+        3 => this.stringValue!,
         4 => this.literalValue,
         _ => null,
     };
