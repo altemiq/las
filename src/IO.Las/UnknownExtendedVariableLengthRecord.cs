@@ -20,4 +20,16 @@ public sealed record UnknownExtendedVariableLengthRecord(ExtendedVariableLengthR
         this.Data.AsSpan().CopyTo(destination[ExtendedVariableLengthRecordHeader.Size..]);
         return ExtendedVariableLengthRecordHeader.Size + this.Data.Length;
     }
+
+    /// <inheritdoc/>
+    public bool Equals(UnknownExtendedVariableLengthRecord? other) => base.Equals(other) && EnumerableEqualityComparer.Instance<byte>().Equals(this.Data, other.Data);
+
+    /// <inheritdoc/>
+    public override int GetHashCode()
+    {
+        System.HashCode hashCode = default;
+        hashCode.Add(base.GetHashCode());
+        hashCode.Add(this.Data, EnumerableEqualityComparer.Instance<byte>());
+        return hashCode.ToHashCode();
+    }
 }
