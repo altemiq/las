@@ -17,7 +17,7 @@ public sealed record UnknownExtendedVariableLengthRecord(ExtendedVariableLengthR
     public override int CopyTo(Span<byte> destination)
     {
         this.Header.CopyTo(destination);
-        this.Data.AsSpan().CopyTo(destination[VariableLengthRecordHeader.Size..]);
-        return VariableLengthRecordHeader.Size + this.Data.Length;
+        this.Data.AsSpan().CopyTo(destination[ExtendedVariableLengthRecordHeader.Size..]);
+        return ExtendedVariableLengthRecordHeader.Size + this.Data.Length;
     }
 }
