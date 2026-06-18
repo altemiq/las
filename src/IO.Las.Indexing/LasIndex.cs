@@ -117,8 +117,7 @@ public class LasIndex : IEnumerable<LasIndexCell>, IEqualityComparer<LasIndex>
                 quantizer.Quantize(inputX, inputY, results);
                 for (var j = 0; j < BatchSize; j++)
                 {
-                    var vector = results[j];
-                    _ = index.Add(vector, current++);
+                    _ = index.Add(results[j], current++);
                 }
 
                 count = 0;
@@ -133,16 +132,14 @@ public class LasIndex : IEnumerable<LasIndexCell>, IEqualityComparer<LasIndex>
                 results);
             for (var i = 0; i < count; i++)
             {
-                var vector = results[i];
-                _ = index.Add(vector, current++);
+                _ = index.Add(results[i], current++);
             }
         }
 #else
         var current = default(uint);
         while (reader.ReadPointDataRecord() is { PointDataRecord: { } record })
         {
-            var vector = quantizer.Get(record);
-            _ = index.Add((float)vector.X, (float)vector.Y, current++);
+            _ = index.Add(quantizer.Get(record).AsVector2D(), current++);
         }
 #endif
 
@@ -337,10 +334,18 @@ public class LasIndex : IEnumerable<LasIndexCell>, IEqualityComparer<LasIndex>
                 // coarsen if a coarser cell will still have fewer than the minimum points (and points in all subcells)
                 var coarsened = false;
 
-                using var enumerator = cellHashes[firstHash].GetEnumerator();
+#if NETFRAMEWORK
+                var keys = new int[cellHashes[firstHash].Count];
+                cellHashes[firstHash].Keys.CopyTo(keys, 0);
+                foreach (var key in keys)
+                {
+                    var outer = new KeyValuePair<int, uint>(key, cellHashes[firstHash][key]);
+#else
+                var enumerator = cellHashes[firstHash].GetEnumerator();
                 while (enumerator.MoveNext())
                 {
                     var outer = enumerator.Current;
+#endif
                     if (outer.Value is 0 || !this.spatial.Coarsen(outer.Key, out var coarserIndex, out var indices))
                     {
                         continue;
