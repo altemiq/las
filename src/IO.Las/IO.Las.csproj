@@ -81,12 +81,13 @@
     <Compile Remove="IUnion{TUnion}.cs" />
   </ItemGroup>
 
-  <ItemGroup Label="Polyfills">
-    <Compile Remove="PolyfillExtensions.BinaryPrimitives.cs" Condition=" $([MSBuild]::IsTargetFrameworkCompatible('$(TargetFramework)', 'net5.0')) " />
-    <Compile Remove="PolyfillExtensions.BitConverter.cs" Condition=" $([MSBuild]::IsTargetFrameworkCompatible('$(TargetFramework)', 'net6.0')) " />
-    <Compile Remove="PolyfillExtensions.Encoding.cs" Condition=" $([MSBuild]::IsTargetFrameworkCompatible('$(TargetFramework)', 'netstandard2.1')) or $([MSBuild]::IsTargetFrameworkCompatible('$(TargetFramework)', 'netcoreapp2.1')) " />
-    <Compile Remove="PolyfillExtensions.Guid.cs" Condition=" $([MSBuild]::IsTargetFrameworkCompatible('$(TargetFramework)', 'netstandard2.1')) or $([MSBuild]::IsTargetFrameworkCompatible('$(TargetFramework)', 'netcoreapp2.1')) " />
-    <Compile Remove="PolyfillExtensions.Stream.cs" Condition=" $([MSBuild]::IsTargetFrameworkCompatible('$(TargetFramework)', 'netstandard2.1')) or $([MSBuild]::IsTargetFrameworkCompatible('$(TargetFramework)', 'netcoreapp1.0')) " />
+  <ItemGroup Label="Polyfills" Condition=" !$([MSBuild]::IsTargetFrameworkCompatible('$(TargetFramework)', 'net6.0')) ">
+    <Compile Include="..\shared\PolyfillExtensions.cs" />
+    <Compile Include="..\shared\PolyfillExtensions.BinaryPrimitives.cs" Condition=" !$([MSBuild]::IsTargetFrameworkCompatible('$(TargetFramework)', 'net5.0')) " />
+    <Compile Include="..\shared\PolyfillExtensions.BitConverter.cs" />
+    <Compile Include="..\shared\PolyfillExtensions.Encoding.cs" Condition=" !$([MSBuild]::IsTargetFrameworkCompatible('$(TargetFramework)', 'netstandard2.1')) and !$([MSBuild]::IsTargetFrameworkCompatible('$(TargetFramework)', 'netcoreapp2.1')) " />
+    <Compile Include="..\shared\PolyfillExtensions.Guid.cs" Condition=" !$([MSBuild]::IsTargetFrameworkCompatible('$(TargetFramework)', 'netstandard2.1')) and !$([MSBuild]::IsTargetFrameworkCompatible('$(TargetFramework)', 'netcoreapp2.1')) " />
+    <Compile Include="..\shared\PolyfillExtensions.Stream.cs" Condition=" !$([MSBuild]::IsTargetFrameworkCompatible('$(TargetFramework)', 'netstandard2.1')) and !$([MSBuild]::IsTargetFrameworkCompatible('$(TargetFramework)', 'netcoreapp1.0')) " />
   </ItemGroup>
 
   <ItemGroup>

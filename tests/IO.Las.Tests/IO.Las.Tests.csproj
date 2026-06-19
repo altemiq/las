@@ -25,14 +25,23 @@
     <Compile Remove="**\*Waveform*.cs" />
   </ItemGroup>
 
-  <ItemGroup Condition=" '$(SupportLas14)' != 'true' ">
-    <!-- Remove extended point data records for versions below 1.4 -->
-    <Compile Remove="**\*Extended*Point*.cs" />
-    <Compile Remove="**\PointConverterTests.cs" />
+  <Choose>
+    <When Condition=" '$(SupportLas14)' == 'true' ">
+      <ItemGroup>
+        <Compile Include="..\shared\ExtraBytesItemExtensions.cs" />
+      </ItemGroup>
+    </When>
+    <Otherwise>
+      <ItemGroup>
+        <!-- Remove extended point data records for versions below 1.4 -->
+        <Compile Remove="**\*Extended*Point*.cs" />
+        <Compile Remove="**\PointConverterTests.cs" />
 
-    <!-- remove new VLRs -->
-    <Compile Remove="**\ExtendedVariableLengthRecord*.cs" />
-    <Compile Remove="**\*ExtraBytes*.cs" />
-  </ItemGroup>
+        <!-- remove new VLRs -->
+        <Compile Remove="**\ExtendedVariableLengthRecord*.cs" />
+        <Compile Remove="**\*ExtraBytes*.cs" />
+      </ItemGroup>
+    </Otherwise>
+  </Choose>
 
 </Project>

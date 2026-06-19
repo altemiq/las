@@ -22,7 +22,7 @@
   <Choose>
     <When Condition=" '$(SupportLas14)' == 'true' ">
       <ItemGroup>
-        <Compile Include="..\IO.Las.Tests\ExtraBytesItemExtensions.cs" />
+        <Compile Include="..\shared\ExtraBytesItemExtensions.cs" />
       </ItemGroup>
     </When>
     <Otherwise>
