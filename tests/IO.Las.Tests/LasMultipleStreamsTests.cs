@@ -5,7 +5,7 @@ public class LasMultipleStreamsTests
     [Test]
     public async Task Sorted()
     {
-        SortedDictionary<string, Stream> dictionary = new(LasStreams.Comparer);
+        SortedDictionary<string, Stream> dictionary = [with(LasStreams.Comparer)];
         BasicLasMultipleMemoryStreams stream = new(dictionary);
 #if LAS1_3_OR_GREATER
         stream.SwitchTo(LasStreams.ExtendedVariableLengthRecord);
@@ -30,7 +30,7 @@ public class LasMultipleStreamsTests
     [Test]
     public async Task AddSameTwice()
     {
-        SortedDictionary<string, Stream> dictionary = new(LasStreams.Comparer);
+        SortedDictionary<string, Stream> dictionary = [with(LasStreams.Comparer)];
         BasicLasMultipleMemoryStreams stream = new(dictionary);
         _ = stream.SwitchTo(LasStreams.Header);
         _ = stream.SwitchTo(LasStreams.VariableLengthRecord);

@@ -33,7 +33,7 @@
   </ItemGroup>
 
   <ItemGroup Label="Polyfills" Condition=" !$([MSBuild]::IsTargetFrameworkCompatible('$(TargetFramework)', 'net6.0')) ">
-    <Compile Include="..\shared\EmbeddedAttribute.cs" />
+    <Compile Include="..\shared\EmbeddedAttribute.cs" Condition=" $([MSBuild]::IsTargetFrameworkCompatible('$(TargetFramework)', 'net5.0')) " />
     <Compile Include="..\shared\PolyfillExtensions.cs" />
     <Compile Include="..\shared\PolyfillExtensions.BinaryPrimitives.cs" Condition=" !$([MSBuild]::IsTargetFrameworkCompatible('$(TargetFramework)', 'net5.0')) " />
     <Compile Include="..\shared\PolyfillExtensions.BitConverter.cs"  />
