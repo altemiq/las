@@ -3,10 +3,12 @@
   <PropertyGroup>
     <TargetFrameworks>net10.0;net9.0;net8.0</TargetFrameworks>
     <TargetFrameworks Condition=" '$(NetCoreOnly)' != 'true' ">$(TargetFrameworks);net472</TargetFrameworks>
-    <MeziantouPolyfill_IncludedPolyfills>
-      $(MeziantouPolyfill_IncludedPolyfills)|
-      T:System.Diagnostics.UnreachableException|
-    </MeziantouPolyfill_IncludedPolyfills>
+  </PropertyGroup>
+
+  <PropertyGroup Condition=" $([MSBuild]::IsTargetFrameworkCompatible('$(TargetFramework)', 'net40')) ">
+    <_Platform>$([System.Runtime.InteropServices.RuntimeInformation]::ProcessArchitecture)</_Platform>
+    <Platform>$(_Platform.ToLower())</Platform>
+    <PlatformTarget>$(_Platform.ToLower())</PlatformTarget>
   </PropertyGroup>
 
   <ItemGroup>
@@ -20,14 +22,5 @@
   <ItemGroup>
     <EmbeddedResource Include="..\..\data\proj.db" />
   </ItemGroup>
-  
-  <Target Name="_UpdatePlatform"
-          BeforeTargets="CheckForAnyCPU"
-          Condition=" $([MSBuild]::IsTargetFrameworkCompatible('$(TargetFramework)', 'net40')) ">
-    <PropertyGroup>
-      <_Platform>$([System.Runtime.InteropServices.RuntimeInformation]::ProcessArchitecture)</_Platform>
-      <Platform>$(_Platform.ToLower())</Platform>
-    </PropertyGroup>
-  </Target>
 
 </Project>

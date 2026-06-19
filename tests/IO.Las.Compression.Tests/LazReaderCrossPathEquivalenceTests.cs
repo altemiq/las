@@ -98,6 +98,6 @@ public class LazReaderCrossPathEquivalenceTests
 #endif
 
     private static Stream GetResource(string resource) =>
-        typeof(LazReaderCrossPathEquivalenceTests).Assembly.GetManifestResourceStream(typeof(LazReaderTests), resource)
+        typeof(LazReaderCrossPathEquivalenceTests).Assembly.GetManifestResourceStream(typeof(LazReaderCrossPathEquivalenceTests), resource)
             ?? throw new System.Diagnostics.UnreachableException($"Failed to get resource '{resource}'");
 }

@@ -159,7 +159,28 @@ public sealed class CachedStream : Stream, ICacheStream, IAsyncCacheStream
 #endif
 
     /// <inheritdoc/>
-    public override async Task<int> ReadAsync(byte[] buffer, int offset, int count, CancellationToken cancellationToken) => await this.ReadAsync(buffer.AsMemory(offset, count), cancellationToken).ConfigureAwait(false);
+    public override async Task<int> ReadAsync(byte[] buffer, int offset, int count, CancellationToken cancellationToken)
+    {
+        var totalRead = 0;
+        while (totalRead < count)
+        {
+            if (this.bufferIndex == this.bufferLength)
+            {
+                await this.CacheAsync(this.baseStream.Position, cancellationToken).ConfigureAwait(false);
+                if (this.bufferLength is 0)
+                {
+                    break;
+                }
+            }
+
+            var length = Math.Min(this.bufferLength - this.bufferIndex, buffer.Length - totalRead);
+            this.internalBuffer.AsSpan(this.BufferPosition, length).CopyTo(buffer.AsSpan(offset + totalRead));
+            this.bufferIndex += length;
+            totalRead += length;
+        }
+
+        return totalRead;
+    }
 
 #if NETSTANDARD2_1_OR_GREATER || NETCOREAPP2_1_OR_GREATER
     /// <inheritdoc/>
