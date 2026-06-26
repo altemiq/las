@@ -17,7 +17,6 @@
   </Folder>
   <Folder Name="/Solution Items/">
     <File Path="Directory.Versions.props" />
-    <File Path="nuget.config" />
   </Folder>
   <Folder Name="/benchmarks/">
     <File Path="benchmarks/Directory.Build.props" />
