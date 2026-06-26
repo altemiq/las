@@ -4,12 +4,12 @@
 
   <ItemGroup Label="AWS">
     <PackageVersion Include="Altemiq.Aspire.Hosting.MiniStack" Version="13.4.3" />
-    <PackageVersion Include="AWSSDK.Extensions.NETCore.Setup" Version="4.0.4.9" />
+    <PackageVersion Include="AWSSDK.Extensions.NETCore.Setup" Version="4.0.4.11" />
   </ItemGroup>
   
   <ItemGroup Label="Azure">
-    <PackageVersion Include="Azure.Storage.Blobs" Version="12.29.0" />
-    <PackageVersion Include="Aspire.Hosting.Azure.Storage" Version="13.4.5" />
+    <PackageVersion Include="Azure.Storage.Blobs" Version="12.29.1" />
+    <PackageVersion Include="Aspire.Hosting.Azure.Storage" Version="13.4.6" />
   </ItemGroup>
   
 </Project>
