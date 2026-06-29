@@ -56,7 +56,21 @@ public sealed class PointDataRecordQuantizer(Vector3D scaleFactor, Vector3D offs
     /// <param name="offset">The offset.</param>
     /// <returns>The converted point.</returns>
     [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
-    public static Vector3D Get(int x, int y, int z, Vector3D scaleFactor, Vector3D offset) => (new Vector3D(x, y, z) * scaleFactor) + offset;
+    public static Vector3D Get(int x, int y, int z, Vector3D scaleFactor, Vector3D offset)
+#if NET9_0_OR_GREATER
+         => Vector256.FusedMultiplyAdd(new Vector3D(x, y, z).AsVector256Unsafe(), scaleFactor.AsVector256Unsafe(), offset.AsVector256Unsafe()).AsVector3D();
+#elif NETCOREAPP3_0_OR_GREATER
+    {
+        if (Fma.IsSupported)
+        {
+            return Fma.MultiplyAdd(new Vector3D(x, y, z).AsVector256Unsafe(), scaleFactor.AsVector256Unsafe(), offset.AsVector256Unsafe()).AsVector3D();
+        }
+
+        return (new Vector3D(x, y, z) * scaleFactor) + offset;
+    }
+#else
+         => (new Vector3D(x, y, z) * scaleFactor) + offset;
+#endif
 
     /// <summary>
     /// Converts the point.
@@ -67,7 +81,21 @@ public sealed class PointDataRecordQuantizer(Vector3D scaleFactor, Vector3D offs
     /// <param name="offset">The offset.</param>
     /// <returns>The converted point.</returns>
     [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
-    public static Vector2D Get(int x, int y, Vector3D scaleFactor, Vector3D offset) => (new Vector2D(x, y) * scaleFactor.AsVector2D()) + offset.AsVector2D();
+    public static Vector2D Get(int x, int y, Vector3D scaleFactor, Vector3D offset)
+#if NET9_0_OR_GREATER
+         => Vector128.FusedMultiplyAdd(new Vector2D(x, y).AsVector128Unsafe(), scaleFactor.AsVector2D().AsVector128Unsafe(), offset.AsVector2D().AsVector128Unsafe()).AsVector2D();
+#elif NETCOREAPP3_0_OR_GREATER
+        {
+            if (Fma.IsSupported)
+            {
+                return Fma.MultiplyAdd(new Vector2D(x, y).AsVector128Unsafe(), scaleFactor.AsVector2D().AsVector128Unsafe(), offset.AsVector2D().AsVector128Unsafe()).AsVector2D();
+            }
+
+            return (new Vector2D(x, y) * scaleFactor.AsVector2D()) + offset.AsVector2D();
+        }
+#else
+        => (new Vector2D(x, y) * scaleFactor.AsVector2D()) + offset.AsVector2D();
+#endif
 
     /// <summary>
     /// Converts the point.
