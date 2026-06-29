@@ -87,16 +87,27 @@ jobs:
     needs: [promote-nuget, promote-docker]
 
     steps:
-      - uses: actions/checkout@v6
-        with:
-          ref: v${{ inputs.version }}
-
       - id: get-version
         run: |
           pre_release_version=${{ inputs.version }}
           release_version=${pre_release_version%%'-'*}
+          
+          if [[ $pre_release_version == *-*.* ]]; then
+            part_after_dash="${pre_release_version#*-}"
+            if [[ $part_after_dash == *.* ]]; then
+              pre_release_version="${pre_release_version%.*}"
+            fi
+          fi
+
+          echo $pre_release_version
+          echo "tag_version=$pre_release_version" >> $GITHUB_OUTPUT
+
           echo $release_version
           echo "release_version=$release_version" >> $GITHUB_OUTPUT
+
+      - uses: actions/checkout@v6
+        with:
+          ref: v${{ steps.get-version.outputs.tag_version }}
 
       - name: Create Release
         uses: altemiq/update-existing-release@v1
