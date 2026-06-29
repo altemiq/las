@@ -42,9 +42,9 @@ jobs:
             "Altemiq.IO.Las.Azure" \
             "Altemiq.IO.Las.Cloud" \
             "Altemiq.IO.Las.Arrow" \
-            "Altemiq.IO.Las.Arrow.Compression" \
+            "Altemiq.IO.Las.Compression.Arrow" \
             "Altemiq.IO.Las.DataFrame" \
-            "Altemiq.IO.Las.DataFrame.Compression")
+            "Altemiq.IO.Las.Compression.DataFrame")
 
           for package in "${packages[@]}"; do
             dotnet dnx ${{ github.repository_owner }}.nuget.promote -- source $package --source https://api.nuget.org/v3/index.json --api-key ${{ steps.login.outputs.NUGET_API_KEY }} --version ${{ inputs.version }}
