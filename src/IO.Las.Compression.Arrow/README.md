@@ -40,4 +40,4 @@ The main types provided by this library are:
 
 <!-- How to provide feedback on this package and contribute to it -->
 
-Altemiq.IO.Las.Arrow is released as open source under the [MIT license](https://licenses.nuget.org/MIT). Bug reports and contributions are welcome at [the GitHub repository](https://github.com/altemiq/las).
+Altemiq.IO.Las.Compression.Arrow is released as open source under the [MIT license](https://licenses.nuget.org/MIT). Bug reports and contributions are welcome at [the GitHub repository](https://github.com/altemiq/las).

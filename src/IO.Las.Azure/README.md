@@ -22,8 +22,9 @@ Provides support for reading LAS/LAZ files through Azure Blob Storage
 using Altemiq.IO.Las;
 using Altemiq.IO.Las.Azure;
 
-# example URIs
-# HTTP: https://example-account.blob.core.windows.net/example-container/example-path/example.las
+// example URIs
+// HTTP: https://example-account.blob.core.windows.net/example-container/example-path/example.las
+var url = new Uri("https://example-account.blob.core.windows.net/example-container/example-path/example.las");
 
 LasReader reader = new(BlobLas.OpenRead(url));
 ```

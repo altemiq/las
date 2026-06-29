@@ -76,7 +76,7 @@ ExtraBytes extraBytes =
 ];
 
 Span<byte> span = stackalloc byte[sizeof(short)];
-using LazWriter writer = new("example.las");
+using LazWriter writer = new("example.laz");
 writer.Write(builder.HeaderBlock, geoKeyDirectoryTag, extraBytes);
 
 ExtendedGpsPointDataRecord point = new()

@@ -22,10 +22,10 @@ Provides support for reading LAS/LAZ files through Amazon S3
 using Altemiq.IO.Las;
 using Altemiq.IO.Las.S3;
 
-# example URIs
-# S3: s3://example-bucket/example-path/example.las
-# Virtual Hosted-Style: https://example-bucket.s3.amazonaws.com/example-path/example.las
-# Path-Style: https://s3.amazonaws.com/example-bucket/example-path/example.las
+// example URIs
+// S3: s3://example-bucket/example-path/example.las
+// Virtual Hosted-Style: https://example-bucket.s3.amazonaws.com/example-path/example.las
+// Path-Style: https://s3.amazonaws.com/example-bucket/example-path/example.las
 var url = new Uri("s3://example-bucket/example-path/example.las");
 
 LasReader reader = new(S3Las.OpenRead(url));

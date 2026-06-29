@@ -26,7 +26,7 @@ context.Open();
 var wkt = context.GetWkt(28355);
 
 // write this to the file
-var vlr = new new OgcCoordinateSystemWkt(wkt);
+var vlr = new OgcCoordinateSystemWkt(wkt);
 ```
 
 Converting GeoTIFF to WKT
@@ -43,7 +43,7 @@ GeoKeyDirectoryTag geoKeyDirectoryTag =
     new() { Count = 1, KeyId = GeoKey.VerticalUnitsGeoKey, ValueOffset = 9001 },
 ];
 
-IEnumerable<VariableLengthRecords> vlrs = [geoKeyDirectoryTag];
+IEnumerable<VariableLengthRecord> vlrs = [geoKeyDirectoryTag];
 
 // convert this to WKT
 var vlrsWithOgcWkt = vlrs.ToWkt();
