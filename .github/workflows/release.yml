@@ -11,6 +11,8 @@ on:
 jobs:
   promote-nuget:
     runs-on: ubuntu-latest
+    permissions:
+      id-token: write
 
     env:
       DOTNET_NOLOGO: true
@@ -23,14 +25,35 @@ jobs:
         with:
           dotnet-version: 10.0.x
 
+      - uses: NuGet/login@v1
+        id: login
+        with:
+          user: ${{ github.actor }}
+
       - name: promote nuget
         run: |
-          for dir in "./src"/*/; do
-            dotnet dnx ${{ github.repository_owner }}.nuget.promote -- source Altemiq.$(basename "$dir") --version ${{ inputs.version }}
+          packages=("Altemiq.IO.Las" \
+            "Altemiq.IO.Las.Compression" \
+            "Altemiq.IO.Las.Geodesy" \
+            "Altemiq.IO.Las.Indexing" \
+            "Altemiq.IO.Las.Tiling" \
+            "Altemiq.IO.Las.Http" \
+            "Altemiq.IO.Las.S3" \
+            "Altemiq.IO.Las.Azure" \
+            "Altemiq.IO.Las.Cloud" \
+            "Altemiq.IO.Las.Arrow" \
+            "Altemiq.IO.Las.Arrow.Compression" \
+            "Altemiq.IO.Las.DataFrame" \
+            "Altemiq.IO.Las.DataFrame.Compression")
+
+          for package in "${packages[@]}"; do
+            dotnet dnx ${{ github.repository_owner }}.nuget.promote -- source $package --source https://api.nuget.org/v3/index.json --api-key ${{ steps.login.outputs.NUGET_API_KEY }} --version ${{ inputs.version }}
           done
 
   promote-docker:
     runs-on: ubuntu-latest
+    permissions:
+      packages: write
 
     steps:
       - name: promote docker container
@@ -61,6 +84,7 @@ jobs:
 
   create-release:
     runs-on: ubuntu-latest
+    needs: [promote-nuget, promote-docker]
 
     steps:
       - uses: actions/checkout@v6
