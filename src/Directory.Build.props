@@ -23,6 +23,8 @@
     <IsTrimmable Condition=" '$(IsTrimmable)' == '' AND $([MSBuild]::IsTargetFrameworkCompatible('$(TargetFramework)', 'net6.0'))">true</IsTrimmable>
     <IsAotCompatible Condition=" '$(IsAotCompatible)' == '' AND $([MSBuild]::IsTargetFrameworkCompatible('$(TargetFramework)', 'net7.0'))">true</IsAotCompatible>
     <VerifyReferenceAotCompatibility Condition=" '$(VerifyReferenceAotCompatibility)' == '' AND '$(IsAotCompatible)' == 'true' ">true</VerifyReferenceAotCompatibility>
+
+    <MeziantouPolyfill_GenerateDebugFile Condition=" '$(Configuration)' == 'Debug' ">true</MeziantouPolyfill_GenerateDebugFile>
   </PropertyGroup>
   
   <PropertyGroup Label="Packaging">
