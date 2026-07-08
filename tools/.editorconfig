@@ -1,0 +1,4 @@
+[*.cs]
+
+# this adds an empty default switch, that gets removed by RCS1070
+dotnet_diagnostic.IDE0010.severity = none

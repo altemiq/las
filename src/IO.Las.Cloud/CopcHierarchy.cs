@@ -190,6 +190,7 @@ public sealed record CopcHierarchy : ExtendedVariableLengthRecord
         /// </summary>
         public int PointCount { get; }
 
+#pragma warning disable MA0136
         /// <summary>
         /// Converts the value of this instance to its equivalent string representation.
         /// </summary>
@@ -203,6 +204,7 @@ public sealed record CopcHierarchy : ExtendedVariableLengthRecord
               {{nameof(this.PointCount)}}: {{this.PointCount}}
             }
             """;
+#pragma warning restore MA0136
 
         /// <summary>
         /// Copies the contents of this instance into a destination <see cref="Span{T}"/>.
@@ -297,6 +299,7 @@ public sealed record CopcHierarchy : ExtendedVariableLengthRecord
         /// <inheritdoc/>
         public override int GetHashCode() => HashCode.Combine(this.Level, this.X, this.Y, this.Z);
 
+#pragma warning disable MA0136
         /// <summary>
         /// Converts the value of this instance to its equivalent string representation.
         /// </summary>
@@ -310,6 +313,7 @@ public sealed record CopcHierarchy : ExtendedVariableLengthRecord
               {{nameof(this.Z)}}: {{this.Z}}
             }
             """;
+#pragma warning restore MA0136
 
         /// <summary>
         /// Copies this instance into the destination.

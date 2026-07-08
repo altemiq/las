@@ -17,7 +17,7 @@ public class ModelSourceGeneratorTests
         var sourceGenerator = generator.AsSourceGenerator();
 
         // trackIncrementalGeneratorSteps allows to report info about each step of the generator
-        GeneratorDriver driver = Microsoft.CodeAnalysis.CSharp.CSharpGeneratorDriver.Create(
+        var driver = Microsoft.CodeAnalysis.CSharp.CSharpGeneratorDriver.Create(
             generators: [sourceGenerator],
             driverOptions: new(default, trackIncrementalGeneratorSteps: true))
             .AddAdditionalTexts([ResourceAdditionalText.Create("models.csv")]);
@@ -26,7 +26,7 @@ public class ModelSourceGeneratorTests
         driver = driver.RunGenerators(compilation);
 
         // Ensure we generated something
-        await Assert.That(driver.GetRunResult().Results.Single().GeneratedSources).IsNotEmpty();
+        _ = await Assert.That(driver.GetRunResult().Results.Single().GeneratedSources).IsNotEmpty();
 
         // Update the compilation and rerun the generator
         compilation = compilation.AddSyntaxTrees(Microsoft.CodeAnalysis.CSharp.CSharpSyntaxTree.ParseText("// dummy"));
@@ -36,8 +36,8 @@ public class ModelSourceGeneratorTests
         var result = driver.GetRunResult().Results.Single();
         var allOutputs = result
             .TrackedOutputSteps
-            .SelectMany(outputStep => outputStep.Value)
-            .SelectMany(output => output.Outputs);
-        await Assert.That(allOutputs).All(output => output.Reason is IncrementalStepRunReason.Cached);
+            .SelectMany(static outputStep => outputStep.Value)
+            .SelectMany(static output => output.Outputs);
+        _ = await Assert.That(allOutputs).All(static output => output.Reason is IncrementalStepRunReason.Cached);
     }
 }

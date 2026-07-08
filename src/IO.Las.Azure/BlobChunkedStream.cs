@@ -9,6 +9,9 @@ namespace Altemiq.IO.Las.Azure;
 /// <summary>
 /// An optimized <see cref="global::Azure.Storage.Blobs"/> <see cref="Stream"/> for <see cref="Las"/> files.
 /// </summary>
+/// <param name="client">The <see cref="global::Azure"/> client.</param>
+/// <param name="length">The length of the stream.</param>
+/// <param name="minimumCacheSize">The minimim cache size.</param>
 public class BlobChunkedStream(global::Azure.Storage.Blobs.Specialized.BlobBaseClient client, long length, int minimumCacheSize = ushort.MaxValue) : ChunkedStream(length)
 {
     /// <inheritdoc/>

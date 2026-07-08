@@ -11,14 +11,14 @@ public class PointDataRecordQuantizerTests
     [MethodDataSource(nameof(GetToDoubleXY))]
     public async Task ConvertToDoubleXY(int inputX, int inputY, double expectedX, double expectedY)
     {
-        await Assert.That(this.quantizer.Get(inputX, inputY)).IsEqualTo(new(expectedX, expectedY));
+        _ = await Assert.That(quantizer.Get(inputX, inputY)).IsEqualTo(new(expectedX, expectedY));
     }
 
     [Test]
     [MethodDataSource(nameof(GetToIntXY))]
     public async Task ConvertToIntXY(double inputX, double inputY, int expectedX, int expectedY)
     {
-        await Assert.That(this.quantizer.Get(inputX, inputY))
+        _ = await Assert.That(quantizer.Get(inputX, inputY))
             .Member(p => p.X, x => x.IsEqualTo(expectedX)).And
             .Member(p => p.Y, y => y.IsEqualTo(expectedY));
     }
@@ -26,13 +26,13 @@ public class PointDataRecordQuantizerTests
     [Test]
     public async Task ConvertToDoubleXYZ()
     {
-        await Assert.That(this.quantizer.Get(321, 123, 456)).IsEqualTo(new(126.21, 457.23, 793.56));
+        _ = await Assert.That(quantizer.Get(321, 123, 456)).IsEqualTo(new(126.21, 457.23, 793.56));
     }
 
     [Test]
     public async Task ConvertToIntXYZ()
     {
-        await Assert.That(this.quantizer.Get(126.21, 457.23, 793.56))
+        _ = await Assert.That(quantizer.Get(126.21, 457.23, 793.56))
             .Member(static p => p.X, static x => x.IsEqualTo(321)).And
             .Member(static p => p.Y, static y => y.IsEqualTo(123)).And
             .Member(static p => p.Z, static z => z.IsEqualTo(456));
@@ -47,16 +47,16 @@ public class PointDataRecordQuantizerTests
         int[] z = [456, 456, 789, 1000, 0, -1000, 50, 10];
         var results = new Vector3D[x.Length];
 
-        this.quantizer.Quantize(x, y, z, results);
+        quantizer.Quantize(x, y, z, results);
 
-        await Assert.That(results[0]).IsEqualTo(new(126.21, 457.23, 793.56));
-        await Assert.That(results[1]).IsEqualTo(new(119.79, 457.23, 793.56));
-        await Assert.That(results[2]).IsEqualTo(new(123.00, 460.56, 796.89));
-        await Assert.That(results[3]).IsEqualTo(new(124.00, 456.00, 799.00));
-        await Assert.That(results[4]).IsEqualTo(new(125.00, 457.00, 789.00));
-        await Assert.That(results[5]).IsEqualTo(new(121.00, 455.00, 779.00));
-        await Assert.That(results[6]).IsEqualTo(new(123.50, 456.50, 789.50));
-        await Assert.That(results[7]).IsEqualTo(new(123.10, 456.10, 789.10));
+        _ = await Assert.That(results[0]).IsEqualTo(new(126.21, 457.23, 793.56));
+        _ = await Assert.That(results[1]).IsEqualTo(new(119.79, 457.23, 793.56));
+        _ = await Assert.That(results[2]).IsEqualTo(new(123.00, 460.56, 796.89));
+        _ = await Assert.That(results[3]).IsEqualTo(new(124.00, 456.00, 799.00));
+        _ = await Assert.That(results[4]).IsEqualTo(new(125.00, 457.00, 789.00));
+        _ = await Assert.That(results[5]).IsEqualTo(new(121.00, 455.00, 779.00));
+        _ = await Assert.That(results[6]).IsEqualTo(new(123.50, 456.50, 789.50));
+        _ = await Assert.That(results[7]).IsEqualTo(new(123.10, 456.10, 789.10));
     }
 
     [Test]
@@ -67,17 +67,17 @@ public class PointDataRecordQuantizerTests
         int[] z = [456, 456, 789, 1000, 0, -1000, 50, 10, 456];
         var results = new System.Numerics.Vector3[x.Length];
 
-        this.quantizer.Quantize(x, y, z, results);
+        quantizer.Quantize(x, y, z, results);
 
-        await Assert.That(results[0]).IsEqualTo(new(126.21F, 457.23F, 793.56F));
-        await Assert.That(results[1]).IsEqualTo(new(119.79F, 457.23F, 793.56F));
-        await Assert.That(results[2]).IsEqualTo(new(123.00F, 460.56F, 796.89F));
-        await Assert.That(results[3]).IsEqualTo(new(124.00F, 456.00F, 799.00F));
-        await Assert.That(results[4]).IsEqualTo(new(125.00F, 457.00F, 789.00F));
-        await Assert.That(results[5]).IsEqualTo(new(121.00F, 455.00F, 779.00F));
-        await Assert.That(results[6]).IsEqualTo(new(123.50F, 456.50F, 789.50F));
-        await Assert.That(results[7]).IsEqualTo(new(123.10F, 456.10F, 789.10F));
-        await Assert.That(results[8]).IsEqualTo(new(126.21F, 457.23F, 793.56F));
+        _ = await Assert.That(results[0]).IsEqualTo(new(126.21F, 457.23F, 793.56F));
+        _ = await Assert.That(results[1]).IsEqualTo(new(119.79F, 457.23F, 793.56F));
+        _ = await Assert.That(results[2]).IsEqualTo(new(123.00F, 460.56F, 796.89F));
+        _ = await Assert.That(results[3]).IsEqualTo(new(124.00F, 456.00F, 799.00F));
+        _ = await Assert.That(results[4]).IsEqualTo(new(125.00F, 457.00F, 789.00F));
+        _ = await Assert.That(results[5]).IsEqualTo(new(121.00F, 455.00F, 779.00F));
+        _ = await Assert.That(results[6]).IsEqualTo(new(123.50F, 456.50F, 789.50F));
+        _ = await Assert.That(results[7]).IsEqualTo(new(123.10F, 456.10F, 789.10F));
+        _ = await Assert.That(results[8]).IsEqualTo(new(126.21F, 457.23F, 793.56F));
     }
 
     [Test]
@@ -87,13 +87,13 @@ public class PointDataRecordQuantizerTests
         int[] y = [123, 123, 456, 0, 100];
         var results = new Vector2D[x.Length];
 
-        this.quantizer.Quantize(x, y, results);
+        quantizer.Quantize(x, y, results);
 
-        await Assert.That(results[0]).IsEqualTo(new(126.21, 457.23));
-        await Assert.That(results[1]).IsEqualTo(new(119.79, 457.23));
-        await Assert.That(results[2]).IsEqualTo(new(123.00, 460.56));
-        await Assert.That(results[3]).IsEqualTo(new(124.00, 456.00));
-        await Assert.That(results[4]).IsEqualTo(new(125.00, 457.00));
+        _ = await Assert.That(results[0]).IsEqualTo(new(126.21, 457.23));
+        _ = await Assert.That(results[1]).IsEqualTo(new(119.79, 457.23));
+        _ = await Assert.That(results[2]).IsEqualTo(new(123.00, 460.56));
+        _ = await Assert.That(results[3]).IsEqualTo(new(124.00, 456.00));
+        _ = await Assert.That(results[4]).IsEqualTo(new(125.00, 457.00));
     }
 
     [Test]
@@ -103,17 +103,17 @@ public class PointDataRecordQuantizerTests
         int[] y = [123, 123, 456, 0, 100, 123, 123, 456, 0];
         var results = new System.Numerics.Vector2[x.Length];
 
-        this.quantizer.Quantize(x, y, results);
+        quantizer.Quantize(x, y, results);
 
-        await Assert.That(results[0]).IsEqualTo(new(126.21F, 457.23F));
-        await Assert.That(results[1]).IsEqualTo(new(119.79F, 457.23F));
-        await Assert.That(results[2]).IsEqualTo(new(123.00F, 460.56F));
-        await Assert.That(results[3]).IsEqualTo(new(124.00F, 456.00F));
-        await Assert.That(results[4]).IsEqualTo(new(125.00F, 457.00F));
-        await Assert.That(results[5]).IsEqualTo(new(126.21F, 457.23F));
-        await Assert.That(results[6]).IsEqualTo(new(119.79F, 457.23F));
-        await Assert.That(results[7]).IsEqualTo(new(123.00F, 460.56F));
-        await Assert.That(results[8]).IsEqualTo(new(124.00F, 456.00F));
+        _ = await Assert.That(results[0]).IsEqualTo(new(126.21F, 457.23F));
+        _ = await Assert.That(results[1]).IsEqualTo(new(119.79F, 457.23F));
+        _ = await Assert.That(results[2]).IsEqualTo(new(123.00F, 460.56F));
+        _ = await Assert.That(results[3]).IsEqualTo(new(124.00F, 456.00F));
+        _ = await Assert.That(results[4]).IsEqualTo(new(125.00F, 457.00F));
+        _ = await Assert.That(results[5]).IsEqualTo(new(126.21F, 457.23F));
+        _ = await Assert.That(results[6]).IsEqualTo(new(119.79F, 457.23F));
+        _ = await Assert.That(results[7]).IsEqualTo(new(123.00F, 460.56F));
+        _ = await Assert.That(results[8]).IsEqualTo(new(124.00F, 456.00F));
     }
 
     [Test]
@@ -124,9 +124,9 @@ public class PointDataRecordQuantizerTests
         int[] z = [];
         Vector3D[] results = [];
 
-        this.quantizer.Quantize(x, y, z, results);
+        quantizer.Quantize(x, y, z, results);
 
-        await Assert.That(results.Length).IsEqualTo(0);
+        _ = await Assert.That(results.Length).IsEqualTo(0);
     }
 
     [Test]
@@ -137,23 +137,23 @@ public class PointDataRecordQuantizerTests
         int[] z = [];
         System.Numerics.Vector3[] results = [];
 
-        this.quantizer.Quantize(x, y, z, results);
+        quantizer.Quantize(x, y, z, results);
 
-        await Assert.That(results.Length).IsEqualTo(0);
+        _ = await Assert.That(results.Length).IsEqualTo(0);
     }
 #endif
 
     public IEnumerable<Func<(int, int, double, double)>> GetToDoubleXY()
     {
-        yield return () => (321, 123, 126.21, 457.23);
-        yield return () => (-321, 123, 119.79, 457.23);
+        yield return static () => (321, 123, 126.21, 457.23);
+        yield return static () => (-321, 123, 119.79, 457.23);
     }
 
     public IEnumerable<Func<(double, double, int, int)>> GetToIntXY()
     {
-        yield return () => (126.21, 457.23, 321, 123);
-        yield return () => (126.2199, 457.23, 322, 123);
-        yield return () => (119.79, 457.23, -321, 123);
-        yield return () => (119.7999, 457.23, -320, 123);
+        yield return static () => (126.21, 457.23, 321, 123);
+        yield return static () => (126.2199, 457.23, 322, 123);
+        yield return static () => (119.79, 457.23, -321, 123);
+        yield return static () => (119.7999, 457.23, -320, 123);
     }
 }

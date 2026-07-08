@@ -22,21 +22,21 @@ public class ExtendedVariableLengthRecordHeaderTests
     [LittleEndianOnly]
     public async Task FromMemory()
     {
-        await Assert.That(Marshal.PtrToStructure<ExtendedVariableLengthRecordHeader>(Marshal.UnsafeAddrOfPinnedArrayElement(Bytes, 0)))
+        _ = await Assert.That(Marshal.PtrToStructure<ExtendedVariableLengthRecordHeader>(Marshal.UnsafeAddrOfPinnedArrayElement(Bytes, 0)))
             .IsNotDefault()
-            .And.Member(h => h.UserId, userId => userId.IsEqualTo("copc"))
-            .And.Member(h => h.RecordId, recordId => recordId.IsEqualTo((ushort)1000))
-            .And.Member(h => h.Description, description => description.IsEqualTo("EPT Hierarchy"));
+            .And.Member(static h => h.UserId, static userId => userId.IsEqualTo("copc"))
+            .And.Member(static h => h.RecordId, static recordId => recordId.IsEqualTo((ushort)1000))
+            .And.Member(static h => h.Description, static description => description.IsEqualTo("EPT Hierarchy"));
     }
 
     [Test]
     public async Task FromBytes()
     {
-        await Assert.That(new ExtendedVariableLengthRecordHeader(Bytes))
+        _ = await Assert.That(new ExtendedVariableLengthRecordHeader(Bytes))
             .IsNotDefault()
-            .And.Member(h => h.UserId, userId => userId.IsEqualTo("copc"))
-            .And.Member(h => h.RecordId, recordId => recordId.IsEqualTo((ushort)1000))
-            .And.Member(h => h.Description, description => description.IsEqualTo("EPT Hierarchy"));
+            .And.Member(static h => h.UserId, static userId => userId.IsEqualTo("copc"))
+            .And.Member(static h => h.RecordId, static recordId => recordId.IsEqualTo((ushort)1000))
+            .And.Member(static h => h.Description, static description => description.IsEqualTo("EPT Hierarchy"));
     }
 
     [Test]
@@ -46,7 +46,7 @@ public class ExtendedVariableLengthRecordHeaderTests
         var destination = new byte[Bytes.Length];
         Marshal.StructureToPtr(Header, Marshal.UnsafeAddrOfPinnedArrayElement(destination, 0), fDeleteOld: false);
         Array.Copy(Bytes, destination, 2);
-        await Assert.That(destination).IsEquivalentTo(Bytes);
+        _ = await Assert.That(destination).IsEquivalentTo(Bytes);
     }
 
     [Test]
@@ -55,7 +55,7 @@ public class ExtendedVariableLengthRecordHeaderTests
         var destination = new byte[Bytes.Length];
         Header.WriteLittleEndian(destination);
         Array.Copy(Bytes, destination, 2);
-        await Assert.That(destination).IsEquivalentTo(Bytes);
+        _ = await Assert.That(destination).IsEquivalentTo(Bytes);
     }
 
     [Test]
@@ -63,6 +63,6 @@ public class ExtendedVariableLengthRecordHeaderTests
     {
         var destination = new byte[Bytes.Length];
         Header.CopyTo(destination);
-        await Assert.That(destination).IsEquivalentTo(Bytes);
+        _ = await Assert.That(destination).IsEquivalentTo(Bytes);
     }
 }

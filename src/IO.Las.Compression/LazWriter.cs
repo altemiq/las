@@ -164,6 +164,7 @@ public sealed class LazWriter : LasWriter
     /// <param name="count">The number of points.</param>
     /// <exception cref="InvalidOperationException">The writer is already writing a chunk.</exception>
     /// <exception cref="ArgumentException"><paramref name="points"/> contains less than <paramref name="count"/> points.</exception>
+    /// <exception cref="System.Diagnostics.UnreachableException">A point data record is <see langword="null"/>.</exception>
     public void Write(IEnumerable<LasPointMemory> points, int count)
     {
 #if LAS1_4_OR_GREATER
@@ -195,6 +196,7 @@ public sealed class LazWriter : LasWriter
     /// </summary>
     /// <param name="points">The points.</param>
     /// <exception cref="InvalidOperationException">The writer is already writing a chunk.</exception>
+    /// <exception cref="System.Diagnostics.UnreachableException">A point data record is <see langword="null"/>.</exception>
     public void Write(IEnumerable<LasPointMemory> points)
     {
 #if LAS1_4_OR_GREATER
@@ -290,6 +292,7 @@ public sealed class LazWriter : LasWriter
     /// <returns>The asynchronous task.</returns>
     /// <exception cref="InvalidOperationException">The writer is already writing a chunk.</exception>
     /// <exception cref="ArgumentException"><paramref name="points"/> contains less than <paramref name="count"/> points.</exception>
+    /// <exception cref="System.Diagnostics.UnreachableException">A point data record is <see langword="null"/>.</exception>
     public async ValueTask WriteAsync(IEnumerable<LasPointMemory> points, int count, CancellationToken cancellationToken = default)
     {
 #if LAS1_4_OR_GREATER
@@ -325,6 +328,7 @@ public sealed class LazWriter : LasWriter
     /// <param name="cancellationToken">The cancellation token.</param>
     /// <returns>The asynchronous task.</returns>
     /// <exception cref="InvalidOperationException">The writer is already writing a chunk.</exception>
+    /// <exception cref="System.Diagnostics.UnreachableException">A point data record is <see langword="null"/>.</exception>
     public async ValueTask WriteAsync(IEnumerable<LasPointMemory> points, CancellationToken cancellationToken = default)
     {
 #if LAS1_4_OR_GREATER
@@ -363,6 +367,7 @@ public sealed class LazWriter : LasWriter
     /// <returns>The asynchronous task.</returns>
     /// <exception cref="InvalidOperationException">The writer is already writing a chunk.</exception>
     /// <exception cref="ArgumentException"><paramref name="points"/> contains less than <paramref name="count"/> points.</exception>
+    /// <exception cref="System.Diagnostics.UnreachableException">A point data record is <see langword="null"/>.</exception>
     public async ValueTask WriteAsync(IAsyncEnumerable<LasPointMemory> points, int count, CancellationToken cancellationToken = default)
     {
 #if LAS1_4_OR_GREATER

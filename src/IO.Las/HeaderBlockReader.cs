@@ -261,30 +261,22 @@ public class HeaderBlockReader(Stream stream)
     /// Gets the variable length record.
     /// </summary>
     /// <returns>The next <see cref="VariableLengthRecord"/>.</returns>
-    public VariableLengthRecord GetVariableLengthRecord()
-    {
-        if (this.IsInVariableLengthRecords() || this.MoveToVariableLengthRecords())
-        {
-            return GetVariableLengthRecord(stream);
-        }
-
-        throw new InvalidDataException("Failed to move to variable length records");
-    }
+    /// <exception cref="InvalidDataException">Failed to move to variable length records.</exception>
+    public VariableLengthRecord GetVariableLengthRecord() =>
+        this.IsInVariableLengthRecords() || this.MoveToVariableLengthRecords()
+            ? GetVariableLengthRecord(stream)
+            : throw new InvalidDataException("Failed to move to variable length records");
 
     /// <summary>
     /// Gets the variable length record asynchronously.
     /// </summary>
     /// <param name="cancellationToken">The token to monitor for cancellation requests. The default value is <see cref="CancellationToken.None"/>.</param>
     /// <returns>The next <see cref="VariableLengthRecord"/>.</returns>
-    public async Task<VariableLengthRecord> GetVariableLengthRecordAsync(CancellationToken cancellationToken = default)
-    {
-        if (this.IsInVariableLengthRecords() || await this.MoveToVariableLengthRecordsAsync(cancellationToken).ConfigureAwait(false))
-        {
-            return await GetVariableLengthRecordAsync(stream, cancellationToken).ConfigureAwait(false);
-        }
-
-        throw new InvalidDataException("Failed to move to variable length records");
-    }
+    /// <exception cref="InvalidDataException">Failed to move to variable length records.</exception>
+    public async Task<VariableLengthRecord> GetVariableLengthRecordAsync(CancellationToken cancellationToken = default) =>
+        this.IsInVariableLengthRecords() || await this.MoveToVariableLengthRecordsAsync(cancellationToken).ConfigureAwait(false)
+            ? await GetVariableLengthRecordAsync(stream, cancellationToken).ConfigureAwait(false)
+            : throw new InvalidDataException("Failed to move to variable length records");
 
 #if LAS1_4_OR_GREATER
     /// <summary>
@@ -463,6 +455,7 @@ public class HeaderBlockReader(Stream stream)
     /// <param name="records">The variable length records.</param>
     /// <param name="extendedVariableLengthRecordPosition">The start of the first extended variable length record.</param>
     /// <returns>The next <see cref="ExtendedVariableLengthRecord"/>.</returns>
+    /// <exception cref="InvalidDataException">Failed to move to extended variable length records.</exception>
     internal ExtendedVariableLengthRecord GetExtendedVariableLengthRecord(IEnumerable<VariableLengthRecord> records, long extendedVariableLengthRecordPosition) =>
         this.IsInExtendedVariableLengthRecords(extendedVariableLengthRecordPosition) || this.MoveToExtendedVariableLengthRecords(extendedVariableLengthRecordPosition)
             ? GetExtendedVariableLengthRecord(stream, records)
@@ -475,6 +468,7 @@ public class HeaderBlockReader(Stream stream)
     /// <param name="extendedVariableLengthRecordPosition">The start of the first extended variable length record.</param>
     /// <param name="cancellationToken">The token to monitor for cancellation requests. The default value is <see cref="CancellationToken.None"/>.</param>
     /// <returns>The next <see cref="ExtendedVariableLengthRecord"/>.</returns>
+    /// <exception cref="InvalidDataException">Failed to move to extended variable length records.</exception>
     internal async Task<ExtendedVariableLengthRecord> GetExtendedVariableLengthRecordAsync(IEnumerable<VariableLengthRecord> records, long extendedVariableLengthRecordPosition, CancellationToken cancellationToken = default) =>
         this.IsInExtendedVariableLengthRecords(extendedVariableLengthRecordPosition) || await this.MoveToExtendedVariableLengthRecordsAsync(extendedVariableLengthRecordPosition, cancellationToken).ConfigureAwait(false)
             ? await GetExtendedVariableLengthRecordAsync(stream, records, cancellationToken).ConfigureAwait(false)

@@ -36,6 +36,7 @@ internal static class MinMax
     /// </summary>
     /// <param name="type">The type.</param>
     /// <returns>The new instance.</returns>
+    /// <exception cref="ArgumentOutOfRangeException"><paramref name="type"/> is not valid.</exception>
     public static IMinMax Create(Type type) => type switch
     {
         { } t when t == typeof(int) => new GenericMinMax<int>(),

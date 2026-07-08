@@ -75,44 +75,44 @@ public class ExtendedGpsWaveformPointTests
     {
         var destination = new byte[Bytes.Length];
         _ = Point.WriteLittleEndian(destination);
-        await Assert.That(destination).IsEquivalentTo(Bytes);
+        _ = await Assert.That(destination).IsEquivalentTo(Bytes);
     }
 
     [Test]
     public async Task CopyTo()
     {
         var destination = new byte[Bytes.Length];
-        Point.CopyTo(destination);
-        await Assert.That(destination).IsEquivalentTo(Bytes);
+        _ = Point.CopyTo(destination);
+        _ = await Assert.That(destination).IsEquivalentTo(Bytes);
     }
 
     private static async Task CheckPoint(ExtendedGpsWaveformPointDataRecord record)
     {
-        await Assert.That(record)
-            .Member(p => p.X, x => x.IsEqualTo(5977566))
-            .And.Member(p => p.Y, y => y.IsEqualTo(957396))
-            .And.Member(p => p.Z, z => z.IsEqualTo(-513145))
-            .And.Member(p => p.Intensity, intensity => intensity.IsEqualTo((ushort)36022))
-            .And.Member(p => p.ReturnNumber, returnNumber => returnNumber.IsEqualTo((byte)1))
-            .And.Member(p => p.NumberOfReturns, numberOfReturns => numberOfReturns.IsEqualTo((byte)2))
-            .And.Member(p => p.Synthetic, synthetic => synthetic.IsFalse())
-            .And.Member(p => p.KeyPoint, keyPoint => keyPoint.IsFalse())
-            .And.Member(p => p.Withheld, withheld => withheld.IsFalse())
-            .And.Member(p => p.Overlap, overlap => overlap.IsFalse())
-            .And.Member(p => p.ScannerChannel, scannerChannel => scannerChannel.IsDefault())
-            .And.Member(p => p.ScanDirectionFlag, scanDirectionFlag => scanDirectionFlag.IsFalse())
-            .And.Member(p => p.EdgeOfFlightLine, edgeOfFlightLine => edgeOfFlightLine.IsFalse())
-            .And.Member(p => p.Classification, classification => classification.IsEqualTo(ExtendedClassification.MediumVegetation))
-            .And.Member(p => p.UserData, userData => userData.IsDefault())
-            .And.Member(p => p.ScanAngle, scanAngle => scanAngle.IsEqualTo((short)30834))
-            .And.Member(p => p.PointSourceId, pointSourceId => pointSourceId.IsDefault())
-            .And.Member(p => Quantizer.GetDateTime(p.GpsTime), gpsTime => gpsTime.IsAfter(new(2017, 1, 1)).And.IsBefore(new(2017, 12, 31)))
-            .And.Member(p => p.WavePacketDescriptorIndex, wavePacketDescriptorIndex => wavePacketDescriptorIndex.IsEqualTo((byte)1))
-            .And.Member(p => p.ByteOffsetToWaveformData, byteOffsetToWaveformData => byteOffsetToWaveformData.IsEqualTo(210883772UL))
-            .And.Member(p => p.WaveformPacketSizeInBytes, waveformPacketSizeInBytes => waveformPacketSizeInBytes.IsEqualTo(64U))
-            .And.Member(p => p.ReturnPointWaveformLocation, returnPointWaveformLocation => returnPointWaveformLocation.IsEqualTo(15969F))
-            .And.Member(p => p.ParametricDx, parametricDx => parametricDx.IsEqualTo(-0.0000025741017F))
-            .And.Member(p => p.ParametricDy, parametricDy => parametricDy.IsEqualTo(0.00000259652484F))
-            .And.Member(p => p.ParametricDz, parametricDz => parametricDz.IsEqualTo(0.000149812418F));
+        _ = await Assert.That(record)
+            .Member(static p => p.X, static x => x.IsEqualTo(5977566))
+            .And.Member(static p => p.Y, static y => y.IsEqualTo(957396))
+            .And.Member(static p => p.Z, static z => z.IsEqualTo(-513145))
+            .And.Member(static p => p.Intensity, static intensity => intensity.IsEqualTo((ushort)36022))
+            .And.Member(static p => p.ReturnNumber, static returnNumber => returnNumber.IsEqualTo((byte)1))
+            .And.Member(static p => p.NumberOfReturns, static numberOfReturns => numberOfReturns.IsEqualTo((byte)2))
+            .And.Member(static p => p.Synthetic, static synthetic => synthetic.IsFalse())
+            .And.Member(static p => p.KeyPoint, static keyPoint => keyPoint.IsFalse())
+            .And.Member(static p => p.Withheld, static withheld => withheld.IsFalse())
+            .And.Member(static p => p.Overlap, static overlap => overlap.IsFalse())
+            .And.Member(static p => p.ScannerChannel, static scannerChannel => scannerChannel.IsDefault())
+            .And.Member(static p => p.ScanDirectionFlag, static scanDirectionFlag => scanDirectionFlag.IsFalse())
+            .And.Member(static p => p.EdgeOfFlightLine, static edgeOfFlightLine => edgeOfFlightLine.IsFalse())
+            .And.Member(static p => p.Classification, static classification => classification.IsEqualTo(ExtendedClassification.MediumVegetation))
+            .And.Member(static p => p.UserData, static userData => userData.IsDefault())
+            .And.Member(static p => p.ScanAngle, static scanAngle => scanAngle.IsEqualTo((short)30834))
+            .And.Member(static p => p.PointSourceId, static pointSourceId => pointSourceId.IsDefault())
+            .And.Member(static p => Quantizer.GetDateTime(p.GpsTime), static gpsTime => gpsTime.IsAfter(new(2017, 1, 1)).And.IsBefore(new(2017, 12, 31)))
+            .And.Member(static p => p.WavePacketDescriptorIndex, static wavePacketDescriptorIndex => wavePacketDescriptorIndex.IsEqualTo((byte)1))
+            .And.Member(static p => p.ByteOffsetToWaveformData, static byteOffsetToWaveformData => byteOffsetToWaveformData.IsEqualTo(210883772UL))
+            .And.Member(static p => p.WaveformPacketSizeInBytes, static waveformPacketSizeInBytes => waveformPacketSizeInBytes.IsEqualTo(64U))
+            .And.Member(static p => p.ReturnPointWaveformLocation, static returnPointWaveformLocation => returnPointWaveformLocation.IsEqualTo(15969F))
+            .And.Member(static p => p.ParametricDx, static parametricDx => parametricDx.IsEqualTo(-0.0000025741017F))
+            .And.Member(static p => p.ParametricDy, static parametricDy => parametricDy.IsEqualTo(0.00000259652484F))
+            .And.Member(static p => p.ParametricDz, static parametricDz => parametricDz.IsEqualTo(0.000149812418F));
     }
 }

@@ -33,22 +33,59 @@ public class HeaderBlockValidator
         {
             // invalid version
             case { Version: { Major: not 1, Minor: < 1 or > HeaderBlock.MaxMinorVersion } }:
-                throw new InvalidOperationException(string.Format(this.Culture, Properties.Resources.ResourceManager.GetString(nameof(Properties.Resources.InvalidVersion), this.Culture)!, header.Version, new Version(1, 1), new Version(1, HeaderBlock.MaxMinorVersion)));
+                throw new InvalidOperationException(
+                    string.Format(
+                        this.Culture,
+#if NETCOREAPP3_0_OR_GREATER
+                        Properties.Resources.ResourceManager.GetString(nameof(Properties.Resources.InvalidVersion), this.Culture)!,
+#else
+                        Properties.Resources.ResourceManager.GetString(nameof(Properties.Resources.InvalidVersion), this.Culture),
+#endif
+                        header.Version,
+                        new Version(1, 1),
+                        new Version(1, HeaderBlock.MaxMinorVersion)));
 
             // invalid point format ID
             case { PointDataFormatId: > GpsPointDataRecord.Id, Version: { Major: 1, Minor: <= 1 } }:
-                throw new InvalidOperationException(string.Format(this.Culture, Properties.Resources.ResourceManager.GetString(nameof(Properties.Resources.InvalidPointFormatId), this.Culture)!, header.PointDataFormatId, header.Version));
+                throw new InvalidOperationException(
+                    string.Format(
+                        this.Culture,
+#if NETCOREAPP3_0_OR_GREATER
+                        Properties.Resources.ResourceManager.GetString(nameof(Properties.Resources.InvalidPointFormatId), this.Culture)!,
+#else
+                        Properties.Resources.ResourceManager.GetString(nameof(Properties.Resources.InvalidPointFormatId), this.Culture),
+#endif
+                        header.PointDataFormatId,
+                        header.Version));
 
 #if LAS1_2_OR_GREATER
             // invalid point format ID
             case { PointDataFormatId: > GpsColorPointDataRecord.Id, Version: { Major: 1, Minor: <= 2 } }:
-                throw new InvalidOperationException(string.Format(this.Culture, Properties.Resources.ResourceManager.GetString(nameof(Properties.Resources.InvalidPointFormatId), this.Culture)!, header.PointDataFormatId, header.Version));
+                throw new InvalidOperationException(
+                    string.Format(
+                        this.Culture,
+#if NETCOREAPP3_0_OR_GREATER
+                        Properties.Resources.ResourceManager.GetString(nameof(Properties.Resources.InvalidPointFormatId), this.Culture)!,
+#else
+                        Properties.Resources.ResourceManager.GetString(nameof(Properties.Resources.InvalidPointFormatId), this.Culture),
+#endif
+                        header.PointDataFormatId,
+                        header.Version));
 #endif
 
 #if LAS1_3_OR_GREATER
             // invalid point format ID
             case { PointDataFormatId: > GpsColorWaveformPointDataRecord.Id, Version: { Major: 1, Minor: <= 3 } }:
-                throw new InvalidOperationException(string.Format(this.Culture, Properties.Resources.ResourceManager.GetString(nameof(Properties.Resources.InvalidPointFormatId), this.Culture)!, header.PointDataFormatId, header.Version));
+                throw new InvalidOperationException(
+                    string.Format(
+                        this.Culture,
+#if NETCOREAPP3_0_OR_GREATER
+                        Properties.Resources.ResourceManager.GetString(nameof(Properties.Resources.InvalidPointFormatId), this.Culture)!,
+#else
+                        Properties.Resources.ResourceManager.GetString(nameof(Properties.Resources.InvalidPointFormatId), this.Culture),
+#endif
+                        header.PointDataFormatId,
+                        header.Version));
 #endif
 
 #if LAS1_4_OR_GREATER
@@ -60,7 +97,16 @@ public class HeaderBlockValidator
 #if LAS1_5_OR_GREATER
             // invalid point format ID
             case { PointDataFormatId: > ExtendedGpsColorNearInfraredWaveformPointDataRecord.Id, Version: { Major: 1, Minor: <= 5 } }:
-                throw new InvalidOperationException(string.Format(this.Culture, Properties.Resources.ResourceManager.GetString(nameof(Properties.Resources.InvalidPointFormatId), this.Culture)!, header.PointDataFormatId, header.Version));
+                throw new InvalidOperationException(
+                    string.Format(
+                        this.Culture,
+#if NETCOREAPP3_0_OR_GREATER
+                        Properties.Resources.ResourceManager.GetString(nameof(Properties.Resources.InvalidPointFormatId), this.Culture)!,
+#else
+                        Properties.Resources.ResourceManager.GetString(nameof(Properties.Resources.InvalidPointFormatId), this.Culture),
+#endif
+                        header.PointDataFormatId,
+                        header.Version));
             case { PointDataFormatId: < ExtendedGpsPointDataRecord.Id, Version: { Major: 1, Minor: >= 5 } }:
                 throw new InvalidOperationException(Properties.v1_5.Resources.ResourceManager.GetString(nameof(Properties.v1_5.Resources.PointFormatIdHasBeenDeprecated), this.Culture));
 #endif
@@ -130,7 +176,15 @@ public class HeaderBlockValidator
         {
             if (variableLengthRecords.OfType<T>().Any())
             {
-                throw new InvalidOperationException(string.Format(culture, Properties.Resources.ResourceManager.GetString(nameof(Properties.Resources.InvalidVlrFound), culture)!, typeof(T)));
+                throw new InvalidOperationException(
+                    string.Format(
+                        culture,
+#if NETCOREAPP3_0_OR_GREATER
+                        Properties.Resources.ResourceManager.GetString(nameof(Properties.Resources.InvalidVlrFound), culture)!,
+#else
+                        Properties.Resources.ResourceManager.GetString(nameof(Properties.Resources.InvalidVlrFound), culture),
+#endif
+                        typeof(T)));
             }
         }
 #endif
@@ -140,7 +194,15 @@ public class HeaderBlockValidator
         {
             if (variableLengthRecords.OfType<T>().Skip(1).Any())
             {
-                throw new InvalidOperationException(string.Format(culture, Properties.Resources.ResourceManager.GetString(nameof(Properties.Resources.MultipleVlrsFound), culture)!, typeof(T)));
+                throw new InvalidOperationException(
+                    string.Format(
+                        culture,
+#if NETCOREAPP3_0_OR_GREATER
+                        Properties.Resources.ResourceManager.GetString(nameof(Properties.Resources.MultipleVlrsFound), culture)!,
+#else
+                        Properties.Resources.ResourceManager.GetString(nameof(Properties.Resources.MultipleVlrsFound), culture),
+#endif
+                        typeof(T)));
             }
         }
     }

@@ -93,9 +93,9 @@ jobs:
           release_version=${pre_release_version%%'-'*}
           
           if [[ $pre_release_version == *-*.* ]]; then
-            part_after_dash="${pre_release_version#*-}"
+            part_after_dash=${pre_release_version#*-}
             if [[ $part_after_dash == *.* ]]; then
-              pre_release_version="${pre_release_version%.*}"
+              pre_release_version=${pre_release_version%.*}
             fi
           fi
 

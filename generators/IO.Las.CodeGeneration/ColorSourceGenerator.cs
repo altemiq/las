@@ -22,7 +22,7 @@ public class ColorSourceGenerator : BaseSourceGenerator
     {
         base.Initialize(context);
         var colors = context.SyntaxProvider.CreateSyntaxProvider(
-            (node, _) => node is StructDeclarationSyntax structNode && GetIdentifier(structNode) is "Color",
+            static (node, _) => node is StructDeclarationSyntax structNode && string.Equals(GetIdentifier(structNode), "Color", StringComparison.Ordinal),
             static (context, _) => GetTypeToGenerate(context));
 
         context.RegisterSourceOutput(colors, static (context, color) => context.AddSource($"{color.Name}.g.cs", GetSourceText(CreateKnownColors(GetNamespace(color.Namespace)))));

@@ -12,7 +12,6 @@ namespace Altemiq.IO.Las;
 /// Cloud optimized extension methods.
 /// </summary>
 [System.Diagnostics.CodeAnalysis.SuppressMessage("StyleCop.CSharp.ReadabilityRules", "SA1101:Prefix local calls with this", Justification = "False positive")]
-[System.Diagnostics.CodeAnalysis.SuppressMessage("Minor Code Smell", "S2325:Methods and properties that don't access instance data should be static", Justification = "False positive")]
 [System.Diagnostics.CodeAnalysis.SuppressMessage("Naming", "CA1708:Identifiers should differ by more than case", Justification = "False positive")]
 public static class CopcExtensions
 {
@@ -81,6 +80,7 @@ public static class CopcExtensions
         /// <param name="swap">Set to <see langword="true"/> to swap the points.</param>
         /// <param name="shuffle">Set to <see langword="true"/> to shuffle the points.</param>
         /// <param name="sort">Set to <see langword="true"/> to sort the points.</param>
+        /// <exception cref="InvalidDataException">The data was invalid.</exception>
         public void CopyToCloudOptimized(
             LazWriter writer,
             int maximumDepth = -1,
@@ -274,7 +274,9 @@ public static class CopcExtensions
 
                     if (buffer.Count == buffer.Capacity || endOfStream)
                     {
+#pragma warning disable S2245 // Pseudorandom number generators (PRNGs) should not be used in security contexts
                         var random = new Random();
+#pragma warning restore S2245 // Pseudorandom number generators (PRNGs) should not be used in security contexts
 
                         // First, we shuffle the points
                         if (shuffle)
@@ -341,8 +343,7 @@ public static class CopcExtensions
                                 continue;
                             }
 
-                            var keys = new List<EptKey>(registry.Keys);
-                            foreach (var currentKey in keys)
+                            foreach (var currentKey in registry.Keys)
                             {
                                 var currentOctant = registry[currentKey];
 
@@ -747,10 +748,12 @@ public static class CopcExtensions
     [System.Runtime.InteropServices.StructLayout(System.Runtime.InteropServices.LayoutKind.Sequential)]
     private struct VoxelRecord(ushort bufferId, int positionId)
     {
-        // The position of the point in the array
+        /* The position of the point in the array. */
         public readonly int PositionId = positionId;
 
-        // The ID of the buffer in which the point was inserted (used for optimization).
+        /*
+          The ID of the buffer in which the point was inserted (used for optimization).
+        */
         public ushort BufferId = bufferId;
     }
 

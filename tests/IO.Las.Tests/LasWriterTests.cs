@@ -38,9 +38,9 @@ public class LasWriterTests
         var outputHeader = lasReader.Header;
         await lasReader.DisposeAsync();
 
-        await Assert.That(outputHeader.SystemIdentifier).IsEqualTo("LAS tests");
-        await Assert.That(outputHeader.GeneratingSoftware).IsEqualTo("Las.Tests.exe");
-        await Assert.That(outputHeader.PointDataFormatId).IsEqualTo((byte)1);
+        _ = await Assert.That(outputHeader.SystemIdentifier).IsEqualTo("LAS tests");
+        _ = await Assert.That(outputHeader.GeneratingSoftware).IsEqualTo("Las.Tests.exe");
+        _ = await Assert.That(outputHeader.PointDataFormatId).IsEqualTo((byte)1);
     }
 
 #if LAS1_4_OR_GREATER
@@ -109,16 +109,16 @@ public class LasWriterTests
         var extra = bytes.ToArray();
         await lasReader.DisposeAsync();
 
-        await Assert.That(outputHeader.SystemIdentifier).IsEqualTo("LAS tests");
-        await Assert.That(outputHeader.GeneratingSoftware).IsEqualTo("Las.Tests.exe");
-        await Assert.That(outputHeader.PointDataFormatId).IsEqualTo((byte)1);
+        _ = await Assert.That(outputHeader.SystemIdentifier).IsEqualTo("LAS tests");
+        _ = await Assert.That(outputHeader.GeneratingSoftware).IsEqualTo("Las.Tests.exe");
+        _ = await Assert.That(outputHeader.PointDataFormatId).IsEqualTo((byte)1);
 
-        await Assert.That(outputPoint)
+        _ = await Assert.That(outputPoint)
             .IsNotNull()
             .And.IsTypeOf<IPointDataRecord>()
-            .And.Member(p => p.Classification, classification => classification.IsEqualTo(Classification.LowVegetation));
+            .And.Member(static p => p.Classification, static classification => classification.IsEqualTo(Classification.LowVegetation));
 
-        await Assert.That(extraBytes.GetValue(0, extra)).ValueIsTypeOf<double>().And.IsEqualTo(ExtraValue);
+        _ = await Assert.That(extraBytes.GetValue(0, extra)).ValueIsTypeOf<double>().And.IsEqualTo(ExtraValue);
     }
 
     [Test]
@@ -186,16 +186,16 @@ public class LasWriterTests
         var outputPoint = await lasReader.ReadPointDataRecordAsync();
         await lasReader.DisposeAsync();
 
-        await Assert.That(outputHeader.SystemIdentifier).IsEqualTo("LAS tests");
-        await Assert.That(outputHeader.GeneratingSoftware).IsEqualTo("Las.Tests.exe");
-        await Assert.That(outputHeader.PointDataFormatId).IsEqualTo((byte)1);
+        _ = await Assert.That(outputHeader.SystemIdentifier).IsEqualTo("LAS tests");
+        _ = await Assert.That(outputHeader.GeneratingSoftware).IsEqualTo("Las.Tests.exe");
+        _ = await Assert.That(outputHeader.PointDataFormatId).IsEqualTo((byte)1);
 
-        await Assert.That(outputPoint.PointDataRecord)
+        _ = await Assert.That(outputPoint.PointDataRecord)
             .IsNotNull()
             .And.IsTypeOf<IPointDataRecord>()
-            .And.Member(p => p.Classification, classification => classification.IsEqualTo(Classification.LowVegetation));
+            .And.Member(static p => p.Classification, static classification => classification.IsEqualTo(Classification.LowVegetation));
 
-        await Assert.That(await extraBytes.GetValueAsync(0, outputPoint.ExtraBytes)).ValueIsTypeOf<double>().And.IsEqualTo(ExtraValue);
+        _ = await Assert.That(await extraBytes.GetValueAsync(0, outputPoint.ExtraBytes)).ValueIsTypeOf<double>().And.IsEqualTo(ExtraValue);
     }
 #endif
 
@@ -335,7 +335,7 @@ public class LasWriterTests
         await Assert.That(outputPoint)
             .IsNotNull()
             .And.IsTypeOf<IPointDataRecord>()
-            .And.Member(p => p.Classification, classification => classification.IsEqualTo(Classification.LowVegetation));
+            .And.Member(static p => p.Classification, static classification => classification.IsEqualTo(Classification.LowVegetation));
 
 #if LAS1_4_OR_GREATER
         await Assert.That(extraBytes.GetValue(0, bytes)).ValueIsTypeOf<double>().And.IsEqualTo(ExtraValue);
@@ -347,7 +347,7 @@ public class LasWriterTests
     [MatrixDataSource]
     public async Task ExtendedVariableLengthRecords([Matrix(true, false)] bool exploded)
     {
-        UnknownExtendedVariableLengthRecord record = new UnknownExtendedVariableLengthRecord(
+        var record = new UnknownExtendedVariableLengthRecord(
             new()
             {
                 UserId = "mine",
@@ -367,7 +367,7 @@ public class LasWriterTests
 
         memoryStream.Position = 0;
         LasReader reader = new(memoryStream);
-        await Assert.That(reader.ExtendedVariableLengthRecords).HasSingleItem()
+        _ = await Assert.That(reader.ExtendedVariableLengthRecords).HasSingleItem()
             .And.Member(static x => x.Single(), x => x.IsEqualTo(record));
 
         await reader.DisposeAsync();

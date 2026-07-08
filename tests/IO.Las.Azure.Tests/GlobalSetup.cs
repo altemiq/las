@@ -1,6 +1,5 @@
 using Aspire.Hosting.Azure;
 using Azure.Storage.Blobs;
-using Microsoft.Extensions.Configuration;
 
 [assembly: Retry(3)]
 [assembly: System.Diagnostics.CodeAnalysis.ExcludeFromCodeCoverage]
@@ -21,15 +20,15 @@ public class GlobalHooks
     {
         // Arrange
         var builder = await DistributedApplicationTestingBuilder.CreateAsync<Projects.IO_Las_Azure_AppHost>(cancellationToken);
-        builder.Services.ConfigureHttpClientDefaults(clientBuilder =>
+        _ = builder.Services.ConfigureHttpClientDefaults(clientBuilder =>
         {
-            clientBuilder.AddStandardResilienceHandler();
+            _ = clientBuilder.AddStandardResilienceHandler();
         });
 
         string connectionString = default;
         builder.Services.AddAzureClients(azureBuilder =>
         {
-            azureBuilder.AddClient<BlobServiceClient, BlobClientOptions>(options =>
+            _ = azureBuilder.AddClient<BlobServiceClient, BlobClientOptions>(options =>
             {
                 while (connectionString is null)
                 {
@@ -43,11 +42,11 @@ public class GlobalHooks
         // get the blob storage
         if (builder.Resources.OfType<AzureBlobStorageResource>().SingleOrDefault() is { } blobStorage)
         {
-            builder.Eventing.Subscribe<ResourceReadyEvent>(blobStorage, AddConnectionString);
+            _ = builder.Eventing.Subscribe<ResourceReadyEvent>(blobStorage, AddConnectionString);
         }
         else if (builder.Resources.OfType<AzureBlobStorageContainerResource>().SingleOrDefault() is { } blobStorageContainer)
         {
-            builder.Eventing.Subscribe<ResourceReadyEvent>(blobStorageContainer, AddConnectionString);
+            _ = builder.Eventing.Subscribe<ResourceReadyEvent>(blobStorageContainer, AddConnectionString);
         }
 
         App = await builder.BuildAsync(cancellationToken);

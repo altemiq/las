@@ -10,7 +10,7 @@ public class ProjectGuidTests
     [Arguments(ProjectGuid2, new byte[] { 0x33, 0x22, 0x11, 0x00, 0x55, 0x44, 0x77, 0x66, 0x4D, 0x79, 0x50, 0x72, 0x6F, 0x6A, 0x30, 0x31 })]
     public async Task HaveTheCorrectBytes(string id, byte[] bytes)
     {
-        await Assert.That(Guid.Parse(id).ToByteArray()).IsEquivalentTo(bytes);
+        _ = await Assert.That(Guid.Parse(id).ToByteArray()).IsEquivalentTo(bytes);
     }
 
     [Test]

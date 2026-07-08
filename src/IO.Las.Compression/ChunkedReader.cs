@@ -646,7 +646,6 @@ internal abstract class ChunkedReader : IPointReader
             return;
         }
 
-#pragma warning disable S1121
         _ = decoder.Initialize(stream);
         var decompressor = new IntegerDecompressor(decoder, 32, 2);
         decompressor.Initialize();
@@ -667,7 +666,6 @@ internal abstract class ChunkedReader : IPointReader
                 throw new InvalidOperationException(Compression.Properties.Resources.ChunkStartsNotInOrder);
             }
         }
-#pragma warning restore S1121
     }
 
     private void MoveToNextChunkIfRequired(Stream stream)
@@ -834,10 +832,8 @@ internal abstract class ChunkedReader : IPointReader
     /// <param name="cancellationToken">The cancellation token.</param>
     public sealed class ChunkedLasPointMemoryEnumerator(ChunkedReader chunkedReader, ILasReader lasReader, CancellationToken cancellationToken) : IAsyncEnumerator<LasPointMemory>
     {
-        private LasPointMemory current;
-
         /// <inheritdoc/>
-        public LasPointMemory Current => this.current;
+        public LasPointMemory Current { get; private set; }
 
         /// <inheritdoc/>
         public ValueTask DisposeAsync() => default;
@@ -850,8 +846,8 @@ internal abstract class ChunkedReader : IPointReader
                 return false;
             }
 
-            this.current = await lasReader.ReadPointDataRecordAsync(cancellationToken).ConfigureAwait(false);
-            return this.current.PointDataRecord is not null;
+            this.Current = await lasReader.ReadPointDataRecordAsync(cancellationToken).ConfigureAwait(false);
+            return this.Current.PointDataRecord is not null;
         }
     }
 }

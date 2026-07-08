@@ -1,5 +1,3 @@
-using System.Numerics;
-
 namespace Altemiq.IO.Las.Indexing;
 
 public class LasIndexCellTests
@@ -9,7 +7,7 @@ public class LasIndexCellTests
     public async Task ContainsPoint([Matrix(0, 25)] double x, [Matrix(1000, 1025)] double y)
     {
         var cell = new LasIndexCell(new(0, 1000), new(100, 1100), []);
-        await Assert.That(cell.Contains(x, y)).IsTrue();
+        _ = await Assert.That(cell.Contains(x, y)).IsTrue();
     }
 
     [Test]
@@ -17,7 +15,7 @@ public class LasIndexCellTests
     public async Task ContainsX([Matrix(0, 25, 50, 75)] double x)
     {
         var cell = new LasIndexCell(new(0, 0), new(100, 0), []);
-        await Assert.That(cell.ContainsX(x)).IsTrue();
+        _ = await Assert.That(cell.ContainsX(x)).IsTrue();
     }
 
     [Test]
@@ -25,7 +23,7 @@ public class LasIndexCellTests
     public async Task ContainsY([Matrix(0, 25, 50, 75)] double y)
     {
         var cell = new LasIndexCell(new(0, 0), new(0, 100), []);
-        await Assert.That(cell.ContainsY(y)).IsTrue();
+        _ = await Assert.That(cell.ContainsY(y)).IsTrue();
     }
 
     [Test]
@@ -42,7 +40,7 @@ public class LasIndexCellTests
     public async Task DoesNotContainPoint(double x, double y)
     {
         var cell = new LasIndexCell(new(0, 1000), new(100, 1100), []);
-        await Assert.That(cell.Contains(x, y)).IsFalse();
+        _ = await Assert.That(cell.Contains(x, y)).IsFalse();
     }
 
     [Test]
@@ -50,7 +48,7 @@ public class LasIndexCellTests
     public async Task DoesNotContainX([Matrix(-1, 100, 101)] double x)
     {
         var cell = new LasIndexCell(new(0, float.MinValue), new(100, float.MaxValue), []);
-        await Assert.That(cell.ContainsX(x)).IsFalse();
+        _ = await Assert.That(cell.ContainsX(x)).IsFalse();
     }
 
     [Test]
@@ -58,7 +56,7 @@ public class LasIndexCellTests
     public async Task DoesNotContainY([Matrix(-1, 100, 101)] double y)
     {
         var cell = new LasIndexCell(new(float.MinValue, 0), new(float.MaxValue, 100), []);
-        await Assert.That(cell.ContainsY(y)).IsFalse();
+        _ = await Assert.That(cell.ContainsY(y)).IsFalse();
     }
 
     [Test]
@@ -69,7 +67,7 @@ public class LasIndexCellTests
     public async Task ContainsIndex(uint index)
     {
         var cell = new LasIndexCell(new(0, 0), new(100, 100), [new(10, 100), new(200, 300)]);
-        await Assert.That(cell.Contains(index)).IsTrue();
+        _ = await Assert.That(cell.Contains(index)).IsTrue();
     }
 
     [Test]
@@ -81,6 +79,6 @@ public class LasIndexCellTests
     public async Task DoesNotContainsIndex(uint index)
     {
         var cell = new LasIndexCell(new(0, 0), new(100, 100), [new(10, 100), new(200, 300)]);
-        await Assert.That(cell.Contains(index)).IsFalse();
+        _ = await Assert.That(cell.Contains(index)).IsFalse();
     }
 }

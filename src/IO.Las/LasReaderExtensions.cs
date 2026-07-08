@@ -53,10 +53,8 @@ public static class LasReaderExtensions
     /// <param name="cancellationToken">The cancellation token.</param>
     public sealed class LasPointMemoryEnumerator(LasReader reader, CancellationToken cancellationToken) : IAsyncEnumerator<LasPointMemory>
     {
-        private LasPointMemory current;
-
         /// <inheritdoc />
-        public LasPointMemory Current => this.current;
+        public LasPointMemory Current { get; private set; }
 
         /// <inheritdoc />
         public ValueTask DisposeAsync() => default;
@@ -64,8 +62,8 @@ public static class LasReaderExtensions
         /// <inheritdoc />
         public async ValueTask<bool> MoveNextAsync()
         {
-            this.current = await reader.ReadPointDataRecordAsync(cancellationToken).ConfigureAwait(false);
-            return this.current.PointDataRecord is not null;
+            this.Current = await reader.ReadPointDataRecordAsync(cancellationToken).ConfigureAwait(false);
+            return this.Current.PointDataRecord is not null;
         }
     }
 }

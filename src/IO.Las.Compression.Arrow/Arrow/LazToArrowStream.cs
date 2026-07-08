@@ -6,8 +6,6 @@
 
 namespace Altemiq.IO.Las.Arrow;
 
-using System.Collections;
-
 /// <summary>
 /// The <see cref="ILazReader"/> to <see cref="Apache.Arrow"/> Stream.
 /// </summary>
@@ -20,37 +18,30 @@ internal static class LazToArrowStream
     /// <param name="reader">The reader.</param>
     /// <param name="schema">The schema.</param>
     /// <returns>The <see cref="RecordBatch"/> instances.</returns>
+    /// <exception cref="NotSupportedException"><paramref name="reader"/> is not supported.</exception>
     internal static IEnumerable<RecordBatch> ToArrowBatches<T>(T reader, Schema schema)
-        where T : ILazReader
-    {
-        if (reader.IsChunked)
+        where T : ILazReader => reader switch
         {
-            return new RecordBatchEnumerable(reader, schema);
-        }
-
-        if (reader is ILasReader lasReader)
-        {
-            return lasReader.ToArrowBatches(schema);
-        }
-
-        throw new NotSupportedException();
-    }
+            { IsChunked: true } => new RecordBatchEnumerable(reader, schema),
+            ILasReader lasReader => lasReader.ToArrowBatches(),
+            _ => throw new NotSupportedException(),
+        };
 
     private sealed class RecordBatchEnumerable(ILazReader reader, Schema schema) : IEnumerable<RecordBatch>, IEnumerator<RecordBatch>
     {
-        private readonly IReadOnlyList<ColumnBuffer> buffers = [.. schema.FieldsList.Select(f => ColumnBuffer.Create(f.DataType.TypeId, capacity: 50_000))];
+        private readonly IReadOnlyList<ColumnBuffer> buffers = [.. schema.FieldsList.Select(static f => ColumnBuffer.Create(f.DataType.TypeId, capacity: 50_000))];
 
-        private RecordBatch? current;
+        [System.Diagnostics.CodeAnalysis.AllowNull]
+        public RecordBatch Current { get; private set; }
 
-        public RecordBatch Current => this.current!;
-
-        object IEnumerator.Current => this.Current;
+        [System.Diagnostics.CodeAnalysis.AllowNull]
+        object System.Collections.IEnumerator.Current => this.Current;
 
         public IEnumerator<RecordBatch> GetEnumerator() => this;
 
-        IEnumerator IEnumerable.GetEnumerator() => this.GetEnumerator();
+        System.Collections.IEnumerator System.Collections.IEnumerable.GetEnumerator() => this.GetEnumerator();
 
-        [System.Diagnostics.CodeAnalysis.MemberNotNullWhen(true, nameof(IEnumerator.Current))]
+        [System.Diagnostics.CodeAnalysis.MemberNotNullWhen(true, nameof(System.Collections.IEnumerator.Current))]
         public bool MoveNext()
         {
             var rowCount = 0;
@@ -63,14 +54,12 @@ internal static class LazToArrowStream
 
             if (rowCount is 0)
             {
-                this.current = default;
+                this.Current = default;
                 return false;
             }
 
-            this.current = LasToArrowStream.FlushToRecordBatch(this.buffers, schema, rowCount);
-#pragma warning disable CS8775 // Member must have a non-null value when exiting in some condition.
+            this.Current = LasToArrowStream.FlushToRecordBatch(this.buffers, schema, rowCount);
             return true;
-#pragma warning restore CS8775 // Member must have a non-null value when exiting in some condition.
         }
 
         public void Reset()

@@ -53,7 +53,7 @@ internal sealed class MockLasReader : ILasReader
 #endif
             NumberOfPointRecords = 2,
         };
-        this.Header = builder.HeaderBlock;
+        Header = builder.HeaderBlock;
     }
 
     public HeaderBlock Header { get; }
@@ -67,23 +67,23 @@ internal sealed class MockLasReader : ILasReader
 
     public int ReadPointDataRecordData(Span<byte> buffer)
     {
-        First.CopyTo(buffer);
-        Second.CopyTo(buffer[this.PointDataLength..]);
-        return this.PointDataLength * 2;
+        _ = First.CopyTo(buffer);
+        _ = Second.CopyTo(buffer[PointDataLength..]);
+        return PointDataLength * 2;
     }
 
     public ValueTask<int> ReadPointDataRecordDataAsync(Memory<byte> buffer, CancellationToken cancellationToken = default)
     {
         cancellationToken.ThrowIfCancellationRequested();
-        First.CopyTo(buffer.Span);
-        Second.CopyTo(buffer[this.PointDataLength..].Span);
-        return new(this.PointDataLength * 2);
+        _ = First.CopyTo(buffer.Span);
+        _ = Second.CopyTo(buffer[PointDataLength..].Span);
+        return new(PointDataLength * 2);
     }
 
     public LasPointSpan ReadPointDataRecord()
     {
-        this.count++;
-        return this.count switch
+        count++;
+        return count switch
         {
             1 => new(First, []),
             2 => new(Second, []),
@@ -96,17 +96,23 @@ internal sealed class MockLasReader : ILasReader
         switch (index)
         {
             case 0:
-                this.count = 1;
+                count = 1;
                 return new(First, []);
             case 1:
-                this.count = 2;
+                count = 2;
                 return new(Second, []);
             default:
                 return default;
         }
     }
 
-    public ValueTask<LasPointMemory> ReadPointDataRecordAsync(CancellationToken cancellationToken = default) => throw new NotImplementedException();
+    public ValueTask<LasPointMemory> ReadPointDataRecordAsync(CancellationToken cancellationToken = default)
+    {
+        throw new NotSupportedException();
+    }
 
-    public ValueTask<LasPointMemory> ReadPointDataRecordAsync(ulong index, CancellationToken cancellationToken = default) => throw new NotImplementedException();
+    public ValueTask<LasPointMemory> ReadPointDataRecordAsync(ulong index, CancellationToken cancellationToken = default)
+    {
+        throw new NotSupportedException();
+    }
 }

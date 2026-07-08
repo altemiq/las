@@ -7,7 +7,7 @@ public class ResourceAdditionalText : Microsoft.CodeAnalysis.AdditionalText
 
     private ResourceAdditionalText(string path, byte[] bytes, int length)
     {
-        this.Path = path;
+        Path = path;
         this.bytes = bytes;
         this.length = length;
     }
@@ -24,5 +24,7 @@ public class ResourceAdditionalText : Microsoft.CodeAnalysis.AdditionalText
     }
 
     public override Microsoft.CodeAnalysis.Text.SourceText GetText(CancellationToken cancellationToken = default)
-        => Microsoft.CodeAnalysis.Text.SourceText.From(this.bytes, this.length, System.Text.Encoding.UTF8);
+    {
+        return Microsoft.CodeAnalysis.Text.SourceText.From(bytes, length, System.Text.Encoding.UTF8);
+    }
 }

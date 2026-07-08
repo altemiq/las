@@ -4,10 +4,6 @@
 // </copyright>
 // -----------------------------------------------------------------------
 
-#pragma warning disable SA1200
-using MinMax = (Altemiq.IO.Las.Vector3D Min, Altemiq.IO.Las.Vector3D Max, System.Double MinGps, System.Double MaxGps);
-#pragma warning restore SA1200
-
 namespace Altemiq.IO.Las;
 
 /// <content>
@@ -197,7 +193,7 @@ internal static partial class RootCommandExtensions
                         var counts = new Dictionary<int, ulong>();
 
                         VerifyPage(error, page, positiveEntries);
-                        MinMax ranges = (new(double.MaxValue), new(double.MinValue), double.MaxValue, double.MinValue);
+                        MinMax ranges = new(new(double.MaxValue), new(double.MinValue), double.MaxValue, double.MinValue);
                         var entries = ProcessPage(reader, page, totals, counts, out var pageRanges).ToList();
                         ranges = Combine(ranges, pageRanges);
                         while (entries.Count > 0)
@@ -247,7 +243,7 @@ internal static partial class RootCommandExtensions
                             MinMax first,
                             MinMax second)
                         {
-                            return (
+                            return new(
                                 Vector3D.Min(first.Min, second.Min),
                                 Vector3D.Max(first.Max, second.Max),
                                 Math.Min(first.MinGps, second.MinGps),
@@ -314,7 +310,7 @@ internal static partial class RootCommandExtensions
                                 }
                             }
 
-                            ranges = (pageMin, pageMax, pageMinGps, pageMaxGps);
+                            ranges = new(pageMin, pageMax, pageMinGps, pageMaxGps);
                             return children;
                         }
                     }
@@ -394,7 +390,7 @@ internal static partial class RootCommandExtensions
                             count--;
                         }
 
-                        return (min, max, minGps, maxGps);
+                        return new(min, max, minGps, maxGps);
                     }
                 });
 
@@ -405,4 +401,7 @@ internal static partial class RootCommandExtensions
         [System.Runtime.CompilerServices.UnsafeAccessor(System.Runtime.CompilerServices.UnsafeAccessorKind.Field, Name = "offsetToVariableLengthRecords")]
         static extern ref int GetOffsetToVariableLengthRecords(LasReader reader);
     }
+
+    [System.Runtime.InteropServices.StructLayout(System.Runtime.InteropServices.LayoutKind.Auto)]
+    private readonly record struct MinMax(Vector3D Min, Vector3D Max, double MinGps, double MaxGps);
 }

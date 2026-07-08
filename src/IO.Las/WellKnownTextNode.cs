@@ -117,14 +117,14 @@ public readonly struct WellKnownTextNode : IEquatable<WellKnownTextNode>
             }
 
 #if NETCOREAPP3_0_OR_GREATER
-            _ = System.Text.Rune.DecodeFromUtf8(span, out System.Text.Rune first, out int firstBytesConsumed);
+            _ = System.Text.Rune.DecodeFromUtf8(span, out var first, out var firstBytesConsumed);
 
             if (System.Text.Rune.IsWhiteSpace(first))
             {
                 return TrimFallback(span[firstBytesConsumed..]);
             }
 
-            _ = System.Text.Rune.DecodeLastFromUtf8(span, out System.Text.Rune last, out int lastBytesConsumed);
+            _ = System.Text.Rune.DecodeLastFromUtf8(span, out var last, out var lastBytesConsumed);
 
             return System.Text.Rune.IsWhiteSpace(last)
                 ? TrimFallback(span[..^lastBytesConsumed])
@@ -134,7 +134,7 @@ public readonly struct WellKnownTextNode : IEquatable<WellKnownTextNode>
             {
                 while (span.Length != 0)
                 {
-                    _ = System.Text.Rune.DecodeFromUtf8(span, out System.Text.Rune current, out int bytesConsumed);
+                    _ = System.Text.Rune.DecodeFromUtf8(span, out var current, out var bytesConsumed);
 
                     if (!System.Text.Rune.IsWhiteSpace(current))
                     {
@@ -146,7 +146,7 @@ public readonly struct WellKnownTextNode : IEquatable<WellKnownTextNode>
 
                 while (span.Length != 0)
                 {
-                    _ = System.Text.Rune.DecodeLastFromUtf8(span, out System.Text.Rune current, out int bytesConsumed);
+                    _ = System.Text.Rune.DecodeLastFromUtf8(span, out var current, out var bytesConsumed);
 
                     if (!System.Text.Rune.IsWhiteSpace(current))
                     {
@@ -236,7 +236,7 @@ public readonly struct WellKnownTextNode : IEquatable<WellKnownTextNode>
     {
         var byteCount = System.Text.Encoding.UTF8.GetByteCount(value);
         Span<byte> buffer = stackalloc byte[byteCount];
-        System.Text.Encoding.UTF8.GetBytes(value, buffer);
+        _ = System.Text.Encoding.UTF8.GetBytes(value, buffer);
         return Parse(buffer);
     }
 #endif
@@ -338,19 +338,19 @@ public readonly struct WellKnownTextNode : IEquatable<WellKnownTextNode>
     /// <returns>A reference to the string builder after the append operation has completed.</returns>
     internal System.Text.StringBuilder AppendTo(System.Text.StringBuilder builder)
     {
-        builder.Append(this.Id);
+        _ = builder.Append(this.Id);
 
-        builder.Append('[');
+        _ = builder.Append('[');
         var first = true;
         foreach (var value in this.Values)
         {
             if (!first)
             {
-                builder.Append(',');
+                _ = builder.Append(',');
             }
 
             first = false;
-            value.AppendTo(builder);
+            _ = value.AppendTo(builder);
         }
 
         return builder.Append(']');

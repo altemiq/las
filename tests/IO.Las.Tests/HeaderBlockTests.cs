@@ -20,7 +20,7 @@ public class HeaderBlockTests
         var first = builder.HeaderBlock;
         var second = builder.HeaderBlock;
 
-        await Assert.That(first).IsEqualTo(second);
+        _ = await Assert.That(first).IsEqualTo(second);
     }
 
     [Test]
@@ -31,7 +31,7 @@ public class HeaderBlockTests
         builder.ProjectId = Guid.NewGuid();
         var second = builder.HeaderBlock;
 
-        await Assert.That(first).IsNotEqualTo(second);
+        _ = await Assert.That(first).IsNotEqualTo(second);
     }
 
     [Test]
@@ -39,13 +39,13 @@ public class HeaderBlockTests
     {
         await Assert.That(
 #if LAS1_5_OR_GREATER
-            () => new HeaderBlock(default, default, default, new(0, 9), default, default, default, default, default, [], default, default, default, [], default, default, default, default, default)
+            static () => new HeaderBlock(default, default, default, new(0, 9), default, default, default, default, default, [], default, default, default, [], default, default, default, default, default)
 #elif LAS1_4_OR_GREATER
-            () => new HeaderBlock(default, default, default, new(0, 9), default, default, default, default, default, [], default, default, default, [], default, default)
+            static () => new HeaderBlock(default, default, default, new(0, 9), default, default, default, default, default, [], default, default, default, [], default, default)
 #elif LAS1_2_OR_GREATER
-            () => new HeaderBlock(default, default, default, new(0, 9), default, default, default, default, default, [], default, default, default, default)
+            static () => new HeaderBlock(default, default, default, new(0, 9), default, default, default, default, default, [], default, default, default, default)
 #else
-            () => new HeaderBlock(default, default, new(0, 9), default, default, default, default, default, [], default, default, default, default)
+            static () => new HeaderBlock(default, default, new(0, 9), default, default, default, default, default, [], default, default, default, default)
 #endif
         ).Throws<ArgumentOutOfRangeException>().WithParameterName("version");
     }
@@ -56,9 +56,9 @@ public class HeaderBlockTests
     {
         await Assert.That(
 #if LAS1_5_OR_GREATER
-            () => new HeaderBlock(default, default, default, new(1, 4), default, default, default, default, default, [], default, default, default, [], default, default, default, default, default)
+            static () => new HeaderBlock(default, default, default, new(1, 4), default, default, default, default, default, [], default, default, default, [], default, default, default, default, default)
 #else
-            () => new HeaderBlock(default, default, default, new(1, 4), default, default, default, default, default, [], default, default, default, [], default, default)
+            static () => new HeaderBlock(default, default, default, new(1, 4), default, default, default, default, default, [], default, default, default, [], default, default)
 #endif
         ).Throws<ArgumentOutOfRangeException>().WithParameterName("legacyPointsByReturn");
     }
@@ -68,9 +68,9 @@ public class HeaderBlockTests
     {
         await Assert.That(
 #if LAS1_5_OR_GREATER
-            () => new HeaderBlock(default, default, default, new(1, 4), default, default, default, default, default, [0, 0, 0, 0, 0], default, default, default, [], default, default, default, default, default)
+            static () => new HeaderBlock(default, default, default, new(1, 4), default, default, default, default, default, [0, 0, 0, 0, 0], default, default, default, [], default, default, default, default, default)
 #else
-            () => new HeaderBlock(default, default, default, new(1, 4), default, default, default, default, default, [0, 0, 0, 0, 0], default, default, default, [], default, default)
+            static () => new HeaderBlock(default, default, default, new(1, 4), default, default, default, default, default, [0, 0, 0, 0, 0], default, default, default, [], default, default)
 #endif
         ).Throws<ArgumentOutOfRangeException>().WithParameterName("pointsByReturn");
     }
@@ -78,13 +78,13 @@ public class HeaderBlockTests
     [Test]
     public async Task InvalidPointReturns()
     {
-        await Assert.That(() => new HeaderBlock(default, default, default, new(1, 2), default, default, default, default, default, [], default, default, default, default)).Throws<ArgumentOutOfRangeException>().WithParameterName("pointsByReturn");
+        await Assert.That(static () => new HeaderBlock(default, default, default, new(1, 2), default, default, default, default, default, [], default, default, default, default)).Throws<ArgumentOutOfRangeException>().WithParameterName("pointsByReturn");
     }
 #else
     [Test]
     public async Task InvalidPointReturns()
     {
-        await Assert.That(() => new HeaderBlock(default, default, new(1, 1), default, default, default, default, default, [], default, default, default, default)).Throws<ArgumentOutOfRangeException>().WithParameterName("pointsByReturn");
+        await Assert.That(static () => new HeaderBlock(default, default, new(1, 1), default, default, default, default, default, [], default, default, default, default)).Throws<ArgumentOutOfRangeException>().WithParameterName("pointsByReturn");
     }
 #endif
 
@@ -92,7 +92,7 @@ public class HeaderBlockTests
     public async Task HashCode()
     {
         HeaderBlockBuilder builder = new();
-        await Assert.That(builder.HeaderBlock.GetHashCode()).IsNotEqualTo(0);
+        _ = await Assert.That(builder.HeaderBlock.GetHashCode()).IsNotEqualTo(0);
     }
 
     [Test]
@@ -100,7 +100,7 @@ public class HeaderBlockTests
     {
         HeaderBlockBuilder headerBlockBuilder = new();
         headerBlockBuilder.SetOffset(123456.123, 234567.321, 123.456);
-        await Assert.That(headerBlockBuilder.Offset).IsEqualTo(new(123000D, 234000D, 100D));
+        _ = await Assert.That(headerBlockBuilder.Offset).IsEqualTo(new(123000D, 234000D, 100D));
     }
 
     [Test]
@@ -228,7 +228,7 @@ public class HeaderBlockTests
     [MethodDataSource(nameof(GetPointTypes))]
     public async Task CreateFromType(Type type, byte number)
     {
-        await Assert.That(typeof(HeaderBlockBuilder).GetMethod(nameof(HeaderBlockBuilder.FromPointType))!.MakeGenericMethod(type).Invoke(default, default)).IsTypeOf<HeaderBlockBuilder>().And.Member(x => x.PointDataFormatId, pointDataFormatId => pointDataFormatId.IsEqualTo(number));
+        _ = await Assert.That(typeof(HeaderBlockBuilder).GetMethod(nameof(HeaderBlockBuilder.FromPointType)).MakeGenericMethod(type).Invoke(default, default)).IsTypeOf<HeaderBlockBuilder>().And.Member(x => x.PointDataFormatId, pointDataFormatId => pointDataFormatId.IsEqualTo(number));
     }
 
     public static IEnumerable<Func<(int, bool)>> GetReturnNumbers()
@@ -243,15 +243,15 @@ public class HeaderBlockTests
 #if LAS1_2_OR_GREATER
     public static IEnumerable<Func<(byte, GlobalEncoding)>> GetDefaultValues()
     {
-        yield return () => (GpsPointDataRecord.Id, GlobalEncoding.StandardGpsTime);
+        yield return static () => (GpsPointDataRecord.Id, GlobalEncoding.StandardGpsTime);
 #if LAS1_4_OR_GREATER
-        yield return () => (ExtendedGpsPointDataRecord.Id, GlobalEncoding.StandardGpsTime | GlobalEncoding.Wkt);
+        yield return static () => (ExtendedGpsPointDataRecord.Id, GlobalEncoding.StandardGpsTime | GlobalEncoding.Wkt);
 #endif
     }
 #else
     public static IEnumerable<Func<byte>> GetDefaultValues()
     {
-        yield return () => GpsPointDataRecord.Id;
+        yield return static () => GpsPointDataRecord.Id;
     }
 #endif
 
@@ -266,7 +266,7 @@ public class HeaderBlockTests
             TimeOffset = timeOffset,
         };
 
-        await Assert.That(builder.HeaderBlock)
+        _ = await Assert.That(builder.HeaderBlock)
             .Member(static header => header.TimeOffset, offset => offset.IsEqualTo(timeOffset)).And
             .Member(static header => header.GlobalEncoding.HasFlag(GlobalEncoding.TimeOffsetFlag), hasFlag => hasFlag.IsEqualTo(expected));
     }
@@ -274,22 +274,22 @@ public class HeaderBlockTests
 
     public static IEnumerable<Func<(Type, byte)>> GetPointTypes()
     {
-        yield return () => (typeof(PointDataRecord), PointDataRecord.Id);
-        yield return () => (typeof(GpsPointDataRecord), GpsPointDataRecord.Id);
+        yield return static () => (typeof(PointDataRecord), PointDataRecord.Id);
+        yield return static () => (typeof(GpsPointDataRecord), GpsPointDataRecord.Id);
 #if LAS1_2_OR_GREATER
-        yield return () => (typeof(ColorPointDataRecord), ColorPointDataRecord.Id);
-        yield return () => (typeof(GpsColorPointDataRecord), GpsColorPointDataRecord.Id);
+        yield return static () => (typeof(ColorPointDataRecord), ColorPointDataRecord.Id);
+        yield return static () => (typeof(GpsColorPointDataRecord), GpsColorPointDataRecord.Id);
 #endif
 #if LAS1_3_OR_GREATER
-        yield return () => (typeof(GpsWaveformPointDataRecord), GpsWaveformPointDataRecord.Id);
-        yield return () => (typeof(GpsColorWaveformPointDataRecord), GpsColorWaveformPointDataRecord.Id);
+        yield return static () => (typeof(GpsWaveformPointDataRecord), GpsWaveformPointDataRecord.Id);
+        yield return static () => (typeof(GpsColorWaveformPointDataRecord), GpsColorWaveformPointDataRecord.Id);
 #endif
 #if LAS1_4_OR_GREATER
-        yield return () => (typeof(ExtendedGpsPointDataRecord), ExtendedGpsPointDataRecord.Id);
-        yield return () => (typeof(ExtendedGpsColorPointDataRecord), ExtendedGpsColorPointDataRecord.Id);
-        yield return () => (typeof(ExtendedGpsColorNearInfraredPointDataRecord), ExtendedGpsColorNearInfraredPointDataRecord.Id);
-        yield return () => (typeof(ExtendedGpsWaveformPointDataRecord), ExtendedGpsWaveformPointDataRecord.Id);
-        yield return () => (typeof(ExtendedGpsColorNearInfraredWaveformPointDataRecord), ExtendedGpsColorNearInfraredWaveformPointDataRecord.Id);
+        yield return static () => (typeof(ExtendedGpsPointDataRecord), ExtendedGpsPointDataRecord.Id);
+        yield return static () => (typeof(ExtendedGpsColorPointDataRecord), ExtendedGpsColorPointDataRecord.Id);
+        yield return static () => (typeof(ExtendedGpsColorNearInfraredPointDataRecord), ExtendedGpsColorNearInfraredPointDataRecord.Id);
+        yield return static () => (typeof(ExtendedGpsWaveformPointDataRecord), ExtendedGpsWaveformPointDataRecord.Id);
+        yield return static () => (typeof(ExtendedGpsColorNearInfraredWaveformPointDataRecord), ExtendedGpsColorNearInfraredWaveformPointDataRecord.Id);
 #endif
     }
 }

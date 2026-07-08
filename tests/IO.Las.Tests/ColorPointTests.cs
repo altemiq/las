@@ -64,40 +64,40 @@ public class ColorPointTests
     {
         var destination = new byte[Bytes.Length];
         _ = Point.WriteLittleEndian(destination);
-        await Assert.That(destination).IsEquivalentTo(Bytes);
+        _ = await Assert.That(destination).IsEquivalentTo(Bytes);
     }
 
     [Test]
     public async Task CopyTo()
     {
         var destination = new byte[Bytes.Length];
-        Point.CopyTo(destination);
-        await Assert.That(destination).IsEquivalentTo(Bytes);
+        _ = Point.CopyTo(destination);
+        _ = await Assert.That(destination).IsEquivalentTo(Bytes);
     }
 
     private static async Task CheckPoint(ColorPointDataRecord record)
     {
-        await Assert.That(record)
-            .Member(p => p.X, x => x.IsEqualTo(2757))
-            .And.Member(p => p.Y, y => y.IsEqualTo(-1377))
-            .And.Member(p => p.Z, z => z.IsEqualTo(-6717))
-            .And.Member(p => p.Intensity, intensity => intensity.IsEqualTo((ushort)430))
-            .And.Member(p => p.ReturnNumber, returnNumber => returnNumber.IsEqualTo((byte)1))
-            .And.Member(p => p.NumberOfReturns, numberOfReturns => numberOfReturns.IsEqualTo((byte)1))
-            .And.Member(p => p.ScanDirectionFlag, scanDirectionFlag => scanDirectionFlag.IsFalse())
-            .And.Member(p => p.EdgeOfFlightLine, edgeOfFlightLine => edgeOfFlightLine.IsFalse())
-            .And.Member(p => p.Classification, classification => classification.IsEqualTo(Classification.Unclassified))
-            .And.Member(p => p.Synthetic, synthetic => synthetic.IsFalse())
-            .And.Member(p => p.KeyPoint, keyPoint => keyPoint.IsFalse())
-            .And.Member(p => p.Withheld, withheld => withheld.IsFalse())
-            .And.Member(p => p.ScanAngleRank, scanAngleRank => scanAngleRank.IsEqualTo((sbyte)-29))
-            .And.Member(p => p.UserData, userData => userData.IsDefault())
-            .And.Member(p => p.PointSourceId, pointSourceId => pointSourceId.IsDefault())
+        _ = await Assert.That(record)
+            .Member(static p => p.X, static x => x.IsEqualTo(2757))
+            .And.Member(static p => p.Y, static y => y.IsEqualTo(-1377))
+            .And.Member(static p => p.Z, static z => z.IsEqualTo(-6717))
+            .And.Member(static p => p.Intensity, static intensity => intensity.IsEqualTo((ushort)430))
+            .And.Member(static p => p.ReturnNumber, static returnNumber => returnNumber.IsEqualTo((byte)1))
+            .And.Member(static p => p.NumberOfReturns, static numberOfReturns => numberOfReturns.IsEqualTo((byte)1))
+            .And.Member(static p => p.ScanDirectionFlag, static scanDirectionFlag => scanDirectionFlag.IsFalse())
+            .And.Member(static p => p.EdgeOfFlightLine, static edgeOfFlightLine => edgeOfFlightLine.IsFalse())
+            .And.Member(static p => p.Classification, static classification => classification.IsEqualTo(Classification.Unclassified))
+            .And.Member(static p => p.Synthetic, static synthetic => synthetic.IsFalse())
+            .And.Member(static p => p.KeyPoint, static keyPoint => keyPoint.IsFalse())
+            .And.Member(static p => p.Withheld, static withheld => withheld.IsFalse())
+            .And.Member(static p => p.ScanAngleRank, static scanAngleRank => scanAngleRank.IsEqualTo((sbyte)-29))
+            .And.Member(static p => p.UserData, static userData => userData.IsDefault())
+            .And.Member(static p => p.PointSourceId, static pointSourceId => pointSourceId.IsDefault())
             .And.Member(
-                p => p.Color,
-                color => color
-                    .Member(c => c.R, r => r.IsNotDefault())
-                    .And.Member(c => c.G, g => g.IsNotDefault())
-                    .And.Member(c => c.B, b => b.IsNotDefault()));
+                static p => p.Color,
+                static color => color
+                    .Member(static c => c.R, static r => r.IsNotDefault())
+                    .And.Member(static c => c.G, static g => g.IsNotDefault())
+                    .And.Member(static c => c.B, static b => b.IsNotDefault()));
     }
 }

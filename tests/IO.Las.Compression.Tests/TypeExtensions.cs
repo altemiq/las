@@ -6,7 +6,12 @@ public static class TypeExtensions
 {
     public static TypeOfAssertion<TValue> IsTypeOf<TValue>(this TUnit.Assertions.Sources.ValueAssertion<TValue> assertion, Type expectedType)
     {
-        assertion.Context.ExpressionBuilder.Append($".IsTypeOf<{expectedType.Name}>()");
+        _ =
+#if NET6_0_OR_GREATER
+            assertion.Context.ExpressionBuilder.Append(System.Globalization.CultureInfo.InvariantCulture, $".IsTypeOf<{expectedType.Name}>()");
+#else
+            assertion.Context.ExpressionBuilder.Append($".IsTypeOf<{expectedType.Name}>()");
+#endif
         return new(assertion.Context, expectedType);
     }
 }
@@ -45,5 +50,8 @@ public class TypeOfAssertion<TValue>(
             : AssertionResult.Failed($"type {actualType.Name} is not assignable to {expectedType.Name}"));
     }
 
-    protected override string GetExpectation() => $"to be of type {expectedType.Name}";
+    protected override string GetExpectation()
+    {
+        return $"to be of type {expectedType.Name}";
+    }
 }

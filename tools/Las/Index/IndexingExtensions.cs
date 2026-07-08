@@ -27,6 +27,7 @@ internal static class IndexingExtensions
     /// </summary>
     /// <param name="reader">The LAS reader.</param>
     /// <returns>The LAS index.</returns>
+    /// <exception cref="InvalidDataException">The data is invalid.</exception>
     public static Indexing.LasIndex ReadIndex(this LasReader reader) =>
         TryReadIndex(reader, out var index)
             ? index

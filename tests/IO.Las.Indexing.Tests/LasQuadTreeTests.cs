@@ -1,5 +1,3 @@
-using System.Numerics;
-
 namespace Altemiq.IO.Las.Indexing;
 
 public class LasQuadTreeTests
@@ -8,7 +6,7 @@ public class LasQuadTreeTests
     public async Task GetCell()
     {
         var quadTree = new LasQuadTree(0, 1000, 0, 1000, 100);
-        await Assert.That(quadTree.GetCellIndex(25, 50)).IsEqualTo(100);
+        _ = await Assert.That(quadTree.GetCellIndex(25, 50)).IsEqualTo(100);
     }
 
     [Test]
@@ -16,8 +14,8 @@ public class LasQuadTreeTests
     {
         var quadTree = new LasQuadTree(0, 1000, 0, 1000, 100);
         var (minimum, maximum) = quadTree.GetBounds(1, 1);
-        await Assert.That(minimum).IsEqualTo(new(500, -300));
-        await Assert.That(maximum).IsEqualTo(new(1300, 500));
+        _ = await Assert.That(minimum).IsEqualTo(new(500, -300));
+        _ = await Assert.That(maximum).IsEqualTo(new(1300, 500));
     }
 
     [Test]
@@ -25,21 +23,21 @@ public class LasQuadTreeTests
     {
         var quadTree = new LasQuadTree(0, 1000, 0, 1000, 100);
         var (minimum, maximum) = quadTree.GetBounds(new Vector2D(750, 250), 1);
-        await Assert.That(minimum).IsEqualTo(new(500, -300));
-        await Assert.That(maximum).IsEqualTo(new(1300, 500));
+        _ = await Assert.That(minimum).IsEqualTo(new(500, -300));
+        _ = await Assert.That(maximum).IsEqualTo(new(1300, 500));
     }
 
     [Test]
     public async Task WithinRectangle()
     {
         var quadTree = new LasQuadTree(0, 1000, 0, 1000, 100);
-        await Assert.That(quadTree.CellsWithinRectangle(0, 100, 0, 100)).IsEquivalentTo([99]);
+        _ = await Assert.That(quadTree.CellsWithinRectangle(0, 100, 0, 100)).IsEquivalentTo([99]);
     }
 
     [Test]
     public async Task WithinTile()
     {
         var quadTree = new LasQuadTree(0, 1000, 0, 1000, 100);
-        await Assert.That(quadTree.CellsWithinTile(0, 0, 100)).IsEquivalentTo([100]);
+        _ = await Assert.That(quadTree.CellsWithinTile(0, 0, 100)).IsEquivalentTo([100]);
     }
 }

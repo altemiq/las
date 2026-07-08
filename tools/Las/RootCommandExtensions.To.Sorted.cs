@@ -34,7 +34,7 @@ internal static partial class RootCommandExtensions
                 Options.Indexing.Append,
             };
 
-            command.SetAction(parseResult => To.Sorted.Processor.Process(parseResult.GetServices(), parseResult.InvocationConfiguration.Output, parseResult.GetRequiredValue(Arguments.Inputs), parseResult.GetValue(Options.To.Output), parseResult.GetValue(Options.Indexing.Append)));
+            command.SetAction(static parseResult => To.Sorted.Processor.Process(parseResult.GetServices(), parseResult.InvocationConfiguration.Output, parseResult.GetRequiredValue(Arguments.Inputs), parseResult.GetValue(Options.To.Output), parseResult.GetValue(Options.Indexing.Append)));
 
             return command;
         }

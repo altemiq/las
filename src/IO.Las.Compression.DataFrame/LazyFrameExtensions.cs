@@ -6,8 +6,6 @@
 
 namespace Altemiq.IO.Las;
 
-#pragma warning disable SA1101
-
 /// <summary>
 /// The <see cref="LazyFrame"/> extensions.
 /// </summary>
@@ -18,6 +16,7 @@ public static class LazyFrameExtensions
         /// <summary>
         /// Creates a <see cref="LazyFrame"/> from the <see cref="ILasReader"/>.
         /// </summary>
+        /// <typeparam name="T">The type of reader.</typeparam>
         /// <param name="reader">The reader.</param>
         /// <returns>The lazy frame.</returns>
         public static LazyFrame ScanLaz<T>(T reader)

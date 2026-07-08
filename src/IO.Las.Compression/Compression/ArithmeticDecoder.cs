@@ -100,6 +100,7 @@ internal sealed class ArithmeticDecoder : ArithmeticCoder
     /// </summary>
     /// <param name="model">The model.</param>
     /// <returns>The decoded symbol.</returns>
+    /// <exception cref="CompressionNotInitializedException">Compression has not been initialized.</exception>
     [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
     public uint DecodeSymbol(ArithmeticSymbolModel model)
     {

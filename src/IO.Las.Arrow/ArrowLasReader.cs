@@ -113,7 +113,7 @@ public sealed class ArrowLasReader : ILasReader, IDisposable
         }
 
         // No more data batch
-        this.currentBatch = null!;
+        this.currentBatch = null;
         this.isClosed = true;
         return default;
     }
@@ -130,7 +130,7 @@ public sealed class ArrowLasReader : ILasReader, IDisposable
                 continue;
             }
 
-            this.currentBatch = null!;
+            this.currentBatch = null;
             this.isClosed = true;
             return default;
         }
@@ -210,7 +210,6 @@ public sealed class ArrowLasReader : ILasReader, IDisposable
     }
 
     /// <inheritdoc />
-    [System.Diagnostics.CodeAnalysis.SuppressMessage("Design", "MA0042:Do not use blocking calls in an async method", Justification = "This would cause recursion")]
     public ValueTask<int> ReadPointDataRecordDataAsync(Memory<byte> buffer, CancellationToken cancellationToken = default)
     {
         cancellationToken.ThrowIfCancellationRequested();
@@ -839,6 +838,7 @@ public sealed class ArrowLasReader : ILasReader, IDisposable
 
     private static byte InferPointDataRecordId(Schema schema)
     {
+#pragma warning disable IDE0046
         if (IsLegacy(schema))
         {
             if (!HasGps(schema))
@@ -860,9 +860,12 @@ public sealed class ArrowLasReader : ILasReader, IDisposable
 
             // Have Color
 #if LAS1_3_OR_GREATER
-            return HasWaveform(schema)
-                ? GpsColorWaveformPointDataRecord.Id
-                : GpsColorPointDataRecord.Id;
+            if (!HasWaveform(schema))
+            {
+                return GpsColorPointDataRecord.Id;
+            }
+
+            return GpsColorWaveformPointDataRecord.Id;
 #endif
 #else
             return GpsPointDataRecord.Id;
@@ -887,12 +890,16 @@ public sealed class ArrowLasReader : ILasReader, IDisposable
             return ExtendedGpsColorPointDataRecord.Id;
         }
 
-        return HasWaveform(schema)
-            ? ExtendedGpsColorNearInfraredWaveformPointDataRecord.Id
-            : ExtendedGpsColorNearInfraredPointDataRecord.Id;
+        if (!HasWaveform(schema))
+        {
+            return ExtendedGpsColorNearInfraredPointDataRecord.Id;
+        }
+
+        return ExtendedGpsColorNearInfraredWaveformPointDataRecord.Id;
 #else
         throw new System.Diagnostics.UnreachableException();
 #endif
+#pragma warning restore IDE0046
 
         static bool IsLegacy(Schema schema)
         {

@@ -42,15 +42,24 @@ public class LazDecodeBenchmarks
 
     [Benchmark]
     [BenchmarkCategory("Fusa", "Parsed")]
-    public long DecodeFusaParsed() => DecodeAll(this.fusa);
+    public long DecodeFusaParsed()
+    {
+        return DecodeAll(this.fusa);
+    }
 
     [Benchmark]
     [BenchmarkCategory("Coloured", "Parsed")]
-    public long DecodeColouredParsed() => DecodeAll(this.coloured);
+    public long DecodeColouredParsed()
+    {
+        return DecodeAll(this.coloured);
+    }
 
     [Benchmark]
     [BenchmarkCategory("FusaHeight7", "Parsed")]
-    public long DecodeFusaHeight7Parsed() => DecodeAll(this.fusaHeight7);
+    public long DecodeFusaHeight7Parsed()
+    {
+        return DecodeAll(this.fusaHeight7);
+    }
 
     private static long DecodeAll(byte[] laz)
     {

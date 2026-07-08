@@ -65,6 +65,7 @@ internal sealed class LasInterval : IEnumerable<KeyValuePair<int, LasIntervalSta
     /// </summary>
     /// <param name="source">The source.</param>
     /// <returns>The LAS interval.</returns>
+    /// <exception cref="ArgumentException">The signature is invalid.</exception>
     public static LasInterval ReadFrom(ReadOnlySpan<byte> source)
     {
         if (System.Buffers.Binary.BinaryPrimitives.ReadUInt32LittleEndian(source[..4]) is not SignatureValue)
@@ -445,7 +446,10 @@ internal sealed class LasInterval : IEnumerable<KeyValuePair<int, LasIntervalSta
             startCell.Total = total;
         }
 
-        static bool IsTombstone(LasIntervalCell cell) => cell is { Start: 1U, End: 0U };
+        static bool IsTombstone(LasIntervalCell cell)
+        {
+            return cell is { Start: 1U, End: 0U };
+        }
     }
 
     /// <summary>
@@ -569,8 +573,8 @@ internal sealed class LasInterval : IEnumerable<KeyValuePair<int, LasIntervalSta
             return false;
         }
 
-        using var firstEnumerator = this.cellsDictionary.OrderBy(kvp => kvp.Key).GetEnumerator();
-        using var secondEnumerator = interval.cellsDictionary.OrderBy(kvp => kvp.Key).GetEnumerator();
+        using var firstEnumerator = this.cellsDictionary.OrderBy(static kvp => kvp.Key).GetEnumerator();
+        using var secondEnumerator = interval.cellsDictionary.OrderBy(static kvp => kvp.Key).GetEnumerator();
 
         while (firstEnumerator.MoveNext())
         {
@@ -819,8 +823,8 @@ internal sealed class LasInterval : IEnumerable<KeyValuePair<int, LasIntervalSta
 
         public enum OwnerKind : byte
         {
-            Head,
-            Tail,
+            Head = 0,
+            Tail = 1,
         }
 
         public OwnerKind Kind { get; }

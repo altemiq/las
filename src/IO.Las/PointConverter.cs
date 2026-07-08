@@ -18,6 +18,7 @@ internal static partial class PointConverter
     /// <param name="point">The point.</param>
     /// <returns>The extended point.</returns>
     /// <remarks>If <paramref name="point"/> is a <see cref="IExtendedPointDataRecord"/> then it is returned.</remarks>
+    /// <exception cref="InvalidCastException">Could not convert the point data record.</exception>
     public static IExtendedPointDataRecord ToExtended(IBasePointDataRecord point) =>
         point switch
         {
@@ -37,6 +38,7 @@ internal static partial class PointConverter
     /// <param name="point">The point.</param>
     /// <returns>The converted point.</returns>
     /// <remarks>If <paramref name="point"/> is a <see cref="IPointDataRecord"/> then it is returned.</remarks>
+    /// <exception cref="InvalidCastException">Could not convert the point data record.</exception>
     public static IPointDataRecord ToSimple(IBasePointDataRecord point) =>
         point switch
         {

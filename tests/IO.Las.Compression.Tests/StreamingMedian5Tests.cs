@@ -16,7 +16,7 @@ public class StreamingMedian5Tests
     [Test]
     public async Task NewInstanceReturnsZeroMedian()
     {
-        await Assert.That(default(StreamingMedian5).Get()).IsEqualTo(0);
+        _ = await Assert.That(default(StreamingMedian5).Get()).IsEqualTo(0);
     }
 
     [Test]
@@ -35,7 +35,7 @@ public class StreamingMedian5Tests
         for (var i = 0; i < inputs.Length; i++)
         {
             median.Add(inputs[i]);
-            await Assert.That(median.Get())
+            _ = await Assert.That(median.Get())
                 .IsEqualTo(expected[i])
                 .Because($"[{name}] median after inserting inputs[0..={i}] = [{string.Join(", ", inputs.Take(i + 1))}]");
         }
@@ -64,8 +64,8 @@ public class StreamingMedian5Tests
 
         // Expected values match the same baseline class behavior: four ascending adds
         // produce a median of 200; four descending produce -200.
-        await Assert.That(medians[0].Get()).IsEqualTo(200);
-        await Assert.That(medians[1].Get()).IsEqualTo(-200);
-        await Assert.That(medians[2].Get()).IsEqualTo(0);
+        _ = await Assert.That(medians[0].Get()).IsEqualTo(200);
+        _ = await Assert.That(medians[1].Get()).IsEqualTo(-200);
+        _ = await Assert.That(medians[2].Get()).IsEqualTo(0);
     }
 }

@@ -8,14 +8,14 @@ public class LasIntervalTests
         var interval = new LasInterval();
         var created = interval.Add(pointIndex: 10, cellIndex: 1);
 
-        await Assert.That(created).IsTrue();
-        await Assert.That(interval.GetNumberOfCells()).IsEqualTo(1);
-        await Assert.That(interval.TryGetCell(1, out var cell)).IsTrue();
+        _ = await Assert.That(created).IsTrue();
+        _ = await Assert.That(interval.GetNumberOfCells()).IsEqualTo(1);
+        _ = await Assert.That(interval.TryGetCell(1, out var cell)).IsTrue();
 
         var intervals = GetIntervals(interval, cell);
-        await Assert.That(intervals).IsEquivalentTo([(10U, 10U)]);
-        await Assert.That(cell.Full).IsEqualTo(1U);
-        await Assert.That(cell.Total).IsEqualTo(1U);
+        _ = await Assert.That(intervals).IsEquivalentTo([(10U, 10U)]);
+        _ = await Assert.That(cell.Full).IsEqualTo(1U);
+        _ = await Assert.That(cell.Total).IsEqualTo(1U);
     }
 
     [Test]
@@ -28,9 +28,9 @@ public class LasIntervalTests
 
         _ = interval.TryGetCell(1, out var cell);
         var intervals = GetIntervals(interval, cell);
-        await Assert.That(intervals).IsEquivalentTo([(10U, 12U)]);
-        await Assert.That(cell.Full).IsEqualTo(3U);
-        await Assert.That(cell.Total).IsEqualTo(3U);
+        _ = await Assert.That(intervals).IsEquivalentTo([(10U, 12U)]);
+        _ = await Assert.That(cell.Full).IsEqualTo(3U);
+        _ = await Assert.That(cell.Total).IsEqualTo(3U);
     }
 
     [Test]
@@ -42,15 +42,15 @@ public class LasIntervalTests
 
         // gap of 100 points exceeds threshold of 10 -> should create a new tail interval
         var createdNew = interval.Add(111, 1);
-        await Assert.That(createdNew).IsTrue();
+        _ = await Assert.That(createdNew).IsTrue();
 
         _ = interval.TryGetCell(1, out var cell);
         var intervals = GetIntervals(interval, cell);
-        await Assert.That(intervals).IsEquivalentTo([(10U, 11U), (111U, 111U)]);
-        await Assert.That(cell.Full).IsEqualTo(3U);
+        _ = await Assert.That(intervals).IsEquivalentTo([(10U, 11U), (111U, 111U)]);
+        _ = await Assert.That(cell.Full).IsEqualTo(3U);
 
         // Total counts per-interval spans: (10..11)+(111..111) = 2+1 = 3
-        await Assert.That(cell.Total).IsEqualTo(3U);
+        _ = await Assert.That(cell.Total).IsEqualTo(3U);
     }
 
     [Test]
@@ -61,11 +61,11 @@ public class LasIntervalTests
         _ = interval.Add(20, 2);
         _ = interval.Add(30, 3);
 
-        await Assert.That(interval.GetNumberOfCells()).IsEqualTo(3);
-        await Assert.That(interval.TryGetCell(1, out _)).IsTrue();
-        await Assert.That(interval.TryGetCell(2, out _)).IsTrue();
-        await Assert.That(interval.TryGetCell(3, out _)).IsTrue();
-        await Assert.That(interval.TryGetCell(4, out _)).IsFalse();
+        _ = await Assert.That(interval.GetNumberOfCells()).IsEqualTo(3);
+        _ = await Assert.That(interval.TryGetCell(1, out _)).IsTrue();
+        _ = await Assert.That(interval.TryGetCell(2, out _)).IsTrue();
+        _ = await Assert.That(interval.TryGetCell(3, out _)).IsTrue();
+        _ = await Assert.That(interval.TryGetCell(4, out _)).IsFalse();
     }
 
     [Test]
@@ -86,8 +86,8 @@ public class LasIntervalTests
 
         var roundTripped = LasInterval.ReadFrom(stream);
 
-        await Assert.That(roundTripped.Equals(original)).IsTrue();
-        await Assert.That(roundTripped.GetNumberOfCells()).IsEqualTo(original.GetNumberOfCells());
+        _ = await Assert.That(roundTripped.Equals(original)).IsTrue();
+        _ = await Assert.That(roundTripped.GetNumberOfCells()).IsEqualTo(original.GetNumberOfCells());
     }
 
     [Test]
@@ -113,7 +113,7 @@ public class LasIntervalTests
         reloaded.WriteTo(secondStream);
         var secondBytes = secondStream.ToArray();
 
-        await Assert.That(secondBytes).IsEquivalentTo(firstBytes);
+        _ = await Assert.That(secondBytes).IsEquivalentTo(firstBytes);
     }
 
     [Test]
@@ -141,7 +141,7 @@ public class LasIntervalTests
 
         // the chain must still be head(10..11) -> tail(50..52) -- the tail must have been found and extended,
         // not overwritten. That both proves the rehydrate path and that the head is untouched.
-        await Assert.That(intervals).IsEquivalentTo([(10U, 11U), (50U, 52U)]);
+        _ = await Assert.That(intervals).IsEquivalentTo([(10U, 11U), (50U, 52U)]);
     }
 
     [Test]
@@ -155,7 +155,7 @@ public class LasIntervalTests
         _ = second.Add(10, 1);
         _ = second.Add(12, 1);
 
-        await Assert.That(first.Equals(second)).IsFalse();
+        _ = await Assert.That(first.Equals(second)).IsFalse();
     }
 
     [Test]
@@ -173,8 +173,8 @@ public class LasIntervalTests
         stream.Position = 0;
         var roundTripped = LasInterval.ReadFrom(stream);
 
-        await Assert.That(built.Equals(roundTripped)).IsTrue();
-        await Assert.That(built.GetHashCode()).IsEqualTo(roundTripped.GetHashCode());
+        _ = await Assert.That(built.Equals(roundTripped)).IsTrue();
+        _ = await Assert.That(built.GetHashCode()).IsEqualTo(roundTripped.GetHashCode());
     }
 
     [Test]
@@ -185,7 +185,7 @@ public class LasIntervalTests
         _ = interval.Add(2, 2);
 
         var clone = interval.CloneEmpty();
-        await Assert.That(clone.GetNumberOfCells()).IsEqualTo(0);
+        _ = await Assert.That(clone.GetNumberOfCells()).IsEqualTo(0);
     }
 
     [Test]
@@ -193,7 +193,7 @@ public class LasIntervalTests
     {
         var interval = new LasInterval();
         var result = interval.Merge([]);
-        await Assert.That(result).IsNull();
+        _ = await Assert.That(result).IsNull();
     }
 
     [Test]
@@ -206,7 +206,7 @@ public class LasIntervalTests
         _ = interval.TryGetCell(1, out var cell);
 
         var merged = interval.Merge([cell]);
-        await Assert.That(merged).IsSameReferenceAs(cell);
+        _ = await Assert.That(merged).IsSameReferenceAs(cell);
     }
 
     [Test]
@@ -222,12 +222,12 @@ public class LasIntervalTests
         _ = interval.TryGetCell(2, out var cell2);
 
         var merged = interval.Merge([cell1, cell2]);
-        await Assert.That(merged).IsNotNull();
+        _ = await Assert.That(merged).IsNotNull();
 
         // merged chain: 10..11 then 100..101 (gap > threshold so two intervals remain)
         var intervals = GetIntervals(interval, merged);
-        await Assert.That(intervals).IsEquivalentTo([(10U, 11U), (100U, 101U)]);
-        await Assert.That(merged.Full).IsEqualTo(4U); // 2 + 2 input points
+        _ = await Assert.That(intervals).IsEquivalentTo([(10U, 11U), (100U, 101U)]);
+        _ = await Assert.That(merged.Full).IsEqualTo(4U); // 2 + 2 input points
     }
 
     [Test]
@@ -237,9 +237,9 @@ public class LasIntervalTests
         _ = interval.Add(10, 5);
 
         var ok = interval.MergeCells([5], 42);
-        await Assert.That(ok).IsTrue();
-        await Assert.That(interval.TryGetCell(5, out _)).IsFalse();
-        await Assert.That(interval.TryGetCell(42, out _)).IsTrue();
+        _ = await Assert.That(ok).IsTrue();
+        _ = await Assert.That(interval.TryGetCell(5, out _)).IsFalse();
+        _ = await Assert.That(interval.TryGetCell(42, out _)).IsTrue();
     }
 
     [Test]
@@ -250,11 +250,11 @@ public class LasIntervalTests
         _ = interval.Add(100, 2);
 
         var ok = interval.MergeCells([1, 2], 99);
-        await Assert.That(ok).IsTrue();
-        await Assert.That(interval.TryGetCell(1, out _)).IsFalse();
-        await Assert.That(interval.TryGetCell(2, out _)).IsFalse();
-        await Assert.That(interval.TryGetCell(99, out var merged)).IsTrue();
-        await Assert.That(merged!.Full).IsEqualTo(2U);
+        _ = await Assert.That(ok).IsTrue();
+        _ = await Assert.That(interval.TryGetCell(1, out _)).IsFalse();
+        _ = await Assert.That(interval.TryGetCell(2, out _)).IsFalse();
+        _ = await Assert.That(interval.TryGetCell(99, out var merged)).IsTrue();
+        _ = await Assert.That(merged.Full).IsEqualTo(2U);
     }
 
     [Test]
@@ -270,7 +270,7 @@ public class LasIntervalTests
         _ = interval.Add(251, 1);
 
         _ = interval.TryGetCell(1, out var cellBefore);
-        await Assert.That(GetIntervals(interval, cellBefore).Count).IsEqualTo(3);
+        _ = await Assert.That(GetIntervals(interval, cellBefore).Count).IsEqualTo(3);
 
         // cap to 2 intervals total (1 cell * 2). Should collapse the smallest gap (38 between 11..50)
         interval.MergeIntervals(maximumIntervals: 2);
@@ -279,7 +279,7 @@ public class LasIntervalTests
         var intervals = GetIntervals(interval, cellAfter);
 
         // first interval should be 10..51 after the smaller gap was eaten; second stays 250..251
-        await Assert.That(intervals).IsEquivalentTo([(10U, 51U), (250U, 251U)]);
+        _ = await Assert.That(intervals).IsEquivalentTo([(10U, 51U), (250U, 251U)]);
     }
 
     [Test]
@@ -294,7 +294,7 @@ public class LasIntervalTests
         interval.MergeIntervals(maximumIntervals: 0);
 
         // cell count should not change
-        await Assert.That(interval.GetNumberOfCells()).IsEqualTo(originalCells);
+        _ = await Assert.That(interval.GetNumberOfCells()).IsEqualTo(originalCells);
     }
 
     // helper: flatten a start cell's chain into a list of (Start, End) tuples.
@@ -302,11 +302,8 @@ public class LasIntervalTests
     // pointers), making the tests robust to representation changes.
     private static List<(uint Start, uint End)> GetIntervals(LasInterval owner, LasIntervalStartCell cell)
     {
-        if (cell is null)
-        {
-            return [];
-        }
-
-        return [.. owner.EnumerateIntervals(cell).Select(t => (t.Start, t.End))];
+        return cell is null
+            ? []
+            : [.. owner.EnumerateIntervals(cell).Select(static t => (t.Start, t.End))];
     }
 }

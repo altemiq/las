@@ -10,8 +10,8 @@ public static class ExtensionMethods
         08, 12, 20, 28, 15, 17, 24, 07,
         19, 27, 23, 06, 26, 05, 04, 31
     ];
-    
-    extension(System.Random random)
+
+    extension(Random random)
     {
         public long NextInt64()
         {
@@ -27,7 +27,7 @@ public static class ExtensionMethods
                 }
             }
         }
-        
+
         public long NextInt64(long minValue, long maxValue)
         {
             var exclusiveRange = (ulong)(maxValue - minValue);
@@ -39,7 +39,7 @@ public static class ExtensionMethods
                 var bits = Log2Ceiling(exclusiveRange);
                 while (true)
                 {
-                    var result = random.NextUInt64() >> (sizeof(long) * 8 - bits);
+                    var result = random.NextUInt64() >> ((sizeof(long) * 8) - bits);
                     if (result < exclusiveRange)
                     {
                         return (long)result + minValue;
@@ -50,7 +50,7 @@ public static class ExtensionMethods
             System.Diagnostics.Debug.Assert(minValue == maxValue || minValue + 1 == maxValue);
             return minValue;
         }
-        
+
         public float NextSingle()
         {
             while (true)
@@ -62,24 +62,26 @@ public static class ExtensionMethods
                 }
             }
         }
-    
-        
-        private ulong NextUInt64() =>
-            (uint)random.Next(1 << 22) |
+
+
+        private ulong NextUInt64()
+        {
+            return (uint)random.Next(1 << 22) |
             ((ulong)(uint)random.Next(1 << 22) << 22) |
             ((ulong)(uint)random.Next(1 << 20) << 44);
+        }
     }
-    
+
     private static int Log2Ceiling(ulong value)
     {
-        int result = Log2(value);
+        var result = Log2(value);
         if (PopCount(value) != 1)
         {
             result++;
         }
-        
+
         return result;
-        
+
         static int PopCount(ulong value)
         {
             const ulong C1 = 0x_55555555_55555555ul;
@@ -94,7 +96,7 @@ public static class ExtensionMethods
             return (int)value;
         }
     }
-    
+
     private static int Log2(uint value)
     {
         // The 0->0 contract is fulfilled by setting the LSB to 1.
@@ -112,21 +114,16 @@ public static class ExtensionMethods
         // Using deBruijn sequence, k=2, n=5 (2^5=32) : 0b_0000_0111_1100_0100_1010_1100_1101_1101u
         return Log2DeBruijn[(int)((value * 0x07C4ACDDu) >> 27)];
     }
-    
+
     private static int Log2(ulong value)
     {
         value |= 1;
 
-        uint hi = (uint)(value >> 32);
+        var hi = (uint)(value >> 32);
 
-        if (hi == 0)
-        {
-            return Log2((uint)value);
-        }
-
-        return 32 + Log2(hi);
+        return hi == 0 ? Log2((uint)value) : 32 + Log2(hi);
     }
-    
+
 }
 
 #endif

@@ -11,6 +11,7 @@ using Microsoft.Extensions.DependencyInjection;
 /// <summary>
 /// The <see cref="S3"/> <see cref="Stream"/> provider.
 /// </summary>
+/// <param name="services">The services.</param>
 public class S3StreamProvider(IServiceProvider services) : IStreamProvider
 {
     private readonly Lazy<Amazon.S3.IAmazonS3> client = new(services.GetRequiredService<Amazon.S3.IAmazonS3>, LazyThreadSafetyMode.PublicationOnly);

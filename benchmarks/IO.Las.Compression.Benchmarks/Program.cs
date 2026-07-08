@@ -37,7 +37,7 @@ static IConfig BuildConfig()
         .AddDiagnoser(BenchmarkDotNet.Diagnosers.MemoryDiagnoser.Default);
 
     // Always include a "local" job that builds against the in-tree ProjectReference.
-    config.AddJob(Job.Default
+    _ = config.AddJob(Job.Default
         .WithMsBuildArguments("/p:LasCompressionVersion=")
         .WithId("local"));
 
@@ -51,7 +51,7 @@ static IConfig BuildConfig()
 
     foreach (var version in baselines.Split([';', ',', ' '], StringSplitOptions.RemoveEmptyEntries))
     {
-        config.AddJob(Job.Default
+        _ = config.AddJob(Job.Default
             .WithMsBuildArguments($"/p:LasCompressionVersion={version}")
             .WithId($"nuget-{version}"));
     }

@@ -252,7 +252,7 @@ public sealed class CachedStream : Stream, ICacheStream, IAsyncCacheStream
             return;
         }
 
-        this.baseStream.Seek(start, SeekOrigin.Begin);
+        _ = this.baseStream.Seek(start, SeekOrigin.Begin);
         this.bufferStart = this.baseStream.Position;
         this.bufferOffset = 0;
         this.bufferIndex = 0;
@@ -272,7 +272,7 @@ public sealed class CachedStream : Stream, ICacheStream, IAsyncCacheStream
             return;
         }
 
-        this.baseStream.Seek(start, SeekOrigin.Begin);
+        _ = this.baseStream.Seek(start, SeekOrigin.Begin);
         this.bufferStart = this.baseStream.Position;
         this.bufferOffset = 0;
         this.bufferIndex = 0;
@@ -284,7 +284,7 @@ public sealed class CachedStream : Stream, ICacheStream, IAsyncCacheStream
 
 #if NETSTANDARD2_1_OR_GREATER || NETCOREAPP3_0_OR_GREATER
     /// <inheritdoc />
-    public async override ValueTask DisposeAsync()
+    public override async ValueTask DisposeAsync()
     {
         await this.baseStream.DisposeAsync().ConfigureAwait(false);
         await base.DisposeAsync().ConfigureAwait(false);

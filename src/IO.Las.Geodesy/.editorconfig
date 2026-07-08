@@ -1,0 +1,5 @@
+[*.cs]
+
+# this makes the SQL much easier to read
+# we always do releases on LINUX so this doesn't matter
+dotnet_diagnostic.MA0136.severity = none

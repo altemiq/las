@@ -34,8 +34,10 @@ internal struct StreamingMedian5
     private int v3;
     private int v4;
 
-    // Inverted so that default(struct) (low == false) corresponds to the
-    // original class' parameterless constructor state (high == true).
+    /*
+      Inverted so that default(struct) (low == false) corresponds to the
+      original class' parameterless constructor state (high == true).
+    */
     private bool low;
 
     /// <summary>

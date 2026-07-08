@@ -47,7 +47,7 @@ public class LazEncodeBenchmarks
                 Y = y,
                 Z = z,
                 Intensity = (ushort)rng.Next(0, 1024),
-                ReturnNumber = (byte)(i % 5 + 1),
+                ReturnNumber = (byte)((i % 5) + 1),
                 NumberOfReturns = 5,
                 ScanDirectionFlag = false,
                 EdgeOfFlightLine = false,

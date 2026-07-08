@@ -10,6 +10,7 @@
     <File Path="docs/LAZ_Specification_1.4_R0.pdf" />
   </Folder>
   <Folder Name="/generators/">
+    <File Path="generators/.editorconfig" />
     <File Path="generators/Directory.Build.props" />
     <File Path="generators/Directory.Build.targets" />
     <File Path="generators/Directory.Packages.props" />
@@ -19,6 +20,7 @@
     <File Path="Directory.Versions.props" />
   </Folder>
   <Folder Name="/benchmarks/">
+    <File Path="benchmarks/.editorconfig" />
     <File Path="benchmarks/Directory.Build.props" />
     <File Path="benchmarks/Directory.Build.targets" />
     <File Path="benchmarks/Directory.Packages.props" />
@@ -27,6 +29,7 @@
     </Project>
   </Folder>
   <Folder Name="/src/">
+    <File Path="src/.editorconfig" />
     <File Path="src/Directory.Build.props" />
     <File Path="src/Directory.Build.targets" />
     <File Path="src/Directory.Packages.props" />
@@ -45,6 +48,7 @@
     <Project Path="src/IO.Las/IO.Las.csproj" />
   </Folder>
   <Folder Name="/tests/">
+    <File Path="tests/.editorconfig" />
     <File Path="tests/Directory.Build.props" />
     <File Path="tests/Directory.Build.targets" />
     <File Path="tests/Directory.Packages.props" />
@@ -79,6 +83,7 @@
     </Project>
   </Folder>
   <Folder Name="/tools/">
+    <File Path="tools/.editorconfig" />
     <File Path="tools/Directory.Build.props" />
     <File Path="tools/Directory.Build.targets" />
     <File Path="tools/Directory.Packages.props" />

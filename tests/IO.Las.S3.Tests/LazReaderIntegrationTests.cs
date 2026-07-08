@@ -10,7 +10,7 @@ public class LazReaderIntegrationTests
     [Arguments("lidar", "laz/asuf.laz", false)]
     public async Task LazExists(string bucketName, string blobName, bool expected)
     {
-        await Assert.That(() => S3Las.Exists(bucketName, blobName, this.S3ClientData.S3Client)).IsEqualTo(expected);
+        _ = await Assert.That(() => S3Las.Exists(bucketName, blobName, S3ClientData.S3Client)).IsEqualTo(expected);
     }
 
     [Test]
@@ -18,27 +18,27 @@ public class LazReaderIntegrationTests
     [Arguments("lidar", "laz/asuf.laz", false)]
     public async Task LazExistsAsync(string bucketName, string key, bool expected)
     {
-        await Assert.That(async () => await S3Las.ExistsAsync(bucketName, key, this.S3ClientData.S3Client)).IsEqualTo(expected);
+        _ = await Assert.That(async () => await S3Las.ExistsAsync(bucketName, key, S3ClientData.S3Client)).IsEqualTo(expected);
     }
 
     [Test]
     public async Task ReadLaz()
     {
-        var stream = await S3Las.OpenReadAsync("lidar", "laz/fusa.laz", this.S3ClientData.S3Client);
+        var stream = await S3Las.OpenReadAsync("lidar", "laz/fusa.laz", S3ClientData.S3Client);
         LazReader reader = new(stream);
 
         await CheckHeader(reader.Header, new(1, 1));
-        await Assert.That(reader.VariableLengthRecords).Count().IsEqualTo(2);
+        _ = await Assert.That(reader.VariableLengthRecords).Count().IsEqualTo(2);
 
-        await Assert.That(reader.ReadPointDataRecord(10).PointDataRecord).IsNotNull()
-            .And.Member(p => p.X, x => x.IsEqualTo(27799961))
-            .And.Member(p => p.Y, y => y.IsEqualTo(612234368))
-            .And.Member(p => p.Z, z => z.IsEqualTo(6222));
+        _ = await Assert.That(reader.ReadPointDataRecord(10).PointDataRecord).IsNotNull()
+            .And.Member(static p => p.X, static x => x.IsEqualTo(27799961))
+            .And.Member(static p => p.Y, static y => y.IsEqualTo(612234368))
+            .And.Member(static p => p.Z, static z => z.IsEqualTo(6222));
 
-        await Assert.That(reader.ReadPointDataRecord(277500).PointDataRecord).IsNotNull()
-            .And.Member(p => p.X, x => x.IsEqualTo(27775097))
-            .And.Member(p => p.Y, y => y.IsEqualTo(612225071))
-            .And.Member(p => p.Z, z => z.IsEqualTo(4228));
+        _ = await Assert.That(reader.ReadPointDataRecord(277500).PointDataRecord).IsNotNull()
+            .And.Member(static p => p.X, static x => x.IsEqualTo(27775097))
+            .And.Member(static p => p.Y, static y => y.IsEqualTo(612225071))
+            .And.Member(static p => p.Z, static z => z.IsEqualTo(4228));
 
         await reader.DisposeAsync();
         await stream.DisposeAsync();

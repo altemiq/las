@@ -14,9 +14,9 @@ public class DataFrameTests
 
         var data = Polars.CSharp.DataFrame.ReadLas(reader);
 
-        await Assert.That(data).IsNotNull();
+        _ = await Assert.That(data).IsNotNull();
 
-        await Assert.That(data.Filter(Col(Arrow.Constants.Columns.ReturnNumber) == 3))
+        _ = await Assert.That(data.Filter(Col(Arrow.Constants.Columns.ReturnNumber) == 3))
             .IsNotNull().And
             .Member(static m => ((Polars.CSharp.DataFrame)m).Height, static height => height.IsEqualTo(281));
     }
@@ -32,11 +32,8 @@ public class DataFrameTests
         var data = Polars.CSharp.DataFrame.ReadLas(reader);
 
         IBasePointDataRecord record = default;
-        data.WriteTo(arrowReader =>
-        {
-            record = arrowReader.ReadPointDataRecord().PointDataRecord;
-        });
+        data.WriteTo(arrowReader => record = arrowReader.ReadPointDataRecord().PointDataRecord);
 
-        await Assert.That(record).IsNotNull();
+        _ = await Assert.That(record).IsNotNull();
     }
 }

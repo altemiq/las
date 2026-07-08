@@ -64,11 +64,11 @@ public static class CompressionExtensions
     /// <returns>The point version.</returns>
     internal static ushort GetPointVersion(this IEnumerable<LasItem> items, ushort defaultVersion = 2) => items
 #if LAS1_4_OR_GREATER
-        .Where(item => item.IsType(LasItemType.Point10) || item.IsType(LasItemType.Point14))
+        .Where(static item => item.IsType(LasItemType.Point10) || item.IsType(LasItemType.Point14))
 #else
-        .Where(item => item.IsType(LasItemType.Point10))
+        .Where(static item => item.IsType(LasItemType.Point10))
 #endif
-        .Select(item => item.Version)
+        .Select(static item => item.Version)
         .FirstOrDefault(defaultVersion);
 
 #if !NET6_0_OR_GREATER

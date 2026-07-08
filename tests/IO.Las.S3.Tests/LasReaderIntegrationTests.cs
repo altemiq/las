@@ -10,7 +10,7 @@ public class LasReaderIntegrationTests
     [Arguments("lidar", "las/asuf.las", false)]
     public async Task LasExists(string bucketName, string blobName, bool expected)
     {
-        await Assert.That(() => S3Las.Exists(bucketName, blobName, this.S3ClientData.S3Client)).IsEqualTo(expected);
+        _ = await Assert.That(() => S3Las.Exists(bucketName, blobName, S3ClientData.S3Client)).IsEqualTo(expected);
     }
 
     [Test]
@@ -18,21 +18,21 @@ public class LasReaderIntegrationTests
     [Arguments("lidar", "las/asuf.las", false)]
     public async Task LasExistsAsync(string bucketName, string key, bool expected)
     {
-        await Assert.That(async () => await S3Las.ExistsAsync(bucketName, key, this.S3ClientData.S3Client)).IsEqualTo(expected);
+        _ = await Assert.That(async () => await S3Las.ExistsAsync(bucketName, key, S3ClientData.S3Client)).IsEqualTo(expected);
     }
 
     [Test]
     public async Task ReadLasAsync()
     {
-        var stream = await S3Las.OpenReadAsync("lidar", "las/fusa.las", this.S3ClientData.S3Client);
+        var stream = await S3Las.OpenReadAsync("lidar", "las/fusa.las", S3ClientData.S3Client);
         LasReader reader = new(stream);
 
         await CheckHeader(reader.Header, new(1, 1));
-        await Assert.That(reader.VariableLengthRecords).HasSingleItem();
+        _ = await Assert.That(reader.VariableLengthRecords).HasSingleItem();
 
-        await Assert.That(await reader.ReadPointDataRecordAsync())
-            .Member(p => p.PointDataRecord, p => p.IsNotNull().And.Member(pt => pt.X, x => x.IsNotDefault()))
-            .And.Member(p => p.ExtraBytes.IsEmpty, empty => empty.IsTrue());
+        _ = await Assert.That(await reader.ReadPointDataRecordAsync())
+            .Member(static p => p.PointDataRecord, static p => p.IsNotNull().And.Member(static pt => pt.X, static x => x.IsNotDefault()))
+            .And.Member(static p => p.ExtraBytes.IsEmpty, static empty => empty.IsTrue());
 
         await reader.DisposeAsync();
         await stream.DisposeAsync();

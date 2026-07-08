@@ -218,14 +218,14 @@ internal sealed class JsonLasReaderFormatter(System.Text.Json.Utf8JsonWriter wri
 
                             switch (value(item))
                             {
-                                case ulong v:
-                                    writer.WriteNumberValue(v);
+                                case ulong ul:
+                                    writer.WriteNumberValue(ul);
                                     break;
-                                case long v:
-                                    writer.WriteNumberValue(v);
+                                case long l:
+                                    writer.WriteNumberValue(l);
                                     break;
-                                case double v:
-                                    writer.WriteNumberValue(v);
+                                case double d:
+                                    writer.WriteNumberValue(d);
                                     break;
                             }
 

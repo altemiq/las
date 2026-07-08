@@ -9,6 +9,7 @@ namespace Altemiq.IO.Las.Providers;
 /// <summary>
 /// The <see cref="Http"/> <see cref="Stream"/> provider.
 /// </summary>
+/// <param name="client">The client.</param>
 public class HttpStreamProvider(HttpClient client) : IStreamProvider
 {
     /// <inheritdoc />

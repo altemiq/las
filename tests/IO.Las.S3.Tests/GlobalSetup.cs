@@ -17,12 +17,12 @@ public class GlobalHooks
     {
         // Arrange
         var builder = await DistributedApplicationTestingBuilder.CreateAsync<Projects.IO_Las_AWS_AppHost>(cancellationToken);
-        builder.Services.ConfigureHttpClientDefaults(clientBuilder =>
+        _ = builder.Services.ConfigureHttpClientDefaults(static clientBuilder =>
         {
-            clientBuilder.AddStandardResilienceHandler();
+            _ = clientBuilder.AddStandardResilienceHandler();
         });
 
-        builder.Services.AddDefaultAWSOptions(static services =>
+        _ = builder.Services.AddDefaultAWSOptions(static services =>
         {
             var options = services.GetRequiredService<IConfiguration>().GetAWSOptions();
             var model = services.GetRequiredService<DistributedApplicationModel>();
@@ -39,8 +39,8 @@ public class GlobalHooks
             options.DefaultClientConfig.ServiceURL = endpoint.Url;
             options.DefaultClientConfig.AuthenticationRegion = ministackServer.Region;
 
-            options.DefaultClientConfig.ServiceSpecificSettings.TryAdd(nameof(Amazon.S3.AmazonS3Config.UseAccelerateEndpoint), bool.FalseString);
-            options.DefaultClientConfig.ServiceSpecificSettings.TryAdd(nameof(Amazon.S3.AmazonS3Config.ForcePathStyle), bool.TrueString);
+            _ = options.DefaultClientConfig.ServiceSpecificSettings.TryAdd(nameof(Amazon.S3.AmazonS3Config.UseAccelerateEndpoint), bool.FalseString);
+            _ = options.DefaultClientConfig.ServiceSpecificSettings.TryAdd(nameof(Amazon.S3.AmazonS3Config.ForcePathStyle), bool.TrueString);
 
             return options;
 
@@ -52,7 +52,7 @@ public class GlobalHooks
             }
         });
 
-        builder.Services.AddAWSService<Amazon.S3.IAmazonS3>();
+        _ = builder.Services.AddAWSService<Amazon.S3.IAmazonS3>();
 
         App = await builder.BuildAsync(cancellationToken);
         await App.StartAsync(cancellationToken);

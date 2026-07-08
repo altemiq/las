@@ -291,7 +291,7 @@ public abstract class MultipleStream(IDictionary<string, Stream> dictionary) : S
         {
             SeekOrigin.Current => this.Position + offset,
             SeekOrigin.End => this.Length - offset,
-            _ => offset,
+            SeekOrigin.Begin or _ => offset,
         };
 
         this.SetPosition(position);

@@ -96,16 +96,16 @@ public class LazWriterTests
 
         await lasReader.DisposeAsync();
 
-        await Assert.That(outputHeader.SystemIdentifier).IsEqualTo("LAS tests");
-        await Assert.That(outputHeader.GeneratingSoftware).IsEqualTo("Las.Tests.exe");
-        await Assert.That(outputHeader.PointDataFormatId).IsEqualTo((byte)1);
+        _ = await Assert.That(outputHeader.SystemIdentifier).IsEqualTo("LAS tests");
+        _ = await Assert.That(outputHeader.GeneratingSoftware).IsEqualTo("Las.Tests.exe");
+        _ = await Assert.That(outputHeader.PointDataFormatId).IsEqualTo((byte)1);
 
-        await Assert.That(outputPoint)
+        _ = await Assert.That(outputPoint)
             .IsNotNull()
             .And.IsTypeOf<IPointDataRecord>()
-            .And.Member(p => p.Classification, classification => classification.IsEqualTo(Classification.LowVegetation));
+            .And.Member(static p => p.Classification, static classification => classification.IsEqualTo(Classification.LowVegetation));
 
-        await Assert.That(extraBytes.GetValue(0, bytes)).ValueIsTypeOf<double>().And.IsEqualTo(ExtraValue);
+        _ = await Assert.That(extraBytes.GetValue(0, bytes)).ValueIsTypeOf<double>().And.IsEqualTo(ExtraValue);
     }
 
 
@@ -195,16 +195,16 @@ public class LazWriterTests
 
         await lasReader.DisposeAsync();
 
-        await Assert.That(outputHeader.SystemIdentifier).IsEqualTo("LAS tests");
-        await Assert.That(outputHeader.GeneratingSoftware).IsEqualTo("Las.Tests.exe");
-        await Assert.That(outputHeader.PointDataFormatId).IsEqualTo((byte)1);
+        _ = await Assert.That(outputHeader.SystemIdentifier).IsEqualTo("LAS tests");
+        _ = await Assert.That(outputHeader.GeneratingSoftware).IsEqualTo("Las.Tests.exe");
+        _ = await Assert.That(outputHeader.PointDataFormatId).IsEqualTo((byte)1);
 
-        await Assert.That(outputPoint)
+        _ = await Assert.That(outputPoint)
             .IsNotNull()
             .And.IsTypeOf<IPointDataRecord>()
-            .And.Member(p => p.Classification, classification => classification.IsEqualTo(Classification.LowVegetation));
+            .And.Member(static p => p.Classification, static classification => classification.IsEqualTo(Classification.LowVegetation));
 
-        await Assert.That(extraBytes.GetValue(0, bytes.Span)).ValueIsTypeOf<double>().And.IsEqualTo(ExtraValue);
+        _ = await Assert.That(extraBytes.GetValue(0, bytes.Span)).ValueIsTypeOf<double>().And.IsEqualTo(ExtraValue);
     }
 #endif
 
@@ -369,7 +369,7 @@ public class LazWriterTests
         await Assert.That(outputPoint)
             .IsNotNull()
             .And.IsTypeOf<IPointDataRecord>()
-            .And.Member(p => p.Classification, classification => classification.IsEqualTo(Classification.LowVegetation));
+            .And.Member(static p => p.Classification, static classification => classification.IsEqualTo(Classification.LowVegetation));
 
 #if LAS1_4_OR_GREATER
         await Assert.That(extraBytes.GetValue(0, bytes)).ValueIsTypeOf<double>().And.IsEqualTo(ExtraValue);
@@ -423,12 +423,12 @@ public class LazWriterTests
         LazReader lasReader = new(memoryStream);
         var outputHeader = lasReader.Header;
 
-        await Assert.That(lasReader.VariableLengthRecords).Contains(vlr => vlr is CompressedTag)
+        _ = await Assert.That(lasReader.VariableLengthRecords).Contains(static vlr => vlr is CompressedTag)
             .And.Member(
-                records => records.OfType<CompressedTag>().Single(),
-                record => record.IsNotNull().And.Member(
-                        ct => ct.Compressor,
-                        compressor => compressor.IsEqualTo(Compressor.LayeredChunked))
+                static records => records.OfType<CompressedTag>().Single(),
+                static record => record.IsNotNull().And.Member(
+                        static ct => ct.Compressor,
+                        static compressor => compressor.IsEqualTo(Compressor.LayeredChunked))
                     .And.IsAssignableTo<CompressedTag>());
 
         ulong count = default;
@@ -441,15 +441,15 @@ public class LazWriterTests
 
         await lasReader.DisposeAsync();
 
-        await Assert.That(outputHeader.SystemIdentifier).IsEqualTo("LAS tests");
-        await Assert.That(outputHeader.GeneratingSoftware).IsEqualTo("Las.Tests.exe");
-        await Assert.That(outputHeader.PointDataFormatId).IsEqualTo((byte)6);
+        _ = await Assert.That(outputHeader.SystemIdentifier).IsEqualTo("LAS tests");
+        _ = await Assert.That(outputHeader.GeneratingSoftware).IsEqualTo("Las.Tests.exe");
+        _ = await Assert.That(outputHeader.PointDataFormatId).IsEqualTo((byte)6);
 
-        await Assert.That(count).IsEqualTo(outputHeader.NumberOfPointRecords);
+        _ = await Assert.That(count).IsEqualTo(outputHeader.NumberOfPointRecords);
 
         static void WriteChunk(LazWriter writer, int size)
         {
-            writer.Write(CreateRecords(size).Select(r => new LasPointMemory(r, default)), size);
+            writer.Write(CreateRecords(size).Select(static r => new LasPointMemory(r, default)), size);
         }
 
         static IEnumerable<IBasePointDataRecord> CreateRecords(int size)
@@ -482,7 +482,7 @@ public class LazWriterTests
                 .Single(static fi => fi.FieldType == typeof(IPointReader))
                 .GetValue(reader)).IsTypeOf(expectedType);
 
-            await Assert.That((uint)typeof(ChunkedReader).GetField(nameof(numberChunksValue), System.Reflection.BindingFlags.Instance | System.Reflection.BindingFlags.NonPublic)!.GetValue(pointReader)!).IsEqualTo((uint)numberChunksValue);
+            _ = await Assert.That((uint)typeof(ChunkedReader).GetField(nameof(numberChunksValue), System.Reflection.BindingFlags.Instance | System.Reflection.BindingFlags.NonPublic).GetValue(pointReader)).IsEqualTo((uint)numberChunksValue);
         }
     }
 
@@ -532,12 +532,12 @@ public class LazWriterTests
         LazReader lasReader = new(memoryStream);
         var outputHeader = lasReader.Header;
 
-        await Assert.That(lasReader.VariableLengthRecords).Contains(vlr => vlr is CompressedTag)
+        _ = await Assert.That(lasReader.VariableLengthRecords).Contains(static vlr => vlr is CompressedTag)
             .And.Member(
-                records => records.OfType<CompressedTag>().Single(),
-                record => record.IsNotNull().And.Member(
-                        tag => tag.Compressor,
-                        compressor => compressor.IsEqualTo(Compressor.LayeredChunked))
+                static records => records.OfType<CompressedTag>().Single(),
+                static record => record.IsNotNull().And.Member(
+                        static tag => tag.Compressor,
+                        static compressor => compressor.IsEqualTo(Compressor.LayeredChunked))
                     .And.IsAssignableTo<CompressedTag>());
 
         int count = default;
@@ -550,15 +550,15 @@ public class LazWriterTests
 
         await lasReader.DisposeAsync();
 
-        await Assert.That(outputHeader.SystemIdentifier).IsEqualTo("LAS tests");
-        await Assert.That(outputHeader.GeneratingSoftware).IsEqualTo("Las.Tests.exe");
-        await Assert.That(outputHeader.PointDataFormatId).IsEqualTo((byte)6);
+        _ = await Assert.That(outputHeader.SystemIdentifier).IsEqualTo("LAS tests");
+        _ = await Assert.That(outputHeader.GeneratingSoftware).IsEqualTo("Las.Tests.exe");
+        _ = await Assert.That(outputHeader.PointDataFormatId).IsEqualTo((byte)6);
 
-        await Assert.That(count).IsEqualTo((int)outputHeader.NumberOfPointRecords);
+        _ = await Assert.That(count).IsEqualTo((int)outputHeader.NumberOfPointRecords);
 
         static ValueTask WriteChunkAsync(LazWriter writer, int size)
         {
-            return writer.WriteAsync(CreateRecords(size).Select(r => new LasPointMemory(r, default)), size);
+            return writer.WriteAsync(CreateRecords(size).Select(static r => new LasPointMemory(r, default)), size);
         }
 
         static IEnumerable<IBasePointDataRecord> CreateRecords(int size)
@@ -591,7 +591,7 @@ public class LazWriterTests
                 .Single(static fi => fi.FieldType == typeof(IPointReader))
                 .GetValue(reader)).IsTypeOf(expectedType);
 
-            await Assert.That((uint)typeof(ChunkedReader).GetField(nameof(numberChunksValue), System.Reflection.BindingFlags.Instance | System.Reflection.BindingFlags.NonPublic)!.GetValue(pointReader)!).IsEqualTo((uint)numberChunksValue);
+            _ = await Assert.That((uint)typeof(ChunkedReader).GetField(nameof(numberChunksValue), System.Reflection.BindingFlags.Instance | System.Reflection.BindingFlags.NonPublic).GetValue(pointReader)).IsEqualTo((uint)numberChunksValue);
         }
     }
 
@@ -619,7 +619,7 @@ public class LazWriterTests
 
         stream.Position = 0;
         LazReader reader = new(stream);
-        await Assert.That(reader.ExtendedVariableLengthRecords)
+        _ = await Assert.That(reader.ExtendedVariableLengthRecords)
             .HasSingleItem()
             .ContainsOnly(e => ExtendedVariableLengthRecordComparer.Instance.Equals(e, record));
         await reader.DisposeAsync();
@@ -652,11 +652,11 @@ public class LazWriterTests
 
         memoryStream.Position = 0;
         LazReader reader = new(memoryStream);
-        await Assert.That(reader.ExtendedVariableLengthRecords).IsEmpty();
+        _ = await Assert.That(reader.ExtendedVariableLengthRecords).IsEmpty();
 
-        await Assert.That(reader.VariableLengthRecords.OfType<CompressedTag>())
+        _ = await Assert.That(reader.VariableLengthRecords.OfType<CompressedTag>())
             .HasSingleItem()
-            .And.Member(x => x.Single().NumOfSpecialEvlrs, x => x.IsEqualTo(1));
+            .And.Member(static x => x.Single().NumOfSpecialEvlrs, static x => x.IsEqualTo(1));
 
         await reader.DisposeAsync();
         await memoryStream.DisposeAsync();
@@ -730,8 +730,8 @@ public class LazWriterTests
         stream.Position = 0;
 
         LazReader reader = new(stream);
-        await Assert.That(reader.ReadPointDataRecord().PointDataRecord).IsEqualTo(first);
-        await Assert.That(reader.ReadPointDataRecord().PointDataRecord).IsEqualTo(second);
+        _ = await Assert.That(reader.ReadPointDataRecord().PointDataRecord).IsEqualTo(first);
+        _ = await Assert.That(reader.ReadPointDataRecord().PointDataRecord).IsEqualTo(second);
         await reader.DisposeAsync();
 
         await stream.DisposeAsync();
@@ -812,9 +812,9 @@ public class LazWriterTests
         stream.Position = 0;
 
         LazReader reader = new(stream);
-        await Assert.That(reader.ReadPointDataRecord().PointDataRecord).IsEqualTo(first);
-        await Assert.That(reader.ReadPointDataRecord().PointDataRecord).IsEqualTo(second);
-        await Assert.That(reader.ReadPointDataRecord().PointDataRecord).IsEqualTo(third);
+        _ = await Assert.That(reader.ReadPointDataRecord().PointDataRecord).IsEqualTo(first);
+        _ = await Assert.That(reader.ReadPointDataRecord().PointDataRecord).IsEqualTo(second);
+        _ = await Assert.That(reader.ReadPointDataRecord().PointDataRecord).IsEqualTo(third);
         await reader.DisposeAsync();
 
         await stream.DisposeAsync();

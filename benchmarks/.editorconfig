@@ -1,0 +1,21 @@
+[*.{cs,vb}]
+
+# prefer this/Me qualitifiation
+dotnet_style_qualification_for_field = true
+dotnet_style_qualification_for_property = true
+dotnet_style_qualification_for_method = true
+dotnet_style_qualification_for_event = true
+
+[*.cs]
+
+# IDE0160: Convert to file-scoped namespace
+csharp_style_namespace_declarations = file_scoped:warning
+
+# Place usings inside the namespace
+csharp_using_directive_placement = inside_namespace
+
+# Use 'var' when the type is apparent
+csharp_style_var_when_type_is_apparent = true:suggestion
+
+# Use 'var' when the type is not apparent
+csharp_style_var_when_type_is_not_apparent = true:suggestion

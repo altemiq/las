@@ -80,6 +80,7 @@ public static partial class ExtensionMethods
     /// <returns>The point data record length.</returns>
     /// <exception cref="InvalidOperationException">Invalid <see cref="HeaderBlock.PointDataFormatId"/> for <see cref="HeaderBlock.Version"/>.</exception>
     /// <exception cref="InvalidCastException">Invalid <see cref="HeaderBlock.PointDataFormatId"/> value.</exception>
+    /// <exception cref="System.Diagnostics.UnreachableException">The header block version is invalid.</exception>
     internal static ushort GetPointDataRecordLength(this in HeaderBlock header) => header switch
     {
         { PointDataFormatId: PointDataRecord.Id, Version: { Major: 1, Minor: >= 0 and < 5 } } => PointDataRecord.Size,

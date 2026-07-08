@@ -43,7 +43,7 @@ internal sealed class LazyFormattable : IFormattable
     /// <param name="values">The values.</param>
     /// <returns>The lazy formattable.</returns>
     public static IFormattable Create<T>(IEnumerable<T> values)
-        where T : IConvertible => Create(values, (formatProvider, value) => value.ToString(formatProvider));
+        where T : IConvertible => Create(values, static (formatProvider, value) => value.ToString(formatProvider));
 
     /// <inheritdoc/>
     string IFormattable.ToString(string? format, IFormatProvider? formatProvider) => this.function(formatProvider);

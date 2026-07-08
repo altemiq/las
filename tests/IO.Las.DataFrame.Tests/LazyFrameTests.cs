@@ -14,9 +14,9 @@ public class LazyFrameTests
 
         var lazy = Polars.CSharp.LazyFrame.ScanLas(reader);
 
-        await Assert.That(lazy).IsNotNull();
+        _ = await Assert.That(lazy).IsNotNull();
 
-        await Assert.That(await lazy.Filter(Col(Arrow.Constants.Columns.ReturnNumber) == 3).CollectAsync())
+        _ = await Assert.That(await lazy.Filter(Col(Arrow.Constants.Columns.ReturnNumber) == 3).CollectAsync())
             .IsNotNull().And
             .Member(static m => ((Polars.CSharp.DataFrame)m).Height, static height => height.IsEqualTo(281));
     }
@@ -32,11 +32,8 @@ public class LazyFrameTests
         var data = Polars.CSharp.LazyFrame.ScanLas(reader);
 
         IBasePointDataRecord record = default;
-        data.SinkTo(arrowReader =>
-        {
-            record = arrowReader.ReadPointDataRecord().PointDataRecord;
-        });
+        data.SinkTo(arrowReader => record = arrowReader.ReadPointDataRecord().PointDataRecord);
 
-        await Assert.That(record).IsNotNull();
+        _ = await Assert.That(record).IsNotNull();
     }
 }

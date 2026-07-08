@@ -9,7 +9,7 @@ using Microsoft.Extensions.DependencyInjection;
 
 var rootCommand = new RootCommand()
     .AddAllTools()
-    .UseServices((parseResult, services) =>
+    .UseServices(static (parseResult, services) =>
         services
             .AddFile()
             .AddAws()

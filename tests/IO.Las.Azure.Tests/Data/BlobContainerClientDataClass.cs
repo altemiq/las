@@ -10,7 +10,7 @@ public class BlobContainerClientDataClass : IAsyncInitializer, IAsyncDisposable
     {
         const string ContainerName = "lidar";
 
-        var services = GlobalHooks.App?.Services ?? throw new NullReferenceException();
+        var services = GlobalHooks.App?.Services ?? throw new InvalidOperationException();
         if (GlobalHooks.NotificationService != null)
         {
             await GlobalHooks.NotificationService.WaitForResourceAsync("azure-blobs", KnownResourceStates.Running).WaitAsync(TimeSpan.FromSeconds(30));
@@ -19,8 +19,8 @@ public class BlobContainerClientDataClass : IAsyncInitializer, IAsyncDisposable
         // get the client
         var servicesClient = services.GetRequiredService<global::Azure.Storage.Blobs.BlobServiceClient>();
 
-        this.BlobContainerClient = servicesClient.GetBlobContainerClient(ContainerName);
-        await this.BlobContainerClient.CreateIfNotExistsAsync();
+        BlobContainerClient = servicesClient.GetBlobContainerClient(ContainerName);
+        _ = await BlobContainerClient.CreateIfNotExistsAsync();
 
         // ensure we load all the embedded data into the bucket
         var @namespace = typeof(BlobContainerClientDataClass).Namespace;
@@ -28,7 +28,7 @@ public class BlobContainerClientDataClass : IAsyncInitializer, IAsyncDisposable
         {
             // strip off the namespace
             var path = manifestResourceName;
-            if (@namespace is not null && manifestResourceName.StartsWith(@namespace))
+            if (@namespace is not null && manifestResourceName.StartsWith(@namespace, StringComparison.Ordinal))
             {
                 path = manifestResourceName[(@namespace.Length + 1)..];
             }
@@ -36,24 +36,24 @@ public class BlobContainerClientDataClass : IAsyncInitializer, IAsyncDisposable
             // convert the path into a name
             var blobNameBuilder = new System.Text.StringBuilder();
             var index = path.LastIndexOf('.');
-            for (int i = 0; i < index; i++)
+            for (var i = 0; i < index; i++)
             {
-                blobNameBuilder.Append(path[i] is '.' ? '/' : path[i]);
+                _ = blobNameBuilder.Append(path[i] is '.' ? '/' : path[i]);
             }
 
-            blobNameBuilder.Append(path[index..]);
+            _ = blobNameBuilder.Append(path[index..]);
             var blobName = blobNameBuilder.ToString();
 
             // push this to blob storage
-            var blobClient = this.BlobContainerClient.GetBlobClient(blobName);
+            var blobClient = BlobContainerClient.GetBlobClient(blobName);
             if (await blobClient.ExistsAsync())
             {
                 continue;
             }
 
             var stream = typeof(BlobContainerClientDataClass).Assembly.GetManifestResourceStream(manifestResourceName);
-            await blobClient.UploadAsync(stream);
-            await stream!.DisposeAsync();
+            _ = await blobClient.UploadAsync(stream);
+            await stream.DisposeAsync();
         }
     }
 

@@ -582,20 +582,15 @@ public static class GeoProjectionConverter
                 {
                     if (i is not 0)
                     {
-                        builder.Append(',');
+                        _ = builder.Append(',');
                     }
 
-                    if (geoKeyDouble is null)
-                    {
-                        builder.Append('?');
-                    }
-                    else
-                    {
-                        builder.Append(System.Globalization.CultureInfo.InvariantCulture, $"{geoKeyDouble[geokeye.ValueOffset + i]:N10}");
-                    }
+                    _ = geoKeyDouble is null
+                        ? builder.Append('?')
+                        : builder.Append(System.Globalization.CultureInfo.InvariantCulture, $"{geoKeyDouble[geokeye.ValueOffset + i]:N10}");
                 }
 
-                builder.Append(']');
+                _ = builder.Append(']');
                 return builder.ToString();
             }
 

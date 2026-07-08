@@ -34,9 +34,9 @@ public class LasReader :
     private readonly long offsetToVariableLengthRecords;
 
 #if LAS1_4_OR_GREATER
-#pragma warning disable S4487
+#pragma warning disable IDE0052, S4487
     private readonly long offsetToExtendedVariableLengthRecords;
-#pragma warning restore S4487
+#pragma warning restore IDE0052, S4487
 #endif
 
     private readonly long endOfPointDataRecords;
@@ -378,7 +378,7 @@ public class LasReader :
         }
 
         this.currentPointIndex = 0;
-        this.BaseStream.Seek(this.offsetToPointData, SeekOrigin.Begin);
+        _ = this.BaseStream.Seek(this.offsetToPointData, SeekOrigin.Begin);
         return true;
     }
 
@@ -406,7 +406,7 @@ public class LasReader :
     /// Asynchronously releases the unmanaged resources used by the <see cref="LasWriter"/> class.
     /// </summary>
     /// <returns>The asynchronous task.</returns>
-    protected async virtual ValueTask DisposeAsyncCore()
+    protected virtual async ValueTask DisposeAsyncCore()
     {
         if (this.disposedValue)
         {

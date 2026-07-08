@@ -10,16 +10,16 @@ public class S3ClientDataClass : IAsyncInitializer, IAsyncDisposable
     {
         const string BucketName = "lidar";
 
-        var services = GlobalHooks.App?.Services ?? throw new NullReferenceException();
+        var services = GlobalHooks.App?.Services ?? throw new InvalidOperationException();
         if (GlobalHooks.NotificationService != null)
         {
             await GlobalHooks.NotificationService.WaitForResourceAsync("ministack", KnownResourceStates.Running).WaitAsync(TimeSpan.FromSeconds(90));
         }
 
-        this.S3Client = services.GetRequiredAwsService<Amazon.S3.IAmazonS3>();
+        S3Client = services.GetRequiredAwsService<Amazon.S3.IAmazonS3>();
 
         // wait until the bucket is available
-        while (!await BucketExistsAsync(this.S3Client, BucketName))
+        while (!await BucketExistsAsync(S3Client, BucketName))
         {
             await Task.Delay(500);
         }
@@ -30,7 +30,7 @@ public class S3ClientDataClass : IAsyncInitializer, IAsyncDisposable
         {
             // strip off the namespace
             var path = manifestResourceName;
-            if (@namespace is not null && manifestResourceName.StartsWith(@namespace))
+            if (@namespace is not null && manifestResourceName.StartsWith(@namespace, StringComparison.Ordinal))
             {
                 path = manifestResourceName[(@namespace.Length + 1)..];
             }
@@ -38,18 +38,18 @@ public class S3ClientDataClass : IAsyncInitializer, IAsyncDisposable
             // convert the path into a key
             var keyBuilder = new System.Text.StringBuilder();
             var index = path.LastIndexOf('.');
-            for (int i = 0; i < index; i++)
+            for (var i = 0; i < index; i++)
             {
-                keyBuilder.Append(path[i] is '.' ? '/' : path[i]);
+                _ = keyBuilder.Append(path[i] is '.' ? '/' : path[i]);
             }
 
-            keyBuilder.Append(path[index..]);
+            _ = keyBuilder.Append(path[index..]);
             var key = keyBuilder.ToString();
 
             // push this to S3
-            if (!await FileExistsAsync(this.S3Client, BucketName, key, CancellationToken.None).ConfigureAwait(false))
+            if (!await FileExistsAsync(S3Client, BucketName, key, CancellationToken.None).ConfigureAwait(false))
             {
-                await this.S3Client.PutObjectAsync(new()
+                _ = await S3Client.PutObjectAsync(new()
                 {
                     BucketName = BucketName,
                     Key = key,
@@ -86,7 +86,7 @@ public class S3ClientDataClass : IAsyncInitializer, IAsyncDisposable
 
     public ValueTask DisposeAsync()
     {
-        this.S3Client?.Dispose();
+        S3Client?.Dispose();
         GC.SuppressFinalize(this);
         return default;
     }

@@ -21,8 +21,8 @@ public class LasReaderTests
             break;
         }
 
-        await Assert.That(pointDataRecord).IsTypeOf<GpsPointDataRecord>().And.Member(p => p.X, x => x.IsNotDefault());
-        await Assert.That(data).IsEmpty();
+        _ = await Assert.That(pointDataRecord).IsTypeOf<GpsPointDataRecord>().And.Member(static p => p.X, static x => x.IsNotDefault());
+        _ = await Assert.That(data).IsEmpty();
 
         await reader.DisposeAsync();
         await stream.DisposeAsync();
@@ -37,8 +37,8 @@ public class LasReaderTests
 
         await foreach (var (pointDataRecord, extraBytes) in reader)
         {
-            await Assert.That(pointDataRecord).IsTypeOf<GpsPointDataRecord>().And.Member(p => p.X, x => x.IsNotDefault());
-            await Assert.That(extraBytes.ToArray()).IsEmpty();
+            _ = await Assert.That(pointDataRecord).IsTypeOf<GpsPointDataRecord>().And.Member(static p => p.X, static x => x.IsNotDefault());
+            _ = await Assert.That(extraBytes.ToArray()).IsEmpty();
 
             break;
         }
@@ -54,12 +54,12 @@ public class LasReaderTests
                                  ?? throw new System.Diagnostics.UnreachableException("Failed to get stream");
         LasReader reader = new(stream);
         await CheckHeader(reader.Header, new(1, 1));
-        await Assert.That(reader.VariableLengthRecords.Count).IsEqualTo(1);
+        _ = await Assert.That(reader.VariableLengthRecords.Count).IsEqualTo(1);
 
         var (pointDataRecord, extraBytes) = reader.ReadPointDataRecord();
 
-        await Assert.That(extraBytes.ToArray()).IsEmpty();
-        await Assert.That(pointDataRecord).IsTypeOf<GpsPointDataRecord>().And.Member(p => p.X, x => x.IsNotDefault());
+        _ = await Assert.That(extraBytes.ToArray()).IsEmpty();
+        _ = await Assert.That(pointDataRecord).IsTypeOf<GpsPointDataRecord>().And.Member(static p => p.X, static x => x.IsNotDefault());
 
         await reader.DisposeAsync();
         await stream.DisposeAsync();
@@ -72,16 +72,16 @@ public class LasReaderTests
                               ?? throw new System.Diagnostics.UnreachableException("Failed to get stream");
         var bytes = new byte[4];
 
-        await Assert.That(await stream.ReadAsync(bytes)).IsEqualTo(bytes.Length);
+        _ = await Assert.That(await stream.ReadAsync(bytes)).IsEqualTo(bytes.Length);
 
         LasReader reader = new(stream, System.Text.Encoding.UTF8.GetString(bytes));
         await CheckHeader(reader.Header, new(1, 1));
-        await Assert.That(reader.VariableLengthRecords).HasSingleItem();
+        _ = await Assert.That(reader.VariableLengthRecords).HasSingleItem();
 
         var (pointDataRecord, extraBytes) = reader.ReadPointDataRecord();
 
-        await Assert.That(extraBytes.ToArray()).IsEmpty();
-        await Assert.That(pointDataRecord).IsTypeOf<GpsPointDataRecord>();
+        _ = await Assert.That(extraBytes.ToArray()).IsEmpty();
+        _ = await Assert.That(pointDataRecord).IsTypeOf<GpsPointDataRecord>();
 
         await reader.DisposeAsync();
         await stream.DisposeAsync();
@@ -98,7 +98,7 @@ public class LasReaderTests
         var max = double.MinValue;
         LasReader reader = new(stream);
         await CheckHeader(reader.Header, new(1, 4));
-        await Assert.That(reader.VariableLengthRecords).Count().IsEqualTo(2);
+        _ = await Assert.That(reader.VariableLengthRecords).Count().IsEqualTo(2);
 
         var extraBytes = reader.VariableLengthRecords.OfType<ExtraBytes>().Single();
 
@@ -109,16 +109,16 @@ public class LasReaderTests
                 continue;
             }
 
-            Interlocked.MinExchange(ref min, value);
-            Interlocked.MaxExchange(ref max, value);
+            _ = Interlocked.MinExchange(ref min, value);
+            _ = Interlocked.MaxExchange(ref max, value);
         }
 
         await reader.DisposeAsync();
 
         await stream.DisposeAsync();
 
-        await Assert.That(min).IsEqualTo(-1.76).Within(0.001);
-        await Assert.That(max).IsEqualTo(19.72).Within(0.001);
+        _ = await Assert.That(min).IsEqualTo(-1.76).Within(0.001);
+        _ = await Assert.That(max).IsEqualTo(19.72).Within(0.001);
     }
 #endif
 
@@ -132,7 +132,7 @@ public class LasReaderTests
 
         var quantizer = new PointDataRecordQuantizer(reader.Header);
         var fileCreation = reader.Header.FileCreation.GetValueOrDefault();
-        await Assert.That(reader.ReadPointDataRecord(10).PointDataRecord)
+        _ = await Assert.That(reader.ReadPointDataRecord(10).PointDataRecord)
             .IsNotNull()
             .And.Member(p => p.X, x => x.IsEqualTo(27799961))
             .And.Member(p => p.Y, y => y.IsEqualTo(612234368))
@@ -140,7 +140,7 @@ public class LasReaderTests
             .And.IsTypeOf<IGpsPointDataRecord>()
             .And.Member(p => quantizer.GetDateTime(p.GpsTime), gpsTime => gpsTime.IsEqualTo(fileCreation).Within(TimeSpan.FromDays(7)));
 
-        await Assert.That(reader.ReadPointDataRecord(277500).PointDataRecord)
+        _ = await Assert.That(reader.ReadPointDataRecord(277500).PointDataRecord)
             .IsNotNull()
             .And.Member(p => p.X, x => x.IsEqualTo(27775097))
             .And.Member(p => p.Y, y => y.IsEqualTo(612225071))
@@ -159,11 +159,11 @@ public class LasReaderTests
                                     ?? throw new System.Diagnostics.UnreachableException("Failed to get stream");
         LasReader reader = new(stream);
         await CheckHeader(reader.Header, new(1, 1));
-        await Assert.That(reader.VariableLengthRecords).HasSingleItem();
+        _ = await Assert.That(reader.VariableLengthRecords).HasSingleItem();
 
-        await Assert.That(await reader.ReadPointDataRecordAsync())
-            .Member(p => p.PointDataRecord, p => p.IsNotNull().And.Member(pt => pt.X, x => x.IsNotDefault()))
-            .And.Member(p => p.ExtraBytes.IsEmpty, empty => empty.IsTrue());
+        _ = await Assert.That(await reader.ReadPointDataRecordAsync())
+            .Member(static p => p.PointDataRecord, static p => p.IsNotNull().And.Member(static pt => pt.X, static x => x.IsNotDefault()))
+            .And.Member(static p => p.ExtraBytes.IsEmpty, static empty => empty.IsTrue());
 
         await reader.DisposeAsync();
         await stream.DisposeAsync();
@@ -175,18 +175,18 @@ public class LasReaderTests
         var stream = typeof(LasReaderTests).Assembly.GetManifestResourceStream(typeof(LasReaderTests), "fusa.las")
                                     ?? throw new System.Diagnostics.UnreachableException("Failed to get stream");
         var bytes = new byte[4];
-        await Assert.That(stream.ReadAsync(bytes, 0, bytes.Length)).IsEqualTo(bytes.Length);
+        _ = await Assert.That(stream.ReadAsync(bytes, 0, bytes.Length)).IsEqualTo(bytes.Length);
         LasReader reader = new(stream, System.Text.Encoding.UTF8.GetString(bytes));
         await CheckHeader(reader.Header, new(1, 1));
-        await Assert.That(reader.VariableLengthRecords).HasSingleItem();
+        _ = await Assert.That(reader.VariableLengthRecords).HasSingleItem();
 
         var (pointDataRecord, extraBytes) = await reader.ReadPointDataRecordAsync();
 
         await reader.DisposeAsync();
         await stream.DisposeAsync();
 
-        await Assert.That(pointDataRecord).IsAssignableTo<IGpsPointDataRecord>();
-        await Assert.That(extraBytes.IsEmpty).IsTrue();
+        _ = await Assert.That(pointDataRecord).IsAssignableTo<IGpsPointDataRecord>();
+        _ = await Assert.That(extraBytes.IsEmpty).IsTrue();
     }
 
 #if LAS1_4_OR_GREATER
@@ -197,7 +197,7 @@ public class LasReaderTests
                                     ?? throw new System.Diagnostics.UnreachableException("Failed to get stream");
         LasReader reader = new(stream);
         await CheckHeader(reader.Header, new(1, 4));
-        await Assert.That(reader.VariableLengthRecords).Count().IsEqualTo(2);
+        _ = await Assert.That(reader.VariableLengthRecords).Count().IsEqualTo(2);
 
         var extraBytes = reader.VariableLengthRecords.OfType<ExtraBytes>().Single();
 
@@ -206,18 +206,18 @@ public class LasReaderTests
 
         while (await reader.ReadPointDataRecordAsync() is { PointDataRecord: not null } point)
         {
-            await Assert.That(point.PointDataRecord).IsAssignableTo<IGpsPointDataRecord>();
+            _ = await Assert.That(point.PointDataRecord).IsAssignableTo<IGpsPointDataRecord>();
 
             var value = await Assert.That(await extraBytes.GetValueAsync(0, point.ExtraBytes)).ValueIsTypeOf<double>();
-            Interlocked.MinExchange(ref min, value);
-            Interlocked.MaxExchange(ref max, value);
+            _ = Interlocked.MinExchange(ref min, value);
+            _ = Interlocked.MaxExchange(ref max, value);
         }
 
         await reader.DisposeAsync();
         await stream.DisposeAsync();
 
-        await Assert.That(min).IsEqualTo(-1.76).Within(0.001);
-        await Assert.That(max).IsEqualTo(19.72).Within(0.001);
+        _ = await Assert.That(min).IsEqualTo(-1.76).Within(0.001);
+        _ = await Assert.That(max).IsEqualTo(19.72).Within(0.001);
     }
 #endif
 
@@ -232,7 +232,7 @@ public class LasReaderTests
         var quantizer = new PointDataRecordQuantizer(reader.Header);
         var fileCreation = reader.Header.FileCreation.GetValueOrDefault();
         var point = await reader.ReadPointDataRecordAsync(10);
-        await Assert.That(point.PointDataRecord)
+        _ = await Assert.That(point.PointDataRecord)
             .IsNotNull()
             .And.Member(p => p.X, x => x.IsEqualTo(27799961))
             .And.Member(p => p.Y, y => y.IsEqualTo(612234368))
@@ -241,7 +241,7 @@ public class LasReaderTests
             .And.Member(p => quantizer.GetDateTime(p.GpsTime), gpsTime => gpsTime.IsEqualTo(fileCreation).Within(TimeSpan.FromDays(7)));
 
         point = await reader.ReadPointDataRecordAsync(277500);
-        await Assert.That(point.PointDataRecord)
+        _ = await Assert.That(point.PointDataRecord)
             .Member(p => p.X, x => x.IsEqualTo(27775097))
             .And.Member(p => p.Y, y => y.IsEqualTo(612225071))
             .And.Member(p => p.Z, z => z.IsEqualTo(4228))
@@ -273,10 +273,10 @@ public class LasReaderTests
             data = extraBytes.ToArray();
         }
 
-        await Assert.That(pointDataRecord)
+        _ = await Assert.That(pointDataRecord)
             .IsTypeOf<GpsPointDataRecord>().And
-            .Member(p => p.X, x => x.IsNotDefault());
-        await Assert.That(data).IsEmpty();
+            .Member(static p => p.X, static x => x.IsNotDefault());
+        _ = await Assert.That(data).IsEmpty();
     }
 
     [Test]
@@ -289,7 +289,7 @@ public class LasReaderTests
         var span = new byte[1024];
 
         var pointsRead = await reader.ReadPointDataRecordDataAsync(span);
-        await Assert.That(pointsRead).IsNotZero();
+        _ = await Assert.That(pointsRead).IsNotZero();
 
         IBasePointDataRecord pointDataRecord = default;
         byte[] data = default;
@@ -300,10 +300,10 @@ public class LasReaderTests
             data = extraBytes.ToArray();
         }
 
-        await Assert.That(pointDataRecord)
+        _ = await Assert.That(pointDataRecord)
             .IsTypeOf<GpsPointDataRecord>().And
-            .Member(p => p.X, x => x.IsNotDefault());
-        await Assert.That(data).IsEmpty();
+            .Member(static p => p.X, static x => x.IsNotDefault());
+        _ = await Assert.That(data).IsEmpty();
     }
 #endif
 

@@ -56,7 +56,7 @@ public class LayeredValueAllocationTests
         // stack-allocated spans. Any per-iteration managed allocation (e.g.
         // a fresh MemoryStream) would be hundreds of bytes × 128 iterations,
         // so a small constant budget is safe.
-        await Assert.That(delta)
+        _ = await Assert.That(delta)
             .IsLessThan(2_048)
             .Because($"warm Initialize() should not allocate a new backing stream per call; observed {delta} bytes across 128 iterations");
     }
@@ -88,7 +88,7 @@ public class LayeredValueAllocationTests
 
         var delta = GC.GetAllocatedBytesForCurrentThread() - before;
 
-        await Assert.That(delta)
+        _ = await Assert.That(delta)
             .IsLessThan(2_048)
             .Because($"warm InitializeIfRequested() should not allocate a new backing stream per call; observed {delta} bytes across 128 iterations");
     }

@@ -48,17 +48,17 @@ public class LazReaderCrossPathEquivalenceTests
         var pointLength = readerB.PointDataLength;
         var buffer = new byte[pointLength * PointsToCompare];
         var read = readerB.ReadPointDataRecordData(buffer);
-        await Assert.That(read).IsEqualTo(PointsToCompare);
+        _ = await Assert.That(read).IsEqualTo(PointsToCompare);
 
         for (var i = 0; i < PointsToCompare; i++)
         {
             var (rec, extra) = readerB.Read(buffer.AsSpan(i * pointLength, pointLength));
             var extraArray = extra.ToArray();
 
-            await Assert.That(rec).IsEqualTo(parsedRecords[i])
+            _ = await Assert.That(rec).IsEqualTo(parsedRecords[i])
                 .Because($"[{resource}] point {i}: parsed record from span path must match parsed record from ReadPointDataRecord path");
 
-            await Assert.That(extraArray).IsEquivalentTo(parsedExtras[i])
+            _ = await Assert.That(extraArray).IsEquivalentTo(parsedExtras[i])
                 .Because($"[{resource}] point {i}: extra bytes from span path must match extra bytes from ReadPointDataRecord path");
         }
     }
@@ -84,20 +84,22 @@ public class LazReaderCrossPathEquivalenceTests
 
         var bufferA = new byte[pointLength * PointsToCompare];
         var readA = readerA.ReadPointDataRecordData(bufferA);
-        await Assert.That(readA).IsEqualTo(PointsToCompare);
+        _ = await Assert.That(readA).IsEqualTo(PointsToCompare);
 
         await using var streamB = GetResource(resource);
         await using var readerB = new LazReader(streamB);
 
         var bufferB = new byte[pointLength * PointsToCompare];
         var readB = readerB.ReadPointDataRecordData(bufferB);
-        await Assert.That(readB).IsEqualTo(PointsToCompare);
+        _ = await Assert.That(readB).IsEqualTo(PointsToCompare);
 
-        await Assert.That(bufferA).IsEquivalentTo(bufferB);
+        _ = await Assert.That(bufferA).IsEquivalentTo(bufferB);
+    }
+
+    private static Stream GetResource(string resource)
+    {
+        return typeof(LazReaderCrossPathEquivalenceTests).Assembly.GetManifestResourceStream(typeof(LazReaderCrossPathEquivalenceTests), resource)
+            ?? throw new System.Diagnostics.UnreachableException($"Failed to get resource '{resource}'");
     }
 #endif
-
-    private static Stream GetResource(string resource) =>
-        typeof(LazReaderCrossPathEquivalenceTests).Assembly.GetManifestResourceStream(typeof(LazReaderCrossPathEquivalenceTests), resource)
-            ?? throw new System.Diagnostics.UnreachableException($"Failed to get resource '{resource}'");
 }

@@ -34,6 +34,6 @@ public sealed class ProjContextTests
     [Arguments(7899, WellKnownTextVersion.Wkt2_2019, """PROJCRS["GDA2020 / Vicgrid",BASEGEOGCRS["GDA2020",DATUM["Geocentric Datum of Australia 2020",ELLIPSOID["GRS 1980",6378137,298.257222101,LENGTHUNIT["metre",1]]],PRIMEM["Greenwich",0,ANGLEUNIT["degree",0.0174532925199433]],ID["EPSG",7844]],CONVERSION["Vicgrid",METHOD["Lambert Conic Conformal (2SP)",ID["EPSG",9802]],PARAMETER["Latitude of false origin",-37,ANGLEUNIT["degree",0.0174532925199433],ID["EPSG",8821]],PARAMETER["Longitude of false origin",145,ANGLEUNIT["degree",0.0174532925199433],ID["EPSG",8822]],PARAMETER["Latitude of 1st standard parallel",-36,ANGLEUNIT["degree",0.0174532925199433],ID["EPSG",8823]],PARAMETER["Latitude of 2nd standard parallel",-38,ANGLEUNIT["degree",0.0174532925199433],ID["EPSG",8824]],PARAMETER["Easting at false origin",2500000,LENGTHUNIT["metre",1],ID["EPSG",8826]],PARAMETER["Northing at false origin",2500000,LENGTHUNIT["metre",1],ID["EPSG",8827]]],CS[Cartesian,2],AXIS["(E)",east,ORDER[1],LENGTHUNIT["metre",1]],AXIS["(N)",north,ORDER[2],LENGTHUNIT["metre",1]],USAGE[SCOPE["State-wide spatial data management."],AREA["Australia - Victoria."],BBOX[-39.2,140.96,-33.98,150.04]],ID["EPSG",7899]]""")]
     public async Task ToWellKnownText(ushort srid, WellKnownTextVersion version, string wkt)
     {
-        await Assert.That(Context.GetWkt(srid, version)).IsEqualTo(wkt);
+        _ = await Assert.That(Context.GetWkt(srid, version)).IsEqualTo(wkt);
     }
 }

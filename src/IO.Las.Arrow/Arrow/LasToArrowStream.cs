@@ -138,7 +138,9 @@ internal static class LasToArrowStream
     /// <param name="length">The length.</param>
     /// <returns>The record batch.</returns>
     /// <exception cref="InvalidOperationException">Incorrect length.</exception>
-    [System.Diagnostics.CodeAnalysis.SuppressMessage("Performance", "CA1863:Use \'CompositeFormat\'", Justification = "This is for exceptions")]
+#if NET8_0_OR_GREATER
+    [System.Diagnostics.CodeAnalysis.SuppressMessage("Performance", "CA1863:Use 'CompositeFormat'", Justification = "This is for exceptions")]
+#endif
     internal static RecordBatch FlushToRecordBatch(IReadOnlyList<ColumnBuffer> buffers, Schema schema, int length)
     {
         return new(schema, GetArrays(schema, buffers, length), length);
@@ -301,13 +303,14 @@ internal static class LasToArrowStream
         }
 #endif
 
-        builder.Metadata(Constants.Metadata.PointDataFormatId, pointDataFormatId.ToString(System.Globalization.CultureInfo.InvariantCulture));
+        builder
+            .Metadata(Constants.Metadata.PointDataFormatId, pointDataFormatId.ToString(System.Globalization.CultureInfo.InvariantCulture))
 #if LAS1_2_OR_GREATER
-        builder.Metadata(Constants.Metadata.GlobalEncoding, header.GlobalEncoding.ToString());
+            .Metadata(Constants.Metadata.GlobalEncoding, header.GlobalEncoding.ToString())
 #endif
-        builder.Metadata(Constants.Metadata.Version, header.Version.ToString());
-        builder.Metadata(Constants.Metadata.Offset, header.Offset.ToString(format: null, System.Globalization.CultureInfo.InvariantCulture));
-        builder.Metadata(Constants.Metadata.ScaleFactor, header.ScaleFactor.ToString(format: null, System.Globalization.CultureInfo.InvariantCulture));
+            .Metadata(Constants.Metadata.Version, header.Version.ToString())
+            .Metadata(Constants.Metadata.Offset, header.Offset.ToString(format: null, System.Globalization.CultureInfo.InvariantCulture))
+            .Metadata(Constants.Metadata.ScaleFactor, header.ScaleFactor.ToString(format: null, System.Globalization.CultureInfo.InvariantCulture));
 #if LAS1_5_OR_GREATER
         builder.Metadata(Constants.Metadata.TimeOffset, header.TimeOffset.ToString(System.Globalization.CultureInfo.InvariantCulture));
 #endif

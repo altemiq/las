@@ -270,33 +270,33 @@ public class PointConverterTests
     [MethodDataSource(nameof(ToExtendedData))]
     public async Task ToExtended(IBasePointDataRecord point, IExtendedPointDataRecord extendedPoint)
     {
-        await Assert.That(PointConverter.ToExtended(point)).IsEqualTo(extendedPoint);
+        _ = await Assert.That(PointConverter.ToExtended(point)).IsEqualTo(extendedPoint);
     }
 
     [Test]
     [MethodDataSource(nameof(ToSimpleData))]
     public async Task ToSimple(IBasePointDataRecord point, IPointDataRecord simplePoint)
     {
-        await Assert.That(PointConverter.ToSimple(point)).IsEqualTo(simplePoint);
+        _ = await Assert.That(PointConverter.ToSimple(point)).IsEqualTo(simplePoint);
     }
 
     public static IEnumerable<Func<(IBasePointDataRecord point, IExtendedPointDataRecord extendedPoint)>> ToExtendedData()
     {
-        yield return () => (PointDataRecord, ExtendedGpsPointDataRecord with { GpsTime = default });
-        yield return () => (GpsPointDataRecord, ExtendedGpsPointDataRecord);
-        yield return () => (ColorPointDataRecord, ExtendedGpsColorPointDataRecord with { GpsTime = default });
-        yield return () => (GpsColorPointDataRecord, ExtendedGpsColorPointDataRecord);
-        yield return () => (GpsWaveformPointDataRecord, ExtendedGpsWaveformPointDataRecord);
-        yield return () => (GpsColorWaveformPointDataRecord, ExtendedGpsColorNearInfraredWaveformPointDataRecord with { NearInfrared = default });
+        yield return static () => (PointDataRecord, ExtendedGpsPointDataRecord with { GpsTime = default });
+        yield return static () => (GpsPointDataRecord, ExtendedGpsPointDataRecord);
+        yield return static () => (ColorPointDataRecord, ExtendedGpsColorPointDataRecord with { GpsTime = default });
+        yield return static () => (GpsColorPointDataRecord, ExtendedGpsColorPointDataRecord);
+        yield return static () => (GpsWaveformPointDataRecord, ExtendedGpsWaveformPointDataRecord);
+        yield return static () => (GpsColorWaveformPointDataRecord, ExtendedGpsColorNearInfraredWaveformPointDataRecord with { NearInfrared = default });
     }
 
     public static IEnumerable<Func<(IBasePointDataRecord point, IPointDataRecord simplePoint)>> ToSimpleData()
     {
-        yield return () => (ExtendedGpsPointDataRecord, GpsPointDataRecord);
-        yield return () => (ExtendedGpsColorPointDataRecord, GpsColorPointDataRecord);
-        yield return () => (ExtendedGpsColorNearInfraredPointDataRecord, GpsColorPointDataRecord);
-        yield return () => (ExtendedGpsWaveformPointDataRecord, GpsWaveformPointDataRecord);
-        yield return () => (ExtendedGpsColorNearInfraredWaveformPointDataRecord, GpsColorWaveformPointDataRecord);
+        yield return static () => (ExtendedGpsPointDataRecord, GpsPointDataRecord);
+        yield return static () => (ExtendedGpsColorPointDataRecord, GpsColorPointDataRecord);
+        yield return static () => (ExtendedGpsColorNearInfraredPointDataRecord, GpsColorPointDataRecord);
+        yield return static () => (ExtendedGpsWaveformPointDataRecord, GpsWaveformPointDataRecord);
+        yield return static () => (ExtendedGpsColorNearInfraredWaveformPointDataRecord, GpsColorWaveformPointDataRecord);
     }
 
     private static class Values
@@ -309,8 +309,8 @@ public class PointConverterTests
         public const byte NumberOfReturns = 2;
         public const sbyte ScanAngleRank = 77;
         public const short ScanAngle = 12833;
-        public const Classification Classification = Altemiq.IO.Las.Classification.MediumVegetation;
-        public const ExtendedClassification ExtendedClassification = Altemiq.IO.Las.ExtendedClassification.MediumVegetation;
+        public const Classification Classification = Classification.MediumVegetation;
+        public const ExtendedClassification ExtendedClassification = ExtendedClassification.MediumVegetation;
         public const bool Synthetic = false;
         public const bool KeyPoint = false;
         public const bool Withheld = false;

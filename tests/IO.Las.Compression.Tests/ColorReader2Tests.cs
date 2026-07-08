@@ -37,7 +37,7 @@ public class ColorReader2Tests
         var input = PackRgb(red, green, blue);
         var output = RoundTripColors(seed, [input]);
 
-        await Assert.That(output[0])
+        _ = await Assert.That(output[0])
             .IsEquivalentTo(input)
             .Because($"round-trip must preserve RGB for scenario \"{description}\"");
     }
@@ -68,7 +68,7 @@ public class ColorReader2Tests
 
         for (var i = 0; i < sequence.Length; i++)
         {
-            await Assert.That(output[i])
+            _ = await Assert.That(output[i])
                 .IsEquivalentTo(sequence[i])
                 .Because($"round-trip must preserve item {i} (input RGB bytes: [{string.Join(", ", sequence[i])}])");
         }
@@ -88,7 +88,7 @@ public class ColorReader2Tests
         var input = PackRgb(red, green, blue);
         var output = RoundTripColors(seed, [input]);
 
-        await Assert.That(output[0])
+        _ = await Assert.That(output[0])
             .IsEquivalentTo(input)
             .Because($"round-trip must preserve RGB for scenario \"{description}\"");
     }

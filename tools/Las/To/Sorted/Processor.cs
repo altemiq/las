@@ -112,17 +112,17 @@ internal static class Processor
 
             const int BatchSize = 1024;
             int pointLength = reader.PointDataLength;
-            byte[] buffer = new byte[BatchSize * pointLength];
+            var buffer = new byte[BatchSize * pointLength];
             var inputX = new int[BatchSize];
             var inputY = new int[BatchSize];
             var results = new System.Numerics.Vector2[BatchSize];
             var points = new IBasePointDataRecord[BatchSize];
-            byte[]?[] extraBytes = new byte[BatchSize][];
+            var extraBytes = new byte[BatchSize][];
 
             var count = 0;
             while (true)
             {
-                int pointsRead = reader.ReadPointDataRecordData(buffer);
+                var pointsRead = reader.ReadPointDataRecordData(buffer);
                 if (pointsRead == 0)
                 {
                     break;
@@ -257,7 +257,7 @@ internal static class Processor
             // remainder
             var x = value.X;
             var y = value.Y;
-            for (var i = (minX.Length / vectorSize) * vectorSize; i < minX.Length; i++)
+            for (var i = minX.Length / vectorSize * vectorSize; i < minX.Length; i++)
             {
                 if (x >= minX[i] && x < maxX[i] && y >= minY[i] && y < maxY[i])
                 {

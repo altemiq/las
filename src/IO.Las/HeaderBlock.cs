@@ -497,6 +497,7 @@ public readonly struct HeaderBlock : IEquatable<HeaderBlock>
         return hashCode.ToHashCode();
     }
 
+#pragma warning disable MA0136
 #if LAS1_5_OR_GREATER
     /// <summary>
     /// Converts the value of this instance to its equivalent string representation.
@@ -575,6 +576,7 @@ public readonly struct HeaderBlock : IEquatable<HeaderBlock>
         }
         """;
 #endif
+#pragma warning restore MA0136
 
     private readonly struct ReadOnlyLegacy(IReadOnlyList<uint> source) : IReadOnlyList<ulong>, IEquatable<IReadOnlyList<ulong>>, IEquatable<IReadOnlyList<uint>>
     {

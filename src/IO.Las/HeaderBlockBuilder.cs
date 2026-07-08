@@ -230,21 +230,25 @@ public class HeaderBlockBuilder
     public static ushort GetSuggestedTimeOffset(int year) => GpsTime.GetTimeOffset(year);
 #endif
 
+#if NET7_0_OR_GREATER
     /// <summary>
     /// Creates a <see cref="HeaderBlockBuilder"/> from the specified typeof <see cref="PointDataFormat"/>.
     /// </summary>
     /// <typeparam name="T">The type of point data record.</typeparam>
     /// <returns>The header block builder.</returns>
     /// <exception cref="InvalidOperationException">Invalid point data type.</exception>
-#if NET7_0_OR_GREATER
     public static HeaderBlockBuilder FromPointType<T>()
+        where T : IBasePointDataRecord => new(T.Id);
 #else
+    /// <summary>
+    /// Creates a <see cref="HeaderBlockBuilder"/> from the specified typeof <see cref="PointDataFormat"/>.
+    /// </summary>
+    /// <typeparam name="T">The type of point data record.</typeparam>
+    /// <returns>The header block builder.</returns>
+    /// <exception cref="InvalidOperationException">Invalid point data type.</exception>
+    /// <exception cref="System.Diagnostics.UnreachableException">Could not find the requiremed field.</exception>
     public static HeaderBlockBuilder FromPointType<[System.Diagnostics.CodeAnalysis.DynamicallyAccessedMembers(System.Diagnostics.CodeAnalysis.DynamicallyAccessedMemberTypes.PublicFields | System.Diagnostics.CodeAnalysis.DynamicallyAccessedMemberTypes.NonPublicFields)] T>()
-#endif
         where T : IBasePointDataRecord =>
-#if NET7_0_OR_GREATER
-        new(T.Id);
-#else
         System.Reflection.IntrospectionExtensions.GetTypeInfo(typeof(T)).GetDeclaredField(nameof(PointDataRecord.Id))?.GetValue(null) is byte pointTypeId
             ? new(pointTypeId)
             : throw new System.Diagnostics.UnreachableException();

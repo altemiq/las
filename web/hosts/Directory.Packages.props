@@ -4,7 +4,7 @@
 
   <ItemGroup Label="AWS">
     <PackageVersion Include="Altemiq.Aspire.Hosting.MiniStack" Version="13.4.3" />
-    <PackageVersion Include="AWSSDK.Extensions.NETCore.Setup" Version="4.0.4.11" />
+    <PackageVersion Include="AWSSDK.Extensions.NETCore.Setup" Version="4.0.100.2" />
   </ItemGroup>
   
   <ItemGroup Label="Azure">

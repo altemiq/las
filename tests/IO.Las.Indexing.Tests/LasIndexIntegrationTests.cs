@@ -21,10 +21,10 @@ public class LasIndexIntegrationTests
         }
 
         // sanity: point 5 should be found
-        await Assert.That(index.IndexOf(5U)).IsGreaterThanOrEqualTo(0);
+        _ = await Assert.That(index.IndexOf(5U)).IsGreaterThanOrEqualTo(0);
 
         // point beyond any added range is absent
-        await Assert.That(index.IndexOf(999_999U)).IsEqualTo(-1);
+        _ = await Assert.That(index.IndexOf(999_999U)).IsEqualTo(-1);
     }
 
     [Test]
@@ -53,8 +53,8 @@ public class LasIndexIntegrationTests
         stream.Position = 0;
         var reloaded = LasIndex.ReadFrom(stream);
 
-        await Assert.That(reloaded.Equals(index)).IsTrue();
-        await Assert.That(reloaded.GetHashCode()).IsEqualTo(index.GetHashCode());
+        _ = await Assert.That(reloaded.Equals(index)).IsTrue();
+        _ = await Assert.That(reloaded.GetHashCode()).IsEqualTo(index.GetHashCode());
     }
 
     [Test]
@@ -72,7 +72,7 @@ public class LasIndexIntegrationTests
         index.Complete(minimumPoints: 0, maximumIntervals: 0);
 
         var ranges = index.All().ToList();
-        await Assert.That(ranges.Count).IsGreaterThanOrEqualTo(1);
+        _ = await Assert.That(ranges.Count).IsGreaterThanOrEqualTo(1);
 
         // the full point-index sweep should cover every added point
         var covered = new HashSet<uint>();
@@ -86,7 +86,7 @@ public class LasIndexIntegrationTests
 
         for (var i = 0U; i < 20U; i++)
         {
-            await Assert.That(covered.Contains(i)).IsTrue();
+            _ = await Assert.That(covered.Contains(i)).IsTrue();
         }
     }
 
@@ -124,13 +124,13 @@ public class LasIndexIntegrationTests
         // the lower-left points (0..4) must be covered
         for (var i = 0U; i < 5U; i++)
         {
-            await Assert.That(covered.Contains(i)).IsTrue();
+            _ = await Assert.That(covered.Contains(i)).IsTrue();
         }
 
         // the upper-right points (100..104) must not be
         for (var i = 100U; i < 105U; i++)
         {
-            await Assert.That(covered.Contains(i)).IsFalse();
+            _ = await Assert.That(covered.Contains(i)).IsFalse();
         }
     }
 
@@ -147,7 +147,7 @@ public class LasIndexIntegrationTests
             _ = index.Add(250F, 250F, i);
         }
 
-        await Assert.That(index.IndexOf(2U)).IsEqualTo(cellIndex);
+        _ = await Assert.That(index.IndexOf(2U)).IsEqualTo(cellIndex);
     }
 
     [Test]
@@ -158,7 +158,7 @@ public class LasIndexIntegrationTests
         _ = index.Add(100F, 100F, 0U);
 
         var empty = index.CloneEmpty();
-        await Assert.That(empty.All().Any()).IsFalse();
+        _ = await Assert.That(empty.All().Any()).IsFalse();
     }
 
     [Test]
@@ -170,10 +170,10 @@ public class LasIndexIntegrationTests
         _ = index.Add(900F, 900F, 1U);
 
         var snapshot = index.AsReadOnly();
-        await Assert.That(snapshot.Count).IsEqualTo(2);
+        _ = await Assert.That(snapshot.Count).IsEqualTo(2);
 
         var enumerated = index.Count();
-        await Assert.That(enumerated).IsEqualTo(snapshot.Count);
+        _ = await Assert.That(enumerated).IsEqualTo(snapshot.Count);
     }
 
     [Test]
@@ -185,7 +185,7 @@ public class LasIndexIntegrationTests
         var second = new LasIndex(new LasQuadTree(0, 1000, 0, 1000, 100));
         _ = second.Add(100F, 100F, 1U);
 
-        await Assert.That(first.Equals(second)).IsFalse();
+        _ = await Assert.That(first.Equals(second)).IsFalse();
     }
 
     [Test]
@@ -209,9 +209,9 @@ public class LasIndexIntegrationTests
         // content-equality is the contract we actually care about)
         writeBack.Position = 0;
         var reparsed = LasIndex.ReadFrom(writeBack);
-        await Assert.That(reparsed.Equals(parsed)).IsTrue();
+        _ = await Assert.That(reparsed.Equals(parsed)).IsTrue();
 
         // and the byte length is the same
-        await Assert.That(roundTripBytes.Length).IsEqualTo(originalBytes.Length);
+        _ = await Assert.That(roundTripBytes.Length).IsEqualTo(originalBytes.Length);
     }
 }

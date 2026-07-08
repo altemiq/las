@@ -10,7 +10,7 @@ public class LasReaderIntegrationTests
     [Arguments("las/asuf.las", false)]
     public async Task LasExists(string blobName, bool expected)
     {
-        await Assert.That(() => BlobLas.Exists(blobName, this.BlobContainerClientData.BlobContainerClient)).IsEqualTo(expected);
+        _ = await Assert.That(() => BlobLas.Exists(blobName, BlobContainerClientData.BlobContainerClient)).IsEqualTo(expected);
     }
 
     [Test]
@@ -18,21 +18,21 @@ public class LasReaderIntegrationTests
     [Arguments("las/asuf.las", false)]
     public async Task LasExistsAsync(string blobName, bool expected)
     {
-        await Assert.That(async () => await BlobLas.ExistsAsync(blobName, this.BlobContainerClientData.BlobContainerClient)).IsEqualTo(expected);
+        _ = await Assert.That(async () => await BlobLas.ExistsAsync(blobName, BlobContainerClientData.BlobContainerClient)).IsEqualTo(expected);
     }
 
     [Test]
     public async Task ReadLasAsync()
     {
-        var stream = await BlobLas.OpenReadAsync("las/fusa.las", this.BlobContainerClientData.BlobContainerClient);
+        var stream = await BlobLas.OpenReadAsync("las/fusa.las", BlobContainerClientData.BlobContainerClient);
         LasReader reader = new(stream);
 
         await CheckHeader(reader.Header, new(1, 1));
-        await Assert.That(reader.VariableLengthRecords).HasSingleItem();
+        _ = await Assert.That(reader.VariableLengthRecords).HasSingleItem();
 
-        await Assert.That(await reader.ReadPointDataRecordAsync())
-            .Member(p => p.PointDataRecord, p => p.IsNotNull().And.Member(pt => pt.X, x => x.IsNotDefault()))
-            .And.Member(p => p.ExtraBytes.IsEmpty, empty => empty.IsTrue());
+        _ = await Assert.That(await reader.ReadPointDataRecordAsync())
+            .Member(static p => p.PointDataRecord, static p => p.IsNotNull().And.Member(static pt => pt.X, static x => x.IsNotDefault()))
+            .And.Member(static p => p.ExtraBytes.IsEmpty, static empty => empty.IsTrue());
 
         await reader.DisposeAsync();
         await stream.DisposeAsync();

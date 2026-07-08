@@ -56,20 +56,15 @@ public sealed class PointDataRecordQuantizer(Vector3D scaleFactor, Vector3D offs
     /// <param name="offset">The offset.</param>
     /// <returns>The converted point.</returns>
     [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
-    public static Vector3D Get(int x, int y, int z, Vector3D scaleFactor, Vector3D offset)
+    public static Vector3D Get(int x, int y, int z, Vector3D scaleFactor, Vector3D offset) =>
 #if NET9_0_OR_GREATER
-         => Vector256.FusedMultiplyAdd(new Vector3D(x, y, z).AsVector256Unsafe(), scaleFactor.AsVector256Unsafe(), offset.AsVector256Unsafe()).AsVector3D();
+        Vector256.FusedMultiplyAdd(new Vector3D(x, y, z).AsVector256Unsafe(), scaleFactor.AsVector256Unsafe(), offset.AsVector256Unsafe()).AsVector3D();
 #elif NETCOREAPP3_0_OR_GREATER
-    {
-        if (Fma.IsSupported)
-        {
-            return Fma.MultiplyAdd(new Vector3D(x, y, z).AsVector256Unsafe(), scaleFactor.AsVector256Unsafe(), offset.AsVector256Unsafe()).AsVector3D();
-        }
-
-        return (new Vector3D(x, y, z) * scaleFactor) + offset;
-    }
+        Fma.IsSupported
+            ? Fma.MultiplyAdd(new Vector3D(x, y, z).AsVector256Unsafe(), scaleFactor.AsVector256Unsafe(), offset.AsVector256Unsafe()).AsVector3D()
+            : (new Vector3D(x, y, z) * scaleFactor) + offset;
 #else
-         => (new Vector3D(x, y, z) * scaleFactor) + offset;
+        (new Vector3D(x, y, z) * scaleFactor) + offset;
 #endif
 
     /// <summary>
@@ -81,20 +76,15 @@ public sealed class PointDataRecordQuantizer(Vector3D scaleFactor, Vector3D offs
     /// <param name="offset">The offset.</param>
     /// <returns>The converted point.</returns>
     [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
-    public static Vector2D Get(int x, int y, Vector3D scaleFactor, Vector3D offset)
+    public static Vector2D Get(int x, int y, Vector3D scaleFactor, Vector3D offset) =>
 #if NET9_0_OR_GREATER
-         => Vector128.FusedMultiplyAdd(new Vector2D(x, y).AsVector128Unsafe(), scaleFactor.AsVector2D().AsVector128Unsafe(), offset.AsVector2D().AsVector128Unsafe()).AsVector2D();
+        Vector128.FusedMultiplyAdd(new Vector2D(x, y).AsVector128Unsafe(), scaleFactor.AsVector2D().AsVector128Unsafe(), offset.AsVector2D().AsVector128Unsafe()).AsVector2D();
 #elif NETCOREAPP3_0_OR_GREATER
-        {
-            if (Fma.IsSupported)
-            {
-                return Fma.MultiplyAdd(new Vector2D(x, y).AsVector128Unsafe(), scaleFactor.AsVector2D().AsVector128Unsafe(), offset.AsVector2D().AsVector128Unsafe()).AsVector2D();
-            }
-
-            return (new Vector2D(x, y) * scaleFactor.AsVector2D()) + offset.AsVector2D();
-        }
+        Fma.IsSupported
+            ? Fma.MultiplyAdd(new Vector2D(x, y).AsVector128Unsafe(), scaleFactor.AsVector2D().AsVector128Unsafe(), offset.AsVector2D().AsVector128Unsafe()).AsVector2D()
+            : (new Vector2D(x, y) * scaleFactor.AsVector2D()) + offset.AsVector2D();
 #else
-        => (new Vector2D(x, y) * scaleFactor.AsVector2D()) + offset.AsVector2D();
+        (new Vector2D(x, y) * scaleFactor.AsVector2D()) + offset.AsVector2D();
 #endif
 
     /// <summary>
@@ -174,7 +164,7 @@ public sealed class PointDataRecordQuantizer(Vector3D scaleFactor, Vector3D offs
         var length = x.Length;
         var i = 0;
         var size = Vector256<double>.Count;
-        var simdLimit = (length / size) * size;
+        var simdLimit = length / size * size;
 
         var scaleX = Vector256.Create(scaleFactor.X);
         var offsetX = Vector256.Create(offset.X);
@@ -248,7 +238,7 @@ public sealed class PointDataRecordQuantizer(Vector3D scaleFactor, Vector3D offs
         var length = x.Length;
         var i = 0;
         var size = Vector256<float>.Count;
-        var simdLimit = (length / size) * size;
+        var simdLimit = length / size * size;
 
         var scaleFactorF = new System.Numerics.Vector3((float)scaleFactor.X, (float)scaleFactor.Y, (float)scaleFactor.Z);
         var offsetF = new System.Numerics.Vector3((float)offset.X, (float)offset.Y, (float)offset.Z);
@@ -337,7 +327,7 @@ public sealed class PointDataRecordQuantizer(Vector3D scaleFactor, Vector3D offs
         var length = x.Length;
         var i = 0;
         var size = Vector256<double>.Count;
-        var simdLimit = (length / size) * size;
+        var simdLimit = length / size * size;
 
         var scaleX = Vector256.Create(scaleFactor.X);
         var offsetX = Vector256.Create(offset.X);
@@ -402,7 +392,7 @@ public sealed class PointDataRecordQuantizer(Vector3D scaleFactor, Vector3D offs
         var length = x.Length;
         var i = 0;
         var size = Vector256<float>.Count;
-        var simdLimit = (length / size) * size;
+        var simdLimit = length / size * size;
 
         var scaleFactorF = new System.Numerics.Vector2((float)scaleFactor.X, (float)scaleFactor.Y);
         var offsetF = new System.Numerics.Vector2((float)offset.X, (float)offset.Y);
@@ -585,6 +575,7 @@ public sealed class PointDataRecordQuantizer(Vector3D scaleFactor, Vector3D offs
 #if !NET7_0_OR_GREATER
     private static Vector256<float> ScaleAndOffset(Vector256<int> input, Vector256<float> scale, Vector256<float> offset)
     {
+#pragma warning disable IDE0046
         var widened = WidenToSingle(input);
         if (Fma.IsSupported)
         {
@@ -604,6 +595,7 @@ public sealed class PointDataRecordQuantizer(Vector3D scaleFactor, Vector3D offs
         }
 
         return ((widened.AsVector() * scale.AsVector()) + offset.AsVector()).AsVector256();
+#pragma warning restore IDE0046
     }
 #endif
 #endif

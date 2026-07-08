@@ -59,15 +59,15 @@ public struct LazyInterpolatedStringHandler(int literalLength, int formattedCoun
     {
         var builder = new System.Text.StringBuilder(literalLength);
 
-        for (int i = 0; i < this.current; i++)
+        for (var i = 0; i < this.current; i++)
         {
             if (this.literals.TryGetValue(i, out var literal))
             {
-                builder.Append(literal);
+                _ = builder.Append(literal);
             }
             else if (this.formattable.TryGetValue(i, out var value))
             {
-                builder.Append(value.Item1.ToString(value.Item2, provider));
+                _ = builder.Append(value.Item1.ToString(value.Item2, provider));
             }
         }
 

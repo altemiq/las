@@ -9,7 +9,7 @@ namespace Altemiq.IO.Las.Indexing;
 /// <summary>
 /// LAS index.
 /// </summary>
-public class LasIndex : IEnumerable<LasIndexCell>, IEqualityComparer<LasIndex>
+public class LasIndex : IEnumerable<LasIndexCell>, IEqualityComparer<LasIndex>, System.Collections.IEqualityComparer
 {
     /// <summary>
     /// The default threshold.
@@ -189,6 +189,7 @@ public class LasIndex : IEnumerable<LasIndexCell>, IEqualityComparer<LasIndex>
     /// </summary>
     /// <param name="source">The source.</param>
     /// <returns>The LAS index.</returns>
+    /// <exception cref="ArgumentException">The signature is invalid.</exception>
     public static LasIndex ReadFrom(ReadOnlySpan<byte> source)
     {
         if (System.Buffers.Binary.BinaryPrimitives.ReadUInt32LittleEndian(source[..4]) is not SignatureValue)
@@ -540,6 +541,23 @@ public class LasIndex : IEnumerable<LasIndexCell>, IEqualityComparer<LasIndex>
 
     /// <inheritdoc/>
     public override int GetHashCode() => HashCode.Combine(this.spatial, this.interval);
+
+    /// <inheritdoc/>
+    bool System.Collections.IEqualityComparer.Equals(object? x, object? y) => (x, y) switch
+    {
+        (null, not null) or (not null, null) => false,
+        (LasIndex a, LasIndex b) => this.Equals(a, b),
+        (not null, not null) => x == y,
+        _ => false,
+    };
+
+    /// <inheritdoc/>
+    int System.Collections.IEqualityComparer.GetHashCode(object obj) => obj switch
+    {
+        LasIndex x => this.GetHashCode(x),
+        { } x => x.GetHashCode(),
+        _ => default,
+    };
 
     private static void ManageCells(LasInterval interval, LasQuadTree spatial)
     {

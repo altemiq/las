@@ -216,6 +216,7 @@ public partial class ProjContext
                             { Code: 8818 } => "pseudo_standard_parallel_1",
                             { Code: 8833 } => "longitude_of_center",
                             { Name: var n } => n.ToLowerInvariant().Replace(' ', '_'),
+                            _ => throw new NotSupportedException(),
                         };
 
                         yield return new("PARAMETER", parameterName, parameter.Value);

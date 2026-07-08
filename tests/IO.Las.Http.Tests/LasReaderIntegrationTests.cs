@@ -10,7 +10,7 @@ public class LasReaderIntegrationTests
     [Arguments("/las/asuf.las", false)]
     public async Task LasExists(string path, bool expected)
     {
-        await Assert.That(() => HttpLas.Exists(path, this.WebApplicationFactory.CreateClient())).IsEqualTo(expected);
+        _ = await Assert.That(() => HttpLas.Exists(path, WebApplicationFactory.CreateClient())).IsEqualTo(expected);
     }
 
     [Test]
@@ -18,21 +18,21 @@ public class LasReaderIntegrationTests
     [Arguments("/las/asuf.las", false)]
     public async Task LasExistsAsync(string path, bool expected)
     {
-        await Assert.That(async () => await HttpLas.ExistsAsync(path, this.WebApplicationFactory.CreateClient())).IsEqualTo(expected);
+        _ = await Assert.That(async () => await HttpLas.ExistsAsync(path, WebApplicationFactory.CreateClient())).IsEqualTo(expected);
     }
 
     [Test]
     public async Task ReadLasAsync()
     {
-        var stream = await HttpLas.OpenReadAsync("/las/fusa.las", this.WebApplicationFactory.CreateClient());
+        var stream = await HttpLas.OpenReadAsync("/las/fusa.las", WebApplicationFactory.CreateClient());
         LasReader reader = new(stream);
 
         await CheckHeader(reader.Header, new(1, 1));
-        await Assert.That(reader.VariableLengthRecords).HasSingleItem();
+        _ = await Assert.That(reader.VariableLengthRecords).HasSingleItem();
 
-        await Assert.That(await reader.ReadPointDataRecordAsync())
-            .Member(p => p.PointDataRecord, p => p.IsNotNull().And.Member(pt => pt.X, x => x.IsNotDefault()))
-            .And.Member(p => p.ExtraBytes.IsEmpty, empty => empty.IsTrue());
+        _ = await Assert.That(await reader.ReadPointDataRecordAsync())
+            .Member(static p => p.PointDataRecord, static p => p.IsNotNull().And.Member(static pt => pt.X, static x => x.IsNotDefault()))
+            .And.Member(static p => p.ExtraBytes.IsEmpty, static empty => empty.IsTrue());
 
         await reader.DisposeAsync();
         await stream.DisposeAsync();

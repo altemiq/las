@@ -57,7 +57,7 @@ public class FileStreamProvider : IStreamProvider
 
             if (Path.GetDirectoryName(path) is { } directoryName)
             {
-                Directory.CreateDirectory(directoryName);
+                _ = Directory.CreateDirectory(directoryName);
             }
         }
     }

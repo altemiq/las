@@ -231,7 +231,7 @@ public class LasWriter(Stream stream, bool leaveOpen = false) :
 
         var byteArray = System.Buffers.ArrayPool<byte>.Shared.Rent(size);
 
-        record.CopyTo(byteArray);
+        _ = record.CopyTo(byteArray);
 
         this.BaseStream.Write(byteArray, 0, size);
 
@@ -284,6 +284,7 @@ public class LasWriter(Stream stream, bool leaveOpen = false) :
     /// <param name="extraByteCount">The extra bytes count.</param>
     /// <returns>The point data record size.</returns>
     /// <exception cref="InvalidCastException">Invalid point data format.</exception>
+    /// <exception cref="ArgumentOutOfRangeException"><paramref name="header"/>.<see cref="HeaderBlock.Version"/> is not valid.</exception>
     protected int WriteHeader(in HeaderBlock header, uint recordCount, uint recordSize, ushort extraByteCount)
 #else
     /// <summary>
@@ -294,6 +295,7 @@ public class LasWriter(Stream stream, bool leaveOpen = false) :
     /// <param name="recordSize">The record size.</param>
     /// <returns>The point data record size.</returns>
     /// <exception cref="InvalidCastException">Invalid point data format.</exception>
+    /// <exception cref="ArgumentOutOfRangeException"><paramref name="header"/>.<see cref="HeaderBlock.Version"/> is not valid.</exception>
     protected int WriteHeader(in HeaderBlock header, uint recordCount, uint recordSize)
 #endif
     {
@@ -480,7 +482,7 @@ public class LasWriter(Stream stream, bool leaveOpen = false) :
     /// Asynchronously releases the unmanaged resources used by the <see cref="LasWriter"/> class.
     /// </summary>
     /// <returns>The asynchronous task.</returns>
-    protected async virtual ValueTask DisposeAsyncCore()
+    protected virtual async ValueTask DisposeAsyncCore()
     {
         if (this.disposedValue)
         {

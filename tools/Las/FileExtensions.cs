@@ -47,6 +47,7 @@ internal static class FileExtensions
         /// <param name="providers">The stream providers.</param>
         /// <returns>The stream from URI.</returns>
         /// <exception cref="InvalidOperationException">The uri scheme is not supported.</exception>
+        /// <exception cref="NotSupportedException">Failed to find provider.</exception>
         public static Stream OpenRead(Uri uri, IEnumerable<IStreamProvider> providers)
             => providers
                 .Where(provider => provider.CanRead && provider.IsValid(uri))
@@ -69,6 +70,7 @@ internal static class FileExtensions
         /// <param name="providers">The stream providers.</param>
         /// <returns>The stream from URI.</returns>
         /// <exception cref="InvalidOperationException">The uri scheme is not supported.</exception>
+        /// <exception cref="NotSupportedException">Failed to find provider.</exception>
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Roslynator", "RCS1163:Unused parameter.", Justification = "This will be used in the future.")]
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Style", "IDE0060:Remove unused parameter", Justification = "This will be used in the future.")]
         public static Stream OpenWrite(Uri uri, IEnumerable<IStreamProvider> providers)
@@ -95,6 +97,7 @@ internal static class FileExtensions
         /// <param name="providers">The stream providers.</param>
         /// <returns>The stream from URI.</returns>
         /// <exception cref="InvalidOperationException">The uri scheme is not supported.</exception>
+        /// <exception cref="NotSupportedException">Failed to find provider.</exception>
         public static Stream Open(Uri uri, FileMode mode, IEnumerable<IStreamProvider> providers)
         {
             foreach (var provider in providers)

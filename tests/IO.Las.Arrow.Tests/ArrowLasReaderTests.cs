@@ -1,7 +1,7 @@
+namespace Altemiq.IO.Las.Arrow;
+
 using Apache.Arrow;
 using Apache.Arrow.Types;
-
-namespace Altemiq.IO.Las.Arrow;
 
 public class ArrowLasReaderTests
 {
@@ -16,7 +16,7 @@ public class ArrowLasReaderTests
 
         var first = arrowReader.ReadPointDataRecord().PointDataRecord;
 
-        await Assert.That(first).IsNotNull().And.IsEqualTo(Data.MockLasReader.First);
+        _ = await Assert.That(first).IsNotNull().And.IsEqualTo(Data.MockLasReader.First);
     }
 
     [Test]
@@ -30,7 +30,7 @@ public class ArrowLasReaderTests
 
         var second = arrowReader.ReadPointDataRecord(1).PointDataRecord;
 
-        await Assert.That(second).IsNotNull().And.IsEqualTo(Data.MockLasReader.Second);
+        _ = await Assert.That(second).IsNotNull().And.IsEqualTo(Data.MockLasReader.Second);
     }
 
     [Test]
@@ -50,7 +50,7 @@ public class ArrowLasReaderTests
             record = arrowReader.ReadPointDataRecord().PointDataRecord;
         }
 
-        await Assert.That(record).IsNotNull();
+        _ = await Assert.That(record).IsNotNull();
     }
 
     [Test]
@@ -66,12 +66,12 @@ public class ArrowLasReaderTests
 
         var record = arrowReader.ReadPointDataRecord(15000).PointDataRecord;
 
-        await Assert.That(record).IsNotNull();
+        _ = await Assert.That(record).IsNotNull();
     }
 
     private static IEnumerable<RecordBatch> CreateRandomData(Schema schema, int batchSize = 10000, int batches = 10)
     {
-        for (int i = 0; i < batches; i++)
+        for (var i = 0; i < batches; i++)
         {
             yield return CreateRecordBatch(schema, batchSize);
         }
@@ -79,8 +79,8 @@ public class ArrowLasReaderTests
         static RecordBatch CreateRecordBatch(Schema schema, int size = 10000)
         {
             var random = new Random((int)DateTime.UtcNow.Ticks);
-
-            var arrays = schema.FieldsList.Select<Field, IArrowArray>(field => field.DataType.TypeId switch
+#pragma warning disable IDE0072
+            IEnumerable<IArrowArray> arrays = [.. schema.FieldsList.Select<Field, IArrowArray>(field => field.DataType.TypeId switch
                 {
                     ArrowTypeId.Boolean => GetArray(random, new BooleanArray.Builder(), size, random => random.NextDouble() > 0.5),
                     ArrowTypeId.UInt8 => GetArray(random, new UInt8Array.Builder(), size, random => (byte)random.Next(byte.MinValue, byte.MaxValue)),
@@ -94,8 +94,8 @@ public class ArrowLasReaderTests
                     ArrowTypeId.Float => GetArray(random, new FloatArray.Builder(), size, random => random.NextSingle() * ushort.MaxValue),
                     ArrowTypeId.Double => GetArray(random, new DoubleArray.Builder(), size, random => random.NextDouble() * int.MaxValue),
                     _ => throw new System.Diagnostics.UnreachableException(),
-                })
-                .ToList();
+                })];
+#pragma warning restore IDE0072
 
             return new(schema, arrays, size);
 
@@ -105,7 +105,7 @@ public class ArrowLasReaderTests
             {
                 for (var i = 0; i < size; i++)
                 {
-                    builder.Append(randomizer(random));
+                    _ = builder.Append(randomizer(random));
                 }
 
                 return builder.Build(null);

@@ -37,31 +37,31 @@ internal sealed class StringBuilderLasReaderFormatter : DefaultLasReaderFormatte
 
         public IFormatBuilder AppendFormat(Style? style, string format, object? arg0)
         {
-            stringBuilder.AppendFormat(formatProvider, format, arg0);
+            _ = stringBuilder.AppendFormat(formatProvider, format, arg0);
             return this;
         }
 
         public IFormatBuilder AppendFormat(Style? style, string format, object? arg0, object? arg1, object? arg2)
         {
-            stringBuilder.AppendFormat(formatProvider, format, arg0, arg1, arg2);
+            _ = stringBuilder.AppendFormat(formatProvider, format, arg0, arg1, arg2);
             return this;
         }
 
         public IFormatBuilder AppendFormat(Style? style, string format, params object?[] args)
         {
-            stringBuilder.AppendFormat(formatProvider, format, args);
+            _ = stringBuilder.AppendFormat(formatProvider, format, args);
             return this;
         }
 
         public IFormatBuilder Append(string value, Style? style = default)
         {
-            stringBuilder.Append(value);
+            _ = stringBuilder.Append(value);
             return this;
         }
 
         public IFormatBuilder AppendLine(string? value = default, Style? style = default)
         {
-            stringBuilder.AppendLine(value);
+            _ = stringBuilder.AppendLine(value);
             return this;
         }
 

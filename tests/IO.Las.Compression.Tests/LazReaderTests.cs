@@ -29,9 +29,9 @@ public class LazReaderTests
 
         await reader.DisposeAsync();
 
-        await Assert.That(count).IsEqualTo(50000);
-        await Assert.That(pointDataRecord).IsTypeOf<ExtendedGpsColorPointDataRecord>().And.Member(p => p.X, x => x.IsNotDefault());
-        await Assert.That(data).IsNotEmpty();
+        _ = await Assert.That(count).IsEqualTo(50000);
+        _ = await Assert.That(pointDataRecord).IsTypeOf<ExtendedGpsColorPointDataRecord>().And.Member(static p => p.X, static x => x.IsNotDefault());
+        _ = await Assert.That(data).IsNotEmpty();
 
         await stream.DisposeAsync();
     }
@@ -56,9 +56,9 @@ public class LazReaderTests
 
         await reader.DisposeAsync();
 
-        await Assert.That(count).IsEqualTo(50000);
-        await Assert.That(pointDataRecord).IsTypeOf<ExtendedGpsColorPointDataRecord>().And.Member(p => p.X, x => x.IsNotDefault());
-        await Assert.That(data).IsNotEmpty();
+        _ = await Assert.That(count).IsEqualTo(50000);
+        _ = await Assert.That(pointDataRecord).IsTypeOf<ExtendedGpsColorPointDataRecord>().And.Member(static p => p.X, static x => x.IsNotDefault());
+        _ = await Assert.That(data).IsNotEmpty();
 
         await stream.DisposeAsync();
     }
@@ -115,10 +115,10 @@ public class LazReaderTests
                            ?? throw new System.Diagnostics.UnreachableException("Failed to get stream");
 
         var reader = LazReader.Create(stream);
-        await Assert.That(reader)
+        _ = await Assert.That(reader)
             .IsNotNull()
             .And.IsTypeOf<LazReader>()
-            .And.Member(static x => x.IsCompressed, x => x.IsTrue());
+            .And.Member(static x => x.IsCompressed, static x => x.IsTrue());
 
         await reader.DisposeAsync();
         await stream.DisposeAsync();
@@ -136,7 +136,7 @@ public class LazReaderTests
 
         LazReader reader = new(stream);
         await CheckHeader(reader.Header, new(1, 4));
-        await Assert.That(reader.VariableLengthRecords).Count().IsEqualTo(3);
+        _ = await Assert.That(reader.VariableLengthRecords).Count().IsEqualTo(3);
         var extraBytesTag = reader.VariableLengthRecords.OfType<ExtraBytes>().Single();
 
         while (true)
@@ -149,20 +149,20 @@ public class LazReaderTests
 
             var extraBytes = record.ExtraBytes.ToArray();
 
-            await Assert.That(point).IsTypeOf<GpsPointDataRecord>();
-            await Assert.That(extraBytes).IsNotEmpty();
+            _ = await Assert.That(point).IsTypeOf<GpsPointDataRecord>();
+            _ = await Assert.That(extraBytes).IsNotEmpty();
 
             var value = await Assert.That(extraBytesTag[0].GetValue(extraBytes.AsSpan())).ValueIsTypeOf<double>();
-            Interlocked.MinExchange(ref min, value);
-            Interlocked.MaxExchange(ref max, value);
+            _ = Interlocked.MinExchange(ref min, value);
+            _ = Interlocked.MaxExchange(ref max, value);
         }
 
         await reader.DisposeAsync();
 
         await stream.DisposeAsync();
 
-        await Assert.That(min).IsEqualTo(-1.76).Within(0.001);
-        await Assert.That(max).IsEqualTo(19.72).Within(0.001);
+        _ = await Assert.That(min).IsEqualTo(-1.76).Within(0.001);
+        _ = await Assert.That(max).IsEqualTo(19.72).Within(0.001);
     }
 #endif
 
@@ -179,17 +179,15 @@ public class LazReaderTests
         LazReader reader = new(stream);
         await CheckHeader(reader.Header, new(major, minor));
 
-        var point = reader.ReadPointDataRecord(10).PointDataRecord!;
-        await Assert.That(point).IsNotNull()
-            .And.Member(p => p.X, x => x.IsEqualTo(27799961))
-            .And.Member(p => p.Y, y => y.IsEqualTo(612234368))
-            .And.Member(p => p.Z, z => z.IsEqualTo(6222));
+        _ = await Assert.That(reader.ReadPointDataRecord(10).PointDataRecord).IsNotNull()
+            .And.Member(static p => p.X, static x => x.IsEqualTo(27799961))
+            .And.Member(static p => p.Y, static y => y.IsEqualTo(612234368))
+            .And.Member(static p => p.Z, static z => z.IsEqualTo(6222));
 
-        point = reader.ReadPointDataRecord(277500).PointDataRecord!;
-        await Assert.That(point).IsNotNull()
-            .And.Member(p => p.X, x => x.IsEqualTo(27775097))
-            .And.Member(p => p.Y, y => y.IsEqualTo(612225071))
-            .And.Member(p => p.Z, z => z.IsEqualTo(4228));
+        _ = await Assert.That(reader.ReadPointDataRecord(277500).PointDataRecord).IsNotNull()
+            .And.Member(static p => p.X, static x => x.IsEqualTo(27775097))
+            .And.Member(static p => p.Y, static y => y.IsEqualTo(612225071))
+            .And.Member(static p => p.Z, static z => z.IsEqualTo(4228));
 
         await reader.DisposeAsync();
         await stream.DisposeAsync();
@@ -209,7 +207,7 @@ public class LazReaderTests
                            ?? throw new System.Diagnostics.UnreachableException("Failed to get stream");
 
         LazReader reader = new(stream);
-        await Assert.That(reader.VariableLengthRecords).Count().IsEqualTo(vlrCount);
+        _ = await Assert.That(reader.VariableLengthRecords).Count().IsEqualTo(vlrCount);
 
         await TestPointAsync(reader, expectedType, hasExtraBytes);
         await TestPointAsync(reader, expectedType, hasExtraBytes);
@@ -220,7 +218,7 @@ public class LazReaderTests
         static async Task TestPointAsync(LasReader pointReader, Type expectedType, bool hasExtraBytes)
         {
             var point = await pointReader.ReadPointDataRecordAsync();
-            await Assert.That(point.PointDataRecord)
+            _ = await Assert.That(point.PointDataRecord)
                 .IsNotNull()
                 .And.IsTypeOf(expectedType);
             _ = hasExtraBytes ? await Assert.That(point.ExtraBytes.IsEmpty).IsFalse() : await Assert.That(point.ExtraBytes.IsEmpty).IsTrue();
@@ -240,23 +238,23 @@ public class LazReaderTests
 
         LazReader reader = new(stream);
         await CheckHeader(reader.Header, new(1, 4));
-        await Assert.That(reader.VariableLengthRecords).Count().IsEqualTo(3);
+        _ = await Assert.That(reader.VariableLengthRecords).Count().IsEqualTo(3);
         var extraBytes = reader.VariableLengthRecords.OfType<ExtraBytes>().Single();
 
         while (await reader.ReadPointDataRecordAsync() is { PointDataRecord: not null } point)
         {
-            await Assert.That(point.PointDataRecord).IsTypeOf<GpsPointDataRecord>();
-            await Assert.That(point.ExtraBytes.IsEmpty).IsFalse();
+            _ = await Assert.That(point.PointDataRecord).IsTypeOf<GpsPointDataRecord>();
+            _ = await Assert.That(point.ExtraBytes.IsEmpty).IsFalse();
             var value = await Assert.That(await extraBytes.GetValueAsync(0, point.ExtraBytes)).ValueIsTypeOf<double>();
-            Interlocked.MinExchange(ref min, value);
-            Interlocked.MaxExchange(ref max, value);
+            _ = Interlocked.MinExchange(ref min, value);
+            _ = Interlocked.MaxExchange(ref max, value);
         }
 
         await reader.DisposeAsync();
         await stream.DisposeAsync();
 
-        await Assert.That(min).IsEqualTo(-1.76).Within(0.001);
-        await Assert.That(max).IsEqualTo(19.72).Within(0.001);
+        _ = await Assert.That(min).IsEqualTo(-1.76).Within(0.001);
+        _ = await Assert.That(max).IsEqualTo(19.72).Within(0.001);
     }
 #endif
 
@@ -274,16 +272,16 @@ public class LazReaderTests
         await CheckHeader(reader.Header, new(major, minor));
 
         var record = await reader.ReadPointDataRecordAsync(10);
-        await Assert.That(record.PointDataRecord).IsNotNull()
-            .And.Member(p => p.X, x => x.IsEqualTo(27799961))
-            .And.Member(p => p.Y, y => y.IsEqualTo(612234368))
-            .And.Member(p => p.Z, z => z.IsEqualTo(6222));
+        _ = await Assert.That(record.PointDataRecord).IsNotNull()
+            .And.Member(static p => p.X, static x => x.IsEqualTo(27799961))
+            .And.Member(static p => p.Y, static y => y.IsEqualTo(612234368))
+            .And.Member(static p => p.Z, static z => z.IsEqualTo(6222));
 
         record = await reader.ReadPointDataRecordAsync(277500);
-        await Assert.That(record.PointDataRecord).IsNotNull()
-            .And.Member(p => p.X, x => x.IsEqualTo(27775097))
-            .And.Member(p => p.Y, y => y.IsEqualTo(612225071))
-            .And.Member(p => p.Z, z => z.IsEqualTo(4228));
+        _ = await Assert.That(record.PointDataRecord).IsNotNull()
+            .And.Member(static p => p.X, static x => x.IsEqualTo(27775097))
+            .And.Member(static p => p.Y, static y => y.IsEqualTo(612225071))
+            .And.Member(static p => p.Z, static z => z.IsEqualTo(4228));
 
         await reader.DisposeAsync();
         await stream.DisposeAsync();
@@ -310,10 +308,10 @@ public class LazReaderTests
             data = extraBytes.ToArray();
         }
 
-        await Assert.That(pointDataRecord)
+        _ = await Assert.That(pointDataRecord)
             .IsTypeOf<GpsPointDataRecord>().And
-            .Member(p => p.X, x => x.IsNotDefault());
-        await Assert.That(data).IsEmpty();
+            .Member(static p => p.X, static x => x.IsNotDefault());
+        _ = await Assert.That(data).IsEmpty();
 
         await reader.DisposeAsync();
         await stream.DisposeAsync();
@@ -329,7 +327,7 @@ public class LazReaderTests
         var span = new byte[1024];
 
         var pointsRead = await reader.ReadPointDataRecordDataAsync(span);
-        await Assert.That(pointsRead).IsNotZero();
+        _ = await Assert.That(pointsRead).IsNotZero();
 
         IBasePointDataRecord pointDataRecord = default;
         byte[] data = default;
@@ -343,10 +341,10 @@ public class LazReaderTests
         await reader.DisposeAsync();
         await stream.DisposeAsync();
 
-        await Assert.That(pointDataRecord)
+        _ = await Assert.That(pointDataRecord)
             .IsTypeOf<GpsPointDataRecord>().And
-            .Member(p => p.X, x => x.IsNotDefault());
-        await Assert.That(data).IsEmpty();
+            .Member(static p => p.X, static x => x.IsNotDefault());
+        _ = await Assert.That(data).IsEmpty();
     }
 #endif
 

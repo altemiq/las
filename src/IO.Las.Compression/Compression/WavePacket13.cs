@@ -118,6 +118,7 @@ internal readonly struct WavePacket13
     /// <inheritdoc/>
     public override int GetHashCode() => HashCode.Combine(this.Offset, this.PacketSize, this.ReturnPoint, this.X, this.Y, this.Z);
 
+#pragma warning disable MA0136
     /// <inheritdoc/>
     public override string ToString() => $$"""
         {
@@ -129,4 +130,5 @@ internal readonly struct WavePacket13
           {{nameof(this.Z)}}: {{this.Z}}
         }
         """;
+#pragma warning restore MA0136
 }

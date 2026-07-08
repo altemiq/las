@@ -40,7 +40,7 @@ public partial class ProjContext
                                    u.object_table_name = {ObjectTableName}
                                """;
         command.Parameters.Clear();
-        command.Parameters.AddWithValue(ObjectTableName, table);
+        _ = command.Parameters.AddWithValue(ObjectTableName, table);
         AddAuthClause(command, auth, code, prefix: "object_", limit: 1);
 
         using var reader = command.ExecuteReader();
@@ -62,9 +62,6 @@ public partial class ProjContext
                 break;
             case WellKnownTextVersion.Wkt2_2019:
                 yield return new("USAGE", scope, area, bbox);
-                break;
-            case WellKnownTextVersion.Wkt1:
-            default:
                 break;
         }
     }

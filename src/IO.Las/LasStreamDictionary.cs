@@ -9,6 +9,7 @@ namespace Altemiq.IO.Las;
 /// <summary>
 /// The <see cref="Las"/> <see cref="Stream"/> <see cref="System.Collections.IDictionary"/>.
 /// </summary>
+/// <param name="comparer">The comparer.</param>
 internal sealed class LasStreamDictionary(IComparer<string> comparer) : IDictionary<string, Stream>
 {
     private readonly List<string> keys = [];
@@ -116,7 +117,11 @@ internal sealed class LasStreamDictionary(IComparer<string> comparer) : IDiction
             return true;
         }
 
+#if NETSTANDARD || NETFRAMEWORK
         value = default!;
+#else
+        value = default;
+#endif
         return false;
     }
 

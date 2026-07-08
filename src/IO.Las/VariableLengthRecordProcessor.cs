@@ -217,7 +217,7 @@ public sealed class VariableLengthRecordProcessor
 #if NETSTANDARD2_1_OR_GREATER || NETCOREAPP2_0_OR_GREATER
         dictionary.GetValueOrDefault(new(userId, recordId));
 #else
-        dictionary.TryGetValue(new(userId, recordId),  out var value) ? value : default;
+        dictionary.TryGetValue(new(userId, recordId), out var value) ? value : default;
 #endif
 
     private readonly struct Key(string? userId, ushort recordId) : IEquatable<Key>, IEqualityComparer<Key>

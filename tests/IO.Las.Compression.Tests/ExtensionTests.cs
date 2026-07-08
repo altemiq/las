@@ -13,24 +13,24 @@ public class ExtensionTests
     [Test]
     public async Task PositiveLongIsInInt32Range()
     {
-        await Assert.That(12345L.IsInt32()).IsTrue();
+        _ = await Assert.That(12345L.IsInt32()).IsTrue();
     }
 
     [Test]
     public async Task NegativeLongIsInInt32Range()
     {
-        await Assert.That((-12345L).IsInt32()).IsTrue();
+        _ = await Assert.That((-12345L).IsInt32()).IsTrue();
     }
 
     [Test]
     public async Task PositiveLongIsNotInInt32Range()
     {
-        await Assert.That(2150000000L.IsInt32()).IsFalse();
+        _ = await Assert.That(2150000000L.IsInt32()).IsFalse();
     }
 
     [Test]
     public async Task NegativeLongIsNotInInt32Range()
     {
-        await Assert.That((-2150000000L).IsInt32()).IsFalse();
+        _ = await Assert.That((-2150000000L).IsInt32()).IsFalse();
     }
 }

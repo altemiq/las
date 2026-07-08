@@ -74,7 +74,7 @@ internal static partial class RootCommandExtensions
                         var input = parseResult.GetRequiredValue(Arguments.Input);
 
 #if LAS1_4_OR_GREATER
-                        var index = Path.GetExtension(input) is ".las" or ".laz"
+                        var index = IsLasOrLaz(Path.GetExtension(input))
                             ? CreateFromReader(input, services)
                             : CreateFromLax(Path.ChangeExtension(input, ".lax"), services);
 #else
@@ -87,6 +87,12 @@ internal static partial class RootCommandExtensions
                         foreach (var item in index)
                         {
                             PrintTree(output, item);
+                        }
+
+                        static bool IsLasOrLaz(string extension)
+                        {
+                            return string.Equals(extension, ".las", StringComparison.OrdinalIgnoreCase)
+                                || string.Equals(extension, ".laz", StringComparison.OrdinalIgnoreCase);
                         }
 
                         static void PrintTree(TextWriter output, Indexing.LasIndexCell cell)

@@ -28,7 +28,7 @@ public class ColorSourceGeneratorTests
         driver = driver.RunGenerators(compilation);
 
         // Ensure we generated something
-        await Assert.That(driver.GetRunResult().Results.Single().GeneratedSources).IsNotEmpty();
+        _ = await Assert.That(driver.GetRunResult().Results.Single().GeneratedSources).IsNotEmpty();
 
         // Update the compilation and rerun the generator
         compilation = compilation.AddSyntaxTrees(Microsoft.CodeAnalysis.CSharp.CSharpSyntaxTree.ParseText("// dummy"));
@@ -38,8 +38,8 @@ public class ColorSourceGeneratorTests
         var result = driver.GetRunResult().Results.Single();
         var allOutputs = result
             .TrackedOutputSteps
-            .SelectMany(outputStep => outputStep.Value)
-            .SelectMany(output => output.Outputs);
-        await Assert.That(allOutputs).All(output => output.Reason is IncrementalStepRunReason.Cached);
+            .SelectMany(static outputStep => outputStep.Value)
+            .SelectMany(static output => output.Outputs);
+        _ = await Assert.That(allOutputs).All(static output => output.Reason is IncrementalStepRunReason.Cached);
     }
 }

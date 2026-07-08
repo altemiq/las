@@ -93,7 +93,6 @@ public abstract class ChunkedStream(long length) : Stream, ICacheStream, IAsyncC
                 this.streamStart += offset;
                 this.streamLength = -1;
                 return this.streamStart;
-            case SeekOrigin.End:
             default:
                 return -1;
         }

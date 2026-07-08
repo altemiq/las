@@ -11,7 +11,7 @@ public class GpsTimeTests
     {
         var builder = new HeaderBlockBuilder(pointDataFormatId);
         var header = builder.HeaderBlock;
-        await Assert.That(GpsTime.GetOffset(header)).IsDefault();
+        _ = await Assert.That(GpsTime.GetOffset(header)).IsDefault();
     }
 
 #if LAS1_5_OR_GREATER
@@ -25,7 +25,7 @@ public class GpsTimeTests
     [Arguments(2040, 2000000000)]
     public async Task GetRecommendedOffset(int year, int offset)
     {
-        await Assert.That(GpsTime.GetOffset(new DateTime(year, 1, 1))).IsEqualTo(offset);
+        _ = await Assert.That(GpsTime.GetOffset(new DateTime(year, 1, 1))).IsEqualTo(offset);
     }
 #endif
 }

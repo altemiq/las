@@ -205,15 +205,10 @@ public sealed partial class ProjContext :
         }
     }
 
-    private static WellKnownTextNode GetUnitNode(string type, string name, double value, string auth, int code, WellKnownTextVersion version)
-    {
-        if (version is WellKnownTextVersion.Wkt1)
-        {
-            return new("UNIT", GetUnitName(name), value, CreateAuthorityNode(auth, code, WellKnownTextVersion.Wkt1));
-        }
-
-        return new($"{type.ToUpperInvariant()}UNIT", GetUnitName(name), value);
-    }
+    private static WellKnownTextNode GetUnitNode(string type, string name, double value, string auth, int code, WellKnownTextVersion version) =>
+        version is WellKnownTextVersion.Wkt1
+            ? new("UNIT", GetUnitName(name), value, CreateAuthorityNode(auth, code, WellKnownTextVersion.Wkt1))
+            : new($"{type.ToUpperInvariant()}UNIT", GetUnitName(name), value);
 
     private static WellKnownTextNode GetUnitNode(Microsoft.Data.Sqlite.SqliteCommand command, string auth, int uom, WellKnownTextVersion version) =>
         UnitNodes.GetOrAdd(

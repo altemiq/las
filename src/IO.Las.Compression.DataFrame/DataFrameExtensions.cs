@@ -6,8 +6,6 @@
 
 namespace Altemiq.IO.Las;
 
-#pragma warning disable SA1101
-
 /// <summary>
 /// <see cref="DataFrame"/> extensions.
 /// </summary>
@@ -18,6 +16,7 @@ public static class DataFrameExtensions
         /// <summary>
         /// Creates a <see cref="DataFrame"/> from the <see cref="ILasReader"/>.
         /// </summary>
+        /// <typeparam name="T">The type of reader.</typeparam>
         /// <param name="reader">The reader.</param>
         /// <returns>The data frame.</returns>
         public static DataFrame ReadLaz<T>(T reader)

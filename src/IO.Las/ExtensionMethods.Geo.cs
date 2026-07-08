@@ -6,6 +6,8 @@
 
 namespace Altemiq.IO.Las;
 
+#pragma warning disable CA1708
+
 /// <summary>
 /// GeoTIFF <see cref="VariableLengthRecord"/> extension methods.
 /// </summary>
@@ -86,21 +88,14 @@ public static partial class ExtensionMethods
     /// <returns>The ASCII value.</returns>
     public static string GetAsciiValue(this GeoKeyDirectoryTag keyDirectory, GeoKey key, GeoAsciiParamsTag asciiParams)
     {
-        return (keyDirectory, asciiParams) switch
-        {
-            (null, _) => throw new ArgumentNullException(nameof(keyDirectory)),
-            (_, null) => throw new ArgumentNullException(nameof(asciiParams)),
-            _ => GetAsciiValueImpl(keyDirectory, key, asciiParams),
-        };
+        ArgumentNullException.ThrowIfNull(keyDirectory);
+        ArgumentNullException.ThrowIfNull(asciiParams);
 
-        static string GetAsciiValueImpl(GeoKeyDirectoryTag keyDirectory, GeoKey key, GeoAsciiParamsTag asciiParams)
+        return keyDirectory[key] switch
         {
-            return keyDirectory[key] switch
-            {
-                { TiffTagLocation: GeoAsciiParamsTag.TagRecordId } geoKeyEntry => asciiParams[geoKeyEntry].TrimEnd('|'),
-                _ => ThrowIsNotAValue<string>(nameof(System.Text.Encoding.UTF8), nameof(key)),
-            };
-        }
+            { TiffTagLocation: GeoAsciiParamsTag.TagRecordId } geoKeyEntry => asciiParams[geoKeyEntry].TrimEnd('|'),
+            _ => ThrowIsNotAValue<string>(nameof(System.Text.Encoding.UTF8), nameof(key)),
+        };
     }
 
     /// <summary>
@@ -129,12 +124,16 @@ public static partial class ExtensionMethods
     /// <param name="keyEntry">The GEO key entry.</param>
     /// <param name="asciiParams">The ASCII parameters.</param>
     /// <returns>The ASCII value.</returns>
-    public static string GetAsciiValue(this GeoKeyEntry keyEntry, GeoAsciiParamsTag asciiParams) => (asciiParams, keyEntry) switch
+    public static string GetAsciiValue(this GeoKeyEntry keyEntry, GeoAsciiParamsTag asciiParams)
     {
-        (null, _) => throw new ArgumentNullException(nameof(asciiParams)),
-        (not null, { TiffTagLocation: GeoAsciiParamsTag.TagRecordId }) => asciiParams[keyEntry].TrimEnd('|'),
-        _ => ThrowIsNotAValue<string>(nameof(System.Text.Encoding.UTF8), nameof(keyEntry)),
-    };
+        ArgumentNullException.ThrowIfNull(asciiParams);
+
+        return keyEntry switch
+        {
+            { TiffTagLocation: GeoAsciiParamsTag.TagRecordId } => asciiParams[keyEntry].TrimEnd('|'),
+            _ => ThrowIsNotAValue<string>(nameof(System.Text.Encoding.UTF8), nameof(keyEntry)),
+        };
+    }
 
     /// <summary>
     /// Tries to get the ASCII value associated with the <see cref="GeoKey"/> from the <see cref="ILasReader"/>.
@@ -259,21 +258,14 @@ public static partial class ExtensionMethods
     /// <returns>The double-precision value.</returns>
     public static double GetDoubleValue(this GeoKeyDirectoryTag keyDirectory, GeoKey key, GeoDoubleParamsTag doubleParams)
     {
-        return (keyDirectory, doubleParams) switch
-        {
-            (null, _) => throw new ArgumentNullException(nameof(keyDirectory)),
-            (_, null) => throw new ArgumentNullException(nameof(doubleParams)),
-            _ => GetDoubleValueImpl(keyDirectory, key, doubleParams),
-        };
+        ArgumentNullException.ThrowIfNull(keyDirectory);
+        ArgumentNullException.ThrowIfNull(doubleParams);
 
-        static double GetDoubleValueImpl(GeoKeyDirectoryTag keyDirectory, GeoKey key, GeoDoubleParamsTag doubleParams)
+        return keyDirectory[key] switch
         {
-            return keyDirectory[key] switch
-            {
-                { TiffTagLocation: GeoDoubleParamsTag.TagRecordId } geoKeyEntry => doubleParams[geoKeyEntry.ValueOffset],
-                _ => ThrowIsNotAValue<double>(nameof(Double), nameof(key)),
-            };
-        }
+            { TiffTagLocation: GeoDoubleParamsTag.TagRecordId } geoKeyEntry => doubleParams[geoKeyEntry.ValueOffset],
+            _ => ThrowIsNotAValue<double>(nameof(Double), nameof(key)),
+        };
     }
 
     /// <summary>
@@ -302,12 +294,16 @@ public static partial class ExtensionMethods
     /// <param name="keyEntry">The GEO key entry.</param>
     /// <param name="doubleParams">The double-precision parameters.</param>
     /// <returns>The double-precision value.</returns>
-    public static double GetDoubleValue(this GeoKeyEntry keyEntry, GeoDoubleParamsTag doubleParams) => (doubleParams, keyEntry) switch
+    public static double GetDoubleValue(this GeoKeyEntry keyEntry, GeoDoubleParamsTag doubleParams)
     {
-        (null, _) => throw new ArgumentNullException(nameof(doubleParams)),
-        (not null, { TiffTagLocation: GeoDoubleParamsTag.TagRecordId }) => doubleParams[keyEntry.ValueOffset],
-        _ => ThrowIsNotAValue<double>(nameof(Double), nameof(keyEntry)),
-    };
+        ArgumentNullException.ThrowIfNull(doubleParams);
+
+        return keyEntry switch
+        {
+            { TiffTagLocation: GeoDoubleParamsTag.TagRecordId } => doubleParams[keyEntry.ValueOffset],
+            _ => ThrowIsNotAValue<double>(nameof(Double), nameof(keyEntry)),
+        };
+    }
 
     /// <summary>
     /// Tries to get the double-precision value associated with the <see cref="GeoKey"/> from the <see cref="ILasReader"/>.
@@ -426,21 +422,14 @@ public static partial class ExtensionMethods
     /// <returns>The double-precision values.</returns>
     public static IEnumerable<double> GetDoubleValues(this GeoKeyDirectoryTag keyDirectory, GeoKey key, GeoDoubleParamsTag doubleParams)
     {
-        return (keyDirectory, doubleParams) switch
-        {
-            (null, _) => throw new ArgumentNullException(nameof(keyDirectory)),
-            (_, null) => throw new ArgumentNullException(nameof(doubleParams)),
-            _ => GetDoubleValuesImpl(keyDirectory, key, doubleParams),
-        };
+        ArgumentNullException.ThrowIfNull(keyDirectory);
+        ArgumentNullException.ThrowIfNull(doubleParams);
 
-        static IEnumerable<double> GetDoubleValuesImpl(GeoKeyDirectoryTag keyDirectory, GeoKey key, GeoDoubleParamsTag doubleParams)
+        return keyDirectory[key] switch
         {
-            return keyDirectory[key] switch
-            {
-                { TiffTagLocation: GeoDoubleParamsTag.TagRecordId } geoKeyEntry => doubleParams.GetValues(geoKeyEntry.ValueOffset, geoKeyEntry.Count),
-                _ => ThrowIsNotAValue<IEnumerable<double>>(nameof(IEnumerable<>), nameof(key)),
-            };
-        }
+            { TiffTagLocation: GeoDoubleParamsTag.TagRecordId } geoKeyEntry => doubleParams.GetValues(geoKeyEntry.ValueOffset, geoKeyEntry.Count),
+            _ => ThrowIsNotAValue<IEnumerable<double>>(nameof(IEnumerable<>), nameof(key)),
+        };
     }
 
     /// <summary>
@@ -469,12 +458,16 @@ public static partial class ExtensionMethods
     /// <param name="keyEntry">The GEO key entry.</param>
     /// <param name="doubleParams">The double-precision parameters.</param>
     /// <returns>The double-precision values.</returns>
-    public static IEnumerable<double> GetDoubleValues(this GeoKeyEntry keyEntry, GeoDoubleParamsTag doubleParams) => (doubleParams, keyEntry) switch
+    public static IEnumerable<double> GetDoubleValues(this GeoKeyEntry keyEntry, GeoDoubleParamsTag doubleParams)
     {
-        (null, _) => throw new ArgumentNullException(nameof(doubleParams)),
-        (not null, { TiffTagLocation: GeoDoubleParamsTag.TagRecordId }) => doubleParams.GetValues(keyEntry.ValueOffset, keyEntry.Count),
-        _ => ThrowIsNotAValue<IEnumerable<double>>(nameof(IEnumerable<>), nameof(keyEntry)),
-    };
+        ArgumentNullException.ThrowIfNull(doubleParams);
+
+        return keyEntry switch
+        {
+            { TiffTagLocation: GeoDoubleParamsTag.TagRecordId } => doubleParams.GetValues(keyEntry.ValueOffset, keyEntry.Count),
+            _ => ThrowIsNotAValue<IEnumerable<double>>(nameof(IEnumerable<>), nameof(keyEntry)),
+        };
+    }
 
     /// <summary>
     /// Tries to get the double-precision values associated with the <see cref="GeoKey"/> from the <see cref="ILasReader"/>.

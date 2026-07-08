@@ -43,18 +43,18 @@ public class IntegerCoderInitializeTests
 
         decompressor.Initialize();
 
-        await Assert.That(CorrectorModelsDec.GetValue(decompressor) as ArithmeticSymbolModel[])
+        _ = await Assert.That(CorrectorModelsDec.GetValue(decompressor) as ArithmeticSymbolModel[])
             .IsNotNull().And
             .Count().IsEqualTo(17).And
-            .Satisfies(cm => cm[0], m => m.IsNull()).And
-            .Satisfies(cm => cm.Skip(1), m => m.All((ArithmeticSymbolModel sm) => sm?.Initialized is true, "Is initialized"));
+            .Satisfies(static cm => cm[0], static m => m.IsNull()).And
+            .Satisfies(static cm => cm.Skip(1), static m => m.All(static (ArithmeticSymbolModel sm) => sm?.Initialized is true, "Is initialized"));
 
         // All bitsModels and the corrector bit model must be initialized.
-        await Assert.That(BitsModelsDec.GetValue(decompressor) as ArithmeticSymbolModel[])
+        _ = await Assert.That(BitsModelsDec.GetValue(decompressor) as ArithmeticSymbolModel[])
             .IsNotNull().And
-            .Count().IsEqualTo(4).And.All(m => m.Initialized);
+            .Count().IsEqualTo(4).And.All(static m => m.Initialized);
 
-        await Assert.That(CorrectorBitModelDec.GetValue(decompressor)).IsNotNull();
+        _ = await Assert.That(CorrectorBitModelDec.GetValue(decompressor)).IsNotNull();
     }
 
     [Test]
@@ -66,17 +66,17 @@ public class IntegerCoderInitializeTests
 
         compressor.Initialize();
 
-        await Assert.That(CorrectorModelsEnc.GetValue(compressor) as ArithmeticSymbolModel[])
+        _ = await Assert.That(CorrectorModelsEnc.GetValue(compressor) as ArithmeticSymbolModel[])
             .IsNotNull().And
             .Count().IsEqualTo(17).And
-            .Satisfies(cm => cm[0], m => m.IsNull()).And
-            .Satisfies(cm => cm.Skip(1), m => m.All((ArithmeticSymbolModel sm) => sm?.Initialized is true, "Is initialized"));
+            .Satisfies(static cm => cm[0], static m => m.IsNull()).And
+            .Satisfies(static cm => cm.Skip(1), static m => m.All(static (ArithmeticSymbolModel sm) => sm?.Initialized is true, "Is initialized"));
 
-        await Assert.That(BitsModelsEnc.GetValue(compressor) as ArithmeticSymbolModel[])
+        _ = await Assert.That(BitsModelsEnc.GetValue(compressor) as ArithmeticSymbolModel[])
             .IsNotNull().And
-            .Count().IsEqualTo(4).And.All(m => m.Initialized);
+            .Count().IsEqualTo(4).And.All(static m => m.Initialized);
 
-        await Assert.That(CorrectorBitModelEnc.GetValue(compressor)).IsNotNull();
+        _ = await Assert.That(CorrectorBitModelEnc.GetValue(compressor)).IsNotNull();
     }
 
     [Test]
@@ -134,7 +134,7 @@ public class IntegerCoderInitializeTests
             encoded = output.ToArray();
         }
 
-        await Assert.That(encoded).Count().IsGreaterThan(0);
+        _ = await Assert.That(encoded).Count().IsGreaterThan(0);
 
         using var input = new MemoryStream(encoded);
         var decoder = new ArithmeticDecoder();
@@ -146,7 +146,7 @@ public class IntegerCoderInitializeTests
         for (var i = 0; i < pairs.Length; i++)
         {
             var decoded = decompressor.Decompress(pairs[i].Pred, context: (uint)(i % contexts));
-            await Assert.That(decoded).IsEqualTo(pairs[i].Real);
+            _ = await Assert.That(decoded).IsEqualTo(pairs[i].Real);
         }
 
         decoder.Done();
@@ -171,7 +171,7 @@ public class IntegerCoderInitializeTests
             + requested1.GetByteCountIfRequested()
             + requested2.GetByteCountIfRequested()
             + requested3.GetByteCountIfRequested();
-        await Assert.That(expectedReadCount).IsEqualTo(18U);
+        _ = await Assert.That(expectedReadCount).IsEqualTo(18U);
 
         // LayeredValue.InitializeIfRequested also advances past non-requested, non-zero layers
         // via stream.Position += ByteCount, so the underlying stream needs 7 + 5 + 11 = 23 bytes.
@@ -192,25 +192,25 @@ public class IntegerCoderInitializeTests
         }
 
         // Cumulative index must equal total requested bytes read.
-        await Assert.That(cumulativeIndex).IsEqualTo(18U);
+        _ = await Assert.That(cumulativeIndex).IsEqualTo(18U);
 
         // Buffer contents should be stream bytes 1..7 (requested0), then stream bytes 13..23 (requested2)
         // because layer 1 (5 bytes) is skipped via stream.Position +=.
         for (var i = 0; i < 7; i++)
         {
-            await Assert.That(buffer[i]).IsEqualTo((byte)(i + 1));
+            _ = await Assert.That(buffer[i]).IsEqualTo((byte)(i + 1));
         }
 
         for (var i = 0; i < 11; i++)
         {
-            await Assert.That(buffer[7 + i]).IsEqualTo((byte)(i + 13));
+            _ = await Assert.That(buffer[7 + i]).IsEqualTo((byte)(i + 13));
         }
 
         // Changed flags reflect whether the layer was requested AND had a nonzero byte count.
-        await Assert.That(requested0.Changed).IsTrue();
-        await Assert.That(requested1.Changed).IsFalse();
-        await Assert.That(requested2.Changed).IsTrue();
-        await Assert.That(requested3.Changed).IsFalse();
+        _ = await Assert.That(requested0.Changed).IsTrue();
+        _ = await Assert.That(requested1.Changed).IsFalse();
+        _ = await Assert.That(requested2.Changed).IsTrue();
+        _ = await Assert.That(requested3.Changed).IsFalse();
     }
 #endif
 }

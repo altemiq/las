@@ -78,6 +78,7 @@ public readonly record struct LasItem
         _ => false,
     };
 
+#pragma warning disable MA0136
     /// <inheritdoc/>
     public override string ToString() =>
         $$"""
@@ -87,4 +88,5 @@ public readonly record struct LasItem
           {{nameof(this.Version)}}: {{this.Version}}
         }
         """;
+#pragma warning restore MA0136
 }

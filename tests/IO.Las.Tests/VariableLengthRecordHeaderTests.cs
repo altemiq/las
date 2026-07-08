@@ -22,21 +22,21 @@ public class VariableLengthRecordHeaderTests
     [LittleEndianOnly]
     public async Task FromMemory()
     {
-        await Assert.That(Marshal.PtrToStructure<VariableLengthRecordHeader>(Marshal.UnsafeAddrOfPinnedArrayElement(Bytes, 0)))
+        _ = await Assert.That(Marshal.PtrToStructure<VariableLengthRecordHeader>(Marshal.UnsafeAddrOfPinnedArrayElement(Bytes, 0)))
             .IsNotDefault()
-            .And.Member(h => h.UserId, userId => userId.IsEqualTo(VariableLengthRecordHeader.ProjectionUserId))
-            .And.Member(h => h.RecordId, recordId => recordId.IsEqualTo((ushort)34735))
-            .And.Member(h => h.Description, description => description.IsEqualTo("by LAStools of Martin Isenburg"));
+            .And.Member(static h => h.UserId, static userId => userId.IsEqualTo(VariableLengthRecordHeader.ProjectionUserId))
+            .And.Member(static h => h.RecordId, static recordId => recordId.IsEqualTo((ushort)34735))
+            .And.Member(static h => h.Description, static description => description.IsEqualTo("by LAStools of Martin Isenburg"));
     }
 
     [Test]
     public async Task FromBytes()
     {
-        await Assert.That(new VariableLengthRecordHeader(Bytes))
+        _ = await Assert.That(new VariableLengthRecordHeader(Bytes))
             .IsNotDefault()
-            .And.Member(h => h.UserId, userId => userId.IsEqualTo(VariableLengthRecordHeader.ProjectionUserId))
-            .And.Member(h => h.RecordId, recordId => recordId.IsEqualTo((ushort)34735))
-            .And.Member(h => h.Description, description => description.IsEqualTo("by LAStools of Martin Isenburg"));
+            .And.Member(static h => h.UserId, static userId => userId.IsEqualTo(VariableLengthRecordHeader.ProjectionUserId))
+            .And.Member(static h => h.RecordId, static recordId => recordId.IsEqualTo((ushort)34735))
+            .And.Member(static h => h.Description, static description => description.IsEqualTo("by LAStools of Martin Isenburg"));
     }
 
     [Test]
@@ -46,7 +46,7 @@ public class VariableLengthRecordHeaderTests
         var destination = new byte[Bytes.Length];
         Marshal.StructureToPtr(Header, Marshal.UnsafeAddrOfPinnedArrayElement(destination, 0), fDeleteOld: false);
         Array.Copy(Bytes, destination, 2);
-        await Assert.That(destination).IsEquivalentTo(Bytes);
+        _ = await Assert.That(destination).IsEquivalentTo(Bytes);
     }
 
     [Test]
@@ -55,6 +55,6 @@ public class VariableLengthRecordHeaderTests
         var destination = new byte[Bytes.Length];
         Header.WriteLittleEndian(destination);
         Array.Copy(Bytes, destination, 2);
-        await Assert.That(destination).IsEquivalentTo(Bytes);
+        _ = await Assert.That(destination).IsEquivalentTo(Bytes);
     }
 }

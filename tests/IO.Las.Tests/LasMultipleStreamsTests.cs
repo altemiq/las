@@ -41,7 +41,7 @@ public class LasMultipleStreamsTests
         _ = stream.SwitchTo(LasStreams.VariableLengthRecord);
         _ = stream.SwitchTo(LasStreams.PointData);
 
-        await Assert.That(dictionary.Keys).IsEquivalentTo(
+        _ = await Assert.That(dictionary.Keys).IsEquivalentTo(
         [
             LasStreams.Header,
             LasStreams.VariableLengthRecord,
@@ -51,6 +51,6 @@ public class LasMultipleStreamsTests
         await stream.DisposeAsync();
     }
 
-    private class BasicLasMultipleMemoryStreams(IDictionary<string, Stream> dictionary) : LasMultipleMemoryStream(dictionary);
+    private sealed class BasicLasMultipleMemoryStreams(IDictionary<string, Stream> dictionary) : LasMultipleMemoryStream(dictionary);
 
 }

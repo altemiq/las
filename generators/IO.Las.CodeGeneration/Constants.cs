@@ -14,8 +14,8 @@ internal static class Constants
     /// <summary>
     /// The newline character.
     /// </summary>
-#pragma warning disable UseRawString
+#pragma warning disable MA0101, UseRawString
     public const string NewLine = @"
 ";
-#pragma warning restore UseRawString
+#pragma warning restore MA0101, UseRawString
 }

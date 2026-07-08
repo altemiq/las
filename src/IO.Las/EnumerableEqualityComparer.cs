@@ -26,20 +26,10 @@ internal static class EnumerableEqualityComparer
     private sealed class Comparer<T> : IEqualityComparer<IEnumerable<T>>
     {
         /// <inheritdoc/>
-        bool IEqualityComparer<IEnumerable<T>>.Equals(IEnumerable<T>? x, IEnumerable<T>? y)
-        {
-            if (x is null)
-            {
-                return y is null;
-            }
-
-            if (y is null)
-            {
-                return false;
-            }
-
-            return x.SequenceEqual(y);
-        }
+        bool IEqualityComparer<IEnumerable<T>>.Equals(IEnumerable<T>? x, IEnumerable<T>? y) =>
+            x is null
+                ? y is null
+                : y is not null && x.SequenceEqual(y);
 
         /// <inheritdoc/>
         int IEqualityComparer<IEnumerable<T>>.GetHashCode(IEnumerable<T> obj)

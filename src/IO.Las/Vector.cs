@@ -74,12 +74,14 @@ public static partial class Vector
     extension(Vector128)
     {
 #if !NET9_0_OR_GREATER
+#pragma warning disable IDE0046
         /// <summary>
         /// Rounds each element in a vector to the nearest integer using the specified rounding mode.
         /// </summary>
         /// <param name="vector">The vector to round.</param>
         /// <param name="mode">The mode under which vector should be rounded.</param>
         /// <returns>The result of rounding each element to the nearest integer using <paramref name="mode"/>.</returns>
+        /// <exception cref="ArgumentOutOfRangeException"><paramref name="mode"/> is not valid.</exception>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static Vector128<float> Round(Vector128<float> vector, MidpointRounding mode)
         {
@@ -122,6 +124,7 @@ public static partial class Vector
         /// <param name="vector">The vector to round.</param>
         /// <param name="mode">The mode under which vector should be rounded.</param>
         /// <returns>The result of rounding each element to the nearest integer using <paramref name="mode"/>.</returns>
+        /// <exception cref="ArgumentOutOfRangeException"><paramref name="mode"/> is not valid.</exception>
         public static Vector128<double> Round(Vector128<double> vector, MidpointRounding mode)
         {
             if (Sse41.IsSupported)
@@ -154,9 +157,11 @@ public static partial class Vector
                 Math.Round(vector.GetElement(0), mode),
                 Math.Round(vector.GetElement(1), mode));
         }
+#pragma warning restore IDE0046
 #endif
 
 #if !NET7_0_OR_GREATER
+#pragma warning disable IDE0046
         /// <summary>
         /// Adds two vectors to compute their sum.
         /// </summary>
@@ -333,18 +338,21 @@ public static partial class Vector
                 Math.Sqrt(vector.GetElement(0)),
                 Math.Sqrt(vector.GetElement(1)));
         }
+#pragma warning restore IDE0046
 #endif
     }
 
     extension(Vector256)
     {
 #if !NET9_0_OR_GREATER
+#pragma warning disable IDE0046
         /// <summary>
         /// Rounds each element in a vector to the nearest integer using the specified rounding mode.
         /// </summary>
         /// <param name="vector">The vector to round.</param>
         /// <param name="mode">The mode under which vector should be rounded.</param>
         /// <returns>The result of rounding each element to the nearest integer using <paramref name="mode"/>.</returns>
+        /// <exception cref="ArgumentOutOfRangeException"><paramref name="vector"/> is not valid.</exception>
         public static Vector256<double> Round(Vector256<double> vector, MidpointRounding mode)
         {
             if (Avx.IsSupported)
@@ -394,9 +402,11 @@ public static partial class Vector
                 Math.Truncate(vector.GetElement(2)),
                 Math.Truncate(vector.GetElement(3)));
         }
+#pragma warning restore IDE0046
 #endif
 
 #if !NET7_0_OR_GREATER
+#pragma warning disable IDE0046
         /// <summary>
         /// Adds two vectors to compute their sum.
         /// </summary>
@@ -603,6 +613,7 @@ public static partial class Vector
                 Math.Sqrt(GetElementUnsafe(vector, 2)),
                 Math.Sqrt(GetElementUnsafe(vector, 4)));
         }
+#pragma warning restore IDE0046
 #endif
     }
 #endif

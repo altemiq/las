@@ -1,0 +1,10 @@
+[*.cs]
+
+# this adds an empty default switch, that gets removed by RCS1070
+dotnet_diagnostic.IDE0010.severity = none
+
+# we are deliberately using pattern matching on strings
+dotnet_diagnostic.MA0127.severity = none
+
+# this is covered by other analyzers
+dotnet_diagnostic.RCS1085.severity = none

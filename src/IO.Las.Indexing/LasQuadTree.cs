@@ -14,9 +14,8 @@ using System.Numerics;
 public sealed class LasQuadTree : IEquatable<LasQuadTree>
 {
     private const uint LasSpatialQuadTree = default;
-    private const string Signature = "LASQ";
-    private const uint SpatialSignatureValue = ((uint)'S' << 24) | ((uint)'S' << 16) | ((uint)'A' << 8) | 'L';
-    private const uint QuadTreeSignatureValue = ((uint)'Q' << 24) | ((uint)'S' << 16) | ((uint)'A' << 8) | 'L';
+    private const uint SpatialSignatureValue = 'L' | ((uint)'A' << 8) | ((uint)'S' << 16) | ((uint)'S' << 24);
+    private const uint QuadTreeSignatureValue = 'L' | ((uint)'A' << 8) | ((uint)'S' << 16) | ((uint)'Q' << 24);
 
     private static readonly int[] LevelOffset = CreateLevelOffset();
 
@@ -132,7 +131,7 @@ public sealed class LasQuadTree : IEquatable<LasQuadTree>
     /// <param name="lhs">The left-hand side.</param>
     /// <param name="rhs">The right-hand side.</param>
     /// <returns>The result of the operator.</returns>
-    public static bool operator ==(LasQuadTree? lhs, LasQuadTree? rhs) => lhs?.Equals(rhs) ?? rhs is null;
+    public static bool operator ==(LasQuadTree? lhs, LasQuadTree? rhs) => lhs?.Equals(rhs) ?? (rhs is null);
 
     /// <summary>
     /// Implements the not-equal operator.
@@ -140,7 +139,7 @@ public sealed class LasQuadTree : IEquatable<LasQuadTree>
     /// <param name="lhs">The left-hand side.</param>
     /// <param name="rhs">The right-hand side.</param>
     /// <returns>The result of the operator.</returns>
-    public static bool operator !=(LasQuadTree? lhs, LasQuadTree? rhs) => !lhs?.Equals(rhs) ?? rhs is not null;
+    public static bool operator !=(LasQuadTree? lhs, LasQuadTree? rhs) => !lhs?.Equals(rhs) ?? (rhs is not null);
 
     /// <summary>
     /// Reads the quad-tree from the specified stream.
@@ -159,6 +158,13 @@ public sealed class LasQuadTree : IEquatable<LasQuadTree>
     /// </summary>
     /// <param name="source">The source.</param>
     /// <returns>The LAS quad-tree.</returns>
+    /// <exception cref="ArgumentException">
+    /// The spatial signature is invalid.
+    /// - or -
+    /// The spatial version is invalid.
+    /// - or -
+    /// The quad tree signature is invalid.
+    /// </exception>
     public static LasQuadTree ReadFrom(ReadOnlySpan<byte> source)
     {
         if (System.Buffers.Binary.BinaryPrimitives.ReadUInt32LittleEndian(source[..4]) is not SpatialSignatureValue)
@@ -173,7 +179,7 @@ public sealed class LasQuadTree : IEquatable<LasQuadTree>
 
         if (System.Buffers.Binary.BinaryPrimitives.ReadUInt32LittleEndian(source[8..12]) is not QuadTreeSignatureValue)
         {
-            ThrowInvalidSignature(System.Text.Encoding.UTF8.GetString(source[8..12]), Signature, nameof(source));
+            ThrowInvalidSignature(System.Text.Encoding.UTF8.GetString(source[8..12]), "LASQ", nameof(source));
         }
 
         // ignore 12..16
@@ -253,6 +259,7 @@ public sealed class LasQuadTree : IEquatable<LasQuadTree>
     /// <inheritdoc/>
     public override int GetHashCode() => HashCode.Combine(this.levels, this.maximum, this.minimum);
 
+#pragma warning disable MA0136
     /// <inheritdoc />
     public override string ToString() =>
     $$"""
@@ -266,6 +273,7 @@ public sealed class LasQuadTree : IEquatable<LasQuadTree>
         "SublevelIndex": {{this.sublevelIndex}}
       }
       """;
+#pragma warning restore MA0136
 
     /// <summary>
     /// Gets the bounds of the cell that the coordinates are within.

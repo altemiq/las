@@ -2,20 +2,12 @@ namespace Altemiq.IO.Las;
 
 public class WellKnownTextValueTests
 {
-    private IEnumerable<object> Values =>
-    [
-        new WellKnownTextNode("ID", "1234"),
-        1234.5678,
-        "1234",
-        new WellKnownTextLiteral("1234"),
-    ];
-
     [Test]
     public async Task DefaultHasNoValue()
     {
         WellKnownTextValue value = default;
-        await Assert.That(value)
-            .Member(static v => v.HasValue, hasValue => hasValue.IsFalse()).And
+        _ = await Assert.That(value)
+            .Member(static v => v.HasValue, static hasValue => hasValue.IsFalse()).And
             .Member(static v => v.Value, static value => value.IsNull());
     }
 
@@ -23,7 +15,7 @@ public class WellKnownTextValueTests
     [Test]
     public async Task SwitchOnNoValue()
     {
-        await Assert.That(default(WellKnownTextValue) switch
+        _ = await Assert.That(default(WellKnownTextValue) switch
         {
             WellKnownTextNode or double or string or WellKnownTextLiteral => true,
             _ => false,
@@ -35,9 +27,9 @@ public class WellKnownTextValueTests
     [InstanceMethodDataSource(nameof(Values))]
     public async Task EqualsInput(object input)
     {
-        await Assert.That(WellKnownTextValue.TryCreate(input, out WellKnownTextValue result)).IsTrue();
-        await Assert.That(result).IsTypeOf<object>().And.IsEqualTo(result);
-        await Assert.That(result).IsTypeOf<object>().And.IsEqualTo(input);
+        _ = await Assert.That(WellKnownTextValue.TryCreate(input, out var result)).IsTrue();
+        _ = await Assert.That(result).IsTypeOf<object>().And.IsEqualTo(result);
+        _ = await Assert.That(result).IsTypeOf<object>().And.IsEqualTo(input);
     }
 #endif
 
@@ -47,10 +39,10 @@ public class WellKnownTextValueTests
         var node = new WellKnownTextNode("ID", "1234");
         WellKnownTextValue value = new(node);
 
-        await Assert.That(value.Value).IsTypeOf<WellKnownTextNode>().And.IsEqualTo(node);
-        await Assert.That(value).IsEqualTo(node);
-        await Assert.That(value.TryGetValue(out WellKnownTextNode n)).IsTrue();
-        await Assert.That(n).IsEqualTo(node);
+        _ = await Assert.That(value.Value).IsTypeOf<WellKnownTextNode>().And.IsEqualTo(node);
+        _ = await Assert.That(value).IsEqualTo(node);
+        _ = await Assert.That(value.TryGetValue(out WellKnownTextNode n)).IsTrue();
+        _ = await Assert.That(n).IsEqualTo(node);
     }
 
     [Test]
@@ -59,10 +51,10 @@ public class WellKnownTextValueTests
         const double DoubleValue = 1234.5678;
         WellKnownTextValue value = new(DoubleValue);
 
-        await Assert.That(value.Value).IsTypeOf<double>().And.IsEqualTo(DoubleValue);
-        await Assert.That(value).IsEqualTo(DoubleValue);
-        await Assert.That(value.TryGetValue(out double d)).IsTrue();
-        await Assert.That(d).IsEqualTo(DoubleValue);
+        _ = await Assert.That(value.Value).IsTypeOf<double>().And.IsEqualTo(DoubleValue);
+        _ = await Assert.That(value).IsEqualTo(DoubleValue);
+        _ = await Assert.That(value.TryGetValue(out double d)).IsTrue();
+        _ = await Assert.That(d).IsEqualTo(DoubleValue);
     }
 
     [Test]
@@ -71,10 +63,10 @@ public class WellKnownTextValueTests
         const string StringValue = "1234";
         WellKnownTextValue value = new(StringValue);
 
-        await Assert.That(value.Value).IsTypeOf<string>().And.IsEqualTo(StringValue);
-        await Assert.That(value).IsEqualTo(StringValue);
-        await Assert.That(value.TryGetValue(out string s)).IsTrue();
-        await Assert.That(s).IsEqualTo(StringValue);
+        _ = await Assert.That(value.Value).IsTypeOf<string>().And.IsEqualTo(StringValue);
+        _ = await Assert.That(value).IsEqualTo(StringValue);
+        _ = await Assert.That(value.TryGetValue(out string s)).IsTrue();
+        _ = await Assert.That(s).IsEqualTo(StringValue);
     }
 
     [Test]
@@ -83,9 +75,19 @@ public class WellKnownTextValueTests
         var literal = new WellKnownTextLiteral("1234");
         WellKnownTextValue value = new(literal);
 
-        await Assert.That(value.Value).IsTypeOf<WellKnownTextLiteral>().And.IsEqualTo(literal);
-        await Assert.That(value).IsEqualTo(literal);
-        await Assert.That(value.TryGetValue(out WellKnownTextLiteral l)).IsTrue();
-        await Assert.That(l).IsEqualTo(literal);
+        _ = await Assert.That(value.Value).IsTypeOf<WellKnownTextLiteral>().And.IsEqualTo(literal);
+        _ = await Assert.That(value).IsEqualTo(literal);
+        _ = await Assert.That(value.TryGetValue(out WellKnownTextLiteral l)).IsTrue();
+        _ = await Assert.That(l).IsEqualTo(literal);
     }
+
+#if NET6_0_OR_GREATER
+    private IEnumerable<Func<object>> Values()
+    {
+        yield return static () => new WellKnownTextNode("ID", "1234");
+        yield return static () => 1234.5678;
+        yield return static () => "1234";
+        yield return static () => new WellKnownTextLiteral("1234");
+    }
+#endif
 }

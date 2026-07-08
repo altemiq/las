@@ -16,6 +16,7 @@ internal abstract class ColumnBuffer
     /// </summary>
     public abstract int Count { get; }
 
+#pragma warning disable IDE0072
     /// <summary>
     /// Creates the column buffer.
     /// </summary>
@@ -39,6 +40,7 @@ internal abstract class ColumnBuffer
             ArrowTypeId.Double => new DoubleColumnBuffer(capacity),
             _ => throw new NotSupportedException(),
         };
+#pragma warning restore IDE0072
 
     /// <summary>
     /// Adds an item to the buffer.
@@ -90,14 +92,9 @@ internal abstract class ColumnBuffer
             var builder = this.GetArrayBuilder();
             foreach (var v in this)
             {
-                if (v.HasValue)
-                {
-                    builder.Append(v.Value);
-                }
-                else
-                {
-                    builder.AppendNull();
-                }
+                _ = v.HasValue
+                    ? builder.Append(v.Value)
+                    : builder.AppendNull();
             }
 
             return builder.Build(allocator: default);

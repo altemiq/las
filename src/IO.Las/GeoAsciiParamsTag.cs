@@ -76,6 +76,7 @@ public record GeoAsciiParamsTag : VariableLengthRecord, IReadOnlyList<string>
     /// </summary>
     /// <param name="key">The key of the element to get.</param>
     /// <returns>The <see cref="string"/> with the specified key.</returns>
+    /// <exception cref="KeyNotFoundException">The key was not found.</exception>
     public string this[GeoKeyEntry key] => this.TryGetValue(key, out var value) ? value : throw new KeyNotFoundException();
 
     /// <summary>

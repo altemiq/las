@@ -1,5 +1,3 @@
-using System.Runtime.CompilerServices;
-
 namespace Altemiq.IO.Las.Compression.Arrow.Data;
 
 internal sealed class MockLazReader : ILasReader, ILazReader
@@ -17,8 +15,8 @@ internal sealed class MockLazReader : ILasReader, ILazReader
             NumberOfPointRecords = 2,
         };
         var header = builder.HeaderBlock;
-        this.Header = header;
-        this.chunkedReader = new(this.reader, in header, 50000);
+        Header = header;
+        chunkedReader = new(reader, in header, 50000);
     }
 
     public HeaderBlock Header { get; }
@@ -34,33 +32,75 @@ internal sealed class MockLazReader : ILasReader, ILazReader
 
     public ushort PointDataLength => GpsPointDataRecord.Size;
 
-    public int ReadPointDataRecordData(Span<byte> buffer) => this.reader.Read(buffer);
+    public int ReadPointDataRecordData(Span<byte> buffer)
+    {
+        return reader.Read(buffer);
+    }
 
-    public ValueTask<int> ReadPointDataRecordDataAsync(Memory<byte> buffer, CancellationToken cancellationToken = default) => this.reader.ReadAsync(buffer, cancellationToken);
+    public ValueTask<int> ReadPointDataRecordDataAsync(Memory<byte> buffer, CancellationToken cancellationToken = default)
+    {
+        return reader.ReadAsync(buffer, cancellationToken);
+    }
 
-    public LasPointSpan ReadPointDataRecord() => this.reader.Read([]);
+    public LasPointSpan ReadPointDataRecord()
+    {
+        return reader.Read([]);
+    }
 
-    public LasPointSpan ReadPointDataRecord(ulong index) => throw new NotImplementedException();
+    public LasPointSpan ReadPointDataRecord(ulong index)
+    {
+        throw new NotSupportedException();
+    }
 
-    public ValueTask<LasPointMemory> ReadPointDataRecordAsync(CancellationToken cancellationToken = default) => this.reader.ReadAsync(ReadOnlyMemory<byte>.Empty, cancellationToken);
+    public ValueTask<LasPointMemory> ReadPointDataRecordAsync(CancellationToken cancellationToken = default)
+    {
+        return reader.ReadAsync(ReadOnlyMemory<byte>.Empty, cancellationToken);
+    }
 
-    public ValueTask<LasPointMemory> ReadPointDataRecordAsync(ulong index, CancellationToken cancellationToken = default) => throw new NotImplementedException();
+    public ValueTask<LasPointMemory> ReadPointDataRecordAsync(ulong index, CancellationToken cancellationToken = default)
+    {
+        throw new NotSupportedException();
+    }
 
-    public ChunkedReader.ChunkedLasPointSpanEnumerable ReadChunk() => new(this.chunkedReader, this);
+    public ChunkedReader.ChunkedLasPointSpanEnumerable ReadChunk()
+    {
+        return new(chunkedReader, this);
+    }
 
-    public ChunkedReader.ChunkedLasPointSpanEnumerable ReadChunk(int chunk) => throw new NotImplementedException();
+    public ChunkedReader.ChunkedLasPointSpanEnumerable ReadChunk(int chunk)
+    {
+        throw new NotSupportedException();
+    }
 
-    public ChunkedReader.ChunkedLasPointMemoryEnumerable ReadChunkAsync() => throw new NotImplementedException();
+    public ChunkedReader.ChunkedLasPointMemoryEnumerable ReadChunkAsync()
+    {
+        throw new NotSupportedException();
+    }
 
-    public ChunkedReader.ChunkedLasPointMemoryEnumerable ReadChunkAsync(int chunk) => throw new NotImplementedException();
+    public ChunkedReader.ChunkedLasPointMemoryEnumerable ReadChunkAsync(int chunk)
+    {
+        throw new NotSupportedException();
+    }
 
-    public bool MoveToChunk(int index) => throw new NotImplementedException();
+    public bool MoveToChunk(int index)
+    {
+        throw new NotSupportedException();
+    }
 
-    public bool MoveToChunk(long chunkStart) => throw new NotImplementedException();
+    public bool MoveToChunk(long chunkStart)
+    {
+        throw new NotSupportedException();
+    }
 
-    public ValueTask<bool> MoveToChunkAsync(int index, CancellationToken cancellationToken = default) => throw new NotImplementedException();
+    public ValueTask<bool> MoveToChunkAsync(int index, CancellationToken cancellationToken = default)
+    {
+        throw new NotSupportedException();
+    }
 
-    public ValueTask<bool> MoveToChunkAsync(long chunkStart, CancellationToken cancellationToken = default) => throw new NotImplementedException();
+    public ValueTask<bool> MoveToChunkAsync(long chunkStart, CancellationToken cancellationToken = default)
+    {
+        throw new NotSupportedException();
+    }
 
     private sealed class MockChunkedReader : ChunkedReader
     {
@@ -77,7 +117,7 @@ internal sealed class MockLazReader : ILasReader, ILazReader
         {
 
 #if NET8_0_OR_GREATER
-            ref uint chunkCount = ref ChunkCountField(this);
+            ref var chunkCount = ref ChunkCountField(this);
             chunkCount = 0;
 #else
             SetChunkCountField(this, 0U);
@@ -85,13 +125,15 @@ internal sealed class MockLazReader : ILasReader, ILazReader
         }
 
 #if NET8_0_OR_GREATER
-        [UnsafeAccessor(UnsafeAccessorKind.Field, Name = "chunkCount")]
+        [System.Runtime.CompilerServices.UnsafeAccessor(System.Runtime.CompilerServices.UnsafeAccessorKind.Field, Name = "chunkCount")]
         private static extern ref uint ChunkCountField(ChunkedReader reader);
 #else
-        private static void SetChunkCountField(ChunkedReader reader, uint chunkCount) =>
+        private static void SetChunkCountField(ChunkedReader reader, uint chunkCount)
+        {
             typeof(ChunkedReader)
-                .GetField("chunkCount", System.Reflection.BindingFlags.Instance | System.Reflection.BindingFlags.NonPublic)!
+                .GetField("chunkCount", System.Reflection.BindingFlags.Instance | System.Reflection.BindingFlags.NonPublic)
                 .SetValue(reader, chunkCount);
+        }
 #endif
     }
 
@@ -101,7 +143,7 @@ internal sealed class MockLazReader : ILasReader, ILazReader
             : base(rawReader, in header, zip, pointDataLength)
         {
 #if NET8_0_OR_GREATER
-            ref Readers.Compressed.ICompressedPointDataRecordReader reader = ref ReaderField(this);
+            ref var reader = ref ReaderField(this);
             reader = rawReader;
 #else
             SetReaderField(this, rawReader);
@@ -109,13 +151,15 @@ internal sealed class MockLazReader : ILasReader, ILazReader
         }
 
 #if NET8_0_OR_GREATER
-        [UnsafeAccessor(UnsafeAccessorKind.Field, Name = "reader")]
+        [System.Runtime.CompilerServices.UnsafeAccessor(System.Runtime.CompilerServices.UnsafeAccessorKind.Field, Name = "reader")]
         private static extern ref Readers.Compressed.ICompressedPointDataRecordReader ReaderField(PointWiseReader reader);
 #else
-        private static void SetReaderField(PointWiseReader reader, Readers.Compressed.ICompressedPointDataRecordReader rawReader) =>
+        private static void SetReaderField(PointWiseReader reader, Readers.Compressed.ICompressedPointDataRecordReader rawReader)
+        {
             typeof(PointWiseReader)
-                .GetField("reader", System.Reflection.BindingFlags.Instance | System.Reflection.BindingFlags.NonPublic)!
+                .GetField("reader", System.Reflection.BindingFlags.Instance | System.Reflection.BindingFlags.NonPublic)
                 .SetValue(reader, rawReader);
+        }
 #endif
     }
 
@@ -165,8 +209,8 @@ internal sealed class MockLazReader : ILasReader, ILazReader
 
         public LasPointSpan Read(ReadOnlySpan<byte> source)
         {
-            this.count++;
-            return this.count switch
+            count++;
+            return count switch
             {
                 1 => new(First, []),
                 2 => new(Second, []),
@@ -176,8 +220,8 @@ internal sealed class MockLazReader : ILasReader, ILazReader
 
         public ValueTask<LasPointMemory> ReadAsync(ReadOnlyMemory<byte> source, CancellationToken cancellationToken = default)
         {
-            this.count++;
-            return this.count switch
+            count++;
+            return count switch
             {
                 1 => new(new LasPointMemory(First, ReadOnlyMemory<byte>.Empty)),
                 2 => new(new LasPointMemory(Second, ReadOnlyMemory<byte>.Empty)),
@@ -187,15 +231,15 @@ internal sealed class MockLazReader : ILasReader, ILazReader
 
         public int Read(Span<byte> buffer)
         {
-            First.CopyTo(buffer);
-            Second.CopyTo(buffer[GpsPointDataRecord.Size..]);
+            _ = First.CopyTo(buffer);
+            _ = Second.CopyTo(buffer[GpsPointDataRecord.Size..]);
             return GpsPointDataRecord.Size * 2;
         }
 
         public ValueTask<int> ReadAsync(Memory<byte> buffer, CancellationToken cancellationToken = default)
         {
-            First.CopyTo(buffer.Span);
-            Second.CopyTo(buffer[GpsPointDataRecord.Size..].Span);
+            _ = First.CopyTo(buffer.Span);
+            _ = Second.CopyTo(buffer[GpsPointDataRecord.Size..].Span);
             return new(GpsPointDataRecord.Size * 2);
         }
     }

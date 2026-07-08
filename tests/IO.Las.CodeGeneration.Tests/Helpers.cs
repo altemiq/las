@@ -4,16 +4,13 @@ internal static class Helpers
 {
     public static IEnumerable<Microsoft.CodeAnalysis.SyntaxTree> GetSyntaxTrees(string project, params IEnumerable<string> files)
     {
-        if (GetSourceDirectory() is { } sourceDirectory)
-        {
-            return files.Select(file =>
+        return GetSourceDirectory() is { } sourceDirectory
+            ? files.Select(file =>
             {
                 var path = Path.Combine(sourceDirectory, project, file);
                 return Microsoft.CodeAnalysis.CSharp.CSharpSyntaxTree.ParseText(File.ReadAllText(path), path: path);
-            });
-        }
-
-        return [];
+            })
+            : [];
 
         static string GetSourceDirectory()
         {

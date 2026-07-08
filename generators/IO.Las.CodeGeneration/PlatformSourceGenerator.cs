@@ -22,7 +22,7 @@ public class PlatformSourceGenerator : BaseSourceGenerator
     {
         base.Initialize(context);
         var platform = context.SyntaxProvider.CreateSyntaxProvider(
-            (node, _) => node is TypeDeclarationSyntax typeNode && GetIdentifier(typeNode) is "Platform",
+            static (node, _) => node is TypeDeclarationSyntax typeNode && string.Equals(GetIdentifier(typeNode), "Platform", StringComparison.Ordinal),
             static (node, _) => GetTypeToGenerate(node));
         var platformCsv = context.AdditionalTextsProvider
             .Where(static file => Path.GetFileNameWithoutExtension(file.Path) is "platforms" && Path.GetExtension(file.Path) is ".csv");

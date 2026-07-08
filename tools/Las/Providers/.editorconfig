@@ -1,0 +1,4 @@
+# C# files
+[*.cs]
+
+dotnet_diagnostic.MA0127.severity = none

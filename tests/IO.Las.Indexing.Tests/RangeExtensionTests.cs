@@ -6,6 +6,6 @@ public class RangeExtensionTests
     public async Task GetIndexesWithMaxValue()
     {
         var indexes = new Range(new(uint.MaxValue - 1), new(uint.MaxValue));
-        await Assert.That(indexes.GetIndexes()).Count().IsEqualTo(2);
+        _ = await Assert.That(indexes.GetIndexes()).Count().IsEqualTo(2);
     }
 }

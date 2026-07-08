@@ -52,18 +52,15 @@ public partial class ProjContext
             AddAuthClause(command, authority, code, prefix: "coordinate_system_", orderBy: $"{AxisAlias}.coordinate_system_order");
 
             using var reader = command.ExecuteReader();
-            if (!reader.Read())
-            {
-                throw new KeyNotFoundException();
-            }
-
-            yield return GetUnitNode(
-                reader.GetString(7),
-                reader.GetString(6),
-                reader.GetDouble(8),
-                reader.GetString(4),
-                reader.GetInt32(5),
-                version);
+            yield return !reader.Read()
+                ? throw new KeyNotFoundException()
+                : GetUnitNode(
+                    reader.GetString(7),
+                    reader.GetString(6),
+                    reader.GetDouble(8),
+                    reader.GetString(4),
+                    reader.GetInt32(5),
+                    version);
         }
     }
 
@@ -120,12 +117,9 @@ public partial class ProjContext
 
                     using (var reader = command.ExecuteReader())
                     {
-                        if (!reader.Read())
-                        {
-                            throw new KeyNotFoundException();
-                        }
-
-                        yield return new("CS", new WellKnownTextLiteral(reader.GetString(0)), reader.GetInt32(1));
+                        yield return !reader.Read()
+                            ? throw new KeyNotFoundException()
+                            : new("CS", new WellKnownTextLiteral(reader.GetString(0)), reader.GetInt32(1));
                     }
 
                     command.CommandText = GetAxisCommandText;

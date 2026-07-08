@@ -672,7 +672,7 @@ public abstract class BaseSourceGenerator : IIncrementalGenerator
         if (char.IsDigit(id[0]))
         {
             // get the numbers
-            int index = 0;
+            var index = 0;
             while (index < id.Length && char.IsDigit(id[index]))
             {
                 index++;

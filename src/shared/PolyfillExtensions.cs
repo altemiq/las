@@ -6,6 +6,8 @@
 
 namespace Altemiq.IO.Las;
 
+#pragma warning disable MA0182
+
 /// <summary>
 /// Polyfill extensions.
 /// </summary>

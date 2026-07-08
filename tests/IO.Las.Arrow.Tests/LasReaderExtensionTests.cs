@@ -1,6 +1,6 @@
-using Apache.Arrow.Types;
-
 namespace Altemiq.IO.Las.Arrow;
+
+using Apache.Arrow.Types;
 
 public class LasReaderExtensionTests
 {
@@ -12,9 +12,9 @@ public class LasReaderExtensionTests
         var schema = reader.GetArrowSchema();
 
         // ensure we have some byte, and ushort fields
-        await Assert.That(schema.FieldsList)
-            .Contains(p => p.DataType.TypeId is ArrowTypeId.UInt8).And
-            .Contains(p => p.DataType.TypeId is ArrowTypeId.UInt16);
+        _ = await Assert.That(schema.FieldsList)
+            .Contains(static p => p.DataType.TypeId is ArrowTypeId.UInt8).And
+            .Contains(static p => p.DataType.TypeId is ArrowTypeId.UInt16);
     }
 
     [Test]
@@ -24,7 +24,7 @@ public class LasReaderExtensionTests
 
         var batches = reader.ToArrowBatches();
 
-        await Assert.That(batches).Count().IsEqualTo(1);
+        _ = await Assert.That(batches).Count().IsEqualTo(1);
     }
 
 

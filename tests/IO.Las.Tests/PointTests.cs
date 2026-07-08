@@ -63,7 +63,7 @@ public class PointTests
     {
         var destination = new byte[Bytes.Length];
         _ = Point.WriteLittleEndian(destination);
-        await Assert.That(destination).IsEquivalentTo(Bytes);
+        _ = await Assert.That(destination).IsEquivalentTo(Bytes);
     }
 
     [Test]
@@ -88,41 +88,41 @@ public class PointTests
             PointSourceId = 10,
         };
 
-        await Assert.That(point)
-            .Member(p => p.X, x => x.IsEqualTo(1))
-            .And.Member(p => p.Y, y => y.IsEqualTo(2))
-            .And.Member(p => p.Z, z => z.IsEqualTo(3))
-            .And.Member(p => p.Intensity, intensity => intensity.IsEqualTo((ushort)4))
-            .And.Member(p => p.ReturnNumber, returnNumber => returnNumber.IsEqualTo((byte)5))
-            .And.Member(p => p.NumberOfReturns, numberOfReturns => numberOfReturns.IsEqualTo((byte)6))
-            .And.Member(p => p.ScanDirectionFlag, scanDirectionFlag => scanDirectionFlag.IsTrue())
-            .And.Member(p => p.EdgeOfFlightLine, edgeOfFlightLine => edgeOfFlightLine.IsTrue())
-            .And.Member(p => p.Classification, classification => classification.IsEqualTo(Classification.LowPoint))
-            .And.Member(p => p.Synthetic, synthetic => synthetic.IsTrue())
-            .And.Member(p => p.KeyPoint, keyPoint => keyPoint.IsTrue())
-            .And.Member(p => p.Withheld, withheld => withheld.IsTrue())
-            .And.Member(p => p.ScanAngleRank, scanAngleRank => scanAngleRank.IsEqualTo((sbyte)-8))
-            .And.Member(p => p.UserData, userData => userData.IsEqualTo((byte)9))
-            .And.Member(p => p.PointSourceId, pointSourceId => pointSourceId.IsEqualTo((ushort)10));
+        _ = await Assert.That(point)
+            .Member(static p => p.X, static x => x.IsEqualTo(1))
+            .And.Member(static p => p.Y, static y => y.IsEqualTo(2))
+            .And.Member(static p => p.Z, static z => z.IsEqualTo(3))
+            .And.Member(static p => p.Intensity, static intensity => intensity.IsEqualTo((ushort)4))
+            .And.Member(static p => p.ReturnNumber, static returnNumber => returnNumber.IsEqualTo((byte)5))
+            .And.Member(static p => p.NumberOfReturns, static numberOfReturns => numberOfReturns.IsEqualTo((byte)6))
+            .And.Member(static p => p.ScanDirectionFlag, static scanDirectionFlag => scanDirectionFlag.IsTrue())
+            .And.Member(static p => p.EdgeOfFlightLine, static edgeOfFlightLine => edgeOfFlightLine.IsTrue())
+            .And.Member(static p => p.Classification, static classification => classification.IsEqualTo(Classification.LowPoint))
+            .And.Member(static p => p.Synthetic, static synthetic => synthetic.IsTrue())
+            .And.Member(static p => p.KeyPoint, static keyPoint => keyPoint.IsTrue())
+            .And.Member(static p => p.Withheld, static withheld => withheld.IsTrue())
+            .And.Member(static p => p.ScanAngleRank, static scanAngleRank => scanAngleRank.IsEqualTo((sbyte)-8))
+            .And.Member(static p => p.UserData, static userData => userData.IsEqualTo((byte)9))
+            .And.Member(static p => p.PointSourceId, static pointSourceId => pointSourceId.IsEqualTo((ushort)10));
     }
 
     private static async Task CheckPoint(PointDataRecord point)
     {
-        await Assert.That(point)
-            .Member(p => p.X, x => x.IsEqualTo(2757))
-            .And.Member(p => p.Y, y => y.IsEqualTo(-1377))
-            .And.Member(p => p.Z, z => z.IsEqualTo(-6717))
-            .And.Member(p => p.Intensity, intensity => intensity.IsEqualTo((ushort)430))
-            .And.Member(p => p.ReturnNumber, returnNumber => returnNumber.IsEqualTo((byte)1))
-            .And.Member(p => p.NumberOfReturns, numberOfReturns => numberOfReturns.IsEqualTo((byte)1))
-            .And.Member(p => p.ScanDirectionFlag, scanDirectionFlag => scanDirectionFlag.IsFalse())
-            .And.Member(p => p.EdgeOfFlightLine, edgeOfFlightLine => edgeOfFlightLine.IsFalse())
-            .And.Member(p => p.Classification, classification => classification.IsEqualTo(Classification.Unclassified))
-            .And.Member(p => p.Synthetic, synthetic => synthetic.IsFalse())
-            .And.Member(p => p.KeyPoint, keyPoint => keyPoint.IsFalse())
-            .And.Member(p => p.Withheld, withheld => withheld.IsFalse())
-            .And.Member(p => p.ScanAngleRank, scanAngleRank => scanAngleRank.IsEqualTo((sbyte)-29))
-            .And.Member(p => p.UserData, userData => userData.IsDefault())
-            .And.Member(p => p.PointSourceId, pointSourceId => pointSourceId.IsDefault());
+        _ = await Assert.That(point)
+            .Member(static p => p.X, static x => x.IsEqualTo(2757))
+            .And.Member(static p => p.Y, static y => y.IsEqualTo(-1377))
+            .And.Member(static p => p.Z, static z => z.IsEqualTo(-6717))
+            .And.Member(static p => p.Intensity, static intensity => intensity.IsEqualTo((ushort)430))
+            .And.Member(static p => p.ReturnNumber, static returnNumber => returnNumber.IsEqualTo((byte)1))
+            .And.Member(static p => p.NumberOfReturns, static numberOfReturns => numberOfReturns.IsEqualTo((byte)1))
+            .And.Member(static p => p.ScanDirectionFlag, static scanDirectionFlag => scanDirectionFlag.IsFalse())
+            .And.Member(static p => p.EdgeOfFlightLine, static edgeOfFlightLine => edgeOfFlightLine.IsFalse())
+            .And.Member(static p => p.Classification, static classification => classification.IsEqualTo(Classification.Unclassified))
+            .And.Member(static p => p.Synthetic, static synthetic => synthetic.IsFalse())
+            .And.Member(static p => p.KeyPoint, static keyPoint => keyPoint.IsFalse())
+            .And.Member(static p => p.Withheld, static withheld => withheld.IsFalse())
+            .And.Member(static p => p.ScanAngleRank, static scanAngleRank => scanAngleRank.IsEqualTo((sbyte)-29))
+            .And.Member(static p => p.UserData, static userData => userData.IsDefault())
+            .And.Member(static p => p.PointSourceId, static pointSourceId => pointSourceId.IsDefault());
     }
 }

@@ -60,6 +60,7 @@ public record GeoDoubleParamsTag : VariableLengthRecord, IReadOnlyList<double>
     /// </summary>
     /// <param name="key">The key of the element to get.</param>
     /// <returns>The <see cref="double"/> with the specified key.</returns>
+    /// <exception cref="KeyNotFoundException">The key was not found.</exception>
     public double this[GeoKeyEntry key] => this.TryGetValue(key, out var value) ? value : throw new KeyNotFoundException();
 
     /// <summary>

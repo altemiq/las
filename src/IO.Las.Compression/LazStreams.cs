@@ -53,6 +53,7 @@ internal static class LazStreams
     /// <param name="s">The string containing the chunk to convert.</param>
     /// <returns>A 32-bit signed integer equivalent to the chunk contained in <paramref name="s"/>.</returns>
     /// <exception cref="InvalidOperationException">The input is not a chunk number.</exception>
+    /// <exception cref="ArgumentException">Invalid chunk format.</exception>
     public static int ParseChunkNumber(string s) => s.Split('_') switch
     {
         [Chunk, var v] => int.Parse(v, System.Globalization.CultureInfo.InvariantCulture),

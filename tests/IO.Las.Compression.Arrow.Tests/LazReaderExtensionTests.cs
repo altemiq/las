@@ -9,6 +9,6 @@ public class LazReaderExtensionTests
 
         var batches = reader.ToArrowBatches();
 
-        await Assert.That(batches).Count().IsEqualTo(1);
+        _ = await Assert.That(batches).Count().IsEqualTo(1);
     }
 }

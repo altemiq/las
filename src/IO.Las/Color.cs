@@ -71,6 +71,7 @@ public readonly partial struct Color : IEquatable<Color>
     /// <param name="green">The green component.</param>
     /// <param name="blue">The blue component.</param>
     /// <returns>The color.</returns>
+    /// <exception cref="ArgumentException">The value is out of byte range.</exception>
     public static Color FromRgb(int red, int green, int blue)
     {
         return new() { R = CheckUInt16(red), G = CheckUInt16(green), B = CheckUInt16(blue) };

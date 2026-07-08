@@ -24,6 +24,7 @@ internal static class StreamExtensions
         /// Reads an <see cref="byte"/> from the stream, as little endian.
         /// </summary>
         /// <returns>The little endian value.</returns>
+        /// <exception cref="EndOfStreamException">The end of the stream has been reached.</exception>
         public byte ReadByteLittleEndian()
         {
             return stream switch
@@ -44,6 +45,7 @@ internal static class StreamExtensions
         /// Reads an <see cref="sbyte"/> from the stream, as little endian.
         /// </summary>
         /// <returns>The little endian value.</returns>
+        /// <exception cref="EndOfStreamException">The end of the stream has been reached.</exception>
         public sbyte ReadSByteLittleEndian()
         {
             return stream switch
@@ -66,6 +68,7 @@ internal static class StreamExtensions
         /// Reads an <see cref="short"/> from the stream, as little endian.
         /// </summary>
         /// <returns>The little endian value.</returns>
+        /// <exception cref="EndOfStreamException">The end of the stream has been reached.</exception>
         public short ReadInt16LittleEndian()
         {
             return stream switch
@@ -88,6 +91,7 @@ internal static class StreamExtensions
         /// Reads an <see cref="ushort"/> from the stream, as little endian.
         /// </summary>
         /// <returns>The little endian value.</returns>
+        /// <exception cref="EndOfStreamException">The end of the stream has been reached.</exception>
         public ushort ReadUInt16LittleEndian()
         {
             return stream switch
@@ -110,6 +114,7 @@ internal static class StreamExtensions
         /// Reads an <see cref="int"/> from the stream, as little endian.
         /// </summary>
         /// <returns>The little endian value.</returns>
+        /// <exception cref="EndOfStreamException">The end of the stream has been reached.</exception>
         public int ReadInt32LittleEndian()
         {
             return stream switch
@@ -132,6 +137,7 @@ internal static class StreamExtensions
         /// Reads an <see cref="uint"/> from the stream, as little endian.
         /// </summary>
         /// <returns>The little endian value.</returns>
+        /// <exception cref="EndOfStreamException">The end of the stream has been reached.</exception>
         public uint ReadUInt32LittleEndian()
         {
             return stream switch
@@ -154,6 +160,7 @@ internal static class StreamExtensions
         /// Reads an <see cref="long"/> from the stream, as little endian.
         /// </summary>
         /// <returns>The little endian value.</returns>
+        /// <exception cref="EndOfStreamException">The end of the stream has been reached.</exception>
         public long ReadInt64LittleEndian()
         {
             return stream switch
@@ -176,6 +183,7 @@ internal static class StreamExtensions
         /// Reads an <see cref="ulong"/> from the stream, as little endian.
         /// </summary>
         /// <returns>The little endian value.</returns>
+        /// <exception cref="EndOfStreamException">The end of the stream has been reached.</exception>
         public ulong ReadUInt64LittleEndian()
         {
             return stream switch
@@ -198,6 +206,7 @@ internal static class StreamExtensions
         /// Reads a <see cref="float"/> from the stream, as little endian.
         /// </summary>
         /// <returns>The little endian value.</returns>
+        /// <exception cref="EndOfStreamException">The end of the stream has been reached.</exception>
         public float ReadSingleLittleEndian()
         {
             return stream switch
@@ -220,6 +229,7 @@ internal static class StreamExtensions
         /// Reads a <see cref="double"/> from the stream, as little endian.
         /// </summary>
         /// <returns>The little endian value.</returns>
+        /// <exception cref="EndOfStreamException">The end of the stream has been reached.</exception>
         public double ReadDoubleLittleEndian()
         {
             return stream switch
@@ -429,6 +439,7 @@ internal static class StreamExtensions
         /// <c>new MemoryStream(byte[], int, int, bool, bool)</c> constructor).
         /// </para>
         /// </remarks>
+        /// <exception cref="ArgumentException"><c><paramref name="index"/> + <paramref name="count"/></c> is not within <paramref name="buffer"/>.</exception>
         public void SetBuffer(byte[] buffer, int index, int count)
         {
             ArgumentNullException.ThrowIfNull(buffer);

@@ -1,2 +1,18 @@
 [*.{cs,vb}]
+
+# CA1822: Mark members as static
 dotnet_diagnostic.CA1822.severity = none
+
+# IDE0320: Make anonymous function static
+dotnet_diagnostic.IDE0320.severity = warning
+
+[*.cs]
+
+# IDE0160: Convert to file-scoped namespace
+csharp_style_namespace_declarations = file_scoped:warning
+
+# IDE0065: 'using' directive placement
+csharp_using_directive_placement = inside_namespace
+
+# IDE0320: Make anonymous function static
+csharp_prefer_static_anonymous_function = true

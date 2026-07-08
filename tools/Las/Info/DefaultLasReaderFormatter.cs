@@ -15,34 +15,26 @@ internal class DefaultLasReaderFormatter(IFormatBuilder builder) : ILasReaderFor
     /// <inheritdoc />
     public ILasReaderFormatter AppendHeader(LasReader reader)
     {
-        builder.AppendMajorHeader("reporting all LAS header entries:").AppendLine();
+        _ = builder.AppendMajorHeader("reporting all LAS header entries:").AppendLine();
         foreach (var (header, value) in GetInformation(reader))
         {
-            switch (header, value)
+            _ = (header, value) switch
             {
-                case (null, _):
-                    // just data
-                    builder
-                        .Append("  ")
-                        .AppendFormat("{0}", value);
-                    break;
-                case (_, string stringValue):
-                    builder
-                        .Append("  ")
-                        .AppendHeader($"{header,-27}")
-                        .Append(" ")
-                        .AppendFormat(format: "'{0}'", stringValue);
-                    break;
-                default:
-                    builder
-                        .Append("  ")
-                        .AppendHeader($"{header,-27}")
-                        .Append(" ")
-                        .AppendFormat("{0}", value);
-                    break;
-            }
-
-            builder.AppendLine();
+                (null, _) => builder
+                    .Append("  ")
+                    .AppendFormat("{0}", value),
+                (_, string stringValue) => builder
+                    .Append("  ")
+                    .AppendHeader($"{header,-27}")
+                    .Append(" ")
+                    .AppendFormat(format: "'{0}'", stringValue),
+                _ => builder
+                    .Append("  ")
+                    .AppendHeader($"{header,-27}")
+                    .Append(" ")
+                    .AppendFormat("{0}", value),
+            };
+            _ = builder.AppendLine();
         }
 
         return this;
@@ -53,40 +45,29 @@ internal class DefaultLasReaderFormatter(IFormatBuilder builder) : ILasReaderFor
     {
         for (var i = 0; i < reader.VariableLengthRecords.Count; i++)
         {
-            builder.AppendMajorHeader("variable length header record {0} of {1}:", i + 1, reader.VariableLengthRecords.Count).AppendLine();
+            _ = builder.AppendMajorHeader("variable length header record {0} of {1}:", i + 1, reader.VariableLengthRecords.Count).AppendLine();
             foreach (var (header, value) in GetInformation(reader, reader.VariableLengthRecords[i]))
             {
-                switch (header, value)
+                _ = (header, value) switch
                 {
-                    case (null, _):
-                        // just data
-                        builder
-                            .Append("    ")
-                            .AppendFormat("{0}", value);
-                        break;
-                    case (string { Length: 0 }, _):
-                        // just information
-                        builder
-                            .Append("  ")
-                            .AppendFormat("{0}", value);
-                        break;
-                    case (_, string stringValue):
-                        builder
-                            .Append("  ")
-                            .AppendHeader($"{header,-20}")
-                            .Append(" ")
-                            .AppendFormat(format: "'{0}'", stringValue);
-                        break;
-                    default:
-                        builder
-                            .Append("  ")
-                            .AppendHeader($"{header,-20}")
-                            .Append(" ")
-                            .AppendFormat("{0}", value);
-                        break;
-                }
-
-                builder.AppendLine();
+                    (null, _) => builder
+                        .Append("    ")
+                        .AppendFormat("{0}", value),
+                    (string { Length: 0 }, _) => builder
+                        .Append("  ")
+                        .AppendFormat("{0}", value),
+                    (_, string stringValue) => builder
+                        .Append("  ")
+                        .AppendHeader($"{header,-20}")
+                        .Append(" ")
+                        .AppendFormat(format: "'{0}'", stringValue),
+                    _ => builder
+                        .Append("  ")
+                        .AppendHeader($"{header,-20}")
+                        .Append(" ")
+                        .AppendFormat("{0}", value),
+                };
+                _ = builder.AppendLine();
             }
         }
 
@@ -99,40 +80,29 @@ internal class DefaultLasReaderFormatter(IFormatBuilder builder) : ILasReaderFor
     {
         for (var i = 0; i < reader.ExtendedVariableLengthRecords.Count; i++)
         {
-            builder.AppendMajorHeader("extended variable length header record {0} of {1}:", i + 1, reader.ExtendedVariableLengthRecords.Count).AppendLine();
+            _ = builder.AppendMajorHeader("extended variable length header record {0} of {1}:", i + 1, reader.ExtendedVariableLengthRecords.Count).AppendLine();
             foreach (var (header, value) in GetInformation(reader.ExtendedVariableLengthRecords[i]))
             {
-                switch (header, value)
+                _ = (header, value) switch
                 {
-                    case (null, _):
-                        // just data
-                        builder
-                            .Append("    ")
-                            .AppendFormat("{0}", value);
-                        break;
-                    case (string { Length: 0 }, _):
-                        // just information
-                        builder
-                            .Append("  ")
-                            .AppendFormat("{0}", value);
-                        break;
-                    case (_, string stringValue):
-                        builder
-                            .Append("  ")
-                            .AppendHeader($"{header,-20}")
-                            .Append(" ")
-                            .AppendFormat(format: "'{0}'", stringValue);
-                        break;
-                    default:
-                        builder
-                            .Append("  ")
-                            .AppendHeader($"{header,-20}")
-                            .Append(" ")
-                            .AppendFormat("{0}", value);
-                        break;
-                }
-
-                builder.AppendLine();
+                    (null, _) => builder
+                        .Append("    ")
+                        .AppendFormat("{0}", value),
+                    (string { Length: 0 }, _) => builder
+                        .Append("  ")
+                        .AppendFormat("{0}", value),
+                    (_, string stringValue) => builder
+                        .Append("  ")
+                        .AppendHeader($"{header,-20}")
+                        .Append(" ")
+                        .AppendFormat(format: "'{0}'", stringValue),
+                    _ => builder
+                        .Append("  ")
+                        .AppendHeader($"{header,-20}")
+                        .Append(" ")
+                        .AppendFormat("{0}", value),
+                };
+                _ = builder.AppendLine();
             }
         }
 
@@ -248,8 +218,15 @@ internal class DefaultLasReaderFormatter(IFormatBuilder builder) : ILasReaderFor
 #if LAS1_4_OR_GREATER
         if (statistics.ScanAngle is not null)
         {
-            builder.Append("  ").AppendHeader("extended_classification   ").AppendFormat("{0,7}{1,7}", statistics.Classification.Minimum, statistics.Classification.Maximum).AppendLine();
-            builder.Append("  ").AppendHeader("extended_scan_angle       ").AppendFormat("{0,7:0.000}{1,7:0.000}", statistics.ScanAngle.Minimum * 180D / 30000D, statistics.ScanAngle.Maximum * 180D / 30000D).AppendLine();
+            builder
+                .Append("  ")
+                .AppendHeader("extended_classification   ")
+                .AppendFormat("{0,7}{1,7}", statistics.Classification.Minimum, statistics.Classification.Maximum)
+                .AppendLine()
+                .Append("  ")
+                .AppendHeader("extended_scan_angle       ")
+                .AppendFormat("{0,7:0.000}{1,7:0.000}", statistics.ScanAngle.Minimum * 180D / 30000D, statistics.ScanAngle.Maximum * 180D / 30000D)
+                .AppendLine();
         }
 
         if (statistics.ScannerChannel is not null)
@@ -275,10 +252,19 @@ internal class DefaultLasReaderFormatter(IFormatBuilder builder) : ILasReaderFor
     public ILasReaderFormatter AppendReturns(LasReader reader, Func<LasReader, Statistics> statisticsFunc)
     {
         var values = statisticsFunc(reader);
-        builder.AppendHeader("number of first returns:        ").AppendFormat("{0}", values.FirstReturns).AppendLine();
-        builder.AppendHeader("number of intermediate returns: ").AppendFormat("{0}", values.IntermediateReturns).AppendLine();
-        builder.AppendHeader("number of last returns:         ").AppendFormat("{0}", values.LastReturns).AppendLine();
-        builder.AppendHeader("number of single returns:       ").AppendFormat("{0}", values.SingleReturns).AppendLine();
+        _ = builder
+            .AppendHeader("number of first returns:        ")
+            .AppendFormat("{0}", values.FirstReturns)
+            .AppendLine()
+            .AppendHeader("number of intermediate returns: ")
+            .AppendFormat("{0}", values.IntermediateReturns)
+            .AppendLine()
+            .AppendHeader("number of last returns:         ")
+            .AppendFormat("{0}", values.LastReturns)
+            .AppendLine()
+            .AppendHeader("number of single returns:       ")
+            .AppendFormat("{0}", values.SingleReturns)
+            .AppendLine();
 
         FormatOverviewReturnNumber(builder, values.OverviewReturnNumber[0], 0);
         if (reader.Header.Version.Minor < 4)
@@ -295,7 +281,7 @@ internal class DefaultLasReaderFormatter(IFormatBuilder builder) : ILasReaderFor
                 return this;
             }
 
-            builder.AppendHeader("overview over extended number of returns of given pulse:");
+            _ = builder.AppendHeader("overview over extended number of returns of given pulse:");
             _ = overviewNumberOfReturns.Aggregate(builder, static (builder, v) => builder.AppendFormat(" {0}", v));
         }
         else
@@ -306,11 +292,11 @@ internal class DefaultLasReaderFormatter(IFormatBuilder builder) : ILasReaderFor
                 return this;
             }
 
-            builder.AppendHeader("overview over number of returns of given pulse:");
+            _ = builder.AppendHeader("overview over number of returns of given pulse:");
             _ = overviewNumberOfReturns.Aggregate(builder, static (builder, v) => builder.AppendFormat(" {0}", v));
         }
 
-        builder.AppendLine();
+        _ = builder.AppendLine();
 
         return this;
 
@@ -321,7 +307,7 @@ internal class DefaultLasReaderFormatter(IFormatBuilder builder) : ILasReaderFor
                 return;
             }
 
-            builder
+            _ = builder
                 .AppendFormat(AnsiConsoleStyles.Warning, "WARNING: there {0} {1} point{2} with return number {3}", value > 1 ? "are" : "is", value, value > 1 ? "s" : string.Empty, returnNumber)
                 .AppendLine();
         }
@@ -333,7 +319,7 @@ internal class DefaultLasReaderFormatter(IFormatBuilder builder) : ILasReaderFor
         var values = statisticsFunc(reader);
         if (values.Histogram.Take(32).Any(static v => v is not 0))
         {
-            builder
+            _ = builder
                 .AppendHeader("histogram of classification of points:")
                 .AppendLine();
             for (var i = 0; i < 32; i++)
@@ -344,13 +330,12 @@ internal class DefaultLasReaderFormatter(IFormatBuilder builder) : ILasReaderFor
                     continue;
                 }
 
-                builder.Append(" ");
-                builder.AppendCaption("{0,15}", value)
-                    .Append("  ");
-                builder
+                _ = builder
+                    .Append(" ")
+                    .AppendCaption("{0,15}", value)
+                    .Append("  ")
                     .AppendValue(GetClassificationName(i))
-                    .Append(" (");
-                builder
+                    .Append(" (")
                     .AppendCount("{0}", i)
                     .AppendLine(")");
 
@@ -389,7 +374,7 @@ internal class DefaultLasReaderFormatter(IFormatBuilder builder) : ILasReaderFor
 
         if (reader.Header.PointDataFormatId >= 6 && values.Histogram.Skip(32).Any(static p => p is not 0))
         {
-            builder
+            _ = builder
                 .AppendHeader("histogram of extended classification of points:")
                 .AppendLine();
             for (var i = 32; i < 256; i++)
@@ -400,7 +385,7 @@ internal class DefaultLasReaderFormatter(IFormatBuilder builder) : ILasReaderFor
                     continue;
                 }
 
-                builder
+                _ = builder
                     .Append(" ")
                     .AppendCaption("{0,15}", value)
                     .Append("  ")

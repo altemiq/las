@@ -19,27 +19,30 @@ public class WebApplicationFactory : TUnit.Core.Interfaces.IAsyncInitializer, IA
 
     private bool disposed;
 
-    public HttpClient CreateClient() => this.client;
+    public HttpClient CreateClient()
+    {
+        return client;
+    }
 
     public Task InitializeAsync()
     {
-        return this.server.StartAsync(new SimpleHttpApplication(), this.cts.Token);
+        return server.StartAsync(new SimpleHttpApplication(), cts.Token);
     }
 
     public async ValueTask DisposeAsync()
     {
-        if (this.disposed)
+        if (disposed)
         {
             return;
         }
 
-        this.disposed = true;
-        await this.server.StopAsync(CancellationToken.None).ConfigureAwait(false);
+        disposed = true;
+        await server.StopAsync(CancellationToken.None).ConfigureAwait(false);
 
 #if NET8_0_OR_GREATER
-        await this.cts.CancelAsync();
+        await cts.CancelAsync();
 #else
-        this.cts.Cancel();
+        cts.Cancel();
 #endif
 
         GC.SuppressFinalize(this);
@@ -75,7 +78,7 @@ public class WebApplicationFactory : TUnit.Core.Interfaces.IAsyncInitializer, IA
         return new(transportOptions, applicationLifetime, loggerFactory);
     }
 
-    private class SimpleHttpApplication : Microsoft.AspNetCore.Hosting.Server.IHttpApplication<HttpContext>
+    private sealed class SimpleHttpApplication : Microsoft.AspNetCore.Hosting.Server.IHttpApplication<HttpContext>
     {
         public HttpContext CreateContext(Microsoft.AspNetCore.Http.Features.IFeatureCollection contextFeatures)
         {
@@ -92,7 +95,7 @@ public class WebApplicationFactory : TUnit.Core.Interfaces.IAsyncInitializer, IA
             }
             else
             {
-                var urlPath = context.Request.Path.Value!.TrimStart('/');
+                var urlPath = context.Request.Path.Value.TrimStart('/');
 
                 var manifestPath = $"{typeof(WebApplicationFactory).Namespace}.Data.{urlPath.Replace('/', '.')}";
                 if (typeof(WebApplicationFactory).Assembly.GetManifestResourceStream(manifestPath) is { } manifestResourceStream)
@@ -110,18 +113,18 @@ public class WebApplicationFactory : TUnit.Core.Interfaces.IAsyncInitializer, IA
                         && rangeValues is [{ } rangeValue, ..])
                     {
                         var range = rangeValue.Replace("bytes=", "").Split('-');
-                        var startByte = int.Parse(range[0]);
-                        if (string.IsNullOrEmpty(range[1].Trim()) || !long.TryParse(range[1], out var endByte))
+                        var startByte = int.Parse(range[0], System.Globalization.CultureInfo.InvariantCulture);
+                        if (string.IsNullOrEmpty(range[1].Trim()) || !long.TryParse(range[1], System.Globalization.NumberStyles.Integer, System.Globalization.CultureInfo.InvariantCulture, out var endByte))
                         {
                             endByte = manifestResourceStream.Length - 1;
                         }
 
                         byteRange = endByte - startByte + 1;
-                        manifestResourceStream.Seek(startByte, SeekOrigin.Begin);
+                        _ = manifestResourceStream.Seek(startByte, SeekOrigin.Begin);
                         context.Response.Headers.Append("Content-Range", $"bytes {startByte}-{byteRange - 1}/{byteRange}");
                     }
 
-                    byte[] buffer = new byte[byteRange];
+                    var buffer = new byte[byteRange];
                     var read = await manifestResourceStream.ReadAsync(buffer.AsMemory(0, buffer.Length));
                     context.Response.ContentType = GetMimeType(urlPath);
                     context.Response.ContentLength = read;
@@ -137,7 +140,7 @@ public class WebApplicationFactory : TUnit.Core.Interfaces.IAsyncInitializer, IA
 
             static string GetMimeType(string filePath)
             {
-                return Path.GetExtension(filePath).ToLower() switch
+                return Path.GetExtension(filePath).ToLower(System.Globalization.CultureInfo.CurrentCulture) switch
                 {
                     ".html" => "text/html",
                     ".htm" => "text/html",

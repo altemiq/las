@@ -79,7 +79,7 @@ public readonly struct WellKnownTextValue :
     {
         1 => this.nodeValue,
         2 => this.doubleValue,
-        3 => this.stringValue!,
+        3 => this.stringValue,
         4 => this.literalValue,
         _ => null,
     };
@@ -237,7 +237,7 @@ public readonly struct WellKnownTextValue :
     {
         1 => this.nodeValue.GetHashCode(),
         2 => this.doubleValue.GetHashCode(),
-        3 => StringComparer.Ordinal.GetHashCode(this.stringValue!),
+        3 when this.stringValue is { } s => StringComparer.Ordinal.GetHashCode(s),
         4 => this.literalValue.GetHashCode(),
         _ => 0,
     };
@@ -273,7 +273,7 @@ public readonly struct WellKnownTextValue :
 
         static int WriteDouble(Span<byte> buffer, double d)
         {
-            System.Buffers.Text.Utf8Formatter.TryFormat(d, buffer, out var bytesWritten, DoubleFormat);
+            _ = System.Buffers.Text.Utf8Formatter.TryFormat(d, buffer, out var bytesWritten, DoubleFormat);
             return bytesWritten;
         }
     }
@@ -288,7 +288,7 @@ public readonly struct WellKnownTextValue :
         {
             1 => this.nodeValue.GetByteCount(),
             2 => GetDoubleByteCount(this.doubleValue),
-            3 => System.Text.Encoding.UTF8.GetByteCount(this.stringValue!) + 2,
+            3 when this.stringValue is { } s => System.Text.Encoding.UTF8.GetByteCount(s) + 2,
             4 => this.literalValue.GetByteCount(),
             _ => default,
         };
@@ -296,7 +296,7 @@ public readonly struct WellKnownTextValue :
         static int GetDoubleByteCount(double d)
         {
             Span<byte> buffer = stackalloc byte[20];
-            System.Buffers.Text.Utf8Formatter.TryFormat(d, buffer, out var bytesWritten, DoubleFormat);
+            _ = System.Buffers.Text.Utf8Formatter.TryFormat(d, buffer, out var bytesWritten, DoubleFormat);
             return bytesWritten;
         }
     }

@@ -228,6 +228,7 @@ public readonly record struct ExtraBytesItem
     /// </summary>
     /// <param name="source">The source.</param>
     /// <returns>The value.</returns>
+    /// <exception cref="System.Diagnostics.UnreachableException">The extra bytes item is invalid.</exception>
     public ExtraBytesValue GetValue(ReadOnlySpan<byte> source)
     {
         return GetItemValue(this, source);

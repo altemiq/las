@@ -6,7 +6,7 @@
 
 namespace Altemiq.IO.Las;
 
-#pragma warning disable RCS1263, SA1101
+#pragma warning disable SA1101
 
 /// <summary>
 /// Memory extensions.
@@ -35,7 +35,9 @@ internal static class MemoryExtensions
             System.Runtime.InteropServices.Marshal.StructureToPtr(structure, GetIntPtr(span), fDeleteOld);
     }
 
+#pragma warning disable S6640
     private static unsafe IntPtr GetIntPtr<T>(Span<T> span) => (IntPtr)System.Runtime.CompilerServices.Unsafe.AsPointer(ref System.Runtime.InteropServices.MemoryMarshal.GetReference(span));
 
     private static unsafe IntPtr GetIntPtr<T>(ReadOnlySpan<T> span) => (IntPtr)System.Runtime.CompilerServices.Unsafe.AsPointer(ref System.Runtime.InteropServices.MemoryMarshal.GetReference(span));
+#pragma warning restore S6640
 }

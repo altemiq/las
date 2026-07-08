@@ -22,7 +22,7 @@ public class ModelSourceGenerator : BaseSourceGenerator
     {
         base.Initialize(context);
         var model = context.SyntaxProvider.CreateSyntaxProvider(
-            (node, _) => node is TypeDeclarationSyntax typeNode && GetIdentifier(typeNode) is "Model",
+            static (node, _) => node is TypeDeclarationSyntax typeNode && string.Equals(GetIdentifier(typeNode), "Model", StringComparison.Ordinal),
             static (node, _) => GetTypeToGenerate(node));
         var modelCsv = context.AdditionalTextsProvider
             .Where(static file => Path.GetFileNameWithoutExtension(file.Path) is "models" && Path.GetExtension(file.Path) is ".csv");
