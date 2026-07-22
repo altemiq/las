@@ -22,6 +22,5 @@ internal interface IUnion<TUnion> : IUnion
     /// <param name="value">The value.</param>
     /// <param name="union">The union if the creation was successful.</param>
     /// <returns>Whether the creation was successful.</returns>
-    [Diagnostics.CodeAnalysis.SuppressMessage("Naming", "CA1716:Identifiers should not match keywords", Justification = "This is by design")]
     static abstract bool TryCreate(object? value, [Diagnostics.CodeAnalysis.NotNullWhen(true)] out TUnion union);
 }
