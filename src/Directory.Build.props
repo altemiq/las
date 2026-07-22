@@ -16,6 +16,9 @@
     <GenerateStronglyTypedResources>true</GenerateStronglyTypedResources>
     <ResourceNamespace>$(Company).$(MSBuildProjectName)</ResourceNamespace>
 
+    <!-- memory safety -->
+    <MemorySafetyRules>preview</MemorySafetyRules>
+
     <CheckEolTargetFramework>false</CheckEolTargetFramework>
 
     <GenerateDocumentationFile>true</GenerateDocumentationFile>
