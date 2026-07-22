@@ -14,14 +14,9 @@ jobs:
     permissions:
       id-token: write
 
-    env:
-      DOTNET_NOLOGO: true
-      DOTNET_CLI_TELEMETRY_OPTOUT: true
-      DOTNET_MULTILEVEL_LOOKUP: false
-
     steps:
       - name: Setup .NET
-        uses: actions/setup-dotnet@v5
+        uses: actions/setup-dotnet@v6
         with:
           dotnet-version: 10.0.x
 
@@ -87,7 +82,8 @@ jobs:
     needs: [promote-nuget, promote-docker]
 
     steps:
-      - id: get-version
+      - name: run local/get-version@v1
+        id: get-version
         run: |
           pre_release_version=${{ inputs.version }}
           release_version=${pre_release_version%%'-'*}
@@ -105,12 +101,11 @@ jobs:
           echo $release_version
           echo "release_version=$release_version" >> $GITHUB_OUTPUT
 
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v7
         with:
           ref: v${{ steps.get-version.outputs.tag_version }}
 
-      - name: Create Release
-        uses: altemiq/update-existing-release@v1
+      - uses: altemiq/update-existing-release@v1
         with:
           release: v${{ steps.get-version.outputs.release_version }}
           tag: v${{ steps.get-version.outputs.release_version }}
