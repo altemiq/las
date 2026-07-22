@@ -41,6 +41,7 @@
 
   <ItemGroup Label="SQLite">
     <PackageVersion Include="Microsoft.Data.Sqlite" Version="10.0.11" />
+    <PackageVersion Update="Microsoft.Data.Sqlite" Version="11.0.0-preview.7.26381.103" Condition=" $([MSBuild]::IsTargetFrameworkCompatible('$(TargetFramework)', 'net10.0')) " />
     <PackageVersion Include="SQLitePCLRaw.bundle_e_sqlite3" Version="3.0.4" />
   </ItemGroup>
 
