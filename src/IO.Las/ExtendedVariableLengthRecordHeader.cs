@@ -50,7 +50,7 @@ public readonly record struct ExtendedVariableLengthRecordHeader
     [System.Runtime.InteropServices.MarshalAs(System.Runtime.InteropServices.UnmanagedType.ByValTStr, SizeConst = DescriptionSize)]
     private readonly string description;
 
-#pragma warning disable CS8618 // Non-nullable field must contain a non-null value when exiting constructor. Consider adding the 'required' modifier or declaring as nullable.
+#pragma warning disable CS8618
     /// <summary>
     /// Initializes a new instance of the <see cref="ExtendedVariableLengthRecordHeader"/> struct.
     /// </summary>
@@ -97,7 +97,7 @@ public readonly record struct ExtendedVariableLengthRecordHeader
         this.recordLengthAfterHeader = System.Buffers.Binary.BinaryPrimitives.ReadUInt64LittleEndian(data[Constants.ExtendedVariableLengthRecord.RecordLengthAfterHeaderFieldOffset..Constants.ExtendedVariableLengthRecord.DescriptionFieldOffset]);
         this.description = System.Text.Encoding.UTF8.GetNullTerminatedString(data[Constants.ExtendedVariableLengthRecord.DescriptionFieldOffset..Size]);
     }
-#pragma warning restore CS8618 // Non-nullable field must contain a non-null value when exiting constructor. Consider adding the 'required' modifier or declaring as nullable.
+#pragma warning restore CS8618
 
     /// <summary>
     /// Gets the summary.

@@ -6,13 +6,17 @@
 
 namespace Altemiq.IO.Las;
 
-#pragma warning disable SA1101
+#pragma warning disable RCS1263, SA1101
 
 /// <summary>
 /// The <see cref="LazyFrame"/> extensions.
 /// </summary>
 public static class LazyFrameExtensions
 {
+    /// <content>
+    /// <see cref="LazyFrame"/> extensions.
+    /// </content>
+    /// <param name="lazyFrame">The lazy frame.</param>
     extension(LazyFrame lazyFrame)
     {
         /// <summary>

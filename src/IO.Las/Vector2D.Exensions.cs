@@ -6,7 +6,7 @@
 
 namespace Altemiq.IO.Las;
 
-#pragma warning disable CA1708, RCS1263, SA1101, S2325
+#pragma warning disable RCS1263, SA1101
 
 #if NETCOREAPP3_0_OR_GREATER
 using System.Runtime.CompilerServices;

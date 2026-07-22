@@ -10,17 +10,17 @@ namespace Altemiq.IO.Las.Cloud;
 using System.Runtime.Intrinsics;
 #endif
 
+#pragma warning disable RCS1263, SA1101
+
 /// <summary>
 /// <see cref="CopcHierarchy.VoxelKey"/> extensions.
 /// </summary>
-[System.Diagnostics.CodeAnalysis.SuppressMessage("StyleCop.CSharp.ReadabilityRules", "SA1101:Prefix local calls with this", Justification = "False positive")]
-[System.Diagnostics.CodeAnalysis.SuppressMessage("Minor Code Smell", "S2325:Methods and properties that don't access instance data should be static", Justification = "False positive")]
-[System.Diagnostics.CodeAnalysis.SuppressMessage("Naming", "CA1708:Identifiers should differ by more than case", Justification = "False positive")]
 public static class VoxelKeyExtensions
 {
     /// <summary>
     /// The <see cref="CopcHierarchy.VoxelKey"/> extensions.
     /// </summary>
+    /// <param name="key">The voxel key.</param>
     extension(in CopcHierarchy.VoxelKey key)
     {
         /// <summary>

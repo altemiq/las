@@ -8,13 +8,11 @@
 namespace Altemiq.IO.Las;
 #pragma warning restore IDE0130, CheckNamespace
 
-#pragma warning disable CA1708, RCS1263
+#pragma warning disable RCS1263, SA1101
 
 /// <summary>
 /// <see cref="Indexing"/> extensions.
 /// </summary>
-[System.Diagnostics.CodeAnalysis.SuppressMessage("StyleCop.CSharp.ReadabilityRules", "SA1101:Prefix local calls with this", Justification = "False positive")]
-[System.Diagnostics.CodeAnalysis.SuppressMessage("Minor Code Smell", "S2325:Methods and properties that don't access instance data should be static", Justification = "False positive")]
 public static class IndexingExtensions
 {
 #if LAS1_4_OR_GREATER

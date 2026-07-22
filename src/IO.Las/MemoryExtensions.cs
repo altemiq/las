@@ -6,8 +6,6 @@
 
 namespace Altemiq.IO.Las;
 
-#pragma warning disable SA1101
-
 /// <summary>
 /// Memory extensions.
 /// </summary>

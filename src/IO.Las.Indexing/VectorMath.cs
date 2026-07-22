@@ -10,7 +10,7 @@ using System.Numerics;
 #if NET7_0_OR_GREATER
 using System.Runtime.Intrinsics;
 
-#pragma warning disable SA1101
+#pragma warning disable RCS1263, SA1101
 #endif
 
 /// <summary>
@@ -19,6 +19,10 @@ using System.Runtime.Intrinsics;
 internal static class VectorMath
 {
 #if NET7_0_OR_GREATER
+    /// <content>
+    /// <see cref="Vector2"/> extensions.
+    /// </content>
+    /// <param name="value">The vector.</param>
     extension(Vector2 value)
     {
         /// <summary>

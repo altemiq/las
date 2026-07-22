@@ -9,15 +9,13 @@ namespace Altemiq.IO.Las;
 
 using System.Runtime.Intrinsics;
 
-#pragma warning disable SA1600
+#pragma warning disable SA1600, SA1601
 
 /// <content>
 /// <see cref="System.Runtime.Intrinsics"/> implementations.
 /// </content>
 public partial struct Vector2D
 {
-#pragma warning disable SA1601
-
     public static partial Vector2D Add(Vector2D left, Vector2D right) => Vector128.Add(left.AsVector128(), right.AsVector128()).AsVector2D();
 
     public static partial Vector2D Subtract(Vector2D left, Vector2D right) => Vector128.Subtract(left.AsVector128(), right.AsVector128()).AsVector2D();
