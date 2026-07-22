@@ -61,16 +61,13 @@ jobs:
       - uses: actions/checkout@v7
 
       - name: Run local/docker-build@v1
+        id: build
         working-directory: container
         run: |
-          docker build -f ContainerFile.windows -t ghcr.io/${{ github.repository_owner }}/lastools:windows-latest .
-
-      - name: Run local/get-image-id@v1
-        id: build
-        shell: pwsh
-        run: |
-          $image = $(docker inspect ghcr.io/${{ github.repository_owner }}/lastools:windows-latest --format='{{.Id}}')
-          "imageid=$image" | Out-File -FilePath $env:GITHUB_OUTPUT -Encoding utf8 -Append
+          # build the image
+          $IdFile = Join-Path ${{ runner.temp }} lastools.id.txt
+          docker build -f ContainerFile.windows -t ghcr.io/${{ github.repository_owner }}/lastools:windows-latest --iidfile $IdFile .
+          "imageid=$(Get-Content $IdFile)" | Out-File -FilePath $env:GITHUB_OUTPUT -Encoding utf8 -Append
 
       - name: Run local/get-version@v1
         id: version
