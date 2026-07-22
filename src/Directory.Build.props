@@ -16,9 +16,6 @@
     <GenerateStronglyTypedResources>true</GenerateStronglyTypedResources>
     <ResourceNamespace>$(Company).$(MSBuildProjectName)</ResourceNamespace>
 
-    <!-- memory safety -->
-    <MemorySafetyRules>preview</MemorySafetyRules>
-
     <CheckEolTargetFramework>false</CheckEolTargetFramework>
 
     <GenerateDocumentationFile>true</GenerateDocumentationFile>
@@ -29,7 +26,12 @@
 
     <MeziantouPolyfill_GenerateDebugFile Condition=" '$(Configuration)' == 'Debug' ">true</MeziantouPolyfill_GenerateDebugFile>
   </PropertyGroup>
-  
+
+  <PropertyGroup Label="Memory">
+    <LangVersion>preview</LangVersion>
+    <Features>memory-safety</Features>
+  </PropertyGroup>
+    
   <PropertyGroup Label="Packaging">
     <Authors>rsking;altemiq</Authors>
     <Description>||PlaceHolder||</Description>
