@@ -6,13 +6,17 @@
 
 namespace Altemiq.IO.Las;
 
-#pragma warning disable SA1101
+#pragma warning disable RCS1263, SA1101
 
 /// <summary>
 /// <see cref="DataFrame"/> extensions.
 /// </summary>
 public static class DataFrameExtensions
 {
+    /// <content>
+    /// <see cref="DataFrame"/> extensions.
+    /// </content>
+    /// <param name="dataFrame">The data frame.</param>
     extension(DataFrame dataFrame)
     {
         /// <summary>

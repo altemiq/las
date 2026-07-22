@@ -6,7 +6,7 @@
 
 namespace Altemiq.IO.Las;
 
-#pragma warning disable MA0102, RCS1263, SA1101
+#pragma warning disable RCS1263, SA1101
 
 /// <summary>
 /// The <see cref="LasReader"/> extensions.

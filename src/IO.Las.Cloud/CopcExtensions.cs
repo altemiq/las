@@ -8,16 +8,17 @@
 namespace Altemiq.IO.Las;
 #pragma warning restore IDE0130, CheckNamespace
 
+#pragma warning disable RCS1263, SA1101
+
 /// <summary>
 /// Cloud optimized extension methods.
 /// </summary>
-[System.Diagnostics.CodeAnalysis.SuppressMessage("StyleCop.CSharp.ReadabilityRules", "SA1101:Prefix local calls with this", Justification = "False positive")]
-[System.Diagnostics.CodeAnalysis.SuppressMessage("Naming", "CA1708:Identifiers should differ by more than case", Justification = "False positive")]
 public static class CopcExtensions
 {
     /// <summary>
     /// The <see cref="ILasReader"/> extensions
     /// </summary>
+    /// <param name="reader">The reader.</param>
     extension(ILasReader reader)
     {
         /// <summary>
@@ -274,9 +275,9 @@ public static class CopcExtensions
 
                     if (buffer.Count == buffer.Capacity || endOfStream)
                     {
-#pragma warning disable S2245 // Pseudorandom number generators (PRNGs) should not be used in security contexts
+#pragma warning disable S2245
                         var random = new Random();
-#pragma warning restore S2245 // Pseudorandom number generators (PRNGs) should not be used in security contexts
+#pragma warning restore S2245
 
                         // First, we shuffle the points
                         if (shuffle)

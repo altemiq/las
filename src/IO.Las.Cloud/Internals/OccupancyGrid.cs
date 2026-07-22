@@ -13,8 +13,6 @@ namespace Altemiq.IO.Las.Cloud.Internals;
 /// <param name="gridSpacing">The grid spacing.</param>
 internal sealed class OccupancyGrid(PointDataRecordQuantizer quantizer, float gridSpacing)
 {
-#pragma warning disable IDE0079
-#pragma warning disable RCS1222
 #pragma warning disable S2933
     private int[] minusAnchors = [];
     private int[]?[] minusMinus = [];
@@ -22,7 +20,7 @@ internal sealed class OccupancyGrid(PointDataRecordQuantizer quantizer, float gr
     private int[] plusAnchors = [];
     private int[]?[] plusMinus = [];
     private int[]?[] plusPlus = [];
-#pragma warning restore IDE0079, RCS1222, S2933
+#pragma warning restore S2933
 
     private float gridSpacing = -gridSpacing;
     private int anker;
