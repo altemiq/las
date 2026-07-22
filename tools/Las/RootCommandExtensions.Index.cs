@@ -89,12 +89,6 @@ internal static partial class RootCommandExtensions
                             PrintTree(output, item);
                         }
 
-                        static bool IsLasOrLaz(string extension)
-                        {
-                            return string.Equals(extension, ".las", StringComparison.OrdinalIgnoreCase)
-                                || string.Equals(extension, ".laz", StringComparison.OrdinalIgnoreCase);
-                        }
-
                         static void PrintTree(TextWriter output, Indexing.LasIndexCell cell)
                         {
                             output.Write(string.Create(System.Globalization.CultureInfo.InvariantCulture, $"({cell.Minimum.X},{cell.Minimum.Y})-({cell.Maximum.X},{cell.Maximum.Y})"));
@@ -103,6 +97,12 @@ internal static partial class RootCommandExtensions
                         }
 
 #if LAS1_4_OR_GREATER
+                        static bool IsLasOrLaz(string extension)
+                        {
+                            return string.Equals(extension, ".las", StringComparison.OrdinalIgnoreCase)
+                                || string.Equals(extension, ".laz", StringComparison.OrdinalIgnoreCase);
+                        }
+
                         static Indexing.LasIndex CreateFromReader(Uri file, IServiceProvider? services)
                         {
                             using var reader = new LasReader(File.OpenRead(file, services), leaveOpen: false);
