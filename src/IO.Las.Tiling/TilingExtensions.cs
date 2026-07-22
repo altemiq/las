@@ -6,16 +6,17 @@
 
 namespace Altemiq.IO.Las;
 
+#pragma warning disable RCS1263, SA1101
+
 /// <summary>
 /// <see cref="Tiling"/> extensions.
 /// </summary>
-[System.Diagnostics.CodeAnalysis.SuppressMessage("StyleCop.CSharp.ReadabilityRules", "SA1101:Prefix local calls with this", Justification = "False positive")]
-[System.Diagnostics.CodeAnalysis.SuppressMessage("Minor Code Smell", "S2325:Methods and properties that don't access instance data should be static", Justification = "False positive")]
 public static class TilingExtensions
 {
     /// <summary>
     /// The <see cref="VariableLengthRecordProcessor"/> extensions.
     /// </summary>
+    /// <param name="processor">The processor.</param>
     extension(VariableLengthRecordProcessor processor)
     {
         /// <summary>

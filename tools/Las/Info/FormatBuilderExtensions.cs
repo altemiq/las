@@ -6,14 +6,19 @@
 
 namespace Altemiq.IO.Las.Info;
 
+#pragma warning disable RCS1263, SA1101
+
 /// <summary>
 /// The <see cref="IFormatBuilder"/> extensions.
 /// </summary>
 internal static class FormatBuilderExtensions
 {
+    /// <content>
+    /// <see cref="IFormatBuilder"/> extensions.
+    /// </content>
+    /// <param name="builder">The builder.</param>
     extension(IFormatBuilder builder)
     {
-#pragma warning disable S2325, SA1101
         /// <summary>
         /// Writes the format values.
         /// </summary>
@@ -121,6 +126,5 @@ internal static class FormatBuilderExtensions
         /// <param name="args">The arguments.</param>
         /// <returns>The input console.</returns>
         public IFormatBuilder AppendCount([System.Diagnostics.CodeAnalysis.StringSyntax(System.Diagnostics.CodeAnalysis.StringSyntaxAttribute.CompositeFormat)] string format, params object?[] args) => builder.AppendFormat(AnsiConsoleStyles.Count, format, args);
-#pragma warning restore S2325, SA1101
     }
 }

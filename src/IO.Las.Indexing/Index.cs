@@ -110,9 +110,6 @@ public readonly struct Index : IEquatable<Index>
     {
         return this.IsFromEnd ? ToStringFromEnd(this.Value, provider) : this.Value.ToString(provider);
 
-#if NET6_0_OR_GREATER
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Minor Code Smell", "S3236:Caller information arguments should not be provided explicitly", Justification = "Checked")]
-#endif
         static string ToStringFromEnd(uint value, IFormatProvider? formatProvider)
         {
 #if NETSTANDARD2_1 || NETCOREAPP2_1_OR_GREATER

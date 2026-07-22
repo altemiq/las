@@ -11,7 +11,7 @@ namespace Altemiq.IO.Las;
 /// </summary>
 internal static class LasStreams
 {
-#pragma warning disable S2325, SA1101
+#pragma warning disable SA1101
     /// <summary>
     /// The <see cref="Stream"/> extensions.
     /// </summary>
@@ -30,7 +30,7 @@ internal static class LasStreams
         /// <returns><see langword="true"/> if the stream can switch; otherwise <see langword="false"/>.</returns>
         public bool CanSwitchStream() => stream is MultipleStream;
     }
-#pragma warning restore S2325, SA1101
+#pragma warning restore SA1101
 
     /// <summary>
     /// The header name.
