@@ -1,13 +1,47 @@
+FROM mcr.microsoft.com/windows/servercore:ltsc2025 AS builder
+
+SHELL ["powershell", "-NoProfile",  "-ExecutionPolicy", "Bypass", "-Command"]
+
+# VC redistributable for x64
+RUN Invoke-WebRequest -Uri "https://aka.ms/vc14/vc_redist.x64.exe" -OutFile C:\vc_redist.x64.exe; \
+    Start-Process -FilePath C:\vc_redist.x64.exe -ArgumentList '/install','/quiet','/norestart' -Wait; \
+    $OutputDirectory = Join-Path $env:SystemDrive crt; \
+    New-Item $OutputDirectory -ItemType Directory | Out-Null; \
+    Get-ChildItem $(Join-Path $env:WINDIR System32) -Filter *140*.dll | Where-Object { $_.Name -match '^(concrt|msvcp|vccorlib|vcruntime).*' } | ForEach-Object { $Output = $(Join-Path $OutputDirectory $_.Name); Write-Host \"Copying $_.FullName to $Output\"; Copy-Item $_.FullName $Output }
+
+# PROJ runtime data
+RUN $BaseUri = 'https://download.osgeo.org/osgeo4w/v2'; \
+    Invoke-WebRequest \"$BaseUri/x86_64/setup.ini\" -OutFile C:\setup.ini; \
+    $content = Get-Content C:\setup.ini; \
+    $PackageName = 'proj-runtime-data'; \
+    $OutputDirectory = Join-Path $env:SystemDrive osgeo; \
+    New-Item $OutputDirectory -ItemType Directory | Out-Null; \
+    $PackageLine = $null; \
+    for ($i = 0; $i -lt $Content.Count; $i++) { if ($Content[$i] -eq \"@ $PackageName\") { for ($j = $i; $j -lt $Content.Count; $j++) { if ($Content[$j] -match '^install:\s+(\S+)') { $PackageLine = $Matches[1]; break; } } break; } } \ 
+    if (-not $PackageLine) { throw \"Could not locate package '$PackageName' in setup.ini\" } \
+    $PackagePath = $PackageLine.Split()[0]; \
+    $PackageFile = Join-Path $env:TEMP (Split-Path $PackagePath -Leaf); \
+    Invoke-WebRequest -Uri \"$BaseUri/$PackagePath\" -OutFile $PackageFile; \
+    $ExtractedDirectory = Join-Path $env:SystemDrive extract; \
+    New-Item $ExtractedDirectory -ItemType Directory | Out-Null; \
+    tar -xzf $PackageFile -C $ExtractedDirectory; \
+    $ProjDataDirectory = Join-Path (Join-Path $ExtractedDirectory share) proj; \
+    Get-ChildItem $ProjDataDirectory -Filter proj* | ForEach-Object { $Output = $(Join-Path $OutputDirectory $_.Name); Write-Host \"Copying $_.FullName to $Output\"; Copy-Item $_.FullName -Destination $(Join-Path $OutputDirectory $_.Name) }
+
+# LAStools
+RUN $LasToolsDownload = Join-Path $env:TEMP LAStools.zip; \
+    Invoke-WebRequest https://downloads.rapidlasso.de/LAStools.zip -OutFile $LasToolsDownload; \
+    $ExtractedDirectory = Join-Path $env:SystemDrive las; \
+    New-Item $ExtractedDirectory -ItemType Directory | Out-Null; \
+    tar -xvf $LasToolsDownload -C $ExtractedDirectory bin/*.exe bin/*.dll bin/*.csv
+
 FROM mcr.microsoft.com/windows/nanoserver:ltsc2022-amd64
 LABEL org.opencontainers.image.description='LAStools for Windows'
 
-COPY VC_redist.x64 C:\\Windows\\System32
-	
-COPY PROJ C:\\Data\\PROJ
+COPY --from=builder C:/crt/ C:/Windows/System32
+
+COPY --from=builder C:/osgeo/ C:/Data/PROJ
 ENV PROJ_DATA=C:\\Data\\PROJ
 
-RUN curl -kqL https://downloads.rapidlasso.de/LAStools.zip -o %TMP%\LAStools.zip & \
-    mkdir C:\LAStools & \
-    tar -xvf %TMP%\LAStools.zip -C C:\LAStools bin/*.exe bin/*.dll bin/*.csv & \
-    del %TMP%\LAStools.zip & \
-    setx PATH "C:\LAStools\bin;%PATH%"
+COPY --from=builder C:/las C:/LAStools
+ENV PATH="C:\\LAStools\\bin;%PATH%"
