@@ -38,10 +38,12 @@ internal sealed record Statistics(
 #if LAS1_4_OR_GREATER
     IEnumerable<IMinMax> ExtraBytes,
 #endif
+    OccupancyGrid? OccupancyGrid,
     int FirstReturns,
     int IntermediateReturns,
     int LastReturns,
     int SingleReturns,
+    long TotalReturns,
     long[] OverviewReturnNumber,
     long[] OverviewNumberOfReturns,
     int[] Histogram);

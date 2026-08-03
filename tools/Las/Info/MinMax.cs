@@ -173,7 +173,17 @@ internal static class MinMax
 
         public void Update(T value) => this.UpdateCore(value);
 
-        void IMinMax.Update(object value) => this.UpdateCore((T)value);
+        void IMinMax.Update(object value)
+        {
+            if (value is ExtraBytesValue extraBytesValue)
+            {
+                this.UpdateCore((T)extraBytesValue.Value);
+            }
+            else
+            {
+                this.UpdateCore((T)value);
+            }
+        }
 
         public bool IsDefault() => this.minimum.Equals(T.MaxValue) && this.maximum.Equals(T.MinValue);
 

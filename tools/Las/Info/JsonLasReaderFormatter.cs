@@ -6,6 +6,7 @@
 
 namespace Altemiq.IO.Las.Info;
 
+using System.Windows.Markup;
 using Humanizer;
 
 /// <summary>
@@ -55,7 +56,7 @@ internal sealed class JsonLasReaderFormatter(System.Text.Json.Utf8JsonWriter wri
 #if LAS1_4_OR_GREATER
         if (reader.Header is { Version: { Major: 1, Minor: >= 4 } })
         {
-            writer.WriteNumber("start_of_first_extended_vlr", GetOffsetToEntendedVariableLengthRecords(reader));
+            writer.WriteNumber("start_of_first_extended_vlr", GetOffsetToExtendedVariableLengthRecords(reader));
             writer.WriteNumber("number_of_extended_vlrs", reader.ExtendedVariableLengthRecords.Count);
             writer.WriteNumber("extended_number_of_point_records", reader.Header.RawNumberOfPointRecords);
             WriteArray(writer, "extended_number_of_points_by_return", reader.Header.RawNumberOfPointsByReturn);
@@ -73,8 +74,8 @@ internal sealed class JsonLasReaderFormatter(System.Text.Json.Utf8JsonWriter wri
         static extern ref ushort GetPointDataLength(LasReader reader);
 
 #if LAS1_4_OR_GREATER
-        [System.Runtime.CompilerServices.UnsafeAccessor(System.Runtime.CompilerServices.UnsafeAccessorKind.Field, Name = "offsetToEntendedVariableLengthRecords")]
-        static extern ref long GetOffsetToEntendedVariableLengthRecords(LasReader reader);
+        [System.Runtime.CompilerServices.UnsafeAccessor(System.Runtime.CompilerServices.UnsafeAccessorKind.Field, Name = "offsetToExtendedVariableLengthRecords")]
+        static extern ref long GetOffsetToExtendedVariableLengthRecords(LasReader reader);
 #endif
 
         static void WritePoint(System.Text.Json.Utf8JsonWriter writer, string name, Vector3D point, Vector3D? scaleFactor = default)
@@ -212,9 +213,10 @@ internal sealed class JsonLasReaderFormatter(System.Text.Json.Utf8JsonWriter wri
                             if (!item.Options.HasFlag(option))
                             {
                                 writer.WriteNull(name);
+                                return;
                             }
 
-                            writer.WriteStartObject(name);
+                            writer.WriteStartArray(name);
 
                             switch (value(item))
                             {
@@ -229,7 +231,7 @@ internal sealed class JsonLasReaderFormatter(System.Text.Json.Utf8JsonWriter wri
                                     break;
                             }
 
-                            writer.WriteEndObject();
+                            writer.WriteEndArray();
                         }
 
                         static string GetName(ExtraBytesDataType dataType)
@@ -548,6 +550,33 @@ internal sealed class JsonLasReaderFormatter(System.Text.Json.Utf8JsonWriter wri
         {
             FormatOverviewReturnNumber(warnings, statistics.OverviewReturnNumber[6], 6);
             FormatOverviewReturnNumber(warnings, statistics.OverviewReturnNumber[7], 7);
+        }
+
+        if (statistics.OccupancyGrid is { } occupancyGrid)
+        {
+            var squareMeters = 4.0 * occupancyGrid.NumOccupied;
+
+            writer.WriteStartObject("las_occupancy_grid");
+
+            writer.WriteStartObject("covered_area");
+            writer.WriteString("description", "covered area in square meters/kilometers");
+            writer.WriteNumber("square_meters", squareMeters);
+            writer.WriteNumber("kilometers", Math.Round(0.000001 * squareMeters, 2));
+            writer.WriteEndObject();
+
+            writer.WriteStartObject("point_density");
+            writer.WriteString("description", "point density per square meter");
+            writer.WriteNumber("all_returns", Math.Round(statistics.TotalReturns / squareMeters, 2));
+            writer.WriteNumber("last_only", Math.Round(statistics.LastReturns / squareMeters, 2));
+            writer.WriteEndObject();
+
+            writer.WriteStartObject("spacing");
+            writer.WriteString("description", "spacing in meters");
+            writer.WriteNumber("all_returns", Math.Round(Math.Sqrt(squareMeters / statistics.TotalReturns), 2));
+            writer.WriteNumber("last_only", Math.Round(Math.Sqrt(squareMeters / statistics.LastReturns), 2));
+            writer.WriteEndObject();
+
+            writer.WriteEndObject();
         }
 
         writer.WriteStartObject("points_by_return");

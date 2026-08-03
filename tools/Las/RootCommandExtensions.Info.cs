@@ -30,6 +30,8 @@ internal static partial class RootCommandExtensions
 
             var noReturnsOption = new Option<bool>("--no-returns");
 
+            var computeDensityOption = new Option<bool>("--compute-density");
+
             var jsonOption = new Option<bool>("-j", "--json");
 
             var command = new Command("info", Tool.Properties.Resources.Command_InfoDescription)
@@ -37,6 +39,7 @@ internal static partial class RootCommandExtensions
                 Arguments.Inputs,
                 noMinMaxOption,
                 noReturnsOption,
+                computeDensityOption,
                 jsonOption,
                 Options.Output,
                 Options.InsideRectangle,
@@ -49,11 +52,12 @@ internal static partial class RootCommandExtensions
                 var noMinMax = parseResult.GetValue(noMinMaxOption);
                 var noReturns = parseResult.GetValue(noReturnsOption);
                 var json = parseResult.GetValue(jsonOption);
+                var computeDensity = parseResult.GetValue(computeDensityOption);
                 var boundingBox = parseResult.GetValue(Options.InsideRectangle);
                 foreach (var file in parseResult.GetRequiredValue(Arguments.Inputs))
                 {
                     using var stream = File.OpenRead(file, services);
-                    Info.Processor.Process(stream, console, System.Globalization.CultureInfo.InvariantCulture, noMinMax, noReturns, json, boundingBox);
+                    Info.Processor.Process(stream, console, System.Globalization.CultureInfo.InvariantCulture, noMinMax, noReturns, computeDensity, json, boundingBox);
                 }
             });
 

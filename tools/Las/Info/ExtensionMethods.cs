@@ -22,7 +22,7 @@ internal static class ExtensionMethods
     public static string ToString(this LasReader lasReader, IFormatProvider? formatProvider)
     {
         var formatter = new StringBuilderLasReaderFormatter(formatProvider);
-        formatter.Format(lasReader, noMinMax: true, noReturns: true);
+        formatter.Format(lasReader, noMinMax: true, noReturns: true, computeDensity: false);
         return formatter.ToString();
     }
 
@@ -33,8 +33,9 @@ internal static class ExtensionMethods
     /// <param name="lasReader">The LAS reader.</param>
     /// <param name="noMinMax">Set to <see langword="true"/> to not report the min/max statistics.</param>
     /// <param name="noReturns">Set to <see langword="true"/> to not report the return statistics.</param>
+    /// <param name="computeDensity">Set to <see langword="true"/> to compute density statistics.</param>
     /// <param name="boundingBox">The optional bounding box.</param>
-    public static void Format(this ILasReaderFormatter builder, LasReader lasReader, bool noMinMax, bool noReturns, BoundingBox? boundingBox = default)
+    public static void Format(this ILasReaderFormatter builder, LasReader lasReader, bool noMinMax, bool noReturns, bool computeDensity, BoundingBox? boundingBox = default)
     {
         _ = builder
             .AppendHeader(lasReader)
@@ -62,11 +63,11 @@ internal static class ExtensionMethods
 
         Statistics GetStatisticsValue(LasReader reader)
         {
-            return statistics ??= GetStatistics(reader, boundingBox);
+            return statistics ??= GetStatistics(reader, computeDensity, boundingBox);
         }
     }
 
-    private static Statistics GetStatistics(LasReader reader, BoundingBox? box = default)
+    private static Statistics GetStatistics(LasReader reader, bool computeDensity, BoundingBox? box = default)
     {
         var values = MinMax.Create<Vector256<int>>();
         var edgeOfFlightLine = false;
@@ -94,6 +95,7 @@ internal static class ExtensionMethods
         var intermediateReturns = default(int);
         var lastReturns = default(int);
         var singleReturns = default(int);
+        var totalReturns = default(long);
 
 #if LAS1_4_OR_GREATER
         var extraBytesRecord = reader.VariableLengthRecords
@@ -102,6 +104,9 @@ internal static class ExtensionMethods
         var extraBytes = extraBytesRecord.Count is 0 ? [] : extraBytesRecord.Select(MinMax.Create).ToArray();
 #endif
 
+        var quantizer = new PointDataRecordQuantizer(reader.Header);
+        OccupancyGrid? occupancyGrid = computeDensity ? new OccupancyGrid(quantizer, 2f) : null;
+
         var histogram = new int[256];
         var numberOfPointsByReturn = new long[16];
         var numberOfReturnsArray = new long[16];
@@ -109,7 +114,6 @@ internal static class ExtensionMethods
         Func<IBasePointDataRecord, bool> filter = _ => true;
         if (box.HasValue)
         {
-            var quantizer = new PointDataRecordQuantizer(reader.Header);
             var boundingBox = box.Value;
             filter = point => boundingBox.Contains(quantizer.Get(point));
         }
@@ -130,6 +134,11 @@ internal static class ExtensionMethods
             var numberOfReturnsValue = record.NumberOfReturns;
             numberOfReturnsArray[numberOfReturnsValue]++;
             values.Update(Vector256.Create(record.X, record.Y, record.Z, record.Intensity, returnNumberValue, numberOfReturnsValue, default, default));
+
+            // add to the occupancy grid if we are computing density
+            occupancyGrid?.Add(record);
+
+            totalReturns++;
             if (returnNumberValue.IsFirst())
             {
                 firstReturns++;
@@ -246,10 +255,12 @@ internal static class ExtensionMethods
 #if LAS1_4_OR_GREATER
             extraBytes,
 #endif
+            occupancyGrid,
             firstReturns,
             intermediateReturns,
             lastReturns,
             singleReturns,
+            totalReturns,
             numberOfPointsByReturn,
             numberOfReturnsArray,
             histogram);

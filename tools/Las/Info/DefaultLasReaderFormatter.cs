@@ -273,6 +273,26 @@ internal class DefaultLasReaderFormatter(IFormatBuilder builder) : ILasReaderFor
             FormatOverviewReturnNumber(builder, values.OverviewReturnNumber[7], 7);
         }
 
+        if (values.OccupancyGrid is { } occupancyGrid)
+        {
+            var squareMeters = 4.0 * occupancyGrid.NumOccupied;
+            builder.AppendHeader("covered area in square meters/kilometers: ")
+                .AppendFormat("{0}/{1:0.00}", squareMeters, 0.000001 * squareMeters)
+                .AppendLine();
+            builder.AppendHeader("point density: ")
+                .AppendFormat(
+                    "all returns {0:0.00} last only {1:0.00} (per square meter)",
+                    values.TotalReturns / squareMeters,
+                    values.LastReturns / squareMeters)
+                .AppendLine();
+            builder.AppendHeader("      spacing: ")
+                .AppendFormat(
+                    "all returns {0:0.00} last only {1:0.00} (in meters)",
+                    Math.Sqrt(squareMeters / values.TotalReturns),
+                    Math.Sqrt(squareMeters / values.LastReturns))
+                .AppendLine();
+        }
+
         if (reader.Header.Version.Minor > 3)
         {
             var overviewNumberOfReturns = values.OverviewNumberOfReturns.Skip(1).Take(15).ToArray();

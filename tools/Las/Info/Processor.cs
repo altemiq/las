@@ -21,7 +21,7 @@ internal static class Processor
     /// <param name="noReturns">No returns.</param>
     /// <param name="json">Output JSON.</param>
     /// <param name="boundingBox">The bounding box.</param>
-    public static void Process(Stream stream, IAnsiConsole console, IFormatProvider formatProvider, bool noMinMax, bool noReturns, bool json, BoundingBox? boundingBox)
+    public static void Process(Stream stream, IAnsiConsole console, IFormatProvider formatProvider, bool noMinMax, bool noReturns, bool computeDensity, bool json, BoundingBox? boundingBox)
     {
         using var reader = LazReader.Create(stream);
         if (json)
@@ -51,7 +51,7 @@ internal static class Processor
             }
 
             var formatter = new JsonLasReaderFormatter(writer);
-            formatter.Format(reader, noMinMax, noReturns, boundingBox);
+            formatter.Format(reader, noMinMax, noReturns, computeDensity, boundingBox);
 
             writer.WriteEndObject();
 
@@ -69,7 +69,7 @@ internal static class Processor
             }
 
             var formatter = new DefaultLasReaderFormatter(new ConsoleFormatBuilder(console, new LasFormatProvider(formatProvider, reader)));
-            formatter.Format(reader, noMinMax, noReturns, boundingBox);
+            formatter.Format(reader, noMinMax, noReturns, computeDensity, boundingBox);
         }
     }
 
