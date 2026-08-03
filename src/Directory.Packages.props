@@ -11,7 +11,7 @@
   </ItemGroup>
   
   <ItemGroup>
-    <PackageVersion Include="Meziantou.Polyfill" Version="1.0.157" />
+    <PackageVersion Include="Meziantou.Polyfill" Version="1.0.158" />
   </ItemGroup>
 
   <ItemGroup Label="Coding Standards">

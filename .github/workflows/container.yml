@@ -34,8 +34,7 @@ jobs:
           echo "lastools=$version" >> $GITHUB_OUTPUT
 
       - name: Run local/tag-lastools-version@v1
-        run: |
-          docker tag ${{ steps.build.outputs.imageid }} ghcr.io/${{ github.repository_owner }}/lastools:ubuntu-${{ steps.version.outputs.lastools }}
+        run: docker tag ${{ steps.build.outputs.imageid }} ghcr.io/${{ github.repository_owner }}/lastools:ubuntu-${{ steps.version.outputs.lastools }}
 
       - uses: docker/login-action@v4
         with:
@@ -44,8 +43,7 @@ jobs:
           password: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Run local/push-containers@v1
-        run: |
-          docker push ghcr.io/${{ github.repository_owner }}/lastools --all-tags
+        run: docker push ghcr.io/${{ github.repository_owner }}/lastools --all-tags
 
     outputs:
       sha: ${{ steps.build.outputs.imageid }}
@@ -78,8 +76,7 @@ jobs:
           "lastools=$version" | Out-File -FilePath $env:GITHUB_OUTPUT -Encoding utf8 -Append
 
       - name: Run local/tag-lastools-version@v1
-        run: |
-          docker tag ${{ steps.build.outputs.imageid }} ghcr.io/${{ github.repository_owner }}/lastools:windows-${{ steps.version.outputs.lastools }}
+        run: docker tag ${{ steps.build.outputs.imageid }} ghcr.io/${{ github.repository_owner }}/lastools:windows-${{ steps.version.outputs.lastools }}
 
       - uses: docker/login-action@v4
         with:
@@ -88,8 +85,7 @@ jobs:
           password: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Run local/push-containers@v1
-        run: |
-          docker push ghcr.io/${{ github.repository_owner }}/lastools --all-tags
+        run: docker push ghcr.io/${{ github.repository_owner }}/lastools --all-tags
 
     outputs:
       sha: ${{ steps.build.outputs.imageid }}
@@ -114,7 +110,7 @@ jobs:
 
       - name: Run local/latest-manifest@v1
         run: |
-          docker manifest create ghcr.io/${{ github.repository_owner }}/lastools:latest  ghcr.io/${{ github.repository_owner }}/lastools:ubuntu-${{ needs.linux.outputs.version }} ghcr.io/${{ github.repository_owner }}/lastools:windows-${{ needs.windows.outputs.version }}
+          docker manifest create ghcr.io/${{ github.repository_owner }}/lastools:latest ghcr.io/${{ github.repository_owner }}/lastools:ubuntu-${{ needs.linux.outputs.version }} ghcr.io/${{ github.repository_owner }}/lastools:windows-${{ needs.windows.outputs.version }}
           docker manifest push ghcr.io/${{ github.repository_owner }}/lastools:latest
 
       - name: Run local/version-manifest@v1

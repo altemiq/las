@@ -2,7 +2,7 @@
   "profiles": {
     "Las": {
       "commandName": "Project",
-      "commandLineArgs": "info $(UserProfile)\\Downloads\\tile080.las"
+      "commandLineArgs": "info $(UserProfile)\\Downloads\\2258317\\1472881.laz --compute-density --json"
     }
   }
 }
