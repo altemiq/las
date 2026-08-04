@@ -40,7 +40,7 @@ internal sealed class OccupancyGrid(PointDataRecordQuantizer quantizer, float gr
             // Pack x and y into a single long (x high bits, y low bits)
             gridKey = ((long)floor[0] << 32) | (uint)floor[1];
         }
-        else // Fallback for when SSE2 is not supported
+        else
         {
             var floor = System.Runtime.Intrinsics.Vector128.Floor(position);
 

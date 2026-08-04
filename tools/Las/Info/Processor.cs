@@ -19,6 +19,7 @@ internal static class Processor
     /// <param name="formatProvider">The format provider.</param>
     /// <param name="noMinMax">No min/max calculate.</param>
     /// <param name="noReturns">No returns.</param>
+    /// <param name="computeDensity">Compute the point density.</param>
     /// <param name="json">Output JSON.</param>
     /// <param name="boundingBox">The bounding box.</param>
     public static void Process(Stream stream, IAnsiConsole console, IFormatProvider formatProvider, bool noMinMax, bool noReturns, bool computeDensity, bool json, BoundingBox? boundingBox)

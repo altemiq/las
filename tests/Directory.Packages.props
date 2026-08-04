@@ -16,10 +16,12 @@
   </ItemGroup>
   
   <ItemGroup Label="Aspire">
+    <PackageVersion Include="Aspire.Hosting.AWS" Version="13.5.0" />
     <PackageVersion Include="Aspire.Hosting.Testing" Version="13.4.6" />
   </ItemGroup>
   
   <ItemGroup Label="AWS">
+    <PackageVersion Include="Amazon.CDK.Lib" Version="2.263.0" />
     <PackageVersion Include="AWSSDK.S3" Version="4.0.101.6" />
   </ItemGroup>
   

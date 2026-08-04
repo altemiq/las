@@ -561,19 +561,19 @@ internal sealed class JsonLasReaderFormatter(System.Text.Json.Utf8JsonWriter wri
             writer.WriteStartObject("covered_area");
             writer.WriteString("description", "covered area in square meters/kilometers");
             writer.WriteNumber("square_meters", squareMeters);
-            writer.WriteNumber("kilometers", Math.Round(0.000001 * squareMeters, 2));
+            writer.WriteNumber("kilometers", Math.Round(0.000001 * squareMeters, 2, MidpointRounding.ToEven));
             writer.WriteEndObject();
 
             writer.WriteStartObject("point_density");
             writer.WriteString("description", "point density per square meter");
-            writer.WriteNumber("all_returns", Math.Round(statistics.TotalReturns / squareMeters, 2));
-            writer.WriteNumber("last_only", Math.Round(statistics.LastReturns / squareMeters, 2));
+            writer.WriteNumber("all_returns", Math.Round(statistics.TotalReturns / squareMeters, 2, MidpointRounding.ToEven));
+            writer.WriteNumber("last_only", Math.Round(statistics.LastReturns / squareMeters, 2, MidpointRounding.ToEven));
             writer.WriteEndObject();
 
             writer.WriteStartObject("spacing");
             writer.WriteString("description", "spacing in meters");
-            writer.WriteNumber("all_returns", Math.Round(Math.Sqrt(squareMeters / statistics.TotalReturns), 2));
-            writer.WriteNumber("last_only", Math.Round(Math.Sqrt(squareMeters / statistics.LastReturns), 2));
+            writer.WriteNumber("all_returns", Math.Round(Math.Sqrt(squareMeters / statistics.TotalReturns), 2, MidpointRounding.ToEven));
+            writer.WriteNumber("last_only", Math.Round(Math.Sqrt(squareMeters / statistics.LastReturns), 2, MidpointRounding.ToEven));
             writer.WriteEndObject();
 
             writer.WriteEndObject();
