@@ -1,18 +1,17 @@
 FROM mcr.microsoft.com/windows/servercore:ltsc2025 AS builder
 
-SHELL ["powershell", "-NoProfile",  "-ExecutionPolicy", "Bypass", "-Command"]
+SHELL ["powershell", "-NoProfile", "-ExecutionPolicy", "Bypass", "-Command"]
 
 # VC redistributable for x64
 RUN Invoke-WebRequest -Uri "https://aka.ms/vc14/vc_redist.x64.exe" -OutFile C:\vc_redist.x64.exe; \
     Start-Process -FilePath C:\vc_redist.x64.exe -ArgumentList '/install','/quiet','/norestart' -Wait; \
     $OutputDirectory = Join-Path $env:SystemDrive crt; \
     New-Item $OutputDirectory -ItemType Directory | Out-Null; \
-    Get-ChildItem $(Join-Path $env:WINDIR System32) -Filter *140*.dll | Where-Object { $_.Name -match '^(concrt|msvcp|vccorlib|vcruntime).*' } | ForEach-Object { $Output = $(Join-Path $OutputDirectory $_.Name); Write-Host \"Copying $_.FullName to $Output\"; Copy-Item $_.FullName $Output }
+    Get-ChildItem $(Join-Path $env:WINDIR System32) -Filter *140*.dll | Where-Object { $_.Name -match '^(concrt|msvcp|vccorlib|vcruntime).*' } | ForEach-Object { $Output = $(Join-Path $OutputDirectory $_.Name); Write-Host \"Copying $($_.FullName) to $Output\"; Copy-Item $_.FullName $Output }
 
 # PROJ runtime data
 RUN $BaseUri = 'https://download.osgeo.org/osgeo4w/v2'; \
-    Invoke-WebRequest \"$BaseUri/x86_64/setup.ini\" -OutFile C:\setup.ini; \
-    $content = Get-Content C:\setup.ini; \
+    $Content = Invoke-WebRequest -Uri \"$BaseUri/x86_64/setup.ini\" -UseBasicParsing | Select-Object -ExpandProperty Content | Out-String | ForEach-Object { $_ -split \"`r?`n\" }; \
     $PackageName = 'proj-runtime-data'; \
     $OutputDirectory = Join-Path $env:SystemDrive osgeo; \
     New-Item $OutputDirectory -ItemType Directory | Out-Null; \
@@ -26,7 +25,7 @@ RUN $BaseUri = 'https://download.osgeo.org/osgeo4w/v2'; \
     New-Item $ExtractedDirectory -ItemType Directory | Out-Null; \
     tar -xzf $PackageFile -C $ExtractedDirectory; \
     $ProjDataDirectory = Join-Path (Join-Path $ExtractedDirectory share) proj; \
-    Get-ChildItem $ProjDataDirectory -Filter proj* | ForEach-Object { $Output = $(Join-Path $OutputDirectory $_.Name); Write-Host \"Copying $_.FullName to $Output\"; Copy-Item $_.FullName -Destination $(Join-Path $OutputDirectory $_.Name) }
+    Get-ChildItem $ProjDataDirectory -Filter proj* | ForEach-Object { $Output = $(Join-Path $OutputDirectory $_.Name); Write-Host \"Copying $($_.FullName) to $Output\"; Copy-Item $_.FullName -Destination $Output }
 
 # LAStools
 RUN $LasToolsDownload = Join-Path $env:TEMP LAStools.zip; \
