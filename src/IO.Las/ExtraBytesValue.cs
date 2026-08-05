@@ -28,85 +28,139 @@ public readonly struct ExtraBytesValue :
     IEquatable<float>,
     IEquatable<double>
 {
+    private readonly byte[]? bytes;
+    private readonly ulong encoded;
+    private readonly ExtraBytesDataType type;
+
     /// <summary>
     /// Initializes a new instance of the <see cref="ExtraBytesValue"/> struct from the specified array of <see cref="byte"/>.
     /// </summary>
     /// <param name="value">The value.</param>
-    public ExtraBytesValue(byte[] value) => this.Value = value;
+    public ExtraBytesValue(byte[] value)
+    {
+        this.bytes = value;
+        this.type = ExtraBytesDataType.Undocumented;
+    }
 
     /// <summary>
     /// Initializes a new instance of the <see cref="ExtraBytesValue"/> struct from the specified <see cref="byte"/> value.
     /// </summary>
     /// <param name="value">The value.</param>
-    public ExtraBytesValue(byte value) => this.Value = value;
+    public ExtraBytesValue(byte value)
+        : this(value, ExtraBytesDataType.UnsignedChar)
+    {
+    }
 
     /// <summary>
     /// Initializes a new instance of the <see cref="ExtraBytesValue"/> struct from the specified <see cref="sbyte"/> value.
     /// </summary>
     /// <param name="value">The value.</param>
-    public ExtraBytesValue(sbyte value) => this.Value = value;
+    public ExtraBytesValue(sbyte value)
+        : this((ulong)value, ExtraBytesDataType.Char)
+    {
+    }
 
     /// <summary>
     /// Initializes a new instance of the <see cref="ExtraBytesValue"/> struct from the specified <see cref="ushort"/> value.
     /// </summary>
     /// <param name="value">The value.</param>
-    public ExtraBytesValue(ushort value) => this.Value = value;
+    public ExtraBytesValue(ushort value)
+        : this(value, ExtraBytesDataType.UnsignedShort)
+    {
+    }
 
     /// <summary>
     /// Initializes a new instance of the <see cref="ExtraBytesValue"/> struct from the specified <see cref="short"/> value.
     /// </summary>
     /// <param name="value">The value.</param>
-    public ExtraBytesValue(short value) => this.Value = value;
+    public ExtraBytesValue(short value)
+        : this((ulong)value, ExtraBytesDataType.Short)
+    {
+    }
 
     /// <summary>
     /// Initializes a new instance of the <see cref="ExtraBytesValue"/> struct from the specified <see cref="uint"/> value.
     /// </summary>
     /// <param name="value">The value.</param>
-    public ExtraBytesValue(uint value) => this.Value = value;
+    public ExtraBytesValue(uint value)
+        : this(value, ExtraBytesDataType.UnsignedLong)
+    {
+    }
 
     /// <summary>
     /// Initializes a new instance of the <see cref="ExtraBytesValue"/> struct from the specified <see cref="int"/> value.
     /// </summary>
     /// <param name="value">The value.</param>
-    public ExtraBytesValue(int value) => this.Value = value;
+    public ExtraBytesValue(int value)
+        : this((ulong)value, ExtraBytesDataType.Long)
+    {
+    }
 
     /// <summary>
     /// Initializes a new instance of the <see cref="ExtraBytesValue"/> struct from the specified <see cref="ulong"/> value.
     /// </summary>
     /// <param name="value">The value.</param>
-    public ExtraBytesValue(ulong value) => this.Value = value;
+    public ExtraBytesValue(ulong value)
+        : this(value, ExtraBytesDataType.UnsignedLongLong)
+    {
+    }
 
     /// <summary>
     /// Initializes a new instance of the <see cref="ExtraBytesValue"/> struct from the specified <see cref="long"/> value.
     /// </summary>
     /// <param name="value">The value.</param>
-    public ExtraBytesValue(long value) => this.Value = value;
+    public ExtraBytesValue(long value)
+        : this((ulong)value, ExtraBytesDataType.LongLong)
+    {
+    }
 
     /// <summary>
     /// Initializes a new instance of the <see cref="ExtraBytesValue"/> struct from the specified <see cref="float"/> value.
     /// </summary>
     /// <param name="value">The value.</param>
-    public ExtraBytesValue(float value) => this.Value = value;
+    public ExtraBytesValue(float value)
+        : this(BitConverter.SingleToUInt32Bits(value), ExtraBytesDataType.Float)
+    {
+    }
 
     /// <summary>
     /// Initializes a new instance of the <see cref="ExtraBytesValue"/> struct from the specified <see cref="double"/> value.
     /// </summary>
     /// <param name="value">The value.</param>
-    public ExtraBytesValue(double value) => this.Value = value;
+    public ExtraBytesValue(double value)
+        : this(BitConverter.DoubleToUInt64Bits(value), ExtraBytesDataType.Double)
+    {
+    }
 
     /// <summary>
-    /// Initializes a new instance of the <see cref="ExtraBytesValue"/> struct from the specified <see cref="object"/> value.
+    /// Initializes a new instance of the <see cref="ExtraBytesValue"/> struct from the specified <see cref="double"/> value.
     /// </summary>
     /// <param name="value">The value.</param>
-    internal ExtraBytesValue(object? value) => this.Value = value;
+    /// <param name="type">The type.</param>
+    internal ExtraBytesValue(ulong value, ExtraBytesDataType type) => (this.encoded, this.type) = (value, type);
 
     /// <inheritdoc />
-    public object? Value { get; }
+    public object? Value =>
+        this.type switch
+        {
+            ExtraBytesDataType.Undocumented => this.bytes,
+            ExtraBytesDataType.UnsignedChar => (byte)this.encoded,
+            ExtraBytesDataType.Char => (sbyte)this.encoded,
+            ExtraBytesDataType.UnsignedShort => (ushort)this.encoded,
+            ExtraBytesDataType.Short => (short)this.encoded,
+            ExtraBytesDataType.UnsignedLong => (uint)this.encoded,
+            ExtraBytesDataType.Long => (int)this.encoded,
+            ExtraBytesDataType.UnsignedLongLong => this.encoded,
+            ExtraBytesDataType.LongLong => (long)this.encoded,
+            ExtraBytesDataType.Float => BitConverter.UInt32BitsToSingle((uint)this.encoded),
+            ExtraBytesDataType.Double => BitConverter.UInt64BitsToDouble(this.encoded),
+            _ => throw new System.Diagnostics.UnreachableException(),
+        };
 
     /// <summary>
     /// Gets a value indicating whether this instance has a value.
     /// </summary>
-    public bool HasValue => this.Value != null;
+    public bool HasValue => this.type is not ExtraBytesDataType.Undocumented || this.bytes is not null;
 
     /// <summary>
     /// Creates a new <see cref="ExtraBytesItem"/> from the specified array of <see cref="byte"/>.
@@ -207,24 +261,44 @@ public readonly struct ExtraBytesValue :
     {
         return value switch
         {
-            byte[] // ExtraBytesDataType.Undocumented
-                or byte // ExtraBytesDataType.UnsignedChar
-                or sbyte // ExtraBytesDataType.Char
-                or ushort // ExtraBytesDataType.UnsignedShort
-                or short // ExtraBytesDataType.Short
-                or uint // ExtraBytesDataType.UnsignedLong
-                or int // ExtraBytesDataType.Long
-                or ulong // ExtraBytesDataType.UnsignedLongLong
-                or long // ExtraBytesDataType.LongLong
-                or float // ExtraBytesDataType.Float
-                or double // ExtraBytesDataType.Double
-                => SetAndReturnTrue(value, out union),
+            // ExtraBytesDataType.Undocumented
+            byte[] b => SetAndReturnTrue(new(b), out union),
+
+            // ExtraBytesDataType.UnsignedChar
+            byte b => SetAndReturnTrue(new(b), out union),
+
+            // ExtraBytesDataType.Char
+            sbyte b => SetAndReturnTrue(new(b), out union),
+
+            // ExtraBytesDataType.UnsignedShort
+            ushort b => SetAndReturnTrue(new(b), out union),
+
+            // ExtraBytesDataType.Short
+            short b => SetAndReturnTrue(new(b), out union),
+
+            // ExtraBytesDataType.UnsignedLong
+            uint b => SetAndReturnTrue(new(b), out union),
+
+            // ExtraBytesDataType.Long
+            int b => SetAndReturnTrue(new(b), out union),
+
+            // ExtraBytesDataType.UnsignedLongLong
+            ulong b => SetAndReturnTrue(new(b), out union),
+
+            // ExtraBytesDataType.LongLong
+            long b => SetAndReturnTrue(new(b), out union),
+
+            // ExtraBytesDataType.Float
+            float b => SetAndReturnTrue(new(b), out union),
+
+            // ExtraBytesDataType.Double
+            double b => SetAndReturnTrue(new(b), out union),
             _ => SetDefaultAndReturnFalse(out union),
         };
 
-        static bool SetAndReturnTrue(object? value, out ExtraBytesValue union)
+        static bool SetAndReturnTrue(ExtraBytesValue v, out ExtraBytesValue union)
         {
-            union = new(value);
+            union = v;
             return true;
         }
 
@@ -243,9 +317,9 @@ public readonly struct ExtraBytesValue :
     /// <returns>A value indicating whether <paramref name="value"/> was successfully obtained.</returns>
     public bool TryGetValue([System.Diagnostics.CodeAnalysis.MaybeNullWhen(false)] out byte[] value)
     {
-        if (this.Value is byte[] bytes)
+        if (this.type is ExtraBytesDataType.Undocumented)
         {
-            value = bytes;
+            value = this.bytes!;
             return true;
         }
 
@@ -260,9 +334,9 @@ public readonly struct ExtraBytesValue :
     /// <returns>A value indicating whether <paramref name="value"/> was successfully obtained.</returns>
     public bool TryGetValue(out byte value)
     {
-        if (this.Value is byte @byte)
+        if (this.type is ExtraBytesDataType.UnsignedChar)
         {
-            value = @byte;
+            value = (byte)this.encoded;
             return true;
         }
 
@@ -277,9 +351,9 @@ public readonly struct ExtraBytesValue :
     /// <returns>A value indicating whether <paramref name="value"/> was successfully obtained.</returns>
     public bool TryGetValue(out sbyte value)
     {
-        if (this.Value is sbyte @sbyte)
+        if (this.type is ExtraBytesDataType.Char)
         {
-            value = @sbyte;
+            value = (sbyte)this.encoded;
             return true;
         }
 
@@ -294,9 +368,9 @@ public readonly struct ExtraBytesValue :
     /// <returns>A value indicating whether <paramref name="value"/> was successfully obtained.</returns>
     public bool TryGetValue(out ushort value)
     {
-        if (this.Value is ushort @ushort)
+        if (this.type is ExtraBytesDataType.UnsignedShort)
         {
-            value = @ushort;
+            value = (ushort)this.encoded;
             return true;
         }
 
@@ -311,9 +385,9 @@ public readonly struct ExtraBytesValue :
     /// <returns>A value indicating whether <paramref name="value"/> was successfully obtained.</returns>
     public bool TryGetValue(out short value)
     {
-        if (this.Value is short @short)
+        if (this.type is ExtraBytesDataType.Short)
         {
-            value = @short;
+            value = (short)this.encoded;
             return true;
         }
 
@@ -328,9 +402,9 @@ public readonly struct ExtraBytesValue :
     /// <returns>A value indicating whether <paramref name="value"/> was successfully obtained.</returns>
     public bool TryGetValue(out uint value)
     {
-        if (this.Value is uint @uint)
+        if (this.type is ExtraBytesDataType.UnsignedLong)
         {
-            value = @uint;
+            value = (uint)this.encoded;
             return true;
         }
 
@@ -345,9 +419,9 @@ public readonly struct ExtraBytesValue :
     /// <returns>A value indicating whether <paramref name="value"/> was successfully obtained.</returns>
     public bool TryGetValue(out int value)
     {
-        if (this.Value is int @int)
+        if (this.type is ExtraBytesDataType.Long)
         {
-            value = @int;
+            value = (int)this.encoded;
             return true;
         }
 
@@ -362,9 +436,9 @@ public readonly struct ExtraBytesValue :
     /// <returns>A value indicating whether <paramref name="value"/> was successfully obtained.</returns>
     public bool TryGetValue(out ulong value)
     {
-        if (this.Value is ulong @ulong)
+        if (this.type is ExtraBytesDataType.UnsignedLongLong)
         {
-            value = @ulong;
+            value = this.encoded;
             return true;
         }
 
@@ -379,9 +453,9 @@ public readonly struct ExtraBytesValue :
     /// <returns>A value indicating whether <paramref name="value"/> was successfully obtained.</returns>
     public bool TryGetValue(out long value)
     {
-        if (this.Value is long @long)
+        if (this.type is ExtraBytesDataType.LongLong)
         {
-            value = @long;
+            value = (long)this.encoded;
             return true;
         }
 
@@ -396,9 +470,9 @@ public readonly struct ExtraBytesValue :
     /// <returns>A value indicating whether <paramref name="value"/> was successfully obtained.</returns>
     public bool TryGetValue(out float value)
     {
-        if (this.Value is float @float)
+        if (this.type is ExtraBytesDataType.Float)
         {
-            value = @float;
+            value = BitConverter.UInt32BitsToSingle((uint)this.encoded);
             return true;
         }
 
@@ -413,9 +487,9 @@ public readonly struct ExtraBytesValue :
     /// <returns>A value indicating whether <paramref name="value"/> was successfully obtained.</returns>
     public bool TryGetValue(out double value)
     {
-        if (this.Value is double @double)
+        if (this.type is ExtraBytesDataType.Double)
         {
-            value = @double;
+            value = BitConverter.UInt64BitsToDouble(this.encoded);
             return true;
         }
 
@@ -459,8 +533,14 @@ public readonly struct ExtraBytesValue :
     /// <inheritdoc />
     public override bool Equals(object? obj) => this.Value is { } value ? value.Equals(obj) : obj is null;
 
+#pragma warning disable IDE0072
     /// <inheritdoc />
-    public override int GetHashCode() => this.Value?.GetHashCode() ?? 0;
+    public override int GetHashCode() => this.type switch
+    {
+        ExtraBytesDataType.Undocumented => this.bytes!.GetHashCode(),
+        _ => this.encoded.GetHashCode(),
+    };
+#pragma warning restore IDE0072
 
     /// <inheritdoc />
     public override string? ToString() => this.Value?.ToString();

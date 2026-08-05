@@ -143,9 +143,8 @@ public class ExtensionMethodTests
         private static MemoryStream CreateAndFillStream(int size)
         {
             var stream = new MemoryStream(size);
-            var random = new Random();
             var buffer = System.Buffers.ArrayPool<byte>.Shared.Rent(size);
-            random.NextBytes(buffer);
+            System.Security.Cryptography.RandomNumberGenerator.Fill(buffer);
             stream.Write(buffer, 0, size);
             System.Buffers.ArrayPool<byte>.Shared.Return(buffer);
             stream.Position = 0;

@@ -276,16 +276,16 @@ internal class DefaultLasReaderFormatter(IFormatBuilder builder) : ILasReaderFor
         if (values.OccupancyGrid is { } occupancyGrid)
         {
             var squareMeters = 4.0 * occupancyGrid.NumOccupied;
-            builder.AppendHeader("covered area in square meters/kilometers: ")
+            _ = builder.AppendHeader("covered area in square meters/kilometers: ")
                 .AppendFormat("{0}/{1:0.00}", squareMeters, 0.000001 * squareMeters)
-                .AppendLine();
-            builder.AppendHeader("point density: ")
+                .AppendLine()
+                .AppendHeader("point density: ")
                 .AppendFormat(
                     "all returns {0:0.00} last only {1:0.00} (per square meter)",
                     values.TotalReturns / squareMeters,
                     values.LastReturns / squareMeters)
-                .AppendLine();
-            builder.AppendHeader("      spacing: ")
+                .AppendLine()
+                .AppendHeader("      spacing: ")
                 .AppendFormat(
                     "all returns {0:0.00} last only {1:0.00} (in meters)",
                     Math.Sqrt(squareMeters / values.TotalReturns),

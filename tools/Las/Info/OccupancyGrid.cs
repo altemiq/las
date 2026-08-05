@@ -49,7 +49,7 @@ internal sealed class OccupancyGrid(PointDataRecordQuantizer quantizer, float gr
         }
 
         // Use the concurrent dictionary to safely increment cell counts
-        this.gridCells.AddOrUpdate(gridKey, 1, (key, value) => value + 1);
+        _ = this.gridCells.AddOrUpdate(gridKey, 1, static (key, value) => value + 1);
 
         return true;
     }

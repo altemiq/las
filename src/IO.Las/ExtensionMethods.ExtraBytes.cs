@@ -126,96 +126,150 @@ public static partial class ExtensionMethods
         /// </summary>
         /// <param name="value">The value to scale and offset.</param>
         /// <returns>The scaled, and offset value.</returns>
-        public ExtraBytesValue ScaleAndApplyOffset(ExtraBytesValue value) => (item, value.Value) switch
+        /// <exception cref="System.Diagnostics.UnreachableException"><paramref name="value"/> is not a valid <see cref="ExtraBytesValue"/>.</exception>
+        public ExtraBytesValue ScaleAndApplyOffset(ExtraBytesValue value)
         {
-            (_, byte[] v) => v,
-            ({ HasScale: false, HasOffset: false }, byte v) => v,
-            ({ HasScale: true, HasOffset: true }, byte v) => ScaleAndApplyOffset(item, v),
-            ({ HasScale: true, HasOffset: false }, byte v) => Scale(item, v),
-            ({ HasScale: false, HasOffset: true }, byte v) => ApplyOffset(item, v),
-            ({ HasScale: false, HasOffset: false }, sbyte v) => v,
-            ({ HasScale: true, HasOffset: true }, sbyte v) => ScaleAndApplyOffset(item, v),
-            ({ HasScale: true, HasOffset: false }, sbyte v) => Scale(item, v),
-            ({ HasScale: false, HasOffset: true }, sbyte v) => ApplyOffset(item, v),
-            ({ HasScale: false, HasOffset: false }, ushort v) => v,
-            ({ HasScale: true, HasOffset: true }, ushort v) => ScaleAndApplyOffset(item, v),
-            ({ HasScale: true, HasOffset: false }, ushort v) => Scale(item, v),
-            ({ HasScale: false, HasOffset: true }, ushort v) => ApplyOffset(item, v),
-            ({ HasScale: false, HasOffset: false }, short v) => v,
-            ({ HasScale: true, HasOffset: true }, short v) => ScaleAndApplyOffset(item, v),
-            ({ HasScale: true, HasOffset: false }, short v) => Scale(item, v),
-            ({ HasScale: false, HasOffset: true }, short v) => ApplyOffset(item, v),
-            ({ HasScale: false, HasOffset: false }, uint v) => v,
-            ({ HasScale: true, HasOffset: true }, uint v) => ScaleAndApplyOffset(item, v),
-            ({ HasScale: true, HasOffset: false }, uint v) => Scale(item, v),
-            ({ HasScale: false, HasOffset: true }, uint v) => ApplyOffset(item, v),
-            ({ HasScale: false, HasOffset: false }, int v) => v,
-            ({ HasScale: true, HasOffset: true }, int v) => ScaleAndApplyOffset(item, v),
-            ({ HasScale: true, HasOffset: false }, int v) => Scale(item, v),
-            ({ HasScale: false, HasOffset: true }, int v) => ApplyOffset(item, v),
-            ({ HasScale: false, HasOffset: false }, ulong v) => v,
-            ({ HasScale: true, HasOffset: true }, ulong v) => ScaleAndApplyOffset(item, v),
-            ({ HasScale: true, HasOffset: false }, ulong v) => Scale(item, v),
-            ({ HasScale: false, HasOffset: true }, ulong v) => ApplyOffset(item, v),
-            ({ HasScale: false, HasOffset: false }, long v) => v,
-            ({ HasScale: true, HasOffset: true }, long v) => ScaleAndApplyOffset(item, v),
-            ({ HasScale: true, HasOffset: false }, long v) => Scale(item, v),
-            ({ HasScale: false, HasOffset: true }, long v) => ApplyOffset(item, v),
-            ({ HasScale: false, HasOffset: false }, float v) => v,
-            ({ HasScale: true, HasOffset: true }, float v) => ScaleAndApplyOffset(item, v),
-            ({ HasScale: true, HasOffset: false }, float v) => Scale(item, v),
-            ({ HasScale: false, HasOffset: true }, float v) => ApplyOffset(item, v),
-            ({ HasScale: false, HasOffset: false }, double v) => v,
-            ({ HasScale: true, HasOffset: true }, double v) => ScaleAndApplyOffset(item, v),
-            ({ HasScale: true, HasOffset: false }, double v) => Scale(item, v),
-            ({ HasScale: false, HasOffset: true }, double v) => ApplyOffset(item, v),
-            _ => value,
-        };
+            return value.TryGetValue(out byte[]? _)
+                ? value
+                : item switch
+                {
+                    { HasScale: false, HasOffset: false } => value,
+                    { HasScale: true, HasOffset: true } => ScaleAndApplyOffsetCore(item, value),
+                    { HasScale: true, HasOffset: false } => ScaleCore(item, value),
+                    { HasScale: false, HasOffset: true } => ApplyOffsetCore(item, value),
+                };
+
+            static double ScaleAndApplyOffsetCore(ExtraBytesItem item, ExtraBytesValue value)
+            {
+                return value switch
+                {
+                    byte v => ScaleAndApplyOffset(item, v),
+                    sbyte v => ScaleAndApplyOffset(item, v),
+                    ushort v => ScaleAndApplyOffset(item, v),
+                    short v => ScaleAndApplyOffset(item, v),
+                    uint v => ScaleAndApplyOffset(item, v),
+                    int v => ScaleAndApplyOffset(item, v),
+                    ulong v => ScaleAndApplyOffset(item, v),
+                    long v => ScaleAndApplyOffset(item, v),
+                    float v => ScaleAndApplyOffset(item, v),
+                    double v => ScaleAndApplyOffset(item, v),
+                    _ => throw new System.Diagnostics.UnreachableException(),
+                };
+            }
+
+            static double ScaleCore(ExtraBytesItem item, ExtraBytesValue value)
+            {
+                return value switch
+                {
+                    byte v => Scale(item, v),
+                    sbyte v => Scale(item, v),
+                    ushort v => Scale(item, v),
+                    short v => Scale(item, v),
+                    uint v => Scale(item, v),
+                    int v => Scale(item, v),
+                    ulong v => Scale(item, v),
+                    long v => Scale(item, v),
+                    float v => Scale(item, v),
+                    double v => Scale(item, v),
+                    _ => throw new System.Diagnostics.UnreachableException(),
+                };
+            }
+
+            static double ApplyOffsetCore(ExtraBytesItem item, ExtraBytesValue value)
+            {
+                return value switch
+                {
+                    byte v => ApplyOffset(item, v),
+                    sbyte v => ApplyOffset(item, v),
+                    ushort v => ApplyOffset(item, v),
+                    short v => ApplyOffset(item, v),
+                    uint v => ApplyOffset(item, v),
+                    int v => ApplyOffset(item, v),
+                    ulong v => ApplyOffset(item, v),
+                    long v => ApplyOffset(item, v),
+                    float v => ApplyOffset(item, v),
+                    double v => ApplyOffset(item, v),
+                    _ => throw new System.Diagnostics.UnreachableException(),
+                };
+            }
+        }
 
         /// <summary>
         /// Gets the value with offset removed and descaled, if required.
         /// </summary>
         /// <param name="value">The value to descale and offset.</param>
         /// <returns>The descaled, and offset value.</returns>
+        /// <exception cref="System.Diagnostics.UnreachableException"><paramref name="value"/> is not a valid <see cref="ExtraBytesValue"/>.</exception>
         public ExtraBytesValue RemoveOffsetAndDescale(ExtraBytesValue value)
         {
-            var returnValue = (item, value.Value) switch
+            if (value is byte[] || item is { HasOffset: false, HasScale: false })
             {
-                ({ HasOffset: false, HasScale: false }, var v) => v,
-                ({ HasOffset: true, HasScale: true }, byte v) => RemoveOffsetAndDescale(item, v),
-                ({ HasOffset: true, HasScale: false }, byte v) => RemoveOffset(item, v),
-                ({ HasOffset: false, HasScale: true }, byte v) => Descale(item, v),
-                ({ HasOffset: true, HasScale: true }, sbyte v) => RemoveOffsetAndDescale(item, v),
-                ({ HasOffset: true, HasScale: false }, sbyte v) => RemoveOffset(item, v),
-                ({ HasOffset: false, HasScale: true }, sbyte v) => Descale(item, v),
-                ({ HasOffset: true, HasScale: true }, ushort v) => RemoveOffsetAndDescale(item, v),
-                ({ HasOffset: true, HasScale: false }, ushort v) => RemoveOffset(item, v),
-                ({ HasOffset: false, HasScale: true }, ushort v) => Descale(item, v),
-                ({ HasOffset: true, HasScale: true }, short v) => RemoveOffsetAndDescale(item, v),
-                ({ HasOffset: true, HasScale: false }, short v) => RemoveOffset(item, v),
-                ({ HasOffset: false, HasScale: true }, short v) => Descale(item, v),
-                ({ HasOffset: true, HasScale: true }, uint v) => RemoveOffsetAndDescale(item, v),
-                ({ HasOffset: true, HasScale: false }, uint v) => RemoveOffset(item, v),
-                ({ HasOffset: false, HasScale: true }, uint v) => Descale(item, v),
-                ({ HasOffset: true, HasScale: true }, int v) => RemoveOffsetAndDescale(item, v),
-                ({ HasOffset: true, HasScale: false }, int v) => RemoveOffset(item, v),
-                ({ HasOffset: false, HasScale: true }, int v) => Descale(item, v),
-                ({ HasOffset: true, HasScale: true }, ulong v) => RemoveOffsetAndDescale(item, v),
-                ({ HasOffset: true, HasScale: false }, ulong v) => RemoveOffset(item, v),
-                ({ HasOffset: false, HasScale: true }, ulong v) => Descale(item, v),
-                ({ HasOffset: true, HasScale: true }, long v) => RemoveOffsetAndDescale(item, v),
-                ({ HasOffset: true, HasScale: false }, long v) => RemoveOffset(item, v),
-                ({ HasOffset: false, HasScale: true }, long v) => Descale(item, v),
-                ({ HasOffset: true, HasScale: true }, float v) => RemoveOffsetAndDescale(item, v),
-                ({ HasOffset: true, HasScale: false }, float v) => RemoveOffset(item, v),
-                ({ HasOffset: false, HasScale: true }, float v) => Descale(item, v),
-                ({ HasOffset: true, HasScale: true }, double v) => RemoveOffsetAndDescale(item, v),
-                ({ HasOffset: true, HasScale: false }, double v) => RemoveOffset(item, v),
-                ({ HasOffset: false, HasScale: true }, double v) => Descale(item, v),
-                _ => value,
+                return value;
+            }
+
+            var doubleValue = item switch
+            {
+                { HasOffset: true, HasScale: true } => RemoveOffsetAndDescaleCore(item, value),
+                { HasOffset: true, HasScale: false } => RemoveOffsetCore(item, value),
+                { HasOffset: false, HasScale: true } => DescaleCore(item, value),
+                _ => throw new System.Diagnostics.UnreachableException(),
             };
 
-            return new(Convert.ChangeType(returnValue, item.DataType.ToType(), System.Globalization.CultureInfo.InvariantCulture));
+            return new((ulong)(long)doubleValue, item.DataType);
+
+            static double RemoveOffsetAndDescaleCore(ExtraBytesItem item, ExtraBytesValue value)
+            {
+                return value switch
+                {
+                    byte v => RemoveOffsetAndDescale(item, v),
+                    sbyte v => RemoveOffsetAndDescale(item, v),
+                    ushort v => RemoveOffsetAndDescale(item, v),
+                    short v => RemoveOffsetAndDescale(item, v),
+                    uint v => RemoveOffsetAndDescale(item, v),
+                    int v => RemoveOffsetAndDescale(item, v),
+                    ulong v => RemoveOffsetAndDescale(item, v),
+                    long v => RemoveOffsetAndDescale(item, v),
+                    float v => RemoveOffsetAndDescale(item, v),
+                    double v => RemoveOffsetAndDescale(item, v),
+                    _ => throw new System.Diagnostics.UnreachableException(),
+                };
+            }
+
+            static double DescaleCore(ExtraBytesItem item, ExtraBytesValue value)
+            {
+                return value switch
+                {
+                    byte v => Descale(item, v),
+                    sbyte v => Descale(item, v),
+                    ushort v => Descale(item, v),
+                    short v => Descale(item, v),
+                    uint v => Descale(item, v),
+                    int v => Descale(item, v),
+                    ulong v => Descale(item, v),
+                    long v => Descale(item, v),
+                    float v => Descale(item, v),
+                    double v => Descale(item, v),
+                    _ => throw new System.Diagnostics.UnreachableException(),
+                };
+            }
+
+            static double RemoveOffsetCore(ExtraBytesItem item, ExtraBytesValue value)
+            {
+                return value switch
+                {
+                    byte v => RemoveOffset(item, v),
+                    sbyte v => RemoveOffset(item, v),
+                    ushort v => RemoveOffset(item, v),
+                    short v => RemoveOffset(item, v),
+                    uint v => RemoveOffset(item, v),
+                    int v => RemoveOffset(item, v),
+                    ulong v => RemoveOffset(item, v),
+                    long v => RemoveOffset(item, v),
+                    float v => RemoveOffset(item, v),
+                    double v => RemoveOffset(item, v),
+                    _ => throw new System.Diagnostics.UnreachableException(),
+                };
+            }
         }
     }
 

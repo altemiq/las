@@ -105,7 +105,7 @@ internal static class ExtensionMethods
 #endif
 
         var quantizer = new PointDataRecordQuantizer(reader.Header);
-        OccupancyGrid? occupancyGrid = computeDensity ? new OccupancyGrid(quantizer, 2f) : null;
+        var occupancyGrid = computeDensity ? new OccupancyGrid(quantizer, 2f) : null;
 
         var histogram = new int[256];
         var numberOfPointsByReturn = new long[16];

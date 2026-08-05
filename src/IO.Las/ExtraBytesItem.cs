@@ -231,235 +231,230 @@ public readonly record struct ExtraBytesItem
     /// <exception cref="System.Diagnostics.UnreachableException">The extra bytes item is invalid.</exception>
     public ExtraBytesValue GetValue(ReadOnlySpan<byte> source)
     {
-        return GetItemValue(this, source);
-
-        static ExtraBytesValue GetItemValue(ExtraBytesItem item, ReadOnlySpan<byte> source)
+        return (this.HasScale, this.HasOffset, this.DataType) switch
         {
-            return (item.HasScale, item.HasOffset, item.DataType) switch
-            {
-                (_, _, ExtraBytesDataType.Undocumented) => source[..(int)item.options].ToArray(),
-                (false, false, ExtraBytesDataType.UnsignedChar) => source[0],
-                (true, true, ExtraBytesDataType.UnsignedChar) => ScaleAndOffsetByte(item, source[0]),
-                (true, false, ExtraBytesDataType.UnsignedChar) => ScaleByte(item, source[0]),
-                (false, true, ExtraBytesDataType.UnsignedChar) => OffsetByte(item, source[0]),
-                (false, false, ExtraBytesDataType.Char) => (sbyte)source[0],
-                (true, true, ExtraBytesDataType.Char) => ScaleAndOffsetSByte(item, (sbyte)source[0]),
-                (true, false, ExtraBytesDataType.Char) => ScaleSByte(item, (sbyte)source[0]),
-                (false, true, ExtraBytesDataType.Char) => OffsetSByte(item, (sbyte)source[0]),
-                (false, false, ExtraBytesDataType.UnsignedShort) => System.Buffers.Binary.BinaryPrimitives.ReadUInt16LittleEndian(source),
-                (true, true, ExtraBytesDataType.UnsignedShort) => ScaleAndOffsetUInt16(item, System.Buffers.Binary.BinaryPrimitives.ReadUInt16LittleEndian(source)),
-                (true, false, ExtraBytesDataType.UnsignedShort) => ScaleUInt16(item, System.Buffers.Binary.BinaryPrimitives.ReadUInt16LittleEndian(source)),
-                (false, true, ExtraBytesDataType.UnsignedShort) => OffsetUInt16(item, System.Buffers.Binary.BinaryPrimitives.ReadUInt16LittleEndian(source)),
-                (false, false, ExtraBytesDataType.Short) => System.Buffers.Binary.BinaryPrimitives.ReadInt16LittleEndian(source),
-                (true, true, ExtraBytesDataType.Short) => ScaleAndOffsetInt16(item, System.Buffers.Binary.BinaryPrimitives.ReadInt16LittleEndian(source)),
-                (true, false, ExtraBytesDataType.Short) => ScaleInt16(item, System.Buffers.Binary.BinaryPrimitives.ReadInt16LittleEndian(source)),
-                (false, true, ExtraBytesDataType.Short) => OffsetInt16(item, System.Buffers.Binary.BinaryPrimitives.ReadInt16LittleEndian(source)),
-                (false, false, ExtraBytesDataType.UnsignedLong) => System.Buffers.Binary.BinaryPrimitives.ReadUInt32LittleEndian(source),
-                (true, true, ExtraBytesDataType.UnsignedLong) => ScaleAndOffsetUInt32(item, System.Buffers.Binary.BinaryPrimitives.ReadUInt32LittleEndian(source)),
-                (true, false, ExtraBytesDataType.UnsignedLong) => ScaleUInt32(item, System.Buffers.Binary.BinaryPrimitives.ReadUInt32LittleEndian(source)),
-                (false, true, ExtraBytesDataType.UnsignedLong) => OffsetUInt32(item, System.Buffers.Binary.BinaryPrimitives.ReadUInt32LittleEndian(source)),
-                (false, false, ExtraBytesDataType.Long) => System.Buffers.Binary.BinaryPrimitives.ReadInt32LittleEndian(source),
-                (true, true, ExtraBytesDataType.Long) => ScaleAndOffsetInt32(item, System.Buffers.Binary.BinaryPrimitives.ReadInt32LittleEndian(source)),
-                (true, false, ExtraBytesDataType.Long) => ScaleInt32(item, System.Buffers.Binary.BinaryPrimitives.ReadInt32LittleEndian(source)),
-                (false, true, ExtraBytesDataType.Long) => OffsetInt32(item, System.Buffers.Binary.BinaryPrimitives.ReadInt32LittleEndian(source)),
-                (false, false, ExtraBytesDataType.UnsignedLongLong) => System.Buffers.Binary.BinaryPrimitives.ReadUInt64LittleEndian(source),
-                (true, true, ExtraBytesDataType.UnsignedLongLong) => ScaleAndOffsetUInt64(item, System.Buffers.Binary.BinaryPrimitives.ReadUInt64LittleEndian(source)),
-                (true, false, ExtraBytesDataType.UnsignedLongLong) => ScaleUInt64(item, System.Buffers.Binary.BinaryPrimitives.ReadUInt64LittleEndian(source)),
-                (false, true, ExtraBytesDataType.UnsignedLongLong) => OffsetUInt64(item, System.Buffers.Binary.BinaryPrimitives.ReadUInt64LittleEndian(source)),
-                (false, false, ExtraBytesDataType.LongLong) => System.Buffers.Binary.BinaryPrimitives.ReadInt64LittleEndian(source),
-                (true, true, ExtraBytesDataType.LongLong) => ScaleAndOffsetInt64(item, System.Buffers.Binary.BinaryPrimitives.ReadInt64LittleEndian(source)),
-                (true, false, ExtraBytesDataType.LongLong) => ScaleInt64(item, System.Buffers.Binary.BinaryPrimitives.ReadInt64LittleEndian(source)),
-                (false, true, ExtraBytesDataType.LongLong) => OffsetInt64(item, System.Buffers.Binary.BinaryPrimitives.ReadInt64LittleEndian(source)),
-                (false, false, ExtraBytesDataType.Float) => System.Buffers.Binary.BinaryPrimitives.ReadSingleLittleEndian(source),
-                (true, true, ExtraBytesDataType.Float) => ScaleAndOffsetSingle(item, System.Buffers.Binary.BinaryPrimitives.ReadSingleLittleEndian(source)),
-                (true, false, ExtraBytesDataType.Float) => ScaleSingle(item, System.Buffers.Binary.BinaryPrimitives.ReadSingleLittleEndian(source)),
-                (false, true, ExtraBytesDataType.Float) => OffsetSingle(item, System.Buffers.Binary.BinaryPrimitives.ReadSingleLittleEndian(source)),
-                (false, false, ExtraBytesDataType.Double) => System.Buffers.Binary.BinaryPrimitives.ReadDoubleLittleEndian(source),
-                (true, true, ExtraBytesDataType.Double) => ScaleAndOffsetDouble(item, System.Buffers.Binary.BinaryPrimitives.ReadDoubleLittleEndian(source)),
-                (true, false, ExtraBytesDataType.Double) => ScaleDouble(item, System.Buffers.Binary.BinaryPrimitives.ReadDoubleLittleEndian(source)),
-                (false, true, ExtraBytesDataType.Double) => OffsetDouble(item, System.Buffers.Binary.BinaryPrimitives.ReadDoubleLittleEndian(source)),
-                _ => throw new System.Diagnostics.UnreachableException(),
-            };
+            (_, _, ExtraBytesDataType.Undocumented) => source[..(int)this.options].ToArray(),
+            (false, false, ExtraBytesDataType.UnsignedChar) => source[0],
+            (true, true, ExtraBytesDataType.UnsignedChar) => ScaleAndOffsetByte(this, source[0]),
+            (true, false, ExtraBytesDataType.UnsignedChar) => ScaleByte(this, source[0]),
+            (false, true, ExtraBytesDataType.UnsignedChar) => OffsetByte(this, source[0]),
+            (false, false, ExtraBytesDataType.Char) => (sbyte)source[0],
+            (true, true, ExtraBytesDataType.Char) => ScaleAndOffsetSByte(this, (sbyte)source[0]),
+            (true, false, ExtraBytesDataType.Char) => ScaleSByte(this, (sbyte)source[0]),
+            (false, true, ExtraBytesDataType.Char) => OffsetSByte(this, (sbyte)source[0]),
+            (false, false, ExtraBytesDataType.UnsignedShort) => System.Buffers.Binary.BinaryPrimitives.ReadUInt16LittleEndian(source),
+            (true, true, ExtraBytesDataType.UnsignedShort) => ScaleAndOffsetUInt16(this, System.Buffers.Binary.BinaryPrimitives.ReadUInt16LittleEndian(source)),
+            (true, false, ExtraBytesDataType.UnsignedShort) => ScaleUInt16(this, System.Buffers.Binary.BinaryPrimitives.ReadUInt16LittleEndian(source)),
+            (false, true, ExtraBytesDataType.UnsignedShort) => OffsetUInt16(this, System.Buffers.Binary.BinaryPrimitives.ReadUInt16LittleEndian(source)),
+            (false, false, ExtraBytesDataType.Short) => System.Buffers.Binary.BinaryPrimitives.ReadInt16LittleEndian(source),
+            (true, true, ExtraBytesDataType.Short) => ScaleAndOffsetInt16(this, System.Buffers.Binary.BinaryPrimitives.ReadInt16LittleEndian(source)),
+            (true, false, ExtraBytesDataType.Short) => ScaleInt16(this, System.Buffers.Binary.BinaryPrimitives.ReadInt16LittleEndian(source)),
+            (false, true, ExtraBytesDataType.Short) => OffsetInt16(this, System.Buffers.Binary.BinaryPrimitives.ReadInt16LittleEndian(source)),
+            (false, false, ExtraBytesDataType.UnsignedLong) => System.Buffers.Binary.BinaryPrimitives.ReadUInt32LittleEndian(source),
+            (true, true, ExtraBytesDataType.UnsignedLong) => ScaleAndOffsetUInt32(this, System.Buffers.Binary.BinaryPrimitives.ReadUInt32LittleEndian(source)),
+            (true, false, ExtraBytesDataType.UnsignedLong) => ScaleUInt32(this, System.Buffers.Binary.BinaryPrimitives.ReadUInt32LittleEndian(source)),
+            (false, true, ExtraBytesDataType.UnsignedLong) => OffsetUInt32(this, System.Buffers.Binary.BinaryPrimitives.ReadUInt32LittleEndian(source)),
+            (false, false, ExtraBytesDataType.Long) => System.Buffers.Binary.BinaryPrimitives.ReadInt32LittleEndian(source),
+            (true, true, ExtraBytesDataType.Long) => ScaleAndOffsetInt32(this, System.Buffers.Binary.BinaryPrimitives.ReadInt32LittleEndian(source)),
+            (true, false, ExtraBytesDataType.Long) => ScaleInt32(this, System.Buffers.Binary.BinaryPrimitives.ReadInt32LittleEndian(source)),
+            (false, true, ExtraBytesDataType.Long) => OffsetInt32(this, System.Buffers.Binary.BinaryPrimitives.ReadInt32LittleEndian(source)),
+            (false, false, ExtraBytesDataType.UnsignedLongLong) => System.Buffers.Binary.BinaryPrimitives.ReadUInt64LittleEndian(source),
+            (true, true, ExtraBytesDataType.UnsignedLongLong) => ScaleAndOffsetUInt64(this, System.Buffers.Binary.BinaryPrimitives.ReadUInt64LittleEndian(source)),
+            (true, false, ExtraBytesDataType.UnsignedLongLong) => ScaleUInt64(this, System.Buffers.Binary.BinaryPrimitives.ReadUInt64LittleEndian(source)),
+            (false, true, ExtraBytesDataType.UnsignedLongLong) => OffsetUInt64(this, System.Buffers.Binary.BinaryPrimitives.ReadUInt64LittleEndian(source)),
+            (false, false, ExtraBytesDataType.LongLong) => System.Buffers.Binary.BinaryPrimitives.ReadInt64LittleEndian(source),
+            (true, true, ExtraBytesDataType.LongLong) => ScaleAndOffsetInt64(this, System.Buffers.Binary.BinaryPrimitives.ReadInt64LittleEndian(source)),
+            (true, false, ExtraBytesDataType.LongLong) => ScaleInt64(this, System.Buffers.Binary.BinaryPrimitives.ReadInt64LittleEndian(source)),
+            (false, true, ExtraBytesDataType.LongLong) => OffsetInt64(this, System.Buffers.Binary.BinaryPrimitives.ReadInt64LittleEndian(source)),
+            (false, false, ExtraBytesDataType.Float) => System.Buffers.Binary.BinaryPrimitives.ReadSingleLittleEndian(source),
+            (true, true, ExtraBytesDataType.Float) => ScaleAndOffsetSingle(this, System.Buffers.Binary.BinaryPrimitives.ReadSingleLittleEndian(source)),
+            (true, false, ExtraBytesDataType.Float) => ScaleSingle(this, System.Buffers.Binary.BinaryPrimitives.ReadSingleLittleEndian(source)),
+            (false, true, ExtraBytesDataType.Float) => OffsetSingle(this, System.Buffers.Binary.BinaryPrimitives.ReadSingleLittleEndian(source)),
+            (false, false, ExtraBytesDataType.Double) => System.Buffers.Binary.BinaryPrimitives.ReadDoubleLittleEndian(source),
+            (true, true, ExtraBytesDataType.Double) => ScaleAndOffsetDouble(this, System.Buffers.Binary.BinaryPrimitives.ReadDoubleLittleEndian(source)),
+            (true, false, ExtraBytesDataType.Double) => ScaleDouble(this, System.Buffers.Binary.BinaryPrimitives.ReadDoubleLittleEndian(source)),
+            (false, true, ExtraBytesDataType.Double) => OffsetDouble(this, System.Buffers.Binary.BinaryPrimitives.ReadDoubleLittleEndian(source)),
+            _ => throw new System.Diagnostics.UnreachableException(),
+        };
 
-            [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
-            static double ScaleAndOffsetByte(ExtraBytesItem item, byte value)
-            {
-                return ScaleByte(item, value) + item.Offset;
-            }
+        [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
+        static double ScaleAndOffsetByte(ExtraBytesItem item, byte value)
+        {
+            return ScaleByte(item, value) + item.Offset;
+        }
 
-            [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
-            static double ScaleAndOffsetSByte(ExtraBytesItem item, sbyte value)
-            {
-                return ScaleSByte(item, value) + item.Offset;
-            }
+        [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
+        static double ScaleAndOffsetSByte(ExtraBytesItem item, sbyte value)
+        {
+            return ScaleSByte(item, value) + item.Offset;
+        }
 
-            [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
-            static double ScaleAndOffsetUInt16(ExtraBytesItem item, ushort value)
-            {
-                return ScaleUInt16(item, value) + item.Offset;
-            }
+        [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
+        static double ScaleAndOffsetUInt16(ExtraBytesItem item, ushort value)
+        {
+            return ScaleUInt16(item, value) + item.Offset;
+        }
 
-            [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
-            static double ScaleAndOffsetInt16(ExtraBytesItem item, short value)
-            {
-                return ScaleInt16(item, value) + item.Offset;
-            }
+        [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
+        static double ScaleAndOffsetInt16(ExtraBytesItem item, short value)
+        {
+            return ScaleInt16(item, value) + item.Offset;
+        }
 
-            [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
-            static double ScaleAndOffsetUInt32(ExtraBytesItem item, uint value)
-            {
-                return ScaleUInt32(item, value) + item.Offset;
-            }
+        [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
+        static double ScaleAndOffsetUInt32(ExtraBytesItem item, uint value)
+        {
+            return ScaleUInt32(item, value) + item.Offset;
+        }
 
-            [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
-            static double ScaleAndOffsetInt32(ExtraBytesItem item, int value)
-            {
-                return ScaleInt32(item, value) + item.Offset;
-            }
+        [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
+        static double ScaleAndOffsetInt32(ExtraBytesItem item, int value)
+        {
+            return ScaleInt32(item, value) + item.Offset;
+        }
 
-            [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
-            static double ScaleAndOffsetUInt64(ExtraBytesItem item, ulong value)
-            {
-                return ScaleUInt64(item, value) + item.Offset;
-            }
+        [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
+        static double ScaleAndOffsetUInt64(ExtraBytesItem item, ulong value)
+        {
+            return ScaleUInt64(item, value) + item.Offset;
+        }
 
-            [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
-            static double ScaleAndOffsetInt64(ExtraBytesItem item, long value)
-            {
-                return ScaleInt64(item, value) + item.Offset;
-            }
+        [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
+        static double ScaleAndOffsetInt64(ExtraBytesItem item, long value)
+        {
+            return ScaleInt64(item, value) + item.Offset;
+        }
 
-            [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
-            static double ScaleAndOffsetSingle(ExtraBytesItem item, float value)
-            {
-                return ScaleSingle(item, value) + item.Offset;
-            }
+        [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
+        static double ScaleAndOffsetSingle(ExtraBytesItem item, float value)
+        {
+            return ScaleSingle(item, value) + item.Offset;
+        }
 
-            [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
-            static double ScaleAndOffsetDouble(ExtraBytesItem item, double value)
-            {
-                return ScaleDouble(item, value) + item.Offset;
-            }
+        [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
+        static double ScaleAndOffsetDouble(ExtraBytesItem item, double value)
+        {
+            return ScaleDouble(item, value) + item.Offset;
+        }
 
-            [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
-            static double ScaleByte(ExtraBytesItem item, byte value)
-            {
-                return value * item.Scale;
-            }
+        [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
+        static double ScaleByte(ExtraBytesItem item, byte value)
+        {
+            return value * item.Scale;
+        }
 
-            [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
-            static double ScaleSByte(ExtraBytesItem item, sbyte value)
-            {
-                return value * item.Scale;
-            }
+        [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
+        static double ScaleSByte(ExtraBytesItem item, sbyte value)
+        {
+            return value * item.Scale;
+        }
 
-            [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
-            static double ScaleUInt16(ExtraBytesItem item, ushort value)
-            {
-                return value * item.Scale;
-            }
+        [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
+        static double ScaleUInt16(ExtraBytesItem item, ushort value)
+        {
+            return value * item.Scale;
+        }
 
-            [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
-            static double ScaleInt16(ExtraBytesItem item, short value)
-            {
-                return value * item.Scale;
-            }
+        [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
+        static double ScaleInt16(ExtraBytesItem item, short value)
+        {
+            return value * item.Scale;
+        }
 
-            [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
-            static double ScaleUInt32(ExtraBytesItem item, uint value)
-            {
-                return value * item.Scale;
-            }
+        [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
+        static double ScaleUInt32(ExtraBytesItem item, uint value)
+        {
+            return value * item.Scale;
+        }
 
-            [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
-            static double ScaleInt32(ExtraBytesItem item, int value)
-            {
-                return value * item.Scale;
-            }
+        [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
+        static double ScaleInt32(ExtraBytesItem item, int value)
+        {
+            return value * item.Scale;
+        }
 
-            [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
-            static double ScaleUInt64(ExtraBytesItem item, ulong value)
-            {
-                return value * item.Scale;
-            }
+        [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
+        static double ScaleUInt64(ExtraBytesItem item, ulong value)
+        {
+            return value * item.Scale;
+        }
 
-            [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
-            static double ScaleInt64(ExtraBytesItem item, long value)
-            {
-                return value * item.Scale;
-            }
+        [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
+        static double ScaleInt64(ExtraBytesItem item, long value)
+        {
+            return value * item.Scale;
+        }
 
-            [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
-            static double ScaleSingle(ExtraBytesItem item, float value)
-            {
-                return value * item.Scale;
-            }
+        [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
+        static double ScaleSingle(ExtraBytesItem item, float value)
+        {
+            return value * item.Scale;
+        }
 
-            [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
-            static double ScaleDouble(ExtraBytesItem item, double value)
-            {
-                return value * item.Scale;
-            }
+        [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
+        static double ScaleDouble(ExtraBytesItem item, double value)
+        {
+            return value * item.Scale;
+        }
 
-            [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
-            static double OffsetByte(ExtraBytesItem item, byte value)
-            {
-                return value + item.Offset;
-            }
+        [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
+        static double OffsetByte(ExtraBytesItem item, byte value)
+        {
+            return value + item.Offset;
+        }
 
-            [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
-            static double OffsetSByte(ExtraBytesItem item, sbyte value)
-            {
-                return value + item.Offset;
-            }
+        [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
+        static double OffsetSByte(ExtraBytesItem item, sbyte value)
+        {
+            return value + item.Offset;
+        }
 
-            [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
-            static double OffsetUInt16(ExtraBytesItem item, ushort value)
-            {
-                return value + item.Offset;
-            }
+        [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
+        static double OffsetUInt16(ExtraBytesItem item, ushort value)
+        {
+            return value + item.Offset;
+        }
 
-            [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
-            static double OffsetInt16(ExtraBytesItem item, short value)
-            {
-                return value + item.Offset;
-            }
+        [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
+        static double OffsetInt16(ExtraBytesItem item, short value)
+        {
+            return value + item.Offset;
+        }
 
-            [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
-            static double OffsetUInt32(ExtraBytesItem item, uint value)
-            {
-                return value + item.Offset;
-            }
+        [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
+        static double OffsetUInt32(ExtraBytesItem item, uint value)
+        {
+            return value + item.Offset;
+        }
 
-            [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
-            static double OffsetInt32(ExtraBytesItem item, int value)
-            {
-                return value + item.Offset;
-            }
+        [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
+        static double OffsetInt32(ExtraBytesItem item, int value)
+        {
+            return value + item.Offset;
+        }
 
-            [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
-            static double OffsetUInt64(ExtraBytesItem item, ulong value)
-            {
-                return value + item.Offset;
-            }
+        [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
+        static double OffsetUInt64(ExtraBytesItem item, ulong value)
+        {
+            return value + item.Offset;
+        }
 
-            [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
-            static double OffsetInt64(ExtraBytesItem item, long value)
-            {
-                return value + item.Offset;
-            }
+        [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
+        static double OffsetInt64(ExtraBytesItem item, long value)
+        {
+            return value + item.Offset;
+        }
 
-            [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
-            static double OffsetSingle(ExtraBytesItem item, float value)
-            {
-                return value + item.Offset;
-            }
+        [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
+        static double OffsetSingle(ExtraBytesItem item, float value)
+        {
+            return value + item.Offset;
+        }
 
-            [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
-            static double OffsetDouble(ExtraBytesItem item, double value)
-            {
-                return value + item.Offset;
-            }
+        [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
+        static double OffsetDouble(ExtraBytesItem item, double value)
+        {
+            return value + item.Offset;
         }
     }
 

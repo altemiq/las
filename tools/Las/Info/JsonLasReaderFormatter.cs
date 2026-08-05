@@ -6,7 +6,6 @@
 
 namespace Altemiq.IO.Las.Info;
 
-using System.Windows.Markup;
 using Humanizer;
 
 /// <summary>
