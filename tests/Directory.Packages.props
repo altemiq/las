@@ -22,7 +22,7 @@
   
   <ItemGroup Label="AWS">
     <PackageVersion Include="Amazon.CDK.Lib" Version="2.263.0" />
-    <PackageVersion Include="AWSSDK.S3" Version="4.0.101.6" />
+    <PackageVersion Include="AWSSDK.S3" Version="4.0.101.7" />
   </ItemGroup>
   
   <ItemGroup Label="Azure">

@@ -24,11 +24,11 @@ internal static partial class PolyfillExtensions
         /// <param name="destination">The stream to which the contents of the current stream will be copied.</param>
         /// <param name="cancellationToken">The token to monitor for cancellation requests. The default value is <see cref="CancellationToken.None"/>.</param>
         /// <returns>A task that represents the asynchronous copy operation.</returns>
-#pragma warning disable MA0040
+#pragma warning disable MA0040, S8949
         public Task CopyToAsync(Stream destination, CancellationToken cancellationToken) =>
             cancellationToken.IsCancellationRequested
                 ? Task.FromCanceled(cancellationToken)
                 : stream.CopyToAsync(destination);
-#pragma warning restore MA0040
+#pragma warning restore MA0040, S8949
     }
 }

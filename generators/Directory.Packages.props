@@ -11,7 +11,7 @@
   </ItemGroup>
 
   <ItemGroup Label="Coding Standards">
-    <GlobalPackageReference Include="Altemiq.DotNet.CodingStandard" Version="1.0.319" />
+    <GlobalPackageReference Include="Altemiq.DotNet.CodingStandard" Version="1.0.336" />
   </ItemGroup>
 
 </Project>
