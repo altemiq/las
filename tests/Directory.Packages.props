@@ -30,10 +30,10 @@
   </ItemGroup>
   
   <ItemGroup Label="DataFrames">
-    <PackageVersion Include="Polars.NET.Native.linux-arm64" Version="0.6.0" />
-    <PackageVersion Include="Polars.NET.Native.linux-x64" Version="0.6.0" />
-    <PackageVersion Include="Polars.NET.Native.win-x64" Version="0.6.0" />
-    <PackageVersion Include="Polars.NET.Native.osx-arm64" Version="0.6.0" />
+    <PackageVersion Include="Polars.NET.Native.linux-arm64" Version="0.7.0" />
+    <PackageVersion Include="Polars.NET.Native.linux-x64" Version="0.7.0" />
+    <PackageVersion Include="Polars.NET.Native.win-x64" Version="0.7.0" />
+    <PackageVersion Include="Polars.NET.Native.osx-arm64" Version="0.7.0" />
   </ItemGroup>
   
   <ItemGroup Label="Microsoft.AspNetCore">

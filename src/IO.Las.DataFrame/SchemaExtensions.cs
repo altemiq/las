@@ -23,7 +23,6 @@ internal static class SchemaExtensions
         /// Converts the <see cref="Apache.Arrow.Schema"/> to be <see cref="Polars"/> compatible.
         /// </summary>
         /// <returns>The <see cref="Polars"/> compatible schema.</returns>
-        /// <exception cref="System.Diagnostics.UnreachableException">The arrow type is <see langword="null"/>.</exception>
         public Apache.Arrow.Schema ToPolarsCompatibleSchema()
         {
             // update this for Polars supported types (i.e. no byte, sbyte, ushort, short)
@@ -53,8 +52,7 @@ internal static class SchemaExtensions
                 {
                     { TypeId: Apache.Arrow.Types.ArrowTypeId.UInt8 or Apache.Arrow.Types.ArrowTypeId.UInt16 } => Apache.Arrow.Types.UInt32Type.Default,
                     { TypeId: Apache.Arrow.Types.ArrowTypeId.Int8 or Apache.Arrow.Types.ArrowTypeId.Int16 } => Apache.Arrow.Types.Int32Type.Default,
-                    { } d => d,
-                    _ => throw new System.Diagnostics.UnreachableException(),
+                    _ => arrowType,
                 };
             }
         }
