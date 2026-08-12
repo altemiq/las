@@ -36,11 +36,11 @@
   </ItemGroup>
   
   <ItemGroup Label="Microsoft.AspNetCore">
-    <PackageVersion Include="Microsoft.AspNetCore.Server.Kestrel" Version="2.3.11" />
+    <PackageVersion Include="Microsoft.AspNetCore.Server.Kestrel" Version="2.3.12" />
   </ItemGroup>
 
   <ItemGroup Label="SQLite">
-    <PackageVersion Include="Microsoft.Data.Sqlite" Version="10.0.10" />
+    <PackageVersion Include="Microsoft.Data.Sqlite" Version="10.0.11" />
     <PackageVersion Include="SQLitePCLRaw.bundle_e_sqlite3" Version="3.0.4" />
   </ItemGroup>
 
