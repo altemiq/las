@@ -9,7 +9,7 @@ public class ExtraBytesValueTests
         _ = await Assert.That(value.HasValue).IsFalse();
         _ = await Assert.That(value.Value).IsNull();
     }
-    
+
     [Test]
     [MatrixDataSource]
     public async Task SetByte([Matrix((byte)(byte.MaxValue * 0.05), (byte)(byte.MaxValue * 0.5), (byte)(byte.MaxValue * 0.9))] byte v)
