@@ -10,7 +10,7 @@ namespace Altemiq.IO.Las.Writers.Compressed;
 /// The compressed <see cref="Writers.PointDataRecordWriter{T}"/> for <see cref="PointDataRecord"/> intances.
 /// </summary>
 /// <typeparam name="T">The type of point data record.</typeparam>
-internal abstract class PointDataRecordWriter<T> : IPointDataRecordWriter, ISimpleWriter
+internal closed class PointDataRecordWriter<T> : IPointDataRecordWriter, ISimpleWriter
     where T : IBasePointDataRecord
 {
     private readonly ArithmeticEncoder encoder;

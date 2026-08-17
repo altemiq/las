@@ -9,3 +9,6 @@ dotnet_diagnostic.IDE0046.severity = none
 
 # we are deliberately using pattern matching on strings
 dotnet_diagnostic.MA0127.severity = none
+
+# stylecop is behind on keyword ordering
+dotnet_diagnostic.SA1206.severity = none

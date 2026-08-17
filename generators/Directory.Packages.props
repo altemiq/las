@@ -10,6 +10,10 @@
     <PackageVersion Include="Microsoft.CodeAnalysis.Analyzers" Version="5.6.0" />
   </ItemGroup>
 
+  <ItemGroup>
+    <PackageVersion Include="Meziantou.Polyfill" Version="1.0.160" />
+  </ItemGroup>
+
   <ItemGroup Label="Coding Standards">
     <GlobalPackageReference Include="Altemiq.DotNet.CodingStandard" Version="1.0.360" />
   </ItemGroup>

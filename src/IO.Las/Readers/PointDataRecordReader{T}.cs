@@ -11,7 +11,7 @@ namespace Altemiq.IO.Las.Readers;
 /// </summary>
 /// <typeparam name="T">The type of point.</typeparam>
 /// <param name="pointDataLength">The point data length.</param>
-internal abstract class PointDataRecordReader<T>(int pointDataLength) : IPointDataRecordReader
+internal closed class PointDataRecordReader<T>(int pointDataLength) : IPointDataRecordReader
     where T : IBasePointDataRecord
 {
     /// <inheritdoc/>

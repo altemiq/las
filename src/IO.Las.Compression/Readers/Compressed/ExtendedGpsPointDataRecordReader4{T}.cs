@@ -10,7 +10,7 @@ namespace Altemiq.IO.Las.Readers.Compressed;
 /// The compressed <see cref="Readers.IPointDataRecordReader"/> for <see cref="IExtendedPointDataRecord"/> instances.
 /// </summary>
 /// <typeparam name="T">The type of extended point data record.</typeparam>
-internal abstract class ExtendedGpsPointDataRecordReader4<T> : ICompressedPointDataRecordReader, IContext
+internal closed class ExtendedGpsPointDataRecordReader4<T> : ICompressedPointDataRecordReader, IContext
     where T : IExtendedPointDataRecord
 {
     private const int Multiple = 500;

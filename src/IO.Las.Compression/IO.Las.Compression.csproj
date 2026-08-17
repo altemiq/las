@@ -27,9 +27,11 @@
       T:System.Index|
       T:System.Range|
       T:System.Runtime.CompilerServices.CallerArgumentExpressionAttribute|
+      T:System.Runtime.CompilerServices.CompilerFeatureRequiredAttribute|
       T:System.Runtime.CompilerServices.DefaultInterpolatedStringHandler|
       T:System.Runtime.CompilerServices.InterpolatedStringHandlerArgumentAttribute|
       T:System.Runtime.CompilerServices.InterpolatedStringHandlerAttribute|
+      T:System.Runtime.CompilerServices.IsClosedTypeAttribute|
       T:System.Runtime.CompilerServices.IsExternalInit|
     </MeziantouPolyfill_IncludedPolyfills>
 

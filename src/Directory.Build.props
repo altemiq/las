@@ -6,7 +6,7 @@
     <VersionPrefix Condition="'$(VersionPrefix)' == ''">$(MaximumLasVersion).$(MinorVersion)</VersionPrefix>
 
     <NeutralLanguage>en</NeutralLanguage>
-    <LangVersion>latest</LangVersion>
+    <LangVersion>preview</LangVersion>
     <ImplicitUsings>enable</ImplicitUsings>
 
     <!-- Nullable -->
@@ -47,7 +47,7 @@
   </PropertyGroup>
 
   <PropertyGroup Label="Analyzers">
-    <AnalysisLevel>latest</AnalysisLevel>
+    <AnalysisLevel>preview</AnalysisLevel>
   </PropertyGroup>
 
   <PropertyGroup>

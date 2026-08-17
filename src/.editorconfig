@@ -11,3 +11,6 @@ dotnet_diagnostic.RCS1085.severity = none
 
 # checking floating point equality is correct
 dotnet_diagnostic.S1244.severity = none
+
+# stylecop is behind on keyword ordering
+dotnet_diagnostic.SA1206.severity = none

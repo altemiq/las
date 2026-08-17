@@ -32,6 +32,8 @@
       T:System.Runtime.CompilerServices.CallerArgumentExpressionAttribute|
       T:System.Runtime.CompilerServices.CollectionBuilderAttribute|
       T:System.Runtime.CompilerServices.CompilerFeatureRequiredAttribute|
+      T:System.Runtime.CompilerServices.CompilerFeatureRequiredAttribute|
+      T:System.Runtime.CompilerServices.IsClosedTypeAttribute|
       T:System.Runtime.CompilerServices.IsExternalInit|
       T:System.Runtime.CompilerServices.IUnion|
       T:System.Runtime.CompilerServices.RequiredMemberAttribute|
@@ -41,9 +43,6 @@
     <!-- turn off buggy analyzer -->
     <NoWarn>$(NoWarn);S1117</NoWarn>
     <NoWarn Condition=" !$([MSBuild]::IsTargetFrameworkCompatible('$(TargetFramework)', 'net10.0')) ">$(NoWarn);AD0001</NoWarn>
-    
-    <!-- turn on preview for unions -->
-    <LangVersion>preview</LangVersion>
   </PropertyGroup>
 
   <PropertyGroup Label="Packaging">

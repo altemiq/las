@@ -10,7 +10,7 @@ namespace Altemiq.IO.Las.Writers.Compressed;
 /// The compressed <see cref="Writers.IPointDataRecordWriter"/> for <see cref="IExtendedPointDataRecord"/> instances.
 /// </summary>
 /// <typeparam name="T">The type of extended point data record.</typeparam>
-internal abstract class ExtendedGpsPointDataRecordWriter4<T> : Writers.PointDataRecordWriter<T>, IContextWriter
+internal closed class ExtendedGpsPointDataRecordWriter4<T> : Writers.PointDataRecordWriter<T>, IContextWriter
     where T : IExtendedPointDataRecord
 {
     private const int Multiple = 500;

@@ -14,7 +14,7 @@ namespace Altemiq.IO.Las;
 /// <param name="pointDataFormatId">The point data format ID.</param>
 /// <param name="zip">The zip information.</param>
 /// <param name="size">The chunk size information.</param>
-internal abstract class ChunkedWriter(Writers.IPointDataRecordWriter rawWriter, int pointDataLength, byte pointDataFormatId, LasZip zip, uint size) : IPointWriter
+internal closed class ChunkedWriter(Writers.IPointDataRecordWriter rawWriter, int pointDataLength, byte pointDataFormatId, LasZip zip, uint size) : IPointWriter
 {
     /// <summary>
     /// The default chunk key.

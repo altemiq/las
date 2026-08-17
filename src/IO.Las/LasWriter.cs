@@ -218,7 +218,6 @@ public class LasWriter(Stream stream, bool leaveOpen = false) :
     {
         ArgumentNullException.ThrowIfNull(record);
 
-        // if we can't seek, then we can't write out the EVLR information
         if (!this.canWriteExtendedVariableLengthRecords)
         {
             // invalid LAS version
@@ -235,6 +234,7 @@ public class LasWriter(Stream stream, bool leaveOpen = false) :
 
         this.BaseStream.Write(byteArray, 0, size);
 
+        // we can't seek, so just set the information
         if (!this.BaseStream.CanSeek)
         {
             // just put this into the registers

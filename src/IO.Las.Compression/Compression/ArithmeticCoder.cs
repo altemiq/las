@@ -9,7 +9,7 @@ namespace Altemiq.IO.Las.Compression;
 /// <summary>
 /// The arithmetic encoder.
 /// </summary>
-internal abstract class ArithmeticCoder
+internal closed class ArithmeticCoder
 {
     /// <summary>
     /// The default model count.

@@ -15,7 +15,7 @@ using static Microsoft.CodeAnalysis.CSharp.SyntaxFactory;
 /// <summary>
 /// The base <see cref="IIncrementalGenerator"/>.
 /// </summary>
-public abstract class BaseSourceGenerator : IIncrementalGenerator
+public closed class BaseSourceGenerator : IIncrementalGenerator
 {
     private static readonly char[] SpaceSeparator = [' '];
 

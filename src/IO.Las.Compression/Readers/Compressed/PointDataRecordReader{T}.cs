@@ -13,7 +13,7 @@ namespace Altemiq.IO.Las.Readers.Compressed;
 /// <param name="decoder">The decoder.</param>
 /// <param name="pointDataLength">The point data length.</param>
 /// <param name="basePointDataLength">The base point data length, without extra bytes.</param>
-internal abstract class PointDataRecordReader<T>(ArithmeticDecoder decoder, int pointDataLength, int basePointDataLength) : ICompressedPointDataRecordReader, ISimple
+internal closed class PointDataRecordReader<T>(ArithmeticDecoder decoder, int pointDataLength, int basePointDataLength) : ICompressedPointDataRecordReader, ISimple
     where T : IBasePointDataRecord
 {
     private readonly ArithmeticSymbolModel changedValuesModel = decoder.CreateSymbolModel(64);

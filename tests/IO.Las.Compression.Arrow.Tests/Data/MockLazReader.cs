@@ -3,7 +3,7 @@ namespace Altemiq.IO.Las.Compression.Arrow.Data;
 internal sealed class MockLazReader : ILasReader, ILazReader
 {
     private readonly MockPointDataRecordReader reader = new();
-    private readonly MockChunkedReader chunkedReader;
+    private readonly ChunkedReader chunkedReader;
 
     public MockLazReader()
     {
@@ -16,7 +16,7 @@ internal sealed class MockLazReader : ILasReader, ILazReader
         };
         var header = builder.HeaderBlock;
         Header = header;
-        chunkedReader = new(reader, in header, 50000);
+        chunkedReader = ChunkedReader.CreateMock(reader, in header, 50000);
     }
 
     public HeaderBlock Header { get; }
@@ -102,66 +102,6 @@ internal sealed class MockLazReader : ILasReader, ILazReader
         throw new NotSupportedException();
     }
 
-    private sealed class MockChunkedReader : ChunkedReader
-    {
-        public MockChunkedReader(Readers.Compressed.ICompressedPointDataRecordReader reader, in HeaderBlock headerBlock, uint chunkSize) : base(
-            new MockChunkReader(
-                reader,
-                headerBlock,
-#if LAS1_4_OR_GREATER
-                new(GpsPointDataRecord.Id, 0, Compressor.PointWiseChunked), GpsPointDataRecord.Size),
-#else
-                new(GpsPointDataRecord.Id, Compressor.PointWiseChunked), GpsPointDataRecord.Size),
-#endif
-                chunkSize)
-        {
-
-#if NET8_0_OR_GREATER
-            ref var chunkCount = ref ChunkCountField(this);
-            chunkCount = 0;
-#else
-            SetChunkCountField(this, 0U);
-#endif
-        }
-
-#if NET8_0_OR_GREATER
-        [System.Runtime.CompilerServices.UnsafeAccessor(System.Runtime.CompilerServices.UnsafeAccessorKind.Field, Name = "chunkCount")]
-        private static extern ref uint ChunkCountField(ChunkedReader reader);
-#else
-        private static void SetChunkCountField(ChunkedReader reader, uint chunkCount)
-        {
-            typeof(ChunkedReader)
-                .GetField("chunkCount", System.Reflection.BindingFlags.Instance | System.Reflection.BindingFlags.NonPublic)
-                .SetValue(reader, chunkCount);
-        }
-#endif
-    }
-
-    private sealed class MockChunkReader : ChunkReader
-    {
-        public MockChunkReader(Readers.Compressed.ICompressedPointDataRecordReader rawReader, in HeaderBlock header, LasZip zip, int pointDataLength)
-            : base(rawReader, in header, zip, pointDataLength)
-        {
-#if NET8_0_OR_GREATER
-            ref var reader = ref ReaderField(this);
-            reader = rawReader;
-#else
-            SetReaderField(this, rawReader);
-#endif
-        }
-
-#if NET8_0_OR_GREATER
-        [System.Runtime.CompilerServices.UnsafeAccessor(System.Runtime.CompilerServices.UnsafeAccessorKind.Field, Name = "reader")]
-        private static extern ref Readers.Compressed.ICompressedPointDataRecordReader ReaderField(PointWiseReader reader);
-#else
-        private static void SetReaderField(PointWiseReader reader, Readers.Compressed.ICompressedPointDataRecordReader rawReader)
-        {
-            typeof(PointWiseReader)
-                .GetField("reader", System.Reflection.BindingFlags.Instance | System.Reflection.BindingFlags.NonPublic)
-                .SetValue(reader, rawReader);
-        }
-#endif
-    }
 
     private sealed class MockPointDataRecordReader : Readers.Compressed.ICompressedPointDataRecordReader
     {
@@ -243,4 +183,5 @@ internal sealed class MockLazReader : ILasReader, ILazReader
             return new(GpsPointDataRecord.Size * 2);
         }
     }
+
 }
