@@ -29,7 +29,7 @@ internal static class LazToArrowStream
 
     private sealed class RecordBatchEnumerable(ILazReader reader, Schema schema) : IEnumerable<RecordBatch>, IEnumerator<RecordBatch>
     {
-        private readonly IReadOnlyList<ColumnBuffer> buffers = [.. schema.FieldsList.Select(static f => ColumnBuffer.Create(f.DataType.TypeId, capacity: 50_000))];
+        private readonly IReadOnlyList<IColumnBuffer> buffers = [.. schema.FieldsList.Select(static f => ColumnBuffer.Create(f.DataType.TypeId, capacity: 50_000))];
 
         [System.Diagnostics.CodeAnalysis.AllowNull]
         public RecordBatch Current { get; private set; }

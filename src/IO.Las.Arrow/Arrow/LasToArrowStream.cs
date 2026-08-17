@@ -20,7 +20,7 @@ internal static class LasToArrowStream
     /// <returns>The <see cref="RecordBatch"/> instances.</returns>
     internal static IEnumerable<RecordBatch> ToArrowBatches(ILasReader reader, Schema schema, int batchSize = 50_000)
     {
-        IReadOnlyList<ColumnBuffer> buffers = [.. schema.FieldsList.Select(f => ColumnBuffer.Create(f.DataType.TypeId, capacity: batchSize))];
+        IReadOnlyList<IColumnBuffer> buffers = [.. schema.FieldsList.Select(f => ColumnBuffer.Create(f.DataType.TypeId, capacity: batchSize))];
 
         var rowCount = 0;
         var hasYielded = false;
@@ -61,7 +61,7 @@ internal static class LasToArrowStream
     /// <param name="buffers">The buffers.</param>
     [System.Diagnostics.CodeAnalysis.SuppressMessage("Major Code Smell", "S1854:Unused assignments should be removed", Justification = "This _could_ be used.")]
     [System.Diagnostics.CodeAnalysis.SuppressMessage("ReSharper", "RedundantAssignment", Justification = "This _could_ be used.")]
-    internal static void AddPointDataRecordToBuffers(IBasePointDataRecord basePointDataRecord, IReadOnlyList<ColumnBuffer> buffers)
+    internal static void AddPointDataRecordToBuffers(IBasePointDataRecord basePointDataRecord, IReadOnlyList<IColumnBuffer> buffers)
     {
         // do the base values
         var index = 0;
@@ -141,11 +141,11 @@ internal static class LasToArrowStream
 #if NET8_0_OR_GREATER
     [System.Diagnostics.CodeAnalysis.SuppressMessage("Performance", "CA1863:Use 'CompositeFormat'", Justification = "This is for exceptions")]
 #endif
-    internal static RecordBatch FlushToRecordBatch(IReadOnlyList<ColumnBuffer> buffers, Schema schema, int length)
+    internal static RecordBatch FlushToRecordBatch(IReadOnlyList<IColumnBuffer> buffers, Schema schema, int length)
     {
         return new(schema, GetArrays(schema, buffers, length), length);
 
-        static IEnumerable<IArrowArray> GetArrays(Schema schema, IReadOnlyList<ColumnBuffer> buffers, int length)
+        static IEnumerable<IArrowArray> GetArrays(Schema schema, IReadOnlyList<IColumnBuffer> buffers, int length)
         {
             for (var i = 0; i < buffers.Count; i++)
             {
