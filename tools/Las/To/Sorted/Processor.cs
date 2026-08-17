@@ -30,8 +30,6 @@ internal static class Processor
                 ? CreateFromLax(laxUri, serviceProvider)
                 : CreateFromReader(file, serviceProvider);
 
-            using var reader = LazReader.Create(File.OpenRead(file, serviceProvider), leaveOpen: false);
-
             SortByIndex(File.OpenRead(file, serviceProvider), index, ref output, embedIndex);
 
             if (output is not null)
