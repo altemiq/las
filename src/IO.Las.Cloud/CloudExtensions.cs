@@ -6,11 +6,11 @@
 
 namespace Altemiq.IO.Las.Cloud;
 
+#pragma warning disable SA1101
+
 /// <summary>
 /// The <see cref="Cloud"/> extensions.
 /// </summary>
-[System.Diagnostics.CodeAnalysis.SuppressMessage("StyleCop.CSharp.ReadabilityRules", "SA1101:Prefix local calls with this", Justification = "False positive")]
-[System.Diagnostics.CodeAnalysis.SuppressMessage("Minor Code Smell", "S2325:Methods and properties that don't access instance data should be static", Justification = "False positive")]
 public static class CloudExtensions
 {
     /// <summary>
