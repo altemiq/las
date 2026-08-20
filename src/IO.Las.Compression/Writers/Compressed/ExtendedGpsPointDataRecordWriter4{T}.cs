@@ -104,7 +104,6 @@ internal closed class ExtendedGpsPointDataRecordWriter4<T> : Writers.PointDataRe
     public virtual void Write(Span<byte> item, ref uint context) => this.Write(item, ref context, item.Length);
 
     /// <inheritdoc/>
-    [System.Diagnostics.CodeAnalysis.SuppressMessage("Design", "MA0042:Do not use blocking calls in an async method", Justification = "This would cause recursion.")]
     public virtual ValueTask<uint> WriteAsync(Memory<byte> item, uint context, CancellationToken cancellationToken = default)
     {
         cancellationToken.ThrowIfCancellationRequested();

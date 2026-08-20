@@ -16,12 +16,11 @@
   </ItemGroup>
   
   <ItemGroup Label="Aspire">
-    <PackageVersion Include="Aspire.Hosting.AWS" Version="13.6.0" />
-    <PackageVersion Include="Aspire.Hosting.Testing" Version="13.4.6" />
+    <PackageVersion Include="Aspire.Hosting.Testing" Version="13.5.0" />
   </ItemGroup>
   
   <ItemGroup Label="AWS">
-    <PackageVersion Include="AWSSDK.S3" Version="4.0.102.1" />
+    <PackageVersion Include="AWSSDK.S3" Version="4.0.102.2" />
   </ItemGroup>
   
   <ItemGroup Label="Azure">
@@ -45,7 +44,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <GlobalPackageReference Include="Meziantou.Polyfill" Version="1.0.160" />
+    <GlobalPackageReference Include="Meziantou.Polyfill" Version="1.0.161" />
   </ItemGroup>
 
 </Project>
