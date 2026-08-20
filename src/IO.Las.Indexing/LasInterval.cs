@@ -157,7 +157,7 @@ internal sealed class LasInterval : IEnumerable<KeyValuePair<int, LasIntervalSta
     /// Clones this into an empty instance.
     /// </summary>
     /// <returns>The empty instance.</returns>
-    public LasInterval CloneEmpty() => new(this.threshold);
+    public LasInterval CloneEmpty() => [with(this.threshold)];
 
     /// <summary>
     /// Adds the point index, to the cell index.

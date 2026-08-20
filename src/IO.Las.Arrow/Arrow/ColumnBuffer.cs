@@ -42,7 +42,7 @@ internal static class ColumnBuffer
         where TArray : IArrowArray
         where TBuilder : IArrowArrayBuilder<T, TArray, TBuilder>, new()
     {
-        private readonly List<T> buffer = new(capacity);
+        private readonly List<T> buffer = [with(capacity)];
 
         public int Count => this.buffer.Count;
 
@@ -59,7 +59,7 @@ internal static class ColumnBuffer
         public IArrowArray BuildArray()
         {
             var builder = new TBuilder();
-            builder.AppendRange(this.buffer);
+            _ = builder.AppendRange(this.buffer);
             return builder.Build(allocator: default);
         }
     }

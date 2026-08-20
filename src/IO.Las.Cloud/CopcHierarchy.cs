@@ -23,7 +23,7 @@ public sealed record CopcHierarchy : ExtendedVariableLengthRecord
 
     private const int EntrySize = 32;
 
-    private readonly SortedDictionary<Entry, Page> pages = new(new EntryComparer());
+    private readonly SortedDictionary<Entry, Page> pages = [with(new EntryComparer())];
 
     /// <summary>
     /// Initializes a new instance of the <see cref="CopcHierarchy"/> class.

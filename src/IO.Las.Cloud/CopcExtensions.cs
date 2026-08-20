@@ -984,7 +984,7 @@ public static class CopcExtensions
 
     private sealed class Octant(int capacity = 25000) : IEnumerable<LasPointMemory>
     {
-        private readonly List<LasPointMemory> points = new(capacity);
+        private readonly List<LasPointMemory> points = [with(capacity)];
 
         private readonly Dictionary<int, VoxelRecord> occupancy = [];
 

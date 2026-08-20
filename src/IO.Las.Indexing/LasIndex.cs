@@ -42,7 +42,7 @@ public class LasIndex : IEnumerable<LasIndexCell>, IEqualityComparer<LasIndex>, 
     /// <param name="spatial">The spatial quad-tree.</param>
     /// <param name="threshold">The interval threshold.</param>
     public LasIndex(LasQuadTree spatial, int threshold = 1000)
-        : this(spatial, new LasInterval(threshold))
+        : this(spatial, [with(threshold)])
     {
     }
 
