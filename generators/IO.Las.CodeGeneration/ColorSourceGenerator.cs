@@ -15,7 +15,7 @@ using static Microsoft.CodeAnalysis.CSharp.SyntaxFactory;
 /// The color source generator.
 /// </summary>
 [Generator(LanguageNames.CSharp)]
-public class ColorSourceGenerator : BaseSourceGenerator
+public sealed class ColorSourceGenerator : BaseSourceGenerator
 {
     /// <inheritdoc/>
     public override void Initialize(IncrementalGeneratorInitializationContext context)

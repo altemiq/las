@@ -64,7 +64,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Compile Update="ExtensionMethods.*.cs;PolyfillExtensions.*.cs">
+    <Compile Update="ChunkedReader.*.cs;ExtensionMethods.*.cs;PolyfillExtensions.*.cs">
       <DependentUpon>$([System.Text.RegularExpressions.Regex]::Replace('%(Filename)%(Extension)', '\.[^.]+\%(Extension)$', '%(Extension)'))</DependentUpon>
     </Compile>
   </ItemGroup>
