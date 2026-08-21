@@ -13,6 +13,113 @@ namespace Altemiq.IO.Las;
 /// </summary>
 public static partial class ExtensionMethods
 {
+    /// <content>
+    /// The <see cref="IBasePointDataRecord"/> extensions.
+    /// </content>
+    extension<T>(T record)
+        where T : unmanaged, IBasePointDataRecord
+    {
+        /// <inheritdoc cref="IBasePointDataRecord.CopyTo(Span{byte})" />
+        public int CopyTo(Span<byte> bytes) => record.CopyTo(bytes);
+
+        /// <inheritdoc cref="IBasePointDataRecord.CopyTo(Span{byte})" />
+        public ValueTask<int> CopyToAsync(Memory<byte> bytes, CancellationToken cancellationToken = default)
+        {
+            cancellationToken.ThrowIfCancellationRequested();
+            return new(record.CopyTo(bytes.Span));
+        }
+    }
+
+    /// <content>
+    /// The <see cref="IEnumerable{IBasePointDataRecord}"/> extensions.
+    /// </content>
+    extension<T>(IEnumerable<T> records)
+        where T : unmanaged, IBasePointDataRecord
+    {
+        /// <inheritdoc cref="IBasePointDataRecord.CopyTo(Span{byte})" />
+        public int CopyTo(Span<byte> bytes)
+        {
+            var written = 0;
+            foreach (var record in records)
+            {
+                written += record.CopyTo(bytes[written..]);
+            }
+
+            return written;
+        }
+
+        /// <inheritdoc cref="IBasePointDataRecord.CopyTo(Span{byte})" />
+        public async ValueTask<int> CopyToAsync(Memory<byte> bytes, CancellationToken cancellation = default)
+        {
+            var written = 0;
+            foreach (var record in records)
+            {
+                written += await record.CopyToAsync(bytes[written..], cancellation).ConfigureAwait(false);
+            }
+
+            return written;
+        }
+    }
+
+    /// <content>
+    /// The <see cref="ReadOnlySpan{IBasePointDataRecord}"/> extensions.
+    /// </content>
+    extension<T>(ReadOnlySpan<T> records)
+        where T : unmanaged, IBasePointDataRecord
+    {
+        /// <inheritdoc cref="IBasePointDataRecord.CopyTo(Span{byte})" />
+        public int CopyTo(Span<byte> bytes)
+        {
+            var written = 0;
+            foreach (var record in records)
+            {
+                written += record.CopyTo(bytes[written..]);
+            }
+
+            return written;
+        }
+    }
+
+    /// <content>
+    /// The <see cref="ReadOnlyMemory{IBasePointDataRecord}"/> extensions.
+    /// </content>
+    extension<T>(ReadOnlyMemory<T> records)
+        where T : unmanaged, IBasePointDataRecord
+    {
+        /// <inheritdoc cref="IBasePointDataRecord.CopyTo(Span{byte})" />
+        public async ValueTask<int> CopyToAsync(Memory<byte> bytes, CancellationToken cancellation = default)
+        {
+            var written = 0;
+            while (records.Length > 0)
+            {
+                written += await records.Span[0].CopyToAsync(bytes[written..], cancellation).ConfigureAwait(false);
+                records = records[1..];
+            }
+
+            return written;
+        }
+    }
+
+    /// <content>
+    /// The <see cref="Memory{IBasePointDataRecord}"/> extensions.
+    /// </content>
+    extension<T>(Memory<T> records)
+        where T : unmanaged, IBasePointDataRecord
+    {
+        /// <inheritdoc cref="IBasePointDataRecord.CopyTo(Span{byte})" />
+        public async ValueTask<int> CopyToAsync(Memory<byte> bytes, CancellationToken cancellation = default)
+        {
+            var written = 0;
+            while (records.Length > 0)
+            {
+                written += await records.Span[0].CopyToAsync(bytes[written..], cancellation).ConfigureAwait(false);
+                records = records[1..];
+            }
+
+            return written;
+        }
+    }
+
     /// <summary>
     /// The <see cref="Stream"/> extensions.
     /// </summary>

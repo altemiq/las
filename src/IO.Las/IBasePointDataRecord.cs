@@ -102,13 +102,6 @@ public interface IBasePointDataRecord
     IBasePointDataRecord Clone();
 
     /// <summary>
-    /// Copies the contents of this instance into a destination <see cref="Span{T}"/>.
-    /// </summary>
-    /// <param name="destination">The destination <see cref="Span{T}"/> object.</param>
-    /// <returns>The number of bytes written.</returns>
-    int CopyTo(Span<byte> destination);
-
-    /// <summary>
     /// Converts this instance to a <see cref="GpsPointDataRecord"/>.
     /// </summary>
     /// <returns>The <see cref="GpsPointDataRecord"/>.</returns>
@@ -179,4 +172,11 @@ public interface IBasePointDataRecord
     /// <returns>The <see cref="ExtendedGpsColorNearInfraredWaveformPointDataRecord"/>.</returns>
     ExtendedGpsColorNearInfraredWaveformPointDataRecord ToExtendedGpsColorNearInfraredWaveformPointDataRecord();
 #endif
+
+    /// <summary>
+    /// Copies the contents of this instance into a destination <see cref="Span{T}"/>.
+    /// </summary>
+    /// <param name="destination">The destination <see cref="Span{T}"/> object.</param>
+    /// <returns>The number of bytes written.</returns>
+    internal int CopyTo(Span<byte> destination);
 }

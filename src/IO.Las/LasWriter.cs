@@ -94,7 +94,7 @@ public class LasWriter(Stream stream, bool leaveOpen = false) :
     /// <summary>
     /// Gets the RAW writer.
     /// </summary>
-    protected Writers.IPointDataRecordWriter RawWriter { get; } = new Writers.Raw.PointDataRecordWriter();
+    protected Writers.IPointDataRecordWriter RawWriter { get; } = new PointDataRecordWriter();
 
     /// <inheritdoc/>
     public virtual void Write(in HeaderBlock header, params IEnumerable<VariableLengthRecord> records)
@@ -147,31 +147,98 @@ public class LasWriter(Stream stream, bool leaveOpen = false) :
     }
 
     /// <inheritdoc />
-    public virtual void Write(IBasePointDataRecord record, ReadOnlySpan<byte> extraBytes = default)
-    {
-        ArgumentNullException.ThrowIfNull(record);
+    public void Write(PointDataRecord record, ReadOnlySpan<byte> extraBytes = default) => this.WriteCore(record, extraBytes);
 
-        var written = this.RawWriter.Write(this.buffer, record, extraBytes);
-        _ = this.BaseStream.SwitchStreamIfMultiple(LasStreams.PointData);
-        this.BaseStream.Write(this.buffer, 0, written);
-    }
+    /// <inheritdoc />
+    public void Write(GpsPointDataRecord record, ReadOnlySpan<byte> extraBytes = default) => this.WriteCore(record, extraBytes);
+
+#if LAS1_2_OR_GREATER
+    /// <inheritdoc/>
+    public void Write(ColorPointDataRecord record, ReadOnlySpan<byte> extraBytes = default) => this.WriteCore(record, extraBytes);
+
+    /// <inheritdoc/>
+    public void Write(GpsColorPointDataRecord record, ReadOnlySpan<byte> extraBytes = default) => this.WriteCore(record, extraBytes);
+#endif
+
+#if LAS1_3_OR_GREATER
+    /// <inheritdoc/>
+    public void Write(GpsWaveformPointDataRecord record, ReadOnlySpan<byte> extraBytes = default) => this.WriteCore(record, extraBytes);
+
+    /// <inheritdoc/>
+    public void Write(GpsColorWaveformPointDataRecord record, ReadOnlySpan<byte> extraBytes = default) => this.WriteCore(record, extraBytes);
+#endif
 
 #if LAS1_4_OR_GREATER
-    /// <summary>
-    /// Writes the extended variable length record.
-    /// </summary>
-    /// <param name="record">The extended variable length record value.</param>
+    /// <inheritdoc/>
+    public void Write(ExtendedGpsPointDataRecord record, ReadOnlySpan<byte> extraBytes = default) => this.WriteCore(record, extraBytes);
+
+    /// <inheritdoc/>
+    public void Write(ExtendedGpsColorPointDataRecord record, ReadOnlySpan<byte> extraBytes = default) => this.WriteCore(record, extraBytes);
+
+    /// <inheritdoc/>
+    public void Write(ExtendedGpsColorNearInfraredPointDataRecord record, ReadOnlySpan<byte> extraBytes = default) => this.WriteCore(record, extraBytes);
+
+    /// <inheritdoc/>
+    public void Write(ExtendedGpsWaveformPointDataRecord record, ReadOnlySpan<byte> extraBytes = default) => this.WriteCore(record, extraBytes);
+
+    /// <inheritdoc/>
+    public void Write(ExtendedGpsColorNearInfraredWaveformPointDataRecord record, ReadOnlySpan<byte> extraBytes = default) => this.WriteCore(record, extraBytes);
+
+    /// <inheritdoc/>
     public virtual void Write(ExtendedVariableLengthRecord record) => this.WriteExtendedVariableLengthRecord(record);
 #endif
 
-    /// <inheritdoc/>
-    public virtual async ValueTask WriteAsync(IBasePointDataRecord record, ReadOnlyMemory<byte> extraBytes = default, CancellationToken cancellationToken = default)
+    /// <inheritdoc />
+    void ILasWriter.Write(IBasePointDataRecord record, ReadOnlySpan<byte> extraBytes)
     {
         ArgumentNullException.ThrowIfNull(record);
+        this.WriteCore(record, extraBytes);
+    }
 
-        var written = await this.RawWriter.WriteAsync(this.buffer, record, extraBytes, cancellationToken).ConfigureAwait(false);
-        _ = this.BaseStream.SwitchStreamIfMultiple(LasStreams.PointData);
-        await this.BaseStream.WriteAsync(this.buffer.AsMemory(0, written), cancellationToken).ConfigureAwait(false);
+    /// <inheritdoc />
+    public ValueTask WriteAsync(PointDataRecord record, ReadOnlyMemory<byte> extraBytes = default, CancellationToken cancellationToken = default) => this.WriteCoreAsync(record, extraBytes, cancellationToken);
+
+    /// <inheritdoc />
+    public ValueTask WriteAsync(GpsPointDataRecord record, ReadOnlyMemory<byte> extraBytes = default, CancellationToken cancellationToken = default) => this.WriteCoreAsync(record, extraBytes, cancellationToken);
+
+#if LAS1_2_OR_GREATER
+    /// <inheritdoc />
+    public ValueTask WriteAsync(ColorPointDataRecord record, ReadOnlyMemory<byte> extraBytes = default, CancellationToken cancellationToken = default) => this.WriteCoreAsync(record, extraBytes, cancellationToken);
+
+    /// <inheritdoc />
+    public ValueTask WriteAsync(GpsColorPointDataRecord record, ReadOnlyMemory<byte> extraBytes = default, CancellationToken cancellationToken = default) => this.WriteCoreAsync(record, extraBytes, cancellationToken);
+#endif
+
+#if LAS1_3_OR_GREATER
+    /// <inheritdoc />
+    public ValueTask WriteAsync(GpsWaveformPointDataRecord record, ReadOnlyMemory<byte> extraBytes = default, CancellationToken cancellationToken = default) => this.WriteCoreAsync(record, extraBytes, cancellationToken);
+
+    /// <inheritdoc />
+    public ValueTask WriteAsync(GpsColorWaveformPointDataRecord record, ReadOnlyMemory<byte> extraBytes = default, CancellationToken cancellationToken = default) => this.WriteCoreAsync(record, extraBytes, cancellationToken);
+#endif
+
+#if LAS1_4_OR_GREATER
+    /// <inheritdoc />
+    public ValueTask WriteAsync(ExtendedGpsPointDataRecord record, ReadOnlyMemory<byte> extraBytes = default, CancellationToken cancellationToken = default) => this.WriteCoreAsync(record, extraBytes, cancellationToken);
+
+    /// <inheritdoc />
+    public ValueTask WriteAsync(ExtendedGpsColorPointDataRecord record, ReadOnlyMemory<byte> extraBytes = default, CancellationToken cancellationToken = default) => this.WriteCoreAsync(record, extraBytes, cancellationToken);
+
+    /// <inheritdoc />
+    public ValueTask WriteAsync(ExtendedGpsColorNearInfraredPointDataRecord record, ReadOnlyMemory<byte> extraBytes = default, CancellationToken cancellationToken = default) => this.WriteCoreAsync(record, extraBytes, cancellationToken);
+
+    /// <inheritdoc />
+    public ValueTask WriteAsync(ExtendedGpsWaveformPointDataRecord record, ReadOnlyMemory<byte> extraBytes = default, CancellationToken cancellationToken = default) => this.WriteCoreAsync(record, extraBytes, cancellationToken);
+
+    /// <inheritdoc />
+    public ValueTask WriteAsync(ExtendedGpsColorNearInfraredWaveformPointDataRecord record, ReadOnlyMemory<byte> extraBytes = default, CancellationToken cancellationToken = default) => this.WriteCoreAsync(record, extraBytes, cancellationToken);
+#endif
+
+    /// <inheritdoc/>
+    ValueTask ILasWriter.WriteAsync(IBasePointDataRecord record, ReadOnlyMemory<byte> extraBytes, CancellationToken cancellationToken)
+    {
+        ArgumentNullException.ThrowIfNull(record);
+        return this.WriteCoreAsync(record, extraBytes, cancellationToken);
     }
 
     /// <inheritdoc />
@@ -498,10 +565,58 @@ public class LasWriter(Stream stream, bool leaveOpen = false) :
     }
 #endif
 
+    /// <summary>
+    /// Writes the point.
+    /// </summary>
+    /// <param name="record">The record.</param>
+    /// <param name="extraBytes">The extra bytes.</param>
+    /// <remarks>It is up to the caller to ensure that <paramref name="record"/> is not <see langword="null"/>. No check is made in this method.</remarks>
+    protected virtual void WriteCore(IBasePointDataRecord record, ReadOnlySpan<byte> extraBytes = default)
+    {
+        var written = this.RawWriter.Write(this.buffer, record, extraBytes);
+        _ = this.BaseStream.SwitchStreamIfMultiple(LasStreams.PointData);
+        this.BaseStream.Write(this.buffer, 0, written);
+    }
+
+    /// <summary>
+    /// Writes the point asynchronously.
+    /// </summary>
+    /// <param name="record">The record.</param>
+    /// <param name="extraBytes">The extra bytes.</param>
+    /// <param name="cancellationToken">The cancellation token.</param>
+    /// <returns>The asynchronous task.</returns>
+    /// <remarks>It is up to the caller to ensure that <paramref name="record"/> is not <see langword="null"/>. No check is made in this method.</remarks>
+    protected virtual async ValueTask WriteCoreAsync(IBasePointDataRecord record, ReadOnlyMemory<byte> extraBytes = default, CancellationToken cancellationToken = default)
+    {
+        var written = await this.RawWriter.WriteAsync(this.buffer, record, extraBytes, cancellationToken).ConfigureAwait(false);
+        _ = this.BaseStream.SwitchStreamIfMultiple(LasStreams.PointData);
+        await this.BaseStream.WriteAsync(this.buffer.AsMemory(0, written), cancellationToken).ConfigureAwait(false);
+    }
+
     private static Stream CreateStream(string path) => path switch
     {
         not null when Directory.Exists(path) => LasMultipleFileStream.OpenWrite(path),
         not null => File.Open(path, FileMode.Create),
         _ => throw new NotSupportedException(),
     };
+
+    private sealed class PointDataRecordWriter : Writers.PointDataRecordWriter<IBasePointDataRecord>
+    {
+        /// <inheritdoc />
+        protected override int Write(Span<byte> destination, IBasePointDataRecord record, ReadOnlySpan<byte> extraBytes)
+        {
+            var bytesWritten = record.CopyTo(destination);
+            extraBytes.CopyTo(destination[bytesWritten..]);
+            return bytesWritten + extraBytes.Length;
+        }
+
+        /// <inheritdoc />
+        protected override ValueTask<int> WriteAsync(Memory<byte> destination, IBasePointDataRecord record, ReadOnlyMemory<byte> extraBytes, CancellationToken cancellationToken = default)
+        {
+            cancellationToken.ThrowIfCancellationRequested();
+            var bytesWritten = record.CopyTo(destination.Span);
+            extraBytes.CopyTo(destination[bytesWritten..]);
+            return new(bytesWritten + extraBytes.Length);
+        }
+    }
 }

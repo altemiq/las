@@ -8,7 +8,7 @@
   <Import Project="$([MSBuild]::GetPathOfFileAbove('$(MSBuildThisFileName.Replace('Packages', 'Versions'))$(MSBuildThisFileExtension)', '$(MSBuildThisFileDirectory)'))" />
 
   <ItemGroup>
-    <PackageVersion Include="TUnit" Version="1.65.0" />
+    <PackageVersion Include="TUnit" Version="1.65.38" />
   </ItemGroup>
   
   <ItemGroup Label="Apache">
@@ -20,11 +20,11 @@
   </ItemGroup>
   
   <ItemGroup Label="AWS">
-    <PackageVersion Include="AWSSDK.S3" Version="4.0.102.2" />
+    <PackageVersion Include="AWSSDK.S3" Version="4.0.102.3" />
   </ItemGroup>
   
   <ItemGroup Label="Azure">
-    <PackageVersion Include="Microsoft.Extensions.Azure" Version="1.14.0" />
+    <PackageVersion Include="Microsoft.Extensions.Azure" Version="1.14.1" />
   </ItemGroup>
   
   <ItemGroup Label="DataFrames">

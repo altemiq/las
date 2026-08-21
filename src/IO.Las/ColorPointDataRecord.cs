@@ -275,7 +275,7 @@ public readonly record struct ColorPointDataRecord :
 #endif
 
     /// <inheritdoc />
-    public int CopyTo(Span<byte> destination)
+    int IBasePointDataRecord.CopyTo(Span<byte> destination)
     {
         switch (BitConverter.IsLittleEndian)
         {

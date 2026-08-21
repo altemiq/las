@@ -26,7 +26,7 @@ public class ExtendedVariableLengthRecordTests
             []);
         HeaderBlockBuilder headerBuilder = new();
         var stream = Activator.CreateInstance(type) as Stream ?? throw new InvalidCastException();
-        LasWriter writer = new(stream, true);
+        ILasWriter writer = new LasWriter(stream, true);
         writer.Write(headerBuilder.HeaderBlock);
 
         // write a point
@@ -71,7 +71,10 @@ public class ExtendedVariableLengthRecordTests
         stream.Position = 0;
         writer.Write(headerBuilder.HeaderBlock);
 
-        await writer.DisposeAsync();
+        if (writer is IAsyncDisposable asyncDisposable)
+        {
+            await asyncDisposable.DisposeAsync();
+        }
 
         stream.Position = 0;
         LasReader reader = new(stream);

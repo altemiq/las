@@ -36,6 +36,7 @@
       T:System.Runtime.CompilerServices.IsClosedTypeAttribute|
       T:System.Runtime.CompilerServices.IsExternalInit|
       T:System.Runtime.CompilerServices.IUnion|
+      T:System.Runtime.CompilerServices.OverloadResolutionPriority|
       T:System.Runtime.CompilerServices.RequiredMemberAttribute|
       T:System.Runtime.CompilerServices.UnionAttribute|
     </MeziantouPolyfill_IncludedPolyfills>

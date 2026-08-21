@@ -23,6 +23,91 @@ public interface ILasWriter
     /// </summary>
     /// <param name="record">The record.</param>
     /// <param name="extraBytes">The extra bytes.</param>
+    void Write(PointDataRecord record, ReadOnlySpan<byte> extraBytes = default);
+
+    /// <summary>
+    /// Writes the point.
+    /// </summary>
+    /// <param name="record">The record.</param>
+    /// <param name="extraBytes">The extra bytes.</param>
+    void Write(GpsPointDataRecord record, ReadOnlySpan<byte> extraBytes = default);
+
+#if LAS1_2_OR_GREATER
+    /// <summary>
+    /// Writes the point.
+    /// </summary>
+    /// <param name="record">The record.</param>
+    /// <param name="extraBytes">The extra bytes.</param>
+    void Write(ColorPointDataRecord record, ReadOnlySpan<byte> extraBytes = default);
+
+    /// <summary>
+    /// Writes the point.
+    /// </summary>
+    /// <param name="record">The record.</param>
+    /// <param name="extraBytes">The extra bytes.</param>
+    void Write(GpsColorPointDataRecord record, ReadOnlySpan<byte> extraBytes = default);
+#endif
+
+#if LAS1_3_OR_GREATER
+    /// <summary>
+    /// Writes the point.
+    /// </summary>
+    /// <param name="record">The record.</param>
+    /// <param name="extraBytes">The extra bytes.</param>
+    void Write(GpsWaveformPointDataRecord record, ReadOnlySpan<byte> extraBytes = default);
+
+    /// <summary>
+    /// Writes the point.
+    /// </summary>
+    /// <param name="record">The record.</param>
+    /// <param name="extraBytes">The extra bytes.</param>
+    void Write(GpsColorWaveformPointDataRecord record, ReadOnlySpan<byte> extraBytes = default);
+#endif
+
+#if LAS1_4_OR_GREATER
+    /// <summary>
+    /// Writes the point.
+    /// </summary>
+    /// <param name="record">The record.</param>
+    /// <param name="extraBytes">The extra bytes.</param>
+    void Write(ExtendedGpsPointDataRecord record, ReadOnlySpan<byte> extraBytes = default);
+
+    /// <summary>
+    /// Writes the point.
+    /// </summary>
+    /// <param name="record">The record.</param>
+    /// <param name="extraBytes">The extra bytes.</param>
+    void Write(ExtendedGpsColorPointDataRecord record, ReadOnlySpan<byte> extraBytes = default);
+
+    /// <summary>
+    /// Writes the point.
+    /// </summary>
+    /// <param name="record">The record.</param>
+    /// <param name="extraBytes">The extra bytes.</param>
+    void Write(ExtendedGpsColorNearInfraredPointDataRecord record, ReadOnlySpan<byte> extraBytes = default);
+
+    /// <summary>
+    /// Writes the point.
+    /// </summary>
+    /// <param name="record">The record.</param>
+    /// <param name="extraBytes">The extra bytes.</param>
+    void Write(ExtendedGpsWaveformPointDataRecord record, ReadOnlySpan<byte> extraBytes = default);
+
+    /// <summary>
+    /// Writes the point.
+    /// </summary>
+    /// <param name="record">The record.</param>
+    /// <param name="extraBytes">The extra bytes.</param>
+    void Write(ExtendedGpsColorNearInfraredWaveformPointDataRecord record, ReadOnlySpan<byte> extraBytes = default);
+#endif
+
+    /// <summary>
+    /// Writes the point.
+    /// </summary>
+    /// <param name="record">The record.</param>
+    /// <param name="extraBytes">The extra bytes.</param>
+    [System.ComponentModel.EditorBrowsable(System.ComponentModel.EditorBrowsableState.Never)]
+    [System.Runtime.CompilerServices.OverloadResolutionPriority(-100)]
     void Write(IBasePointDataRecord record, ReadOnlySpan<byte> extraBytes = default);
 
 #if LAS1_4_OR_GREATER
@@ -34,11 +119,118 @@ public interface ILasWriter
 #endif
 
     /// <summary>
+    /// Writes the point.
+    /// </summary>
+    /// <param name="record">The record.</param>
+    /// <param name="extraBytes">The extra bytes.</param>
+    /// <param name="cancellationToken">The cancellation token.</param>
+    /// <returns>The asynchronous task.</returns>
+    ValueTask WriteAsync(PointDataRecord record, ReadOnlyMemory<byte> extraBytes = default, CancellationToken cancellationToken = default);
+
+    /// <summary>
+    /// Writes the point.
+    /// </summary>
+    /// <param name="record">The record.</param>
+    /// <param name="extraBytes">The extra bytes.</param>
+    /// <param name="cancellationToken">The cancellation token.</param>
+    /// <returns>The asynchronous task.</returns>
+    ValueTask WriteAsync(GpsPointDataRecord record, ReadOnlyMemory<byte> extraBytes = default, CancellationToken cancellationToken = default);
+
+#if LAS1_2_OR_GREATER
+    /// <summary>
     /// Writes the point asynchronously.
     /// </summary>
     /// <param name="record">The record.</param>
     /// <param name="extraBytes">The extra bytes.</param>
     /// <param name="cancellationToken">The cancellation token.</param>
     /// <returns>The asynchronous task.</returns>
+    ValueTask WriteAsync(ColorPointDataRecord record, ReadOnlyMemory<byte> extraBytes = default, CancellationToken cancellationToken = default);
+
+    /// <summary>
+    /// Writes the point asynchronously.
+    /// </summary>
+    /// <param name="record">The record.</param>
+    /// <param name="extraBytes">The extra bytes.</param>
+    /// <param name="cancellationToken">The cancellation token.</param>
+    /// <returns>The asynchronous task.</returns>
+    ValueTask WriteAsync(GpsColorPointDataRecord record, ReadOnlyMemory<byte> extraBytes = default, CancellationToken cancellationToken = default);
+#endif
+
+#if LAS1_3_OR_GREATER
+    /// <summary>
+    /// Writes the point asynchronously.
+    /// </summary>
+    /// <param name="record">The record.</param>
+    /// <param name="extraBytes">The extra bytes.</param>
+    /// <param name="cancellationToken">The cancellation token.</param>
+    /// <returns>The asynchronous task.</returns>
+    ValueTask WriteAsync(GpsWaveformPointDataRecord record, ReadOnlyMemory<byte> extraBytes = default, CancellationToken cancellationToken = default);
+
+    /// <summary>
+    /// Writes the point asynchronously.
+    /// </summary>
+    /// <param name="record">The record.</param>
+    /// <param name="extraBytes">The extra bytes.</param>
+    /// <param name="cancellationToken">The cancellation token.</param>
+    /// <returns>The asynchronous task.</returns>
+    ValueTask WriteAsync(GpsColorWaveformPointDataRecord record, ReadOnlyMemory<byte> extraBytes = default, CancellationToken cancellationToken = default);
+#endif
+
+#if LAS1_4_OR_GREATER
+    /// <summary>
+    /// Writes the point asynchronously.
+    /// </summary>
+    /// <param name="record">The record.</param>
+    /// <param name="extraBytes">The extra bytes.</param>
+    /// <param name="cancellationToken">The cancellation token.</param>
+    /// <returns>The asynchronous task.</returns>
+    ValueTask WriteAsync(ExtendedGpsPointDataRecord record, ReadOnlyMemory<byte> extraBytes = default, CancellationToken cancellationToken = default);
+
+    /// <summary>
+    /// Writes the point asynchronously.
+    /// </summary>
+    /// <param name="record">The record.</param>
+    /// <param name="extraBytes">The extra bytes.</param>
+    /// <param name="cancellationToken">The cancellation token.</param>
+    /// <returns>The asynchronous task.</returns>
+    ValueTask WriteAsync(ExtendedGpsColorPointDataRecord record, ReadOnlyMemory<byte> extraBytes = default, CancellationToken cancellationToken = default);
+
+    /// <summary>
+    /// Writes the point asynchronously.
+    /// </summary>
+    /// <param name="record">The record.</param>
+    /// <param name="extraBytes">The extra bytes.</param>
+    /// <param name="cancellationToken">The cancellation token.</param>
+    /// <returns>The asynchronous task.</returns>
+    ValueTask WriteAsync(ExtendedGpsColorNearInfraredPointDataRecord record, ReadOnlyMemory<byte> extraBytes = default, CancellationToken cancellationToken = default);
+
+    /// <summary>
+    /// Writes the point asynchronously.
+    /// </summary>
+    /// <param name="record">The record.</param>
+    /// <param name="extraBytes">The extra bytes.</param>
+    /// <param name="cancellationToken">The cancellation token.</param>
+    /// <returns>The asynchronous task.</returns>
+    ValueTask WriteAsync(ExtendedGpsWaveformPointDataRecord record, ReadOnlyMemory<byte> extraBytes = default, CancellationToken cancellationToken = default);
+
+    /// <summary>
+    /// Writes the point asynchronously.
+    /// </summary>
+    /// <param name="record">The record.</param>
+    /// <param name="extraBytes">The extra bytes.</param>
+    /// <param name="cancellationToken">The cancellation token.</param>
+    /// <returns>The asynchronous task.</returns>
+    ValueTask WriteAsync(ExtendedGpsColorNearInfraredWaveformPointDataRecord record, ReadOnlyMemory<byte> extraBytes = default, CancellationToken cancellationToken = default);
+#endif
+
+    /// <summary>
+    /// Writes the point asynchronously.
+    /// </summary>
+    /// <param name="record">The record.</param>
+    /// <param name="extraBytes">The extra bytes.</param>
+    /// <param name="cancellationToken">The cancellation token.</param>
+    /// <returns>The asynchronous task.</returns>
+    [System.ComponentModel.EditorBrowsable(System.ComponentModel.EditorBrowsableState.Never)]
+    [System.Runtime.CompilerServices.OverloadResolutionPriority(-100)]
     ValueTask WriteAsync(IBasePointDataRecord record, ReadOnlyMemory<byte> extraBytes = default, CancellationToken cancellationToken = default);
 }

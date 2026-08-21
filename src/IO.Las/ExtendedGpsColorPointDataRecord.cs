@@ -344,7 +344,7 @@ public readonly record struct ExtendedGpsColorPointDataRecord :
 #endif
 
     /// <inheritdoc />
-    public int CopyTo(Span<byte> destination)
+    int IBasePointDataRecord.CopyTo(Span<byte> destination)
     {
         switch (BitConverter.IsLittleEndian)
         {

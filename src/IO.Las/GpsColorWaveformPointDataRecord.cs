@@ -363,7 +363,7 @@ public readonly record struct GpsColorWaveformPointDataRecord :
 #endif
 
     /// <inheritdoc />
-    public int CopyTo(Span<byte> destination)
+    int IBasePointDataRecord.CopyTo(Span<byte> destination)
     {
         switch (BitConverter.IsLittleEndian)
         {

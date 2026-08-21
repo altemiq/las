@@ -130,13 +130,6 @@ public sealed class LazWriter : LasWriter
         }
     }
 
-    /// <inheritdoc/>
-    public override void Write(IBasePointDataRecord record, ReadOnlySpan<byte> extraBytes = default)
-    {
-        ArgumentNullException.ThrowIfNull(record);
-        this.pointWriter!.Write(this.BaseStream, record, extraBytes);
-    }
-
     /// <summary>
     /// Writes the point to the specified chunk.
     /// </summary>
@@ -176,7 +169,7 @@ public sealed class LazWriter : LasWriter
         {
             foreach (var point in points.Take(count))
             {
-                this.Write(
+                this.WriteCore(
                     point.PointDataRecord ?? throw new System.Diagnostics.UnreachableException(),
                     point.ExtraBytes.Span);
             }
@@ -184,7 +177,7 @@ public sealed class LazWriter : LasWriter
 #else
         foreach (var point in points.Take(count))
         {
-            this.Write(
+            this.WriteCore(
                 point.PointDataRecord ?? throw new System.Diagnostics.UnreachableException(),
                 point.ExtraBytes.Span);
         }
@@ -208,7 +201,7 @@ public sealed class LazWriter : LasWriter
         {
             foreach (var point in points)
             {
-                this.Write(
+                this.WriteCore(
                     point.PointDataRecord ?? throw new System.Diagnostics.UnreachableException(),
                     point.ExtraBytes.Span);
             }
@@ -216,7 +209,7 @@ public sealed class LazWriter : LasWriter
 #else
         foreach (var point in points)
         {
-            this.Write(
+            this.WriteCore(
                 point.PointDataRecord ?? throw new System.Diagnostics.UnreachableException(),
                 point.ExtraBytes.Span);
         }
@@ -260,13 +253,6 @@ public sealed class LazWriter : LasWriter
     public void Write(ExtendedVariableLengthRecord record, bool special, Action<long> callback) => this.extendedVariableLengthRecords.Add(new(record, special, callback));
 #endif
 
-    /// <inheritdoc/>
-    public override ValueTask WriteAsync(IBasePointDataRecord record, ReadOnlyMemory<byte> extraBytes = default, CancellationToken cancellationToken = default)
-    {
-        ArgumentNullException.ThrowIfNull(record);
-        return this.pointWriter!.WriteAsync(this.BaseStream, record, extraBytes, cancellationToken);
-    }
-
     /// <summary>
     /// Writes the point to the specified chunk asynchronously.
     /// </summary>
@@ -304,7 +290,7 @@ public sealed class LazWriter : LasWriter
         {
             foreach (var point in points.Take(count))
             {
-                await this.WriteAsync(
+                await this.WriteCoreAsync(
                     point.PointDataRecord ?? throw new System.Diagnostics.UnreachableException(),
                     point.ExtraBytes,
                     cancellationToken).ConfigureAwait(false);
@@ -313,7 +299,7 @@ public sealed class LazWriter : LasWriter
 #else
         foreach (var point in points.Take(count))
         {
-            await this.WriteAsync(
+            await this.WriteCoreAsync(
                 point.PointDataRecord ?? throw new System.Diagnostics.UnreachableException(),
                 point.ExtraBytes,
                 cancellationToken).ConfigureAwait(false);
@@ -340,7 +326,7 @@ public sealed class LazWriter : LasWriter
         {
             foreach (var point in points)
             {
-                await this.WriteAsync(
+                await this.WriteCoreAsync(
                     point.PointDataRecord ?? throw new System.Diagnostics.UnreachableException(),
                     point.ExtraBytes,
                     cancellationToken).ConfigureAwait(false);
@@ -349,7 +335,7 @@ public sealed class LazWriter : LasWriter
 #else
         foreach (var point in points)
         {
-            await this.WriteAsync(
+            await this.WriteCoreAsync(
                 point.PointDataRecord ?? throw new System.Diagnostics.UnreachableException(),
                 point.ExtraBytes,
                 cancellationToken).ConfigureAwait(false);
@@ -380,7 +366,7 @@ public sealed class LazWriter : LasWriter
             var current = default(int);
             await foreach (var point in points.WithCancellation(cancellationToken).ConfigureAwait(false))
             {
-                await this.WriteAsync(
+                await this.WriteCoreAsync(
                     point.PointDataRecord ?? throw new System.Diagnostics.UnreachableException(),
                     point.ExtraBytes,
                     cancellationToken).ConfigureAwait(false);
@@ -396,7 +382,7 @@ public sealed class LazWriter : LasWriter
         var current = default(int);
         await foreach (var point in points.WithCancellation(cancellationToken).ConfigureAwait(false))
         {
-            await this.WriteAsync(
+            await this.WriteCoreAsync(
                 point.PointDataRecord ?? throw new System.Diagnostics.UnreachableException(),
                 point.ExtraBytes,
                 cancellationToken).ConfigureAwait(false);
@@ -460,6 +446,14 @@ public sealed class LazWriter : LasWriter
         return base.DisposeAsyncCore();
     }
 #endif
+
+    /// <inheritdoc/>
+    protected override void WriteCore(IBasePointDataRecord record, ReadOnlySpan<byte> extraBytes = default) =>
+        this.pointWriter!.Write(this.BaseStream, record, extraBytes);
+
+    /// <inheritdoc/>
+    protected override ValueTask WriteCoreAsync(IBasePointDataRecord record, ReadOnlyMemory<byte> extraBytes = default, CancellationToken cancellationToken = default) =>
+        this.pointWriter!.WriteAsync(this.BaseStream, record, extraBytes, cancellationToken);
 
     private static Stream CreateStream(string path) => path switch
     {
