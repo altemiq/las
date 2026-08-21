@@ -5,10 +5,10 @@ public class ColorTests
     [Test]
     public async Task SetValues()
     {
-        var color = Color.FromRgb(12345, 54321, 12457);
+        var color = Color.FromRgb(12345, 54321, 13579);
         _ = await Assert.That(color.R).IsEqualTo((ushort)12345);
         _ = await Assert.That(color.G).IsEqualTo((ushort)54321);
-        _ = await Assert.That(color.B).IsEqualTo((ushort)12457);
+        _ = await Assert.That(color.B).IsEqualTo((ushort)13579);
     }
 
     [Test]
@@ -34,7 +34,7 @@ public class ColorTests
     [Test]
     public async Task RoundTrip()
     {
-        var color = Color.FromRgb(12345, 54321, 12457);
+        var color = Color.FromRgb(12345, 54321, 13579);
         var next = Color.FromRgb(color.R, color.G, color.B);
         _ = await Assert.That(color).IsEqualTo(next);
     }
