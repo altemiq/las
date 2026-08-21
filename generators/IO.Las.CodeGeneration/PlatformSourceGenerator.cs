@@ -15,7 +15,7 @@ using static Microsoft.CodeAnalysis.CSharp.SyntaxFactory;
 /// The LAS source generators.
 /// </summary>
 [Generator(LanguageNames.CSharp)]
-public class PlatformSourceGenerator : BaseSourceGenerator
+public sealed class PlatformSourceGenerator : BaseSourceGenerator
 {
     /// <inheritdoc/>
     public override void Initialize(IncrementalGeneratorInitializationContext context)
