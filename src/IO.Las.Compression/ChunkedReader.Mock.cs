@@ -4,9 +4,9 @@
 // </copyright>
 // -----------------------------------------------------------------------
 
-namespace Altemiq.IO.Las;
-
 #if DEBUG
+
+namespace Altemiq.IO.Las;
 
 /// <content>
 /// The mock components.
