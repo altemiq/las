@@ -16,7 +16,7 @@
   </ItemGroup>
   
   <ItemGroup Label="Aspire">
-    <PackageVersion Include="Aspire.Hosting.Testing" Version="13.5.0" />
+    <PackageVersion Include="Aspire.Hosting.Testing" Version="13.5.1" />
   </ItemGroup>
   
   <ItemGroup Label="AWS">
