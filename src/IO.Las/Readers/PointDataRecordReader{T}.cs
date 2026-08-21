@@ -12,7 +12,7 @@ namespace Altemiq.IO.Las.Readers;
 /// <typeparam name="T">The type of point.</typeparam>
 /// <param name="pointDataLength">The point data length.</param>
 internal closed class PointDataRecordReader<T>(int pointDataLength) : IPointDataRecordReader
-    where T : IBasePointDataRecord
+    where T : unmanaged, IBasePointDataRecord
 {
     /// <inheritdoc/>
     LasPointSpan IPointDataRecordReader.Read(ReadOnlySpan<byte> source) => new(this.Read(source[..pointDataLength]), source[pointDataLength..]);
