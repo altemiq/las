@@ -10,7 +10,7 @@
   </ItemGroup>
 
   <ItemGroup Label="Coding Standards">
-    <GlobalPackageReference Include="Altemiq.DotNet.CodingStandard" Version="1.0.378" />
+    <GlobalPackageReference Include="Altemiq.DotNet.CodingStandard" Version="1.0.380" />
   </ItemGroup>
   
 </Project>
