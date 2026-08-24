@@ -42,6 +42,9 @@ jobs:
             9.0.x
             10.0.x
 
+      - name: Run local/dotnet-tool-restore@v1
+        run: dotnet tool restore
+
       - name: Run local/dotnet-restore@v1
         run: dotnet restore
 
