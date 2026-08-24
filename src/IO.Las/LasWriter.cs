@@ -600,10 +600,10 @@ public class LasWriter(Stream stream, bool leaveOpen = false) :
         _ => throw new NotSupportedException(),
     };
 
-    private sealed class PointDataRecordWriter : Writers.PointDataRecordWriter<IBasePointDataRecord>
+    private sealed class PointDataRecordWriter : Writers.IPointDataRecordWriter
     {
         /// <inheritdoc />
-        protected override int Write(Span<byte> destination, IBasePointDataRecord record, ReadOnlySpan<byte> extraBytes)
+        public int Write(Span<byte> destination, IBasePointDataRecord record, ReadOnlySpan<byte> extraBytes)
         {
             var bytesWritten = record.CopyTo(destination);
             extraBytes.CopyTo(destination[bytesWritten..]);
@@ -611,7 +611,7 @@ public class LasWriter(Stream stream, bool leaveOpen = false) :
         }
 
         /// <inheritdoc />
-        protected override ValueTask<int> WriteAsync(Memory<byte> destination, IBasePointDataRecord record, ReadOnlyMemory<byte> extraBytes, CancellationToken cancellationToken = default)
+        public ValueTask<int> WriteAsync(Memory<byte> destination, IBasePointDataRecord record, ReadOnlyMemory<byte> extraBytes, CancellationToken cancellationToken = default)
         {
             cancellationToken.ThrowIfCancellationRequested();
             var bytesWritten = record.CopyTo(destination.Span);

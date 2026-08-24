@@ -11,7 +11,7 @@ namespace Altemiq.IO.Las.Writers;
 /// </summary>
 /// <typeparam name="T">The typeof of <see cref="IBasePointDataRecord"/>.</typeparam>
 internal abstract class PointDataRecordWriter<T> : IPointDataRecordWriter
-    where T : IBasePointDataRecord
+    where T : unmanaged, IBasePointDataRecord
 {
     /// <inheritdoc/>
     int IPointDataRecordWriter.Write(Span<byte> destination, IBasePointDataRecord record, ReadOnlySpan<byte> extraBytes) => record is T t ? this.Write(destination, t, extraBytes) : throw new InvalidOperationException();
