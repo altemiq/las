@@ -422,7 +422,7 @@ public sealed class ArrowLasReader : ILasReader, IDisposable
                 Overlap = GetBooleanValue(recordBatch.Column(Arrow.Constants.Columns.Extended.Overlap, StringComparer.Ordinal), index),
                 ScannerChannel = GetValue<byte>(recordBatch.Column(Arrow.Constants.Columns.Extended.ScannerChannel, StringComparer.Ordinal), index),
                 Classification = (ExtendedClassification)GetValue<byte>(recordBatch.Column(Arrow.Constants.Columns.Extended.Classification, StringComparer.Ordinal), index),
-                ScanAngle = GetValue<sbyte>(recordBatch.Column(Arrow.Constants.Columns.Extended.ScanAngle, StringComparer.Ordinal), index),
+                ScanAngle = GetValue<short>(recordBatch.Column(Arrow.Constants.Columns.Extended.ScanAngle, StringComparer.Ordinal), index),
                 GpsTime = GetValue<double>(recordBatch.Column(Arrow.Constants.Columns.Gps.GpsTime, StringComparer.Ordinal), index),
             },
             ExtendedGpsColorPointDataRecord.Id => new ExtendedGpsColorPointDataRecord
@@ -443,7 +443,7 @@ public sealed class ArrowLasReader : ILasReader, IDisposable
                 Overlap = GetBooleanValue(recordBatch.Column(Arrow.Constants.Columns.Extended.Overlap, StringComparer.Ordinal), index),
                 ScannerChannel = GetValue<byte>(recordBatch.Column(Arrow.Constants.Columns.Extended.ScannerChannel, StringComparer.Ordinal), index),
                 Classification = (ExtendedClassification)GetValue<byte>(recordBatch.Column(Arrow.Constants.Columns.Extended.Classification, StringComparer.Ordinal), index),
-                ScanAngle = GetValue<sbyte>(recordBatch.Column(Arrow.Constants.Columns.Extended.ScanAngle, StringComparer.Ordinal), index),
+                ScanAngle = GetValue<short>(recordBatch.Column(Arrow.Constants.Columns.Extended.ScanAngle, StringComparer.Ordinal), index),
                 GpsTime = GetValue<double>(recordBatch.Column(Arrow.Constants.Columns.Gps.GpsTime, StringComparer.Ordinal), index),
                 Color = new()
                 {
@@ -470,7 +470,7 @@ public sealed class ArrowLasReader : ILasReader, IDisposable
                 Overlap = GetBooleanValue(recordBatch.Column(Arrow.Constants.Columns.Extended.Overlap, StringComparer.Ordinal), index),
                 ScannerChannel = GetValue<byte>(recordBatch.Column(Arrow.Constants.Columns.Extended.ScannerChannel, StringComparer.Ordinal), index),
                 Classification = (ExtendedClassification)GetValue<byte>(recordBatch.Column(Arrow.Constants.Columns.Extended.Classification, StringComparer.Ordinal), index),
-                ScanAngle = GetValue<sbyte>(recordBatch.Column(Arrow.Constants.Columns.Extended.ScanAngle, StringComparer.Ordinal), index),
+                ScanAngle = GetValue<short>(recordBatch.Column(Arrow.Constants.Columns.Extended.ScanAngle, StringComparer.Ordinal), index),
                 GpsTime = GetValue<double>(recordBatch.Column(Arrow.Constants.Columns.Gps.GpsTime, StringComparer.Ordinal), index),
                 Color = new()
                 {
@@ -498,7 +498,7 @@ public sealed class ArrowLasReader : ILasReader, IDisposable
                 Overlap = GetBooleanValue(recordBatch.Column(Arrow.Constants.Columns.Extended.Overlap, StringComparer.Ordinal), index),
                 ScannerChannel = GetValue<byte>(recordBatch.Column(Arrow.Constants.Columns.Extended.ScannerChannel, StringComparer.Ordinal), index),
                 Classification = (ExtendedClassification)GetValue<byte>(recordBatch.Column(Arrow.Constants.Columns.Extended.Classification, StringComparer.Ordinal), index),
-                ScanAngle = GetValue<sbyte>(recordBatch.Column(Arrow.Constants.Columns.Extended.ScanAngle, StringComparer.Ordinal), index),
+                ScanAngle = GetValue<short>(recordBatch.Column(Arrow.Constants.Columns.Extended.ScanAngle, StringComparer.Ordinal), index),
                 GpsTime = GetValue<double>(recordBatch.Column(Arrow.Constants.Columns.Gps.GpsTime, StringComparer.Ordinal), index),
                 WavePacketDescriptorIndex = GetValue<byte>(recordBatch.Column(Arrow.Constants.Columns.Waveform.WavePacketDescriptorIndex, StringComparer.Ordinal), index),
                 ByteOffsetToWaveformData = GetValue<ulong>(recordBatch.Column(Arrow.Constants.Columns.Waveform.ByteOffsetToWaveformData, StringComparer.Ordinal), index),
@@ -526,7 +526,7 @@ public sealed class ArrowLasReader : ILasReader, IDisposable
                 Overlap = GetBooleanValue(recordBatch.Column(Arrow.Constants.Columns.Extended.Overlap, StringComparer.Ordinal), index),
                 ScannerChannel = GetValue<byte>(recordBatch.Column(Arrow.Constants.Columns.Extended.ScannerChannel, StringComparer.Ordinal), index),
                 Classification = (ExtendedClassification)GetValue<byte>(recordBatch.Column(Arrow.Constants.Columns.Extended.Classification, StringComparer.Ordinal), index),
-                ScanAngle = GetValue<sbyte>(recordBatch.Column(Arrow.Constants.Columns.Extended.ScanAngle, StringComparer.Ordinal), index),
+                ScanAngle = GetValue<short>(recordBatch.Column(Arrow.Constants.Columns.Extended.ScanAngle, StringComparer.Ordinal), index),
                 GpsTime = GetValue<double>(recordBatch.Column(Arrow.Constants.Columns.Gps.GpsTime, StringComparer.Ordinal), index),
                 Color = new()
                 {
@@ -711,7 +711,7 @@ public sealed class ArrowLasReader : ILasReader, IDisposable
                 FieldAccessors.ExtendedPointDataRecord.SetOverlap(destination, GetBooleanValue(recordBatch.Column(Arrow.Constants.Columns.Extended.Overlap, StringComparer.Ordinal), index));
                 FieldAccessors.ExtendedPointDataRecord.SetScannerChannel(destination, GetValue<byte>(recordBatch.Column(Arrow.Constants.Columns.Extended.ScannerChannel, StringComparer.Ordinal), index));
                 FieldAccessors.ExtendedPointDataRecord.SetClassification(destination, (ExtendedClassification)GetValue<byte>(recordBatch.Column(Arrow.Constants.Columns.Extended.Classification, StringComparer.Ordinal), index));
-                FieldAccessors.ExtendedPointDataRecord.SetScanAngle(destination, GetValue<sbyte>(recordBatch.Column(Arrow.Constants.Columns.Extended.ScanAngle, StringComparer.Ordinal), index));
+                FieldAccessors.ExtendedPointDataRecord.SetScanAngle(destination, GetValue<short>(recordBatch.Column(Arrow.Constants.Columns.Extended.ScanAngle, StringComparer.Ordinal), index));
                 FieldAccessors.ExtendedPointDataRecord.SetGpsTime(destination, GetValue<double>(recordBatch.Column(Arrow.Constants.Columns.Gps.GpsTime, StringComparer.Ordinal), index));
                 return ExtendedGpsPointDataRecord.Size;
             case ExtendedGpsColorPointDataRecord.Id:
@@ -731,7 +731,7 @@ public sealed class ArrowLasReader : ILasReader, IDisposable
                 FieldAccessors.ExtendedPointDataRecord.SetOverlap(destination, GetBooleanValue(recordBatch.Column(Arrow.Constants.Columns.Extended.Overlap, StringComparer.Ordinal), index));
                 FieldAccessors.ExtendedPointDataRecord.SetScannerChannel(destination, GetValue<byte>(recordBatch.Column(Arrow.Constants.Columns.Extended.ScannerChannel, StringComparer.Ordinal), index));
                 FieldAccessors.ExtendedPointDataRecord.SetClassification(destination, (ExtendedClassification)GetValue<byte>(recordBatch.Column(Arrow.Constants.Columns.Extended.Classification, StringComparer.Ordinal), index));
-                FieldAccessors.ExtendedPointDataRecord.SetScanAngle(destination, GetValue<sbyte>(recordBatch.Column(Arrow.Constants.Columns.Extended.ScanAngle, StringComparer.Ordinal), index));
+                FieldAccessors.ExtendedPointDataRecord.SetScanAngle(destination, GetValue<short>(recordBatch.Column(Arrow.Constants.Columns.Extended.ScanAngle, StringComparer.Ordinal), index));
                 FieldAccessors.ExtendedPointDataRecord.SetGpsTime(destination, GetValue<double>(recordBatch.Column(Arrow.Constants.Columns.Gps.GpsTime, StringComparer.Ordinal), index));
                 FieldAccessors.ExtendedPointDataRecord.SetColor(
                     destination,
@@ -756,7 +756,7 @@ public sealed class ArrowLasReader : ILasReader, IDisposable
                 FieldAccessors.ExtendedPointDataRecord.SetOverlap(destination, GetBooleanValue(recordBatch.Column(Arrow.Constants.Columns.Extended.Overlap, StringComparer.Ordinal), index));
                 FieldAccessors.ExtendedPointDataRecord.SetScannerChannel(destination, GetValue<byte>(recordBatch.Column(Arrow.Constants.Columns.Extended.ScannerChannel, StringComparer.Ordinal), index));
                 FieldAccessors.ExtendedPointDataRecord.SetClassification(destination, (ExtendedClassification)GetValue<byte>(recordBatch.Column(Arrow.Constants.Columns.Extended.Classification, StringComparer.Ordinal), index));
-                FieldAccessors.ExtendedPointDataRecord.SetScanAngle(destination, GetValue<sbyte>(recordBatch.Column(Arrow.Constants.Columns.Extended.ScanAngle, StringComparer.Ordinal), index));
+                FieldAccessors.ExtendedPointDataRecord.SetScanAngle(destination, GetValue<short>(recordBatch.Column(Arrow.Constants.Columns.Extended.ScanAngle, StringComparer.Ordinal), index));
                 FieldAccessors.ExtendedPointDataRecord.SetGpsTime(destination, GetValue<double>(recordBatch.Column(Arrow.Constants.Columns.Gps.GpsTime, StringComparer.Ordinal), index));
                 FieldAccessors.ExtendedPointDataRecord.SetColor(
                     destination,
@@ -782,7 +782,7 @@ public sealed class ArrowLasReader : ILasReader, IDisposable
                 FieldAccessors.ExtendedPointDataRecord.SetOverlap(destination, GetBooleanValue(recordBatch.Column(Arrow.Constants.Columns.Extended.Overlap, StringComparer.Ordinal), index));
                 FieldAccessors.ExtendedPointDataRecord.SetScannerChannel(destination, GetValue<byte>(recordBatch.Column(Arrow.Constants.Columns.Extended.ScannerChannel, StringComparer.Ordinal), index));
                 FieldAccessors.ExtendedPointDataRecord.SetClassification(destination, (ExtendedClassification)GetValue<byte>(recordBatch.Column(Arrow.Constants.Columns.Extended.Classification, StringComparer.Ordinal), index));
-                FieldAccessors.ExtendedPointDataRecord.SetScanAngle(destination, GetValue<sbyte>(recordBatch.Column(Arrow.Constants.Columns.Extended.ScanAngle, StringComparer.Ordinal), index));
+                FieldAccessors.ExtendedPointDataRecord.SetScanAngle(destination, GetValue<short>(recordBatch.Column(Arrow.Constants.Columns.Extended.ScanAngle, StringComparer.Ordinal), index));
                 FieldAccessors.ExtendedPointDataRecord.SetGpsTime(destination, GetValue<double>(recordBatch.Column(Arrow.Constants.Columns.Gps.GpsTime, StringComparer.Ordinal), index));
                 FieldAccessors.ExtendedPointDataRecord.SetWaveform(
                     destination,
@@ -811,7 +811,7 @@ public sealed class ArrowLasReader : ILasReader, IDisposable
                 FieldAccessors.ExtendedPointDataRecord.SetOverlap(destination, GetBooleanValue(recordBatch.Column(Arrow.Constants.Columns.Extended.Overlap, StringComparer.Ordinal), index));
                 FieldAccessors.ExtendedPointDataRecord.SetScannerChannel(destination, GetValue<byte>(recordBatch.Column(Arrow.Constants.Columns.Extended.ScannerChannel, StringComparer.Ordinal), index));
                 FieldAccessors.ExtendedPointDataRecord.SetClassification(destination, (ExtendedClassification)GetValue<byte>(recordBatch.Column(Arrow.Constants.Columns.Extended.Classification, StringComparer.Ordinal), index));
-                FieldAccessors.ExtendedPointDataRecord.SetScanAngle(destination, GetValue<sbyte>(recordBatch.Column(Arrow.Constants.Columns.Extended.ScanAngle, StringComparer.Ordinal), index));
+                FieldAccessors.ExtendedPointDataRecord.SetScanAngle(destination, GetValue<short>(recordBatch.Column(Arrow.Constants.Columns.Extended.ScanAngle, StringComparer.Ordinal), index));
                 FieldAccessors.ExtendedPointDataRecord.SetGpsTime(destination, GetValue<double>(recordBatch.Column(Arrow.Constants.Columns.Gps.GpsTime, StringComparer.Ordinal), index));
                 FieldAccessors.ExtendedPointDataRecord.SetColor(
                     destination,
