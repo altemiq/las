@@ -63,7 +63,7 @@ public sealed record CopcInfo : VariableLengthRecord
         this.RootHierOffset = System.Buffers.Binary.BinaryPrimitives.ReadUInt64LittleEndian(data[RootHierOffsetOffset..RootHierSizeOffset]);
         this.RootHierSize = System.Buffers.Binary.BinaryPrimitives.ReadUInt64LittleEndian(data[RootHierSizeOffset..GpsTimeMinimumOffset]);
         this.GpsTimeMinimum = System.Buffers.Binary.BinaryPrimitives.ReadDoubleLittleEndian(data[GpsTimeMinimumOffset..GpsTimeMaximumOffset]);
-        this.GpsTimeMaximum = System.Buffers.Binary.BinaryPrimitives.ReadDoubleLittleEndian(data[GpsTimeMinimumOffset..ReservedOffset]);
+        this.GpsTimeMaximum = System.Buffers.Binary.BinaryPrimitives.ReadDoubleLittleEndian(data[GpsTimeMaximumOffset..ReservedOffset]);
     }
 
     /// <summary>
@@ -123,7 +123,7 @@ public sealed record CopcInfo : VariableLengthRecord
         System.Buffers.Binary.BinaryPrimitives.WriteUInt64LittleEndian(destination[RootHierOffsetOffset..RootHierSizeOffset], this.RootHierOffset);
         System.Buffers.Binary.BinaryPrimitives.WriteUInt64LittleEndian(destination[RootHierSizeOffset..GpsTimeMinimumOffset], this.RootHierSize);
         System.Buffers.Binary.BinaryPrimitives.WriteDoubleLittleEndian(destination[GpsTimeMinimumOffset..GpsTimeMaximumOffset], this.GpsTimeMinimum);
-        System.Buffers.Binary.BinaryPrimitives.WriteDoubleLittleEndian(destination[GpsTimeMinimumOffset..ReservedOffset], this.GpsTimeMaximum);
+        System.Buffers.Binary.BinaryPrimitives.WriteDoubleLittleEndian(destination[GpsTimeMaximumOffset..ReservedOffset], this.GpsTimeMaximum);
         destination[ReservedOffset..TotalSize].Clear();
         return TotalSize;
     }
