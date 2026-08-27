@@ -285,7 +285,7 @@ public sealed record CopcHierarchy : ExtendedVariableLengthRecord
         /// <param name="a">The first key.</param>
         /// <param name="b">The second key.</param>
         /// <returns>The result of the operator.</returns>
-        public static bool operator !=(in VoxelKey a, in VoxelKey b) => a.Level != b.Level || a.X != b.X || a.Y != b.Y || a.Z == b.Z;
+        public static bool operator !=(in VoxelKey a, in VoxelKey b) => a.Level != b.Level || a.X != b.X || a.Y != b.Y || a.Z != b.Z;
 
         /// <inheritdoc/>
         public override bool Equals([System.Diagnostics.CodeAnalysis.NotNullWhen(true)] object? obj) => obj is VoxelKey key && this.Equals(key);
