@@ -632,7 +632,7 @@ public sealed class ArrowLasReader : ILasReader, IDisposable
                     GetValue<ushort>(recordBatch.Column(Arrow.Constants.Columns.Color.Red, StringComparer.Ordinal), index),
                     GetValue<ushort>(recordBatch.Column(Arrow.Constants.Columns.Color.Green, StringComparer.Ordinal), index),
                     GetValue<ushort>(recordBatch.Column(Arrow.Constants.Columns.Color.Blue, StringComparer.Ordinal), index));
-                return GpsPointDataRecord.Size;
+                return GpsColorPointDataRecord.Size;
 #endif
 #if LAS1_3_OR_GREATER
             case GpsWaveformPointDataRecord.Id:
