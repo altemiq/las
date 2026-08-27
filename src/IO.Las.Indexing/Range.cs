@@ -10,7 +10,7 @@ namespace Altemiq.IO.Las.Indexing;
 /// Represent a range has start and end indexes.
 /// </summary>
 /// <param name="start">The inclusive start index of the range.</param>
-/// <param name="end">The exclusive end index of the range.</param>
+/// <param name="end">The inclusive end index of the range.</param>
 [System.Runtime.InteropServices.StructLayout(System.Runtime.InteropServices.LayoutKind.Auto)]
 public readonly struct Range(Index start, Index end) : IEquatable<Range>
 {
@@ -25,7 +25,7 @@ public readonly struct Range(Index start, Index end) : IEquatable<Range>
     public Index Start { get; } = start;
 
     /// <summary>
-    /// Gets the exclusive end index of the <see cref="Range"/>.
+    /// Gets the inclusive end index of the <see cref="Range"/>.
     /// </summary>
     public Index End { get; } = end;
 
@@ -106,16 +106,20 @@ public readonly struct Range(Index start, Index end) : IEquatable<Range>
     /// </summary>
     /// <param name="length">A positive integer that represents the length of that the range will be used with.</param>
     /// <returns>The start offset and length of the range.</returns>
-    /// <remarks>For performance reasons, this method doesn't validate <paramref name="length"/> to ensure that it is not negative. It does ensure that <paramref name="length"/> is within the current <see cref="Range"/> instance.</remarks>
+    /// <remarks>
+    /// <para>For performance reasons, this method doesn't validate <paramref name="length"/> to ensure that it is not negative. It does ensure that <paramref name="length"/> is within the current <see cref="Range"/> instance.</para>
+    /// <para>When <see cref="End"/> points at a concrete element (such as an on-disk LAX interval end index) the end is inclusive and the length includes that element. When <see cref="End"/> is a from-end sentinel (such as <see cref="Index.End"/>) it points beyond the last element and the end is exclusive.</para>
+    /// </remarks>
     /// <exception cref="ArgumentOutOfRangeException">The offset is invalid.</exception>
     [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
     public (uint Offset, uint Length) GetOffsetAndLength(uint length)
     {
         var startOffset = this.Start.GetOffset(length);
         var endOffset = this.End.GetOffset(length);
+        var rangeLength = this.End.IsFromEnd ? endOffset - startOffset : endOffset - startOffset + 1;
 
         return endOffset <= length && startOffset <= endOffset
-            ? (startOffset, endOffset - startOffset)
+            ? (startOffset, rangeLength)
             : throw new ArgumentOutOfRangeException(nameof(length));
     }
 }

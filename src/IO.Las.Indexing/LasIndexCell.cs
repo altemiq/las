@@ -62,7 +62,7 @@ public readonly record struct LasIndexCell
     /// </summary>
     /// <param name="index">The point index.</param>
     /// <returns><see langword="true"/> if the <paramref name="index"/> is within this cell; otherwise <see langword="false"/>.</returns>
-    public bool Contains(uint index) => this.Intervals.Any(range => index >= range.Start.Value && index < range.End.Value);
+    public bool Contains(uint index) => this.Intervals.Any(range => index >= range.Start.Value && index <= range.End.Value);
 
     /// <summary>
     /// Determines whether the specified x-coordinate is in this cell.
