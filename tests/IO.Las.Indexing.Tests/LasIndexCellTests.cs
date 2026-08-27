@@ -62,8 +62,10 @@ public class LasIndexCellTests
     [Test]
     [Arguments(10U)]
     [Arguments(50U)]
+    [Arguments(100U)]
     [Arguments(200U)]
     [Arguments(250U)]
+    [Arguments(300U)]
     public async Task ContainsIndex(uint index)
     {
         var cell = new LasIndexCell(new(0, 0), new(100, 100), [new(10, 100), new(200, 300)]);
@@ -72,9 +74,7 @@ public class LasIndexCellTests
 
     [Test]
     [Arguments(5U)]
-    [Arguments(100U)]
     [Arguments(150U)]
-    [Arguments(300U)]
     [Arguments(350U)]
     public async Task DoesNotContainsIndex(uint index)
     {
