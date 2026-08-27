@@ -68,7 +68,7 @@ public readonly record struct GpsColorWaveformPointDataRecord :
         this.ScanAngleRank = (sbyte)data[Constants.PointDataRecord.ScanAngleRankFieldOffset];
         this.UserData = data[Constants.PointDataRecord.UserDataFieldOffset];
         this.PointSourceId = FieldAccessors.PointDataRecord.GetPointSourceId(data);
-        this.GpsTime = System.Buffers.Binary.BinaryPrimitives.ReadDoubleLittleEndian(data[Constants.PointDataRecord.GpsTimeFieldOffset..Constants.PointDataRecord.GpsColorFieldOffset]);
+        this.GpsTime = FieldAccessors.PointDataRecord.GetGpsTime(data);
         this.Color = new()
         {
             R = System.Buffers.Binary.BinaryPrimitives.ReadUInt16LittleEndian(data[Constants.PointDataRecord.GpsColorFieldOffset..]),

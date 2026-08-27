@@ -91,7 +91,7 @@ internal static class FieldAccessors
         /// </summary>
         /// <param name="source">The data.</param>
         /// <returns>The GPS time.</returns>
-        public static ushort GetGpsTime(ReadOnlySpan<byte> source) => System.Buffers.Binary.BinaryPrimitives.ReadUInt16LittleEndian(source[Constants.PointDataRecord.PointSourceIdFieldOffset..Constants.PointDataRecord.GpsTimeFieldOffset]);
+        public static double GetGpsTime(ReadOnlySpan<byte> source) => System.Buffers.Binary.BinaryPrimitives.ReadDoubleLittleEndian(source[Constants.PointDataRecord.GpsTimeFieldOffset..GpsPointDataRecord.Size]);
 
         /// <summary>
         /// Sets the GPS time.
