@@ -343,6 +343,9 @@ public static class CopcExtensions
                                 continue;
                             }
 
+                            // Collect the keys to remove, deferring the removal until after the enumeration
+                            // completes: removing from a Dictionary while iterating its keys throws.
+                            var keysToRemove = new List<EptKey>();
                             foreach (var currentKey in registry.Keys)
                             {
                                 var currentOctant = registry[currentKey];
@@ -395,7 +398,7 @@ public static class CopcExtensions
                                                 0));
                                         }
 
-                                        _ = registry.Remove(currentKey);
+                                        keysToRemove.Add(currentKey);
                                         moved = true;
                                     }
 
@@ -428,7 +431,12 @@ public static class CopcExtensions
                                 entries.Add(entry);
 
                                 currentOctant.Clean();
-                                _ = registry.Remove(currentKey);
+                                keysToRemove.Add(currentKey);
+                            }
+
+                            foreach (var keyToRemove in keysToRemove)
+                            {
+                                _ = registry.Remove(keyToRemove);
                             }
                         }
 
