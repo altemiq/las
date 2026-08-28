@@ -122,6 +122,7 @@ public class WebApplicationFactory : TUnit.Core.Interfaces.IAsyncInitializer, IA
                         byteRange = endByte - startByte + 1;
                         _ = manifestResourceStream.Seek(startByte, SeekOrigin.Begin);
                         context.Response.Headers.Append("Content-Range", $"bytes {startByte}-{byteRange - 1}/{byteRange}");
+                        context.Response.StatusCode = (int)HttpStatusCode.PartialContent;
                     }
 
                     var buffer = new byte[byteRange];

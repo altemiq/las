@@ -29,15 +29,12 @@ public sealed class HttpChunkedStream : ChunkedStream
     /// <inheritdoc/>
     protected override Stream? GetStream(long start, int length)
     {
-        var request = new HttpRequestMessage
-        {
-            RequestUri = this.uri,
-            Headers = { Range = new(start, start + length - 1) },
-        };
-
-        return this.httpClient.SendAsync(request).Result is { } response && response.EnsureSuccessStatusCode() is { StatusCode: HttpStatusCode.PartialContent }
-            ? response.Content.ReadAsStreamAsync().GetAwaiter().GetResult()
-            : default;
+        var valueTask = this.GetStreamAsync(start, length, CancellationToken.None);
+#pragma warning disable S5034
+        return valueTask.IsCompleted
+            ? valueTask.Result
+            : valueTask.AsTask().GetAwaiter().GetResult();
+#pragma warning restore S5034
     }
 
     /// <inheritdoc/>
@@ -49,8 +46,8 @@ public sealed class HttpChunkedStream : ChunkedStream
             Headers = { Range = new(start, start + length - 1) },
         };
 
-        return await this.httpClient.SendAsync(request, cancellationToken).ConfigureAwait(false) is { } response && response.EnsureSuccessStatusCode() is { StatusCode: HttpStatusCode.PartialContent }
-            ? await response.Content.ReadAsStreamAsync(cancellationToken).ConfigureAwait(false)
+        return await this.httpClient.SendAsync(request, cancellationToken).ConfigureAwait(false) is { Content: { } content, StatusCode: HttpStatusCode.PartialContent }
+            ? await content.ReadAsStreamAsync(cancellationToken).ConfigureAwait(false)
             : default;
     }
 }
