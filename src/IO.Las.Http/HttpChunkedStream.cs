@@ -6,6 +6,8 @@
 
 namespace Altemiq.IO.Las.Http;
 
+using System.Net;
+
 /// <summary>
 /// The <see cref="System.Net.Http"/> <see cref="Stream"/> for LAS.
 /// </summary>
@@ -33,7 +35,7 @@ public sealed class HttpChunkedStream : ChunkedStream
             Headers = { Range = new(start, start + length - 1) },
         };
 
-        return this.httpClient.SendAsync(request).Result is { IsSuccessStatusCode: true } response
+        return this.httpClient.SendAsync(request).Result is { } response && response.EnsureSuccessStatusCode() is { StatusCode: HttpStatusCode.PartialContent }
             ? response.Content.ReadAsStreamAsync().GetAwaiter().GetResult()
             : default;
     }
@@ -47,7 +49,7 @@ public sealed class HttpChunkedStream : ChunkedStream
             Headers = { Range = new(start, start + length - 1) },
         };
 
-        return await this.httpClient.SendAsync(request, cancellationToken).ConfigureAwait(false) is { IsSuccessStatusCode: true } response
+        return await this.httpClient.SendAsync(request, cancellationToken).ConfigureAwait(false) is { } response && response.EnsureSuccessStatusCode() is { StatusCode: HttpStatusCode.PartialContent }
             ? await response.Content.ReadAsStreamAsync(cancellationToken).ConfigureAwait(false)
             : default;
     }
