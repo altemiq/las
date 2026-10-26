@@ -41,6 +41,8 @@ jobs:
             8.0.x
             9.0.x
             10.0.x
+            
+      - uses: timheuer/setup-aspire@v0.1.0
 
       - name: Run local/dotnet-tool-restore@v1
         run: dotnet tool restore
