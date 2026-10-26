@@ -19,7 +19,7 @@
   </PropertyGroup>
   
   <ItemGroup>
-    <PackageReference Include="Polars.NET" VersionOverride="0.7.0" />
+    <PackageReference Include="Polars.NET" VersionOverride="1.0.0" />
   </ItemGroup>
   
   <ItemGroup>
