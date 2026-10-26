@@ -8,7 +8,7 @@
   <Import Project="$([MSBuild]::GetPathOfFileAbove('$(MSBuildThisFileName.Replace('Packages', 'Versions'))$(MSBuildThisFileExtension)', '$(MSBuildThisFileDirectory)'))" />
 
   <ItemGroup>
-    <PackageVersion Include="TUnit" Version="1.65.51" />
+    <PackageVersion Include="TUnit" Version="1.76.28" />
   </ItemGroup>
   
   <ItemGroup Label="Apache">
@@ -16,11 +16,11 @@
   </ItemGroup>
   
   <ItemGroup Label="Aspire">
-    <PackageVersion Include="Aspire.Hosting.Testing" Version="13.5.2" />
+    <PackageVersion Include="Aspire.Hosting.Testing" Version="13.6.4" />
   </ItemGroup>
   
   <ItemGroup Label="AWS">
-    <PackageVersion Include="AWSSDK.S3" Version="4.0.102.3" />
+    <PackageVersion Include="AWSSDK.S3" Version="4.0.104.6" />
   </ItemGroup>
   
   <ItemGroup Label="Azure">
@@ -28,14 +28,14 @@
   </ItemGroup>
   
   <ItemGroup Label="DataFrames">
-    <PackageVersion Include="Polars.NET.Native.linux-arm64" Version="0.7.0" />
-    <PackageVersion Include="Polars.NET.Native.linux-x64" Version="0.7.0" />
-    <PackageVersion Include="Polars.NET.Native.win-x64" Version="0.7.0" />
-    <PackageVersion Include="Polars.NET.Native.osx-arm64" Version="0.7.0" />
+    <PackageVersion Include="Polars.NET.Native.linux-arm64" Version="1.0.0" />
+    <PackageVersion Include="Polars.NET.Native.linux-x64" Version="1.0.0" />
+    <PackageVersion Include="Polars.NET.Native.win-x64" Version="1.0.0" />
+    <PackageVersion Include="Polars.NET.Native.osx-arm64" Version="1.0.0" />
   </ItemGroup>
   
   <ItemGroup Label="Microsoft.AspNetCore">
-    <PackageVersion Include="Microsoft.AspNetCore.Server.Kestrel" Version="2.3.12" />
+    <PackageVersion Include="Microsoft.AspNetCore.Server.Kestrel" Version="2.3.13" />
   </ItemGroup>
   
   <Choose>
@@ -46,14 +46,14 @@
     </When>
     <Otherwise>
       <ItemGroup>
-        <PackageVersion Include="Microsoft.Data.Sqlite" Version="10.0.11" />
-        <PackageVersion Include="SQLitePCLRaw.bundle_e_sqlite3" Version="3.0.4" />
+        <PackageVersion Include="Microsoft.Data.Sqlite" Version="10.0.14" />
+        <PackageVersion Include="SQLitePCLRaw.bundle_e_sqlite3" Version="3.0.5" />
       </ItemGroup>
     </Otherwise>
   </Choose>
 
   <ItemGroup>
-    <GlobalPackageReference Include="Meziantou.Polyfill" Version="1.0.161" />
+    <GlobalPackageReference Include="Meziantou.Polyfill" Version="1.0.169" />
   </ItemGroup>
 
 </Project>
