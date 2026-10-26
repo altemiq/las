@@ -8,8 +8,8 @@
   </ItemGroup>
   
   <ItemGroup Label="Azure">
-    <PackageVersion Include="Azure.Storage.Blobs" Version="12.29.1" />
-    <PackageVersion Include="Aspire.Hosting.Azure.Storage" Version="13.5.2" />
+    <PackageVersion Include="Azure.Storage.Blobs" Version="12.30.1" />
+    <PackageVersion Include="Aspire.Hosting.Azure.Storage" Version="13.6.4" />
   </ItemGroup>
   
 </Project>
