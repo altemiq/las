@@ -44,7 +44,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <GlobalPackageReference Include="Meziantou.Polyfill" Version="1.0.161" />
+    <GlobalPackageReference Include="Meziantou.Polyfill" Version="1.0.169" />
   </ItemGroup>
 
 </Project>
