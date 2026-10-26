@@ -21,6 +21,7 @@ public static class IndexingExtensions
     /// <content>
     /// The <see cref="VariableLengthRecordProcessor"/> extensions.
     /// </content>
+    /// <param name="processor">The processor.</param>
     extension(VariableLengthRecordProcessor processor)
     {
         /// <summary>

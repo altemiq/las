@@ -14,16 +14,17 @@ using System.Runtime.CompilerServices;
 /// <remarks>
 /// This is a value type so that arrays of <see cref="StreamingMedian5"/> are stored
 /// contiguously as a single heap allocation, rather than as an array of references
-/// to separately-allocated instances each containing its own <c>int[5]</c>. For the
-/// per-point LAZ decode/encode hot path this removes 16-96 heap allocations and
-/// 16-96 pointer indirections per reader/writer instance.
+/// to separately-allocated instances each containing its own <c language="csharp">int[5]</c>.
+/// For the per-point LAZ decode/encode hot path this removes 16-96 heap allocations
+/// and 16-96 pointer indirections per reader/writer instance.
 /// <para>
 /// A default-constructed (e.g. zero-initialised array element) instance behaves
 /// identically to the previous class' parameterless constructor: all five values
 /// are zero and the insertion phase starts in the "high" state. The latter is
 /// encoded here as the inverted field <see cref="low"/> so that
-/// <c>default(StreamingMedian5)</c> matches the class behaviour (<c>low == false</c>
-/// corresponds to the class' <c>high = true</c>).
+/// <c language="csharp">default(StreamingMedian5)</c> matches the class behaviour
+/// (<c language="csharp">low == false</c> corresponds to the class'
+/// <c language="csharp">high = true</c>).
 /// </para>
 /// </remarks>
 internal struct StreamingMedian5

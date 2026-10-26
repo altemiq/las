@@ -7,12 +7,12 @@
 namespace Altemiq.IO.Las;
 
 /// <content>
-/// The INFO command extensions.
+/// The <pre>info</pre> command extensions.
 /// </content>
 internal static partial class RootCommandExtensions
 {
     /// <summary>
-    /// Adds INFO to the root command.
+    /// Adds <pre>info</pre> to the root command.
     /// </summary>
     /// <typeparam name="T">The type of command.</typeparam>
     /// <param name="command">The command.</param>

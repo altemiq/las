@@ -157,7 +157,7 @@ public class LasWriterTests
         MemoryStream memoryStream = new();
         const double ExtraValue = 123.34;
         var span = new byte[sizeof(short)];
-        ILasWriter lasWriter = new LasWriter(memoryStream, true);
+        LasWriter lasWriter = new(memoryStream, true);
         lasWriter.Write(builder.HeaderBlock, geoKeyDirectoryTag, extraBytes);
 
         GpsPointDataRecord point = new()

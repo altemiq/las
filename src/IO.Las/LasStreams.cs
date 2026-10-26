@@ -15,6 +15,7 @@ internal static class LasStreams
     /// <summary>
     /// The <see cref="Stream"/> extensions.
     /// </summary>
+    /// <param name="stream">The stream.</param>
     extension(Stream stream)
     {
         /// <summary>

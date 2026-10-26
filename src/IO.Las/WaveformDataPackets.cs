@@ -8,7 +8,7 @@ namespace Altemiq.IO.Las;
 
 /// <summary>
 /// The packet of Raw Waveform Amplitude values for all records immediately follow this VLR header.
-/// Note that when using a <c>bit</c> resolution that is not an even increment of 8, the last byte of each waveform packet must be padded such that the next waveform record will start on an even byte boundary.
+/// Note that when using a <pre>bit</pre> resolution that is not an even increment of 8, the last byte of each waveform packet must be padded such that the next waveform record will start on an even byte boundary.
 /// </summary>
 public sealed record WaveformDataPackets : ExtendedVariableLengthRecord
 {

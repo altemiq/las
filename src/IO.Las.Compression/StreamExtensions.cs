@@ -18,6 +18,7 @@ internal static class StreamExtensions
     /// <summary>
     /// <see cref="Stream"/> extensions.
     /// </summary>
+    /// <param name="stream">The stream.</param>
     extension(Stream stream)
     {
         /// <summary>
@@ -422,24 +423,24 @@ internal static class StreamExtensions
         /// <para>
         /// <see cref="MemoryStream"/> has no public API to change the backing
         /// buffer after construction: the constructor parameters are all
-        /// stored in private (one of which, <c>_origin</c>, is
+        /// stored in private (one of which, <c language="csharp">_origin</c>, is
         /// <see langword="readonly"/>). This extension reaches into those
-        /// fields using <c>System.Runtime.CompilerServices.UnsafeAccessor</c>
+        /// fields using <pre>System.Runtime.CompilerServices.UnsafeAccessor</pre>
         /// on net8+, and cached <see cref="System.Reflection.FieldInfo"/>
         /// on older TFMs (which can still assign readonly fields).
         /// </para>
         /// <para>
         /// The result is equivalent to constructing
-        /// <c>new MemoryStream(buffer, index, count, writable: false, publiclyVisible: true)</c>
+        /// <c language="csharp">new MemoryStream(buffer, index, count, writable: false, publiclyVisible: true)</c>
         /// but reuses the existing instance, so hot paths that re-initialise a
         /// stream per chunk allocate nothing. The caller is responsible for
         /// ensuring <paramref name="memoryStream"/> was originally constructed
         /// as a non-expandable, non-writable byte-array-backed stream (the
         /// typical shape produced by the
-        /// <c>new MemoryStream(byte[], int, int, bool, bool)</c> constructor).
+        /// <c language="csharp">new MemoryStream(byte[], int, int, bool, bool)</c> constructor).
         /// </para>
         /// </remarks>
-        /// <exception cref="ArgumentException"><c><paramref name="index"/> + <paramref name="count"/></c> is not within <paramref name="buffer"/>.</exception>
+        /// <exception cref="ArgumentException"><c language="csharp"><paramref name="index"/> + <paramref name="count"/></c> is not within <paramref name="buffer"/>.</exception>
         public void SetBuffer(byte[] buffer, int index, int count)
         {
             ArgumentNullException.ThrowIfNull(buffer);
@@ -486,7 +487,7 @@ internal static class StreamExtensions
     /// <summary>
     /// Cached <see cref="System.Reflection.FieldInfo"/> handles for the
     /// private <see cref="MemoryStream"/> backing fields. Used by the
-    /// pre-net8 implementation of <c>SetBuffer</c>.
+    /// pre-net8 implementation of <pre>SetBuffer</pre>.
     /// </summary>
     [System.Diagnostics.CodeAnalysis.SuppressMessage("Major Code Smell", "S3011:Reflection should not be used to increase accessibility of classes, methods, or fields", Justification = "Deliberate: MemoryStream has no public API to swap its backing buffer; reflection is the documented fallback for pre-net8 TFMs that lack UnsafeAccessor.")]
     private static class MemoryStreamFields

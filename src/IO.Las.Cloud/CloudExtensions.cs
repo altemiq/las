@@ -6,7 +6,7 @@
 
 namespace Altemiq.IO.Las.Cloud;
 
-#pragma warning disable SA1101
+#pragma warning disable RCS1228, SA1101
 
 /// <summary>
 /// The <see cref="Cloud"/> extensions.
@@ -16,6 +16,7 @@ public static class CloudExtensions
     /// <summary>
     /// The <see cref="ILasReader"/> extensions
     /// </summary>
+    /// <param name="reader">The reader.</param>
     extension(ILasReader reader)
     {
         /// <summary>

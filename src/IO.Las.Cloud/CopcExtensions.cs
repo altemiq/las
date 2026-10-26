@@ -8,16 +8,17 @@
 namespace Altemiq.IO.Las;
 #pragma warning restore IDE0130, CheckNamespace
 
+#pragma warning disable CA1708, SA1101
+
 /// <summary>
 /// Cloud optimized extension methods.
 /// </summary>
-[System.Diagnostics.CodeAnalysis.SuppressMessage("StyleCop.CSharp.ReadabilityRules", "SA1101:Prefix local calls with this", Justification = "False positive")]
-[System.Diagnostics.CodeAnalysis.SuppressMessage("Naming", "CA1708:Identifiers should differ by more than case", Justification = "False positive")]
 public static class CopcExtensions
 {
     /// <summary>
     /// The <see cref="ILasReader"/> extensions
     /// </summary>
+    /// <param name="reader">The reader.</param>
     extension(ILasReader reader)
     {
         /// <summary>
@@ -456,6 +457,8 @@ public static class CopcExtensions
     /// <summary>
     /// The <see cref="LazReader"/> extensions
     /// </summary>
+    /// <typeparam name="T">The type of reader.</typeparam>
+    /// <param name="reader">The reader.</param>
     extension<T>(T reader)
         where T : ILasReader, ILazReader
     {
@@ -545,6 +548,7 @@ public static class CopcExtensions
     /// <summary>
     /// The <see cref="VariableLengthRecordProcessor"/> extensions
     /// </summary>
+    /// <param name="processor">The reader.</param>
     extension(VariableLengthRecordProcessor processor)
     {
         /// <summary>

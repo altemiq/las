@@ -12,7 +12,7 @@ namespace Altemiq.IO.Las;
 /// </summary>
 /// <remarks>
 /// The digitizer gain and offset are used to convert the raw digitized value to an absolute digitizer voltage using the formula:
-/// <c>VOLTS = OFFSET + GAIN * Raw_Waveform_Amplitude</c>.
+/// <c language="none">VOLTS = OFFSET + GAIN * Raw_Waveform_Amplitude</c>.
 /// </remarks>
 public sealed record WaveformPacketDescriptor : VariableLengthRecord
 {

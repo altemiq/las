@@ -11,7 +11,7 @@ using Readers.Compressed;
 
 /// <summary>
 /// Tests asserting the Initialize paths in <see cref="IntegerCompressor"/>, <see cref="IntegerDecompressor"/>.
-/// These tests are specifically written to guard the LINQ-to-for-loop refactor in <c>IntegerCompressor.Initialize</c>, <c>IntegerDecompressor.Initialize</c>.
+/// These tests are specifically written to guard the LINQ-to-for-loop refactor in <see cref="IntegerCompressor.Initialize"/>, <see cref="IntegerDecompressor.Initialize"/>.
 /// </summary>
 public class IntegerCoderInitializeTests
 {

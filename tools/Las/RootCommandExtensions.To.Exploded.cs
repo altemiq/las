@@ -7,12 +7,12 @@
 namespace Altemiq.IO.Las;
 
 /// <content>
-/// The <c>to exploded</c> extensions.
+/// The <pre>to exploded</pre> extensions.
 /// </content>
 internal static partial class RootCommandExtensions
 {
     /// <summary>
-    /// Adds the <c>to exploded</c> command.
+    /// Adds the <pre>to exploded</pre> command.
     /// </summary>
     /// <typeparam name="T">The type of command.</typeparam>
     /// <param name="command">The command.</param>

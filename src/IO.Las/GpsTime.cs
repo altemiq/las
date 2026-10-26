@@ -71,11 +71,11 @@ internal static class GpsTime
     public static double GetOffset(in HeaderBlock header)
     {
         // if our points have a GPS time.
-        return IsValidPointDataFormat(header)
-            ? GetOffsetOrThrow(header)
+        return IsGpsPointDataFormat(header)
+            ? GetOffsetOrDefault(header)
             : default;
 
-        static bool IsValidPointDataFormat(in HeaderBlock header)
+        static bool IsGpsPointDataFormat(in HeaderBlock header)
         {
 #if LAS1_2_OR_GREATER
             return header.PointDataFormatId is not PointDataRecord.Id and not ColorPointDataRecord.Id;
@@ -84,31 +84,17 @@ internal static class GpsTime
 #endif
         }
 
-        static double GetOffsetOrThrow(in HeaderBlock header)
+        static double GetOffsetOrDefault(in HeaderBlock header)
         {
 #if LAS1_2_OR_GREATER
-            return HasFlag(header.GlobalEncoding, GlobalEncoding.StandardGpsTime)
-#if LAS1_5_OR_GREATER
-                ? GetAdjusted(header)
-#else
-                ? StandardOffset
-#endif
-                : GetOffset(CalculateGpsWeek(header));
-
-#if LAS1_5_OR_GREATER
-            static double GetAdjusted(in HeaderBlock header)
+            return header.GlobalEncoding.HasFlag(GlobalEncoding.StandardGpsTime) switch
             {
-                return HasFlag(header.GlobalEncoding, GlobalEncoding.TimeOffsetFlag)
-                    ? header.TimeOffset
-                    : StandardOffset;
-            }
+#if LAS1_5_OR_GREATER
+                true when header.GlobalEncoding.HasFlag(GlobalEncoding.TimeOffsetFlag) => header.TimeOffset,
 #endif
-
-            [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
-            static bool HasFlag(GlobalEncoding globalEncoding, GlobalEncoding flag)
-            {
-                return (globalEncoding & flag) == flag;
-            }
+                true => StandardOffset,
+                false => GetOffset(CalculateGpsWeek(header)),
+            };
 #else
             return GetOffset(CalculateGpsWeek(header));
 #endif

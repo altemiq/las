@@ -7,16 +7,16 @@
 namespace Altemiq.IO.Las.Geodesy;
 
 /// <summary>
-/// The <c>Geodesy</c> extensions.
+/// The <see cref="Geodesy"/> extensions.
 /// </summary>
 public static class GeodesyExtensions
 {
 #if LAS1_4_OR_GREATER
     /// <summary>
-    /// Gets the WKT from the list of <c>GeoTIFF</c> tags.
+    /// Gets the WKT from the list of <pre>GeoTIFF</pre> tags.
     /// </summary>
-    /// <param name="records">The list of <c>GeoTIFF</c> tags.</param>
-    /// <returns>An <see cref="IEnumerable{T}"/> constaining the <c>WKT</c> tags if possible.</returns>
+    /// <param name="records">The list of <pre>GeoTIFF</pre> tags.</param>
+    /// <returns>An <see cref="IEnumerable{T}"/> constaining the <pre>WKT</pre> tags if possible.</returns>
     /// <exception cref="ArgumentNullException"><paramref name="records"/> is <see langword="null"/>.</exception>
     public static IEnumerable<VariableLengthRecord> ToWkt(this IReadOnlyCollection<VariableLengthRecord> records)
     {

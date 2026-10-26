@@ -451,25 +451,12 @@ public class HeaderBlockBuilder
     }
 
 #if LAS1_5_OR_GREATER
-    private double GetGpsTime(DateTime gpsTime)
+    private double GetGpsTime(DateTime gpsTime) => this.GlobalEncoding.HasFlag(GlobalEncoding.StandardGpsTime) switch
     {
-        return HasFlag(this.GlobalEncoding, GlobalEncoding.StandardGpsTime)
-            ? GetAdjusted(gpsTime)
-            : GpsTime.DateTimeToGpsWeekTime(gpsTime, 0);
-
-        double GetAdjusted(DateTime value)
-        {
-            return HasFlag(this.GlobalEncoding, GlobalEncoding.TimeOffsetFlag)
-                ? GpsTime.DateTimeToTimeOffsetGpsTime(value, this.TimeOffset)
-                : GpsTime.DateTimeToAdjustedStandardGpsTime(value);
-        }
-
-        [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
-        static bool HasFlag(GlobalEncoding globalEncoding, GlobalEncoding flag)
-        {
-            return (globalEncoding & flag) == flag;
-        }
-    }
+        true when this.GlobalEncoding.HasFlag(GlobalEncoding.TimeOffsetFlag) => GpsTime.DateTimeToTimeOffsetGpsTime(gpsTime, this.TimeOffset),
+        true => GpsTime.DateTimeToAdjustedStandardGpsTime(gpsTime),
+        false => GpsTime.DateTimeToGpsWeekTime(gpsTime, 0),
+    };
 #endif
 
     private HeaderBlock CreateHeaderBlock()

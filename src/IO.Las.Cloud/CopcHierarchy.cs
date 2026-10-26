@@ -7,7 +7,7 @@
 namespace Altemiq.IO.Las.Cloud;
 
 /// <summary>
-/// The <c>COPC</c> hierarchy.
+/// The <pre>COPC</pre> hierarchy.
 /// </summary>
 public sealed record CopcHierarchy : ExtendedVariableLengthRecord
 {
@@ -36,7 +36,7 @@ public sealed record CopcHierarchy : ExtendedVariableLengthRecord
             RecordId = TagRecordId,
             RecordLengthAfterHeader = (ushort)(entries.Count * EntrySize),
             Description = "EPT hierarchy",
-        }) => this.Root = new([.. entries]);
+        }) => this.Root = [with([.. entries])];
 
     /// <summary>
     /// Initializes a new instance of the <see cref="CopcHierarchy"/> class.
@@ -50,7 +50,7 @@ public sealed record CopcHierarchy : ExtendedVariableLengthRecord
     {
         var temp = info.RootHierOffset - evlrStart;
         var rootOffset = (int)(temp - ExtendedVariableLengthRecordHeader.Size);
-        this.Root = new(data[rootOffset..], (int)(info.RootHierSize / EntrySize));
+        this.Root = [with(data[rootOffset..], (int)(info.RootHierSize / EntrySize))];
 
         // go through reach entry in root
         foreach (var entry in this.Root)

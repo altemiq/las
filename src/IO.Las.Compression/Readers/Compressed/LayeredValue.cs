@@ -27,7 +27,7 @@ internal sealed class LayeredValue(bool requested)
     /// <summary>
     /// The reusable stream over the current chunk's slice of the shared byte
     /// buffer. Initialised to an empty non-expandable MemoryStream and
-    /// re-targeted on every chunk via the <c>SetBuffer</c> extension method,
+    /// re-targeted on every chunk via the <c language="csharp">SetBuffer</c> extension method,
     /// instead of being reallocated. Eliminates what used to be
     /// N-layers-per-chunk <see cref="MemoryStream"/> allocations.
     /// </summary>

@@ -16,6 +16,7 @@ internal static partial class PolyfillExtensions
     /// <summary>
     /// The <see cref="Guid"/> extensions.
     /// </summary>
+    /// <param name="guid">The GUID.</param>
     extension(Guid guid)
     {
         /// <summary>

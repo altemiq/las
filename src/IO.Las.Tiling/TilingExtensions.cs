@@ -16,6 +16,7 @@ public static class TilingExtensions
     /// <summary>
     /// The <see cref="VariableLengthRecordProcessor"/> extensions.
     /// </summary>
+    /// <param name="processor">The processor.</param>
     extension(VariableLengthRecordProcessor processor)
     {
         /// <summary>

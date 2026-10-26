@@ -9,7 +9,7 @@ namespace Altemiq.IO.Las.Info;
 using Humanizer;
 
 /// <summary>
-/// the <c>JSON</c> <see cref="ILasReaderFormatter"/>.
+/// The <pre>JSON</pre> <see cref="ILasReaderFormatter"/>.
 /// </summary>
 /// <param name="writer">The JSON writer.</param>
 internal sealed class JsonLasReaderFormatter(System.Text.Json.Utf8JsonWriter writer) : ILasReaderFormatter

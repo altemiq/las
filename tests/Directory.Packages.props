@@ -20,7 +20,7 @@
   </ItemGroup>
   
   <ItemGroup Label="AWS">
-    <PackageVersion Include="AWSSDK.S3" Version="4.0.104.6" />
+    <PackageVersion Include="AWSSDK.S3" Version="4.0.104.7" />
   </ItemGroup>
   
   <ItemGroup Label="Azure">
@@ -28,10 +28,11 @@
   </ItemGroup>
   
   <ItemGroup Label="DataFrames">
-    <PackageVersion Include="Polars.NET.Native.linux-arm64" Version="1.0.0" />
-    <PackageVersion Include="Polars.NET.Native.linux-x64" Version="1.0.0" />
-    <PackageVersion Include="Polars.NET.Native.win-x64" Version="1.0.0" />
-    <PackageVersion Include="Polars.NET.Native.osx-arm64" Version="1.0.0" />
+    <PackageVersion Include="Polars.NET" Version="1.0.1" />
+    <PackageVersion Include="Polars.NET.Native.linux-arm64" Version="1.0.1" />
+    <PackageVersion Include="Polars.NET.Native.linux-x64" Version="1.0.1" />
+    <PackageVersion Include="Polars.NET.Native.win-x64" Version="1.0.1" />
+    <PackageVersion Include="Polars.NET.Native.osx-arm64" Version="1.0.1" />
   </ItemGroup>
   
   <ItemGroup Label="Microsoft.AspNetCore">

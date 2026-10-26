@@ -16,6 +16,7 @@ public static partial class ExtensionMethods
     /// <summary>
     /// The <see cref="ExtraBytesItem"/> extensions.
     /// </summary>
+    /// <param name="item">The item.</param>
     extension(ExtraBytesItem item)
     {
         /// <summary>

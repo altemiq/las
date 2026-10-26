@@ -16,6 +16,8 @@ public static partial class ExtensionMethods
     /// <content>
     /// The <see cref="IBasePointDataRecord"/> extensions.
     /// </content>
+    /// <typeparam name="T">The type of record.</typeparam>
+    /// <param name="record">The record.</param>
     extension<T>(T record)
         where T : unmanaged, IBasePointDataRecord
     {
@@ -33,6 +35,8 @@ public static partial class ExtensionMethods
     /// <content>
     /// The <see cref="IEnumerable{IBasePointDataRecord}"/> extensions.
     /// </content>
+    /// <typeparam name="T">The type of record.</typeparam>
+    /// <param name="records">The records.</param>
     extension<T>(IEnumerable<T> records)
         where T : unmanaged, IBasePointDataRecord
     {
@@ -64,6 +68,8 @@ public static partial class ExtensionMethods
     /// <content>
     /// The <see cref="ReadOnlySpan{IBasePointDataRecord}"/> extensions.
     /// </content>
+    /// <typeparam name="T">The type of record.</typeparam>
+    /// <param name="records">The records.</param>
     extension<T>(ReadOnlySpan<T> records)
         where T : unmanaged, IBasePointDataRecord
     {
@@ -83,6 +89,8 @@ public static partial class ExtensionMethods
     /// <content>
     /// The <see cref="ReadOnlyMemory{IBasePointDataRecord}"/> extensions.
     /// </content>
+    /// <typeparam name="T">The type of record.</typeparam>
+    /// <param name="records">The records.</param>
     extension<T>(ReadOnlyMemory<T> records)
         where T : unmanaged, IBasePointDataRecord
     {
@@ -103,6 +111,8 @@ public static partial class ExtensionMethods
     /// <content>
     /// The <see cref="Memory{IBasePointDataRecord}"/> extensions.
     /// </content>
+    /// <typeparam name="T">The type of record.</typeparam>
+    /// <param name="records">The records.</param>
     extension<T>(Memory<T> records)
         where T : unmanaged, IBasePointDataRecord
     {
@@ -123,6 +133,7 @@ public static partial class ExtensionMethods
     /// <summary>
     /// The <see cref="Stream"/> extensions.
     /// </summary>
+    /// <param name="stream">The stream.</param>
     extension(Stream stream)
     {
         /// <summary>

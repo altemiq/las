@@ -139,7 +139,7 @@ internal closed class PointDataRecordReader<T>(ArithmeticDecoder decoder, int po
     /// <param name="destination">The destination buffer.</param>
     /// <remarks>
     /// Subclasses override this to append any per-format trailing bytes (GPS time,
-    /// color, waveform, extra bytes) into <c>destination[pointDataRecordSize..]</c>.
+    /// color, waveform, extra bytes) into <c language="csharp">destination[pointDataRecordSize..]</c>.
     /// </remarks>
     protected virtual void ProcessData(Span<byte> destination) => this.ProcessDataCore(destination);
 

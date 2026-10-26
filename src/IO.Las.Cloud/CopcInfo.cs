@@ -7,7 +7,7 @@
 namespace Altemiq.IO.Las.Cloud;
 
 /// <summary>
-/// Represents the <c>COPC</c> information.
+/// Represents the <pre>COPC</pre> information.
 /// </summary>
 /// <remarks>
 /// <para>The info VLR <i>MUST</i> exist.</para>

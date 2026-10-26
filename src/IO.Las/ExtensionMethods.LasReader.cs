@@ -16,6 +16,7 @@ public static partial class ExtensionMethods
     /// <summary>
     /// The <see cref="ILasReader"/> extensions.
     /// </summary>
+    /// <param name="reader">The reader.</param>
     extension(ILasReader reader)
     {
 #if LAS1_4_OR_GREATER

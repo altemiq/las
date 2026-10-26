@@ -8,6 +8,8 @@ namespace Altemiq.IO.Las;
 
 using System.Runtime.CompilerServices;
 
+#pragma warning disable RCS1141
+
 /// <summary>
 /// Extensions for <see cref="BitConverter"/>.
 /// </summary>

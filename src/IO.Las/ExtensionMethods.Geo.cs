@@ -14,14 +14,14 @@ namespace Altemiq.IO.Las;
 public static partial class ExtensionMethods
 {
     /// <summary>
-    /// Gets a value indicating whether the specified variable length record is a <c>GeoTIFF</c> tag.
+    /// Gets a value indicating whether the specified variable length record is a <pre>GeoTIFF</pre> tag.
     /// </summary>
     /// <param name="record">The variable length record.</param>
-    /// <returns><see langword="true"/> is <paramref name="record"/> is a <c>GeoTIFF</c> tag; otherwise <see langword="false"/>.</returns>
+    /// <returns><see langword="true"/> is <paramref name="record"/> is a <pre>GeoTIFF</pre> tag; otherwise <see langword="false"/>.</returns>
     public static bool IsGeoTiff(this VariableLengthRecord record) => record is GeoAsciiParamsTag or GeoDoubleParamsTag or GeoKeyDirectoryTag;
 
     /// <summary>
-    /// Removes the <c>GeoTIFF</c> tags from the list.
+    /// Removes the <pre>GeoTIFF</pre> tags from the list.
     /// </summary>
     /// <param name="records">The list of variable length records.</param>
     public static void RemoveGeoTiff(this IList<VariableLengthRecord> records)
@@ -37,14 +37,14 @@ public static partial class ExtensionMethods
 
 #if LAS1_4_OR_GREATER
     /// <summary>
-    /// Gets a value indicating whether the specified variable length record is a <c>WKT</c> tag.
+    /// Gets a value indicating whether the specified variable length record is a <pre>WKT</pre> tag.
     /// </summary>
     /// <param name="record">The variable length record.</param>
-    /// <returns><see langword="true"/> is <paramref name="record"/> is a <c>WKT</c> tag; otherwise <see langword="false"/>.</returns>
+    /// <returns><see langword="true"/> is <paramref name="record"/> is a <pre>WKT</pre> tag; otherwise <see langword="false"/>.</returns>
     public static bool IsWkt(this VariableLengthRecord record) => record is OgcCoordinateSystemWkt or OgcMathTransformWkt;
 
     /// <summary>
-    /// Removes the <c>WKT</c> tags from the list.
+    /// Removes the <pre>WKT</pre> tags from the list.
     /// </summary>
     /// <param name="records">The list of variable length records.</param>
     public static void RemoveWkt(this IList<VariableLengthRecord> records)

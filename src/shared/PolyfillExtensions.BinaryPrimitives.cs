@@ -6,7 +6,7 @@
 
 namespace Altemiq.IO.Las;
 
-#pragma warning disable CA1708
+#pragma warning disable CA1708, RCS1141, RCS1228
 
 /// <content>
 /// Extension methods for <see cref="System.Buffers.Binary.BinaryPrimitives"/>.

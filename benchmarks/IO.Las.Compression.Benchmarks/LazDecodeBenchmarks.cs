@@ -16,11 +16,11 @@ using BenchmarkDotNet.Attributes;
 /// </summary>
 /// <remarks>
 /// This benchmark file is deliberately written to be source-compatible
-/// with every published version of <c>Altemiq.IO.Las.Compression</c> on
+/// with every published version of <see cref="Compression"/> on
 /// the GitHub Packages feed, so the same binary can be compiled against
 /// either the local source tree or a published baseline package for
 /// side-by-side throughput comparison. See <see cref="Program"/> for the
-/// per-job <c>LasCompressionVersion</c> swap config.
+/// per-job <c language="csharp">LasCompressionVersion</c> swap config.
 /// </remarks>
 [MemoryDiagnoser]
 public class LazDecodeBenchmarks

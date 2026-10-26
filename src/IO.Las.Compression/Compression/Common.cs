@@ -19,7 +19,7 @@ internal static class Common
     /// For LAS files with the return (r) and the number (n) of returns field correctly populated the mapping should really
     /// be only the following.
     /// </para>
-    /// <code>
+    /// <code language="none">
     ///  { 15, 15, 15, 15, 15, 15, 15, 15 },
     ///  { 15,  0, 15, 15, 15, 15, 15, 15 },
     ///  { 15,  1,  2, 15, 15, 15, 15, 15 },
@@ -55,7 +55,7 @@ internal static class Common
     /// For LAS files with the return (r) and the number (n) of returns field correctly populated the mapping should really
     /// be only the following.
     /// </para>
-    /// <code>
+    /// <code language="none">
     ///  {  0,  7,  7,  7,  7,  7,  7,  7 },
     ///  {  7,  0,  7,  7,  7,  7,  7,  7 },
     ///  {  7,  1,  0,  7,  7,  7,  7,  7 },
@@ -91,7 +91,7 @@ internal static class Common
     /// For LAS points with correctly populated return numbers (1 &lt;= r &lt;= n) and number of returns of given pulse (1 &lt;= n &lt;= 15) the return mapping that
     /// serializes the possible combinations into one number should be the following.
     /// </para>
-    /// <code>
+    /// <code language="none">
     ///  { ---, ---, ---, ---, ---, ---, ---, ---, ---, ---, ---, ---, ---, ---, ---, --- },
     ///  { ---,   0, ---, ---, ---, ---, ---, ---, ---, ---, ---, ---, ---, ---, ---, --- },
     ///  { ---,   1,   2, ---, ---, ---, ---, ---, ---, ---, ---, ---, ---, ---, ---, --- },
@@ -112,7 +112,7 @@ internal static class Common
     /// <para>
     /// We drastically simplify the number of return combinations that we want to distinguish down to 16 as higher returns will not have significant entropy differences.
     /// </para>
-    /// <code>
+    /// <code language="none">
     ///  { --, --, --, --, --, --, --, --, --, --, --, --, --, --, --, -- },
     ///  { --,  0, --, --, --, --, --, --, --, --, --, --, --, --, --, -- },
     ///  { --,  1,  2, --, --, --, --, --, --, --, --, --, --, --, --, -- },
@@ -163,7 +163,7 @@ internal static class Common
     /// For LAS points with return number (1 &lt;= r &lt;= n) and a number of returns of given pulse (1 &lt;= n &lt;= 15) the level of penetration counted in number
     /// of returns should really simply be n - r with all invalid combinations being mapped to 15 like shown below.
     /// </para>
-    /// <code>
+    /// <code language="none">
     ///  {  0, 15, 15, 15, 15, 15, 15, 15, 15, 15, 15, 15, 15, 15, 15, 15 }
     ///  { 15,  0, 15, 15, 15, 15, 15, 15, 15, 15, 15, 15, 15, 15, 15, 15 }
     ///  { 15,  1,  0, 15, 15, 15, 15, 15, 15, 15, 15, 15, 15, 15, 15, 15 }
