@@ -180,8 +180,8 @@ dotnet pack
 
 - .NET 10.0 (latest)
 - .NET 9.0
-- .NET 8.0
 - .NET 7.0
+- .NET 5.0
 - .NET Standard 2.1
 - .NET Standard 2.0
 
