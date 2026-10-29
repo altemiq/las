@@ -73,16 +73,25 @@ internal static class LasToArrowStream
         buffers[index++].Add(basePointDataRecord.NumberOfReturns);
         buffers[index++].Add(basePointDataRecord.ScanDirectionFlag);
         buffers[index++].Add(basePointDataRecord.EdgeOfFlightLine);
+#if LAS1_1_OR_GREATER
         buffers[index++].Add(basePointDataRecord.Synthetic);
         buffers[index++].Add(basePointDataRecord.KeyPoint);
         buffers[index++].Add(basePointDataRecord.Withheld);
         buffers[index++].Add(basePointDataRecord.UserData);
         buffers[index++].Add(basePointDataRecord.PointSourceId);
+#else
+        buffers[index++].Add(basePointDataRecord.FileMarker);
+        buffers[index++].Add(basePointDataRecord.UserBitField);
+#endif
 
         switch (basePointDataRecord)
         {
             case IPointDataRecord pointDataRecord:
+#if LAS1_1_OR_GREATER
                 buffers[index++].Add((byte)pointDataRecord.Classification);
+#else
+                buffers[index++].Add(pointDataRecord.Classification);
+#endif
                 buffers[index++].Add(pointDataRecord.ScanAngleRank);
                 break;
 #if LAS1_4_OR_GREATER
@@ -195,11 +204,16 @@ internal static class LasToArrowStream
             .Field(new Field(Constants.Columns.NumberOfReturns, UInt8Type.Default, nullable: false))
             .Field(new Field(Constants.Columns.ScanDirectionFlag, BooleanType.Default, nullable: false))
             .Field(new Field(Constants.Columns.EdgeOfFlightLine, BooleanType.Default, nullable: false))
+#if LAS1_1_OR_GREATER
             .Field(new Field(Constants.Columns.Synthetic, BooleanType.Default, nullable: false))
             .Field(new Field(Constants.Columns.KeyPoint, BooleanType.Default, nullable: false))
             .Field(new Field(Constants.Columns.Withheld, BooleanType.Default, nullable: false))
             .Field(new Field(Constants.Columns.UserData, UInt8Type.Default, nullable: false))
             .Field(new Field(Constants.Columns.PointSourceId, UInt16Type.Default, nullable: false));
+#else
+            .Field(new Field(Constants.Columns.FileMarker, UInt8Type.Default, nullable: false))
+            .Field(new Field(Constants.Columns.UserBitField, UInt16Type.Default, nullable: false));
+#endif
 
         var pointDataFormatId = header.PointDataFormatId;
 #if LAS1_3_OR_GREATER

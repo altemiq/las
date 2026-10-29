@@ -32,7 +32,7 @@ public class HeaderBlockValidator
         switch (header)
         {
             // invalid version
-            case { Version: { Major: not 1, Minor: < 1 or > HeaderBlock.MaxMinorVersion } }:
+            case { Version: { Major: not 1, Minor: < 0 or > HeaderBlock.MaxMinorVersion } }:
                 throw new InvalidOperationException(
                     string.Format(
                         this.Culture,
@@ -42,7 +42,7 @@ public class HeaderBlockValidator
                         Properties.Resources.ResourceManager.GetString(nameof(Properties.Resources.InvalidVersion), this.Culture),
 #endif
                         header.Version,
-                        new Version(1, 1),
+                        new Version(1, 0),
                         new Version(1, HeaderBlock.MaxMinorVersion)));
 
             // invalid point format ID

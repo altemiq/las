@@ -28,7 +28,7 @@
   </Choose>
 
   <ItemGroup>
-    <EmbeddedResource Include="..\..\data\las\fusa.las" />
+    <EmbeddedResource Include="..\..\data\las\fusa*.las" />
   </ItemGroup>
 
 </Project>

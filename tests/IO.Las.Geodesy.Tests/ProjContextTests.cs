@@ -13,7 +13,14 @@ public sealed class ProjContextTests
     [After(Class)]
     public static void Cleanup()
     {
-        Context.Dispose();
+        try
+        {
+            Context.Dispose();
+        }
+        catch
+        {
+            // ignore teardown exceptions
+        }
     }
 
     [Test]

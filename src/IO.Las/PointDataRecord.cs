@@ -20,7 +20,13 @@ public readonly record struct PointDataRecord :
     /// <summary>
     /// The size of a point data record.
     /// </summary>
-    public const ushort Size = Constants.PointDataRecord.PointSourceIdFieldOffset + sizeof(ushort);
+    public const ushort Size =
+#if LAS1_1_OR_GREATER
+        Constants.PointDataRecord.PointSourceIdFieldOffset
+#else
+        Constants.PointDataRecord.UserBitFieldFieldOffset
+#endif
+        + sizeof(ushort);
 
     /// <summary>
     /// The point data format ID.
@@ -30,8 +36,10 @@ public readonly record struct PointDataRecord :
     [System.Runtime.InteropServices.FieldOffset(Constants.PointDataRecord.FlagsFieldOffset)]
     private readonly byte flags;
 
+#if LAS1_1_OR_GREATER
     [System.Runtime.InteropServices.FieldOffset(Constants.PointDataRecord.ClassificationFieldOffset)]
     private readonly byte classification;
+#endif
 
     /// <summary>
     /// Initializes a new instance of the <see cref="PointDataRecord"/> struct from the byte array.
@@ -55,10 +63,20 @@ public readonly record struct PointDataRecord :
         this.Z = FieldAccessors.PointDataRecord.GetZ(data);
         this.Intensity = FieldAccessors.PointDataRecord.GetIntensity(data);
         this.flags = data[Constants.PointDataRecord.FlagsFieldOffset];
-        this.classification = data[Constants.PointDataRecord.ClassificationFieldOffset];
+#if LAS1_1_OR_GREATER
+        this.classification
+#else
+        this.Classification
+#endif
+            = data[Constants.PointDataRecord.ClassificationFieldOffset];
         this.ScanAngleRank = (sbyte)data[Constants.PointDataRecord.ScanAngleRankFieldOffset];
+#if LAS1_1_OR_GREATER
         this.UserData = data[Constants.PointDataRecord.UserDataFieldOffset];
         this.PointSourceId = FieldAccessors.PointDataRecord.GetPointSourceId(data);
+#else
+        this.FileMarker = data[Constants.PointDataRecord.FileMarkerFieldOffset];
+        this.UserBitField = FieldAccessors.PointDataRecord.GetUserBitField(data);
+#endif
     }
 
 #if NET7_0_OR_GREATER
@@ -113,6 +131,7 @@ public readonly record struct PointDataRecord :
         init => FieldAccessors.PointDataRecord.SetEdgeOfFlightLine(ref this.flags, value);
     }
 
+#if LAS1_1_OR_GREATER
     /// <inheritdoc />
     public required Classification Classification
     {
@@ -140,11 +159,17 @@ public readonly record struct PointDataRecord :
         get => FieldAccessors.PointDataRecord.GetWithheld(this.classification);
         init => FieldAccessors.PointDataRecord.SetWithheld(ref this.classification, value);
     }
+#else
+    /// <inheritdoc />
+    [field: System.Runtime.InteropServices.FieldOffset(Constants.PointDataRecord.ClassificationFieldOffset)]
+    public required byte Classification { get; init; }
+#endif
 
     /// <inheritdoc />
     [field: System.Runtime.InteropServices.FieldOffset(Constants.PointDataRecord.ScanAngleRankFieldOffset)]
     public required sbyte ScanAngleRank { get; init; }
 
+#if LAS1_1_OR_GREATER
     /// <inheritdoc />
     [field: System.Runtime.InteropServices.FieldOffset(Constants.PointDataRecord.UserDataFieldOffset)]
     public byte UserData { get; init; }
@@ -152,6 +177,15 @@ public readonly record struct PointDataRecord :
     /// <inheritdoc />
     [field: System.Runtime.InteropServices.FieldOffset(Constants.PointDataRecord.PointSourceIdFieldOffset)]
     public required ushort PointSourceId { get; init; }
+#else
+    /// <inheritdoc />
+    [field: System.Runtime.InteropServices.FieldOffset(Constants.PointDataRecord.FileMarkerFieldOffset)]
+    public byte FileMarker { get; init; }
+
+    /// <inheritdoc />
+    [field: System.Runtime.InteropServices.FieldOffset(Constants.PointDataRecord.UserBitFieldFieldOffset)]
+    public required ushort UserBitField { get; init; }
+#endif
 
     /// <summary>
     /// Creates a <see cref="PointDataRecord"/> from a <see cref="PointDataRecord"/>.
@@ -280,10 +314,20 @@ public readonly record struct PointDataRecord :
         FieldAccessors.PointDataRecord.SetZ(destination, this.Z);
         FieldAccessors.PointDataRecord.SetIntensity(destination, this.Intensity);
         destination[Constants.PointDataRecord.FlagsFieldOffset] = this.flags;
-        destination[Constants.PointDataRecord.ClassificationFieldOffset] = this.classification;
+        destination[Constants.PointDataRecord.ClassificationFieldOffset] =
+#if LAS1_1_OR_GREATER
+            this.classification;
+#else
+            this.Classification;
+#endif
         destination[Constants.PointDataRecord.ScanAngleRankFieldOffset] = (byte)this.ScanAngleRank;
+#if LAS1_1_OR_GREATER
         destination[Constants.PointDataRecord.UserDataFieldOffset] = this.UserData;
         FieldAccessors.PointDataRecord.SetPointSourceId(destination, this.PointSourceId);
+#else
+        destination[Constants.PointDataRecord.FileMarkerFieldOffset] = this.FileMarker;
+        FieldAccessors.PointDataRecord.SetUserBitField(destination, this.UserBitField);
+#endif
         return Size;
     }
 

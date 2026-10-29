@@ -129,6 +129,7 @@ internal static class Constants
         /// </summary>
         public const int ScanAngleRankFieldOffset = ClassificationFieldOffset + sizeof(byte);
 
+#if LAS1_1_OR_GREATER
         /// <summary>
         /// The <see cref="IBasePointDataRecord.UserData"/> field offset.
         /// </summary>
@@ -143,6 +144,22 @@ internal static class Constants
         /// The <see cref="IGpsPointDataRecord.GpsTime"/> field offset.
         /// </summary>
         public const int GpsTimeFieldOffset = PointSourceIdFieldOffset + sizeof(ushort);
+#else
+        /// <summary>
+        /// The <see cref="IBasePointDataRecord.FileMarker"/> field offset.
+        /// </summary>
+        public const int FileMarkerFieldOffset = ScanAngleRankFieldOffset + sizeof(sbyte);
+
+        /// <summary>
+        /// The <see cref="IBasePointDataRecord.UserBitField"/> field offset.
+        /// </summary>
+        public const int UserBitFieldFieldOffset = FileMarkerFieldOffset + sizeof(byte);
+
+        /// <summary>
+        /// The <see cref="IGpsPointDataRecord.GpsTime"/> field offset.
+        /// </summary>
+        public const int GpsTimeFieldOffset = UserBitFieldFieldOffset + sizeof(ushort);
+#endif
 
 #if LAS1_2_OR_GREATER
         /// <summary>

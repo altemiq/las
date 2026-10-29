@@ -21,7 +21,9 @@ internal sealed class JsonLasReaderFormatter(System.Text.Json.Utf8JsonWriter wri
 
         var header = reader.Header;
         writer.WriteString("file_signature", header.FileSignature);
+#if LAS1_1_OR_GREATER
         writer.WriteNumber("file_source_id", header.FileSourceId);
+#endif
 #if LAS1_2_OR_GREATER
         writer.WriteNumber("global_encoding", (ushort)header.GlobalEncoding);
 #endif

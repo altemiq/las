@@ -423,7 +423,9 @@ internal class DefaultLasReaderFormatter(IFormatBuilder builder) : ILasReaderFor
     {
         var header = reader.Header;
         yield return ("file signature:", header.FileSignature);
+#if LAS1_1_OR_GREATER
         yield return ("file source ID:", header.FileSourceId);
+#endif
 #if LAS1_2_OR_GREATER
         yield return ("global_encoding:", (ushort)header.GlobalEncoding);
 #endif

@@ -19,14 +19,18 @@ public class LasIndexTests
     }
 
     [Test]
-    public async Task CreateFromReader()
+    [Arguments("fusa_0")]
+#if LAS1_1_OR_GREATER
+    [Arguments("fusa")]
+#endif
+    public async Task CreateFromReader(string name)
     {
-        var stream = typeof(LasIndexTests).Assembly.GetManifestResourceStream(typeof(LasIndexTests), "fusa.lax")
+        var stream = typeof(LasIndexTests).Assembly.GetManifestResourceStream(typeof(LasIndexTests), $"{name}.lax")
                      ?? throw new System.Diagnostics.UnreachableException();
         var fromLax = await Assert.That(() => LasIndex.ReadFrom(stream)).IsTypeOf<LasIndex>();
         await stream.DisposeAsync();
 
-        var reader = new LasReader(typeof(LasIndexTests).Assembly.GetManifestResourceStream(typeof(LasIndexTests), "fusa.las")
+        var reader = new LasReader(typeof(LasIndexTests).Assembly.GetManifestResourceStream(typeof(LasIndexTests), $"{name}.las")
                                    ?? throw new System.Diagnostics.UnreachableException());
         //var rdr = LasIndex.Create(reader);
         var fromLas = await Assert.That(() => LasIndex.Create(reader)).IsTypeOf<LasIndex>();

@@ -13,6 +13,7 @@ internal static class PointDataRecordFieldAccessorsExtensions
 {
     extension(FieldAccessors.PointDataRecord)
     {
+#if LAS1_1_OR_GREATER
         /// <summary>
         /// Sets the classification.
         /// </summary>
@@ -47,6 +48,21 @@ internal static class PointDataRecordFieldAccessorsExtensions
         /// <param name="bytes">The bytes.</param>
         /// <param name="value">The value.</param>
         public static void SetUserData(Span<byte> bytes, byte value) => bytes[Constants.PointDataRecord.UserDataFieldOffset] = value;
+#else
+        /// <summary>
+        /// Sets the classification.
+        /// </summary>
+        /// <param name="bytes">The bytes.</param>
+        /// <param name="value">The value.</param>
+        public static void SetClassification(Span<byte> bytes, byte value) => bytes[Constants.PointDataRecord.ClassificationFieldOffset] = value;
+
+        /// <summary>
+        /// Sets the file marker.
+        /// </summary>
+        /// <param name="bytes">The bytes.</param>
+        /// <param name="value">The value.</param>
+        public static void SetFileMarker(Span<byte> bytes, byte value) => bytes[Constants.PointDataRecord.FileMarkerFieldOffset] = value;
+#endif
 
         /// <summary>
         /// Sets the scan angle rank.

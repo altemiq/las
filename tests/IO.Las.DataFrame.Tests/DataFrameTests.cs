@@ -5,9 +5,13 @@ using static Polars.CSharp.Polars;
 public class DataFrameTests
 {
     [Test]
-    public async Task ReadLas()
+    [Arguments("fusa_0.las")]
+#if LAS1_1_OR_GREATER
+    [Arguments("fusa.las")]
+#endif
+    public async Task ReadLas(string name)
     {
-        var stream = typeof(DataFrameTests).Assembly.GetManifestResourceStream(typeof(DataFrameTests), "fusa.las")
+        var stream = typeof(DataFrameTests).Assembly.GetManifestResourceStream(typeof(DataFrameTests), name)
                                  ?? throw new System.Diagnostics.UnreachableException("Failed to get stream");
 
         await using LasReader reader = new(stream);
@@ -22,9 +26,13 @@ public class DataFrameTests
     }
 
     [Test]
-    public async Task WriteTo()
+    [Arguments("fusa_0.las")]
+#if LAS1_1_OR_GREATER
+    [Arguments("fusa.las")]
+#endif
+    public async Task WriteTo(string name)
     {
-        var stream = typeof(DataFrameTests).Assembly.GetManifestResourceStream(typeof(DataFrameTests), "fusa.las")
+        var stream = typeof(DataFrameTests).Assembly.GetManifestResourceStream(typeof(DataFrameTests), name)
                      ?? throw new System.Diagnostics.UnreachableException("Failed to get stream");
 
         await using LasReader reader = new(stream);

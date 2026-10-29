@@ -372,7 +372,7 @@ internal sealed class LasZip
 #elif LAS1_2_OR_GREATER
         _ => throw new NotSupportedException(Properties.v1_2.Resources.OnlyDataPointsAreAllowed),
 #else
-        _ => throw new NotSupportedException(Properties.v1_1.Resources.OnlyDataPointsAreAllowed),
+        _ => throw new NotSupportedException(Properties.v1_0.Resources.OnlyDataPointsAreAllowed),
 #endif
 
     };

@@ -11,11 +11,19 @@ namespace Altemiq.IO.Las;
 /// </summary>
 public interface IPointDataRecord : IBasePointDataRecord
 {
+#if LAS1_1_OR_GREATER
     /// <summary>
     /// Gets the classification.
     /// </summary>
     /// <value>The standard ASPRS classification as defined in <see cref="Classification"/>.</value>
     Classification Classification { get; init; }
+#else
+    /// <summary>
+    /// Gets the classification.
+    /// </summary>
+    /// <value>The ASPRS standard has a public list of classifications which shall be used when mixing vendor specific user software.</value>
+    byte Classification { get; init; }
+#endif
 
     /// <summary>
     /// Gets the scan angle rank.

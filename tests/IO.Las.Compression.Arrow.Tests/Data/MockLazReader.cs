@@ -117,13 +117,19 @@ internal sealed class MockLazReader : ILasReader, ILazReader
             NumberOfReturns = 1,
             ScanDirectionFlag = false,
             EdgeOfFlightLine = false,
+#if LAS1_1_OR_GREATER
             Classification = Classification.Unclassified,
             Synthetic = false,
             KeyPoint = false,
             Withheld = true,
-            ScanAngleRank = -29,
             UserData = 0,
             PointSourceId = 0,
+#else
+            Classification = 1,
+            FileMarker = 0,
+            UserBitField = 0,
+#endif
+            ScanAngleRank = -29,
             GpsTime = 492249.15875399113,
         };
 
@@ -137,13 +143,19 @@ internal sealed class MockLazReader : ILasReader, ILazReader
             NumberOfReturns = 1,
             ScanDirectionFlag = false,
             EdgeOfFlightLine = true,
+#if LAS1_1_OR_GREATER
             Classification = Classification.LowVegetation,
             Synthetic = false,
             KeyPoint = false,
             Withheld = false,
-            ScanAngleRank = 29,
             UserData = 1,
             PointSourceId = 0,
+#else
+            Classification = 3,
+            FileMarker = 1,
+            UserBitField = 0,
+#endif
+            ScanAngleRank = 29,
             GpsTime = 492249.15875399213,
         };
 

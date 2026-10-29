@@ -7,7 +7,11 @@ public class AccessorExtensionTests
     [Test]
     public async Task SetValues()
     {
+#if LAS1_1_OR_GREATER
         _ = await Assert.That(static () => PointDataRecordFieldAccessorsExtensions.SetClassification(new byte[PointDataRecord.Size], Classification.HighVegetation)).ThrowsNothing();
+#else
+        _ = await Assert.That(static () => PointDataRecordFieldAccessorsExtensions.SetClassification(new byte[PointDataRecord.Size], 5)).ThrowsNothing();
+#endif
     }
 
 #if LAS1_4_OR_GREATER

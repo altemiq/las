@@ -4,9 +4,13 @@ public class LasReaderTests
 {
 
     [Test]
-    public async Task ReadEnumerable()
+    [Arguments("fusa_0")]
+#if LAS1_1_OR_GREATER
+    [Arguments("fusa")]
+#endif
+    public async Task ReadEnumerable(string name)
     {
-        var stream = typeof(LasReaderTests).Assembly.GetManifestResourceStream(typeof(LasReaderTests), "fusa.las")
+        var stream = typeof(LasReaderTests).Assembly.GetManifestResourceStream(typeof(LasReaderTests), $"{name}.las")
                                  ?? throw new System.Diagnostics.UnreachableException("Failed to get stream");
         LasReader reader = new(stream);
 
@@ -29,9 +33,13 @@ public class LasReaderTests
     }
 
     [Test]
-    public async Task ReadAsyncEnumerable()
+    [Arguments("fusa_0")]
+#if LAS1_1_OR_GREATER
+    [Arguments("fusa")]
+#endif
+    public async Task ReadAsyncEnumerable(string name)
     {
-        var stream = typeof(LasReaderTests).Assembly.GetManifestResourceStream(typeof(LasReaderTests), "fusa.las")
+        var stream = typeof(LasReaderTests).Assembly.GetManifestResourceStream(typeof(LasReaderTests), $"{name}.las")
                                ?? throw new System.Diagnostics.UnreachableException("Failed to get stream");
         LasReader reader = new(stream);
 
@@ -48,12 +56,16 @@ public class LasReaderTests
     }
 
     [Test]
-    public async Task ReadLas()
+    [Arguments("fusa_0", 0)]
+#if LAS1_1_OR_GREATER
+    [Arguments("fusa", 1)]
+#endif
+    public async Task ReadLas(string name, int minor)
     {
-        var stream = typeof(LasReaderTests).Assembly.GetManifestResourceStream(typeof(LasReaderTests), "fusa.las")
+        var stream = typeof(LasReaderTests).Assembly.GetManifestResourceStream(typeof(LasReaderTests), $"{name}.las")
                                  ?? throw new System.Diagnostics.UnreachableException("Failed to get stream");
         LasReader reader = new(stream);
-        await CheckHeader(reader.Header, new(1, 1));
+        await CheckHeader(reader.Header, new(1, minor));
         _ = await Assert.That(reader.VariableLengthRecords.Count).IsEqualTo(1);
 
         var (pointDataRecord, extraBytes) = reader.ReadPointDataRecord();
@@ -66,16 +78,20 @@ public class LasReaderTests
     }
 
     [Test]
-    public async Task ReadLasWithFileSignature()
+    [Arguments("fusa_0", 0)]
+#if LAS1_1_OR_GREATER
+    [Arguments("fusa", 1)]
+#endif
+    public async Task ReadLasWithFileSignature(string name, int minor)
     {
-        var stream = typeof(LasReaderTests).Assembly.GetManifestResourceStream(typeof(LasReaderTests), "fusa.las")
+        var stream = typeof(LasReaderTests).Assembly.GetManifestResourceStream(typeof(LasReaderTests), $"{name}.las")
                               ?? throw new System.Diagnostics.UnreachableException("Failed to get stream");
         var bytes = new byte[4];
 
         _ = await Assert.That(await stream.ReadAsync(bytes)).IsEqualTo(bytes.Length);
 
         LasReader reader = new(stream, System.Text.Encoding.UTF8.GetString(bytes));
-        await CheckHeader(reader.Header, new(1, 1));
+        await CheckHeader(reader.Header, new(1, minor));
         _ = await Assert.That(reader.VariableLengthRecords).HasSingleItem();
 
         var (pointDataRecord, extraBytes) = reader.ReadPointDataRecord();
@@ -123,12 +139,16 @@ public class LasReaderTests
 #endif
 
     [Test]
-    public async Task ReadByPointIndex()
+    [Arguments("fusa_0", 0)]
+#if LAS1_1_OR_GREATER
+    [Arguments("fusa", 1)]
+#endif
+    public async Task ReadByPointIndex(string name, int minor)
     {
-        var stream = typeof(LasReaderTests).Assembly.GetManifestResourceStream(typeof(LasReaderTests), "fusa.las")
+        var stream = typeof(LasReaderTests).Assembly.GetManifestResourceStream(typeof(LasReaderTests), $"{name}.las")
                                     ?? throw new System.Diagnostics.UnreachableException("Failed to get stream");
         LasReader reader = new(stream);
-        await CheckHeader(reader.Header, new(1, 1));
+        await CheckHeader(reader.Header, new(1, minor));
 
         var quantizer = new PointDataRecordQuantizer(reader.Header);
         var fileCreation = reader.Header.FileCreation.GetValueOrDefault();
@@ -153,12 +173,16 @@ public class LasReaderTests
     }
 
     [Test]
-    public async Task ReadLasAsync()
+    [Arguments("fusa_0", 0)]
+#if LAS1_1_OR_GREATER
+    [Arguments("fusa", 1)]
+#endif
+    public async Task ReadLasAsync(string name, int minor)
     {
-        var stream = typeof(LasReaderTests).Assembly.GetManifestResourceStream(typeof(LasReaderTests), "fusa.las")
+        var stream = typeof(LasReaderTests).Assembly.GetManifestResourceStream(typeof(LasReaderTests), $"{name}.las")
                                     ?? throw new System.Diagnostics.UnreachableException("Failed to get stream");
         LasReader reader = new(stream);
-        await CheckHeader(reader.Header, new(1, 1));
+        await CheckHeader(reader.Header, new(1, minor));
         _ = await Assert.That(reader.VariableLengthRecords).HasSingleItem();
 
         _ = await Assert.That(await reader.ReadPointDataRecordAsync())
@@ -170,14 +194,18 @@ public class LasReaderTests
     }
 
     [Test]
-    public async Task ReadLasWithFileSignatureAsync()
+    [Arguments("fusa_0", 0)]
+#if LAS1_1_OR_GREATER
+    [Arguments("fusa", 1)]
+#endif
+    public async Task ReadLasWithFileSignatureAsync(string name, int minor)
     {
-        var stream = typeof(LasReaderTests).Assembly.GetManifestResourceStream(typeof(LasReaderTests), "fusa.las")
+        var stream = typeof(LasReaderTests).Assembly.GetManifestResourceStream(typeof(LasReaderTests), $"{name}.las")
                                     ?? throw new System.Diagnostics.UnreachableException("Failed to get stream");
         var bytes = new byte[4];
         _ = await Assert.That(stream.ReadAsync(bytes, 0, bytes.Length)).IsEqualTo(bytes.Length);
         LasReader reader = new(stream, System.Text.Encoding.UTF8.GetString(bytes));
-        await CheckHeader(reader.Header, new(1, 1));
+        await CheckHeader(reader.Header, new(1, minor));
         _ = await Assert.That(reader.VariableLengthRecords).HasSingleItem();
 
         var (pointDataRecord, extraBytes) = await reader.ReadPointDataRecordAsync();
@@ -222,12 +250,16 @@ public class LasReaderTests
 #endif
 
     [Test]
-    public async Task ReadByPointIndexAsync()
+    [Arguments("fusa_0", 0)]
+#if LAS1_1_OR_GREATER
+    [Arguments("fusa", 1)]
+#endif
+    public async Task ReadByPointIndexAsync(string name, int minor)
     {
-        var stream = typeof(LasReaderTests).Assembly.GetManifestResourceStream(typeof(LasReaderTests), "fusa.las")
+        var stream = typeof(LasReaderTests).Assembly.GetManifestResourceStream(typeof(LasReaderTests), $"{name}.las")
                                ?? throw new System.Diagnostics.UnreachableException("Failed to get stream");
         LasReader reader = new(stream);
-        await CheckHeader(reader.Header, new(1, 1));
+        await CheckHeader(reader.Header, new(1, minor));
 
         var quantizer = new PointDataRecordQuantizer(reader.Header);
         var fileCreation = reader.Header.FileCreation.GetValueOrDefault();
@@ -254,9 +286,13 @@ public class LasReaderTests
 
 #if NETSTANDARD2_1_OR_GREATER || NETCOREAPP2_1_OR_GREATER
     [Test]
-    public async Task ReadToSpan()
+    [Arguments("fusa_0")]
+#if LAS1_1_OR_GREATER
+    [Arguments("fusa")]
+#endif
+    public async Task ReadToSpan(string name)
     {
-        await using var stream = typeof(LasReaderTests).Assembly.GetManifestResourceStream(typeof(LasReaderTests), "fusa.las")
+        await using var stream = typeof(LasReaderTests).Assembly.GetManifestResourceStream(typeof(LasReaderTests), $"{name}.las")
                                ?? throw new System.Diagnostics.UnreachableException("Failed to get stream");
         await using LasReader reader = new(stream);
 
@@ -280,9 +316,13 @@ public class LasReaderTests
     }
 
     [Test]
-    public async Task ReadToMemory()
+    [Arguments("fusa_0")]
+#if LAS1_1_OR_GREATER
+    [Arguments("fusa")]
+#endif
+    public async Task ReadToMemory(string name)
     {
-        await using var stream = typeof(LasReaderTests).Assembly.GetManifestResourceStream(typeof(LasReaderTests), "fusa.las")
+        await using var stream = typeof(LasReaderTests).Assembly.GetManifestResourceStream(typeof(LasReaderTests), $"{name}.las")
                                ?? throw new System.Diagnostics.UnreachableException("Failed to get stream");
         await using LasReader reader = new(stream);
 
@@ -311,7 +351,9 @@ public class LasReaderTests
     {
         await Assert.That(headerBlock)
             .Member(static headerBlock => headerBlock.FileSignature, static fileSignature => fileSignature.IsEqualTo("LASF"))
+#if LAS1_1_OR_GREATER
             .And.Member(static headerBlock => headerBlock.FileSourceId, static fileSourceId => fileSourceId.IsDefault())
+#endif
 #if LAS1_2_OR_GREATER
             .And.Member(static headerBlock => headerBlock.GlobalEncoding, static globalEncoding => globalEncoding.IsEqualTo(GlobalEncoding.None))
 #endif

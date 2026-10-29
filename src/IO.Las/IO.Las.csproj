@@ -92,6 +92,15 @@
     </Compile>
   </ItemGroup>
 
+  <ItemGroup Condition=" '$(SupportLas11)' != 'true' ">
+    <!-- Remove classification below 1.1 -->
+    <Compile Remove="**\Classification.cs" />
+
+    <!-- Remove v1.1 specific resources -->
+    <EmbeddedResource Remove="Properties\v1.1\*.resx" />
+    <None Remove="Properties\v1.1\*.xml" />
+  </ItemGroup>
+
   <ItemGroup Condition=" '$(SupportLas12)' != 'true' ">
     <!-- Remove color point data records for versions below 1.2 -->
     <Compile Remove="**\*Color*.cs" />
@@ -119,6 +128,7 @@
   <ItemGroup Condition=" '$(SupportLas14)' != 'true' ">
     <!-- Remove extended point data records for versions below 1.4 -->
     <Compile Remove="**\*Extended*PointDataRecord*.cs" />
+    <Compile Remove="**\ExtendedClassification.cs" />
 
     <!-- Remove near-infrared point data records -->
     <Compile Remove="**\*NearInfrared*.cs" />

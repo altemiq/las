@@ -25,13 +25,19 @@ public class GpsPointTests
             NumberOfReturns = 1,
             ScanDirectionFlag = false,
             EdgeOfFlightLine = false,
+#if LAS1_1_OR_GREATER
             Classification = Classification.Unclassified,
             Synthetic = false,
             KeyPoint = false,
             Withheld = false,
-            ScanAngleRank = -29,
             UserData = 0,
             PointSourceId = 0,
+#else
+            Classification = 1,
+            FileMarker = 0,
+            UserBitField = 0,
+#endif
+            ScanAngleRank = -29,
             GpsTime = 492249.15875399113,
         };
 
@@ -88,6 +94,7 @@ public class GpsPointTests
             .And.Member(static p => p.NumberOfReturns, static numberOfReturns => numberOfReturns.IsEqualTo((byte)1))
             .And.Member(static p => p.ScanDirectionFlag, static scanDirectionFlag => scanDirectionFlag.IsFalse())
             .And.Member(static p => p.EdgeOfFlightLine, static edgeOfFlightLine => edgeOfFlightLine.IsFalse())
+#if LAS1_1_OR_GREATER
             .And.Member(static p => p.Classification, static classification => classification.IsEqualTo(Classification.Unclassified))
             .And.Member(static p => p.Synthetic, static synthetic => synthetic.IsFalse())
             .And.Member(static p => p.KeyPoint, static keyPoint => keyPoint.IsFalse())
@@ -95,6 +102,11 @@ public class GpsPointTests
             .And.Member(static p => p.ScanAngleRank, static scanAngleRank => scanAngleRank.IsEqualTo((sbyte)-29))
             .And.Member(static p => p.UserData, static userData => userData.IsDefault())
             .And.Member(static p => p.PointSourceId, static pointSourceId => pointSourceId.IsDefault())
+#else
+            .And.Member(static p => p.Classification, static classification => classification.IsEqualTo(1))
+            .And.Member(static p => p.FileMarker, static fileMarker => fileMarker.IsDefault())
+            .And.Member(static p => p.UserBitField, static userBitField => userBitField.IsDefault())
+#endif
             .And.Member(static p => Quantizer.GetDateTime(p.GpsTime), static gpsTime => gpsTime.IsAfter(new(2010, 1, 1)));
     }
 }
