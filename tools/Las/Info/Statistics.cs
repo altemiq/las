@@ -8,7 +8,7 @@ namespace Altemiq.IO.Las.Info;
 
 using System.Runtime.Intrinsics;
 
-#pragma warning disable RCS1141
+#pragma warning disable SA1600, RCS1141
 
 /// <summary>
 /// The statistics.

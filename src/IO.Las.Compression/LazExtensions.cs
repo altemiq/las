@@ -6,8 +6,6 @@
 
 namespace Altemiq.IO.Las;
 
-#pragma warning disable S2325, SA1101
-
 /// <summary>
 /// LAZ extensions.
 /// </summary>

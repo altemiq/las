@@ -142,12 +142,6 @@ public sealed record ExtraBytes : VariableLengthRecord, IExtraBytes
     /// <summary>
     /// Gets the byte count.
     /// </summary>
-    /// <returns>The byte count.</returns>
-    internal ushort GetByteCount() => (ushort)this.items.Sum(GetByteCount);
-
-    /// <summary>
-    /// Gets the byte count.
-    /// </summary>
     /// <param name="item">The item.</param>
     /// <returns>The byte count.</returns>
     internal static int GetByteCount(ExtraBytesItem item) =>
@@ -162,6 +156,12 @@ public sealed record ExtraBytes : VariableLengthRecord, IExtraBytes
             { DataType: ExtraBytesDataType.Double } => sizeof(double),
             _ => default,
         };
+
+    /// <summary>
+    /// Gets the byte count.
+    /// </summary>
+    /// <returns>The byte count.</returns>
+    internal ushort GetByteCount() => (ushort)this.items.Sum(GetByteCount);
 
     private static System.Collections.ObjectModel.ReadOnlyCollection<ExtraBytesItem> GetEntries(ReadOnlySpan<byte> source)
     {

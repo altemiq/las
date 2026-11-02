@@ -10,9 +10,9 @@ using System.Runtime.CompilerServices;
 
 #pragma warning disable RCS1141
 
-/// <summary>
+/// <content>
 /// Extensions for <see cref="BitConverter"/>.
-/// </summary>
+/// </content>
 internal static partial class ExtensionMethods
 {
     /// <summary>

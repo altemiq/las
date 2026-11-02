@@ -43,7 +43,13 @@ internal class LasMultipleMemoryStream : MultipleStream
     /// <inheritdoc/>
     public override long Position
     {
-        get => base.Position;
+        get
+        {
+#pragma warning disable IDE0027 // Use expression body for accessor
+            return base.Position;
+#pragma warning restore IDE0027 // Use expression body for accessor
+        }
+
         set
         {
             if (value is 0)

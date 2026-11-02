@@ -6,9 +6,9 @@
 
 namespace Altemiq.IO.Las;
 
-/// <summary>
+/// <content>
 /// The <see cref="System.Threading.Interlocked"/> extensions.
-/// </summary>
+/// </content>
 public static partial class ExtensionMethods
 {
     extension(System.Threading.Interlocked)

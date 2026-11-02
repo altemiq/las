@@ -6,8 +6,6 @@
 
 namespace Altemiq.IO.Las;
 
-#pragma warning disable SA1101
-
 /// <summary>
 /// The <see cref="Command"/> extensions.
 /// </summary>
@@ -79,12 +77,15 @@ internal static class CommandExtensions
 
         return command;
 
-        static RootCommand? GetRootCommand(Symbol? symbol) => symbol switch
+        static RootCommand? GetRootCommand(Symbol? symbol)
         {
-            null => default,
-            RootCommand rootCommand => rootCommand,
-            { Parents: var parents } => parents.Select(GetRootCommand).FirstOrDefault(static p => p is not null),
-        };
+            return symbol switch
+            {
+                null => default,
+                RootCommand rootCommand => rootCommand,
+                { Parents: var parents } => parents.Select(GetRootCommand).FirstOrDefault(static p => p is not null),
+            };
+        }
     }
 
     private sealed class FigletHelpCommand(Command command, System.CommandLine.Invocation.SynchronousCommandLineAction action, Func<FigletText> getText, IAnsiConsole? console = default)

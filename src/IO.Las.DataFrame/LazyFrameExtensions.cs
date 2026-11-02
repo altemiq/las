@@ -6,8 +6,6 @@
 
 namespace Altemiq.IO.Las;
 
-#pragma warning disable SA1101
-
 /// <summary>
 /// The <see cref="LazyFrame"/> extensions.
 /// </summary>

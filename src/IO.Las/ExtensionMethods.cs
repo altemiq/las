@@ -6,7 +6,7 @@
 
 namespace Altemiq.IO.Las;
 
-#pragma warning disable CA1708, SA1101
+#pragma warning disable CA1708
 
 /// <summary>
 /// Extension methods.
@@ -154,6 +154,7 @@ public static partial class ExtensionMethods
         /// </summary>
         /// <param name="position">The position.</param>
         /// <param name="cancellationToken">The token to monitor for cancellation requests. The default value is <see cref="CancellationToken.None"/>.</param>
+        /// <returns>The value task.</returns>
         internal ValueTask MoveToPositionForwardsOnlyAsync(long position, CancellationToken cancellationToken = default)
         {
             var streamPosition = stream.Position;
@@ -182,6 +183,7 @@ public static partial class ExtensionMethods
         /// </summary>
         /// <param name="position">The position.</param>
         /// <param name="cancellationToken">The token to monitor for cancellation requests. The default value is <see cref="CancellationToken.None"/>.</param>
+        /// <returns>The value task.</returns>
         internal ValueTask MoveToPositionAbsoluteAsync(long position, CancellationToken cancellationToken = default)
         {
             var streamPosition = stream.Position;

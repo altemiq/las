@@ -6,8 +6,6 @@
 
 namespace Altemiq.IO.Las.Cloud;
 
-#pragma warning disable RCS1228, SA1101
-
 /// <summary>
 /// The <see cref="Cloud"/> extensions.
 /// </summary>

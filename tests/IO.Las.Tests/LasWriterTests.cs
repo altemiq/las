@@ -337,7 +337,7 @@ public class LasWriterTests
             });
 #endif
 
-                await lasWriter.DisposeAsync();
+        await lasWriter.DisposeAsync();
 
         stream.Reset();
         LasReader lasReader = new(stream);

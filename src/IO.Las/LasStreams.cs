@@ -11,28 +11,6 @@ namespace Altemiq.IO.Las;
 /// </summary>
 internal static class LasStreams
 {
-#pragma warning disable S2325, SA1101
-    /// <summary>
-    /// The <see cref="Stream"/> extensions.
-    /// </summary>
-    /// <param name="stream">The stream.</param>
-    extension(Stream stream)
-    {
-        /// <summary>
-        /// Switches the stream to the specified name if the stream is a <see cref="MultipleStream"/>.
-        /// </summary>
-        /// <param name="name">The name of the stream to switch to.</param>
-        /// <returns><see langword="true"/> if the stream was successfully switched; otherwise <see langword="false"/>.</returns>
-        public bool SwitchStreamIfMultiple(string name) => stream is MultipleStream multipleStream && multipleStream.SwitchTo(name);
-
-        /// <summary>
-        /// Gets a value indicating whether the specified <see cref="Stream"/> can switch streams.
-        /// </summary>
-        /// <returns><see langword="true"/> if the stream can switch; otherwise <see langword="false"/>.</returns>
-        public bool CanSwitchStream() => stream is MultipleStream;
-    }
-#pragma warning restore S2325, SA1101
-
     /// <summary>
     /// The header name.
     /// </summary>
@@ -59,6 +37,26 @@ internal static class LasStreams
     /// The stream comparer.
     /// </summary>
     public static readonly StringComparer Comparer = new LasStreamComparer();
+
+    /// <summary>
+    /// The <see cref="Stream"/> extensions.
+    /// </summary>
+    /// <param name="stream">The stream.</param>
+    extension(Stream stream)
+    {
+        /// <summary>
+        /// Switches the stream to the specified name if the stream is a <see cref="MultipleStream"/>.
+        /// </summary>
+        /// <param name="name">The name of the stream to switch to.</param>
+        /// <returns><see langword="true"/> if the stream was successfully switched; otherwise <see langword="false"/>.</returns>
+        public bool SwitchStreamIfMultiple(string name) => stream is MultipleStream multipleStream && multipleStream.SwitchTo(name);
+
+        /// <summary>
+        /// Gets a value indicating whether the specified <see cref="Stream"/> can switch streams.
+        /// </summary>
+        /// <returns><see langword="true"/> if the stream can switch; otherwise <see langword="false"/>.</returns>
+        public bool CanSwitchStream() => stream is MultipleStream;
+    }
 
     private sealed class LasStreamComparer : StringComparer
     {
