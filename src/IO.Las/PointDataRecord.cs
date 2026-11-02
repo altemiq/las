@@ -6,6 +6,8 @@
 
 namespace Altemiq.IO.Las;
 
+#pragma warning disable CS0618, S1133
+
 /// <summary>
 /// Represents a point data record.
 /// </summary>
@@ -14,6 +16,9 @@ namespace Altemiq.IO.Las;
 public readonly record struct PointDataRecord :
 #if NET7_0_OR_GREATER
     IBasePointDataRecord<PointDataRecord>,
+#endif
+#if LAS1_1_OR_GREATER
+    ILegacyPointDataRecord,
 #endif
     IPointDataRecord
 {
@@ -177,6 +182,26 @@ public readonly record struct PointDataRecord :
     /// <inheritdoc />
     [field: System.Runtime.InteropServices.FieldOffset(Constants.PointDataRecord.PointSourceIdFieldOffset)]
     public required ushort PointSourceId { get; init; }
+
+    /// <inheritdoc />
+    [Obsolete($"Use {nameof(UserData)} instead")]
+    [System.ComponentModel.Browsable(false)]
+    [System.ComponentModel.EditorBrowsable(System.ComponentModel.EditorBrowsableState.Never)]
+    byte ILegacyPointDataRecord.FileMarker
+    {
+        get => this.UserData;
+        init => this.UserData = value;
+    }
+
+    /// <inheritdoc />
+    [Obsolete($"Use {nameof(PointSourceId)} instead")]
+    [System.ComponentModel.Browsable(false)]
+    [System.ComponentModel.EditorBrowsable(System.ComponentModel.EditorBrowsableState.Never)]
+    public ushort UserBitField
+    {
+        get => this.PointSourceId;
+        init => this.PointSourceId = value;
+    }
 #else
     /// <inheritdoc />
     [field: System.Runtime.InteropServices.FieldOffset(Constants.PointDataRecord.FileMarkerFieldOffset)]

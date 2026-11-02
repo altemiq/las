@@ -96,6 +96,9 @@
     <!-- Remove classification below 1.1 -->
     <Compile Remove="**\Classification.cs" />
 
+    <!-- Remove the "legacy" point data record -->
+    <Compile Remove="**\ILegacyPointDataRecord.cs" />
+
     <!-- Remove v1.1 specific resources -->
     <EmbeddedResource Remove="Properties\v1.1\*.resx" />
     <None Remove="Properties\v1.1\*.xml" />

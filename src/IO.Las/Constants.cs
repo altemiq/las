@@ -140,6 +140,24 @@ internal static class Constants
         /// </summary>
         public const int PointSourceIdFieldOffset = UserDataFieldOffset + sizeof(byte);
 
+#pragma warning disable S1133
+        /// <summary>
+        /// The <see cref="ILegacyPointDataRecord.FileMarker"/> field offset.
+        /// </summary>
+        [Obsolete($"Use {nameof(UserDataFieldOffset)} instead")]
+        [System.ComponentModel.Browsable(false)]
+        [System.ComponentModel.EditorBrowsable(System.ComponentModel.EditorBrowsableState.Never)]
+        public const int FileMarkerFieldOffset = UserDataFieldOffset;
+
+        /// <summary>
+        /// The <see cref="ILegacyPointDataRecord.UserBitField"/> field offset.
+        /// </summary>
+        [Obsolete($"Use {nameof(PointSourceIdFieldOffset)} instead")]
+        [System.ComponentModel.Browsable(false)]
+        [System.ComponentModel.EditorBrowsable(System.ComponentModel.EditorBrowsableState.Never)]
+        public const int UserBitFieldFieldOffset = PointSourceIdFieldOffset;
+#pragma warning restore S1133
+
         /// <summary>
         /// The <see cref="IGpsPointDataRecord.GpsTime"/> field offset.
         /// </summary>
