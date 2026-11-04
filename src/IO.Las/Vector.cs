@@ -71,6 +71,9 @@ public static partial class Vector
         }
     }
 
+    /// <content>
+    /// The <see cref="Vector128"/> extensions.
+    /// </content>
     extension(Vector128)
     {
 #if !NET9_0_OR_GREATER

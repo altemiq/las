@@ -74,7 +74,7 @@ internal static class LasStreams
         [System.Diagnostics.CodeAnalysis.SuppressMessage("ReSharper", "ConvertIfStatementToReturnStatement", Justification = "This makes it harder to read.")]
         public override int Compare(string? x, string? y)
         {
-            if (Ordinal.Compare(x, y) is 0)
+            if (Ordinal.Equals(x, y))
             {
                 // these are the same.
                 return 0;
