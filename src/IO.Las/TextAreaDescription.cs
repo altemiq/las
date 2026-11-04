@@ -54,14 +54,12 @@ public sealed record TextAreaDescription : VariableLengthRecord
     /// <inheritdoc />
     public override int CopyTo(Span<byte> destination)
     {
-        var d = destination;
-        this.Header.CopyTo(d);
-        int bytesWritten = VariableLengthRecordHeader.Size;
-        d = destination[bytesWritten..];
+        this.Header.CopyTo(destination);
+        var d = destination[VariableLengthRecordHeader.Size..];
 
-        bytesWritten += System.Text.Encoding.ASCII.GetBytes(this.Value, d);
-        d[bytesWritten] = 0;
+        var textLength = System.Text.Encoding.ASCII.GetBytes(this.Value, d);
+        d[textLength] = default;
 
-        return bytesWritten + 1;
+        return VariableLengthRecordHeader.Size + textLength + 1;
     }
 }
