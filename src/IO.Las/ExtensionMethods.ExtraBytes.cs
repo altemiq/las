@@ -6,8 +6,6 @@
 
 namespace Altemiq.IO.Las;
 
-#pragma warning disable SA1101
-
 /// <content>
 /// Extension methods for <see cref="ExtraBytes"/>.
 /// </content>
@@ -16,6 +14,7 @@ public static partial class ExtensionMethods
     /// <summary>
     /// The <see cref="ExtraBytesItem"/> extensions.
     /// </summary>
+    /// <param name="item">The item.</param>
     extension(ExtraBytesItem item)
     {
         /// <summary>

@@ -56,12 +56,11 @@ public sealed record OgcMathTransformWkt : VariableLengthRecord
     public override int CopyTo(Span<byte> destination)
     {
         this.Header.CopyTo(destination);
-        int bytesWritten = VariableLengthRecordHeader.Size;
-        var d = destination[bytesWritten..];
+        var d = destination[VariableLengthRecordHeader.Size..];
 
-        bytesWritten += this.Wkt.CopyTo(d);
-        d[bytesWritten] = 0;
+        var textLength = this.Wkt.CopyTo(d);
+        d[textLength] = default;
 
-        return bytesWritten + 1;
+        return VariableLengthRecordHeader.Size + textLength + 1;
     }
 }

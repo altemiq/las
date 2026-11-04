@@ -7,7 +7,7 @@
 namespace Altemiq.IO.Las.Cloud;
 
 /// <summary>
-/// The <c>COPC</c> constants.
+/// The <pre>COPC</pre> constants.
 /// </summary>
 internal static class CopcConstants
 {

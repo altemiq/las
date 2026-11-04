@@ -8,7 +8,7 @@
 namespace Altemiq.IO.Las;
 #pragma warning restore IDE0130, CheckNamespace
 
-#pragma warning disable RCS1263, SA1101
+#pragma warning disable CA1708
 
 /// <summary>
 /// <see cref="Indexing"/> extensions.
@@ -19,6 +19,7 @@ public static class IndexingExtensions
     /// <content>
     /// The <see cref="VariableLengthRecordProcessor"/> extensions.
     /// </content>
+    /// <param name="processor">The processor.</param>
     extension(VariableLengthRecordProcessor processor)
     {
         /// <summary>

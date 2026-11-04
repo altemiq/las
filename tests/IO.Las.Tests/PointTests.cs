@@ -23,13 +23,19 @@ public class PointTests
             NumberOfReturns = 1,
             ScanDirectionFlag = false,
             EdgeOfFlightLine = false,
+#if LAS1_1_OR_GREATER
             Classification = Classification.Unclassified,
             Synthetic = false,
             KeyPoint = false,
             Withheld = false,
-            ScanAngleRank = -29,
             UserData = 0,
             PointSourceId = 0,
+#else
+            Classification = 1,
+            FileMarker = 0,
+            UserBitField = 0,
+#endif
+            ScanAngleRank = -29,
         };
 
     [Test]
@@ -79,13 +85,19 @@ public class PointTests
             NumberOfReturns = 6,
             ScanDirectionFlag = true,
             EdgeOfFlightLine = true,
+#if LAS1_1_OR_GREATER
             Classification = Classification.LowPoint,
             Synthetic = true,
             KeyPoint = true,
             Withheld = true,
-            ScanAngleRank = -8,
             UserData = 9,
             PointSourceId = 10,
+#else
+            Classification = 7,
+            FileMarker = 9,
+            UserBitField = 10,
+#endif
+            ScanAngleRank = -8,
         };
 
         _ = await Assert.That(point)
@@ -97,13 +109,19 @@ public class PointTests
             .And.Member(static p => p.NumberOfReturns, static numberOfReturns => numberOfReturns.IsEqualTo((byte)6))
             .And.Member(static p => p.ScanDirectionFlag, static scanDirectionFlag => scanDirectionFlag.IsTrue())
             .And.Member(static p => p.EdgeOfFlightLine, static edgeOfFlightLine => edgeOfFlightLine.IsTrue())
+#if LAS1_1_OR_GREATER
             .And.Member(static p => p.Classification, static classification => classification.IsEqualTo(Classification.LowPoint))
             .And.Member(static p => p.Synthetic, static synthetic => synthetic.IsTrue())
             .And.Member(static p => p.KeyPoint, static keyPoint => keyPoint.IsTrue())
             .And.Member(static p => p.Withheld, static withheld => withheld.IsTrue())
-            .And.Member(static p => p.ScanAngleRank, static scanAngleRank => scanAngleRank.IsEqualTo((sbyte)-8))
             .And.Member(static p => p.UserData, static userData => userData.IsEqualTo((byte)9))
-            .And.Member(static p => p.PointSourceId, static pointSourceId => pointSourceId.IsEqualTo((ushort)10));
+            .And.Member(static p => p.PointSourceId, static pointSourceId => pointSourceId.IsEqualTo((ushort)10))
+#else
+            .And.Member(static p => p.Classification, static classification => classification.IsEqualTo(7))
+            .And.Member(static p => p.FileMarker, static fileMarker => fileMarker.IsEqualTo((byte)9))
+            .And.Member(static p => p.UserBitField, static userBitField => userBitField.IsEqualTo((ushort)10))
+#endif
+            .And.Member(static p => p.ScanAngleRank, static scanAngleRank => scanAngleRank.IsEqualTo((sbyte)-8));
     }
 
     private static async Task CheckPoint(PointDataRecord point)
@@ -117,12 +135,18 @@ public class PointTests
             .And.Member(static p => p.NumberOfReturns, static numberOfReturns => numberOfReturns.IsEqualTo((byte)1))
             .And.Member(static p => p.ScanDirectionFlag, static scanDirectionFlag => scanDirectionFlag.IsFalse())
             .And.Member(static p => p.EdgeOfFlightLine, static edgeOfFlightLine => edgeOfFlightLine.IsFalse())
+#if LAS1_1_OR_GREATER
             .And.Member(static p => p.Classification, static classification => classification.IsEqualTo(Classification.Unclassified))
             .And.Member(static p => p.Synthetic, static synthetic => synthetic.IsFalse())
             .And.Member(static p => p.KeyPoint, static keyPoint => keyPoint.IsFalse())
             .And.Member(static p => p.Withheld, static withheld => withheld.IsFalse())
-            .And.Member(static p => p.ScanAngleRank, static scanAngleRank => scanAngleRank.IsEqualTo((sbyte)-29))
             .And.Member(static p => p.UserData, static userData => userData.IsDefault())
-            .And.Member(static p => p.PointSourceId, static pointSourceId => pointSourceId.IsDefault());
+            .And.Member(static p => p.PointSourceId, static pointSourceId => pointSourceId.IsDefault())
+#else
+            .And.Member(static p => p.Classification, static classification => classification.IsEqualTo(1))
+            .And.Member(static p => p.FileMarker, static fileMarker => fileMarker.IsDefault())
+            .And.Member(static p => p.UserBitField, static userBitField => userBitField.IsDefault())
+#endif
+            .And.Member(static p => p.ScanAngleRank, static scanAngleRank => scanAngleRank.IsEqualTo((sbyte)-29));
     }
 }

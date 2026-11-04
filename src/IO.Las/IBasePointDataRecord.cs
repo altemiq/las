@@ -67,6 +67,7 @@ public interface IBasePointDataRecord
     /// <value><see langword="true"/> if the point is at the end of a scan. It is the last point on a given scan line before it changes direction; otherwise, <see langword="false"/>.</value>
     bool EdgeOfFlightLine { get; init; }
 
+#if LAS1_1_OR_GREATER
     /// <summary>
     /// Gets a value indicating whether this <see cref="PointDataRecord"/> is synthetic.
     /// </summary>
@@ -84,7 +85,9 @@ public interface IBasePointDataRecord
     /// </summary>
     /// <value><see langword="true"/> if this point should not be included in processing (synonymous with Deleted); otherwise, <see langword="false"/>.</value>
     bool Withheld { get; init; }
+#endif
 
+#if LAS1_1_OR_GREATER
     /// <summary>
     /// Gets the user data.
     /// </summary>
@@ -94,6 +97,22 @@ public interface IBasePointDataRecord
     /// Gets the point source id.
     /// </summary>
     ushort PointSourceId { get; init; }
+#else
+    /// <summary>
+    /// Gets the file marker.
+    /// </summary>
+    /// <remarks>The file marker is an optional field that should be used in conjunction with the
+    /// variable length records.The file marker allows for the LAS flight - line based files to be combined
+    /// into single files with more than one flight - line.The actual original flight - line should be tracked in
+    /// the variable length records, so that individual flight lines can be separated from a given combined
+    /// file.</remarks>
+    byte FileMarker { get; init; }
+
+    /// <summary>
+    /// Gets the bit field that is to be used at the users discretion.
+    /// </summary>
+    ushort UserBitField { get; init; }
+#endif
 
     /// <summary>
     /// Clones this instance to a new instance.

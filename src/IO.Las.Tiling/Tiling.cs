@@ -85,7 +85,13 @@ public sealed record Tiling : VariableLengthRecord
     /// </summary>
     public bool Buffer
     {
-        get => (this.value & BufferMask) is not 0;
+        get
+        {
+#pragma warning disable IDE0027 // Use expression body for accessor
+            return (this.value & BufferMask) is not 0;
+#pragma warning restore IDE0027 // Use expression body for accessor
+        }
+
         init
         {
             var current = this.value & ~BufferMask;
@@ -103,7 +109,13 @@ public sealed record Tiling : VariableLengthRecord
     /// </summary>
     public bool Reversible
     {
-        get => (this.value & ReversibleMask) is not 0;
+        get
+        {
+#pragma warning disable IDE0027 // Use expression body for accessor
+            return (this.value & ReversibleMask) is not 0;
+#pragma warning restore IDE0027 // Use expression body for accessor
+        }
+
         init
         {
             var current = this.value & ~ReversibleMask;

@@ -7,12 +7,12 @@
 namespace Altemiq.IO.Las;
 
 /// <content>
-/// The <c>copc</c> extensions.
+/// The <pre>copc</pre> extensions.
 /// </content>
 internal static partial class RootCommandExtensions
 {
     /// <summary>
-    /// Adds the <c>copc</c> command.
+    /// Adds the <pre>copc</pre> command.
     /// </summary>
     /// <typeparam name="T">The type of command.</typeparam>
     /// <param name="command">The command.</param>

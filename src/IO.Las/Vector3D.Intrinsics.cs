@@ -9,8 +9,6 @@ namespace Altemiq.IO.Las;
 
 using System.Runtime.Intrinsics;
 
-#pragma warning disable SA1600, SA1601
-
 /// <content>
 /// <see cref="System.Runtime.Intrinsics"/> implementations.
 /// </content>

@@ -16,6 +16,7 @@ internal static partial class PolyfillExtensions
     /// <summary>
     /// <see cref="System.Text.Encoding"/> extensions.
     /// </summary>
+    /// <param name="encoding">The encoding.</param>
     extension(System.Text.Encoding encoding)
     {
         /// <summary>

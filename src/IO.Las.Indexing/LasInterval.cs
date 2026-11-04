@@ -206,7 +206,7 @@ internal sealed class LasInterval : IEnumerable<KeyValuePair<int, LasIntervalSta
 
     /// <summary>
     /// Enumerates the intervals contained within the specified <paramref name="startCell"/> as
-    /// <c>(Start, End)</c> pairs. Intended for use by consumers that want to walk a chain without
+    /// <c language="csharp">(Start, End)</c> pairs. Intended for use by consumers that want to walk a chain without
     /// touching the arena directly.
     /// </summary>
     /// <param name="startCell">The start cell.</param>

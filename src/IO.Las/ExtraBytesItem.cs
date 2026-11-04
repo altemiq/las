@@ -162,7 +162,13 @@ public readonly record struct ExtraBytesItem
     /// </summary>
     public ExtraBytesValue NoData
     {
-        get => this.GetDataAsFull(this.noData);
+        get
+        {
+#pragma warning disable IDE0027 // Use expression body for accessor
+            return this.GetDataAsFull(this.noData);
+#pragma warning restore IDE0027 // Use expression body for accessor
+        }
+
         init
         {
             this.noData = new byte[AnyDataSize];
@@ -175,7 +181,13 @@ public readonly record struct ExtraBytesItem
     /// </summary>
     public ExtraBytesValue Min
     {
-        get => this.GetDataAsFull(this.min);
+        get
+        {
+#pragma warning disable IDE0027 // Use expression body for accessor
+            return this.GetDataAsFull(this.min);
+#pragma warning restore IDE0027 // Use expression body for accessor
+        }
+
         init
         {
             this.min ??= new byte[AnyDataSize];
@@ -188,7 +200,13 @@ public readonly record struct ExtraBytesItem
     /// </summary>
     public ExtraBytesValue Max
     {
-        get => this.GetDataAsFull(this.max);
+        get
+        {
+#pragma warning disable IDE0027 // Use expression body for accessor
+            return this.GetDataAsFull(this.max);
+#pragma warning restore IDE0027 // Use expression body for accessor
+        }
+
         init
         {
             this.max ??= new byte[AnyDataSize];

@@ -6,8 +6,6 @@
 
 namespace Altemiq.IO.Las;
 
-#pragma warning disable SA1101
-
 /// <summary>
 /// LAZ extensions.
 /// </summary>
@@ -16,6 +14,7 @@ public static class LazExtensions
     /// <summary>
     /// The <see cref="ILasReader"/> extensions.
     /// </summary>
+    /// <param name="reader">The reader.</param>
     extension(ILasReader reader)
     {
 #if LAS1_4_OR_GREATER

@@ -6,8 +6,6 @@
 
 namespace Altemiq.IO.Las;
 
-#pragma warning disable RCS1263, SA1101
-
 /// <summary>
 /// <see cref="DataFrame"/> extensions.
 /// </summary>
@@ -33,6 +31,14 @@ public static class DataFrameExtensions
 
             return DataFrame.ReadRecordBatches(batches, schema);
         }
+
+        /// <summary>
+        /// Imports the stream eagerly.
+        /// </summary>
+        /// <param name="stream">The stream.</param>
+        /// <param name="schema">The schema.</param>
+        /// <returns>The data frame.</returns>
+        public static DataFrame ReadRecordBatches(IEnumerable<Apache.Arrow.RecordBatch> stream, Apache.Arrow.Schema schema) => NewDataFrame(Polars.NET.Core.Arrow.ArrowStreamInterop.ImportEager(stream, schema));
 
         /// <summary>
         /// Common Write Interface:Transform DataFrame to <see cref="ILasReader"/>.
@@ -62,14 +68,6 @@ public static class DataFrameExtensions
 
             consumerTask.Wait();
         }
-
-        /// <summary>
-        /// Imports the stream eagerly.
-        /// </summary>
-        /// <param name="stream">The stream.</param>
-        /// <param name="schema">The schema.</param>
-        /// <returns>The data frame.</returns>
-        public static DataFrame ReadRecordBatches(IEnumerable<Apache.Arrow.RecordBatch> stream, Apache.Arrow.Schema schema) => NewDataFrame(Polars.NET.Core.Arrow.ArrowStreamInterop.ImportEager(stream, schema));
     }
 
     [System.Runtime.CompilerServices.UnsafeAccessor(System.Runtime.CompilerServices.UnsafeAccessorKind.Constructor)]

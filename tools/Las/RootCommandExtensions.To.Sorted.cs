@@ -7,12 +7,12 @@
 namespace Altemiq.IO.Las;
 
 /// <content>
-/// The <c>sort</c> extensions.
+/// The <pre>sort</pre> extensions.
 /// </content>
 internal static partial class RootCommandExtensions
 {
     /// <summary>
-    /// Adds the <c>sort</c> command.
+    /// Adds the <pre>sort</pre> command.
     /// </summary>
     /// <typeparam name="T">The type of command.</typeparam>
     /// <param name="command">The command.</param>

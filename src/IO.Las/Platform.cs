@@ -36,12 +36,6 @@ public readonly partial record struct Platform
     internal char Code { get; }
 
     /// <summary>
-    /// Converts the value of this instance to its equivalent string representation.
-    /// </summary>
-    /// <returns>The string representation of the value of this instance.</returns>>
-    public override string ToString() => $"{this.Id.GetDescription()},{this.Type},{this.Code}";
-
-    /// <summary>
     /// Parses the platform from specified identifier.
     /// </summary>
     /// <param name="c">The identifier.</param>
@@ -56,4 +50,10 @@ public readonly partial record struct Platform
     /// <param name="platform">The platform.</param>
     /// <returns><see langword="true"/> if the platform was successfully parsed; otherwise <see langword="false"/>.</returns>
     public static partial bool TryParse(char c, out Platform platform);
+
+    /// <summary>
+    /// Converts the value of this instance to its equivalent string representation.
+    /// </summary>
+    /// <returns>The string representation of the value of this instance.</returns>>
+    public override string ToString() => $"{this.Id.GetDescription()},{this.Type},{this.Code}";
 }

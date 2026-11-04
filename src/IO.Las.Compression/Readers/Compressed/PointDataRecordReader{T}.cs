@@ -20,10 +20,18 @@ internal closed class PointDataRecordReader<T>(ArithmeticDecoder decoder, int po
     private readonly IntegerDecompressor intensityIntegerDecompressor = new(decoder, 16, 4);
     private readonly ArithmeticSymbolModel scanAngleRankModels0 = decoder.CreateSymbolModel(ArithmeticCoder.ModelCount);
     private readonly ArithmeticSymbolModel scanAngleRankModels1 = decoder.CreateSymbolModel(ArithmeticCoder.ModelCount);
+#if LAS1_1_OR_GREATER
     private readonly IntegerDecompressor pointSourceIdIntegerDecompressor = new(decoder);
+#else
+    private readonly IntegerDecompressor userBitFieldIntegerDecompressor = new(decoder);
+#endif
     private readonly ArithmeticSymbolModel?[] bitByteModels = new ArithmeticSymbolModel[ArithmeticCoder.ModelCount];
     private readonly ArithmeticSymbolModel?[] classificationModels = new ArithmeticSymbolModel[ArithmeticCoder.ModelCount];
+#if LAS1_1_OR_GREATER
     private readonly ArithmeticSymbolModel?[] userDataModels = new ArithmeticSymbolModel[ArithmeticCoder.ModelCount];
+#else
+    private readonly ArithmeticSymbolModel?[] fileMarkerModels = new ArithmeticSymbolModel[ArithmeticCoder.ModelCount];
+#endif
     private readonly IntegerDecompressor deltaXIntegerDecompressor = new(decoder, 32, 2);
     private readonly IntegerDecompressor deltaYIntegerDecompressor = new(decoder, 32, 22);
     private readonly IntegerDecompressor zIntegerDecompressor = new(decoder, 32, 20);
@@ -56,12 +64,20 @@ internal closed class PointDataRecordReader<T>(ArithmeticDecoder decoder, int po
         this.intensityIntegerDecompressor.Initialize();
         _ = this.scanAngleRankModels0.Initialize();
         _ = this.scanAngleRankModels1.Initialize();
+#if LAS1_1_OR_GREATER
         this.pointSourceIdIntegerDecompressor.Initialize();
+#else
+        this.userBitFieldIntegerDecompressor.Initialize();
+#endif
         for (var i = 0; i < ArithmeticCoder.ModelCount; i++)
         {
             _ = this.bitByteModels[i]?.Initialize();
             _ = this.classificationModels[i]?.Initialize();
+#if LAS1_1_OR_GREATER
             _ = this.userDataModels[i]?.Initialize();
+#else
+            _ = this.fileMarkerModels[i]?.Initialize();
+#endif
         }
 
         this.deltaXIntegerDecompressor.Initialize();
@@ -139,7 +155,7 @@ internal closed class PointDataRecordReader<T>(ArithmeticDecoder decoder, int po
     /// <param name="destination">The destination buffer.</param>
     /// <remarks>
     /// Subclasses override this to append any per-format trailing bytes (GPS time,
-    /// color, waveform, extra bytes) into <c>destination[pointDataRecordSize..]</c>.
+    /// color, waveform, extra bytes) into <c language="csharp">destination[pointDataRecordSize..]</c>.
     /// </remarks>
     protected virtual void ProcessData(Span<byte> destination) => this.ProcessDataCore(destination);
 
@@ -231,6 +247,7 @@ internal closed class PointDataRecordReader<T>(ArithmeticDecoder decoder, int po
                 this.lastPoint[Constants.PointDataRecord.ScanAngleRankFieldOffset] = (val + this.lastPoint[Constants.PointDataRecord.ScanAngleRankFieldOffset]).Fold();
             }
 
+#if LAS1_1_OR_GREATER
             // decompress the user data ... if it has changed
             if ((changedValues & 2) is not 0)
             {
@@ -251,6 +268,28 @@ internal closed class PointDataRecordReader<T>(ArithmeticDecoder decoder, int po
                 var pointSourceId = (ushort)this.pointSourceIdIntegerDecompressor.Decompress(FieldAccessors.PointDataRecord.GetPointSourceId(this.lastPoint));
                 FieldAccessors.PointDataRecord.SetPointSourceId(this.lastPoint, pointSourceId);
             }
+#else
+            // decompress the file marker ... if it has changed
+            if ((changedValues & 2) is not 0)
+            {
+                var model = this.fileMarkerModels[this.lastPoint[Constants.PointDataRecord.FileMarkerFieldOffset]];
+                if (model is null)
+                {
+                    model = decoder.CreateSymbolModel(ArithmeticCoder.ModelCount);
+                    this.fileMarkerModels[this.lastPoint[Constants.PointDataRecord.FileMarkerFieldOffset]] = model;
+                    _ = model.Initialize();
+                }
+
+                this.lastPoint[Constants.PointDataRecord.FileMarkerFieldOffset] = (byte)decoder.DecodeSymbol(model);
+            }
+
+            // decompress the user bit field ... if it has changed
+            if ((changedValues & 1) is not 0)
+            {
+                var userBitField = (ushort)this.userBitFieldIntegerDecompressor.Decompress(FieldAccessors.PointDataRecord.GetUserBitField(this.lastPoint));
+                FieldAccessors.PointDataRecord.SetUserBitField(this.lastPoint, userBitField);
+            }
+#endif
         }
         else
         {

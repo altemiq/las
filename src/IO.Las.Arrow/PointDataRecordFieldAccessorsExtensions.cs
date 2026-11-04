@@ -13,12 +13,25 @@ internal static class PointDataRecordFieldAccessorsExtensions
 {
     extension(FieldAccessors.PointDataRecord)
     {
+#if LAS1_1_OR_GREATER
         /// <summary>
         /// Sets the classification.
         /// </summary>
         /// <param name="bytes">The bytes.</param>
         /// <param name="value">The value.</param>
         public static void SetClassification(Span<byte> bytes, Classification value) => FieldAccessors.PointDataRecord.SetClassification(ref bytes[Constants.PointDataRecord.ClassificationFieldOffset], value);
+
+#pragma warning disable S1133
+        /// <summary>
+        /// Sets the classification.
+        /// </summary>
+        /// <param name="bytes">The bytes.</param>
+        /// <param name="value">The value.</param>
+        [Obsolete($"Use {nameof(SetClassification)} with {nameof(Classification)} instead")]
+        [System.ComponentModel.Browsable(false)]
+        [System.ComponentModel.EditorBrowsable(System.ComponentModel.EditorBrowsableState.Never)]
+        public static void SetClassification(Span<byte> bytes, byte value) => bytes[Constants.PointDataRecord.ClassificationFieldOffset] = value;
+#pragma warning restore S1133
 
         /// <summary>
         /// Sets the synthetic flag.
@@ -47,6 +60,33 @@ internal static class PointDataRecordFieldAccessorsExtensions
         /// <param name="bytes">The bytes.</param>
         /// <param name="value">The value.</param>
         public static void SetUserData(Span<byte> bytes, byte value) => bytes[Constants.PointDataRecord.UserDataFieldOffset] = value;
+
+#pragma warning disable S1133
+        /// <summary>
+        /// Sets the file marker.
+        /// </summary>
+        /// <param name="bytes">The bytes.</param>
+        /// <param name="value">The value.</param>
+        [Obsolete($"Use {nameof(SetUserData)} instead")]
+        [System.ComponentModel.Browsable(false)]
+        [System.ComponentModel.EditorBrowsable(System.ComponentModel.EditorBrowsableState.Never)]
+        public static void SetFileMarker(Span<byte> bytes, byte value) => bytes[Constants.PointDataRecord.FileMarkerFieldOffset] = value;
+#pragma warning restore S1133
+#else
+        /// <summary>
+        /// Sets the classification.
+        /// </summary>
+        /// <param name="bytes">The bytes.</param>
+        /// <param name="value">The value.</param>
+        public static void SetClassification(Span<byte> bytes, byte value) => bytes[Constants.PointDataRecord.ClassificationFieldOffset] = value;
+
+        /// <summary>
+        /// Sets the file marker.
+        /// </summary>
+        /// <param name="bytes">The bytes.</param>
+        /// <param name="value">The value.</param>
+        public static void SetFileMarker(Span<byte> bytes, byte value) => bytes[Constants.PointDataRecord.FileMarkerFieldOffset] = value;
+#endif
 
         /// <summary>
         /// Sets the scan angle rank.

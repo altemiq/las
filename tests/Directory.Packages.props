@@ -8,7 +8,7 @@
   <Import Project="$([MSBuild]::GetPathOfFileAbove('$(MSBuildThisFileName.Replace('Packages', 'Versions'))$(MSBuildThisFileExtension)', '$(MSBuildThisFileDirectory)'))" />
 
   <ItemGroup>
-    <PackageVersion Include="TUnit" Version="1.76.28" />
+    <PackageVersion Include="TUnit" Version="1.79.0" />
   </ItemGroup>
   
   <ItemGroup Label="Apache">
@@ -20,7 +20,7 @@
   </ItemGroup>
   
   <ItemGroup Label="AWS">
-    <PackageVersion Include="AWSSDK.S3" Version="4.0.104.6" />
+    <PackageVersion Include="AWSSDK.S3" Version="4.0.104.8" />
   </ItemGroup>
   
   <ItemGroup Label="Azure">
@@ -28,10 +28,11 @@
   </ItemGroup>
   
   <ItemGroup Label="DataFrames">
-    <PackageVersion Include="Polars.NET.Native.linux-arm64" Version="1.0.0" />
-    <PackageVersion Include="Polars.NET.Native.linux-x64" Version="1.0.0" />
-    <PackageVersion Include="Polars.NET.Native.win-x64" Version="1.0.0" />
-    <PackageVersion Include="Polars.NET.Native.osx-arm64" Version="1.0.0" />
+    <PackageVersion Include="Polars.NET" Version="1.0.1" />
+    <PackageVersion Include="Polars.NET.Native.linux-arm64" Version="1.0.1" />
+    <PackageVersion Include="Polars.NET.Native.linux-x64" Version="1.0.1" />
+    <PackageVersion Include="Polars.NET.Native.win-x64" Version="1.0.1" />
+    <PackageVersion Include="Polars.NET.Native.osx-arm64" Version="1.0.1" />
   </ItemGroup>
   
   <ItemGroup Label="Microsoft.AspNetCore">
@@ -53,7 +54,7 @@
   </Choose>
 
   <ItemGroup>
-    <GlobalPackageReference Include="Meziantou.Polyfill" Version="1.0.169" />
+    <GlobalPackageReference Include="Meziantou.Polyfill" Version="1.0.170" />
   </ItemGroup>
 
 </Project>

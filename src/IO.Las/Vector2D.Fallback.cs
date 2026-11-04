@@ -7,8 +7,6 @@
 #if !NETCOREAPP3_0_OR_GREATER
 namespace Altemiq.IO.Las;
 
-#pragma warning disable SA1600, SA1601
-
 /// <content>
 /// Software implementations.
 /// </content>

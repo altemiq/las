@@ -33,12 +33,19 @@ internal static partial class PointConverter
                 ScanDirectionFlag = pointDataRecord.ScanDirectionFlag,
                 EdgeOfFlightLine = pointDataRecord.EdgeOfFlightLine,
                 Classification = pointDataRecord.Classification,
+#if LAS1_1_OR_GREATER
                 Synthetic = pointDataRecord.Synthetic,
                 KeyPoint = pointDataRecord.KeyPoint,
                 Withheld = pointDataRecord.Withheld,
+#endif
                 ScanAngleRank = pointDataRecord.ScanAngleRank,
+#if LAS1_1_OR_GREATER
                 UserData = pointDataRecord.UserData,
                 PointSourceId = pointDataRecord.PointSourceId,
+#else
+                FileMarker = pointDataRecord.FileMarker,
+                UserBitField = pointDataRecord.UserBitField,
+#endif
                 GpsTime = default,
             };
 
@@ -61,12 +68,19 @@ internal static partial class PointConverter
                 ScanDirectionFlag = pointDataRecord.ScanDirectionFlag,
                 EdgeOfFlightLine = pointDataRecord.EdgeOfFlightLine,
                 Classification = pointDataRecord.Classification,
+#if LAS1_1_OR_GREATER
                 Synthetic = pointDataRecord.Synthetic,
                 KeyPoint = pointDataRecord.KeyPoint,
                 Withheld = pointDataRecord.Withheld,
+#endif
                 ScanAngleRank = pointDataRecord.ScanAngleRank,
+#if LAS1_1_OR_GREATER
                 UserData = pointDataRecord.UserData,
                 PointSourceId = pointDataRecord.PointSourceId,
+#else
+                FileMarker = pointDataRecord.FileMarker,
+                UserBitField = pointDataRecord.UserBitField,
+#endif
                 GpsTime = pointDataRecord.GpsTime,
             };
 

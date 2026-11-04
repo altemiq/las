@@ -10,7 +10,7 @@ namespace Altemiq.IO.Las.Cloud;
 using System.Runtime.Intrinsics;
 #endif
 
-#pragma warning disable RCS1263, SA1101
+#pragma warning disable CA1708
 
 /// <summary>
 /// <see cref="CopcHierarchy.VoxelKey"/> extensions.
@@ -85,6 +85,7 @@ public static class VoxelKeyExtensions
     /// <summary>
     /// The <see cref="BoundingBox"/> extensions.
     /// </summary>
+    /// <param name="boundingBox">The bounding box.</param>
     extension(in BoundingBox boundingBox)
     {
         /// <summary>

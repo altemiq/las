@@ -634,7 +634,7 @@ public class LasReader :
             { PointDataFormatId: ExtendedGpsWaveformPointDataRecord.Id, Version: { Major: 1, Minor: >= 4 } } => new Readers.Raw.ExtendedGpsWaveformPointDataRecordReader(),
             { PointDataFormatId: ExtendedGpsColorNearInfraredWaveformPointDataRecord.Id, Version: { Major: 1, Minor: >= 4 } } => new Readers.Raw.ExtendedGpsColorNearInfraredWaveformPointDataRecordReader(),
 #endif
-            { Version: { Major: 1, Minor: <= 1 } } => throw new InvalidOperationException(Properties.v1_1.Resources.OnlyDataPointsAreAllowed),
+            { Version: { Major: 1, Minor: <= 1 } } => throw new InvalidOperationException(Properties.v1_0.Resources.OnlyDataPointsAreAllowed),
 #if LAS1_2_OR_GREATER
             { Version: { Major: 1, Minor: 2 } } => throw new InvalidOperationException(Properties.v1_2.Resources.OnlyDataPointsAreAllowed),
 #endif

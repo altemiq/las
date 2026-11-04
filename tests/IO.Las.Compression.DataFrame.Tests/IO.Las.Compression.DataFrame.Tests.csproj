@@ -28,7 +28,7 @@
   </Choose>
 
   <ItemGroup>
-    <EmbeddedResource Include="..\..\data\laz\fusa.laz" />
+    <EmbeddedResource Include="..\..\data\laz\fusa*.laz" />
     <EmbeddedResource Include="..\IO.Las.Compression.Tests\fusa_height*.laz" />
   </ItemGroup>
 

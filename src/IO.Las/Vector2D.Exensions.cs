@@ -6,16 +6,16 @@
 
 namespace Altemiq.IO.Las;
 
-#pragma warning disable RCS1263, SA1101
+#pragma warning disable CA1708
 
 #if NETCOREAPP3_0_OR_GREATER
 using System.Runtime.CompilerServices;
 using System.Runtime.Intrinsics;
 #endif
 
-/// <summary>
+/// <content>
 /// <see cref="Vector2D"/> extensions.
-/// </summary>
+/// </content>
 public static partial class Vector
 {
     /// <summary>The <see cref="Vector3D"/> extensions.</summary>

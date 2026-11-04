@@ -12,21 +12,21 @@ using System.Collections;
 /// Represents the compressed tag.
 /// </summary>
 /// <remarks>
-/// <code>
+/// <code language="none">
 /// the data of the LASzip VLR
-///     ushort  compressor              2 bytes<br/>
-///     ushort  coder                   2 bytes<br/>
-///     byte    version_major           1 byte<br/>
-///     byte    version_minor           1 byte<br/>
-///     ushort  version_revision        2 bytes<br/>
-///     uint    options                 4 bytes<br/>
-///     uint    chunk_size              4 bytes<br/>
-///     long    number_of_special_evlrs 8 bytes<br/>
-///     long    offset_to_special_evlrs 8 bytes<br/>
-///     ushort  num_items               2 bytes<br/>
-///        ushort type                      2 bytes * num_items<br/>
-///        ushort size                      2 bytes * num_items<br/>
-///        ushort version                   2 bytes * num_items<br/>
+///     ushort  compressor              2 bytes
+///     ushort  coder                   2 bytes
+///     byte    version_major           1 byte
+///     byte    version_minor           1 byte
+///     ushort  version_revision        2 bytes
+///     uint    options                 4 bytes
+///     uint    chunk_size              4 bytes
+///     long    number_of_special_evlrs 8 bytes
+///     long    offset_to_special_evlrs 8 bytes
+///     ushort  num_items               2 bytes
+///        ushort type                      2 bytes * num_items
+///        ushort size                      2 bytes * num_items
+///        ushort version                   2 bytes * num_items
 /// which totals 34+6*num_items
 /// </code>
 /// </remarks>

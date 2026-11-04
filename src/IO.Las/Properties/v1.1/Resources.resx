@@ -117,8 +117,4 @@
   <resheader name="writer">
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
-  <data name="OnlyDataPointsAreAllowed" xml:space="preserve">
-    <value>Only data points 0 or 1 are allowed</value>
-    <comment>Error message for an invalid point format ID.@Invariant</comment>
-  </data>
 </root>

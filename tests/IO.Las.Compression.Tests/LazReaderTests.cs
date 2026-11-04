@@ -105,7 +105,10 @@ public class LazReaderTests
 #endif
 
     [Test]
+    [Arguments("fusa_0.laz")]
+#if LAS1_1_OR_GREATER
     [Arguments("fusa.laz")]
+#endif
 #if LAS1_4_OR_GREATER
     [Arguments("fusa_height.laz")]
 #endif
@@ -167,7 +170,10 @@ public class LazReaderTests
 #endif
 
     [Test]
+    [Arguments("fusa_0.laz", 1, 0)]
+#if LAS1_1_OR_GREATER
     [Arguments("fusa.laz", 1, 1)]
+#endif
 #if LAS1_4_OR_GREATER
     [Arguments("fusa_height.laz", 1, 4)]
 #endif
@@ -259,7 +265,10 @@ public class LazReaderTests
 #endif
 
     [Test]
+    [Arguments("fusa_0.laz", 1, 0)]
+#if LAS1_1_OR_GREATER
     [Arguments("fusa.laz", 1, 1)]
+#endif
 #if LAS1_4_OR_GREATER
     [Arguments("fusa_height.laz", 1, 4)]
 #endif
@@ -289,9 +298,13 @@ public class LazReaderTests
 
 #if NETSTANDARD2_1_OR_GREATER || NETCOREAPP2_1_OR_GREATER
     [Test]
-    public async Task ReadToSpan()
+    [Arguments("fusa_0.laz")]
+#if LAS1_1_OR_GREATER
+    [Arguments("fusa.laz")]
+#endif
+    public async Task ReadToSpan(string name)
     {
-        var stream = typeof(LazReaderTests).Assembly.GetManifestResourceStream(typeof(LazReaderTests), "fusa.laz")
+        var stream = typeof(LazReaderTests).Assembly.GetManifestResourceStream(typeof(LazReaderTests), name)
                                ?? throw new System.Diagnostics.UnreachableException("Failed to get stream");
         LazReader reader = new(stream);
 
@@ -318,9 +331,13 @@ public class LazReaderTests
     }
 
     [Test]
-    public async Task ReadToMemory()
+    [Arguments("fusa_0.laz")]
+#if LAS1_1_OR_GREATER
+    [Arguments("fusa.laz")]
+#endif
+    public async Task ReadToMemory(string name)
     {
-        var stream = typeof(LazReaderTests).Assembly.GetManifestResourceStream(typeof(LazReaderTests), "fusa.laz")
+        var stream = typeof(LazReaderTests).Assembly.GetManifestResourceStream(typeof(LazReaderTests), name)
                                ?? throw new System.Diagnostics.UnreachableException("Failed to get stream");
         LazReader reader = new(stream);
 
@@ -352,7 +369,9 @@ public class LazReaderTests
     {
         await Assert.That(headerBlock)
             .Member(static headerBlock => headerBlock.FileSignature, static fileSignature => fileSignature.IsEqualTo("LASF"))
+#if LAS1_1_OR_GREATER
             .And.Member(static headerBlock => headerBlock.FileSourceId, static fileSourceId => fileSourceId.IsDefault())
+#endif
 #if LAS1_2_OR_GREATER
             .And.Member(static headerBlock => headerBlock.GlobalEncoding, static globalEncoding => globalEncoding.IsEqualTo(GlobalEncoding.None))
 #endif

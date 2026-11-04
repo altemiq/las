@@ -9,8 +9,6 @@ namespace Altemiq.IO.Las.Indexing;
 using System.Numerics;
 #if NET7_0_OR_GREATER
 using System.Runtime.Intrinsics;
-
-#pragma warning disable RCS1263, SA1101
 #endif
 
 /// <summary>

@@ -7,7 +7,7 @@
 namespace Altemiq.IO.Las.Writers.Compressed;
 
 /// <summary>
-/// The compressed <see cref="Writers.PointDataRecordWriter{T}"/> for <see cref="PointDataRecord"/> intances.
+/// The compressed <see cref="IPointDataRecordWriter"/> for <see cref="PointDataRecord"/> intances.
 /// </summary>
 /// <typeparam name="T">The type of point data record.</typeparam>
 internal closed class PointDataRecordWriter<T> : IPointDataRecordWriter, ISimpleWriter
@@ -17,10 +17,18 @@ internal closed class PointDataRecordWriter<T> : IPointDataRecordWriter, ISimple
     private readonly ArithmeticSymbolModel changedValuesModel;
     private readonly IntegerCompressor intensityIntegerCompressor;
     private readonly ArithmeticSymbolModel[] scanAngleRankModels = new ArithmeticSymbolModel[2];
+#if LAS1_1_OR_GREATER
     private readonly IntegerCompressor pointSourceIdIntegerCompressor;
+#else
+    private readonly IntegerCompressor userBitFieldIntegerCompressor;
+#endif
     private readonly ArithmeticSymbolModel?[] bitByteModels = new ArithmeticSymbolModel[ArithmeticCoder.ModelCount];
     private readonly ArithmeticSymbolModel?[] classificationModels = new ArithmeticSymbolModel[ArithmeticCoder.ModelCount];
+#if LAS1_1_OR_GREATER
     private readonly ArithmeticSymbolModel?[] userDataModels = new ArithmeticSymbolModel[ArithmeticCoder.ModelCount];
+#else
+    private readonly ArithmeticSymbolModel?[] fileMarkerModels = new ArithmeticSymbolModel[ArithmeticCoder.ModelCount];
+#endif
     private readonly IntegerCompressor deltaXIntegerCompressor;
     private readonly IntegerCompressor deltaYIntegerCompressor;
     private readonly IntegerCompressor zIntegerCompressor;
@@ -43,7 +51,11 @@ internal closed class PointDataRecordWriter<T> : IPointDataRecordWriter, ISimple
         this.intensityIntegerCompressor = new(encoder, 16, 4);
         this.scanAngleRankModels[0] = encoder.CreateSymbolModel(ArithmeticCoder.ModelCount);
         this.scanAngleRankModels[1] = encoder.CreateSymbolModel(ArithmeticCoder.ModelCount);
+#if LAS1_1_OR_GREATER
         this.pointSourceIdIntegerCompressor = new(encoder);
+#else
+        this.userBitFieldIntegerCompressor = new(encoder);
+#endif
         this.deltaXIntegerCompressor = new(encoder, 32, 2);  // 32 bits, 2 context
         this.deltaYIntegerCompressor = new(encoder, 32, 22); // 32 bits, 22 contexts
         this.zIntegerCompressor = new(encoder, 32, 20);  // 32 bits, 20 contexts
@@ -102,12 +114,20 @@ internal closed class PointDataRecordWriter<T> : IPointDataRecordWriter, ISimple
         this.intensityIntegerCompressor.Initialize();
         _ = this.scanAngleRankModels[0].Initialize();
         _ = this.scanAngleRankModels[1].Initialize();
+#if LAS1_1_OR_GREATER
         this.pointSourceIdIntegerCompressor.Initialize();
+#else
+        this.userBitFieldIntegerCompressor.Initialize();
+#endif
         for (var i = 0; i < ArithmeticCoder.ModelCount; i++)
         {
             _ = this.bitByteModels[i]?.Initialize();
             _ = this.classificationModels[i]?.Initialize();
+#if LAS1_1_OR_GREATER
             _ = this.userDataModels[i]?.Initialize();
+#else
+            _ = this.fileMarkerModels[i]?.Initialize();
+#endif
         }
 
         this.deltaXIntegerCompressor.Initialize();
@@ -137,7 +157,11 @@ internal closed class PointDataRecordWriter<T> : IPointDataRecordWriter, ISimple
             | ((this.lastItem[15] != item[15] ? 1 : 0) << 3) // classification
             | ((this.lastItem[16] != item[16] ? 1 : 0) << 2) // scan_angle_rank
             | ((this.lastItem[17] != item[17] ? 1 : 0) << 1) // user_data
+#if LAS1_1_OR_GREATER
             | (FieldAccessors.PointDataRecord.GetPointSourceId(this.lastItem) != FieldAccessors.PointDataRecord.GetPointSourceId(item) ? 1 : 0);
+#else
+            | (FieldAccessors.PointDataRecord.GetUserBitField(this.lastItem) != FieldAccessors.PointDataRecord.GetUserBitField(item) ? 1 : 0);
+#endif
 
         this.encoder.EncodeSymbol(this.changedValuesModel, (uint)changedValues);
 
@@ -183,7 +207,8 @@ internal closed class PointDataRecordWriter<T> : IPointDataRecordWriter, ISimple
             this.encoder.EncodeSymbol(this.scanAngleRankModels[FieldAccessors.PointDataRecord.GetScanDirectionFlag(item) ? 1 : 0], (item[16] - this.lastItem[16]).Fold());
         }
 
-        // compress the user_data ... if it has changed
+#if LAS1_1_OR_GREATER
+        // compress the user data ... if it has changed
         if ((changedValues & 2) is not 0)
         {
             var model = this.userDataModels[this.lastItem[17]];
@@ -197,11 +222,32 @@ internal closed class PointDataRecordWriter<T> : IPointDataRecordWriter, ISimple
             this.encoder.EncodeSymbol(model, item[17]);
         }
 
-        // compress the point_source_ID ... if it has changed
+        // compress the point source ID ... if it has changed
         if ((changedValues & 1) is not 0)
         {
             this.pointSourceIdIntegerCompressor.Compress(FieldAccessors.PointDataRecord.GetPointSourceId(this.lastItem), FieldAccessors.PointDataRecord.GetPointSourceId(item));
         }
+#else
+        // compress the file marker ... if it has changed
+        if ((changedValues & 2) is not 0)
+        {
+            var model = this.fileMarkerModels[this.lastItem[17]];
+            if (model is null)
+            {
+                model = this.encoder.CreateSymbolModel(ArithmeticCoder.ModelCount);
+                this.fileMarkerModels[this.lastItem[17]] = model;
+                _ = model.Initialize();
+            }
+
+            this.encoder.EncodeSymbol(model, item[17]);
+        }
+
+        // compress the user bit field ... if it has changed
+        if ((changedValues & 1) is not 0)
+        {
+            this.userBitFieldIntegerCompressor.Compress(FieldAccessors.PointDataRecord.GetUserBitField(this.lastItem), FieldAccessors.PointDataRecord.GetUserBitField(item));
+        }
+#endif
 
         // compress x coordinate
         var diff = FieldAccessors.PointDataRecord.GetX(item) - FieldAccessors.PointDataRecord.GetX(this.lastItem);

@@ -34,8 +34,8 @@ internal static class MemoryExtensions
     }
 
 #pragma warning disable S6640
-    private static unsafe IntPtr GetIntPtr<T>(Span<T> span) => (IntPtr)System.Runtime.CompilerServices.Unsafe.AsPointer(ref System.Runtime.InteropServices.MemoryMarshal.GetReference(span));
+    private static unsafe nint GetIntPtr<T>(Span<T> span) => (nint)System.Runtime.CompilerServices.Unsafe.AsPointer(ref System.Runtime.InteropServices.MemoryMarshal.GetReference(span));
 
-    private static unsafe IntPtr GetIntPtr<T>(ReadOnlySpan<T> span) => (IntPtr)System.Runtime.CompilerServices.Unsafe.AsPointer(ref System.Runtime.InteropServices.MemoryMarshal.GetReference(span));
+    private static unsafe nint GetIntPtr<T>(ReadOnlySpan<T> span) => (nint)System.Runtime.CompilerServices.Unsafe.AsPointer(ref System.Runtime.InteropServices.MemoryMarshal.GetReference(span));
 #pragma warning restore S6640
 }

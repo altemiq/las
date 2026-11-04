@@ -18,9 +18,9 @@ internal static class FileManager
     private static readonly string ProjDirectory = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "proj");
 
     /// <summary>
-    /// Finds the <c>proj.db</c>.
+    /// Finds the <pre>proj.db</pre>.
     /// </summary>
-    /// <returns>The path to <c>proj.db</c>.</returns>
+    /// <returns>The path to <pre>proj.db</pre>.</returns>
     public static string FindProjDb() => FindResource("proj.db");
 
     private static string FindResource(string name) => GetResourcePaths(name).FirstOrDefault(File.Exists) ?? throw new FileNotFoundException($"Cannot find {name}", name);

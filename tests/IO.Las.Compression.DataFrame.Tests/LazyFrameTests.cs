@@ -5,7 +5,10 @@ using static Polars.CSharp.Polars;
 public class LazyFrameTests
 {
     [Test]
+    [Arguments("fusa_0.laz")]
+#if LAS1_1_OR_GREATER
     [Arguments("fusa.laz")]
+#endif
 #if LAS1_4_OR_GREATER
     [Arguments("fusa_height.laz")]
     [Arguments("fusa_height_7.laz")]

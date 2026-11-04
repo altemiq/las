@@ -7,8 +7,8 @@
 namespace Altemiq.IO.Las.Compression;
 
 /// <summary>
-/// Tests asserting that the parsed <c>ReadPointDataRecord()</c> path and the
-/// raw-bytes <c>ReadPointDataRecordData(Span&lt;byte&gt;)</c> path produce identical
+/// Tests asserting that the parsed <c language="csharp">ReadPointDataRecord()</c> path and the
+/// raw-bytes <c language="csharp">ReadPointDataRecordData(Span&lt;byte&gt;)</c> path produce identical
 /// parsed records for the same input. These guard the upcoming refactor that
 /// eliminates the intermediate double-copy in the raw-bytes path: if the refactor
 /// diverges the two paths, these tests will catch it.
@@ -17,7 +17,10 @@ public class LazReaderCrossPathEquivalenceTests
 {
 #if NETSTANDARD2_1_OR_GREATER || NETCOREAPP2_1_OR_GREATER
     [Test]
+    [Arguments("fusa_0.laz")]
+#if LAS1_1_OR_GREATER
     [Arguments("fusa.laz")]
+#endif
 #if LAS1_2_OR_GREATER
     [Arguments("coloured.laz")]
 #endif
@@ -64,7 +67,10 @@ public class LazReaderCrossPathEquivalenceTests
     }
 
     [Test]
+    [Arguments("fusa_0.laz")]
+#if LAS1_2_OR_GREATER
     [Arguments("fusa.laz")]
+#endif
 #if LAS1_2_OR_GREATER
     [Arguments("coloured.laz")]
 #endif

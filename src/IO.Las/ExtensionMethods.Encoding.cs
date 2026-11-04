@@ -6,8 +6,6 @@
 
 namespace Altemiq.IO.Las;
 
-#pragma warning disable SA1101
-
 /// <content>
 /// Extension methods for <see cref="System.Text.Encoding"/>.
 /// </content>
@@ -16,6 +14,7 @@ public static partial class ExtensionMethods
     /// <summary>
     /// <see cref="System.Text.Encoding"/> extensions.
     /// </summary>
+    /// <param name="encoding">The encoding.</param>
     extension(System.Text.Encoding encoding)
     {
         /// <summary>

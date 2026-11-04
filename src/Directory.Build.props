@@ -56,8 +56,12 @@
   </PropertyGroup>
 
   <PropertyGroup>
-    <NoWarn>$(NoWarn);SA1642;SA1643</NoWarn>
+    <NoWarn>$(NoWarn);SA1642</NoWarn>
   </PropertyGroup>
+
+  <!--<PropertyGroup>
+    <NoWarn>$(NoWarn);SA1642;SA1643</NoWarn>
+  </PropertyGroup>-->
 
   <PropertyGroup>
     <UseSpanParsing>false</UseSpanParsing>

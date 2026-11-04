@@ -45,7 +45,7 @@ internal static class LazStreams
     /// </summary>
     /// <param name="index">The chunk index.</param>
     /// <returns>The formatted chunk index.</returns>
-    public static string FormatChunk(int index) => ChunkNameCache.GetOrAdd(index, string.Create(System.Globalization.CultureInfo.InvariantCulture, $"{Chunk}_{index}"));
+    public static string FormatChunk(int index) => ChunkNameCache.GetOrAdd(index, static index => string.Create(System.Globalization.CultureInfo.InvariantCulture, $"{Chunk}_{index}"));
 
     /// <summary>
     /// Converts the string representation of a chunk to its 32-bit signed integer equivalent.

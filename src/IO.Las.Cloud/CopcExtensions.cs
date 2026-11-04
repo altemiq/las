@@ -8,7 +8,7 @@
 namespace Altemiq.IO.Las;
 #pragma warning restore IDE0130, CheckNamespace
 
-#pragma warning disable RCS1263, SA1101
+#pragma warning disable CA1708
 
 /// <summary>
 /// Cloud optimized extension methods.
@@ -457,6 +457,8 @@ public static class CopcExtensions
     /// <summary>
     /// The <see cref="LazReader"/> extensions
     /// </summary>
+    /// <typeparam name="T">The type of reader.</typeparam>
+    /// <param name="reader">The reader.</param>
     extension<T>(T reader)
         where T : ILasReader, ILazReader
     {
@@ -546,6 +548,7 @@ public static class CopcExtensions
     /// <summary>
     /// The <see cref="VariableLengthRecordProcessor"/> extensions
     /// </summary>
+    /// <param name="processor">The reader.</param>
     extension(VariableLengthRecordProcessor processor)
     {
         /// <summary>

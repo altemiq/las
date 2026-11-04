@@ -7,7 +7,7 @@
 namespace Altemiq.IO.Las.Writers.Compressed;
 
 /// <summary>
-/// The compressed <see cref="Writers.PointDataRecordWriter{T}"/> for <see cref="PointDataRecord"/> intances.
+/// The compressed <see cref="PointDataRecordWriter{T}"/> for <see cref="PointDataRecord"/> intances.
 /// </summary>
 /// <param name="encoder">The encoder.</param>
 /// <param name="extraBytes">The number of extra bytes.</param>

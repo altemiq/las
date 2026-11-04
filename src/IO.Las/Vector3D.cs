@@ -71,31 +71,31 @@ public readonly partial struct Vector3D : IFormattable, IEquatable<Vector3D>
     /// <summary>
     /// Gets a vector whose 3 elements are equal to zero.
     /// </summary>
-    /// <returns>A vector whose three elements are equal to zero (that is, it returns the vector <c>(0,0,0)</c>.</returns>
+    /// <returns>A vector whose three elements are equal to zero (that is, it returns the vector <c language="csharp">(0,0,0)</c>.</returns>
     public static Vector3D Zero => default;
 
     /// <summary>
     /// Gets a vector whose 3 elements are equal to one.
     /// </summary>
-    /// <returns>A vector whose three elements are equal to one (that is, it returns the vector <c>(1,1,1)</c>.</returns>
+    /// <returns>A vector whose three elements are equal to one (that is, it returns the vector <c language="csharp">(1,1,1)</c>.</returns>
     public static Vector3D One => new(1D);
 
     /// <summary>
     /// Gets the vector (1,0,0).
     /// </summary>
-    /// <returns>The vector <c>(1,0,0)</c>.</returns>
+    /// <returns>The vector <c language="csharp">(1,0,0)</c>.</returns>
     public static Vector3D UnitX => new(1D, 0D, 0D);
 
     /// <summary>
     /// Gets the vector (0,1,0).
     /// </summary>
-    /// <returns>The vector <c>(0,1,0)</c>.</returns>
+    /// <returns>The vector <c language="csharp">(0,1,0)</c>.</returns>
     public static Vector3D UnitY => new(0D, 1D, 0D);
 
     /// <summary>
     /// Gets the vector (0,0,1).
     /// </summary>
-    /// <returns>The vector <c>(0,0,1)</c>.</returns>
+    /// <returns>The vector <c language="csharp">(0,0,1)</c>.</returns>
     public static Vector3D UnitZ => new(0D, 0D, 1D);
 
     /// <summary>

@@ -6,13 +6,13 @@
 
 namespace Altemiq.IO.Las;
 
-/// <summary>
-/// The <c>to laz</c> extensions.
-/// </summary>
+/// <content>
+/// The <pre>to laz</pre> extensions.
+/// </content>
 internal static partial class RootCommandExtensions
 {
     /// <summary>
-    /// Adds the <c>to laz</c> command.
+    /// Adds the <pre>to laz</pre> command.
     /// </summary>
     /// <typeparam name="T">The type of command.</typeparam>
     /// <param name="command">The command.</param>

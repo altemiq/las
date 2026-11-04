@@ -44,8 +44,10 @@ public class HeaderBlockTests
             static () => new HeaderBlock(default, default, default, new(0, 9), default, default, default, default, default, [], default, default, default, [], default, default)
 #elif LAS1_2_OR_GREATER
             static () => new HeaderBlock(default, default, default, new(0, 9), default, default, default, default, default, [], default, default, default, default)
-#else
+#elif LAS1_1_OR_GREATER
             static () => new HeaderBlock(default, default, new(0, 9), default, default, default, default, default, [], default, default, default, default)
+#else
+            static () => new HeaderBlock(default, new(0, 9), default, default, default, default, default, [], default, default, default, default)
 #endif
         ).Throws<ArgumentOutOfRangeException>().WithParameterName("version");
     }
@@ -80,11 +82,17 @@ public class HeaderBlockTests
     {
         await Assert.That(static () => new HeaderBlock(default, default, default, new(1, 2), default, default, default, default, default, [], default, default, default, default)).Throws<ArgumentOutOfRangeException>().WithParameterName("pointsByReturn");
     }
-#else
+#elif LAS1_1_OR_GREATER
     [Test]
     public async Task InvalidPointReturns()
     {
         await Assert.That(static () => new HeaderBlock(default, default, new(1, 1), default, default, default, default, default, [], default, default, default, default)).Throws<ArgumentOutOfRangeException>().WithParameterName("pointsByReturn");
+    }
+#else
+    [Test]
+    public async Task InvalidPointReturns()
+    {
+        await Assert.That(static () => new HeaderBlock(default, new(1, 0), default, default, default, default, default, [], default, default, default, default)).Throws<ArgumentOutOfRangeException>().WithParameterName("pointsByReturn");
     }
 #endif
 
@@ -168,7 +176,9 @@ public class HeaderBlockTests
     {
         HeaderBlockBuilder builder = new(pointDataTypeId);
         var header = builder.HeaderBlock;
+#if LAS1_1_OR_GREATER
         await Assert.That(header.FileSourceId).IsDefault();
+#endif
         await Assert.That(header.ProjectId).IsEqualTo(Guid.Empty);
 #if LAS1_2_OR_GREATER
         await Assert.That(header.GlobalEncoding).IsEqualTo(globalEncoding);
@@ -195,9 +205,13 @@ public class HeaderBlockTests
     }
 
     [Test]
-    public async Task Read()
+    [Arguments("fusa_0")]
+#if LAS1_1_OR_GREATER
+    [Arguments("fusa")]
+#endif
+    public async Task Read(string name)
     {
-        var stream = typeof(LasReaderTests).Assembly.GetManifestResourceStream(typeof(LasReaderTests), "fusa.las")
+        var stream = typeof(LasReaderTests).Assembly.GetManifestResourceStream(typeof(LasReaderTests), $"{name}.las")
                                ?? throw new System.Diagnostics.UnreachableException("Failed to get stream");
         var reader = new HeaderBlockReader(stream);
         await Assert.That(reader.GetFileSignature).IsEquivalentTo("LASF");
@@ -210,9 +224,13 @@ public class HeaderBlockTests
     }
 
     [Test]
-    public async Task ReadAsync()
+    [Arguments("fusa_0")]
+#if LAS1_1_OR_GREATER
+    [Arguments("fusa")]
+#endif
+    public async Task ReadAsync(string name)
     {
-        var stream = typeof(LasReaderTests).Assembly.GetManifestResourceStream(typeof(LasReaderTests), "fusa.las")
+        var stream = typeof(LasReaderTests).Assembly.GetManifestResourceStream(typeof(LasReaderTests), $"{name}.las")
                                ?? throw new System.Diagnostics.UnreachableException("Failed to get stream");
         var reader = new HeaderBlockReader(stream);
         await Assert.That(async () => await reader.GetFileSignatureAsync()).IsEqualTo("LASF");

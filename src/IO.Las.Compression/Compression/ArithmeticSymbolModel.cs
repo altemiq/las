@@ -89,7 +89,7 @@ internal sealed class ArithmeticSymbolModel
     public uint Symbols { get; }
 
     /// <summary>
-    /// Gets the last symbol index (<c><see cref="Symbols"/> - 1</c>).
+    /// Gets the last symbol index (<c language="csharp"><see cref="Symbols"/> - 1</c>).
     /// </summary>
     public uint LastSymbol { get; }
 

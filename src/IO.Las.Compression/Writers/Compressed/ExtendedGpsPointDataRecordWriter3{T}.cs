@@ -7,10 +7,10 @@
 namespace Altemiq.IO.Las.Writers.Compressed;
 
 /// <summary>
-/// The compressed <see cref="Writers.IPointDataRecordWriter"/> for <see cref="IExtendedPointDataRecord"/> instances.
+/// The compressed <see cref="IPointDataRecordWriter"/> for <see cref="IExtendedPointDataRecord"/> instances.
 /// </summary>
 /// <typeparam name="T">The type of extended point data record.</typeparam>
-internal closed class ExtendedGpsPointDataRecordWriter3<T> : Writers.PointDataRecordWriter<T>, IContextWriter
+internal closed class ExtendedGpsPointDataRecordWriter3<T> : IPointDataRecordWriter, IContextWriter
     where T : unmanaged, IExtendedPointDataRecord
 {
     private const int Multiple = 500;
@@ -101,7 +101,38 @@ internal closed class ExtendedGpsPointDataRecordWriter3<T> : Writers.PointDataRe
     public virtual bool Initialize(ReadOnlySpan<byte> item, ref uint context) => this.Initialize(item, ref context, item.Length);
 
     /// <inheritdoc/>
+    int IPointDataRecordWriter.Write(Span<byte> destination, IBasePointDataRecord record, ReadOnlySpan<byte> extraBytes)
+    {
+        if (record is T t)
+        {
+            var context = default(uint);
+            var bytesWritten = t.CopyTo(destination);
+            extraBytes.CopyTo(destination[bytesWritten..]);
+            bytesWritten += extraBytes.Length;
+            this.Write(destination[..bytesWritten], ref context);
+            return default;
+        }
+
+        throw new InvalidOperationException();
+    }
+
+    /// <inheritdoc/>
     public virtual void Write(Span<byte> item, ref uint context) => this.Write(item, ref context, item.Length);
+
+    /// <inheritdoc/>
+    async ValueTask<int> IPointDataRecordWriter.WriteAsync(Memory<byte> destination, IBasePointDataRecord record, ReadOnlyMemory<byte> extraBytes, CancellationToken cancellationToken)
+    {
+        if (record is T t)
+        {
+            var bytesWritten = t.CopyTo(destination.Span);
+            extraBytes.CopyTo(destination[bytesWritten..]);
+            bytesWritten += extraBytes.Length;
+            _ = await this.WriteAsync(destination[..bytesWritten], default, cancellationToken).ConfigureAwait(false);
+            return default;
+        }
+
+        throw new InvalidOperationException();
+    }
 
     /// <inheritdoc/>
     public virtual ValueTask<uint> WriteAsync(Memory<byte> item, uint context, CancellationToken cancellationToken = default)
@@ -109,16 +140,6 @@ internal closed class ExtendedGpsPointDataRecordWriter3<T> : Writers.PointDataRe
         cancellationToken.ThrowIfCancellationRequested();
         this.Write(item.Span, ref context);
         return new(context);
-    }
-
-    /// <inheritdoc/>
-    protected sealed override async ValueTask<int> WriteAsync(Memory<byte> destination, [System.Diagnostics.CodeAnalysis.NotNull] T record, ReadOnlyMemory<byte> extraBytes, CancellationToken cancellationToken = default)
-    {
-        var bytesWritten = record.CopyTo(destination.Span);
-        extraBytes.CopyTo(destination[bytesWritten..]);
-        bytesWritten += extraBytes.Length;
-        _ = await this.WriteAsync(destination[..bytesWritten], default, cancellationToken).ConfigureAwait(false);
-        return default;
     }
 
     /// <summary>
@@ -155,17 +176,6 @@ internal closed class ExtendedGpsPointDataRecordWriter3<T> : Writers.PointDataRe
         this.CreateAndInitModelsAndCompressors(this.currentContext, item, gpsTimeChangedIndex);
 
         return true;
-    }
-
-    /// <inheritdoc/>
-    protected sealed override int Write(Span<byte> destination, [System.Diagnostics.CodeAnalysis.NotNull] T record, ReadOnlySpan<byte> extraBytes)
-    {
-        var context = default(uint);
-        var bytesWritten = record.CopyTo(destination);
-        extraBytes.CopyTo(destination[bytesWritten..]);
-        bytesWritten += extraBytes.Length;
-        this.Write(destination[..bytesWritten], ref context);
-        return default;
     }
 
     private void Write(Span<byte> item, ref uint context, int gpsTimeChangeIndex)

@@ -51,10 +51,16 @@ public class LazEncodeBenchmarks
                 NumberOfReturns = 5,
                 ScanDirectionFlag = false,
                 EdgeOfFlightLine = false,
-                Classification = (Classification)2,
-                ScanAngleRank = (sbyte)rng.Next(-30, 31),
+#if LAS1_1_OR_GREATER
+                Classification = Classification.Ground,
                 UserData = 0,
                 PointSourceId = 1,
+#else
+                Classification = 2,
+                FileMarker = 0,
+                UserBitField = 1,
+#endif
+                ScanAngleRank = (sbyte)rng.Next(-30, 31),
                 GpsTime = gpsTime,
             };
         }

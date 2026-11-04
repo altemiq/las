@@ -72,6 +72,7 @@ internal static class FieldAccessors
         /// <param name="value">The value.</param>
         public static void SetIntensity(Span<byte> destination, ushort value) => System.Buffers.Binary.BinaryPrimitives.WriteUInt16LittleEndian(destination[Constants.PointDataRecord.IntensityFieldOffset..Constants.PointDataRecord.FlagsFieldOffset], value);
 
+#if LAS1_1_OR_GREATER
         /// <summary>
         /// Gets the point source ID.
         /// </summary>
@@ -85,6 +86,43 @@ internal static class FieldAccessors
         /// <param name="destination">The destination.</param>
         /// <param name="value">The value.</param>
         public static void SetPointSourceId(Span<byte> destination, ushort value) => System.Buffers.Binary.BinaryPrimitives.WriteUInt16LittleEndian(destination[Constants.PointDataRecord.PointSourceIdFieldOffset..Constants.PointDataRecord.GpsTimeFieldOffset], value);
+
+#pragma warning disable S1133
+        /// <summary>
+        /// Sets the user bit field.
+        /// </summary>
+        /// <param name="source">The data.</param>
+        /// <returns>The point source ID.</returns>
+        [Obsolete($"Use {nameof(GetPointSourceId)} instead")]
+        [System.ComponentModel.Browsable(false)]
+        [System.ComponentModel.EditorBrowsable(System.ComponentModel.EditorBrowsableState.Never)]
+        public static ushort GetUserBitField(ReadOnlySpan<byte> source) => System.Buffers.Binary.BinaryPrimitives.ReadUInt16LittleEndian(source[Constants.PointDataRecord.UserBitFieldFieldOffset..Constants.PointDataRecord.GpsTimeFieldOffset]);
+
+        /// <summary>
+        /// Sets the user bit field.
+        /// </summary>
+        /// <param name="destination">The destination.</param>
+        /// <param name="value">The value.</param>
+        [Obsolete($"Use {nameof(SetPointSourceId)} instead")]
+        [System.ComponentModel.Browsable(false)]
+        [System.ComponentModel.EditorBrowsable(System.ComponentModel.EditorBrowsableState.Never)]
+        public static void SetUserBitField(Span<byte> destination, ushort value) => System.Buffers.Binary.BinaryPrimitives.WriteUInt16LittleEndian(destination[Constants.PointDataRecord.UserBitFieldFieldOffset..Constants.PointDataRecord.GpsTimeFieldOffset], value);
+#pragma warning restore S1133
+#else
+        /// <summary>
+        /// Sets the user bit field.
+        /// </summary>
+        /// <param name="source">The data.</param>
+        /// <returns>The point source ID.</returns>
+        public static ushort GetUserBitField(ReadOnlySpan<byte> source) => System.Buffers.Binary.BinaryPrimitives.ReadUInt16LittleEndian(source[Constants.PointDataRecord.UserBitFieldFieldOffset..Constants.PointDataRecord.GpsTimeFieldOffset]);
+
+        /// <summary>
+        /// Sets the user bit field.
+        /// </summary>
+        /// <param name="destination">The destination.</param>
+        /// <param name="value">The value.</param>
+        public static void SetUserBitField(Span<byte> destination, ushort value) => System.Buffers.Binary.BinaryPrimitives.WriteUInt16LittleEndian(destination[Constants.PointDataRecord.UserBitFieldFieldOffset..Constants.PointDataRecord.GpsTimeFieldOffset], value);
+#endif
 
         /// <summary>
         /// Gets the GPS time.
@@ -212,6 +250,7 @@ internal static class FieldAccessors
         /// <param name="value">The value to set.</param>
         public static void SetEdgeOfFlightLine(ref byte flags, bool value) => BitManipulation.Apply(ref flags, Constants.BitMasks.Mask7, value);
 
+#if LAS1_1_OR_GREATER
         /// <summary>
         /// Gets the classification.
         /// </summary>
@@ -268,6 +307,7 @@ internal static class FieldAccessors
         /// <param name="classification">The classification.</param>
         /// <param name="value">The value to set.</param>
         public static void SetWithheld(ref byte classification, bool value) => BitManipulation.Apply(ref classification, Constants.BitMasks.Mask7, value);
+#endif
     }
 
 #if LAS1_4_OR_GREATER

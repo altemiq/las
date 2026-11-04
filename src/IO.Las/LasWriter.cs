@@ -124,26 +124,33 @@ public class LasWriter(Stream stream, bool leaveOpen = false) :
 #endif
         Array.Resize(ref this.buffer, pointDataRecordSize);
 
-        if (recordSize is 0)
-        {
-            return;
-        }
-
         _ = this.BaseStream.SwitchStreamIfMultiple(LasStreams.VariableLengthRecord);
-        var byteArray = System.Buffers.ArrayPool<byte>.Shared.Rent(0);
-        foreach (var record in recordsList)
+        var isLas10 = header.Version is { Major: 1, Minor: 0 };
+        if (recordSize is not 0)
         {
-            var size = record.Size;
-            if (byteArray.Length < size)
+            var byteArray = System.Buffers.ArrayPool<byte>.Shared.Rent(recordsList.Max(static x => x.Size));
+            foreach (var record in recordsList)
             {
-                System.Buffers.ArrayPool<byte>.Shared.Return(byteArray);
-                byteArray = System.Buffers.ArrayPool<byte>.Shared.Rent(size);
+                var bytesWritten = record.CopyTo(byteArray);
+
+                if (isLas10)
+                {
+                    // ensure that the VLR header starts with the signature
+                    byteArray[0] = 0xBB;
+                    byteArray[1] = 0xAA;
+                }
+
+                this.BaseStream.Write(byteArray, 0, bytesWritten);
             }
 
-            this.BaseStream.Write(byteArray, 0, record.CopyTo(byteArray));
+            System.Buffers.ArrayPool<byte>.Shared.Return(byteArray);
         }
 
-        System.Buffers.ArrayPool<byte>.Shared.Return(byteArray);
+        if (isLas10)
+        {
+            // write the extra marker bytes for LAS 1.0
+            this.BaseStream.Write([0xDD, 0xCC]);
+        }
     }
 
     /// <inheritdoc />
@@ -391,9 +398,12 @@ public class LasWriter(Stream stream, bool leaveOpen = false) :
         {
             var size = header.Version switch
             {
-                { Major: 1, Minor: 0 or 1 } => HeaderBlock.Size10,
+                { Major: 1, Minor: 0 } => HeaderBlock.Size10,
+#if LAS1_1_OR_GREATER
+                { Major: 1, Minor: 1 } => HeaderBlock.Size11,
+#endif
 #if LAS1_2_OR_GREATER
-                { Major: 1, Minor: 2 } => HeaderBlock.Size10,
+                { Major: 1, Minor: 2 } => HeaderBlock.Size12,
 #endif
 #if LAS1_3_OR_GREATER
                 { Major: 1, Minor: 3 } => HeaderBlock.Size13,
@@ -416,9 +426,33 @@ public class LasWriter(Stream stream, bool leaveOpen = false) :
             System.Text.Encoding.UTF8.GetBytes(header.FileSignature, destination[..4]);
 
             // write identification
-            System.Buffers.Binary.BinaryPrimitives.WriteUInt16LittleEndian(destination[4..6], header.FileSourceId);
+#if LAS1_1_OR_GREATER
+            if (header.Version is { Major: 1, Minor: >= 1 })
+            {
+                System.Buffers.Binary.BinaryPrimitives.WriteUInt16LittleEndian(destination[4..6], header.FileSourceId);
 #if LAS1_2_OR_GREATER
-            System.Buffers.Binary.BinaryPrimitives.WriteUInt16LittleEndian(destination[6..8], (ushort)header.GlobalEncoding);
+                if (header.Version is { Major: 1, Minor: >= 2 })
+                {
+                    System.Buffers.Binary.BinaryPrimitives.WriteUInt16LittleEndian(destination[6..8], (ushort)header.GlobalEncoding);
+                }
+                else
+                {
+                    // ensure that the reserved values are zero'd
+                    destination[6..8].Clear();
+                }
+#else
+                // ensure that the reserved values are zero'd
+                destination[6..8].Clear();
+#endif
+            }
+            else
+            {
+                // ensure that the reserved values are zero'd
+                destination[4..8].Clear();
+            }
+#else
+            // ensure that the reserved values are zero'd
+            destination[4..8].Clear();
 #endif
             _ = header.ProjectId.TryWriteBytes(destination[8..24]);
 
@@ -448,7 +482,14 @@ public class LasWriter(Stream stream, bool leaveOpen = false) :
             }
 
             System.Buffers.Binary.BinaryPrimitives.WriteUInt16LittleEndian(destination[94..96], size);
-            System.Buffers.Binary.BinaryPrimitives.WriteUInt32LittleEndian(destination[96..100], size + recordSize);
+
+            var offsetToPointData = size + recordSize;
+            if (header.Version is { Major: 1, Minor: 0 })
+            {
+                offsetToPointData += 2;
+            }
+
+            System.Buffers.Binary.BinaryPrimitives.WriteUInt32LittleEndian(destination[96..100], offsetToPointData);
             System.Buffers.Binary.BinaryPrimitives.WriteUInt32LittleEndian(destination[100..104], recordCount);
             destination[104] = header.PointDataFormat;
 
@@ -468,7 +509,7 @@ public class LasWriter(Stream stream, bool leaveOpen = false) :
             }
 #else
             System.Buffers.Binary.BinaryPrimitives.WriteUInt32LittleEndian(destination[107..111], header.NumberOfPointRecords);
-            for (int i = 0; i < 5; i++)
+            for (var i = 0; i < 5; i++)
             {
                 var start = 111 + (i * sizeof(uint));
                 System.Buffers.Binary.BinaryPrimitives.WriteUInt32LittleEndian(destination[start..(start + sizeof(uint))], header.NumberOfPointsByReturn[i]);

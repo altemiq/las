@@ -7,7 +7,7 @@
 #if !NET5_0_OR_GREATER
 namespace Altemiq.IO.Las.Http;
 
-#pragma warning disable MA0040, RCS1263, SA1101
+#pragma warning disable MA0040
 
 /// <summary>
 /// The <see cref="Http"/> extensions.

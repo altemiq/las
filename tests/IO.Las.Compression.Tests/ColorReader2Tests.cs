@@ -12,8 +12,8 @@ using Writers.Compressed;
 /// <summary>
 /// Round-trip tests for <see cref="ColorReader2"/> / <see cref="ColorWriter2"/>.
 /// These guard the refactor of <see cref="ColorReader2.Read"/> which replaces
-/// repeated <c>BinaryPrimitives.ReadUInt16LittleEndian</c> / <c>WriteUInt16LittleEndian</c>
-/// round-trips on a 6-byte span with local <c>ushort</c> registers.
+/// repeated <c language="csharp">BinaryPrimitives.ReadUInt16LittleEndian</c> / <c language="csharp">BinaryPrimitives.WriteUInt16LittleEndian</c>
+/// round-trips on a 6-byte span with local <see cref="ushort"/> registers.
 /// </summary>
 public class ColorReader2Tests
 {

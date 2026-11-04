@@ -36,12 +36,6 @@ public readonly partial record struct Model
     internal string Code { get; }
 
     /// <summary>
-    /// Converts the value of this instance to its equivalent string representation.
-    /// </summary>
-    /// <returns>The string representation of the value of this instance.</returns>>
-    public override string ToString() => $"{this.Brand.GetDescription()},{this.Name},{this.Code}";
-
-    /// <summary>
     /// Parses the model from specified identifier.
     /// </summary>
     /// <param name = "s">The identifier.</param>
@@ -56,4 +50,10 @@ public readonly partial record struct Model
     /// <param name = "model">The model.</param>
     /// <returns><see langword="true"/> if the model was successfully parsed; otherwise <see langword="false"/>.</returns>
     public static partial bool TryParse(string s, out Model model);
+
+    /// <summary>
+    /// Converts the value of this instance to its equivalent string representation.
+    /// </summary>
+    /// <returns>The string representation of the value of this instance.</returns>>
+    public override string ToString() => $"{this.Brand.GetDescription()},{this.Name},{this.Code}";
 }

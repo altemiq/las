@@ -7,17 +7,16 @@
 
   <ItemGroup>
     <PackageVersion Include="Altemiq.CommandLine.DependencyInjection" Version="2.0.0" />
-    <PackageVersion Include="Altemiq.CommandLine.Spectre" Version="2.0.0" />
     <PackageVersion Include="Humanizer" Version="3.0.10" />
     <PackageVersion Include="Microsoft.Extensions.Http" Version="11.0.0-rc.3.26522.148" />
-    <PackageVersion Include="Spectre.Console" Version="0.54.0" />
+    <PackageVersion Include="Spectre.Console" Version="0.57.2" />
     <PackageVersion Include="Spectre.Console.Analyzer" Version="1.0.0" />
     <PackageVersion Include="System.CommandLine" Version="3.0.0-rc.3.26522.148" />
   </ItemGroup>
 
   <ItemGroup Label="AWS">
-    <PackageVersion Include="AWSSDK.Extensions.NETCore.Setup" Version="4.0.102.6" />
-    <PackageVersion Include="AWSSDK.S3" Version="4.0.104.6" />
+    <PackageVersion Include="AWSSDK.Extensions.NETCore.Setup" Version="4.0.102.7" />
+    <PackageVersion Include="AWSSDK.S3" Version="4.0.104.8" />
   </ItemGroup>
 
   <ItemGroup Label="Azure">
@@ -34,7 +33,7 @@
   </ItemGroup>
   
   <ItemGroup Label="Coding Standards">
-    <GlobalPackageReference Include="Altemiq.DotNet.CodingStandard" Version="1.0.458" />
+    <GlobalPackageReference Include="Altemiq.DotNet.CodingStandard" Version="1.0.462" />
   </ItemGroup>
 
 </Project>

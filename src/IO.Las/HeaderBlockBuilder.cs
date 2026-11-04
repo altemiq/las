@@ -56,11 +56,13 @@ public class HeaderBlockBuilder
     /// <param name="header">The header block.</param>
     public HeaderBlockBuilder(HeaderBlock header) => this.PopulateFromHeaderBlock(ref header);
 
+#if LAS1_1_OR_GREATER
     /// <summary>
     /// Gets or sets the file source id.
     /// </summary>
     /// <inheritdoc cref="HeaderBlock.FileSourceId" />
     public ushort FileSourceId { get; set; }
+#endif
 
 #if LAS1_2_OR_GREATER
     /// <summary>
@@ -451,25 +453,12 @@ public class HeaderBlockBuilder
     }
 
 #if LAS1_5_OR_GREATER
-    private double GetGpsTime(DateTime gpsTime)
+    private double GetGpsTime(DateTime gpsTime) => this.GlobalEncoding.HasFlag(GlobalEncoding.StandardGpsTime) switch
     {
-        return HasFlag(this.GlobalEncoding, GlobalEncoding.StandardGpsTime)
-            ? GetAdjusted(gpsTime)
-            : GpsTime.DateTimeToGpsWeekTime(gpsTime, 0);
-
-        double GetAdjusted(DateTime value)
-        {
-            return HasFlag(this.GlobalEncoding, GlobalEncoding.TimeOffsetFlag)
-                ? GpsTime.DateTimeToTimeOffsetGpsTime(value, this.TimeOffset)
-                : GpsTime.DateTimeToAdjustedStandardGpsTime(value);
-        }
-
-        [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
-        static bool HasFlag(GlobalEncoding globalEncoding, GlobalEncoding flag)
-        {
-            return (globalEncoding & flag) == flag;
-        }
-    }
+        true when this.GlobalEncoding.HasFlag(GlobalEncoding.TimeOffsetFlag) => GpsTime.DateTimeToTimeOffsetGpsTime(gpsTime, this.TimeOffset),
+        true => GpsTime.DateTimeToAdjustedStandardGpsTime(gpsTime),
+        false => GpsTime.DateTimeToGpsWeekTime(gpsTime, 0),
+    };
 #endif
 
     private HeaderBlock CreateHeaderBlock()
@@ -518,7 +507,9 @@ public class HeaderBlockBuilder
 #endif
 
         return new(
+#if LAS1_1_OR_GREATER
             this.FileSourceId,
+#endif
 #if LAS1_5_OR_GREATER
             (GlobalEncoding)BitManipulation.Get((byte)this.GlobalEncoding, Constants.BitMasks.Mask0 | Constants.BitMasks.Mask1 | Constants.BitMasks.Mask2 | Constants.BitMasks.Mask3 | Constants.BitMasks.Mask4 | Constants.BitMasks.Mask5 | Constants.BitMasks.Mask6),
 #elif LAS1_4_OR_GREATER
@@ -558,7 +549,9 @@ public class HeaderBlockBuilder
 
     private void PopulateFromHeaderBlock(ref HeaderBlock header, bool keepMinMax = false)
     {
+#if LAS1_1_OR_GREATER
         this.FileSourceId = header.FileSourceId;
+#endif
 #if LAS1_2_OR_GREATER
         this.GlobalEncoding = header.GlobalEncoding;
 #endif

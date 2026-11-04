@@ -8,13 +8,13 @@ namespace Altemiq.IO.Las;
 
 using Altemiq.IO.Las.To.Copc;
 
-/// <summary>
-/// The <c>to copc</c> extensions.
-/// </summary>
+/// <content>
+/// The <pre>to copc</pre> extensions.
+/// </content>
 internal static partial class RootCommandExtensions
 {
     /// <summary>
-    /// Adds the <c>to copc</c> command.
+    /// Adds the <pre>to copc</pre> command.
     /// </summary>
     /// <typeparam name="T">The type of command.</typeparam>
     /// <param name="command">The command.</param>
