@@ -123,8 +123,8 @@ public sealed class LazWriter : LasWriter
             if (isLas10)
             {
                 // ensure that the VLR header starts with the signature
-                buffer[0] = 0xAA;
-                buffer[1] = 0xBB;
+                buffer[0] = 0xBB;
+                buffer[1] = 0xAA;
             }
 
             this.BaseStream.Write(buffer, 0, bytesWritten);
@@ -133,8 +133,8 @@ public sealed class LazWriter : LasWriter
         if (isLas10)
         {
             // write the extra marker bytes for LAS 1.0
-            buffer[0] = 0xCC;
-            buffer[1] = 0xDD;
+            buffer[0] = 0xDD;
+            buffer[1] = 0xCC;
             this.BaseStream.Write(buffer, 0, 2);
         }
 

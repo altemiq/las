@@ -136,8 +136,8 @@ public class LasWriter(Stream stream, bool leaveOpen = false) :
                 if (isLas10)
                 {
                     // ensure that the VLR header starts with the signature
-                    byteArray[0] = 0xAA;
-                    byteArray[1] = 0xBB;
+                    byteArray[0] = 0xBB;
+                    byteArray[1] = 0xAA;
                 }
 
                 this.BaseStream.Write(byteArray, 0, bytesWritten);
@@ -149,7 +149,7 @@ public class LasWriter(Stream stream, bool leaveOpen = false) :
         if (isLas10)
         {
             // write the extra marker bytes for LAS 1.0
-            this.BaseStream.Write([0xCC, 0xDD]);
+            this.BaseStream.Write([0xDD, 0xCC]);
         }
     }
 
