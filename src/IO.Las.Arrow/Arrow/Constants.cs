@@ -56,6 +56,7 @@ public static class Constants
         /// </summary>
         public const string EdgeOfFlightLine = "edge_of_flight_line";
 
+#if LAS1_1_OR_GREATER
         /// <summary>
         /// The <see cref="IBasePointDataRecord.Synthetic"/> column name.
         /// </summary>
@@ -80,6 +81,18 @@ public static class Constants
         /// The <see cref="IBasePointDataRecord.PointSourceId"/> column name.
         /// </summary>
         public const string PointSourceId = "point_source_id";
+#else
+
+        /// <summary>
+        /// The <see cref="IBasePointDataRecord.FileMarker"/> column name.
+        /// </summary>
+        public const string FileMarker = "file_marker";
+
+        /// <summary>
+        /// The <see cref="IBasePointDataRecord.UserBitField"/> column name.
+        /// </summary>
+        public const string UserBitField = "user_bit_field";
+#endif
 
         /// <summary>
         /// The <see cref="IPointDataRecord"/> column names.

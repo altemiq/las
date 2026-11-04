@@ -6,9 +6,9 @@
 
 namespace Altemiq.IO.Las;
 
-/// <summary>
+/// <content>
 /// The <pre>to laz</pre> extensions.
-/// </summary>
+/// </content>
 internal static partial class RootCommandExtensions
 {
     /// <summary>

@@ -8,7 +8,7 @@
 namespace Altemiq.IO.Las;
 #pragma warning restore IDE0130, CheckNamespace
 
-#pragma warning disable CA1708, SA1101
+#pragma warning disable CA1708
 
 /// <summary>
 /// Cloud optimized extension methods.

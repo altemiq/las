@@ -6,13 +6,13 @@
 
 namespace Altemiq.IO.Las.S3;
 
-#pragma warning disable RCS1263, SA1101
-
 /// <summary>
 /// <see cref="Amazon.S3.Util.AmazonS3Uri"/> extensions.
 /// </summary>
 public static class AmazonS3UriExtensions
 {
+    private const string Host = "amazonaws.com";
+
     /// <content>
     /// <see cref="Amazon.S3.Util.AmazonS3Uri"/> extensions.
     /// </content>
@@ -55,6 +55,4 @@ public static class AmazonS3UriExtensions
             return builder.Uri;
         }
     }
-
-    private const string Host = "amazonaws.com";
 }

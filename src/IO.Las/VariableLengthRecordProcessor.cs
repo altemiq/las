@@ -6,7 +6,6 @@
 
 namespace Altemiq.IO.Las;
 
-#pragma warning disable MA0202
 #if LAS1_3_OR_GREATER
 /// <summary>
 /// The <see cref="VariableLengthRecord"/> and <see cref="ExtendedVariableLengthRecord"/> processor.
@@ -16,7 +15,6 @@ namespace Altemiq.IO.Las;
 /// The <see cref="VariableLengthRecord"/> processor.
 /// </summary>
 #endif
-#pragma warning restore MA0202
 public sealed class VariableLengthRecordProcessor
 {
     /// <summary>

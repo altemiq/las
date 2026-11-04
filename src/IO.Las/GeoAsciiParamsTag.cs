@@ -127,9 +127,9 @@ public record GeoAsciiParamsTag : VariableLengthRecord, IReadOnlyList<string>
 
         foreach (var s in this.strings)
         {
-            bytesWritten += System.Text.Encoding.ASCII.GetBytes(s, d);
-            d[bytesWritten] = 0;
-            bytesWritten++;
+            var textLength = System.Text.Encoding.ASCII.GetBytes(s, d);
+            d[textLength] = default;
+            bytesWritten += textLength + 1;
             d = destination[bytesWritten..];
         }
 

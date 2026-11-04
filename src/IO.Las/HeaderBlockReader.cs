@@ -479,7 +479,9 @@ public class HeaderBlockReader(Stream stream)
     {
         var builder = new HeaderBlockBuilder
         {
+#if LAS1_1_OR_GREATER
             FileSourceId = System.Buffers.Binary.BinaryPrimitives.ReadUInt16LittleEndian(source[..2]),
+#endif
 #if LAS1_2_OR_GREATER
             GlobalEncoding = (GlobalEncoding)System.Buffers.Binary.BinaryPrimitives.ReadUInt16LittleEndian(source[2..4]),
 #endif
@@ -571,7 +573,7 @@ public class HeaderBlockReader(Stream stream)
         builder.Min = new(minX, minY, minZ);
 
 #if LAS1_3_OR_GREATER
-        if (headerSize > HeaderBlock.Size10)
+        if (headerSize > HeaderBlock.Size11)
         {
             headerValues = headerValues with { StartOfWaveformData = System.Buffers.Binary.BinaryPrimitives.ReadUInt64LittleEndian(source[131..139]) };
         }

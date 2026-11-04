@@ -6,11 +6,9 @@
 
 namespace Altemiq.IO.Las;
 
-#pragma warning disable CA1708
-
-/// <summary>
+/// <content>
 /// GeoTIFF <see cref="VariableLengthRecord"/> extension methods.
-/// </summary>
+/// </content>
 public static partial class ExtensionMethods
 {
     /// <summary>

@@ -107,6 +107,7 @@ public sealed class LazWriter : LasWriter
 
         _ = this.BaseStream.SwitchStreamIfMultiple(LasStreams.VariableLengthRecord);
         var buffer = System.Buffers.ArrayPool<byte>.Shared.Rent(recordsList.Max(static x => x.Size));
+        var isLas10 = header.Version is { Major: 1, Minor: 0 };
         foreach (var record in recordsList)
         {
 #if LAS1_4_OR_GREATER
@@ -119,7 +120,22 @@ public sealed class LazWriter : LasWriter
 
             var bytesWritten = record.CopyTo(buffer);
 
+            if (isLas10)
+            {
+                // ensure that the VLR header starts with the signature
+                buffer[0] = 0xBB;
+                buffer[1] = 0xAA;
+            }
+
             this.BaseStream.Write(buffer, 0, bytesWritten);
+        }
+
+        if (isLas10)
+        {
+            // write the extra marker bytes for LAS 1.0
+            buffer[0] = 0xDD;
+            buffer[1] = 0xCC;
+            this.BaseStream.Write(buffer, 0, 2);
         }
 
         System.Buffers.ArrayPool<byte>.Shared.Return(buffer);

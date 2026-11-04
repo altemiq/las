@@ -22,12 +22,16 @@ public class LazReaderIntegrationTests
     }
 
     [Test]
-    public async Task ReadLaz()
+    [Arguments("laz/fusa_0.laz", 0)]
+#if LAS1_1_OR_GREATER
+    [Arguments("laz/fusa.laz", 1)]
+#endif
+    public async Task ReadLaz(string blobName, int minor)
     {
-        var stream = await BlobLas.OpenReadAsync("laz/fusa.laz", BlobContainerClientData.BlobContainerClient);
+        var stream = await BlobLas.OpenReadAsync(blobName, BlobContainerClientData.BlobContainerClient);
         LazReader reader = new(stream);
 
-        await CheckHeader(reader.Header, new(1, 1));
+        await CheckHeader(reader.Header, new(1, minor));
         _ = await Assert.That(reader.VariableLengthRecords).Count().IsEqualTo(2);
 
         _ = await Assert.That(reader.ReadPointDataRecord(10).PointDataRecord).IsNotNull()
@@ -48,7 +52,9 @@ public class LazReaderIntegrationTests
     {
         await Assert.That(headerBlock)
             .Member(static headerBlock => headerBlock.FileSignature, static fileSignature => fileSignature.IsEqualTo("LASF"))
+#if LAS1_1_OR_GREATER
             .And.Member(static headerBlock => headerBlock.FileSourceId, static fileSourceId => fileSourceId.IsDefault())
+#endif
 #if LAS1_2_OR_GREATER
             .And.Member(static headerBlock => headerBlock.GlobalEncoding, static globalEncoding => globalEncoding.IsEqualTo(GlobalEncoding.None))
 #endif

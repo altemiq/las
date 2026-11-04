@@ -6,7 +6,7 @@
 
 namespace Altemiq.IO.Las;
 
-#pragma warning disable CA1708, RCS1263, SA1101, S2325
+#pragma warning disable CA1708
 
 using System.Runtime.CompilerServices;
 
@@ -71,6 +71,9 @@ public static partial class Vector
         }
     }
 
+    /// <content>
+    /// The <see cref="Vector128"/> extensions.
+    /// </content>
     extension(Vector128)
     {
 #if !NET9_0_OR_GREATER

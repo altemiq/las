@@ -25,6 +25,80 @@ public readonly struct HeaderBlock : IEquatable<HeaderBlock>
     /// The size of the version 1.0 header block.
     /// </summary>
     internal const ushort Size10 = (sizeof(sbyte) * 4) // File Signature (“LASF”)
+        + sizeof(uint) // Reserved
+        + sizeof(uint) // Project ID - GUID data 1
+        + sizeof(ushort) // Project ID - GUID data 2
+        + sizeof(ushort) // Project ID - GUID data 3
+        + (sizeof(byte) * 8) // Project ID - GUID data 4
+        + sizeof(byte) // Version Major
+        + sizeof(byte) // Version Minor
+        + (sizeof(sbyte) * 32) // System Identifier
+        + (sizeof(sbyte) * 32) // Generating Software
+        + sizeof(ushort) // File Creation Day of Year
+        + sizeof(ushort) // File Creation Year
+        + sizeof(ushort) // Header Size
+        + sizeof(uint) // Offset to point data
+        + sizeof(uint) // Number of Variable Length Records
+        + sizeof(byte) // Point Data Format ID (0-99 for spec)
+        + sizeof(ushort) // Point Data Record Length
+        + sizeof(uint) // Number of point records
+        + (sizeof(uint) * 5) // Number of points by return
+        + sizeof(double) // X scale factor
+        + sizeof(double) // Y scale factor
+        + sizeof(double) // Z scale factor
+        + sizeof(double) // X offset
+        + sizeof(double) // Y offset
+        + sizeof(double) // Z offset
+        + sizeof(double) // Max X
+        + sizeof(double) // Min X
+        + sizeof(double) // Max Y
+        + sizeof(double) // Min Y
+        + sizeof(double) // Max Z
+        + sizeof(double); // Min Z
+
+#if LAS1_1_OR_GREATER
+    /// <summary>
+    /// The size of the version 1.1 header block.
+    /// </summary>
+    internal const ushort Size11 = (sizeof(sbyte) * 4) // File Signature (“LASF”)
+        + sizeof(ushort) // File Source ID
+        + sizeof(ushort) // Reserved
+        + sizeof(uint) // Project ID - GUID data 1
+        + sizeof(ushort) // Project ID - GUID data 2
+        + sizeof(ushort) // Project ID - GUID data 3
+        + (sizeof(byte) * 8) // Project ID - GUID data 4
+        + sizeof(byte) // Version Major
+        + sizeof(byte) // Version Minor
+        + (sizeof(sbyte) * 32) // System Identifier
+        + (sizeof(sbyte) * 32) // Generating Software
+        + sizeof(ushort) // File Creation Day of Year
+        + sizeof(ushort) // File Creation Year
+        + sizeof(ushort) // Header Size
+        + sizeof(uint) // Offset to point data
+        + sizeof(uint) // Number of Variable Length Records
+        + sizeof(byte) // Point Data Format ID (0-99 for spec)
+        + sizeof(ushort) // Legacy point Data Record Length
+        + sizeof(uint) // Legacy number of point records
+        + (sizeof(uint) * 5) // Number of points by return
+        + sizeof(double) // X scale factor
+        + sizeof(double) // Y scale factor
+        + sizeof(double) // Z scale factor
+        + sizeof(double) // X offset
+        + sizeof(double) // Y offset
+        + sizeof(double) // Z offset
+        + sizeof(double) // Max X
+        + sizeof(double) // Min X
+        + sizeof(double) // Max Y
+        + sizeof(double) // Min Y
+        + sizeof(double) // Max Z
+        + sizeof(double); // Min Z
+#endif
+
+#if LAS1_2_OR_GREATER
+    /// <summary>
+    /// The size of the version 1.2 header block.
+    /// </summary>
+    internal const ushort Size12 = (sizeof(sbyte) * 4) // File Signature (“LASF”)
         + sizeof(ushort) // File Source ID
         + sizeof(ushort) // Global Encoding
         + sizeof(uint) // Project ID - GUID data 1
@@ -56,12 +130,13 @@ public readonly struct HeaderBlock : IEquatable<HeaderBlock>
         + sizeof(double) // Min Y
         + sizeof(double) // Max Z
         + sizeof(double); // Min Z
+#endif
 
 #if LAS1_3_OR_GREATER
     /// <summary>
     /// The size of the version 1.3 header block.
     /// </summary>
-    internal const ushort Size13 = Size10
+    internal const ushort Size13 = Size12
         + sizeof(ulong); // Start of wavelength data
 #endif
 
@@ -98,8 +173,10 @@ public readonly struct HeaderBlock : IEquatable<HeaderBlock>
         = 3;
 #elif LAS1_2_OR_GREATER
         = 2;
-#else
+#elif LAS1_1_OR_GREATER
         = 1;
+#else
+        = 0;
 #endif
 
     /// <summary>
@@ -139,11 +216,15 @@ public readonly struct HeaderBlock : IEquatable<HeaderBlock>
     /// <include file="Properties/v1.4/Documentation.xml" path="doc/members/member[@name='M:Altemiq.IO.Las.HeaderBlock.Constructor']/*" />
 #elif LAS1_2_OR_GREATER
     /// <include file="Properties/v1.2/Documentation.xml" path="doc/members/member[@name='M:Altemiq.IO.Las.HeaderBlock.Constructor']/*" />
-#else
+#elif LAS1_1_OR_GREATER
     /// <include file="Properties/v1.1/Documentation.xml" path="doc/members/member[@name='M:Altemiq.IO.Las.HeaderBlock.Constructor']/*" />
+#else
+    /// <include file="Properties/v1.0/Documentation.xml" path="doc/members/member[@name='M:Altemiq.IO.Las.HeaderBlock.Constructor']/*" />
 #endif
     internal HeaderBlock(
+#if LAS1_1_OR_GREATER
         ushort fileSourceId,
+#endif
 #if LAS1_2_OR_GREATER
         GlobalEncoding globalEncoding,
 #endif
@@ -175,12 +256,14 @@ public readonly struct HeaderBlock : IEquatable<HeaderBlock>
         Vector3D max)
     {
         this.FileSignature = "LASF";
+#if LAS1_1_OR_GREATER
         this.FileSourceId = fileSourceId;
+#endif
         this.ProjectId = projectId ?? Guid.Empty;
 #if LAS1_2_OR_GREATER
         this.GlobalEncoding = globalEncoding;
 #endif
-        ArgumentOutOfRangeException.ThrowIfLessThan(version, new(1, 1));
+        ArgumentOutOfRangeException.ThrowIfLessThan(version, new(1, 0));
         ArgumentOutOfRangeException.ThrowIfGreaterThan(version, new(1, MaxMinorVersion));
 
         this.Version = version;
@@ -234,6 +317,7 @@ public readonly struct HeaderBlock : IEquatable<HeaderBlock>
     /// </summary>
     public string FileSignature { get; }
 
+#if LAS1_1_OR_GREATER
     /// <summary>
     /// Gets the file source id.
     /// </summary>
@@ -251,6 +335,7 @@ public readonly struct HeaderBlock : IEquatable<HeaderBlock>
     /// </para>
     /// </remarks>
     public ushort FileSourceId { get; }
+#endif
 
 #pragma warning disable MA0202
 #if LAS1_5_OR_GREATER
@@ -431,7 +516,9 @@ public readonly struct HeaderBlock : IEquatable<HeaderBlock>
 
     /// <inheritdoc cref="Equals(HeaderBlock)"/>
     public bool Equals(in HeaderBlock other) => StringComparer.Ordinal.Equals(this.FileSignature, other.FileSignature)
+#if LAS1_1_OR_GREATER
                                                 && this.FileSourceId == other.FileSourceId
+#endif
 #if LAS1_2_OR_GREATER
                                                 && this.GlobalEncoding == other.GlobalEncoding
 #endif
@@ -463,7 +550,9 @@ public readonly struct HeaderBlock : IEquatable<HeaderBlock>
     {
         var hashCode = default(HashCode);
         hashCode.Add(this.FileSignature, StringComparer.Ordinal);
+#if LAS1_1_OR_GREATER
         hashCode.Add(this.FileSourceId);
+#endif
 #if LAS1_2_OR_GREATER
         hashCode.Add(this.GlobalEncoding);
 #endif
@@ -558,11 +647,10 @@ public readonly struct HeaderBlock : IEquatable<HeaderBlock>
         $$"""
         {
           {{nameof(this.FileSignature)}}: 'LASF',
-          {{nameof(this.FileSourceId)}}: {{this.FileSourceId}},
           {{nameof(this.ProjectId)}}: '{{this.ProjectId}}',
           {{nameof(this.Version)}}: {{this.Version}},
           {{nameof(this.SystemIdentifier)}}: '{{this.SystemIdentifier}}',
-          {{nameof(this.FileSourceId)}}: {{this.FileSourceId}},
+          {{nameof(this.GeneratingSoftware)}}: {{this.GeneratingSoftware}},
           {{nameof(this.FileCreation)}}: {{this.FileCreation}},
           {{nameof(this.PointDataFormat)}}: {{this.PointDataFormat}},
           {{nameof(this.NumberOfPointRecords)}}: {{nameof(this.NumberOfPointRecords)}}

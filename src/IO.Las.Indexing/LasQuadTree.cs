@@ -18,6 +18,7 @@ public sealed class LasQuadTree : IEquatable<LasQuadTree>
     private const uint QuadTreeSignatureValue = 'L' | ((uint)'A' << 8) | ((uint)'S' << 16) | ((uint)'Q' << 24);
 
     private static readonly int[] LevelOffset = CreateLevelOffset();
+    private static readonly Vector2 MaxFloat = new(float.MaxValue);
 
     private readonly int sublevel;
     private readonly int sublevelIndex;
@@ -82,7 +83,7 @@ public sealed class LasQuadTree : IEquatable<LasQuadTree>
         static (uint X, uint Y) UInt32Quantize(Vector2 n)
         {
             var rounded = Vector2.Round(
-                Vector2.Clamp(n, Vector2.Zero, new(float.MaxValue)),
+                Vector2.Clamp(n, Vector2.Zero, MaxFloat),
                 MidpointRounding.AwayFromZero);
             return ((uint)rounded.X, (uint)rounded.Y);
         }
@@ -248,9 +249,7 @@ public sealed class LasQuadTree : IEquatable<LasQuadTree>
         {
             null => false,
             not null when ReferenceEquals(this, other) => true,
-            not null => other.levels == this.levels
-                        && other.maximum == this.maximum
-                        && other.minimum == this.minimum,
+            not null => other.levels == this.levels && other.maximum == this.maximum && other.minimum == this.minimum,
         };
 
     /// <inheritdoc/>

@@ -7,17 +7,16 @@
 
   <ItemGroup>
     <PackageVersion Include="Altemiq.CommandLine.DependencyInjection" Version="2.0.0" />
-    <PackageVersion Include="Altemiq.CommandLine.Spectre" Version="2.0.0" />
     <PackageVersion Include="Humanizer" Version="3.0.10" />
     <PackageVersion Include="Microsoft.Extensions.Http" Version="10.0.14" />
-    <PackageVersion Include="Spectre.Console" Version="0.54.0" />
+    <PackageVersion Include="Spectre.Console" Version="0.57.2" />
     <PackageVersion Include="Spectre.Console.Analyzer" Version="1.0.0" />
     <PackageVersion Include="System.CommandLine" Version="2.0.14" />
   </ItemGroup>
 
   <ItemGroup Label="AWS">
     <PackageVersion Include="AWSSDK.Extensions.NETCore.Setup" Version="4.0.102.7" />
-    <PackageVersion Include="AWSSDK.S3" Version="4.0.104.7" />
+    <PackageVersion Include="AWSSDK.S3" Version="4.0.104.8" />
   </ItemGroup>
 
   <ItemGroup Label="Azure">
@@ -31,11 +30,11 @@
   
   <ItemGroup Label="SQLite">
     <PackageVersion Include="Microsoft.Data.Sqlite" Version="10.0.14" />
-    <PackageVersion Include="SQLitePCLRaw.bundle_e_sqlite3" Version="3.0.4" />
+    <PackageVersion Include="SQLitePCLRaw.bundle_e_sqlite3" Version="3.0.5" />
   </ItemGroup>
   
   <ItemGroup Label="Coding Standards">
-    <GlobalPackageReference Include="Altemiq.DotNet.CodingStandard" Version="1.0.458" />
+    <GlobalPackageReference Include="Altemiq.DotNet.CodingStandard" Version="1.0.462" />
   </ItemGroup>
 
 </Project>

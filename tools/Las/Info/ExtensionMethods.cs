@@ -74,8 +74,13 @@ internal static class ExtensionMethods
         var scanDirectionFlag = false;
         var classification = MinMax.Create<byte>();
         IMinMax<sbyte>? scanAngleRank = default;
+#if LAS1_1_OR_GREATER
         var userData = MinMax.Create<byte>();
         var pointSourceId = MinMax.Create<ushort>();
+#else
+        var fileMarker = MinMax.Create<byte>();
+        var userBitField = MinMax.Create<ushort>();
+#endif
 #if LAS1_4_OR_GREATER
         IMinMax<short>? scanAngle = default;
         IMinMax<byte>? scannerChannel = default;
@@ -181,7 +186,11 @@ internal static class ExtensionMethods
                 case IPointDataRecord pointDataRecord:
                     {
                         scanAngleRank ??= MinMax.Create<sbyte>();
+#if LAS1_1_OR_GREATER
                         var classificationValue = (byte)pointDataRecord.Classification;
+#else
+                        var classificationValue = pointDataRecord.Classification;
+#endif
                         classification.Update(classificationValue);
                         scanAngleRank.Update(pointDataRecord.ScanAngleRank);
 
@@ -190,8 +199,13 @@ internal static class ExtensionMethods
                     }
             }
 
+#if LAS1_1_OR_GREATER
             userData.Update(record.UserData);
             pointSourceId.Update(record.PointSourceId);
+#else
+            fileMarker.Update(record.FileMarker);
+            userBitField.Update(record.UserBitField);
+#endif
 
             if (record is IGpsPointDataRecord gpsPointDataRecord)
             {
@@ -236,8 +250,13 @@ internal static class ExtensionMethods
             scanDirectionFlag,
             classification,
             scanAngleRank,
+#if LAS1_1_OR_GREATER
             userData,
             pointSourceId,
+#else
+            fileMarker,
+            userBitField,
+#endif
 #if LAS1_4_OR_GREATER
             scanAngle,
             scannerChannel,

@@ -265,12 +265,18 @@ public sealed class ArrowLasReader : ILasReader, IDisposable
                 NumberOfReturns = GetValue<byte>(recordBatch.Column(Arrow.Constants.Columns.NumberOfReturns, StringComparer.Ordinal), index),
                 ScanDirectionFlag = GetBooleanValue(recordBatch.Column(Arrow.Constants.Columns.ScanDirectionFlag, StringComparer.Ordinal), index),
                 EdgeOfFlightLine = GetBooleanValue(recordBatch.Column(Arrow.Constants.Columns.EdgeOfFlightLine, StringComparer.Ordinal), index),
+#if LAS1_1_OR_GREATER
                 Synthetic = GetBooleanValue(recordBatch.Column(Arrow.Constants.Columns.Synthetic, StringComparer.Ordinal), index),
                 KeyPoint = GetBooleanValue(recordBatch.Column(Arrow.Constants.Columns.KeyPoint, StringComparer.Ordinal), index),
                 Withheld = GetBooleanValue(recordBatch.Column(Arrow.Constants.Columns.Withheld, StringComparer.Ordinal), index),
                 UserData = GetValue<byte>(recordBatch.Column(Arrow.Constants.Columns.UserData, StringComparer.Ordinal), index),
                 PointSourceId = GetValue<ushort>(recordBatch.Column(Arrow.Constants.Columns.PointSourceId, StringComparer.Ordinal), index),
                 Classification = (Classification)GetValue<byte>(recordBatch.Column(Arrow.Constants.Columns.Legacy.Classification, StringComparer.Ordinal), index),
+#else
+                FileMarker = GetValue<byte>(recordBatch.Column(Arrow.Constants.Columns.FileMarker, StringComparer.Ordinal), index),
+                UserBitField = GetValue<ushort>(recordBatch.Column(Arrow.Constants.Columns.UserBitField, StringComparer.Ordinal), index),
+                Classification = GetValue<byte>(recordBatch.Column(Arrow.Constants.Columns.Legacy.Classification, StringComparer.Ordinal), index),
+#endif
                 ScanAngleRank = GetValue<sbyte>(recordBatch.Column(Arrow.Constants.Columns.Legacy.ScanAngleRank, StringComparer.Ordinal), index),
             },
             GpsPointDataRecord.Id => new GpsPointDataRecord
@@ -283,12 +289,18 @@ public sealed class ArrowLasReader : ILasReader, IDisposable
                 NumberOfReturns = GetValue<byte>(recordBatch.Column(Arrow.Constants.Columns.NumberOfReturns, StringComparer.Ordinal), index),
                 ScanDirectionFlag = GetBooleanValue(recordBatch.Column(Arrow.Constants.Columns.ScanDirectionFlag, StringComparer.Ordinal), index),
                 EdgeOfFlightLine = GetBooleanValue(recordBatch.Column(Arrow.Constants.Columns.EdgeOfFlightLine, StringComparer.Ordinal), index),
+#if LAS1_1_OR_GREATER
                 Synthetic = GetBooleanValue(recordBatch.Column(Arrow.Constants.Columns.Synthetic, StringComparer.Ordinal), index),
                 KeyPoint = GetBooleanValue(recordBatch.Column(Arrow.Constants.Columns.KeyPoint, StringComparer.Ordinal), index),
                 Withheld = GetBooleanValue(recordBatch.Column(Arrow.Constants.Columns.Withheld, StringComparer.Ordinal), index),
                 UserData = GetValue<byte>(recordBatch.Column(Arrow.Constants.Columns.UserData, StringComparer.Ordinal), index),
                 PointSourceId = GetValue<ushort>(recordBatch.Column(Arrow.Constants.Columns.PointSourceId, StringComparer.Ordinal), index),
                 Classification = (Classification)GetValue<byte>(recordBatch.Column(Arrow.Constants.Columns.Legacy.Classification, StringComparer.Ordinal), index),
+#else
+                FileMarker = GetValue<byte>(recordBatch.Column(Arrow.Constants.Columns.FileMarker, StringComparer.Ordinal), index),
+                UserBitField = GetValue<ushort>(recordBatch.Column(Arrow.Constants.Columns.UserBitField, StringComparer.Ordinal), index),
+                Classification = GetValue<byte>(recordBatch.Column(Arrow.Constants.Columns.Legacy.Classification, StringComparer.Ordinal), index),
+#endif
                 ScanAngleRank = GetValue<sbyte>(recordBatch.Column(Arrow.Constants.Columns.Legacy.ScanAngleRank, StringComparer.Ordinal), index),
                 GpsTime = GetValue<double>(recordBatch.Column(Arrow.Constants.Columns.Gps.GpsTime, StringComparer.Ordinal), index),
             },
@@ -561,12 +573,18 @@ public sealed class ArrowLasReader : ILasReader, IDisposable
                 FieldAccessors.PointDataRecord.SetNumberOfReturns(destination, GetValue<byte>(recordBatch.Column(Arrow.Constants.Columns.NumberOfReturns, StringComparer.Ordinal), index));
                 FieldAccessors.PointDataRecord.SetScanDirectionFlag(destination, GetBooleanValue(recordBatch.Column(Arrow.Constants.Columns.ScanDirectionFlag, StringComparer.Ordinal), index));
                 FieldAccessors.PointDataRecord.SetEdgeOfFlightLine(destination, GetBooleanValue(recordBatch.Column(Arrow.Constants.Columns.EdgeOfFlightLine, StringComparer.Ordinal), index));
+#if LAS1_1_OR_GREATER
                 FieldAccessors.PointDataRecord.SetSynthetic(destination, GetBooleanValue(recordBatch.Column(Arrow.Constants.Columns.Synthetic, StringComparer.Ordinal), index));
                 FieldAccessors.PointDataRecord.SetKeyPoint(destination, GetBooleanValue(recordBatch.Column(Arrow.Constants.Columns.KeyPoint, StringComparer.Ordinal), index));
                 FieldAccessors.PointDataRecord.SetWithheld(destination, GetBooleanValue(recordBatch.Column(Arrow.Constants.Columns.Withheld, StringComparer.Ordinal), index));
                 FieldAccessors.PointDataRecord.SetUserData(destination, GetValue<byte>(recordBatch.Column(Arrow.Constants.Columns.UserData, StringComparer.Ordinal), index));
                 FieldAccessors.PointDataRecord.SetPointSourceId(destination, GetValue<ushort>(recordBatch.Column(Arrow.Constants.Columns.PointSourceId, StringComparer.Ordinal), index));
                 FieldAccessors.PointDataRecord.SetClassification(destination, (Classification)GetValue<byte>(recordBatch.Column(Arrow.Constants.Columns.Legacy.Classification, StringComparer.Ordinal), index));
+#else
+                FieldAccessors.PointDataRecord.SetFileMarker(destination, GetValue<byte>(recordBatch.Column(Arrow.Constants.Columns.FileMarker, StringComparer.Ordinal), index));
+                FieldAccessors.PointDataRecord.SetUserBitField(destination, GetValue<ushort>(recordBatch.Column(Arrow.Constants.Columns.UserBitField, StringComparer.Ordinal), index));
+                FieldAccessors.PointDataRecord.SetClassification(destination, GetValue<byte>(recordBatch.Column(Arrow.Constants.Columns.Legacy.Classification, StringComparer.Ordinal), index));
+#endif
                 FieldAccessors.PointDataRecord.SetScanAngleRank(destination, GetValue<sbyte>(recordBatch.Column(Arrow.Constants.Columns.Legacy.ScanAngleRank, StringComparer.Ordinal), index));
                 return PointDataRecord.Size;
             case GpsPointDataRecord.Id:
@@ -578,12 +596,18 @@ public sealed class ArrowLasReader : ILasReader, IDisposable
                 FieldAccessors.PointDataRecord.SetNumberOfReturns(destination, GetValue<byte>(recordBatch.Column(Arrow.Constants.Columns.NumberOfReturns, StringComparer.Ordinal), index));
                 FieldAccessors.PointDataRecord.SetScanDirectionFlag(destination, GetBooleanValue(recordBatch.Column(Arrow.Constants.Columns.ScanDirectionFlag, StringComparer.Ordinal), index));
                 FieldAccessors.PointDataRecord.SetEdgeOfFlightLine(destination, GetBooleanValue(recordBatch.Column(Arrow.Constants.Columns.EdgeOfFlightLine, StringComparer.Ordinal), index));
-                FieldAccessors.PointDataRecord.SetSynthetic(ref destination[Constants.PointDataRecord.ClassificationFieldOffset], GetBooleanValue(recordBatch.Column(Arrow.Constants.Columns.Synthetic, StringComparer.Ordinal), index));
+#if LAS1_1_OR_GREATER
+                FieldAccessors.PointDataRecord.SetSynthetic(destination, GetBooleanValue(recordBatch.Column(Arrow.Constants.Columns.Synthetic, StringComparer.Ordinal), index));
                 FieldAccessors.PointDataRecord.SetKeyPoint(destination, GetBooleanValue(recordBatch.Column(Arrow.Constants.Columns.KeyPoint, StringComparer.Ordinal), index));
                 FieldAccessors.PointDataRecord.SetWithheld(destination, GetBooleanValue(recordBatch.Column(Arrow.Constants.Columns.Withheld, StringComparer.Ordinal), index));
                 FieldAccessors.PointDataRecord.SetUserData(destination, GetValue<byte>(recordBatch.Column(Arrow.Constants.Columns.UserData, StringComparer.Ordinal), index));
                 FieldAccessors.PointDataRecord.SetPointSourceId(destination, GetValue<ushort>(recordBatch.Column(Arrow.Constants.Columns.PointSourceId, StringComparer.Ordinal), index));
                 FieldAccessors.PointDataRecord.SetClassification(destination, (Classification)GetValue<byte>(recordBatch.Column(Arrow.Constants.Columns.Legacy.Classification, StringComparer.Ordinal), index));
+#else
+                FieldAccessors.PointDataRecord.SetFileMarker(destination, GetValue<byte>(recordBatch.Column(Arrow.Constants.Columns.FileMarker, StringComparer.Ordinal), index));
+                FieldAccessors.PointDataRecord.SetUserBitField(destination, GetValue<ushort>(recordBatch.Column(Arrow.Constants.Columns.UserBitField, StringComparer.Ordinal), index));
+                FieldAccessors.PointDataRecord.SetClassification(destination, GetValue<byte>(recordBatch.Column(Arrow.Constants.Columns.Legacy.Classification, StringComparer.Ordinal), index));
+#endif
                 FieldAccessors.PointDataRecord.SetScanAngleRank(destination, GetValue<sbyte>(recordBatch.Column(Arrow.Constants.Columns.Legacy.ScanAngleRank, StringComparer.Ordinal), index));
                 FieldAccessors.PointDataRecord.SetGpsTime(destination, GetValue<double>(recordBatch.Column(Arrow.Constants.Columns.Gps.GpsTime, StringComparer.Ordinal), index));
                 return GpsPointDataRecord.Size;

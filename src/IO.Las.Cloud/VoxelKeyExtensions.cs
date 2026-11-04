@@ -10,7 +10,7 @@ namespace Altemiq.IO.Las.Cloud;
 using System.Runtime.Intrinsics;
 #endif
 
-#pragma warning disable CA1708, RCS1228, S2325, SA1101
+#pragma warning disable CA1708
 
 /// <summary>
 /// <see cref="CopcHierarchy.VoxelKey"/> extensions.

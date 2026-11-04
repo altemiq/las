@@ -9,13 +9,17 @@ namespace Altemiq.IO.Las;
 public class LasWriterTests
 {
     [Test]
-    public async Task HeaderWithoutExtraBytes()
+    [Arguments(0)]
+#if LAS1_1_OR_GREATER
+    [Arguments(1)]
+#endif
+    public async Task HeaderWithoutExtraBytes(int minor)
     {
         HeaderBlockBuilder builder = new()
         {
             SystemIdentifier = "LAS tests",
             GeneratingSoftware = "Las.Tests.exe",
-            Version = new(1, 1),
+            Version = new(1, minor),
             FileCreation = new DateTime(2010, 1, 1).AddDays(40),
             PointDataFormatId = 1,
         };
@@ -203,13 +207,17 @@ public class LasWriterTests
 #endif
 
     [Test]
-    public async Task ExplodedStream()
+    [Arguments(0)]
+#if LAS1_1_OR_GREATER
+    [Arguments(1)]
+#endif
+    public async Task ExplodedStream(int minor)
     {
         HeaderBlockBuilder builder = new()
         {
             SystemIdentifier = "LAS tests",
             GeneratingSoftware = "Las.Tests.exe",
-            Version = new(1, 1),
+            Version = new(1, minor),
             FileCreation = new DateTime(2010, 1, 1).AddDays(40),
             PointDataFormatId = 1,
 #if LAS1_4_OR_GREATER
@@ -293,12 +301,17 @@ public class LasWriterTests
                 X = default,
                 Y = default,
                 Z = default,
-                Classification = Classification.HighVegetation,
                 EdgeOfFlightLine = default,
                 GpsTime = default,
                 NumberOfReturns = 1,
                 ReturnNumber = 1,
+#if LAS1_1_OR_GREATER
+                Classification = Classification.HighVegetation,
                 PointSourceId = default,
+#else
+                Classification = 5,
+                UserBitField = default,
+#endif
                 ScanDirectionFlag = default,
                 ScanAngleRank = default,
             });
@@ -308,12 +321,17 @@ public class LasWriterTests
                 X = 1,
                 Y = 1,
                 Z = 1,
-                Classification = Classification.LowVegetation,
                 EdgeOfFlightLine = default,
                 GpsTime = default,
                 NumberOfReturns = 1,
                 ReturnNumber = 1,
+#if LAS1_1_OR_GREATER
+                Classification = Classification.LowVegetation,
                 PointSourceId = default,
+#else
+                Classification = 3,
+                UserBitField = default,
+#endif
                 ScanDirectionFlag = default,
                 ScanAngleRank = default,
             });
@@ -338,7 +356,11 @@ public class LasWriterTests
         await Assert.That(outputPoint)
             .IsNotNull()
             .And.IsTypeOf<IPointDataRecord>()
+#if LAS1_1_OR_GREATER
             .And.Member(static p => p.Classification, static classification => classification.IsEqualTo(Classification.LowVegetation));
+#else
+            .And.Member(static p => p.Classification, static classification => classification.IsEqualTo(3));
+#endif
 
 #if LAS1_4_OR_GREATER
         await Assert.That(extraBytes.GetValue(0, bytes)).ValueIsTypeOf<double>().And.IsEqualTo(ExtraValue);

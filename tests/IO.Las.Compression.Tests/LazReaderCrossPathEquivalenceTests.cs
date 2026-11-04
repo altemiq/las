@@ -17,7 +17,10 @@ public class LazReaderCrossPathEquivalenceTests
 {
 #if NETSTANDARD2_1_OR_GREATER || NETCOREAPP2_1_OR_GREATER
     [Test]
+    [Arguments("fusa_0.laz")]
+#if LAS1_1_OR_GREATER
     [Arguments("fusa.laz")]
+#endif
 #if LAS1_2_OR_GREATER
     [Arguments("coloured.laz")]
 #endif
@@ -64,7 +67,10 @@ public class LazReaderCrossPathEquivalenceTests
     }
 
     [Test]
+    [Arguments("fusa_0.laz")]
+#if LAS1_2_OR_GREATER
     [Arguments("fusa.laz")]
+#endif
 #if LAS1_2_OR_GREATER
     [Arguments("coloured.laz")]
 #endif

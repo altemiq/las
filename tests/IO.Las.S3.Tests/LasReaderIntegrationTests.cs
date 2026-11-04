@@ -22,12 +22,16 @@ public class LasReaderIntegrationTests
     }
 
     [Test]
-    public async Task ReadLasAsync()
+    [Arguments("lidar", "las/fusa_0.las", 0)]
+#if LAS1_1_OR_GREATER
+    [Arguments("lidar", "las/fusa.las", 1)]
+#endif
+    public async Task ReadLasAsync(string bucketName, string key, int minor)
     {
-        var stream = await S3Las.OpenReadAsync("lidar", "las/fusa.las", S3ClientData.S3Client);
+        var stream = await S3Las.OpenReadAsync(bucketName, key, S3ClientData.S3Client);
         LasReader reader = new(stream);
 
-        await CheckHeader(reader.Header, new(1, 1));
+        await CheckHeader(reader.Header, new(1, minor));
         _ = await Assert.That(reader.VariableLengthRecords).HasSingleItem();
 
         _ = await Assert.That(await reader.ReadPointDataRecordAsync())
@@ -42,7 +46,9 @@ public class LasReaderIntegrationTests
     {
         await Assert.That(headerBlock)
             .Member(static headerBlock => headerBlock.FileSignature, static fileSignature => fileSignature.IsEqualTo("LASF"))
+#if LAS1_1_OR_GREATER
             .And.Member(static headerBlock => headerBlock.FileSourceId, static fileSourceId => fileSourceId.IsDefault())
+#endif
 #if LAS1_2_OR_GREATER
             .And.Member(static headerBlock => headerBlock.GlobalEncoding, static globalEncoding => globalEncoding.IsEqualTo(GlobalEncoding.None))
 #endif

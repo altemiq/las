@@ -6,7 +6,7 @@
 
 namespace Altemiq.IO.Las;
 
-#pragma warning disable S2325, SA1101
+#pragma warning disable CA1708
 
 /// <content>
 /// The <see cref="ILasReader"/> extensions.
