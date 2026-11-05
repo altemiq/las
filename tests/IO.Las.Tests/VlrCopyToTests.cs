@@ -12,7 +12,7 @@ public sealed class TextAreaDescriptionTests
     [Arguments("UNIT")]
     [Arguments("HELLO WORLD")]
     [Arguments("A")]
-    public async Task CopyTo_WritesNullTerminatorImmediatelyAfterValue(string value)
+    public async Task NullTerminatorImmediatelyAfterValue(string value)
     {
         var record = new TextAreaDescription(value);
         var buffer = new byte[record.Size];
@@ -30,7 +30,7 @@ public sealed class TextAreaDescriptionTests
     }
 
     [Test]
-    public async Task CopyTo_WithSingleCharValue_NulAtExpectedOffset()
+    public async Task SingleCharValue()
     {
         var record = new TextAreaDescription("Z");
         var buffer = new byte[record.Size];
@@ -43,7 +43,7 @@ public sealed class TextAreaDescriptionTests
     }
 
     [Test]
-    public async Task CopyTo_BufferOfExactSize_DoesNotThrowAndLastByteIsNull()
+    public async Task CopyToBufferOfExactSize()
     {
         var value = "TEST";
         var record = new TextAreaDescription(value);
@@ -62,7 +62,7 @@ public sealed class TextAreaDescriptionTests
 public sealed class GeoAsciiParamsTagTests
 {
     [Test]
-    public async Task CopyTo_TwoStrings_EachNullTerminated()
+    public async Task TwoStrings()
     {
         var record = new GeoAsciiParamsTag("UNIT", "METER");
         var buffer = new byte[record.Size];
@@ -85,7 +85,7 @@ public sealed class GeoAsciiParamsTagTests
     }
 
     [Test]
-    public async Task CopyTo_SingleString_NullTerminatorAtExpectedOffset()
+    public async Task SingleString()
     {
         var record = new GeoAsciiParamsTag("EARTH");
         var buffer = new byte[record.Size];
@@ -101,7 +101,7 @@ public sealed class GeoAsciiParamsTagTests
     }
 
     [Test]
-    public async Task CopyTo_ThreeStrings_AllNullTerminatorsAtCorrectOffsets()
+    public async Task ThreeStrings()
     {
         var record = new GeoAsciiParamsTag("A", "BC", "DEF");
         var buffer = new byte[record.Size];
@@ -131,10 +131,10 @@ public sealed class GeoAsciiParamsTagTests
     }
 
     [Test]
-    public async Task CopyTo_BufferOfExactSize_DoesNotThrowAndLastByteIsNull()
+    public async Task BufferOfExactSize()
     {
         var record = new GeoAsciiParamsTag("UNIT", "METER");
-        var bufferSize = VariableLengthRecordHeader.Size + (4 + 1) + (5 + 1);
+        var bufferSize = VariableLengthRecordHeader.Size + (4 + 1) + 5 + 1;
 
         var buffer = new byte[bufferSize];
         var bytesWritten = record.CopyTo(buffer);
@@ -148,7 +148,7 @@ public sealed class GeoAsciiParamsTagTests
 public sealed class OgcCoordinateSystemWktTests
 {
     [Test]
-    public async Task CopyTo_NullTerminatorImmediatelyAfterWkt()
+    public async Task NullTerminatorImmediatelyAfterWkt()
     {
         var record = new OgcCoordinateSystemWkt("GEOGCS[4326]");
         var buffer = new byte[record.Size];
@@ -163,7 +163,7 @@ public sealed class OgcCoordinateSystemWktTests
     }
 
     [Test]
-    public async Task CopyTo_WktContentIsNonZeroAndNullFollows()
+    public async Task ContentIsNonZero()
     {
         var record = new OgcCoordinateSystemWkt("GEOGCS[4326]");
         var wktByteLength = record.Header.RecordLengthAfterHeader - 1; // excludes the NUL
@@ -180,7 +180,7 @@ public sealed class OgcCoordinateSystemWktTests
     }
 
     [Test]
-    public async Task CopyTo_BufferOfExactSize_DoesNotThrow()
+    public async Task BufferOfExactSize()
     {
         var record = new OgcCoordinateSystemWkt("GEOGCS[4326]");
         var buffer = new byte[record.Size];
@@ -195,7 +195,7 @@ public sealed class OgcCoordinateSystemWktTests
 public sealed class OgcMathTransformWktTests
 {
     [Test]
-    public async Task CopyTo_NullTerminatorImmediatelyAfterWkt()
+    public async Task NullTerminatorImmediatelyAfterWkt()
     {
         var record = new OgcMathTransformWkt("GEOGCS[4326]");
         var buffer = new byte[record.Size];
@@ -207,7 +207,7 @@ public sealed class OgcMathTransformWktTests
     }
 
     [Test]
-    public async Task CopyTo_WktContentIsNonZeroAndNullFollows()
+    public async Task ContentIsNonZero()
     {
         var record = new OgcMathTransformWkt("GEOGCS[4326]");
         var wktByteLength = record.Header.RecordLengthAfterHeader - 1;
@@ -224,7 +224,7 @@ public sealed class OgcMathTransformWktTests
     }
 
     [Test]
-    public async Task CopyTo_BufferOfExactSize_DoesNotThrow()
+    public async Task BufferOfExactSize()
     {
         var record = new OgcMathTransformWkt("GEOGCS[4326]");
         var buffer = new byte[record.Size];

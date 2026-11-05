@@ -82,17 +82,17 @@ public class ArrowLasReaderTests
 #pragma warning disable IDE0072
             IEnumerable<IArrowArray> arrays = [.. schema.FieldsList.Select<Field, IArrowArray>(field => field.DataType.TypeId switch
                 {
-                    ArrowTypeId.Boolean => GetArray(random, new BooleanArray.Builder(), size, random => random.NextDouble() > 0.5),
-                    ArrowTypeId.UInt8 => GetArray(random, new UInt8Array.Builder(), size, random => (byte)random.Next(byte.MinValue, byte.MaxValue)),
-                    ArrowTypeId.Int8 => GetArray(random, new Int8Array.Builder(), size, random => (sbyte)random.Next(sbyte.MinValue, sbyte.MaxValue)),
-                    ArrowTypeId.UInt16 => GetArray(random, new UInt16Array.Builder(), size, random => (ushort)random.Next(ushort.MinValue, ushort.MaxValue)),
-                    ArrowTypeId.Int16 => GetArray(random, new Int16Array.Builder(), size, random => (short)random.Next(short.MinValue, short.MaxValue)),
-                    ArrowTypeId.UInt32 => GetArray(random, new UInt32Array.Builder(), size, random => (uint)random.NextInt64(uint.MinValue, uint.MaxValue)),
-                    ArrowTypeId.Int32 => GetArray(random, new Int32Array.Builder(), size, random => random.Next()),
-                    ArrowTypeId.UInt64 => GetArray(random, new UInt64Array.Builder(), size, random => (ulong)random.NextInt64(uint.MinValue, uint.MaxValue)),
-                    ArrowTypeId.Int64 => GetArray(random, new Int64Array.Builder(), size, random => random.NextInt64()),
-                    ArrowTypeId.Float => GetArray(random, new FloatArray.Builder(), size, random => random.NextSingle() * ushort.MaxValue),
-                    ArrowTypeId.Double => GetArray(random, new DoubleArray.Builder(), size, random => random.NextDouble() * int.MaxValue),
+                    ArrowTypeId.Boolean => GetArray(random, new BooleanArray.Builder(), size, static random => random.NextDouble() > 0.5),
+                    ArrowTypeId.UInt8 => GetArray(random, new UInt8Array.Builder(), size, static random => (byte)random.Next(byte.MinValue, byte.MaxValue)),
+                    ArrowTypeId.Int8 => GetArray(random, new Int8Array.Builder(), size, static random => (sbyte)random.Next(sbyte.MinValue, sbyte.MaxValue)),
+                    ArrowTypeId.UInt16 => GetArray(random, new UInt16Array.Builder(), size, static random => (ushort)random.Next(ushort.MinValue, ushort.MaxValue)),
+                    ArrowTypeId.Int16 => GetArray(random, new Int16Array.Builder(), size, static random => (short)random.Next(short.MinValue, short.MaxValue)),
+                    ArrowTypeId.UInt32 => GetArray(random, new UInt32Array.Builder(), size, static random => (uint)random.NextInt64(uint.MinValue, uint.MaxValue)),
+                    ArrowTypeId.Int32 => GetArray(random, new Int32Array.Builder(), size, static random => random.Next()),
+                    ArrowTypeId.UInt64 => GetArray(random, new UInt64Array.Builder(), size, static random => (ulong)random.NextInt64(uint.MinValue, uint.MaxValue)),
+                    ArrowTypeId.Int64 => GetArray(random, new Int64Array.Builder(), size, static random => random.NextInt64()),
+                    ArrowTypeId.Float => GetArray(random, new FloatArray.Builder(), size, static random => random.NextSingle() * ushort.MaxValue),
+                    ArrowTypeId.Double => GetArray(random, new DoubleArray.Builder(), size, static random => random.NextDouble() * int.MaxValue),
                     _ => throw new System.Diagnostics.UnreachableException(),
                 })];
 #pragma warning restore IDE0072

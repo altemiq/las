@@ -6,8 +6,6 @@
 
 namespace Altemiq.IO.Las.Info;
 
-#pragma warning disable RCS1263, SA1101
-
 /// <summary>
 /// The <see cref="IFormatBuilder"/> extensions.
 /// </summary>

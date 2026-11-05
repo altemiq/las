@@ -41,6 +41,10 @@
     <PackageIcon>icon.png</PackageIcon>
   </PropertyGroup>
 
+  <PropertyGroup Condition=" $([MSBuild]::IsTargetFrameworkCompatible('$(TargetFramework)', 'net11.0')) ">
+    <Features>runtime-async=on</Features>
+  </PropertyGroup>
+
   <PropertyGroup Condition=" $([MSBuild]::GetTargetFrameworkIdentifier('$(TargetFramework)')) == '.NETStandard' and $([MSBuild]::VersionLessThan($([MSBuild]::GetTargetFrameworkVersion('$(TargetFramework)')), '2.0')) ">
     <NoWarn>$(NoWarn);NETSDK1215</NoWarn>
   </PropertyGroup>
@@ -54,14 +58,6 @@
   <PropertyGroup Label="Analyzers">
     <AnalysisLevel>preview</AnalysisLevel>
   </PropertyGroup>
-
-  <PropertyGroup>
-    <NoWarn>$(NoWarn);SA1642</NoWarn>
-  </PropertyGroup>
-
-  <!--<PropertyGroup>
-    <NoWarn>$(NoWarn);SA1642;SA1643</NoWarn>
-  </PropertyGroup>-->
 
   <PropertyGroup>
     <UseSpanParsing>false</UseSpanParsing>

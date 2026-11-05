@@ -6,8 +6,6 @@
 
 namespace Altemiq.IO.Las;
 
-#pragma warning disable CA1708
-
 using System.Runtime.CompilerServices;
 
 #if NETCOREAPP3_0_OR_GREATER
@@ -24,7 +22,6 @@ using System.Runtime.Intrinsics.X86;
 public static partial class Vector
 {
 #if NETCOREAPP3_0_OR_GREATER
-#pragma warning disable RCS1263, SA1101
     /// <content>
     /// The <see cref="Vector128{Double}"/> extensions.
     /// </content>
@@ -72,9 +69,6 @@ public static partial class Vector
         }
     }
 
-    /// <content>
-    /// The <see cref="Vector128"/> extensions.
-    /// </content>
     extension(Vector128)
     {
 #if !NET9_0_OR_GREATER
@@ -666,6 +660,5 @@ public static partial class Vector
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     private static T GetElementUnsafe<T>(in Vector256<T> vector, int index)
         where T : struct => Unsafe.Add(ref Unsafe.As<Vector256<T>, T>(ref Unsafe.AsRef(in vector)), index);
-#pragma warning restore RCS1263, SA1101
 #endif
 }

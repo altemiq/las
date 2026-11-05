@@ -6,6 +6,8 @@
 
 namespace Altemiq.IO.Las;
 
+#pragma warning disable S6640
+
 /// <summary>
 /// Memory extensions.
 /// </summary>
@@ -19,8 +21,14 @@ internal static class MemoryExtensions
         /// <typeparam name="T">The type of the object to which the data is to be copied. This must be a formatted class or a structure.</typeparam>
         /// <param name="span">The span of memory.</param>
         /// <returns>A managed object that contains the data that the <paramref name="span"/> parameter points to.</returns>
-        public static T? SpanToStructure<[System.Diagnostics.CodeAnalysis.DynamicallyAccessedMembers(System.Diagnostics.CodeAnalysis.DynamicallyAccessedMemberTypes.PublicConstructors | System.Diagnostics.CodeAnalysis.DynamicallyAccessedMemberTypes.NonPublicConstructors)] T>(ReadOnlySpan<byte> span) =>
-            System.Runtime.InteropServices.Marshal.PtrToStructure<T>(GetIntPtr(span));
+        public static T? SpanToStructure<[System.Diagnostics.CodeAnalysis.DynamicallyAccessedMembers(System.Diagnostics.CodeAnalysis.DynamicallyAccessedMemberTypes.PublicConstructors | System.Diagnostics.CodeAnalysis.DynamicallyAccessedMemberTypes.NonPublicConstructors)] T>(ReadOnlySpan<byte> span)
+        {
+            unsafe
+            {
+                return System.Runtime.InteropServices.Marshal.PtrToStructure<T>(
+                    (nint)System.Runtime.CompilerServices.Unsafe.AsPointer(ref System.Runtime.InteropServices.MemoryMarshal.GetReference(span)));
+            }
+        }
 
         /// <summary>
         /// Marshals data from a managed object of a specified type to a block of memory.
@@ -29,13 +37,15 @@ internal static class MemoryExtensions
         /// <param name="structure">A managed object that holds the data to be marshaled. The object must be a structure or an instance of a formatted class.</param>
         /// <param name="span">The span of memory.</param>
         /// <param name="fDeleteOld"><see langword="true"/> to call the <see cref="System.Runtime.InteropServices.Marshal.DestroyStructure{T}"/> method on the <paramref name="span"/> parameter before this method copies the data. The block must contain valid data. Note that passing false when the memory block already contains data can lead to a memory leak.</param>
-        public static void StructureToSpan<T>([System.Diagnostics.CodeAnalysis.DisallowNull] T structure, Span<byte> span, bool fDeleteOld = false) =>
-            System.Runtime.InteropServices.Marshal.StructureToPtr(structure, GetIntPtr(span), fDeleteOld);
+        public static void StructureToSpan<T>([System.Diagnostics.CodeAnalysis.DisallowNull] T structure, Span<byte> span, bool fDeleteOld = false)
+        {
+            unsafe
+            {
+                System.Runtime.InteropServices.Marshal.StructureToPtr(
+                    structure,
+                    (nint)System.Runtime.CompilerServices.Unsafe.AsPointer(ref System.Runtime.InteropServices.MemoryMarshal.GetReference(span)),
+                    fDeleteOld);
+            }
+        }
     }
-
-#pragma warning disable S6640
-    private static unsafe nint GetIntPtr<T>(Span<T> span) => (nint)System.Runtime.CompilerServices.Unsafe.AsPointer(ref System.Runtime.InteropServices.MemoryMarshal.GetReference(span));
-
-    private static unsafe nint GetIntPtr<T>(ReadOnlySpan<T> span) => (nint)System.Runtime.CompilerServices.Unsafe.AsPointer(ref System.Runtime.InteropServices.MemoryMarshal.GetReference(span));
-#pragma warning restore S6640
 }

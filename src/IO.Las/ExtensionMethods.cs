@@ -6,8 +6,6 @@
 
 namespace Altemiq.IO.Las;
 
-#pragma warning disable CA1708
-
 /// <summary>
 /// Extension methods.
 /// </summary>

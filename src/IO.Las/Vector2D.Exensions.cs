@@ -6,8 +6,6 @@
 
 namespace Altemiq.IO.Las;
 
-#pragma warning disable CA1708
-
 #if NETCOREAPP3_0_OR_GREATER
 using System.Runtime.CompilerServices;
 using System.Runtime.Intrinsics;
@@ -18,7 +16,9 @@ using System.Runtime.Intrinsics;
 /// </content>
 public static partial class Vector
 {
-    /// <summary>The <see cref="Vector3D"/> extensions.</summary>
+    /// <summary>
+    /// The <see cref="Vector3D"/> extensions.
+    /// </summary>
     /// <param name="value">The vector to reinterpret.</param>
     extension(Vector2D value)
     {
