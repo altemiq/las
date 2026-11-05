@@ -584,85 +584,139 @@ public readonly struct HeaderBlock : IEquatable<HeaderBlock>
         return hashCode.ToHashCode();
     }
 
+    /// <summary>
+    /// Converts the value of this instance to its equivalent string representation.
+    /// </summary>
+    /// <returns>The string representation of the value of this instance.</returns>>
+    public override string ToString()
+    {
 #pragma warning disable MA0136
 #if LAS1_5_OR_GREATER
-    /// <summary>
-    /// Converts the value of this instance to its equivalent string representation.
-    /// </summary>
-    /// <returns>The string representation of the value of this instance.</returns>>
-    public override string ToString() =>
-        $$"""
+        if (this.Version is { Major: 1, Minor: >= 5 })
         {
-          {{nameof(this.FileSignature)}}: 'LASF',
-          {{nameof(this.FileSourceId)}}: {{this.FileSourceId}},
-          {{nameof(this.GlobalEncoding)}}: {{(int)this.GlobalEncoding}},
-          {{nameof(this.ProjectId)}}: '{{this.ProjectId}}',
-          {{nameof(this.Version)}}: {{this.Version}},
-          {{nameof(this.SystemIdentifier)}}: '{{this.SystemIdentifier}}',
-          {{nameof(this.FileSourceId)}}: {{this.FileSourceId}},
-          {{nameof(this.FileCreation)}}: {{this.FileCreation}},
-          {{nameof(this.PointDataFormat)}}: {{this.PointDataFormat}},
-          {{nameof(this.NumberOfPointRecords)}}: {{nameof(this.NumberOfPointRecords)}}
-          {{nameof(this.NumberOfPointsByReturn)}}: [ {{string.Join(", ", this.NumberOfPointsByReturn)}} ],
-          {{nameof(this.ScaleFactor)}}, [ {{this.ScaleFactor.X}}, {{this.ScaleFactor.Y}}, {{this.ScaleFactor.Z}} ],
-          {{nameof(this.Offset)}}, [ {{this.Offset.X}}, {{this.Offset.Y}}, {{this.Offset.Z}} ],
-          {{nameof(this.Min)}}, [ {{this.Min.X}}, {{this.Min.Y}}, {{this.Min.Z}} ],
-          {{nameof(this.Max)}}, [ {{this.Max.X}}, {{this.Max.Y}}, {{this.Max.Z}} ],
-          {{nameof(this.MaxGpsTime)}}, {{this.MaxGpsTime}}
-          {{nameof(this.MinGpsTime)}}, {{this.MinGpsTime}}
-          {{nameof(this.TimeOffset)}}, {{this.TimeOffset}}
+            return
+                $$"""
+                {
+                  {{nameof(this.FileSignature)}}: 'LASF',
+                  {{nameof(this.FileSourceId)}}: {{this.FileSourceId}},
+                  {{nameof(this.GlobalEncoding)}}: {{(int)this.GlobalEncoding}},
+                  {{nameof(this.ProjectId)}}: '{{this.ProjectId}}',
+                  {{nameof(this.Version)}}: {{this.Version}},
+                  {{nameof(this.SystemIdentifier)}}: '{{this.SystemIdentifier}}',
+                  {{nameof(this.FileSourceId)}}: {{this.FileSourceId}},
+                  {{nameof(this.FileCreation)}}: {{this.FileCreation}},
+                  {{nameof(this.PointDataFormat)}}: {{this.PointDataFormat}},
+                  {{nameof(this.NumberOfPointRecords)}}: {{nameof(this.NumberOfPointRecords)}}
+                  {{nameof(this.NumberOfPointsByReturn)}}: [ {{string.Join(", ", this.NumberOfPointsByReturn)}} ],
+                  {{nameof(this.ScaleFactor)}}, [ {{this.ScaleFactor.X}}, {{this.ScaleFactor.Y}}, {{this.ScaleFactor.Z}} ],
+                  {{nameof(this.Offset)}}, [ {{this.Offset.X}}, {{this.Offset.Y}}, {{this.Offset.Z}} ],
+                  {{nameof(this.Min)}}, [ {{this.Min.X}}, {{this.Min.Y}}, {{this.Min.Z}} ],
+                  {{nameof(this.Max)}}, [ {{this.Max.X}}, {{this.Max.Y}}, {{this.Max.Z}} ],
+                  {{nameof(this.MaxGpsTime)}}, {{this.MaxGpsTime}}
+                  {{nameof(this.MinGpsTime)}}, {{this.MinGpsTime}}
+                  {{nameof(this.TimeOffset)}}, {{this.TimeOffset}}
+                }
+                """;
         }
-        """;
-#elif LAS1_4_OR_GREATER
-    /// <summary>
-    /// Converts the value of this instance to its equivalent string representation.
-    /// </summary>
-    /// <returns>The string representation of the value of this instance.</returns>>
-    public override string ToString() =>
-        $$"""
-        {
-          {{nameof(this.FileSignature)}}: 'LASF',
-          {{nameof(this.FileSourceId)}}: {{this.FileSourceId}},
-          {{nameof(this.GlobalEncoding)}}: {{(int)this.GlobalEncoding}},
-          {{nameof(this.ProjectId)}}: '{{this.ProjectId}}',
-          {{nameof(this.Version)}}: {{this.Version}},
-          {{nameof(this.SystemIdentifier)}}: '{{this.SystemIdentifier}}',
-          {{nameof(this.FileSourceId)}}: {{this.FileSourceId}},
-          {{nameof(this.FileCreation)}}: {{this.FileCreation}},
-          {{nameof(this.PointDataFormat)}}: {{this.PointDataFormat}},
-          {{nameof(this.NumberOfPointRecords)}}: {{nameof(this.NumberOfPointRecords)}}
-          {{nameof(this.NumberOfPointsByReturn)}}: [ {{string.Join(", ", this.NumberOfPointsByReturn)}} ],
-          {{nameof(this.ScaleFactor)}}, [ {{this.ScaleFactor.X}}, {{this.ScaleFactor.Y}}, {{this.ScaleFactor.Z}} ],
-          {{nameof(this.Offset)}}, [ {{this.Offset.X}}, {{this.Offset.Y}}, {{this.Offset.Z}} ],
-          {{nameof(this.Min)}}, [ {{this.Min.X}}, {{this.Min.Y}}, {{this.Min.Z}} ],
-          {{nameof(this.Max)}}, [ {{this.Max.X}}, {{this.Max.Y}}, {{this.Max.Z}} ]
-        }
-        """;
-#else
-    /// <summary>
-    /// Converts the value of this instance to its equivalent string representation.
-    /// </summary>
-    /// <returns>The string representation of the value of this instance.</returns>>
-    public override string ToString() =>
-        $$"""
-        {
-          {{nameof(this.FileSignature)}}: 'LASF',
-          {{nameof(this.ProjectId)}}: '{{this.ProjectId}}',
-          {{nameof(this.Version)}}: {{this.Version}},
-          {{nameof(this.SystemIdentifier)}}: '{{this.SystemIdentifier}}',
-          {{nameof(this.GeneratingSoftware)}}: {{this.GeneratingSoftware}},
-          {{nameof(this.FileCreation)}}: {{this.FileCreation}},
-          {{nameof(this.PointDataFormat)}}: {{this.PointDataFormat}},
-          {{nameof(this.NumberOfPointRecords)}}: {{nameof(this.NumberOfPointRecords)}}
-          {{nameof(this.NumberOfPointsByReturn)}}: [ {{string.Join(", ", this.NumberOfPointsByReturn)}} ],
-          {{nameof(this.ScaleFactor)}}, [ {{this.ScaleFactor.X}}, {{this.ScaleFactor.Y}}, {{this.ScaleFactor.Z}} ],
-          {{nameof(this.Offset)}}, [ {{this.Offset.X}}, {{this.Offset.Y}}, {{this.Offset.Z}} ],
-          {{nameof(this.Min)}}, [ {{this.Min.X}}, {{this.Min.Y}}, {{this.Min.Z}} ],
-          {{nameof(this.Max)}}, [ {{this.Max.X}}, {{this.Max.Y}}, {{this.Max.Z}} ]
-        }
-        """;
 #endif
+
+#if LAS1_4_OR_GREATER
+        if (this.Version is { Major: 1, Minor: >= 4 })
+        {
+            return
+                $$"""
+                {
+                  {{nameof(this.FileSignature)}}: 'LASF',
+                  {{nameof(this.FileSourceId)}}: {{this.FileSourceId}},
+                  {{nameof(this.GlobalEncoding)}}: {{(int)this.GlobalEncoding}},
+                  {{nameof(this.ProjectId)}}: '{{this.ProjectId}}',
+                  {{nameof(this.Version)}}: {{this.Version}},
+                  {{nameof(this.SystemIdentifier)}}: '{{this.SystemIdentifier}}',
+                  {{nameof(this.FileSourceId)}}: {{this.FileSourceId}},
+                  {{nameof(this.FileCreation)}}: {{this.FileCreation}},
+                  {{nameof(this.PointDataFormat)}}: {{this.PointDataFormat}},
+                  {{nameof(this.NumberOfPointRecords)}}: {{nameof(this.NumberOfPointRecords)}}
+                  {{nameof(this.NumberOfPointsByReturn)}}: [ {{string.Join(", ", this.NumberOfPointsByReturn)}} ],
+                  {{nameof(this.ScaleFactor)}}, [ {{this.ScaleFactor.X}}, {{this.ScaleFactor.Y}}, {{this.ScaleFactor.Z}} ],
+                  {{nameof(this.Offset)}}, [ {{this.Offset.X}}, {{this.Offset.Y}}, {{this.Offset.Z}} ],
+                  {{nameof(this.Min)}}, [ {{this.Min.X}}, {{this.Min.Y}}, {{this.Min.Z}} ],
+                  {{nameof(this.Max)}}, [ {{this.Max.X}}, {{this.Max.Y}}, {{this.Max.Z}} ]
+                }
+                """;
+        }
+#endif
+
+#if LAS1_2_OR_GREATER
+        if (this.Version is { Major: 1, Minor: >= 2 })
+        {
+            return
+                $$"""
+                {
+                  {{nameof(this.FileSignature)}}: 'LASF',
+                  {{nameof(this.FileSourceId)}}: {{this.FileSourceId}},
+                  {{nameof(this.GlobalEncoding)}}: {{(int)this.GlobalEncoding}},
+                  {{nameof(this.ProjectId)}}: '{{this.ProjectId}}',
+                  {{nameof(this.Version)}}: {{this.Version}},
+                  {{nameof(this.SystemIdentifier)}}: '{{this.SystemIdentifier}}',
+                  {{nameof(this.GeneratingSoftware)}}: {{this.GeneratingSoftware}},
+                  {{nameof(this.FileCreation)}}: {{this.FileCreation}},
+                  {{nameof(this.PointDataFormat)}}: {{this.PointDataFormat}},
+                  {{nameof(this.NumberOfPointRecords)}}: {{nameof(this.NumberOfPointRecords)}}
+                  {{nameof(this.NumberOfPointsByReturn)}}: [ {{string.Join(", ", this.NumberOfPointsByReturn)}} ],
+                  {{nameof(this.ScaleFactor)}}, [ {{this.ScaleFactor.X}}, {{this.ScaleFactor.Y}}, {{this.ScaleFactor.Z}} ],
+                  {{nameof(this.Offset)}}, [ {{this.Offset.X}}, {{this.Offset.Y}}, {{this.Offset.Z}} ],
+                  {{nameof(this.Min)}}, [ {{this.Min.X}}, {{this.Min.Y}}, {{this.Min.Z}} ],
+                  {{nameof(this.Max)}}, [ {{this.Max.X}}, {{this.Max.Y}}, {{this.Max.Z}} ]
+                }
+                """;
+        }
+#endif
+
+#if LAS1_1_OR_GREATER
+        if (this.Version is { Major: 1, Minor: >= 1 })
+        {
+            return
+                $$"""
+                {
+                  {{nameof(this.FileSignature)}}: 'LASF',
+                  {{nameof(this.FileSourceId)}}: {{this.FileSourceId}},
+                  {{nameof(this.ProjectId)}}: '{{this.ProjectId}}',
+                  {{nameof(this.Version)}}: {{this.Version}},
+                  {{nameof(this.SystemIdentifier)}}: '{{this.SystemIdentifier}}',
+                  {{nameof(this.GeneratingSoftware)}}: {{this.GeneratingSoftware}},
+                  {{nameof(this.FileCreation)}}: {{this.FileCreation}},
+                  {{nameof(this.PointDataFormat)}}: {{this.PointDataFormat}},
+                  {{nameof(this.NumberOfPointRecords)}}: {{nameof(this.NumberOfPointRecords)}}
+                  {{nameof(this.NumberOfPointsByReturn)}}: [ {{string.Join(", ", this.NumberOfPointsByReturn)}} ],
+                  {{nameof(this.ScaleFactor)}}, [ {{this.ScaleFactor.X}}, {{this.ScaleFactor.Y}}, {{this.ScaleFactor.Z}} ],
+                  {{nameof(this.Offset)}}, [ {{this.Offset.X}}, {{this.Offset.Y}}, {{this.Offset.Z}} ],
+                  {{nameof(this.Min)}}, [ {{this.Min.X}}, {{this.Min.Y}}, {{this.Min.Z}} ],
+                  {{nameof(this.Max)}}, [ {{this.Max.X}}, {{this.Max.Y}}, {{this.Max.Z}} ]
+                }
+                """;
+        }
+#endif
+
+        return
+            $$"""
+            {
+              {{nameof(this.FileSignature)}}: 'LASF',
+              {{nameof(this.ProjectId)}}: '{{this.ProjectId}}',
+              {{nameof(this.Version)}}: {{this.Version}},
+              {{nameof(this.SystemIdentifier)}}: '{{this.SystemIdentifier}}',
+              {{nameof(this.GeneratingSoftware)}}: {{this.GeneratingSoftware}},
+              {{nameof(this.FileCreation)}}: {{this.FileCreation}},
+              {{nameof(this.PointDataFormat)}}: {{this.PointDataFormat}},
+              {{nameof(this.NumberOfPointRecords)}}: {{nameof(this.NumberOfPointRecords)}}
+              {{nameof(this.NumberOfPointsByReturn)}}: [ {{string.Join(", ", this.NumberOfPointsByReturn)}} ],
+              {{nameof(this.ScaleFactor)}}, [ {{this.ScaleFactor.X}}, {{this.ScaleFactor.Y}}, {{this.ScaleFactor.Z}} ],
+              {{nameof(this.Offset)}}, [ {{this.Offset.X}}, {{this.Offset.Y}}, {{this.Offset.Z}} ],
+              {{nameof(this.Min)}}, [ {{this.Min.X}}, {{this.Min.Y}}, {{this.Min.Z}} ],
+              {{nameof(this.Max)}}, [ {{this.Max.X}}, {{this.Max.Y}}, {{this.Max.Z}} ]
+            }
+            """;
 #pragma warning restore MA0136
+    }
 
     private readonly struct ReadOnlyLegacy(IReadOnlyList<uint> source) : IReadOnlyList<ulong>, IEquatable<IReadOnlyList<ulong>>, IEquatable<IReadOnlyList<uint>>
     {

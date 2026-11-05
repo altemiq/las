@@ -261,17 +261,17 @@ public sealed class LasQuadTree : IEquatable<LasQuadTree>
 #pragma warning disable MA0136
     /// <inheritdoc />
     public override string ToString() =>
-    $$"""
-      {
-        "Levels": {{this.levels}},
-        "MaxX": {{this.maximum.X}},
-        "MaxY": {{this.maximum.Y}},
-        "MinX": {{this.minimum.X}},
-        "MinY": {{this.minimum.Y}},
-        "Sublevel": {{this.sublevel}},
-        "SublevelIndex": {{this.sublevelIndex}}
-      }
-      """;
+        $$"""
+        {
+          "Levels": {{this.levels}},
+          "MaxX": {{this.maximum.X}},
+          "MaxY": {{this.maximum.Y}},
+          "MinX": {{this.minimum.X}},
+          "MinY": {{this.minimum.Y}},
+          "Sublevel": {{this.sublevel}},
+          "SublevelIndex": {{this.sublevelIndex}}
+        }
+        """;
 #pragma warning restore MA0136
 
     /// <summary>
