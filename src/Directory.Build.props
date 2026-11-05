@@ -25,6 +25,8 @@
     <VerifyReferenceAotCompatibility Condition=" '$(VerifyReferenceAotCompatibility)' == '' AND '$(IsAotCompatible)' == 'true' ">true</VerifyReferenceAotCompatibility>
 
     <MeziantouPolyfill_GenerateDebugFile Condition=" '$(Configuration)' == 'Debug' ">true</MeziantouPolyfill_GenerateDebugFile>
+
+    <IncludeDefaultStyleCop>false</IncludeDefaultStyleCop>
   </PropertyGroup>
 
   <PropertyGroup Label="Memory">
@@ -75,6 +77,11 @@
 
   <ItemGroup>
     <None Include="$([MSBuild]::EnsureTrailingSlash('$(MSBuildProjectDirectory)'))README.md" Pack="true" PackagePath="\" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <!-- Add stylecop.json -->
+    <AdditionalFiles Include="$([MSBuild]::GetPathOfFileAbove('stylecop.json', '$(MSBuildThisFileDirectory)'))" Visible="false" />
   </ItemGroup>
 
   <PropertyGroup>

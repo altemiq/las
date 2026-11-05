@@ -66,9 +66,9 @@ public class LasReaderTests
 
         var enumerator = reader.WithCancellation(source.Token).ConfigureAwait(false).GetAsyncEnumerator();
 
-        await Assert.That(async () => await enumerator.MoveNextAsync()).IsTrue();
+        _ = await Assert.That(async () => await enumerator.MoveNextAsync()).IsTrue();
         await source.CancelAsync();
-        await Assert.That(async () => await enumerator.MoveNextAsync())
+        _ = await Assert.That(async () => await enumerator.MoveNextAsync())
             .Throws<OperationCanceledException>().And
             .HasProperty(static x => x.CancellationToken, source.Token);
 

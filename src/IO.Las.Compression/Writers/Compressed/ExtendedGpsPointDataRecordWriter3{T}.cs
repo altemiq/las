@@ -36,7 +36,7 @@ internal closed class ExtendedGpsPointDataRecordWriter3<T> : IPointDataRecordWri
     private uint currentContext;
 
     /// <summary>
-    /// Initializes a new instance of the <see cref="ExtendedGpsPointDataRecordWriter3"/> class.
+    /// Initializes a new instance of the <see cref="ExtendedGpsPointDataRecordWriter3{T}"/> class.
     /// </summary>
     /// <param name="encoder">The Encoder.</param>
     protected ExtendedGpsPointDataRecordWriter3(ArithmeticEncoder encoder)

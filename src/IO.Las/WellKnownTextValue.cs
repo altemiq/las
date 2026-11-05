@@ -35,7 +35,7 @@ public readonly struct WellKnownTextValue :
     private readonly int tag;
 
     /// <summary>
-    /// Initialize a new instance of the <see cref="WellKnownTextValue"/> struct.
+    /// Initializes a new instance of the <see cref="WellKnownTextValue"/> struct.
     /// </summary>
     /// <param name="node">The node.</param>
     public WellKnownTextValue(WellKnownTextNode node)
@@ -45,7 +45,7 @@ public readonly struct WellKnownTextValue :
     }
 
     /// <summary>
-    /// Initialize a new instance of the <see cref="WellKnownTextValue"/> struct.
+    /// Initializes a new instance of the <see cref="WellKnownTextValue"/> struct.
     /// </summary>
     /// <param name="value">The value.</param>
     public WellKnownTextValue(double value)
@@ -55,7 +55,7 @@ public readonly struct WellKnownTextValue :
     }
 
     /// <summary>
-    /// Initialize a new instance of the <see cref="WellKnownTextValue"/> struct.
+    /// Initializes a new instance of the <see cref="WellKnownTextValue"/> struct.
     /// </summary>
     /// <param name="value">The value.</param>
     public WellKnownTextValue(string value)
@@ -65,7 +65,7 @@ public readonly struct WellKnownTextValue :
     }
 
     /// <summary>
-    /// Initialize a new instance of the <see cref="WellKnownTextValue"/> struct.
+    /// Initializes a new instance of the <see cref="WellKnownTextValue"/> struct.
     /// </summary>
     /// <param name="value">The value.</param>
     public WellKnownTextValue(WellKnownTextLiteral value)
