@@ -145,7 +145,7 @@ internal class LasMultipleFileStream : MultipleStream
     }
 
     /// <inheritdoc/>
-    protected sealed override Stream CreateStream(string name) => File.Open(Path.Combine(this.baseDirectory, name + Extension), this.fileMode);
+    protected sealed override Stream CreateStream(string name) => File.Open(Path.Combine(this.baseDirectory, name + Extension), this.fileMode, useAsync: true);
 
     /// <summary>
     /// Adds the file if it exists.
@@ -166,7 +166,7 @@ internal class LasMultipleFileStream : MultipleStream
         var path = Path.Combine(directory, fileName);
         if (File.Exists(path))
         {
-            this.Add(name, File.Open(path, mode));
+            this.Add(name, File.Open(path, mode, useAsync: true));
         }
     }
 }

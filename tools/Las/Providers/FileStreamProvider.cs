@@ -40,13 +40,13 @@ public class FileStreamProvider : IStreamProvider
 
     private static bool ExistsCore(Uri uri) => uri is { Scheme: "file", LocalPath: { } path } && Path.Exists(path);
 
-    private static FileStream OpenReadCore(Uri uri) => new(uri.LocalPath, FileMode.Open, FileAccess.Read, FileShare.Read, ushort.MaxValue);
+    private static FileStream OpenReadCore(Uri uri) => new(uri.LocalPath, FileMode.Open, FileAccess.Read, FileShare.Read, ushort.MaxValue, useAsync: true);
 
     private static FileStream OpenWriteCore(Uri uri)
     {
         var path = uri.LocalPath;
         CreateDirectoryIfPossible(path);
-        return File.Open(path, FileMode.Create);
+        return File.Open(path, FileMode.Create, useAsync: true);
 
         static void CreateDirectoryIfPossible(string path)
         {

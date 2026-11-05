@@ -474,7 +474,7 @@ public sealed class LazWriter : LasWriter
     private static Stream CreateStream(string path) => path switch
     {
         not null when Directory.Exists(path) => LazMultipleFileStream.OpenWrite(path),
-        not null => File.Open(path, FileMode.Create),
+        not null => File.Open(path, FileMode.Create, useAsync: true),
         _ => throw new NotSupportedException(),
     };
 

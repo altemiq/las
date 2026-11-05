@@ -214,6 +214,29 @@ public class LasIndex : IEnumerable<LasIndexCell>, IEqualityComparer<LasIndex>, 
     }
 
     /// <summary>
+    /// Reads the index from the specified path.
+    /// </summary>
+    /// <param name="path">The path.</param>
+    /// <param name="cancellationToken">The cancellation token.</param>
+    /// <returns>The LAS index.</returns>
+    public static async ValueTask<LasIndex> ReadFromAsync(string path, CancellationToken cancellationToken = default)
+    {
+        var stream = File.OpenRead(path, useAsync: true);
+        try
+        {
+            return await ReadFromAsync(stream, cancellationToken).ConfigureAwait(false);
+        }
+        finally
+        {
+#if NETSTANDARD2_1_OR_GREATER || NETCOREAPP3_0_OR_GREATER
+            await stream.DisposeAsync().ConfigureAwait(false);
+#else
+            stream.Dispose();
+#endif
+        }
+    }
+
+    /// <summary>
     /// Reads the index from the specified stream.
     /// </summary>
     /// <param name="stream">The stream.</param>

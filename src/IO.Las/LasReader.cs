@@ -659,7 +659,7 @@ public class LasReader :
 
     private static Stream CreateStream(string path) => path switch
     {
-        not null when File.Exists(path) => File.OpenRead(path),
+        not null when File.Exists(path) => File.OpenRead(path, useAsync: true),
         not null when Directory.Exists(path) => LasMultipleFileStream.OpenRead(path),
         _ => throw new NotSupportedException(),
     };

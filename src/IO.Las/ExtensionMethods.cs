@@ -11,6 +11,32 @@ namespace Altemiq.IO.Las;
 /// </summary>
 public static partial class ExtensionMethods
 {
+    extension(File)
+    {
+        /// <inheritdoc cref="File.OpenRead(string)"/>
+        public static FileStream OpenRead(string path, bool useAsync) =>
+            new(
+                path,
+                FileMode.Open,
+                FileAccess.Read,
+                FileShare.Read,
+                4096,
+                useAsync);
+
+        /// <inheritdoc cref="File.Open(string, FileMode)"/>
+        public static FileStream Open(string path, FileMode fileMode, bool useAsync)
+        {
+            var access = fileMode == FileMode.Append ? FileAccess.Write : FileAccess.ReadWrite;
+            return new(
+                path,
+                fileMode,
+                access,
+                FileShare.None,
+                4096,
+                useAsync);
+        }
+    }
+
     /// <content>
     /// The <see cref="IBasePointDataRecord"/> extensions.
     /// </content>

@@ -637,7 +637,7 @@ public class LasWriter(Stream stream, bool leaveOpen = false) :
     private static Stream CreateStream(string path) => path switch
     {
         not null when Directory.Exists(path) => LasMultipleFileStream.OpenWrite(path),
-        not null => File.Open(path, FileMode.Create),
+        not null => File.Open(path, FileMode.Create, useAsync: true),
         _ => throw new NotSupportedException(),
     };
 

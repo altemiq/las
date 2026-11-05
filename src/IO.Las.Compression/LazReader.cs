@@ -53,7 +53,7 @@ public sealed class LazReader : LasReader, ILazReader
     /// </summary>
     /// <param name="path">The path.</param>
     /// <returns>The <see cref="LazReader"/> or <see cref="LasReader"/> depending on whether the header specifies compression.</returns>
-    public static LasReader Create(string path) => Create(File.OpenRead(path));
+    public static LasReader Create(string path) => Create(File.OpenRead(path, useAsync: true));
 
     /// <summary>
     /// Creates either a <see cref="LazReader"/> or <see cref="LasReader"/> depending on whether the header specifies compression.
@@ -209,7 +209,7 @@ public sealed class LazReader : LasReader, ILazReader
 
     private static Stream CreateStream(string path) => path switch
     {
-        not null when File.Exists(path) => File.OpenRead(path),
+        not null when File.Exists(path) => File.OpenRead(path, useAsync: true),
         not null when Directory.Exists(path) => LazMultipleFileStream.OpenRead(path),
         _ => throw new NotSupportedException(),
     };
