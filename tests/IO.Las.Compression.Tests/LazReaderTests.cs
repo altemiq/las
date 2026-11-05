@@ -37,7 +37,7 @@ public class LazReaderTests
     }
 
     [Test]
-    public async Task ReadAsyncEnumerable()
+    public async Task ReadAsyncEnumerable(CancellationToken cancellationToken)
     {
         var stream = typeof(LazReaderTests).Assembly.GetManifestResourceStream(typeof(LazReaderTests), "fusa_height_7.laz")
                                ?? throw new System.Diagnostics.UnreachableException("Failed to get stream");
@@ -47,7 +47,7 @@ public class LazReaderTests
         byte[] data = default;
         var count = 0;
 
-        await foreach (var point in reader.ReadChunkAsync(0).WithCancellation(CancellationToken.None))
+        await foreach (var point in reader.ReadChunkAsync(0).WithCancellation(cancellationToken).ConfigureAwait(false))
         {
             pointDataRecord = point.PointDataRecord;
             data = point.ExtraBytes.ToArray();
@@ -62,7 +62,51 @@ public class LazReaderTests
 
         await stream.DisposeAsync();
     }
+
+    [Test]
+    public async Task CanCancelReadChunkAsyncEnumerable()
+    {
+        var stream = typeof(LazReaderTests).Assembly.GetManifestResourceStream(typeof(LazReaderTests), "fusa_height_7.laz")
+                               ?? throw new System.Diagnostics.UnreachableException("Failed to get stream");
+        LazReader reader = new(stream);
+
+        CancellationTokenSource source = new();
+
+        var enumerator = reader.ReadChunkAsync().WithCancellation(source.Token).ConfigureAwait(false).GetAsyncEnumerator();
+
+        await Assert.That(async () => await enumerator.MoveNextAsync()).IsTrue();
+        await source.CancelAsync();
+        await Assert.That(async () => await enumerator.MoveNextAsync())
+            .Throws<OperationCanceledException>().And
+            .HasProperty(static x => x.CancellationToken, source.Token);
+
+        await enumerator.DisposeAsync();
+        await reader.DisposeAsync();
+        await stream.DisposeAsync();
+    }
 #endif
+
+    [Test]
+    public async Task CanCancelAsyncEnumerable()
+    {
+        var stream = typeof(LazReaderTests).Assembly.GetManifestResourceStream(typeof(LazReaderTests), "fusa_0.laz")
+                               ?? throw new System.Diagnostics.UnreachableException("Failed to get stream");
+        LazReader reader = new(stream);
+
+        CancellationTokenSource source = new();
+
+        var enumerator = reader.WithCancellation(source.Token).ConfigureAwait(false).GetAsyncEnumerator();
+
+        await Assert.That(async () => await enumerator.MoveNextAsync()).IsTrue();
+        await source.CancelAsync();
+        await Assert.That(async () => await enumerator.MoveNextAsync())
+            .Throws<OperationCanceledException>().And
+            .HasProperty(static x => x.CancellationToken, source.Token);
+
+        await enumerator.DisposeAsync();
+        await reader.DisposeAsync();
+        await stream.DisposeAsync();
+    }
 
 #if LAS1_2_OR_GREATER
     [Test]

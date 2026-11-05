@@ -37,13 +37,13 @@ public class LasReaderTests
 #if LAS1_1_OR_GREATER
     [Arguments("fusa")]
 #endif
-    public async Task ReadAsyncEnumerable(string name)
+    public async Task ReadAsyncEnumerable(string name, CancellationToken cancellationToken = default)
     {
         var stream = typeof(LasReaderTests).Assembly.GetManifestResourceStream(typeof(LasReaderTests), $"{name}.las")
                                ?? throw new System.Diagnostics.UnreachableException("Failed to get stream");
         LasReader reader = new(stream);
 
-        await foreach (var (pointDataRecord, extraBytes) in reader)
+        await foreach (var (pointDataRecord, extraBytes) in reader.WithCancellation(cancellationToken).ConfigureAwait(false))
         {
             _ = await Assert.That(pointDataRecord).IsTypeOf<GpsPointDataRecord>().And.Member(static p => p.X, static x => x.IsNotDefault());
             _ = await Assert.That(extraBytes.ToArray()).IsEmpty();
@@ -51,6 +51,28 @@ public class LasReaderTests
             break;
         }
 
+        await reader.DisposeAsync();
+        await stream.DisposeAsync();
+    }
+
+    [Test]
+    public async Task CanCancelAsyncEnumerable()
+    {
+        var stream = typeof(LasReaderTests).Assembly.GetManifestResourceStream(typeof(LasReaderTests), $"fusa_0.las")
+                                   ?? throw new System.Diagnostics.UnreachableException("Failed to get stream");
+        LasReader reader = new(stream);
+
+        CancellationTokenSource source = new();
+
+        var enumerator = reader.WithCancellation(source.Token).ConfigureAwait(false).GetAsyncEnumerator();
+
+        await Assert.That(async () => await enumerator.MoveNextAsync()).IsTrue();
+        await source.CancelAsync();
+        await Assert.That(async () => await enumerator.MoveNextAsync())
+            .Throws<OperationCanceledException>().And
+            .HasProperty(static x => x.CancellationToken, source.Token);
+
+        await enumerator.DisposeAsync();
         await reader.DisposeAsync();
         await stream.DisposeAsync();
     }
