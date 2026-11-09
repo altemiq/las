@@ -22,6 +22,10 @@
     <Compile Remove="**\*Waveform*.cs" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Compile Include="..\shared\InterlockedExtensions.cs" />
+  </ItemGroup>
+
   <Choose>
     <When Condition=" '$(SupportLas14)' == 'true' ">
       <ItemGroup>

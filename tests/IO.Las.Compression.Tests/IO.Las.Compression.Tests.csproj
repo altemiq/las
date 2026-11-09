@@ -13,6 +13,10 @@
     <EmbeddedResource Include="..\..\data\laz\fusa*.laz" />
     <EmbeddedResource Include="*.laz" />
   </ItemGroup>
+
+  <ItemGroup>
+    <Compile Include="..\shared\InterlockedExtensions.cs" />
+  </ItemGroup>
   
   <ItemGroup Condition=" '$(SupportLas12)' != 'true' ">
     <!-- Remove color point data records for versions below 1.2 -->

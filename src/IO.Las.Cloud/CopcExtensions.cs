@@ -8,6 +8,8 @@
 namespace Altemiq.IO.Las;
 #pragma warning restore IDE0130, CheckNamespace
 
+using Altemiq.IO.Las.Cloud.Internals;
+
 /// <summary>
 /// Cloud optimized extension methods.
 /// </summary>
