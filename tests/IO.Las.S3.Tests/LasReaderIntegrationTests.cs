@@ -1,16 +1,14 @@
 namespace Altemiq.IO.Las.S3;
 
-public class LasReaderIntegrationTests
+[ClassDataSource<AppFixture>(Shared = SharedType.PerTestSession)]
+public class LasReaderIntegrationTests(AppFixture fixture)
 {
-    [ClassDataSource<Data.S3ClientDataClass>(Shared = SharedType.PerTestSession)]
-    public required Data.S3ClientDataClass S3ClientData { get; init; }
-
     [Test]
     [Arguments("lidar", "las/fusa.las", true)]
     [Arguments("lidar", "las/asuf.las", false)]
     public async Task LasExists(string bucketName, string blobName, bool expected)
     {
-        _ = await Assert.That(() => S3Las.Exists(bucketName, blobName, S3ClientData.S3Client)).IsEqualTo(expected);
+        _ = await Assert.That(() => S3Las.Exists(bucketName, blobName, fixture.CreateAmazonS3Client())).IsEqualTo(expected);
     }
 
     [Test]
@@ -18,7 +16,7 @@ public class LasReaderIntegrationTests
     [Arguments("lidar", "las/asuf.las", false)]
     public async Task LasExistsAsync(string bucketName, string key, bool expected)
     {
-        _ = await Assert.That(async () => await S3Las.ExistsAsync(bucketName, key, S3ClientData.S3Client)).IsEqualTo(expected);
+        _ = await Assert.That(async () => await S3Las.ExistsAsync(bucketName, key, fixture.CreateAmazonS3Client())).IsEqualTo(expected);
     }
 
     [Test]
@@ -28,7 +26,7 @@ public class LasReaderIntegrationTests
 #endif
     public async Task ReadLasAsync(string bucketName, string key, int minor)
     {
-        var stream = await S3Las.OpenReadAsync(bucketName, key, S3ClientData.S3Client);
+        var stream = await S3Las.OpenReadAsync(bucketName, key, fixture.CreateAmazonS3Client());
         LasReader reader = new(stream);
 
         await CheckHeader(reader.Header, new(1, minor));

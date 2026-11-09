@@ -5,31 +5,14 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="Aspire.Hosting.Testing"/>
-    <PackageReference Include="Microsoft.Extensions.Azure" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <Using Include="System.Net" />
-    <Using Include="Microsoft.Extensions.DependencyInjection" />
-    <Using Include="Aspire.Hosting.ApplicationModel" />
-    <Using Include="Aspire.Hosting.Testing" />
+    <PackageReference Include="TUnit.Aspire"/>
+    <!--<PackageReference Include="Microsoft.Extensions.Azure" />-->
   </ItemGroup>
 
   <ItemGroup>
     <ProjectReference Include="..\..\src\IO.Las.Azure\IO.Las.Azure.csproj" />
     <ProjectReference Include="..\..\src\IO.Las.Compression\IO.Las.Compression.csproj" />
     <ProjectReference Include="..\..\web\hosts\IO.Las.Azure.AppHost\IO.Las.Azure.AppHost.csproj" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <Using Include="Aspire.Hosting" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <EmbeddedResource Include="..\..\data\*\fusa*">
-      <Link>Data\%(RecursiveDir)%(Filename)%(Extension)</Link>
-    </EmbeddedResource>
   </ItemGroup>
 
 </Project>

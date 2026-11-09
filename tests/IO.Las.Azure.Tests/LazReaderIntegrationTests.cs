@@ -1,16 +1,14 @@
 namespace Altemiq.IO.Las.Azure;
 
-public class LazReaderIntegrationTests
+[ClassDataSource<AppFixture>(Shared = SharedType.PerTestSession)]
+public class LazReaderIntegrationTests(AppFixture fixture)
 {
-    [ClassDataSource<Data.BlobContainerClientDataClass>(Shared = SharedType.PerTestSession)]
-    public required Data.BlobContainerClientDataClass BlobContainerClientData { get; init; }
-
     [Test]
     [Arguments("laz/fusa.laz", true)]
     [Arguments("laz/asuf.laz", false)]
     public async Task LazExists(string blobName, bool expected)
     {
-        _ = await Assert.That(() => BlobLas.Exists(blobName, BlobContainerClientData.BlobContainerClient)).IsEqualTo(expected);
+        _ = await Assert.That(() => BlobLas.Exists(blobName, fixture.CreateContainerClient())).IsEqualTo(expected);
     }
 
     [Test]
@@ -18,7 +16,7 @@ public class LazReaderIntegrationTests
     [Arguments("laz/asuf.laz", false)]
     public async Task LazExistsAsync(string blobName, bool expected)
     {
-        _ = await Assert.That(async () => await BlobLas.ExistsAsync(blobName, BlobContainerClientData.BlobContainerClient)).IsEqualTo(expected);
+        _ = await Assert.That(async () => await BlobLas.ExistsAsync(blobName, fixture.CreateContainerClient())).IsEqualTo(expected);
     }
 
     [Test]
@@ -28,7 +26,7 @@ public class LazReaderIntegrationTests
 #endif
     public async Task ReadLaz(string blobName, int minor)
     {
-        var stream = await BlobLas.OpenReadAsync(blobName, BlobContainerClientData.BlobContainerClient);
+        var stream = await BlobLas.OpenReadAsync(blobName, fixture.CreateContainerClient());
         LazReader reader = new(stream);
 
         await CheckHeader(reader.Header, new(1, minor));

@@ -2,30 +2,16 @@
 
   <PropertyGroup>
     <TargetFrameworks>net11.0;net10.0;net9.0;net8.0</TargetFrameworks>
-    <TargetFrameworks Condition=" '$(NetCoreOnly)' != 'true' ">$(TargetFrameworks);net472</TargetFrameworks>
   </PropertyGroup>
-
+    
   <ItemGroup>
-    <EmbeddedResource Include="..\..\data\*\fusa*.*">
-      <Link>Data\%(RecursiveDir)%(Filename)%(Extension)</Link>
-    </EmbeddedResource>
-  </ItemGroup>
-  
-  <ItemGroup>
-    <PackageReference Include="Microsoft.AspNetCore.Server.Kestrel" />
+    <PackageReference Include="TUnit.Aspire" />
   </ItemGroup>
 
   <ItemGroup>
     <ProjectReference Include="..\..\src\IO.Las.Compression\IO.Las.Compression.csproj" />
     <ProjectReference Include="..\..\src\IO.Las.Http\IO.Las.Http.csproj" />
-  </ItemGroup>
-
-  <ItemGroup Condition=" $([MSBuild]::IsTargetFrameworkCompatible('$(TargetFramework)', 'net40')) ">
-    <Using Include="System.Net.Http" />
-  </ItemGroup>
-  
-  <ItemGroup>
-    <Using Include="System.Net" />
+    <ProjectReference Include="..\..\web\hosts\IO.Las.Http.AppHost\IO.Las.Http.AppHost.csproj" />
   </ItemGroup>
 
 </Project>

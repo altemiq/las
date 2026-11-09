@@ -1,22 +1,25 @@
-﻿[assembly: Retry(3)]
-[assembly: System.Diagnostics.CodeAnalysis.ExcludeFromCodeCoverage]
+﻿namespace Altemiq.IO.Las.S3;
 
-namespace Altemiq.IO.Las.S3;
-
-using Aspire.Hosting.AWS;
+using Aspire.Hosting.ApplicationModel;
 using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.DependencyInjection;
 
-public class GlobalHooks
+public class AppFixture : TUnit.Aspire.AspireFixture<Projects.IO_Las_AWS_AppHost>
 {
-    public static DistributedApplication App { get; private set; }
+    private readonly Lazy<Amazon.S3.IAmazonS3> client;
 
-    public static ResourceNotificationService NotificationService => App.ResourceNotifications;
-
-    [Before(TestSession)]
-    public static async Task SetUp(CancellationToken cancellationToken)
+    public AppFixture()
     {
-        // Arrange
-        var builder = await DistributedApplicationTestingBuilder.CreateAsync<Projects.IO_Las_AWS_AppHost>(cancellationToken);
+        client = new(() => App.Services.GetRequiredService<Amazon.S3.IAmazonS3>(), LazyThreadSafetyMode.ExecutionAndPublication);
+    }
+
+    public Amazon.S3.IAmazonS3 CreateAmazonS3Client()
+    {
+        return client.Value;
+    }
+
+    protected override void ConfigureBuilder(Aspire.Hosting.Testing.IDistributedApplicationTestingBuilder builder)
+    {
         _ = builder.Services.ConfigureHttpClientDefaults(static clientBuilder =>
         {
             _ = clientBuilder.AddStandardResilienceHandler();
@@ -28,13 +31,14 @@ public class GlobalHooks
             var model = services.GetRequiredService<DistributedApplicationModel>();
 
             // Set credentials
-            var profile = model.Resources.OfType<IAWSProfileConfig>().Single().Profiles.Single();
+            var profile = model.Resources.OfType<Aspire.Hosting.AWS.IAWSProfileConfig>().Single().Profiles.Single();
             options.Credentials = new Amazon.Runtime.BasicAWSCredentials(
                 GetValue(profile.AccessKeyId.GetValueAsync(CancellationToken.None)),
                 GetValue(profile.SecretAccessKey.GetValueAsync(CancellationToken.None)));
 
             // Set service URL and region
             var ministackServer = model.Resources.OfType<MiniStackServerResource>().Single();
+
             var endpoint = ministackServer.GetEndpoint(Uri.UriSchemeHttp, KnownNetworkIdentifiers.LocalhostNetwork);
             options.DefaultClientConfig.ServiceURL = endpoint.Url;
             options.DefaultClientConfig.AuthenticationRegion = ministackServer.Region;
@@ -53,18 +57,5 @@ public class GlobalHooks
         });
 
         _ = builder.Services.AddAWSService<Amazon.S3.IAmazonS3>();
-
-        App = await builder.BuildAsync(cancellationToken);
-        await App.StartAsync(cancellationToken);
-    }
-
-    [After(TestSession)]
-    public static async Task CleanUp(CancellationToken cancellationToken)
-    {
-        if (App is { } app)
-        {
-            await app.StopAsync(cancellationToken);
-            await app.DisposeAsync();
-        }
     }
 }

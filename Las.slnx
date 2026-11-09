@@ -97,5 +97,12 @@
     <File Path="web/hosts/Directory.Packages.props" />
     <Project Path="web/hosts/IO.Las.AWS.AppHost/IO.Las.AWS.AppHost.csproj" />
     <Project Path="web/hosts/IO.Las.Azure.AppHost/IO.Las.Azure.AppHost.csproj" />
+    <Project Path="web/hosts/IO.Las.Http.AppHost/IO.Las.Http.AppHost.csproj" />
+  </Folder>
+  <Folder Name="/web/services/">
+    <File Path="web/services/Directory.Packages.props" />
+    <Project Path="web/services/IO.Las.Azure.Seeder/IO.Las.Azure.Seeder.csproj" />
+    <Project Path="web/services/IO.Las.Http.Web/IO.Las.Http.Web.csproj" />
+    <Project Path="web/services/IO.Las.ServiceDefaults/IO.Las.ServiceDefaults.csproj" Id="1709b0f9-3782-4d21-961c-29f8bdcc3589" />
   </Folder>
 </Solution>

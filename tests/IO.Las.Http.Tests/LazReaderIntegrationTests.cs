@@ -1,16 +1,14 @@
 namespace Altemiq.IO.Las.Http;
 
-public class LazReaderIntegrationTests
+[ClassDataSource<AppFixture>(Shared = SharedType.PerTestSession)]
+public class LazReaderIntegrationTests(AppFixture fixture)
 {
-    [ClassDataSource<WebApplicationFactory>(Shared = SharedType.PerTestSession)]
-    public required WebApplicationFactory WebApplicationFactory { get; init; }
-
     [Test]
     [Arguments("/laz/fusa.laz", true)]
     [Arguments("/laz/asuf.laz", false)]
     public async Task LazExists(string path, bool expected)
     {
-        _ = await Assert.That(() => HttpLas.Exists(path, WebApplicationFactory.CreateClient())).IsEqualTo(expected);
+        _ = await Assert.That(() => HttpLas.Exists(path, fixture.CreateWebHttpClient)).IsEqualTo(expected);
     }
 
     [Test]
@@ -18,7 +16,7 @@ public class LazReaderIntegrationTests
     [Arguments("/laz/asuf.laz", false)]
     public async Task LazExistsAsync(string path, bool expected)
     {
-        _ = await Assert.That(async () => await HttpLas.ExistsAsync(path, WebApplicationFactory.CreateClient())).IsEqualTo(expected);
+        _ = await Assert.That(async () => await HttpLas.ExistsAsync(path, fixture.CreateWebHttpClient)).IsEqualTo(expected);
     }
 
     [Test]
@@ -28,7 +26,7 @@ public class LazReaderIntegrationTests
 #endif
     public async Task ReadLazAsync(string uri, int minor)
     {
-        var stream = await HttpLas.OpenReadAsync(uri, WebApplicationFactory.CreateClient());
+        var stream = await HttpLas.OpenReadAsync(uri, fixture.CreateWebHttpClient);
         LazReader reader = new(stream);
 
         await CheckHeader(reader.Header, new(1, minor));

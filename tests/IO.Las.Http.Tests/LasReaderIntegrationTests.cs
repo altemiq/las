@@ -1,16 +1,14 @@
 ﻿namespace Altemiq.IO.Las.Http;
 
-public class LasReaderIntegrationTests
+[ClassDataSource<AppFixture>(Shared = SharedType.PerTestSession)]
+public class LasReaderIntegrationTests(AppFixture fixture)
 {
-    [ClassDataSource<WebApplicationFactory>(Shared = SharedType.PerTestSession)]
-    public required WebApplicationFactory WebApplicationFactory { get; init; }
-
     [Test]
     [Arguments("/las/fusa.las", true)]
     [Arguments("/las/asuf.las", false)]
     public async Task LasExists(string path, bool expected)
     {
-        _ = await Assert.That(() => HttpLas.Exists(path, WebApplicationFactory.CreateClient())).IsEqualTo(expected);
+        _ = await Assert.That(() => HttpLas.Exists(path, fixture.CreateWebHttpClient)).IsEqualTo(expected);
     }
 
     [Test]
@@ -18,7 +16,7 @@ public class LasReaderIntegrationTests
     [Arguments("/las/asuf.las", false)]
     public async Task LasExistsAsync(string path, bool expected)
     {
-        _ = await Assert.That(async () => await HttpLas.ExistsAsync(path, WebApplicationFactory.CreateClient())).IsEqualTo(expected);
+        _ = await Assert.That(async () => await HttpLas.ExistsAsync(path, fixture.CreateWebHttpClient)).IsEqualTo(expected);
     }
 
     [Test]
@@ -28,7 +26,7 @@ public class LasReaderIntegrationTests
 #endif
     public async Task ReadLasAsync(string uri, int minor)
     {
-        var stream = await HttpLas.OpenReadAsync(uri, WebApplicationFactory.CreateClient());
+        var stream = await HttpLas.OpenReadAsync(uri, fixture.CreateWebHttpClient);
         LasReader reader = new(stream);
 
         await CheckHeader(reader.Header, new(1, minor));

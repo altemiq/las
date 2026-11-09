@@ -6,10 +6,15 @@
 
 var builder = DistributedApplication.CreateBuilder(args);
 
-_ = builder
+var azure = builder
     .AddAzureStorage("azure")
     .RunAsEmulator()
-    .AddBlobs("azure-blobs");
+    .AddBlobs("blobs");
+
+_ = builder
+    .AddProject<Projects.IO_Las_Azure_Seeder>("seeder")
+    .WithReference(azure)
+    .WaitFor(azure);
 
 await builder
     .Build()
