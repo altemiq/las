@@ -3,7 +3,6 @@
   <PropertyGroup>
     <TargetFrameworks>net10.0;net9.0;net8.0</TargetFrameworks>
     <RootNamespace>$(RootNamespace.Replace('.Compression.DataFrame', ''))</RootNamespace>
-    <VersionSuffix Condition=" '$(VersionSuffix)' == '' ">beta1</VersionSuffix>
     <NoWarn Condition=" !$([MSBuild]::IsTargetFrameworkCompatible('$(TargetFramework)', 'net10.0')) ">$(NoWarn);AD0001</NoWarn>
     
     <!-- set things that Polars.NET doesn't support -->
