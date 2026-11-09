@@ -24,7 +24,10 @@ public static partial class ExtensionMethods
         /// <returns>A string that contains the decoded bytes from the provided read-only span.</returns>
         public string GetNullTerminatedString(ReadOnlySpan<byte> bytes)
         {
-#if NET6_0_OR_GREATER
+#if NET11_0_OR_GREATER
+            var ptr = (byte*)System.Runtime.CompilerServices.Unsafe.AsPointer(ref System.Runtime.InteropServices.MemoryMarshal.GetReference(bytes));
+            return encoding.GetString(System.Runtime.InteropServices.MemoryMarshal.CreateReadOnlySpanFromNullTerminated(ptr));
+#elif NET6_0_OR_GREATER
 #pragma warning disable S6640
             unsafe
             {

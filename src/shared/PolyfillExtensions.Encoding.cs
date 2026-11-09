@@ -29,8 +29,9 @@ internal static partial class PolyfillExtensions
 #pragma warning disable S6640
             unsafe
             {
-                var ptr = (byte*)System.Runtime.CompilerServices.Unsafe.AsPointer(ref System.Runtime.InteropServices.MemoryMarshal.GetReference(bytes));
-                return encoding.GetString(ptr, bytes.Length);
+                return encoding.GetString(
+                    (byte*)System.Runtime.CompilerServices.Unsafe.AsPointer(ref System.Runtime.InteropServices.MemoryMarshal.GetReference(bytes)),
+                    bytes.Length);
             }
 #pragma warning restore S6640
         }
@@ -45,8 +46,9 @@ internal static partial class PolyfillExtensions
 #pragma warning disable S6640
             unsafe
             {
-                var ptr = (char*)System.Runtime.CompilerServices.Unsafe.AsPointer(ref System.Runtime.InteropServices.MemoryMarshal.GetReference(chars));
-                return encoding.GetByteCount(ptr, chars.Length);
+                return encoding.GetByteCount(
+                    (char*)System.Runtime.CompilerServices.Unsafe.AsPointer(ref System.Runtime.InteropServices.MemoryMarshal.GetReference(chars)),
+                    chars.Length);
             }
 #pragma warning restore S6640
         }
@@ -67,9 +69,11 @@ internal static partial class PolyfillExtensions
 #pragma warning disable S6640
             unsafe
             {
-                var charsPtr = (char*)System.Runtime.CompilerServices.Unsafe.AsPointer(ref System.Runtime.InteropServices.MemoryMarshal.GetReference(chars));
-                var bytesPtr = (byte*)System.Runtime.CompilerServices.Unsafe.AsPointer(ref System.Runtime.InteropServices.MemoryMarshal.GetReference(bytes));
-                return encoding.GetBytes(charsPtr, chars.Length, bytesPtr, bytes.Length);
+                return encoding.GetBytes(
+                    (char*)System.Runtime.CompilerServices.Unsafe.AsPointer(ref System.Runtime.InteropServices.MemoryMarshal.GetReference(chars)),
+                    chars.Length,
+                    (byte*)System.Runtime.CompilerServices.Unsafe.AsPointer(ref System.Runtime.InteropServices.MemoryMarshal.GetReference(bytes)),
+                    bytes.Length);
             }
 #pragma warning restore S6640
         }
