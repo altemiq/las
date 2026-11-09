@@ -41,9 +41,8 @@ jobs:
             8.0.x
             9.0.x
             10.0.x
+            11.0.x
             
-      - uses: timheuer/setup-aspire@v0.1.0
-
       - name: Run local/dotnet-tool-restore@v1
         run: dotnet tool restore
 
@@ -89,7 +88,7 @@ jobs:
 
       - uses: actions/setup-dotnet@v6
         with:
-          dotnet-version: 10.0.x
+          dotnet-version: 11.0.x
 
       - name: Run local/get-properties@v1
         id: msbuild
@@ -122,7 +121,7 @@ jobs:
 
       - uses: actions/setup-dotnet@v6
         with:
-          dotnet-version: 10.0.x
+          dotnet-version: 11.0.x
 
       - name: Run local/dotnet-restore@v1
         run: dotnet restore
@@ -177,7 +176,7 @@ jobs:
 
       - uses: actions/setup-dotnet@v6
         with:
-          dotnet-version: 10.0.x
+          dotnet-version: 11.0.x
 
       - name: Run local/dotnet-restore@v1
         run: dotnet restore
@@ -214,7 +213,7 @@ jobs:
 
       - uses: actions/setup-dotnet@v6
         with:
-          dotnet-version: 10.0.x
+          dotnet-version: 11.0.x
 
       - name: Run local/dotnet-restore@v1
         run: dotnet restore
