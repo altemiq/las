@@ -21,7 +21,7 @@
   </ItemGroup>
   
   <ItemGroup Label="AWS">
-    <PackageVersion Include="AWSSDK.S3" Version="4.0.104.8" />
+    <PackageVersion Include="AWSSDK.S3" Version="4.0.104.11" />
   </ItemGroup>
   
   <ItemGroup Label="Azure">
