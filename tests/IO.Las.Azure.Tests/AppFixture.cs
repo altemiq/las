@@ -28,10 +28,7 @@ public class AppFixture : TUnit.Aspire.AspireFixture<Projects.IO_Las_Azure_AppHo
 
     protected override void ConfigureBuilder(IDistributedApplicationTestingBuilder builder)
     {
-        _ = builder.Services.ConfigureHttpClientDefaults(static clientBuilder =>
-        {
-            _ = clientBuilder.AddStandardResilienceHandler();
-        });
+        _ = builder.Services.ConfigureHttpClientDefaults(static clientBuilder => clientBuilder.AddStandardResilienceHandler());
     }
 
     protected override async Task WaitForResourcesAsync(DistributedApplication app, CancellationToken cancellationToken)

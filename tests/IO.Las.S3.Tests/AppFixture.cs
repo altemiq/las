@@ -13,17 +13,11 @@ public class AppFixture : TUnit.Aspire.AspireFixture<Projects.IO_Las_AWS_AppHost
         client = new(() => App.Services.GetRequiredService<Amazon.S3.IAmazonS3>(), LazyThreadSafetyMode.ExecutionAndPublication);
     }
 
-    public Amazon.S3.IAmazonS3 CreateAmazonS3Client()
-    {
-        return client.Value;
-    }
+    public Amazon.S3.IAmazonS3 CreateAmazonS3Client() => client.Value;
 
     protected override void ConfigureBuilder(Aspire.Hosting.Testing.IDistributedApplicationTestingBuilder builder)
     {
-        _ = builder.Services.ConfigureHttpClientDefaults(static clientBuilder =>
-        {
-            _ = clientBuilder.AddStandardResilienceHandler();
-        });
+        _ = builder.Services.ConfigureHttpClientDefaults(static clientBuilder => clientBuilder.AddStandardResilienceHandler());
 
         _ = builder.Services.AddDefaultAWSOptions(static services =>
         {
