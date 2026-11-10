@@ -11,7 +11,7 @@ public class AppFixture : TUnit.Aspire.AspireFixture<Projects.IO_Las_Http_AppHos
             _ = clientBuilder
                 .AddStandardResilienceHandler();
             _ = clientBuilder
-                .ConfigurePrimaryHttpMessageHandler(() => new HttpClientHandler { ServerCertificateCustomValidationCallback = HttpClientHandler.DangerousAcceptAnyServerCertificateValidator });
+                .ConfigurePrimaryHttpMessageHandler(static () => new HttpClientHandler { ServerCertificateCustomValidationCallback = HttpClientHandler.DangerousAcceptAnyServerCertificateValidator });
         });
     }
 

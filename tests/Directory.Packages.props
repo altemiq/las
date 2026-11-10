@@ -8,8 +8,8 @@
   <Import Project="$([MSBuild]::GetPathOfFileAbove('$(MSBuildThisFileName.Replace('Packages', 'Versions'))$(MSBuildThisFileExtension)', '$(MSBuildThisFileDirectory)'))" />
 
   <ItemGroup>
-    <PackageVersion Include="TUnit" Version="1.81.10" />
-    <PackageVersion Include="TUnit.Aspire" Version="1.81.10" />
+    <PackageVersion Include="TUnit" Version="1.81.16" />
+    <PackageVersion Include="TUnit.Aspire" Version="1.81.16" />
   </ItemGroup>
   
   <ItemGroup Label="Apache">

@@ -7,11 +7,11 @@
 namespace Altemiq.IO.Las;
 
 /// <content>
-/// The <see cref="System.Threading.Interlocked"/> extensions.
+/// The <see cref="Interlocked"/> extensions.
 /// </content>
 public static partial class ExtensionMethods
 {
-    extension(System.Threading.Interlocked)
+    extension(Interlocked)
     {
 #if NET9_0_OR_GREATER
         /// <summary>

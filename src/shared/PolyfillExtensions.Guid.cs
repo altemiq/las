@@ -6,8 +6,6 @@
 
 namespace Altemiq.IO.Las;
 
-#pragma warning disable SA1101
-
 /// <content>
 /// Extension methods for <see cref="Guid"/>.
 /// </content>
