@@ -1,8 +1,8 @@
-﻿<Project Sdk="Aspire.AppHost.Sdk/13.6.4">
+﻿<Project Sdk="Aspire.AppHost.Sdk/13.6.5">
 
   <PropertyGroup>
     <OutputType>Exe</OutputType>
-    <TargetFramework>net8.0</TargetFramework>
+    <TargetFramework>net10.0</TargetFramework>
     <AspireUseCliBundle>true</AspireUseCliBundle>
     <UserSecretsId>e4673e92-e1f0-4a0c-a1ba-1d953df03967</UserSecretsId>
   </PropertyGroup>

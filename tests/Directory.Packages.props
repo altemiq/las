@@ -8,8 +8,8 @@
   <Import Project="$([MSBuild]::GetPathOfFileAbove('$(MSBuildThisFileName.Replace('Packages', 'Versions'))$(MSBuildThisFileExtension)', '$(MSBuildThisFileDirectory)'))" />
 
   <ItemGroup>
-    <PackageVersion Include="TUnit" Version="1.81.16" />
-    <PackageVersion Include="TUnit.Aspire" Version="1.81.16" />
+    <PackageVersion Include="TUnit" Version="1.83.0" />
+    <PackageVersion Include="TUnit.Aspire" Version="1.83.0" />
   </ItemGroup>
   
   <ItemGroup Label="Apache">
@@ -17,7 +17,7 @@
   </ItemGroup>
   
   <ItemGroup Label="Aspire">
-    <PackageVersion Include="Aspire.Hosting.Testing" Version="13.6.4" />
+    <PackageVersion Include="Aspire.Hosting.Testing" Version="13.6.5" />
   </ItemGroup>
   
   <ItemGroup Label="AWS">
@@ -29,33 +29,33 @@
   </ItemGroup>
   
   <ItemGroup Label="DataFrames">
-    <PackageVersion Include="Polars.NET" Version="1.0.1" />
-    <PackageVersion Include="Polars.NET.Native.linux-arm64" Version="1.0.1" />
-    <PackageVersion Include="Polars.NET.Native.linux-x64" Version="1.0.1" />
-    <PackageVersion Include="Polars.NET.Native.win-x64" Version="1.0.1" />
-    <PackageVersion Include="Polars.NET.Native.osx-arm64" Version="1.0.1" />
-  </ItemGroup>
-  
-  <ItemGroup Label="Microsoft.AspNetCore">
-    <PackageVersion Include="Microsoft.AspNetCore.Server.Kestrel" Version="2.3.13" />
+    <PackageVersion Include="Polars.NET" Version="1.1.0" />
+    <PackageVersion Include="Polars.NET.Native.linux-arm64" Version="1.1.0" />
+    <PackageVersion Include="Polars.NET.Native.linux-x64" Version="1.1.0" />
+    <PackageVersion Include="Polars.NET.Native.win-x64" Version="1.1.0" />
+    <PackageVersion Include="Polars.NET.Native.osx-arm64" Version="1.1.0" />
   </ItemGroup>
   
   <Choose>
     <When Condition=" $([MSBuild]::IsTargetFrameworkCompatible('$(TargetFramework)', 'net10.0')) ">
       <ItemGroup>
-        <PackageVersion Include="Microsoft.Data.Sqlite" Version="11.0.0-rc.3.26522.148"  />
+        <PackageVersion Include="Microsoft.Data.Sqlite" Version="11.0.0"  />
       </ItemGroup>
     </When>
     <Otherwise>
       <ItemGroup>
-        <PackageVersion Include="Microsoft.Data.Sqlite" Version="10.0.14" />
-        <PackageVersion Include="SQLitePCLRaw.bundle_e_sqlite3" Version="3.0.5" />
+        <PackageVersion Include="Microsoft.Bcl.AsyncInterfaces" Version="10.0.15" />
+        <PackageVersion Include="Microsoft.Data.Sqlite" Version="10.0.15" />
+      </ItemGroup>
+
+      <ItemGroup>
+        <PackageReference Include="Microsoft.Bcl.AsyncInterfaces" />
       </ItemGroup>
     </Otherwise>
   </Choose>
 
   <ItemGroup>
-    <GlobalPackageReference Include="Meziantou.Polyfill" Version="1.0.170" />
+    <GlobalPackageReference Include="Meziantou.Polyfill" Version="1.0.171" />
   </ItemGroup>
 
 </Project>
