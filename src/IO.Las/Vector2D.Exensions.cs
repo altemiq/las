@@ -60,9 +60,12 @@ public static partial class Vector
         internal Vector128<double> AsVector128Unsafe()
         {
             // This relies on us stripping the "init" flag from the ".locals" declaration to let the upper bits be uninitialized.
-            Unsafe.SkipInit(out Vector128<double> result);
-            Unsafe.WriteUnaligned(ref Unsafe.As<Vector128<double>, byte>(ref result), value);
-            return result;
+            unsafe
+            {
+                Unsafe.SkipInit(out Vector128<double> result);
+                Unsafe.WriteUnaligned(ref Unsafe.As<Vector128<double>, byte>(ref result), value);
+                return result;
+            }
         }
 
         /// <summary>
@@ -72,9 +75,12 @@ public static partial class Vector
         internal Vector256<double> AsVector256Unsafe()
         {
             // This relies on us stripping the "init" flag from the ".locals" declaration to let the upper bits be uninitialized.
-            Unsafe.SkipInit(out Vector256<double> result);
-            Unsafe.WriteUnaligned(ref Unsafe.As<Vector256<double>, byte>(ref result), value);
-            return result;
+            unsafe
+            {
+                Unsafe.SkipInit(out Vector256<double> result);
+                Unsafe.WriteUnaligned(ref Unsafe.As<Vector256<double>, byte>(ref result), value);
+                return result;
+            }
         }
 #endif
     }

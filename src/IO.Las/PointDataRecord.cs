@@ -39,11 +39,11 @@ public readonly record struct PointDataRecord :
     public const byte Id = 0;
 
     [System.Runtime.InteropServices.FieldOffset(Constants.PointDataRecord.FlagsFieldOffset)]
-    private readonly byte flags;
+    private safe readonly byte flags;
 
 #if LAS1_1_OR_GREATER
     [System.Runtime.InteropServices.FieldOffset(Constants.PointDataRecord.ClassificationFieldOffset)]
-    private readonly byte classification;
+    private safe readonly byte classification;
 #endif
 
     /// <summary>
@@ -94,19 +94,19 @@ public readonly record struct PointDataRecord :
 
     /// <inheritdoc />
     [field: System.Runtime.InteropServices.FieldOffset(Constants.PointDataRecord.XFieldOffset)]
-    public required int X { get; init; }
+    public safe required int X { get; init; }
 
     /// <inheritdoc />
     [field: System.Runtime.InteropServices.FieldOffset(Constants.PointDataRecord.YFieldOffset)]
-    public required int Y { get; init; }
+    public safe required int Y { get; init; }
 
     /// <inheritdoc />
     [field: System.Runtime.InteropServices.FieldOffset(Constants.PointDataRecord.ZFieldOffset)]
-    public required int Z { get; init; }
+    public safe required int Z { get; init; }
 
     /// <inheritdoc />
     [field: System.Runtime.InteropServices.FieldOffset(Constants.PointDataRecord.IntensityFieldOffset)]
-    public ushort Intensity { get; init; }
+    public safe ushort Intensity { get; init; }
 
     /// <inheritdoc />
     public required byte ReturnNumber
@@ -167,21 +167,21 @@ public readonly record struct PointDataRecord :
 #else
     /// <inheritdoc />
     [field: System.Runtime.InteropServices.FieldOffset(Constants.PointDataRecord.ClassificationFieldOffset)]
-    public required byte Classification { get; init; }
+    public safe required byte Classification { get; init; }
 #endif
 
     /// <inheritdoc />
     [field: System.Runtime.InteropServices.FieldOffset(Constants.PointDataRecord.ScanAngleRankFieldOffset)]
-    public required sbyte ScanAngleRank { get; init; }
+    public safe required sbyte ScanAngleRank { get; init; }
 
 #if LAS1_1_OR_GREATER
     /// <inheritdoc />
     [field: System.Runtime.InteropServices.FieldOffset(Constants.PointDataRecord.UserDataFieldOffset)]
-    public byte UserData { get; init; }
+    public safe byte UserData { get; init; }
 
     /// <inheritdoc />
     [field: System.Runtime.InteropServices.FieldOffset(Constants.PointDataRecord.PointSourceIdFieldOffset)]
-    public required ushort PointSourceId { get; init; }
+    public safe required ushort PointSourceId { get; init; }
 
     /// <inheritdoc />
     [Obsolete($"Use {nameof(UserData)} instead")]
@@ -205,11 +205,11 @@ public readonly record struct PointDataRecord :
 #else
     /// <inheritdoc />
     [field: System.Runtime.InteropServices.FieldOffset(Constants.PointDataRecord.FileMarkerFieldOffset)]
-    public byte FileMarker { get; init; }
+    public safe byte FileMarker { get; init; }
 
     /// <inheritdoc />
     [field: System.Runtime.InteropServices.FieldOffset(Constants.PointDataRecord.UserBitFieldFieldOffset)]
-    public required ushort UserBitField { get; init; }
+    public safe required ushort UserBitField { get; init; }
 #endif
 
     /// <summary>
@@ -300,7 +300,7 @@ public readonly record struct PointDataRecord :
     /// </summary>
     /// <param name="data">The data.</param>
     /// <returns>The instance of <see cref="PointDataRecord"/>.</returns>
-    public static PointDataRecord Create(ReadOnlySpan<byte> data) => BitConverter.IsLittleEndian ? System.Runtime.InteropServices.MemoryMarshal.Read<PointDataRecord>(data) : new(data);
+    public static PointDataRecord Create(ReadOnlySpan<byte> data) => BitConverter.IsLittleEndian ? unsafe(System.Runtime.InteropServices.MemoryMarshal.Read<PointDataRecord>(data)) : new(data);
 
     /// <inheritdoc />
     IBasePointDataRecord IBasePointDataRecord.Clone() => this;
@@ -317,7 +317,10 @@ public readonly record struct PointDataRecord :
         {
             case true:
 #if NET8_0_OR_GREATER
-                System.Runtime.InteropServices.MemoryMarshal.Write(destination, in this);
+                unsafe
+                {
+                    System.Runtime.InteropServices.MemoryMarshal.Write(destination, in this);
+                }
 #else
                 System.Runtime.InteropServices.MemoryMarshal.Write(destination, ref System.Runtime.CompilerServices.Unsafe.AsRef(this));
 #endif

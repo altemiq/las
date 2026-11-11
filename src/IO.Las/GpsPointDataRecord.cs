@@ -34,11 +34,11 @@ public readonly record struct GpsPointDataRecord :
     public const byte Id = 1;
 
     [System.Runtime.InteropServices.FieldOffset(Constants.PointDataRecord.FlagsFieldOffset)]
-    private readonly byte flags;
+    private safe readonly byte flags;
 
 #if LAS1_1_OR_GREATER
     [System.Runtime.InteropServices.FieldOffset(Constants.PointDataRecord.ClassificationFieldOffset)]
-    private readonly byte classification;
+    private safe readonly byte classification;
 #endif
 
     /// <summary>
@@ -90,19 +90,19 @@ public readonly record struct GpsPointDataRecord :
 
     /// <inheritdoc />
     [field: System.Runtime.InteropServices.FieldOffset(Constants.PointDataRecord.XFieldOffset)]
-    public required int X { get; init; }
+    public safe required int X { get; init; }
 
     /// <inheritdoc />
     [field: System.Runtime.InteropServices.FieldOffset(Constants.PointDataRecord.YFieldOffset)]
-    public required int Y { get; init; }
+    public safe required int Y { get; init; }
 
     /// <inheritdoc />
     [field: System.Runtime.InteropServices.FieldOffset(Constants.PointDataRecord.ZFieldOffset)]
-    public required int Z { get; init; }
+    public safe required int Z { get; init; }
 
     /// <inheritdoc />
     [field: System.Runtime.InteropServices.FieldOffset(Constants.PointDataRecord.IntensityFieldOffset)]
-    public ushort Intensity { get; init; }
+    public safe ushort Intensity { get; init; }
 
     /// <inheritdoc />
     public required byte ReturnNumber
@@ -163,21 +163,21 @@ public readonly record struct GpsPointDataRecord :
 #else
     /// <inheritdoc />
     [field: System.Runtime.InteropServices.FieldOffset(Constants.PointDataRecord.ClassificationFieldOffset)]
-    public required byte Classification { get; init; }
+    public safe required byte Classification { get; init; }
 #endif
 
     /// <inheritdoc />
     [field: System.Runtime.InteropServices.FieldOffset(Constants.PointDataRecord.ScanAngleRankFieldOffset)]
-    public required sbyte ScanAngleRank { get; init; }
+    public safe required sbyte ScanAngleRank { get; init; }
 
 #if LAS1_1_OR_GREATER
     /// <inheritdoc />
     [field: System.Runtime.InteropServices.FieldOffset(Constants.PointDataRecord.UserDataFieldOffset)]
-    public byte UserData { get; init; }
+    public safe byte UserData { get; init; }
 
     /// <inheritdoc />
     [field: System.Runtime.InteropServices.FieldOffset(Constants.PointDataRecord.PointSourceIdFieldOffset)]
-    public required ushort PointSourceId { get; init; }
+    public safe required ushort PointSourceId { get; init; }
 
     /// <inheritdoc />
     [Obsolete($"Use {nameof(UserData)} instead")]
@@ -201,16 +201,16 @@ public readonly record struct GpsPointDataRecord :
 #else
     /// <inheritdoc />
     [field: System.Runtime.InteropServices.FieldOffset(Constants.PointDataRecord.FileMarkerFieldOffset)]
-    public byte FileMarker { get; init; }
+    public safe byte FileMarker { get; init; }
 
     /// <inheritdoc />
     [field: System.Runtime.InteropServices.FieldOffset(Constants.PointDataRecord.UserBitFieldFieldOffset)]
-    public required ushort UserBitField { get; init; }
+    public safe required ushort UserBitField { get; init; }
 #endif
 
     /// <inheritdoc />
     [field: System.Runtime.InteropServices.FieldOffset(Constants.PointDataRecord.GpsTimeFieldOffset)]
-    public required double GpsTime { get; init; }
+    public safe required double GpsTime { get; init; }
 
     /// <summary>
     /// Converts a <see cref="GpsPointDataRecord"/> instance to a <see cref="PointDataRecord"/>.
@@ -314,7 +314,7 @@ public readonly record struct GpsPointDataRecord :
     /// </summary>
     /// <param name="data">The data.</param>
     /// <returns>The instance of <see cref="GpsPointDataRecord"/>.</returns>
-    public static GpsPointDataRecord Create(ReadOnlySpan<byte> data) => BitConverter.IsLittleEndian ? System.Runtime.InteropServices.MemoryMarshal.Read<GpsPointDataRecord>(data) : new(data);
+    public static GpsPointDataRecord Create(ReadOnlySpan<byte> data) => BitConverter.IsLittleEndian ? unsafe(System.Runtime.InteropServices.MemoryMarshal.Read<GpsPointDataRecord>(data)) : new(data);
 
     /// <inheritdoc />
     IBasePointDataRecord IBasePointDataRecord.Clone() => this;
@@ -331,7 +331,10 @@ public readonly record struct GpsPointDataRecord :
         {
             case true:
 #if NET8_0_OR_GREATER
-                System.Runtime.InteropServices.MemoryMarshal.Write(destination, in this);
+                unsafe
+                {
+                    System.Runtime.InteropServices.MemoryMarshal.Write(destination, in this);
+                }
 #else
                 System.Runtime.InteropServices.MemoryMarshal.Write(destination, ref System.Runtime.CompilerServices.Unsafe.AsRef(this));
 #endif

@@ -22,34 +22,20 @@ internal static partial class PolyfillExtensions
         /// </summary>
         /// <param name="bytes">A read-only byte span to decode to a Unicode string.</param>
         /// <returns>A string that contains the decoded bytes from the provided read-only span.</returns>
-        public string GetString(ReadOnlySpan<byte> bytes)
-        {
-#pragma warning disable S6640
-            unsafe
-            {
-                return encoding.GetString(
-                    (byte*)System.Runtime.CompilerServices.Unsafe.AsPointer(ref System.Runtime.InteropServices.MemoryMarshal.GetReference(bytes)),
-                    bytes.Length);
-            }
-#pragma warning restore S6640
-        }
+        public string GetString(ReadOnlySpan<byte> bytes) =>
+            unsafe(encoding.GetString(
+                (byte*)System.Runtime.CompilerServices.Unsafe.AsPointer(ref System.Runtime.InteropServices.MemoryMarshal.GetReference(bytes)),
+                bytes.Length));
 
         /// <summary>
         /// Calculates the number of bytes produced by encoding the characters in the specified character span.
         /// </summary>
         /// <param name="chars">The span of characters to encode.</param>
         /// <returns>The number of bytes produced by encoding the specified character span.</returns>
-        public int GetByteCount(ReadOnlySpan<byte> chars)
-        {
-#pragma warning disable S6640
-            unsafe
-            {
-                return encoding.GetByteCount(
-                    (char*)System.Runtime.CompilerServices.Unsafe.AsPointer(ref System.Runtime.InteropServices.MemoryMarshal.GetReference(chars)),
-                    chars.Length);
-            }
-#pragma warning restore S6640
-        }
+        public int GetByteCount(ReadOnlySpan<byte> chars) =>
+            unsafe(encoding.GetByteCount(
+                (char*)System.Runtime.CompilerServices.Unsafe.AsPointer(ref System.Runtime.InteropServices.MemoryMarshal.GetReference(chars)),
+                chars.Length));
 
         /// <summary>
         /// Encodes into a span of bytes a set of characters from the specified read-only span.
@@ -64,16 +50,11 @@ internal static partial class PolyfillExtensions
                 return 0;
             }
 
-#pragma warning disable S6640
-            unsafe
-            {
-                return encoding.GetBytes(
-                    (char*)System.Runtime.CompilerServices.Unsafe.AsPointer(ref System.Runtime.InteropServices.MemoryMarshal.GetReference(chars)),
-                    chars.Length,
-                    (byte*)System.Runtime.CompilerServices.Unsafe.AsPointer(ref System.Runtime.InteropServices.MemoryMarshal.GetReference(bytes)),
-                    bytes.Length);
-            }
-#pragma warning restore S6640
+            return unsafe(encoding.GetBytes(
+                (char*)System.Runtime.CompilerServices.Unsafe.AsPointer(ref System.Runtime.InteropServices.MemoryMarshal.GetReference(chars)),
+                chars.Length,
+                (byte*)System.Runtime.CompilerServices.Unsafe.AsPointer(ref System.Runtime.InteropServices.MemoryMarshal.GetReference(bytes)),
+                bytes.Length));
         }
     }
 }

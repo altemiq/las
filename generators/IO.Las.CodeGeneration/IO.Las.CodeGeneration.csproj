@@ -8,9 +8,6 @@
       T:System.Runtime.CompilerServices.CompilerFeatureRequiredAttribute|
       T:System.Runtime.CompilerServices.IsClosedTypeAttribute|
     </MeziantouPolyfill_IncludedPolyfills>
-
-      <!-- turn on preview for closed -->
-    <LangVersion>preview</LangVersion>
   </PropertyGroup>
 
   <ItemGroup>

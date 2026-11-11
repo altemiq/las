@@ -26,19 +26,19 @@ public readonly partial struct Color : IEquatable<Color>
     /// Gets the red component value of this <see cref="Color" /> structure.
     /// </summary>
     [field: System.Runtime.InteropServices.FieldOffset(0)]
-    public ushort R { get; init; }
+    public safe ushort R { get; init; }
 
     /// <summary>
     /// Gets the green component value of this <see cref="Color" /> structure.
     /// </summary>
     [field: System.Runtime.InteropServices.FieldOffset(2)]
-    public ushort G { get; init; }
+    public safe ushort G { get; init; }
 
     /// <summary>
     /// Gets the blue component value of this <see cref="Color" /> structure.
     /// </summary>
     [field: System.Runtime.InteropServices.FieldOffset(4)]
-    public ushort B { get; init; }
+    public safe ushort B { get; init; }
 
     /// <summary>
     /// Converts a <see cref="Color" /> to a <see cref="System.Drawing.Color" />.

@@ -9,7 +9,6 @@
 
     <OutputType>Exe</OutputType>
 
-    <LangVersion>preview</LangVersion>
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>disable</Nullable>
 

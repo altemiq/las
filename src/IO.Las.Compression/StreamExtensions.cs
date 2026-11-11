@@ -388,7 +388,7 @@ internal static class StreamExtensions
                 return true;
 
                 [System.Runtime.CompilerServices.UnsafeAccessor(System.Runtime.CompilerServices.UnsafeAccessorKind.Method, Name = nameof(InternalReadSpan))]
-                static extern ReadOnlySpan<byte> InternalReadSpan(MemoryStream stream, int count);
+                static safe extern ReadOnlySpan<byte> InternalReadSpan(MemoryStream stream, int count);
             }
 #else
             if (memoryStream.TryGetBuffer(out var memoryBuffer))
@@ -456,19 +456,19 @@ internal static class StreamExtensions
             CapacityRef(memoryStream) = index + count;
 
             [System.Runtime.CompilerServices.UnsafeAccessor(System.Runtime.CompilerServices.UnsafeAccessorKind.Field, Name = "_buffer")]
-            static extern ref byte[] BufferRef(MemoryStream stream);
+            static safe extern ref byte[] BufferRef(MemoryStream stream);
 
             [System.Runtime.CompilerServices.UnsafeAccessor(System.Runtime.CompilerServices.UnsafeAccessorKind.Field, Name = "_origin")]
-            static extern ref int OriginRef(MemoryStream stream);
+            static safe extern ref int OriginRef(MemoryStream stream);
 
             [System.Runtime.CompilerServices.UnsafeAccessor(System.Runtime.CompilerServices.UnsafeAccessorKind.Field, Name = "_position")]
-            static extern ref int PositionRef(MemoryStream stream);
+            static safe extern ref int PositionRef(MemoryStream stream);
 
             [System.Runtime.CompilerServices.UnsafeAccessor(System.Runtime.CompilerServices.UnsafeAccessorKind.Field, Name = "_length")]
-            static extern ref int LengthRef(MemoryStream stream);
+            static safe extern ref int LengthRef(MemoryStream stream);
 
             [System.Runtime.CompilerServices.UnsafeAccessor(System.Runtime.CompilerServices.UnsafeAccessorKind.Field, Name = "_capacity")]
-            static extern ref int CapacityRef(MemoryStream stream);
+            static safe extern ref int CapacityRef(MemoryStream stream);
 #else
             MemoryStreamFields.Buffer.SetValue(memoryStream, buffer);
             MemoryStreamFields.Origin.SetValue(memoryStream, index);

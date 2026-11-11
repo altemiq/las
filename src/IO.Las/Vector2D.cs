@@ -434,7 +434,10 @@ public readonly partial struct Vector2D : IFormattable, IEquatable<Vector2D>
             throw new ArgumentException(Properties.Resources.ElementsInSourceIsGreaterThanDestination, nameof(array));
         }
 
-        Unsafe.WriteUnaligned(ref Unsafe.As<double, byte>(ref array[0]), this);
+        unsafe
+        {
+            Unsafe.WriteUnaligned(ref Unsafe.As<double, byte>(ref array[0]), this);
+        }
     }
 
     /// <summary>Copies the elements of the vector to a specified array starting at a specified index position.</summary>
@@ -457,7 +460,10 @@ public readonly partial struct Vector2D : IFormattable, IEquatable<Vector2D>
             throw new ArgumentException(Properties.Resources.ElementsInSourceIsGreaterThanDestination, nameof(index));
         }
 
-        Unsafe.WriteUnaligned(ref Unsafe.As<double, byte>(ref array[index]), this);
+        unsafe
+        {
+            Unsafe.WriteUnaligned(ref Unsafe.As<double, byte>(ref array[index]), this);
+        }
     }
 
     /// <summary>
@@ -473,6 +479,9 @@ public readonly partial struct Vector2D : IFormattable, IEquatable<Vector2D>
             throw new ArgumentException(Properties.Resources.ElementsInSourceIsGreaterThanDestination, nameof(destination));
         }
 
-        Unsafe.WriteUnaligned(ref Unsafe.As<double, byte>(ref System.Runtime.InteropServices.MemoryMarshal.GetReference(destination)), this);
+        unsafe
+        {
+            Unsafe.WriteUnaligned(ref Unsafe.As<double, byte>(ref System.Runtime.InteropServices.MemoryMarshal.GetReference(destination)), this);
+        }
     }
 }

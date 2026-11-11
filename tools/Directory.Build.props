@@ -7,7 +7,6 @@
     <DefaultTargetFramework>net11.0</DefaultTargetFramework>
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
-    <LangVersion>preview</LangVersion>
 
     <IsPackable>false</IsPackable>
     <IsPublishable>true</IsPublishable>

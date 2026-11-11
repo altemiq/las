@@ -53,7 +53,7 @@ internal partial class ChunkedReader
 
 #if NET8_0_OR_GREATER
         [System.Runtime.CompilerServices.UnsafeAccessor(System.Runtime.CompilerServices.UnsafeAccessorKind.Field, Name = "reader")]
-        private static extern ref Readers.Compressed.ICompressedPointDataRecordReader ReaderField(PointWiseReader reader);
+        private static safe extern ref Readers.Compressed.ICompressedPointDataRecordReader ReaderField(PointWiseReader reader);
 #else
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Major Code Smell", "S3011:Reflection should not be used to increase accessibility of classes, methods, or fields", Justification = "Checked")]
         private static void SetReaderField(PointWiseReader reader, Readers.Compressed.ICompressedPointDataRecordReader rawReader)

@@ -176,9 +176,15 @@ public sealed class PointDataRecordQuantizer(Vector3D scaleFactor, Vector3D offs
         while (i < simdLimit)
         {
 #if NET7_0_OR_GREATER
-            var inputX = Vector128.LoadUnsafe(ref System.Runtime.InteropServices.MemoryMarshal.GetReference(x[i..]));
-            var inputY = Vector128.LoadUnsafe(ref System.Runtime.InteropServices.MemoryMarshal.GetReference(y[i..]));
-            var inputZ = Vector128.LoadUnsafe(ref System.Runtime.InteropServices.MemoryMarshal.GetReference(z[i..]));
+            Vector128<int> inputX;
+            Vector128<int> inputY;
+            Vector128<int> inputZ;
+            unsafe
+            {
+                inputX = Vector128.LoadUnsafe(ref System.Runtime.InteropServices.MemoryMarshal.GetReference(x[i..]));
+                inputY = Vector128.LoadUnsafe(ref System.Runtime.InteropServices.MemoryMarshal.GetReference(y[i..]));
+                inputZ = Vector128.LoadUnsafe(ref System.Runtime.InteropServices.MemoryMarshal.GetReference(z[i..]));
+            }
 #else
             var inputX = Vector128.Create(x[i], x[i + 1], x[i + 2], x[i + 3]);
             var inputY = Vector128.Create(y[i], y[i + 1], y[i + 2], y[i + 3]);
@@ -253,9 +259,15 @@ public sealed class PointDataRecordQuantizer(Vector3D scaleFactor, Vector3D offs
         while (i < simdLimit)
         {
 #if NET7_0_OR_GREATER
-            var inputX = Vector256.LoadUnsafe(ref System.Runtime.InteropServices.MemoryMarshal.GetReference(x[i..]));
-            var inputY = Vector256.LoadUnsafe(ref System.Runtime.InteropServices.MemoryMarshal.GetReference(y[i..]));
-            var inputZ = Vector256.LoadUnsafe(ref System.Runtime.InteropServices.MemoryMarshal.GetReference(z[i..]));
+            Vector256<int> inputX;
+            Vector256<int> inputY;
+            Vector256<int> inputZ;
+            unsafe
+            {
+                inputX = Vector256.LoadUnsafe(ref System.Runtime.InteropServices.MemoryMarshal.GetReference(x[i..]));
+                inputY = Vector256.LoadUnsafe(ref System.Runtime.InteropServices.MemoryMarshal.GetReference(y[i..]));
+                inputZ = Vector256.LoadUnsafe(ref System.Runtime.InteropServices.MemoryMarshal.GetReference(z[i..]));
+            }
 #else
             var inputX =
                 Vector256.Create(
@@ -337,8 +349,13 @@ public sealed class PointDataRecordQuantizer(Vector3D scaleFactor, Vector3D offs
         while (i < simdLimit)
         {
 #if NET7_0_OR_GREATER
-            var inputX = Vector128.LoadUnsafe(ref System.Runtime.InteropServices.MemoryMarshal.GetReference(x[i..]));
-            var inputY = Vector128.LoadUnsafe(ref System.Runtime.InteropServices.MemoryMarshal.GetReference(y[i..]));
+            Vector128<int> inputX;
+            Vector128<int> inputY;
+            unsafe
+            {
+                inputX = Vector128.LoadUnsafe(ref System.Runtime.InteropServices.MemoryMarshal.GetReference(x[i..]));
+                inputY = Vector128.LoadUnsafe(ref System.Runtime.InteropServices.MemoryMarshal.GetReference(y[i..]));
+            }
 #else
             var inputX = Vector128.Create(x[i], x[i + 1], x[i + 2], x[i + 3]);
             var inputY = Vector128.Create(y[i], y[i + 1], y[i + 2], y[i + 3]);
@@ -405,8 +422,13 @@ public sealed class PointDataRecordQuantizer(Vector3D scaleFactor, Vector3D offs
         while (i < simdLimit)
         {
 #if NET7_0_OR_GREATER
-            var inputX = Vector256.LoadUnsafe(ref System.Runtime.InteropServices.MemoryMarshal.GetReference(x[i..]));
-            var inputY = Vector256.LoadUnsafe(ref System.Runtime.InteropServices.MemoryMarshal.GetReference(y[i..]));
+            Vector256<int> inputX;
+            Vector256<int> inputY;
+            unsafe
+            {
+                inputX = Vector256.LoadUnsafe(ref System.Runtime.InteropServices.MemoryMarshal.GetReference(x[i..]));
+                inputY = Vector256.LoadUnsafe(ref System.Runtime.InteropServices.MemoryMarshal.GetReference(y[i..]));
+            }
 #else
             var inputX =
                 Vector256.Create(

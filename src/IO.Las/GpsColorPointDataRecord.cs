@@ -30,10 +30,10 @@ public readonly record struct GpsColorPointDataRecord :
     public const byte Id = 3;
 
     [System.Runtime.InteropServices.FieldOffset(Constants.PointDataRecord.FlagsFieldOffset)]
-    private readonly byte flags;
+    private safe readonly byte flags;
 
     [System.Runtime.InteropServices.FieldOffset(Constants.PointDataRecord.ClassificationFieldOffset)]
-    private readonly byte classification;
+    private safe readonly byte classification;
 
     /// <summary>
     /// Initializes a new instance of the <see cref="GpsColorPointDataRecord"/> struct from the byte array.
@@ -80,19 +80,19 @@ public readonly record struct GpsColorPointDataRecord :
 
     /// <inheritdoc />
     [field: System.Runtime.InteropServices.FieldOffset(Constants.PointDataRecord.XFieldOffset)]
-    public required int X { get; init; }
+    public safe required int X { get; init; }
 
     /// <inheritdoc />
     [field: System.Runtime.InteropServices.FieldOffset(Constants.PointDataRecord.YFieldOffset)]
-    public required int Y { get; init; }
+    public safe required int Y { get; init; }
 
     /// <inheritdoc />
     [field: System.Runtime.InteropServices.FieldOffset(Constants.PointDataRecord.ZFieldOffset)]
-    public required int Z { get; init; }
+    public safe required int Z { get; init; }
 
     /// <inheritdoc />
     [field: System.Runtime.InteropServices.FieldOffset(Constants.PointDataRecord.IntensityFieldOffset)]
-    public ushort Intensity { get; init; }
+    public safe ushort Intensity { get; init; }
 
     /// <inheritdoc />
     public required byte ReturnNumber
@@ -152,23 +152,23 @@ public readonly record struct GpsColorPointDataRecord :
 
     /// <inheritdoc />
     [field: System.Runtime.InteropServices.FieldOffset(Constants.PointDataRecord.ScanAngleRankFieldOffset)]
-    public required sbyte ScanAngleRank { get; init; }
+    public safe required sbyte ScanAngleRank { get; init; }
 
     /// <inheritdoc />
     [field: System.Runtime.InteropServices.FieldOffset(Constants.PointDataRecord.UserDataFieldOffset)]
-    public byte UserData { get; init; }
+    public safe byte UserData { get; init; }
 
     /// <inheritdoc />
     [field: System.Runtime.InteropServices.FieldOffset(Constants.PointDataRecord.PointSourceIdFieldOffset)]
-    public required ushort PointSourceId { get; init; }
+    public safe required ushort PointSourceId { get; init; }
 
     /// <inheritdoc />
     [field: System.Runtime.InteropServices.FieldOffset(Constants.PointDataRecord.GpsTimeFieldOffset)]
-    public required double GpsTime { get; init; }
+    public safe required double GpsTime { get; init; }
 
     /// <inheritdoc />
     [field: System.Runtime.InteropServices.FieldOffset(Constants.PointDataRecord.GpsColorFieldOffset)]
-    public required Color Color { get; init; }
+    public safe required Color Color { get; init; }
 
     /// <summary>
     /// Converts a <see cref="GpsColorPointDataRecord"/> instance to a <see cref="PointDataRecord"/>.
@@ -284,7 +284,7 @@ public readonly record struct GpsColorPointDataRecord :
     /// </summary>
     /// <param name="data">The data.</param>
     /// <returns>The instance of <see cref="GpsColorPointDataRecord"/>.</returns>
-    public static GpsColorPointDataRecord Create(ReadOnlySpan<byte> data) => BitConverter.IsLittleEndian ? System.Runtime.InteropServices.MemoryMarshal.Read<GpsColorPointDataRecord>(data) : new(data);
+    public static GpsColorPointDataRecord Create(ReadOnlySpan<byte> data) => BitConverter.IsLittleEndian ? unsafe(System.Runtime.InteropServices.MemoryMarshal.Read<GpsColorPointDataRecord>(data)) : new(data);
 
     /// <inheritdoc />
     IBasePointDataRecord IBasePointDataRecord.Clone() => this;
@@ -301,7 +301,10 @@ public readonly record struct GpsColorPointDataRecord :
         {
             case true:
 #if NET8_0_OR_GREATER
-                System.Runtime.InteropServices.MemoryMarshal.Write(destination, in this);
+                unsafe
+                {
+                    System.Runtime.InteropServices.MemoryMarshal.Write(destination, in this);
+                }
 #else
                 System.Runtime.InteropServices.MemoryMarshal.Write(destination, ref System.Runtime.CompilerServices.Unsafe.AsRef(this));
 #endif

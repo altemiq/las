@@ -37,10 +37,10 @@ public readonly record struct GpsColorWaveformPointDataRecord :
     private const int ParametricDzFieldOffset = ParametricDyFieldOffset + sizeof(float);
 
     [System.Runtime.InteropServices.FieldOffset(Constants.PointDataRecord.FlagsFieldOffset)]
-    private readonly byte flags;
+    private safe readonly byte flags;
 
     [System.Runtime.InteropServices.FieldOffset(Constants.PointDataRecord.ClassificationFieldOffset)]
-    private readonly byte classification;
+    private safe readonly byte classification;
 
     /// <summary>
     /// Initializes a new instance of the <see cref="GpsColorWaveformPointDataRecord"/> struct from the byte array.
@@ -94,19 +94,19 @@ public readonly record struct GpsColorWaveformPointDataRecord :
 
     /// <inheritdoc />
     [field: System.Runtime.InteropServices.FieldOffset(Constants.PointDataRecord.XFieldOffset)]
-    public required int X { get; init; }
+    public safe required int X { get; init; }
 
     /// <inheritdoc />
     [field: System.Runtime.InteropServices.FieldOffset(Constants.PointDataRecord.YFieldOffset)]
-    public required int Y { get; init; }
+    public safe required int Y { get; init; }
 
     /// <inheritdoc />
     [field: System.Runtime.InteropServices.FieldOffset(Constants.PointDataRecord.ZFieldOffset)]
-    public required int Z { get; init; }
+    public safe required int Z { get; init; }
 
     /// <inheritdoc />
     [field: System.Runtime.InteropServices.FieldOffset(Constants.PointDataRecord.IntensityFieldOffset)]
-    public ushort Intensity { get; init; }
+    public safe ushort Intensity { get; init; }
 
     /// <inheritdoc />
     public required byte ReturnNumber
@@ -166,51 +166,51 @@ public readonly record struct GpsColorWaveformPointDataRecord :
 
     /// <inheritdoc />
     [field: System.Runtime.InteropServices.FieldOffset(Constants.PointDataRecord.ScanAngleRankFieldOffset)]
-    public required sbyte ScanAngleRank { get; init; }
+    public safe required sbyte ScanAngleRank { get; init; }
 
     /// <inheritdoc />
     [field: System.Runtime.InteropServices.FieldOffset(Constants.PointDataRecord.UserDataFieldOffset)]
-    public byte UserData { get; init; }
+    public safe byte UserData { get; init; }
 
     /// <inheritdoc />
     [field: System.Runtime.InteropServices.FieldOffset(Constants.PointDataRecord.PointSourceIdFieldOffset)]
-    public required ushort PointSourceId { get; init; }
+    public safe required ushort PointSourceId { get; init; }
 
     /// <inheritdoc />
     [field: System.Runtime.InteropServices.FieldOffset(Constants.PointDataRecord.GpsTimeFieldOffset)]
-    public required double GpsTime { get; init; }
+    public safe required double GpsTime { get; init; }
 
     /// <inheritdoc />
     [field: System.Runtime.InteropServices.FieldOffset(Constants.PointDataRecord.GpsColorFieldOffset)]
-    public required Color Color { get; init; }
+    public safe required Color Color { get; init; }
 
     /// <inheritdoc/>
     [field: System.Runtime.InteropServices.FieldOffset(Constants.PointDataRecord.GpsColorWaveformFieldOffset)]
-    public required byte WavePacketDescriptorIndex { get; init; }
+    public safe required byte WavePacketDescriptorIndex { get; init; }
 
     /// <inheritdoc/>
     [field: System.Runtime.InteropServices.FieldOffset(ByteOffsetToWaveformDataFieldOffset)]
-    public required ulong ByteOffsetToWaveformData { get; init; }
+    public safe required ulong ByteOffsetToWaveformData { get; init; }
 
     /// <inheritdoc/>
     [field: System.Runtime.InteropServices.FieldOffset(WaveformPacketSizeInBytesFieldOffset)]
-    public required uint WaveformPacketSizeInBytes { get; init; }
+    public safe required uint WaveformPacketSizeInBytes { get; init; }
 
     /// <inheritdoc/>
     [field: System.Runtime.InteropServices.FieldOffset(ReturnPointWaveformLocationFieldOffset)]
-    public required float ReturnPointWaveformLocation { get; init; }
+    public safe required float ReturnPointWaveformLocation { get; init; }
 
     /// <inheritdoc/>
     [field: System.Runtime.InteropServices.FieldOffset(ParametricDxFieldOffset)]
-    public required float ParametricDx { get; init; }
+    public safe required float ParametricDx { get; init; }
 
     /// <inheritdoc/>
     [field: System.Runtime.InteropServices.FieldOffset(ParametricDyFieldOffset)]
-    public required float ParametricDy { get; init; }
+    public safe required float ParametricDy { get; init; }
 
     /// <inheritdoc/>
     [field: System.Runtime.InteropServices.FieldOffset(ParametricDzFieldOffset)]
-    public required float ParametricDz { get; init; }
+    public safe required float ParametricDz { get; init; }
 
     /// <summary>
     /// Converts a <see cref="GpsColorWaveformPointDataRecord"/> instance to a <see cref="PointDataRecord"/>.
@@ -352,7 +352,7 @@ public readonly record struct GpsColorWaveformPointDataRecord :
     /// </summary>
     /// <param name="data">The data.</param>
     /// <returns>The instance of <see cref="GpsColorWaveformPointDataRecord"/>.</returns>
-    public static GpsColorWaveformPointDataRecord Create(ReadOnlySpan<byte> data) => BitConverter.IsLittleEndian ? System.Runtime.InteropServices.MemoryMarshal.Read<GpsColorWaveformPointDataRecord>(data) : new(data);
+    public static GpsColorWaveformPointDataRecord Create(ReadOnlySpan<byte> data) => BitConverter.IsLittleEndian ? unsafe(System.Runtime.InteropServices.MemoryMarshal.Read<GpsColorWaveformPointDataRecord>(data)) : new(data);
 
     /// <inheritdoc />
     IBasePointDataRecord IBasePointDataRecord.Clone() => this;
@@ -369,7 +369,10 @@ public readonly record struct GpsColorWaveformPointDataRecord :
         {
             case true:
 #if NET8_0_OR_GREATER
-                System.Runtime.InteropServices.MemoryMarshal.Write(destination, in this);
+                unsafe
+                {
+                    System.Runtime.InteropServices.MemoryMarshal.Write(destination, in this);
+                }
 #else
                 System.Runtime.InteropServices.MemoryMarshal.Write(destination, ref System.Runtime.CompilerServices.Unsafe.AsRef(this));
 #endif

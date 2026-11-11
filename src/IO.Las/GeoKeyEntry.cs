@@ -18,7 +18,7 @@ public readonly record struct GeoKeyEntry
     /// </summary>
     /// <remarks>Defined key ID for each piece of GeoTIFF data. IDs contained in the GeoTIFF specification.</remarks>
     [field: System.Runtime.InteropServices.FieldOffset(0)]
-    public GeoKey KeyId { get; init; }
+    public safe GeoKey KeyId { get; init; }
 
     /// <summary>
     /// Gets the TIFF tag location.
@@ -41,18 +41,18 @@ public readonly record struct GeoKeyEntry
     /// </list>
     /// </remarks>
     [field: System.Runtime.InteropServices.FieldOffset(2)]
-    public ushort TiffTagLocation { get; init; }
+    public safe ushort TiffTagLocation { get; init; }
 
     /// <summary>
     /// Gets the number of characters in string for values of <see cref="GeoAsciiParamsTag"/>, otherwise is 1.
     /// </summary>
     [field: System.Runtime.InteropServices.FieldOffset(4)]
-    public ushort Count { get; init; }
+    public safe ushort Count { get; init; }
 
     /// <summary>
     /// Gets the value offset.
     /// </summary>
     /// <remarks>Contents vary depending on value for <see cref="TiffTagLocation"/>.</remarks>
     [field: System.Runtime.InteropServices.FieldOffset(6)]
-    public ushort ValueOffset { get; init; }
+    public safe ushort ValueOffset { get; init; }
 }

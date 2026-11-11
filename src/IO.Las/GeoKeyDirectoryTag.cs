@@ -122,7 +122,10 @@ public sealed record GeoKeyDirectoryTag : VariableLengthRecord, IReadOnlyList<Ge
             if (BitConverter.IsLittleEndian)
             {
 #if NET8_0_OR_GREATER
-                System.Runtime.InteropServices.MemoryMarshal.Write(d, in System.Runtime.CompilerServices.Unsafe.AsRef(in value));
+                unsafe
+                {
+                    System.Runtime.InteropServices.MemoryMarshal.Write(d, in System.Runtime.CompilerServices.Unsafe.AsRef(in value));
+                }
 #else
                 System.Runtime.InteropServices.MemoryMarshal.Write(d, ref System.Runtime.CompilerServices.Unsafe.AsRef(value));
 #endif
@@ -156,7 +159,7 @@ public sealed record GeoKeyDirectoryTag : VariableLengthRecord, IReadOnlyList<Ge
         {
             var index = i * 8;
             var entry = BitConverter.IsLittleEndian
-                ? System.Runtime.InteropServices.MemoryMarshal.Read<GeoKeyEntry>(source[index..])
+                ? unsafe(System.Runtime.InteropServices.MemoryMarshal.Read<GeoKeyEntry>(source[index..]))
                 : new()
                 {
                     KeyId = (GeoKey)System.Buffers.Binary.BinaryPrimitives.ReadUInt16LittleEndian(source[index..]),

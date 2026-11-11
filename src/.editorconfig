@@ -14,3 +14,6 @@ dotnet_diagnostic.RCS1085.severity = none
 
 # checking floating point equality is correct
 dotnet_diagnostic.S1244.severity = none
+
+# S6640: Do not use unsafe blocks
+dotnet_diagnostic.S6640.severity = none

@@ -29,10 +29,10 @@ public readonly record struct ExtendedGpsColorPointDataRecord :
     public const byte Id = 7;
 
     [System.Runtime.InteropServices.FieldOffset(Constants.ExtendedPointDataRecord.FlagsFieldOffset)]
-    private readonly byte flags;
+    private safe readonly byte flags;
 
     [System.Runtime.InteropServices.FieldOffset(Constants.ExtendedPointDataRecord.ClassificationFlagsFieldOffset)]
-    private readonly byte classificationFlags;
+    private safe readonly byte classificationFlags;
 
     /// <summary>
     /// Initializes a new instance of the <see cref="ExtendedGpsColorPointDataRecord"/> struct from the byte array.
@@ -80,19 +80,19 @@ public readonly record struct ExtendedGpsColorPointDataRecord :
 
     /// <inheritdoc />
     [field: System.Runtime.InteropServices.FieldOffset(Constants.ExtendedPointDataRecord.XFieldOffset)]
-    public required int X { get; init; }
+    public safe required int X { get; init; }
 
     /// <inheritdoc />
     [field: System.Runtime.InteropServices.FieldOffset(Constants.ExtendedPointDataRecord.YFieldOffset)]
-    public required int Y { get; init; }
+    public safe required int Y { get; init; }
 
     /// <inheritdoc />
     [field: System.Runtime.InteropServices.FieldOffset(Constants.ExtendedPointDataRecord.ZFieldOffset)]
-    public required int Z { get; init; }
+    public safe required int Z { get; init; }
 
     /// <inheritdoc />
     [field: System.Runtime.InteropServices.FieldOffset(Constants.ExtendedPointDataRecord.IntensityFieldOffset)]
-    public ushort Intensity { get; init; }
+    public safe ushort Intensity { get; init; }
 
     /// <inheritdoc />
     public required byte ReturnNumber
@@ -159,27 +159,27 @@ public readonly record struct ExtendedGpsColorPointDataRecord :
 
     /// <inheritdoc />
     [field: System.Runtime.InteropServices.FieldOffset(Constants.ExtendedPointDataRecord.ClassificationFieldOffset)]
-    public required ExtendedClassification Classification { get; init; }
+    public safe required ExtendedClassification Classification { get; init; }
 
     /// <inheritdoc />
     [field: System.Runtime.InteropServices.FieldOffset(Constants.ExtendedPointDataRecord.UserDataFieldOffset)]
-    public byte UserData { get; init; }
+    public safe byte UserData { get; init; }
 
     /// <inheritdoc />
     [field: System.Runtime.InteropServices.FieldOffset(Constants.ExtendedPointDataRecord.ScanAngleFieldOffset)]
-    public required short ScanAngle { get; init; }
+    public safe required short ScanAngle { get; init; }
 
     /// <inheritdoc />
     [field: System.Runtime.InteropServices.FieldOffset(Constants.ExtendedPointDataRecord.PointSourceIdFieldOffset)]
-    public required ushort PointSourceId { get; init; }
+    public safe required ushort PointSourceId { get; init; }
 
     /// <inheritdoc />
     [field: System.Runtime.InteropServices.FieldOffset(Constants.ExtendedPointDataRecord.GpsTimeFieldOffset)]
-    public required double GpsTime { get; init; }
+    public safe required double GpsTime { get; init; }
 
     /// <inheritdoc />
     [field: System.Runtime.InteropServices.FieldOffset(Constants.ExtendedPointDataRecord.ColorFieldOffset)]
-    public required Color Color { get; init; }
+    public safe required Color Color { get; init; }
 
     /// <summary>
     /// Converts a <see cref="ExtendedGpsColorPointDataRecord"/> instance to a <see cref="PointDataRecord"/>.
@@ -333,7 +333,7 @@ public readonly record struct ExtendedGpsColorPointDataRecord :
     /// </summary>
     /// <param name="data">The data.</param>
     /// <returns>The instance of <see cref="ExtendedGpsColorPointDataRecord"/>.</returns>
-    public static ExtendedGpsColorPointDataRecord Create(ReadOnlySpan<byte> data) => BitConverter.IsLittleEndian ? System.Runtime.InteropServices.MemoryMarshal.Read<ExtendedGpsColorPointDataRecord>(data) : new(data);
+    public static ExtendedGpsColorPointDataRecord Create(ReadOnlySpan<byte> data) => BitConverter.IsLittleEndian ? unsafe(System.Runtime.InteropServices.MemoryMarshal.Read<ExtendedGpsColorPointDataRecord>(data)) : new(data);
 
     /// <inheritdoc />
     IBasePointDataRecord IBasePointDataRecord.Clone() => this;
@@ -350,7 +350,10 @@ public readonly record struct ExtendedGpsColorPointDataRecord :
         {
             case true:
 #if NET8_0_OR_GREATER
-                System.Runtime.InteropServices.MemoryMarshal.Write(destination, in this);
+                unsafe
+                {
+                    System.Runtime.InteropServices.MemoryMarshal.Write(destination, in this);
+                }
 #else
                 System.Runtime.InteropServices.MemoryMarshal.Write(destination, ref System.Runtime.CompilerServices.Unsafe.AsRef(this));
 #endif

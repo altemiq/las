@@ -38,10 +38,10 @@ public readonly record struct ExtendedGpsColorNearInfraredWaveformPointDataRecor
     private const int ParametricDzFieldOffset = ParametricDyFieldOffset + sizeof(float);
 
     [System.Runtime.InteropServices.FieldOffset(Constants.ExtendedPointDataRecord.FlagsFieldOffset)]
-    private readonly byte flags;
+    private safe readonly byte flags;
 
     [System.Runtime.InteropServices.FieldOffset(Constants.ExtendedPointDataRecord.ClassificationFlagsFieldOffset)]
-    private readonly byte classificationFlags;
+    private safe readonly byte classificationFlags;
 
     /// <summary>
     /// Initializes a new instance of the <see cref="ExtendedGpsColorNearInfraredWaveformPointDataRecord"/> struct from the byte array.
@@ -97,19 +97,19 @@ public readonly record struct ExtendedGpsColorNearInfraredWaveformPointDataRecor
 
     /// <inheritdoc />
     [field: System.Runtime.InteropServices.FieldOffset(Constants.ExtendedPointDataRecord.XFieldOffset)]
-    public required int X { get; init; }
+    public safe required int X { get; init; }
 
     /// <inheritdoc />
     [field: System.Runtime.InteropServices.FieldOffset(Constants.ExtendedPointDataRecord.YFieldOffset)]
-    public required int Y { get; init; }
+    public safe required int Y { get; init; }
 
     /// <inheritdoc />
     [field: System.Runtime.InteropServices.FieldOffset(Constants.ExtendedPointDataRecord.ZFieldOffset)]
-    public required int Z { get; init; }
+    public safe required int Z { get; init; }
 
     /// <inheritdoc />
     [field: System.Runtime.InteropServices.FieldOffset(Constants.ExtendedPointDataRecord.IntensityFieldOffset)]
-    public ushort Intensity { get; init; }
+    public safe ushort Intensity { get; init; }
 
     /// <inheritdoc />
     public required byte ReturnNumber
@@ -176,59 +176,59 @@ public readonly record struct ExtendedGpsColorNearInfraredWaveformPointDataRecor
 
     /// <inheritdoc />
     [field: System.Runtime.InteropServices.FieldOffset(Constants.ExtendedPointDataRecord.ClassificationFieldOffset)]
-    public required ExtendedClassification Classification { get; init; }
+    public safe required ExtendedClassification Classification { get; init; }
 
     /// <inheritdoc />
     [field: System.Runtime.InteropServices.FieldOffset(Constants.ExtendedPointDataRecord.UserDataFieldOffset)]
-    public byte UserData { get; init; }
+    public safe byte UserData { get; init; }
 
     /// <inheritdoc />
     [field: System.Runtime.InteropServices.FieldOffset(Constants.ExtendedPointDataRecord.ScanAngleFieldOffset)]
-    public required short ScanAngle { get; init; }
+    public safe required short ScanAngle { get; init; }
 
     /// <inheritdoc />
     [field: System.Runtime.InteropServices.FieldOffset(Constants.ExtendedPointDataRecord.PointSourceIdFieldOffset)]
-    public required ushort PointSourceId { get; init; }
+    public safe required ushort PointSourceId { get; init; }
 
     /// <inheritdoc />
     [field: System.Runtime.InteropServices.FieldOffset(Constants.ExtendedPointDataRecord.GpsTimeFieldOffset)]
-    public required double GpsTime { get; init; }
+    public safe required double GpsTime { get; init; }
 
     /// <inheritdoc />
     [field: System.Runtime.InteropServices.FieldOffset(Constants.ExtendedPointDataRecord.ColorFieldOffset)]
-    public required Color Color { get; init; }
+    public safe required Color Color { get; init; }
 
     /// <inheritdoc />
     [field: System.Runtime.InteropServices.FieldOffset(Constants.ExtendedPointDataRecord.NirFieldOffset)]
-    public required ushort NearInfrared { get; init; }
+    public safe required ushort NearInfrared { get; init; }
 
     /// <inheritdoc/>
     [field: System.Runtime.InteropServices.FieldOffset(WavePacketDescriptorIndexFieldOffset)]
-    public required byte WavePacketDescriptorIndex { get; init; }
+    public safe required byte WavePacketDescriptorIndex { get; init; }
 
     /// <inheritdoc/>
     [field: System.Runtime.InteropServices.FieldOffset(ByteOffsetToWaveformDataFieldOffset)]
-    public required ulong ByteOffsetToWaveformData { get; init; }
+    public safe required ulong ByteOffsetToWaveformData { get; init; }
 
     /// <inheritdoc/>
     [field: System.Runtime.InteropServices.FieldOffset(WaveformPacketSizeInBytesFieldOffset)]
-    public required uint WaveformPacketSizeInBytes { get; init; }
+    public safe required uint WaveformPacketSizeInBytes { get; init; }
 
     /// <inheritdoc/>
     [field: System.Runtime.InteropServices.FieldOffset(ReturnPointWaveformLocationFieldOffset)]
-    public required float ReturnPointWaveformLocation { get; init; }
+    public safe required float ReturnPointWaveformLocation { get; init; }
 
     /// <inheritdoc/>
     [field: System.Runtime.InteropServices.FieldOffset(ParametricDxFieldOffset)]
-    public required float ParametricDx { get; init; }
+    public safe required float ParametricDx { get; init; }
 
     /// <inheritdoc/>
     [field: System.Runtime.InteropServices.FieldOffset(ParametricDyFieldOffset)]
-    public required float ParametricDy { get; init; }
+    public safe required float ParametricDy { get; init; }
 
     /// <inheritdoc/>
     [field: System.Runtime.InteropServices.FieldOffset(ParametricDzFieldOffset)]
-    public required float ParametricDz { get; init; }
+    public safe required float ParametricDz { get; init; }
 
     /// <summary>
     /// Converts a <see cref="ExtendedGpsColorNearInfraredWaveformPointDataRecord"/> instance to a <see cref="PointDataRecord"/>.
@@ -396,7 +396,7 @@ public readonly record struct ExtendedGpsColorNearInfraredWaveformPointDataRecor
     /// </summary>
     /// <param name="data">The data.</param>
     /// <returns>The instance of <see cref="ExtendedGpsColorNearInfraredWaveformPointDataRecord"/>.</returns>
-    public static ExtendedGpsColorNearInfraredWaveformPointDataRecord Create(ReadOnlySpan<byte> data) => BitConverter.IsLittleEndian ? System.Runtime.InteropServices.MemoryMarshal.Read<ExtendedGpsColorNearInfraredWaveformPointDataRecord>(data) : new(data);
+    public static ExtendedGpsColorNearInfraredWaveformPointDataRecord Create(ReadOnlySpan<byte> data) => BitConverter.IsLittleEndian ? unsafe(System.Runtime.InteropServices.MemoryMarshal.Read<ExtendedGpsColorNearInfraredWaveformPointDataRecord>(data)) : new(data);
 
     /// <inheritdoc />
     IBasePointDataRecord IBasePointDataRecord.Clone() => this;
@@ -413,7 +413,10 @@ public readonly record struct ExtendedGpsColorNearInfraredWaveformPointDataRecor
         {
             case true:
 #if NET8_0_OR_GREATER
-                System.Runtime.InteropServices.MemoryMarshal.Write(destination, in this);
+                unsafe
+                {
+                    System.Runtime.InteropServices.MemoryMarshal.Write(destination, in this);
+                }
 #else
                 System.Runtime.InteropServices.MemoryMarshal.Write(destination, ref System.Runtime.CompilerServices.Unsafe.AsRef(this));
 #endif

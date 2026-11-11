@@ -35,8 +35,11 @@ public static partial class Vector
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public Vector2D AsVector2D()
         {
-            ref var address = ref Unsafe.As<Vector128<double>, byte>(ref value);
-            return Unsafe.ReadUnaligned<Vector2D>(ref address);
+            unsafe
+            {
+                ref var address = ref Unsafe.As<Vector128<double>, byte>(ref value);
+                return Unsafe.ReadUnaligned<Vector2D>(ref address);
+            }
         }
     }
 
@@ -53,8 +56,11 @@ public static partial class Vector
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public Vector2D AsVector2D()
         {
-            ref var address = ref Unsafe.As<Vector256<double>, byte>(ref value);
-            return Unsafe.ReadUnaligned<Vector2D>(ref address);
+            unsafe
+            {
+                ref var address = ref Unsafe.As<Vector256<double>, byte>(ref value);
+                return Unsafe.ReadUnaligned<Vector2D>(ref address);
+            }
         }
 
         /// <summary>
@@ -64,8 +70,11 @@ public static partial class Vector
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public Vector3D AsVector3D()
         {
-            ref var address = ref Unsafe.As<Vector256<double>, byte>(ref value);
-            return Unsafe.ReadUnaligned<Vector3D>(ref address);
+            unsafe
+            {
+                ref var address = ref Unsafe.As<Vector256<double>, byte>(ref value);
+                return Unsafe.ReadUnaligned<Vector3D>(ref address);
+            }
         }
     }
 

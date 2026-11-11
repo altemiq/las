@@ -71,5 +71,5 @@ public static class DataFrameExtensions
     }
 
     [System.Runtime.CompilerServices.UnsafeAccessor(System.Runtime.CompilerServices.UnsafeAccessorKind.Constructor)]
-    private static extern DataFrame NewDataFrame(Polars.NET.Core.DataFrameHandle handle);
+    private static safe extern DataFrame NewDataFrame(Polars.NET.Core.DataFrameHandle handle);
 }

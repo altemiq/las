@@ -28,19 +28,19 @@ public readonly record struct LasItem
     /// Gets the type.
     /// </summary>
     [field: System.Runtime.InteropServices.FieldOffset(0)]
-    public LasItemType Type { get; init; }
+    public safe LasItemType Type { get; init; }
 
     /// <summary>
     /// Gets the size.
     /// </summary>
     [field: System.Runtime.InteropServices.FieldOffset(2)]
-    public ushort Size { get; init; }
+    public safe ushort Size { get; init; }
 
     /// <summary>
     /// Gets the version.
     /// </summary>
     [field: System.Runtime.InteropServices.FieldOffset(4)]
-    public ushort Version { get; init; }
+    public safe ushort Version { get; init; }
 
     /// <summary>
     /// Gets the name.

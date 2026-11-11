@@ -23,19 +23,13 @@ public static partial class ExtensionMethods
         /// <param name="bytes">A read-only byte span to decode to a Unicode string.</param>
         /// <returns>A string that contains the decoded bytes from the provided read-only span.</returns>
         public string GetNullTerminatedString(ReadOnlySpan<byte> bytes)
-        {
-#if NET11_0_OR_GREATER
-            var ptr = (byte*)System.Runtime.CompilerServices.Unsafe.AsPointer(ref System.Runtime.InteropServices.MemoryMarshal.GetReference(bytes));
-            return encoding.GetString(System.Runtime.InteropServices.MemoryMarshal.CreateReadOnlySpanFromNullTerminated(ptr));
-#elif NET6_0_OR_GREATER
-#pragma warning disable S6640
-            unsafe
-            {
-                var ptr = (byte*)System.Runtime.CompilerServices.Unsafe.AsPointer(ref System.Runtime.InteropServices.MemoryMarshal.GetReference(bytes));
-                return encoding.GetString(System.Runtime.InteropServices.MemoryMarshal.CreateReadOnlySpanFromNullTerminated(ptr));
-            }
-#pragma warning restore S6640
+#if NET6_0_OR_GREATER
+            => unsafe(
+                encoding.GetString(
+                    System.Runtime.InteropServices.MemoryMarshal.CreateReadOnlySpanFromNullTerminated(
+                        (byte*)System.Runtime.CompilerServices.Unsafe.AsPointer(ref System.Runtime.InteropServices.MemoryMarshal.GetReference(bytes)))));
 #else
+        {
             var endIndex = bytes.IndexOf((byte)0);
             if (endIndex is -1)
             {
@@ -43,8 +37,8 @@ public static partial class ExtensionMethods
             }
 
             return encoding.GetString(bytes[..endIndex]);
-#endif
         }
+#endif
 
         /// <summary>
         /// Encodes into a span of bytes a set of characters from the specified read-only span.
