@@ -3,10 +3,19 @@
   <PropertyGroup>
     <RootNamespace>$(Company).IO.$(MSBuildProjectName)</RootNamespace>
     <ResourceNamespace>$(RootNamespace).Tool</ResourceNamespace>
+    <Authors>$(Company.ToLower())</Authors>
   </PropertyGroup>
 
   <ItemGroup>
     <Using Include="System.CommandLine" />
   </ItemGroup>
+  
+  <Target Name="_UpdateUbuntuVersion"
+          AfterTargets="ComputeContainerBaseImage"
+          BeforeTargets="ComputeContainerConfig">
+    <PropertyGroup>
+      <ContainerBaseImage>$(ContainerBaseImage.Replace('noble','resolute'))</ContainerBaseImage>
+    </PropertyGroup>
+  </Target>
 
 </Project>
